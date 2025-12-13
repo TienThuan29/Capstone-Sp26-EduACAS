@@ -1,0 +1,6 @@
+@AcasService_HostAddress = http://localhost:5197
+
+GET {{AcasService_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
