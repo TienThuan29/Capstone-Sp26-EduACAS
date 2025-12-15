@@ -4,6 +4,7 @@ using AuthService.Application.ResponseDTOs;
 using AuthService.Application.Utils;
 using AuthService.Web.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AuthService.Web.Controllers.TestController;
 
@@ -27,6 +28,7 @@ public class AuthCommandController : ControllerBase
     }
     
     [HttpPost("authenticate")]
+    [EnableRateLimiting("AuthPolicy")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> AuthenticateUser([FromBody] LoginCredentials loginCredentials)
     {
         try
@@ -46,6 +48,7 @@ public class AuthCommandController : ControllerBase
     }
 
     [HttpPost("register")]
+    [EnableRateLimiting("AuthPolicy")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> CreateUser([FromBody] RegisterData registerData)
     {
         try

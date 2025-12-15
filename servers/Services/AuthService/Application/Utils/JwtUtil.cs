@@ -10,6 +10,8 @@ public class JwtUtil
     private readonly string _secret;
     private readonly string _accessTokenExpiration;
     private readonly string _refreshTokenExpiration;
+    private readonly string _issuer;
+    private readonly string _audience;
   
     public JwtUtil(IConfiguration configuration)
     {
@@ -17,6 +19,8 @@ public class JwtUtil
                   throw new InvalidOperationException("JWT_SECRET is not configured");
         _accessTokenExpiration = configuration["Jwt:JwtAccessTokenExpiration"] ?? "1d";
         _refreshTokenExpiration = configuration["Jwt:JwtRefreshTokenExpiration"] ?? "7d";
+        _issuer = configuration["Jwt:Issuer"] ?? "AuthService";
+        _audience = configuration["Jwt:Audience"] ?? "AcasService";
     }
     
     public string GenerateAccessToken(JwtPayload payload)
@@ -46,6 +50,8 @@ public class JwtUtil
         {
             Subject = new ClaimsIdentity(claims),
             Expires = expires,
+            Issuer = _issuer,
+            Audience = _audience,
             SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
         };
 

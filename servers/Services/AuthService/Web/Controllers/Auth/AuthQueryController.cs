@@ -27,8 +27,13 @@ public class AuthQueryController : ControllerBase
     {
         try
         {
-            // get access token from header
-            var accessToken = Request.Headers["accessToken"].FirstOrDefault();
+            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<UserProfileResponse>("User not authenticated", 401);
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
             if (string.IsNullOrEmpty(accessToken))
             {
                 return ResponseUtil.Error<UserProfileResponse>("User not authenticated", 401);
