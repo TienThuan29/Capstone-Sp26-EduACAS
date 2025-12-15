@@ -52,6 +52,9 @@ builder.Services.AddHostedService<RedisHostedService>();
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
 
+// RabbitMQ Consumer
+builder.Services.AddHostedService<UserRequestConsumer>();
+
 // repo
 builder.Services.AddHostedService<DynamoDbHostedService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();

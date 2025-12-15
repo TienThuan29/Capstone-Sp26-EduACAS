@@ -1,6 +1,7 @@
 
 
 using AcasService.Application.Utils;
+using AcasService.Messaging;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,16 +10,46 @@ using Microsoft.AspNetCore.Mvc;
 public class TestAuthController : ControllerBase
 {
     private readonly ILogger<TestAuthController> _logger;
+    private readonly UserRequestProducer _userRequestProducer;
 
-    public TestAuthController(ILogger<TestAuthController> logger)
+    public TestAuthController(
+        ILogger<TestAuthController> logger,
+        UserRequestProducer userRequestProducer)
     {
         _logger = logger;
+        _userRequestProducer = userRequestProducer;
     }
 
     [HttpGet("test-unauthorized")]
     public async Task<ActionResult<ApiResponse<string>>> TestUnauhtorized()
     {
         return ResponseUtil.Success<string>("This is unauthorized", "Test unauthorized successful", 200);
+    }
+
+    [HttpGet("test-get-user/{userId}")]
+    public async Task<ActionResult<ApiResponse<UserProfileResponse>>> TestGetUserFromMessageQueue([FromRoute] string userId)
+    {
+        try
+        {
+            _logger.LogInformation("Requesting user info via RabbitMQ: UserId={UserId}", userId);
+
+            var userProfile = await _userRequestProducer.GetUserByIdAsync(userId);
+
+            if (userProfile == null)
+            {
+                return ResponseUtil.Error<UserProfileResponse>("User not found", 404);
+            }
+
+            _logger.LogInformation("User retrieved successfully: UserId={UserId}, Email={Email}", 
+                userProfile.Id, userProfile.Email);
+
+            return ResponseUtil.Success(userProfile, "User retrieved successfully via RabbitMQ", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting user via RabbitMQ: UserId={UserId}", userId);
+            return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
+        }
     }
 
     [HttpGet("test-admin")]

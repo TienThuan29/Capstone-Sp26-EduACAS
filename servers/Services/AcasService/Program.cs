@@ -2,8 +2,28 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AcasService.Messaging;
+using AcasService.Repositories.Redis;
+using StackExchange.Redis;
+using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Redis configuration
+var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ??
+                           throw new InvalidOperationException("Redis:ConnectionString is not configured");
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    return ConnectionMultiplexer.Connect(redisConnectionString);
+});
+builder.Services.AddHostedService<RedisHostedService>();
+
+// RabbitMQ configuration - register as singleton first, then as hosted service
+builder.Services.AddSingleton<RabbitMqHostedService>();
+builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
+
+// RabbitMQ Producer
+builder.Services.AddSingleton<UserRequestProducer>();
 
 // JWT Authentication Configuration
 var jwtSecret = builder.Configuration["Jwt:JwtSecret"] ??
@@ -73,7 +93,21 @@ builder.Services.AddSwaggerGen(c =>
         Description = "ACAS Service API"
     });
 });
-builder.Services.AddHealthChecks();
+// Health checks
+var redisConnectionStringForHealth = builder.Configuration["Redis:ConnectionString"] ??
+                                     throw new InvalidOperationException("Redis:ConnectionString is not configured");
+var rabbitMqHostName = builder.Configuration["RabbitMQ:HostName"] ??
+                       throw new InvalidOperationException("RabbitMQ:HostName is not configured");
+var rabbitMqPort = builder.Configuration.GetValue<int>("RabbitMQ:Port", 5672);
+var rabbitMqUserName = builder.Configuration["RabbitMQ:UserName"] ??
+                       throw new InvalidOperationException("RabbitMQ:UserName is not configured");
+var rabbitMqPassword = builder.Configuration["RabbitMQ:Password"] ??
+                       throw new InvalidOperationException("RabbitMQ:Password is not configured");
+var rabbitMqVirtualHost = builder.Configuration["RabbitMQ:VirtualHost"] ?? "/";
+
+builder.Services.AddHealthChecks()
+    .AddRedis(redisConnectionStringForHealth, name: "redis")
+    .AddCheck<RabbitMqHealthCheck>("rabbitmq");
 
 // Rate Limiting Configuration
 var rateLimitingSection = builder.Configuration.GetSection("RateLimiting");
