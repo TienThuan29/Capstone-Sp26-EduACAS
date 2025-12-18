@@ -31,17 +31,15 @@ public class UserRequestConsumer : IHostedService
     {
         var channel = _rabbitMqService.Channel;
 
-        // Declare request queue
         channel.QueueDeclare(
             queue: RequestQueueName,
             durable: true,
             exclusive: false,
             autoDelete: false,
-            arguments: null);
-
+            arguments: null
+        );
         // Set QoS to process one message at a time
         channel.BasicQos(prefetchSize: 0, prefetchCount: 1, global: false);
-
         // Create consumer
         _consumer = new EventingBasicConsumer(channel);
         _consumer.Received += async (model, ea) =>
@@ -67,9 +65,7 @@ public class UserRequestConsumer : IHostedService
                 }
                 else
                 {
-                    _logger.LogInformation("Processing user request: UserId={UserId}", request.UserId);
-
-                    // Get user from repository
+                    // _logger.LogInformation("Processing user request: UserId={UserId}", request.UserId);
                     var user = await userRepository.FindByIdAsync(request.UserId);
 
                     if (user == null || !user.IsEnable)
@@ -107,7 +103,6 @@ public class UserRequestConsumer : IHostedService
                     basicProperties: replyProperties,
                     body: responseBody
                 );
-
                 // Acknowledge message
                 responseChannel.BasicAck(deliveryTag: ea.DeliveryTag, multiple: false);
             }

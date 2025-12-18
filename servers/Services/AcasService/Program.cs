@@ -17,8 +17,6 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     return ConnectionMultiplexer.Connect(redisConnectionString);
 });
 builder.Services.AddHostedService<RedisHostedService>();
-
-// RabbitMQ configuration - register as singleton first, then as hosted service
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
 

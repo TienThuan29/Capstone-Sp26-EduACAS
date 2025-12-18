@@ -31,18 +31,12 @@ public class TestAuthController : ControllerBase
     {
         try
         {
-            _logger.LogInformation("Requesting user info via RabbitMQ: UserId={UserId}", userId);
-
+            // _logger.LogInformation("Requesting user info via RabbitMQ: UserId={UserId}", userId);
             var userProfile = await _userRequestProducer.GetUserByIdAsync(userId);
-
             if (userProfile == null)
             {
                 return ResponseUtil.Error<UserProfileResponse>("User not found", 404);
             }
-
-            _logger.LogInformation("User retrieved successfully: UserId={UserId}, Email={Email}", 
-                userProfile.Id, userProfile.Email);
-
             return ResponseUtil.Success(userProfile, "User retrieved successfully via RabbitMQ", 200);
         }
         catch (Exception ex)

@@ -1,0 +1,19 @@
+# Build artifacts
+bin/
+obj/
+
+# Test and coverage outputs
+TestResults/
+*.coverage
+*.coveragexml
+coverage/
+coverage*.json
+coverage*.xml
+
+# IDE / tooling leftovers
+.vs/
+.idea/
+.vscode/
+*.user
+*.rsuser
+*.suo

@@ -98,37 +98,38 @@ public class UserRequestProducer
             var consumerTag = channel.BasicConsume(
                 queue: responseQueueName,
                 autoAck: true,
-                consumer: consumer);
+                consumer: consumer
+            );
 
             // Send request
             var requestMessage = JsonSerializer.Serialize(new { UserId = userId });
             var requestBody = Encoding.UTF8.GetBytes(requestMessage);
 
             var properties = channel.CreateBasicProperties();
-            properties.CorrelationId = correlationId;
-            properties.ReplyTo = responseQueueName;
+            properties.CorrelationId = correlationId; // thiết lập correlationId cho message gửi đi
+            properties.ReplyTo = responseQueueName; // Chỉ định consumer sẽ gửi response
             properties.Persistent = true;
+            //Persistent = true: Message được lưu vào disk, không mất khi RabbitMQ restart
+            //Persistent = false (mặc định): Message chỉ lưu trong memory, có thể mất khi restart
 
             channel.BasicPublish(
                 exchange: "",
                 routingKey: RequestQueueName,
                 basicProperties: properties,
-                body: requestBody);
+                body: requestBody
+            );
 
-            _logger.LogInformation("User request sent: UserId={UserId}, CorrelationId={CorrelationId}", 
-                userId, correlationId);
+            // _logger.LogInformation("User request sent: UserId={UserId}, CorrelationId={CorrelationId}", 
+            //     userId, correlationId);
 
             // Wait for response with timeout
             using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
-
             try
             {
                 var response = await responseReceived.Task.WaitAsync(linkedCts.Token);
-                
                 // Cancel consumer
                 channel.BasicCancel(consumerTag);
-                
                 return response;
             }
             catch (OperationCanceledException)
