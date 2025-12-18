@@ -3,6 +3,7 @@ using Amazon;
 using Amazon.Extensions.NETCore.Setup;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.RateLimiting;
@@ -15,6 +16,8 @@ using AuthService.Repositories.Redis;
 using AuthService.Messaging;
 using StackExchange.Redis;
 using RabbitMQ.Client;
+using Microsoft.OpenApi;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +51,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 });
 builder.Services.AddHostedService<RedisHostedService>();
 
-// RabbitMQ configuration - register as singleton first, then as hosted service
+// RabbitMQ cconfig
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
 
@@ -73,6 +76,24 @@ builder.Services.AddSwaggerGen(c =>
         Title = "Auth Service API",
         Version = "v1",
         Description = "Authentication and Authorization Service"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+    });
+
+    c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer", hostDocument: null, externalResource: null),
+            new List<string>()
+        }
     });
 });
 // Health checks

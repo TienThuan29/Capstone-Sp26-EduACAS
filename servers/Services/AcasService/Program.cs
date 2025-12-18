@@ -5,6 +5,7 @@ using System.Text;
 using AcasService.Messaging;
 using AcasService.Repositories.Redis;
 using StackExchange.Redis;
+using Microsoft.OpenApi;
 using RabbitMQ.Client;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -89,6 +90,24 @@ builder.Services.AddSwaggerGen(c =>
         Title = "ACAS Service API",
         Version = "v1",
         Description = "ACAS Service API"
+    });
+
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+    });
+
+    c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer", hostDocument: null, externalResource: null),
+            new List<string>()
+        }
     });
 });
 // Health checks
