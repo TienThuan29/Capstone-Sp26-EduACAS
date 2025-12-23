@@ -1,11 +1,7 @@
 using Amazon.DynamoDBv2;
 using Amazon;
 using Amazon.Extensions.NETCore.Setup;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.Json.Serialization;
+using AuthService.Repositories.DynamoDB;
 using System.Threading.RateLimiting;
 using AuthService.Application.Commands;
 using AuthService.Application.Mappers;

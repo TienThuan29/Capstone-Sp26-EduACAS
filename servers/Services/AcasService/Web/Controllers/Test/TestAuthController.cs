@@ -1,7 +1,7 @@
 
 
 using AcasService.Application.Utils;
-using AcasService.Messaging;
+using AcasService.Messaging.User;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

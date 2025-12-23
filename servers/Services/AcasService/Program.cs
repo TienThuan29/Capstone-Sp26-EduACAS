@@ -2,13 +2,44 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AcasService.Application.Commands.S3;
 using AcasService.Messaging;
+using AcasService.Messaging.User;
 using AcasService.Repositories.Redis;
+using AcasService.Repositories.S3;
 using StackExchange.Redis;
 using Microsoft.OpenApi;
 using RabbitMQ.Client;
+using Amazon.DynamoDBv2;
+using Amazon;
+using Amazon.S3;
+using Amazon.Extensions.NETCore.Setup;
+using AcasService.Application.Queries.S3;
+using AcasService.Repositories.DynamoDB;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// config AWS DynamoDB
+var awsRegion = builder.Configuration["AWS:Region"] ??
+                throw new InvalidOperationException("AWS_REGION is not configured");
+var awsAccessKey = builder.Configuration["AWS:AccessKey"] ??
+                   throw new InvalidOperationException("AWS_ACCESS_KEY is not configured");
+var awsSecretKey = builder.Configuration["AWS:SecretKey"] ??
+                   throw new InvalidOperationException("AWS_SECRET_KEY is not configured");
+
+var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
+var awsOptions = new AWSOptions
+{
+    Region = regionEndpoint
+};
+
+if (!string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey))
+{
+    awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey);
+}
+
+builder.Services.AddAWSService<IAmazonDynamoDB>(awsOptions);
+builder.Services.AddAWSService<IAmazonS3>(awsOptions);
 
 // Redis configuration
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ??
@@ -29,6 +60,15 @@ var jwtSecret = builder.Configuration["Jwt:JwtSecret"] ??
                 throw new InvalidOperationException("Jwt:JwtSecret is not configured");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "AuthService";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AcasService";
+
+// Repositories
+builder.Services.AddHostedService<DynamoDbHostedService>();
+builder.Services.AddScoped<IPrivateS3Repository, PrivateS3Repository>();
+builder.Services.AddScoped<IPublicS3Repository, PublicS3Repository>();
+
+// Command and Query
+builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
+builder.Services.AddScoped<IPrivateS3Query, PrivateS3Query>();
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 

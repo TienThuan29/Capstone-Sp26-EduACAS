@@ -1,13 +1,12 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
-namespace AuthService.Repositories.DynamoDB;
+namespace AcasService.Repositories.DynamoDB;
 
 public class DynamoDbHostedService : IHostedService
 {
     private readonly IAmazonDynamoDB _dynamoDb;
     private readonly ILogger<DynamoDbHostedService> _logger;
-    private readonly string _userTableName;
 
     public DynamoDbHostedService(
         IAmazonDynamoDB dynamoDb,
@@ -16,8 +15,6 @@ public class DynamoDbHostedService : IHostedService
     {
         _dynamoDb = dynamoDb;
         _logger = logger;
-        _userTableName = configuration["DynamoDB:UserTable"] ?? 
-                         throw new ArgumentNullException("DynamoDB:UserTable is not configured");
     }
     
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -27,10 +24,8 @@ public class DynamoDbHostedService : IHostedService
 
         try
         {
-            _logger.LogInformation("Warming up DynamoDB connection by describing table: {Table}", _userTableName);
             await _dynamoDb.DescribeTableAsync(new DescribeTableRequest
             {
-                TableName = _userTableName
             }, linkedCts.Token);
             _logger.LogInformation("DynamoDB warm-up completed");
         }
