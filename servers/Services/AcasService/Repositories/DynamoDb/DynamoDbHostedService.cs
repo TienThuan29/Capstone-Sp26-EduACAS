@@ -1,3 +1,4 @@
+using System.Linq;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
@@ -7,6 +8,7 @@ public class DynamoDbHostedService : IHostedService
 {
     private readonly IAmazonDynamoDB _dynamoDb;
     private readonly ILogger<DynamoDbHostedService> _logger;
+    private readonly IReadOnlyCollection<string> _tablesToWarmUp;
 
     public DynamoDbHostedService(
         IAmazonDynamoDB dynamoDb,
@@ -15,6 +17,7 @@ public class DynamoDbHostedService : IHostedService
     {
         _dynamoDb = dynamoDb;
         _logger = logger;
+        _tablesToWarmUp = BuildWarmUpTableList(configuration);
     }
     
     public async Task StartAsync(CancellationToken cancellationToken)
@@ -22,22 +25,60 @@ public class DynamoDbHostedService : IHostedService
         using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
         using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
 
-        try
+        if (_tablesToWarmUp.Count == 0)
         {
-            await _dynamoDb.DescribeTableAsync(new DescribeTableRequest
+            _logger.LogInformation("No DynamoDB tables configured for warm-up");
+            return;
+        }
+
+        foreach (var tableName in _tablesToWarmUp)
+        {
+            try
             {
-            }, linkedCts.Token);
-            _logger.LogInformation("DynamoDB warm-up completed");
-        }
-        catch (OperationCanceledException)
-        {
-            _logger.LogWarning("DynamoDB warm-up timed out; proceeding without blocking startup");
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "DynamoDB warm-up failed; service will attempt on first real call");
+                _logger.LogInformation("Warming up DynamoDB table: {Table}", tableName);
+                await _dynamoDb.DescribeTableAsync(new DescribeTableRequest
+                {
+                    TableName = tableName
+                }, linkedCts.Token);
+                _logger.LogInformation("DynamoDB table warm-up completed: {Table}", tableName);
+            }
+            catch (ResourceNotFoundException)
+            {
+                _logger.LogWarning("DynamoDB table not found (may belong to another service): {Table}", tableName);
+            }
+            catch (OperationCanceledException)
+            {
+                _logger.LogWarning("DynamoDB warm-up timed out for table: {Table}; continuing startup", tableName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "DynamoDB warm-up failed for table: {Table}; will retry on first real call", tableName);
+            }
         }
     }
 
     public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
+
+    private static IReadOnlyCollection<string> BuildWarmUpTableList(IConfiguration configuration)
+    {
+        var tables = new[]
+        {
+            configuration["DynamoDB:ClassroomTableName"] ?? "acas-classrooms",
+            configuration["DynamoDB:ClassroomEnrollmentTableName"] ?? "acas-classroom-enrollments",
+            configuration["DynamoDB:CommentTableName"] ?? "acas-comments",
+            configuration["DynamoDB:DiscussionIssueTableName"] ?? "acas-discussion-issues",
+            configuration["DynamoDB:ExaminationTableName"] ?? "acas-examinations",
+            configuration["DynamoDB:MaterialTableName"] ?? "acas-materials",
+            configuration["DynamoDB:ProblemTableName"] ?? "acas-problems",
+            configuration["DynamoDB:ProgrammingLanguageTableName"] ?? "acas-programming-languages",
+            configuration["DynamoDB:RegradingRequestTableName"] ?? "acas-regrading-requests",
+            configuration["DynamoDB:SubjectTableName"] ?? "acas-subjects",
+            configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions"
+        };
+
+        return tables
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+    }
 }
