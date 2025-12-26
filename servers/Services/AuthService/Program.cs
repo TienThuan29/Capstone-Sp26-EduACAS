@@ -59,6 +59,7 @@ builder.Services.AddHostedService<UserRequestConsumer>();
 builder.Services.AddHostedService<DynamoDbHostedService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserOptCacheRepository, UserOptCacheRepository>();
+builder.Services.AddScoped<IUserCacheRepository, UserCacheRepository>();
 
 // email configuration
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));

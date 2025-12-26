@@ -15,12 +15,17 @@ public interface IUserCommand
     public Task<string> RegisterWithEmailVerificationAsync(RegisterData registerData);
 
     public Task<bool> VerifyEmailAsync(VerifyEmailRequest verifyEmailRequest);
+
+    public Task<bool> SendForgotPasswordLinkAsync(ForgotPasswordRequest forgotPasswordRequest);
+
+    public Task<bool> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest);
 }
 
 public class UserCommand : IUserCommand
 {
     private readonly IUserRepository _userRepository;
     private readonly IUserOptCacheRepository _userOptCacheRepository;
+    private readonly IUserCacheRepository _userCacheRepository;
     private readonly IConfiguration _configuration;
     private readonly JwtUtil _jwtUtil;
     private readonly UserMapper _userMapper;
@@ -34,6 +39,7 @@ public class UserCommand : IUserCommand
          JwtUtil jwtUtil,
          ILogger<UserCommand> logger,
          IUserOptCacheRepository userOptCacheRepository,
+         IUserCacheRepository userCacheRepository,
          IEmailService emailService
     )
     {
@@ -43,6 +49,7 @@ public class UserCommand : IUserCommand
         _jwtUtil = jwtUtil;
         _logger = logger;
         _userOptCacheRepository = userOptCacheRepository;
+        _userCacheRepository = userCacheRepository;
         _emailService = emailService;
     }
 
@@ -142,4 +149,39 @@ public class UserCommand : IUserCommand
         return true;
     }
 
+    public async Task<bool> SendForgotPasswordLinkAsync(ForgotPasswordRequest forgotPasswordRequest)
+    {
+        var user = await _userRepository.FindByEmailAsync(forgotPasswordRequest.Email);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found");
+        }
+        var uuidToken = Guid.NewGuid().ToString();
+        var cachingTime = TimeSpan.FromMinutes(5);
+        var isSaved = await _userCacheRepository.SaveAsync(uuidToken, user, cachingTime);
+        if (!isSaved)
+        {
+            throw new InvalidOperationException("Failed to save user to cache");
+        }
+        var frontendUrl = _configuration["FrontendUrl"];
+        var resetPasswordUrl = $"{frontendUrl}/forgot-password/reset?token={uuidToken}";
+        await _emailService.SendEmailAsync(user.Email, "Reset Password", resetPasswordUrl, EmailService.EmailPasswordResetTemplate);
+        return true;
+    }
+
+    public async Task<bool> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest)
+    {
+        var user = await _userCacheRepository.GetAsync(resetPasswordRequest.Token);
+        if (user == null)
+        {
+            throw new InvalidOperationException("Invalid token");
+        }
+        user.Password = resetPasswordRequest.NewPassword;
+        var updatedUser = await _userRepository.UpdatePasswordAsync(user);
+        if (updatedUser == null)
+        {
+            throw new InvalidOperationException("Failed to update user password");
+        }
+        return true;
+    }
 }

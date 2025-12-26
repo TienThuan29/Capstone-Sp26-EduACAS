@@ -130,6 +130,51 @@ public class EmailService : IEmailService
             </div>
             </body>
             </html>";
+      
+      public static string EmailPasswordResetTemplate = @"<!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset=""UTF-8"" />
+            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+            <style>
+                  body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 24px; }}
+                  .card {{ max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 40px 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }}
+                  .title {{ font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 8px; text-align: center; }}
+                  .subtitle {{ font-size: 15px; color: #6b7280; margin: 0 0 32px; text-align: center; }}
+                  .message {{ font-size: 15px; line-height: 1.6; color: #1f2937; margin: 0 0 28px; text-align: center; }}
+                  .button-container {{ background: #f9fafb; border: 2px dashed #e5e7eb; border-radius: 12px; padding: 32px 24px; margin: 32px 0; text-align: center; }}
+                  .button-label {{ font-size: 13px; color: #6b7280; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 20px; font-weight: 600; }}
+                  .reset-button {{ display: inline-block; padding: 14px 32px; background: #111827; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; transition: background 0.2s; }}
+                  .reset-button:hover {{ background: #374151; }}
+                  .expiry {{ font-size: 13px; color: #9ca3af; text-align: center; margin: 20px 0 0; }}
+                  .warning {{ font-size: 13px; color: #dc2626; text-align: center; margin: 24px 0 0; padding: 12px; background: #fef2f2; border-radius: 8px; border-left: 3px solid #dc2626; }}
+                  .footer {{ font-size: 12px; color: #9ca3af; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 16px; text-align: center; line-height: 1.5; }}
+            </style>
+            </head>
+            <body>
+            <div class=""card"">
+                  <div class=""title"">Reset Your Password</div>
+                  <div class=""subtitle"">EduACAS Password Reset</div>
+                  <div class=""message"">
+                  We received a request to reset your password. Click the button below to create a new password. This link will expire in {1}.
+                  </div>
+                  <div class=""button-container"">
+                        <div class=""button-label"">Reset Password Link</div>
+                        <a href=""{0}"" class=""reset-button"">Reset Password</a>
+                  </div>
+                  <div class=""expiry"">
+                  This link expires in {1}
+                  </div>
+                  <div class=""warning"">
+                  <strong>Security Notice:</strong> If you didn't request this password reset, please ignore this email. Your password will remain unchanged.
+                  </div>
+                  <div class=""footer"">
+                  If you didn't request a password reset, you can safely ignore this email.<br />
+                  This is an automated message, please do not reply.
+                  </div>
+            </div>
+            </body>
+            </html>";
 }
 
 public class EmailSettings

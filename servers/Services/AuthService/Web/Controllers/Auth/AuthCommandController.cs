@@ -91,7 +91,7 @@ public class AuthCommandController : ControllerBase
             return ResponseUtil.Error<object>("Internal Server Error", 500);
         }
     }
-    
+
     [HttpPost("verify-email")]
     [EnableRateLimiting("AuthPolicy")]
     public async Task<ActionResult<ApiResponse<object>>> VerifyEmail([FromBody] VerifyEmailRequest verifyEmailRequest)
@@ -108,6 +108,46 @@ public class AuthCommandController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Email verification error");
+            return ResponseUtil.Error<object>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPost("forgot-password")]
+    [EnableRateLimiting("AuthPolicy")]
+    public async Task<ActionResult<ApiResponse<object>>> SendForgotPasswordLink([FromBody] ForgotPasswordRequest forgotPasswordRequest)
+    {
+        try
+        {
+            var isSent = await _userCommand.SendForgotPasswordLinkAsync(forgotPasswordRequest);
+            return ResponseUtil.Success(new { }, "Forgot password link sent successfully");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("User not found"))
+        {
+            return ResponseUtil.Error<object>("User not found", 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Forgot password link error");
+            return ResponseUtil.Error<object>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPost("reset-password")]
+    [EnableRateLimiting("AuthPolicy")]
+    public async Task<ActionResult<ApiResponse<object>>> ResetPassword([FromBody] ResetPasswordRequest resetPasswordRequest)
+    {
+        try
+        {
+            var isReset = await _userCommand.ResetPasswordAsync(resetPasswordRequest);
+            return ResponseUtil.Success(new { }, "Password reset successfully");
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Invalid token"))
+        {
+            return ResponseUtil.Error<object>("Invalid token", 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Password reset error");
             return ResponseUtil.Error<object>("Internal Server Error", 500);
         }
     }

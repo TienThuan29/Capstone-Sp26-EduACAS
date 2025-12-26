@@ -9,6 +9,21 @@ builder.Services.AddHttpClient();
 builder.Services.AddHealthChecks();
 builder.Services.AddSwaggerGen();
 
+// CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",
+                "http://127.0.0.1:3000"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 // ocelot config
 builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
 builder.Services.AddOcelot(builder.Configuration);
@@ -23,6 +38,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseRouting();
+app.UseCors();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/health");
