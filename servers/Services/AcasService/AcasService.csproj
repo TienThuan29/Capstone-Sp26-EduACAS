@@ -12,7 +12,6 @@
     <PackageReference Include="Microsoft.OpenApi" Version="2.3.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.400.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
-    <PackageReference Include="Microsoft.OpenApi" Version="2.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
     <PackageReference Include="StackExchange.Redis" Version="2.8.16" />
