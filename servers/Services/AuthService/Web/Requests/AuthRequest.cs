@@ -36,3 +36,12 @@ public class RegisterData
     [RegularExpression(@"^(ADMIN|LECTURER|STUDENT)$", ErrorMessage = "Role must be ADMIN/LECTURER/STUDENT.")]
     public string Role { get; set; } = string.Empty;
 }
+
+public class VerifyEmailRequest
+{
+    [Required]
+    public string RegisterSession { get; set; } = string.Empty;
+
+    [Required]
+    public string Opt { get; set; } = string.Empty;
+}

@@ -13,6 +13,7 @@ using AuthService.Messaging;
 using StackExchange.Redis;
 using RabbitMQ.Client;
 using Microsoft.OpenApi;
+using AuthService.Application.Notifications;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,12 +58,27 @@ builder.Services.AddHostedService<UserRequestConsumer>();
 // repo
 builder.Services.AddHostedService<DynamoDbHostedService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserOptCacheRepository, UserOptCacheRepository>();
+
+// email configuration
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+
 // services
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserMapper>();
 builder.Services.AddScoped<JwtUtil>();
 builder.Services.AddScoped<IUserQuery, UserQuery>();
 builder.Services.AddScoped<IUserCommand, UserCommand>();
 // controllers
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:8080")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -155,7 +171,30 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(c =>
     {
         c.RouteTemplate = "swagger/{documentName}/swagger.json";
+        c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+        {
+            const string gatewayPrefix = "/api/auth/v1";
+
+            var prefixedPaths = new OpenApiPaths();
+            foreach (var path in swaggerDoc.Paths)
+            {
+                var originalPath = path.Key;
+                var trimmedPath = originalPath.StartsWith("/api/v1", StringComparison.OrdinalIgnoreCase)
+                    ? originalPath["/api/v1".Length..]
+                    : originalPath;
+
+                if (!trimmedPath.StartsWith("/"))
+                {
+                    trimmedPath = "/" + trimmedPath;
+                }
+
+                prefixedPaths.Add($"{gatewayPrefix}{trimmedPath}", path.Value);
+            }
+
+            swaggerDoc.Paths = prefixedPaths;
+        });
     });
+
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Auth Service API");
@@ -169,10 +208,13 @@ app.MapGet("/openapi/v1.json", (HttpContext context) =>
     context.Response.Redirect("/swagger/v1/swagger.json", permanent: false);
 });
 
-app.UseCors();
 app.UseRouting();
+app.UseCors();
 app.UseRateLimiter();
-app.UseHttpsRedirection();
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
