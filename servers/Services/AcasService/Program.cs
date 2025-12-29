@@ -16,6 +16,10 @@ using Amazon.S3;
 using Amazon.Extensions.NETCore.Setup;
 using AcasService.Application.Queries.S3;
 using AcasService.Repositories.DynamoDB;
+using AcasService.Repositories.Subject;
+using AcasService.Application.Commands;
+using AcasService.Application.Queries;
+using AcasService.Repositories.Classroom;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,10 +69,19 @@ var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AcasService";
 builder.Services.AddHostedService<DynamoDbHostedService>();
 builder.Services.AddScoped<IPrivateS3Repository, PrivateS3Repository>();
 builder.Services.AddScoped<IPublicS3Repository, PublicS3Repository>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
 builder.Services.AddScoped<IPrivateS3Query, PrivateS3Query>();
+builder.Services.AddScoped<ISubjectCommand, SubjectCommand>();
+builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();
+builder.Services.AddScoped<IClassroomCommand, ClassroomCommand>();  
+builder.Services.AddScoped<IClassroomQuery, ClassroomQuery>();
+
+builder.Services.AddScoped<AcasService.Application.Mappers.SubjectMapper>();
+builder.Services.AddScoped<AcasService.Application.Mappers.ClassroomMapper>();
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
