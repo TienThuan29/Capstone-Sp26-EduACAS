@@ -1,29 +1,56 @@
 "use client"
 
-import { Card, DarkThemeToggle } from "flowbite-react"
+import { Card } from "flowbite-react"
 import Image from "next/image"
-import {
-  UsersIcon,
-  BookOpenIcon,
-  ClipboardIcon,
-  FileCodeIcon,
-  CheckCircleIcon,
-  BarChartIcon,
-  LaptopIcon,
-  GraduateIcon,
-  SparklesIcon,
-  ChartStatsIcon,
-} from "@/components/svg-icons"
 
-export default function Home() {
+export default function LandingPage() {
+  const UsersIcon = () => (
+    <svg className="w-12 h-12" fill="none" stroke="#C9A24D" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </svg>
+  )
+
+  const BookOpenIcon = () => (
+    <svg className="w-12 h-12" fill="none" stroke="#C9A24D" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
+    </svg>
+  )
+
+  const ClipboardIcon = () => (
+    <svg className="w-12 h-12" fill="none" stroke="#C9A24D" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" />
+    </svg>
+  )
+
+  const FileCodeIcon = () => (
+    <svg className="w-12 h-12" fill="none" stroke="#C9A24D" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <polyline points="10 13 8 15 10 17" />
+      <polyline points="14 13 16 15 14 17" />
+    </svg>
+  )
+
+  const CheckCircleIcon = () => (
+    <svg className="w-12 h-12" fill="none" stroke="#C9A24D" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+      <polyline points="22 4 12 14.01 9 11.01" />
+    </svg>
+  )
+
+  const BarChartIcon = () => (
+    <svg className="w-12 h-12" fill="none" stroke="#C9A24D" strokeWidth="2" viewBox="0 0 24 24">
+      <line x1="12" y1="20" x2="12" y2="10" />
+      <line x1="18" y1="20" x2="18" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="16" />
+    </svg>
+  )
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "#FFFFFF" }}>
-      {/* Dark Theme Toggle */}
-      <div className="fixed top-4 right-4 z-50">
-        <DarkThemeToggle />
-      </div>
-
       {/* Hero Section */}
       <section className="py-20 px-4 min-h-screen flex items-center" style={{ backgroundColor: "#F5F7FA" }}>
         <div
@@ -63,10 +90,10 @@ export default function Home() {
             {/* Content Section */}
             <div className="space-y-6">
               <div
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold"
+                className="inline-block px-5 py-2 rounded-full text-sm font-bold"
                 style={{ backgroundColor: "#C9A24D", color: "#FFFFFF" }}
               >
-                <GraduateIcon /> E-LEARNING PLATFORM
+                🎓 E-LEARNING PLATFORM
               </div>
 
               <h1 className="text-5xl md:text-6xl font-bold">
@@ -90,8 +117,11 @@ export default function Home() {
                   className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg"
                   style={{ backgroundColor: "#1F4E79" }}
                 >
-                  Bắt đầu
+                  Bắt đầu →
                 </button>
+                <span className="font-mono text-sm opacity-60" style={{ color: "#1F4E79" }}>
+                  // Miễn phí tham gia
+                </span>
               </div>
 
               <div className="grid grid-cols-3 gap-4 pt-6">
@@ -120,10 +150,10 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div
-              className="inline-flex items-center gap-2 mb-3 px-5 py-2 rounded-full text-sm font-semibold"
+              className="inline-block mb-3 px-5 py-2 rounded-full text-sm font-semibold"
               style={{ backgroundColor: "#F5F7FA", color: "#C9A24D" }}
             >
-              <SparklesIcon /> TÍNH NĂNG NỔI BẬT
+              ✨ TÍNH NĂNG NỔI BẬT
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#1F4E79" }}>
               Tính năng nổi bật
@@ -202,10 +232,10 @@ export default function Home() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-12">
             <div
-              className="inline-flex items-center gap-2 mb-3 px-5 py-2 rounded-full text-sm font-semibold"
+              className="inline-block mb-3 px-5 py-2 rounded-full text-sm font-semibold"
               style={{ backgroundColor: "#FFFFFF", color: "#1F4E79" }}
             >
-              <ChartStatsIcon /> THỐNG KÊ
+              📊 THỐNG KÊ
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#1F4E79" }}>
               Cộng đồng của chúng tôi
@@ -246,10 +276,10 @@ export default function Home() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <div
-              className="inline-flex items-center gap-2 mb-3 px-5 py-2 rounded-full text-sm font-semibold"
+              className="inline-block mb-3 px-5 py-2 rounded-full text-sm font-semibold"
               style={{ backgroundColor: "#F5F7FA", color: "#C9A24D" }}
             >
-              <LaptopIcon /> NGÔN NGỮ LẬP TRÌNH
+              💻 NGÔN NGỮ LẬP TRÌNH
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#1F4E79" }}>
               Các ngôn ngữ lập trình
