@@ -1,0 +1,163 @@
+using AcasService.Models;
+using AcasService.Web.Requests;
+
+namespace AcasService.Application.Commands.Problem;
+
+public interface IProblemCommand
+{
+    Task<string> CreateProblemAsync(CreateProblemRequest request);
+    Task UpdateProblemAsync(string problemId, UpdateProblemRequest request);
+    Task DeleteProblemAsync(string problemId);
+    Task AddTestCaseAsync(string problemId, CreateTestCaseRequest request);
+    Task UpdateTestCaseAsync(string problemId, string testCaseId, UpdateTestCaseRequest request);
+    Task DeleteTestCaseAsync(string problemId, string testCaseId);
+}
+
+public class ProblemCommand : IProblemCommand
+{
+    private readonly Repositories.Problem.IProblemRepository _problemRepository;
+    private readonly ILogger<ProblemCommand> _logger;
+
+    public ProblemCommand(Repositories.Problem.IProblemRepository problemRepository, ILogger<ProblemCommand> logger)
+    {
+        _problemRepository = problemRepository;
+        _logger = logger;
+    }
+
+    public async Task<string> CreateProblemAsync(CreateProblemRequest request)
+    {
+        try
+        {
+            var problem = new Models.Problem
+            {
+                ExamId = request.ExamId,
+                LecturerId = request.LecturerId,
+                Title = request.Title,
+                Content = request.Content,
+                FileName = request.FileName,
+                Mark = request.Mark,
+                Difficulty = request.Difficulty,
+                CodeTemplate = request.CodeTemplate
+            };
+
+            var problemId = await _problemRepository.CreateAsync(problem);
+            _logger.LogInformation("Problem created with ID {ProblemId}", problemId);
+            return problemId;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating problem");
+            throw;
+        }
+    }
+
+    public async Task UpdateProblemAsync(string problemId, UpdateProblemRequest request)
+    {
+        try
+        {
+            var problem = await _problemRepository.GetByIdAsync(problemId);
+            if (problem == null)
+            {
+                throw new KeyNotFoundException($"Problem {problemId} not found");
+            }
+
+            problem.Title = request.Title;
+            problem.Content = request.Content;
+            problem.FileName = request.FileName;
+            problem.Mark = request.Mark;
+            problem.Difficulty = request.Difficulty;
+            problem.CodeTemplate = request.CodeTemplate;
+
+            await _problemRepository.UpdateAsync(problem);
+            _logger.LogInformation("Problem {ProblemId} updated successfully", problemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating problem {ProblemId}", problemId);
+            throw;
+        }
+    }
+
+    public async Task DeleteProblemAsync(string problemId)
+    {
+        try
+        {
+            await _problemRepository.DeleteAsync(problemId);
+            _logger.LogInformation("Problem {ProblemId} deleted successfully", problemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting problem {ProblemId}", problemId);
+            throw;
+        }
+    }
+
+    public async Task AddTestCaseAsync(string problemId, CreateTestCaseRequest request)
+    {
+        try
+        {
+            var problemExists = await _problemRepository.ExistsAsync(problemId);
+            if (!problemExists)
+            {
+                throw new KeyNotFoundException($"Problem {problemId} not found");
+            }
+
+            var testCase = new TestCase
+            {
+                InputData = request.InputData,
+                ExpectedOutput = request.ExpectedOutput,
+                IsPublic = request.IsPublic,
+                IsCaseInsensitive = request.IsCaseInsensitive,
+                IsRemovedSpace = request.IsRemovedSpace
+            };
+
+            await _problemRepository.AddTestCaseAsync(problemId, testCase);
+            _logger.LogInformation("Test case added to problem {ProblemId}", problemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding test case to problem {ProblemId}", problemId);
+            throw;
+        }
+    }
+
+    public async Task UpdateTestCaseAsync(string problemId, string testCaseId, UpdateTestCaseRequest request)
+    {
+        try
+        {
+            var testCase = await _problemRepository.GetTestCaseAsync(problemId, testCaseId);
+            if (testCase == null)
+            {
+                throw new KeyNotFoundException($"Test case {testCaseId} not found for problem {problemId}");
+            }
+
+            testCase.InputData = request.InputData;
+            testCase.ExpectedOutput = request.ExpectedOutput;
+            testCase.IsPublic = request.IsPublic;
+            testCase.IsCaseInsensitive = request.IsCaseInsensitive;
+            testCase.IsRemovedSpace = request.IsRemovedSpace;
+
+            await _problemRepository.UpdateTestCaseAsync(problemId, testCase);
+            _logger.LogInformation("Test case {TestCaseId} updated for problem {ProblemId}", testCaseId, problemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating test case {TestCaseId} for problem {ProblemId}", testCaseId, problemId);
+            throw;
+        }
+    }
+
+    public async Task DeleteTestCaseAsync(string problemId, string testCaseId)
+    {
+        try
+        {
+            await _problemRepository.DeleteTestCaseAsync(problemId, testCaseId);
+            _logger.LogInformation("Test case {TestCaseId} deleted from problem {ProblemId}", testCaseId, problemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting test case {TestCaseId} from problem {ProblemId}", testCaseId, problemId);
+            throw;
+        }
+    }
+}

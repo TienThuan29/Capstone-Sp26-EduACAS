@@ -2,9 +2,12 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AcasService.Application.Commands.Problem;
 using AcasService.Application.Commands.S3;
+using AcasService.Application.Queries.Problem;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
+using AcasService.Repositories.Problem;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using StackExchange.Redis;
@@ -65,10 +68,13 @@ var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AcasService";
 builder.Services.AddHostedService<DynamoDbHostedService>();
 builder.Services.AddScoped<IPrivateS3Repository, PrivateS3Repository>();
 builder.Services.AddScoped<IPublicS3Repository, PublicS3Repository>();
+builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
 builder.Services.AddScoped<IPrivateS3Query, PrivateS3Query>();
+builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
+builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
