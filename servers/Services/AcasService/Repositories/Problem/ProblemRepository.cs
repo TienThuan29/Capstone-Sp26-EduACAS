@@ -22,12 +22,17 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         _problemTableName =
             configuration["DynamoDB:ProblemTableName"] ??
             configuration["DynamoDB:ProblemTable"] ??
-            "Problems";
+            throw new ArgumentNullException("DynamoDB:ProblemTableName is not configured");
 
         _testCaseTableName =
             configuration["DynamoDB:TestCaseTableName"] ??
             configuration["DynamoDB:TestCaseTable"] ??
-            "TestCases";
+            throw new ArgumentNullException("DynamoDB:TestCaseTableName is not configured");
+        
+        base.TableName = _problemTableName;
+        var awsRegion = configuration["AWS:Region"] ?? "Not configured";
+        logger.LogInformation("ProblemRepository initialized - Region: {Region}, ProblemTable: {ProblemTable}, TestCaseTable: {TestCaseTable}", 
+            awsRegion, _problemTableName, _testCaseTableName);
     }
 
     public async Task<string> CreateAsync(Models.Problem problem)
@@ -39,13 +44,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             problem.UpdatedDate = DateTime.UtcNow;
 
             var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
-            var request = new PutItemRequest
-            {
-                TableName = _problemTableName,
-                Item = dynamoItem
-            };
-
-            var response = await _dynamoDBClient.PutItemAsync(request);
+            var response = await PutItemAsync(dynamoItem, _problemTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -67,13 +66,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         try
         {
             var key = DynamoMapper.CreateKey(problemId);
-            var request = new GetItemRequest
-            {
-                TableName = _problemTableName,
-                Key = key
-            };
-
-            var response = await _dynamoDBClient.GetItemAsync(request);
+            var response = await GetItemAsync(key, _problemTableName);
 
             if (response.Item.Count == 0)
                 return null;
@@ -187,13 +180,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             problem.CreatedDate = existingProblem.CreatedDate;
 
             var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
-            var request = new PutItemRequest
-            {
-                TableName = _problemTableName,
-                Item = dynamoItem
-            };
-
-            var response = await _dynamoDBClient.PutItemAsync(request);
+            var response = await PutItemAsync(dynamoItem, _problemTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -222,13 +209,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             problem.UpdatedDate = DateTime.UtcNow;
 
             var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
-            var request = new PutItemRequest
-            {
-                TableName = _problemTableName,
-                Item = dynamoItem
-            };
-
-            var response = await _dynamoDBClient.PutItemAsync(request);
+            var response = await PutItemAsync(dynamoItem, _problemTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -267,13 +248,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             testCase.IsDeleted = false;
 
             var dynamoItem = DynamoMapper.TestCaseToDynamoItem(problemId, testCase);
-            var request = new PutItemRequest
-            {
-                TableName = _testCaseTableName,
-                Item = dynamoItem
-            };
-
-            var response = await _dynamoDBClient.PutItemAsync(request);
+            var response = await PutItemAsync(dynamoItem, _testCaseTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -299,13 +274,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
                 throw new KeyNotFoundException($"Test case {testCase.Id} not found for problem {problemId}");
 
             var dynamoItem = DynamoMapper.TestCaseToDynamoItem(problemId, testCase);
-            var request = new PutItemRequest
-            {
-                TableName = _testCaseTableName,
-                Item = dynamoItem
-            };
-
-            var response = await _dynamoDBClient.PutItemAsync(request);
+            var response = await PutItemAsync(dynamoItem, _testCaseTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -332,13 +301,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
 
             testCase.IsDeleted = true;
             var dynamoItem = DynamoMapper.TestCaseToDynamoItem(problemId, testCase);
-            var request = new PutItemRequest
-            {
-                TableName = _testCaseTableName,
-                Item = dynamoItem
-            };
-
-            var response = await _dynamoDBClient.PutItemAsync(request);
+            var response = await PutItemAsync(dynamoItem, _testCaseTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {

@@ -23,11 +23,6 @@ public class ProblemCommandController : ControllerBase
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(request.Title) || string.IsNullOrWhiteSpace(request.ExamId))
-            {
-                return ResponseUtil.Error<object>("Title and ExamId are required.", statusCode: 400);
-            }
-
             var problemId = await _problemCommand.CreateProblemAsync(request);
             return ResponseUtil.Success(
                 new { id = problemId },
@@ -124,14 +119,6 @@ public class ProblemCommandController : ControllerBase
                 return ResponseUtil.Error<object>("Problem ID is required.", statusCode: 400);
             }
 
-            if (string.IsNullOrWhiteSpace(request.InputData) || string.IsNullOrWhiteSpace(request.ExpectedOutput))
-            {
-                return ResponseUtil.Error<object>(
-                    "InputData and ExpectedOutput are required.",
-                    statusCode: 400
-                );
-            }
-
             await _problemCommand.AddTestCaseAsync(problemId, request);
             return ResponseUtil.Success(
                 new { message = "Test case added successfully" },
@@ -173,18 +160,6 @@ public class ProblemCommandController : ControllerBase
                     "At least one test case is required.",
                     statusCode: 400
                 );
-            }
-
-            // Validate all test cases
-            foreach (var request in requests)
-            {
-                if (string.IsNullOrWhiteSpace(request.InputData) || string.IsNullOrWhiteSpace(request.ExpectedOutput))
-                {
-                    return ResponseUtil.Error<object>(
-                        "InputData and ExpectedOutput are required for all test cases.",
-                        statusCode: 400
-                    );
-                }
             }
 
             await _problemCommand.AddBulkTestCasesAsync(problemId, requests);
