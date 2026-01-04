@@ -127,33 +127,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddControllers()
-    .ConfigureApiBehaviorOptions(options =>
-    {
-        options.InvalidModelStateResponseFactory = context =>
-        {
-            var errors = context.ModelState
-                .Where(e => e.Value?.Errors.Count > 0)
-                .Select(e => new
-                {
-                    Field = e.Key,
-                    Errors = e.Value?.Errors.Select(x => x.ErrorMessage).ToArray()
-                })
-                .ToList();
-
-            var result = new
-            {
-                success = false,
-                message = "Validation failed",
-                data = (object?)null,
-                errors = errors,
-                statusCode = 400
-            };
-
-            return new BadRequestObjectResult(result);
-        };
-    });
-    
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
