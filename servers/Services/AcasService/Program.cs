@@ -8,6 +8,7 @@ using AcasService.Messaging.User;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using StackExchange.Redis;
+// using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi;
 using RabbitMQ.Client;
 using Amazon.DynamoDBv2;
@@ -24,6 +25,7 @@ using AcasService.Repositories.ProgrammingLanguage;
 using AcasService.Repositories.Examination;
 using AcasService.Application.Mappers;
 using System.Text.Json.Serialization; 
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -139,38 +141,76 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+<<<<<<< HEAD
 builder.Services.AddControllers().AddJsonOptions(options =>
     {
       
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
+=======
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.WithOrigins("http://localhost:8080")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddControllers();
+>>>>>>> origin/main
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new()
+    // c.SwaggerDoc("v1", new()
+    // {
+    //     Title = "ACAS Service API",
+    //     Version = "v1",
+    //     Description = "ACAS Service API"
+    // });
+    c.SwaggerDoc("v1", new OpenApiInfo  
     {
         Title = "ACAS Service API",
         Version = "v1",
         Description = "ACAS Service API"
     });
 
+    // c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    // {
+    //     Name = "Authorization",
+    //     Type = SecuritySchemeType.Http,
+    //     Scheme = "bearer",
+    //     BearerFormat = "JWT",
+    //     In = ParameterLocation.Header,
+    //     Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
+    // });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
-        Scheme = "Bearer",
+        Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
     });
 
+    // c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
+    // {
+    //     {
+    //         new OpenApiSecuritySchemeReference("Bearer", hostDocument: null, externalResource
+    //         ),
+    //         new List<string>()
+    //     }
+    // });
     c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecuritySchemeReference("Bearer", hostDocument: null, externalResource: null),
             new List<string>()
-        }
+        }       
     });
+
 });
 // Health checks
 var redisConnectionStringForHealth = builder.Configuration["Redis:ConnectionString"] ??
@@ -235,6 +275,28 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger(c =>
     {
         c.RouteTemplate = "swagger/{documentName}/swagger.json";
+        c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+        {
+            const string gatewayPrefix = "/api/acas/v1";
+
+            var prefixedPaths = new OpenApiPaths();
+            foreach (var path in swaggerDoc.Paths)
+            {
+                var originalPath = path.Key;
+                var trimmedPath = originalPath.StartsWith("/api/v1", StringComparison.OrdinalIgnoreCase)
+                    ? originalPath["/api/v1".Length..]
+                    : originalPath;
+
+                if (!trimmedPath.StartsWith("/"))
+                {
+                    trimmedPath = "/" + trimmedPath;
+                }
+
+                prefixedPaths.Add($"{gatewayPrefix}{trimmedPath}", path.Value);
+            }
+
+            swaggerDoc.Paths = prefixedPaths;
+        });
     });
     app.UseSwaggerUI(c =>
     {
@@ -249,9 +311,13 @@ app.MapGet("/openapi/v1.json", (HttpContext context) =>
     context.Response.Redirect("/swagger/v1/swagger.json", permanent: false);
 });
 
-app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors();
 app.UseRateLimiter();
+if (app.Environment.IsProduction())
+{
+    app.UseHttpsRedirection();
+}
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

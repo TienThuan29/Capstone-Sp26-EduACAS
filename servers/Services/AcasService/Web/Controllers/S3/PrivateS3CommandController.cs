@@ -9,7 +9,7 @@ namespace AcasService.Web.Controllers.S3;
 [ApiController]
 [Route("api/v1/private-s3")]
 [Authorize(Roles = "LECTURER, ADMIN")]
-public class PrivateS3CommandController
+public class PrivateS3CommandController : ControllerBase
 {
     private readonly ILogger<PrivateS3CommandController> _logger;
     

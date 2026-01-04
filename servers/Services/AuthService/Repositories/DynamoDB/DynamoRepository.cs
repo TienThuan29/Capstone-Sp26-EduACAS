@@ -7,7 +7,7 @@ public abstract class DynamoRepository
 {
     protected readonly IAmazonDynamoDB _dynamoDBClient;
     protected readonly ILogger<DynamoRepository> _logger;
-    protected string _tableName;
+    protected string _tableName = string.Empty;
 
     protected string TableName { get => _tableName; set => _tableName = value; }
 
