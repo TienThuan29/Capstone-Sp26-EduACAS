@@ -155,6 +155,61 @@ public class ProblemCommandController : ControllerBase
         }
     }
 
+    [HttpPost("{problemId}/bulk-test-cases")]
+    public async Task<ActionResult<ApiResponse<object>>> AddBulkTestCases(
+        [FromRoute] string problemId,
+        [FromBody] List<CreateTestCaseRequest> requests)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(problemId))
+            {
+                return ResponseUtil.Error<object>("Problem ID is required.", statusCode: 400);
+            }
+
+            if (requests == null || requests.Count == 0)
+            {
+                return ResponseUtil.Error<object>(
+                    "At least one test case is required.",
+                    statusCode: 400
+                );
+            }
+
+            // Validate all test cases
+            foreach (var request in requests)
+            {
+                if (string.IsNullOrWhiteSpace(request.InputData) || string.IsNullOrWhiteSpace(request.ExpectedOutput))
+                {
+                    return ResponseUtil.Error<object>(
+                        "InputData and ExpectedOutput are required for all test cases.",
+                        statusCode: 400
+                    );
+                }
+            }
+
+            await _problemCommand.AddBulkTestCasesAsync(problemId, requests);
+            return ResponseUtil.Success(
+                new { message = $"{requests.Count} test cases added successfully", count = requests.Count },
+                "Test cases added successfully.",
+                statusCode: 201
+            );
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Problem {ProblemId} not found", problemId);
+            return ResponseUtil.Error<object>(ex.Message, statusCode: 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding bulk test cases to problem {ProblemId}", problemId);
+            return ResponseUtil.Error<object>(
+                "Failed to add test cases.",
+                error: ex.Message,
+                stack: ex.StackTrace
+            );
+        }
+    }
+
     [HttpPut("{problemId}/test-cases/{testCaseId}")]
     public async Task<ActionResult<ApiResponse<object>>> UpdateTestCase(
         [FromRoute] string problemId,

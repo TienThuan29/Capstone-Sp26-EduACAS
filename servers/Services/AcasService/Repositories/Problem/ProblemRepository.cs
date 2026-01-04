@@ -1,14 +1,13 @@
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using AcasService.Models;
+using AcasService.Repositories.DynamoDb;
 using System.Net;
 
 namespace AcasService.Repositories.Problem;
 
-public class ProblemRepository : IProblemRepository
+public class ProblemRepository : DynamoRepository, IProblemRepository
 {
-    private readonly IAmazonDynamoDB _dynamoDbClient;
-    private readonly ILogger<ProblemRepository> _logger;
     private readonly IConfiguration _configuration;
     private readonly string _problemTableName;
     private readonly string _testCaseTableName;
@@ -16,11 +15,9 @@ public class ProblemRepository : IProblemRepository
     public ProblemRepository(
         IAmazonDynamoDB dynamoDbClient,
         IConfiguration configuration,
-        ILogger<ProblemRepository> logger)
+        ILogger<DynamoRepository> logger) : base(dynamoDbClient, logger)
     {
-        _dynamoDbClient = dynamoDbClient;
         _configuration = configuration;
-        _logger = logger;
         // Support both legacy keys (ProblemTable/TestCaseTable) and the current *TableName keys.
         _problemTableName =
             configuration["DynamoDB:ProblemTableName"] ??
@@ -48,7 +45,7 @@ public class ProblemRepository : IProblemRepository
                 Item = dynamoItem
             };
 
-            var response = await _dynamoDbClient.PutItemAsync(request);
+            var response = await _dynamoDBClient.PutItemAsync(request);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -76,7 +73,7 @@ public class ProblemRepository : IProblemRepository
                 Key = key
             };
 
-            var response = await _dynamoDbClient.GetItemAsync(request);
+            var response = await _dynamoDBClient.GetItemAsync(request);
 
             if (response.Item.Count == 0)
                 return null;
@@ -105,7 +102,7 @@ public class ProblemRepository : IProblemRepository
                 }
             };
 
-            var response = await _dynamoDbClient.QueryAsync(request);
+            var response = await _dynamoDBClient.QueryAsync(request);
             
             var problems = response.Items
                 .Where(item => item.ContainsKey("isDeleted") && item["isDeleted"].BOOL == false)
@@ -136,7 +133,7 @@ public class ProblemRepository : IProblemRepository
                 }
             };
 
-            var response = await _dynamoDbClient.QueryAsync(request);
+            var response = await _dynamoDBClient.QueryAsync(request);
 
             var problems = response.Items
                 .Where(item => item.ContainsKey("isDeleted") && item["isDeleted"].BOOL == false)
@@ -166,7 +163,7 @@ public class ProblemRepository : IProblemRepository
                 }
             };
 
-            var response = await _dynamoDbClient.ScanAsync(request);
+            var response = await _dynamoDBClient.ScanAsync(request);
             var problems = response.Items.Select(DynamoMapper.DynamoItemToProblem).ToList();
 
             return problems;
@@ -196,7 +193,7 @@ public class ProblemRepository : IProblemRepository
                 Item = dynamoItem
             };
 
-            var response = await _dynamoDbClient.PutItemAsync(request);
+            var response = await _dynamoDBClient.PutItemAsync(request);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -231,7 +228,7 @@ public class ProblemRepository : IProblemRepository
                 Item = dynamoItem
             };
 
-            var response = await _dynamoDbClient.PutItemAsync(request);
+            var response = await _dynamoDBClient.PutItemAsync(request);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -276,7 +273,7 @@ public class ProblemRepository : IProblemRepository
                 Item = dynamoItem
             };
 
-            var response = await _dynamoDbClient.PutItemAsync(request);
+            var response = await _dynamoDBClient.PutItemAsync(request);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -308,7 +305,7 @@ public class ProblemRepository : IProblemRepository
                 Item = dynamoItem
             };
 
-            var response = await _dynamoDbClient.PutItemAsync(request);
+            var response = await _dynamoDBClient.PutItemAsync(request);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -341,7 +338,7 @@ public class ProblemRepository : IProblemRepository
                 Item = dynamoItem
             };
 
-            var response = await _dynamoDbClient.PutItemAsync(request);
+            var response = await _dynamoDBClient.PutItemAsync(request);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -376,7 +373,7 @@ public class ProblemRepository : IProblemRepository
                 }
             };
 
-            var response = await _dynamoDbClient.QueryAsync(request);
+            var response = await _dynamoDBClient.QueryAsync(request);
 
             if (response.Items.Count == 0)
                 return null;
@@ -407,7 +404,7 @@ public class ProblemRepository : IProblemRepository
                 }
             };
 
-            var response = await _dynamoDbClient.QueryAsync(request);
+            var response = await _dynamoDBClient.QueryAsync(request);
             var testCases = response.Items.Select(DynamoMapper.DynamoItemToTestCase).ToList();
 
             return testCases;

@@ -9,6 +9,7 @@ public interface IProblemCommand
     Task UpdateProblemAsync(string problemId, UpdateProblemRequest request);
     Task DeleteProblemAsync(string problemId);
     Task AddTestCaseAsync(string problemId, CreateTestCaseRequest request);
+    Task AddBulkTestCasesAsync(string problemId, List<CreateTestCaseRequest> requests);
     Task UpdateTestCaseAsync(string problemId, string testCaseId, UpdateTestCaseRequest request);
     Task DeleteTestCaseAsync(string problemId, string testCaseId);
 }
@@ -117,6 +118,39 @@ public class ProblemCommand : IProblemCommand
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error adding test case to problem {ProblemId}", problemId);
+            throw;
+        }
+    }
+
+    public async Task AddBulkTestCasesAsync(string problemId, List<CreateTestCaseRequest> requests)
+    {
+        try
+        {
+            var problemExists = await _problemRepository.ExistsAsync(problemId);
+            if (!problemExists)
+            {
+                throw new KeyNotFoundException($"Problem {problemId} not found");
+            }
+
+            foreach (var request in requests)
+            {
+                var testCase = new TestCase
+                {
+                    InputData = request.InputData,
+                    ExpectedOutput = request.ExpectedOutput,
+                    IsPublic = request.IsPublic,
+                    IsCaseInsensitive = request.IsCaseInsensitive,
+                    IsRemovedSpace = request.IsRemovedSpace
+                };
+
+                await _problemRepository.AddTestCaseAsync(problemId, testCase);
+            }
+
+            _logger.LogInformation("{Count} test cases added to problem {ProblemId}", requests.Count, problemId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error adding bulk test cases to problem {ProblemId}", problemId);
             throw;
         }
     }
