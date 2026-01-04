@@ -35,8 +35,10 @@ public class ExaminationRequestDTO
     public float TotalMark { get; set; }
 
     [Required]
-    public Status Status { get; set; }
+    [RegularExpression(@"^(PENDING|ONGOING|COMPLETED)$", ErrorMessage = "Status must be either PENDING, ONGOING, or COMPLETED")]
+    public string Status { get; set; }
 
     [Required]
-    public Mode Mode { get; set; }
+    [RegularExpression(@"^(PRACTICAL|EXAMINATION)$", ErrorMessage = "Mode must be either PRACTICAL or EXAMINATION")]
+    public string Mode { get; set; }
 }

@@ -2,6 +2,7 @@ using AcasService.Application.ResponseDTOs;
 using AcasService.Web.Requests;
 using AcasService.Application.Mappers;
 using AcasService.Repositories.Examination;
+using AcasService.Models;
 
 namespace AcasService.Application.Commands.Examination;
 
@@ -51,6 +52,12 @@ public async Task<ExaminationResponseDTO?> UpdateAsync(
         {
             throw new Exception("Examination with given Id does not exist.");
         }
+        if (!Enum.TryParse<Status>(examDto.Status, true, out var status))
+            throw new ArgumentException($"Invalid status: {examDto.Status}");
+
+        if (!Enum.TryParse<Mode>(examDto.Mode, true, out var mode))
+            throw new ArgumentException($"Invalid mode: {examDto.Mode}");
+
         existingExam.ExamName = examDto.ExamName;
         existingExam.ProgrammingLanguageId = examDto.ProgrammingLanguageId;
         existingExam.ProblemIds = examDto.ProblemIds;
@@ -60,8 +67,8 @@ public async Task<ExaminationResponseDTO?> UpdateAsync(
         existingExam.Description = examDto.Description;
         existingExam.IsPublicResult = examDto.IsPublicResult;
         existingExam.TotalMark = examDto.TotalMark;
-        existingExam.Status = examDto.Status;
-        existingExam.Mode = examDto.Mode;
+        existingExam.Status = status;
+        existingExam.Mode = mode;
         existingExam.UpdatedDate = DateTime.UtcNow;
 
         var updatedExam = await _examinationRepository.UpdateAsync(id, existingExam);

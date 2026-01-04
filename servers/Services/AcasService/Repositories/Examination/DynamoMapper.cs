@@ -1,8 +1,9 @@
-namespace AcasService.Repositories.Examination;
-
-
 using Amazon.DynamoDBv2.Model;
 using AcasService.Models;
+
+
+
+namespace AcasService.Repositories.Examination;
 
 
     public static class DynamoMapper

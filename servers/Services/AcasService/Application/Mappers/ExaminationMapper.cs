@@ -1,6 +1,6 @@
 using AcasService.Application.ResponseDTOs;
 using AcasService.Web.Requests;
-
+using AcasService.Models;
 namespace AcasService.Application.Mappers;
 
 public class ExaminationMapper
@@ -29,6 +29,10 @@ public class ExaminationMapper
 
     public Models.Examination ToExaminationModel(ExaminationRequestDTO examRequest)
     {
+        if (!Enum.TryParse<Mode>(examRequest.Mode, true, out var mode))
+            throw new InvalidOperationException($"Invalid Mode: {examRequest.Mode}");
+        if (!Enum.TryParse<Status>(examRequest.Status, true, out var status))
+            throw new InvalidOperationException($"Invalid Status: {examRequest.Status}");
         return new Models.Examination
         {
             ExamName = examRequest.ExamName,
@@ -40,8 +44,8 @@ public class ExaminationMapper
             Description = examRequest.Description,
             IsPublicResult = examRequest.IsPublicResult,
             TotalMark = examRequest.TotalMark,
-            Status = examRequest.Status,
-            Mode = examRequest.Mode
+            Status = status,
+            Mode = mode
         };
     }
 }

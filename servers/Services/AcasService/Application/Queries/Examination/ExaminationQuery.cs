@@ -21,10 +21,10 @@ public class ExaminationQuery : IExaminationQuery
     private readonly ExaminationMapper _examinationMapper;
     private readonly ILogger<ExaminationQuery> _logger;
 
-    public ExaminationQuery(IExaminationRepository examinationRepository, ILogger<ExaminationQuery> logger)
+    public ExaminationQuery(IExaminationRepository examinationRepository, ILogger<ExaminationQuery> logger, ExaminationMapper examinationMapper)
     {
         _examinationRepository = examinationRepository;
-        _examinationMapper = new ExaminationMapper();
+        _examinationMapper = examinationMapper;
         _logger = logger;
     }
 
