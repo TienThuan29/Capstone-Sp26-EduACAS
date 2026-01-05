@@ -19,7 +19,6 @@ public class SubjectCommandController : ControllerBase
         _logger = logger;
     }
 
-    // 1. CREATE (POST)
     [HttpPost]
     public async Task<ActionResult<ApiResponse<SubjectResponse>>> CreateSubject([FromBody] CreateSubjectRequest request)
     {
@@ -35,7 +34,6 @@ public class SubjectCommandController : ControllerBase
         }
     }
 
-    // 2. UPDATE (PUT)
     [HttpPut("{id}")]
     public async Task<ActionResult<ApiResponse<SubjectResponse>>> UpdateSubject(string id, [FromBody] UpdateSubjectRequest request)
     {
@@ -56,7 +54,6 @@ public class SubjectCommandController : ControllerBase
         }
     }
 
-    // 3. DELETE (DELETE)
     [HttpDelete("{id}")]
     public async Task<ActionResult<ApiResponse<bool>>> DeleteSubject(string id)
     {

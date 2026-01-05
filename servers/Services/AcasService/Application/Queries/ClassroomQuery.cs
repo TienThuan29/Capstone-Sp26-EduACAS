@@ -6,7 +6,7 @@ namespace AcasService.Application.Queries
 {
     public interface IClassroomQuery
     {
-        // Define query methods here
+        
         Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId);
         Task<List<ClassroomResponse>> GetAllClassroomsAsync();
     }
@@ -29,7 +29,7 @@ namespace AcasService.Application.Queries
 
 
 
-        // Implement query methods here
+        
         public async Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId)
         {
             try

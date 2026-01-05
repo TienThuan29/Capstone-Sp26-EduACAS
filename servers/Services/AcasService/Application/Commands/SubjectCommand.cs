@@ -38,7 +38,7 @@ namespace AcasService.Application.Commands
                 SubjectCode = request.SubjectCode,
                 SubjectName = request.SubjectName,
                 Description = request.Description,
-                CreatedBy = "System",
+                CreatedBy = request.CreatedBy,
                 IsDeleted = false,
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = null

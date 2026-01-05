@@ -16,14 +16,12 @@ public static class DynamoMapper
             ["isDeleted"] = new AttributeValue { BOOL = subject.IsDeleted },
             ["createdDate"] = new AttributeValue { S = subject.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
         };
-            //["updatedDate"] = new AttributeValue { S = subject.UpdatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
             if (subject.UpdatedDate.HasValue)
         {
             item["updatedDate"] = new AttributeValue { S = subject.UpdatedDate.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") };
         }
         else
         {
-            // Nếu update chưa có thì có thể lấy luôn CreateDate hoặc để null
             item["updatedDate"] = new AttributeValue { NULL = true };
         }
     

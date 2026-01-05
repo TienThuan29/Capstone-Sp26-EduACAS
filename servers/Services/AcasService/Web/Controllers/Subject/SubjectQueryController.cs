@@ -18,7 +18,6 @@ public class SubjectQueryController : ControllerBase
         _logger = logger;
     }
 
-    // 1. GET ALL
     [HttpGet]
     public async Task<ActionResult<ApiResponse<List<SubjectResponse>>>> GetAllSubjects()
     {
@@ -34,7 +33,7 @@ public class SubjectQueryController : ControllerBase
         }
     }
 
-    // 2. GET BY ID
+   
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<SubjectResponse>>> GetSubjectById(string id)
     {

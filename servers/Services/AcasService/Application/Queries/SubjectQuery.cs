@@ -13,12 +13,12 @@ namespace AcasService.Application.Queries
 
     public class SubjectQuery : ISubjectQuery
     {
-        // 1. Khai báo công cụ cần thiết
+     
         private readonly ISubjectRepository _subjectRepository;
         private readonly SubjectMapper _subjectMapper;
-        private readonly ILogger<SubjectQuery> _logger; // Log lỗi cho dễ sửa
+        private readonly ILogger<SubjectQuery> _logger; 
 
-        // 2. Nhận công cụ qua Constructor (Dependency Injection)
+        
         public SubjectQuery(
             ISubjectRepository subjectRepository,
             SubjectMapper subjectMapper,
@@ -30,7 +30,7 @@ namespace AcasService.Application.Queries
             _logger = logger;
         }
 
-        // Hàm 1: Lấy môn học theo ID
+        
         public async Task<SubjectResponse> GetSubjectByIdAsync(string subjectId)
         {
             try
@@ -42,24 +42,24 @@ namespace AcasService.Application.Queries
                     throw new KeyNotFoundException($"Subject with id {subjectId} not found.");
                 }
 
-                // Mapper đã handle vụ null rồi, cứ truyền vào
+                
                 return _subjectMapper.ToSubjectResponse(subject);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting subject by id: {Id}", subjectId);
-                throw; // Ném lỗi ra để Controller biết đường trả về 500
+                throw; 
             }
         }
 
-        // Hàm 2: Lấy tất cả môn học
+        
         public async Task<List<SubjectResponse>> GetAllSubjectsAsync()
         {
             try
             {
                 var subjects = await _subjectRepository.FindAllAsync();
 
-                // Dùng LINQ để map từng cái một
+                
                 return subjects.Select(s => _subjectMapper.ToSubjectResponse(s)).ToList();
             }
             catch (Exception ex)
