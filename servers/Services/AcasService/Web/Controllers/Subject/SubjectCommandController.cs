@@ -1,0 +1,76 @@
+﻿using AcasService.Application.Commands;
+using AcasService.Application.ResponseDTOs;
+using AcasService.Application.Utils;
+using AcasService.Web.Requests;
+using Microsoft.AspNetCore.Mvc;
+
+namespace AcasService.Web.Controllers.Subject;
+
+[ApiController]
+[Route("api/v1/subjects")]
+public class SubjectCommandController : ControllerBase
+{
+    private readonly ISubjectCommand _subjectCommand;
+    private readonly ILogger<SubjectCommandController> _logger;
+
+    public SubjectCommandController(ISubjectCommand subjectCommand, ILogger<SubjectCommandController> logger)
+    {
+        _subjectCommand = subjectCommand;
+        _logger = logger;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<SubjectResponse>>> CreateSubject([FromBody] CreateSubjectRequest request)
+    {
+        try
+        {
+            var result = await _subjectCommand.CreateSubjectAsync(request);
+            return ResponseUtil.Success(result, "Subject created successfully", 201);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating subject");
+            return ResponseUtil.Error<SubjectResponse>("Failed to create new subject",500);
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ApiResponse<SubjectResponse>>> UpdateSubject(string id, [FromBody] UpdateSubjectRequest request)
+    {
+        try
+        {
+            var result = await _subjectCommand.UpdateSubjectAsync(id, request);
+            return ResponseUtil.Success(result, "Subject updated successfully",200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Subject not found for update");
+            return ResponseUtil.Error<SubjectResponse>("Subject not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating subject");
+            return ResponseUtil.Error<SubjectResponse>("Failed to update subject", 500);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ApiResponse<bool>>> DeleteSubject(string id)
+    {
+        try
+        {
+            var result = await _subjectCommand.DeleteSubjectAsync(id);
+            return ResponseUtil.Success(result!=null, "Subject deleted successfully",200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Subject not found for delete");
+            return ResponseUtil.Error<bool>("Subject not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting subject");
+            return ResponseUtil.Error<bool>("Failed to delete subject", 500);
+        }
+    }
+}
