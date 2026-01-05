@@ -68,7 +68,7 @@ export default function LandingPage() {
                   style={{ backgroundColor: "#FFFFFF", border: "3px solid #C9A24D" }}
                 >
                   <Image
-                    src="/images/edu-acas-20logo.jpeg"
+                    src="/images/Edu-ACAS logo.png"
                     alt="Edu-ACAS Logo"
                     width={400}
                     height={400}

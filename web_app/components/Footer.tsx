@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <footer className="py-12 px-4" style={{ backgroundColor: "#1F4E79" }}>
+    <footer id="contact" className="py-12 px-4 bg-[#1F4E79] dark:bg-gray-900">
       <div
         className="absolute top-0 left-0 right-0 h-1"
         style={{ background: `linear-gradient(90deg, #C9A24D 0%, #FFFFFF 50%, #C9A24D 100%)` }}
