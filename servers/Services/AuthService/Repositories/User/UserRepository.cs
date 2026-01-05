@@ -78,12 +78,6 @@ public class UserRepository : DynamoRepository, IUserRepository
     {
         try
         {
-            // Log DynamoDB operation details
-            var region = _configuration["AWS:Region"] ?? "Unknown";
-            var regionEndpoint = _dynamoDBClient.Config.RegionEndpoint?.SystemName ?? "Unknown";
-            _logger.LogInformation("Finding user by email - Region: {Region} ({RegionEndpoint}), Table: {Table}, Email: {Email}",
-                region, regionEndpoint, _userTableName, email);
-
             var scanRequest = new ScanRequest
             {
                 TableName = _userTableName,
