@@ -105,21 +105,37 @@ const Sidebar = () => {
     >
       {/* Logo */}
       <div
-        className={`border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"} p-4 flex items-center justify-between`}
+        className={`border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"} p-4 flex items-center ${isExpanded ? 'justify-between' : 'justify-center'}`}
       >
-        {isExpanded && (
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-full" style={{ backgroundColor: "#1F4E79" }} />
-            <span className={`font-bold ${isDarkMode ? "text-white" : "text-gray-800"}`}>Edu-ACAS</span>
-          </div>
+        {isExpanded ? (
+          <>
+            <div className="flex-1 flex justify-center">
+              <img 
+                src="/images/Edu-ACAS logo.png" 
+                alt="Edu-ACAS Logo" 
+                className="w-20 h-16 object-contain"
+              />
+            </div>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`p-1 rounded transition-colors ${isDarkMode ? "hover:bg-gray-800 text-gray-300" : "hover:bg-gray-100 text-gray-600"}`}
+            >
+              {"<<"}
+            </button>
+          </>
+        ) : (
+          <button
+            onClick={() => setIsExpanded(!isExpanded)}
+            className={`w-full flex flex-col items-center gap-2`}
+          >
+            <img 
+              src="/images/Edu-ACAS logo.png" 
+              alt="Edu-ACAS Logo" 
+              className="w-16 h-16 object-contain"
+            />
+            <span className={`text-xs ${isDarkMode ? "text-gray-400" : "text-gray-500"}`}>{">>"}</span>
+          </button>
         )}
-        {!isExpanded && <div className="w-8 h-8 rounded-full mx-auto" style={{ backgroundColor: "#1F4E79" }} />}
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          className={`p-1 rounded transition-colors ${isDarkMode ? "hover:bg-gray-800 text-gray-300" : "hover:bg-gray-100 text-gray-600"}`}
-        >
-          {"<>"}
-        </button>
       </div>
 
       {/* Main Menu */}

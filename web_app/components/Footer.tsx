@@ -9,9 +9,13 @@ export default function Footer() {
       <div className="container mx-auto max-w-7xl">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
           <div>
-            <h4 className="text-lg font-bold mb-4 text-white font-mono">
-              <span style={{ color: "#C9A24D" }}>{"<"}</span>Edu-ACAS<span style={{ color: "#C9A24D" }}>{"/>"}</span>
-            </h4>
+            <div className="mb-4 inline-block p-3 rounded-lg bg-white dark:bg-transparent">
+              <img 
+                src="/images/Edu-ACAS logo.png" 
+                alt="Edu-ACAS Logo" 
+                className="h-20 w-auto"
+              />
+            </div>
             <p className="text-white opacity-80 text-sm">
               Nền tảng học lập trình qua các bài tập tương tác và thử thách code.
             </p>

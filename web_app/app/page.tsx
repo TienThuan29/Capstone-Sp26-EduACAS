@@ -3,6 +3,7 @@
 import { Card } from "flowbite-react"
 import Image from "next/image"
 import Link from "next/link"
+import { Carousel } from "flowbite-react";
 import {
   LaptopIcon,
   GraduateIcon,
