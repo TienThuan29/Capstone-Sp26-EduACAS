@@ -2,9 +2,12 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AcasService.Application.Commands.Problem;
 using AcasService.Application.Commands.S3;
+using AcasService.Application.Queries.Problem;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
+using AcasService.Repositories.Problem;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using StackExchange.Redis;
@@ -17,6 +20,18 @@ using Amazon.S3;
 using Amazon.Extensions.NETCore.Setup;
 using AcasService.Application.Queries.S3;
 using AcasService.Repositories.DynamoDB;
+using AcasService.Repositories.Subject;
+using AcasService.Application.Commands;
+using AcasService.Application.Queries;
+using AcasService.Repositories.Classroom;
+using AcasService.Application.Commands.ProgrammingLanguage;
+using AcasService.Application.Commands.Examination;
+using AcasService.Application.Queries.ProgrammingLanguage;
+using AcasService.Application.Queries.Examination;
+using AcasService.Repositories.ProgrammingLanguage;
+using AcasService.Repositories.Examination;
+using AcasService.Application.Mappers;
+using System.Text.Json.Serialization; 
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -67,10 +82,32 @@ var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AcasService";
 builder.Services.AddHostedService<DynamoDbHostedService>();
 builder.Services.AddScoped<IPrivateS3Repository, PrivateS3Repository>();
 builder.Services.AddScoped<IPublicS3Repository, PublicS3Repository>();
+builder.Services.AddScoped<ISubjectRepository, SubjectRepository>();
+builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
+builder.Services.AddScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>();
+builder.Services.AddScoped<IExaminationRepository, ExaminationRepository>();
+builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
 builder.Services.AddScoped<IPrivateS3Query, PrivateS3Query>();
+builder.Services.AddScoped<ISubjectCommand, SubjectCommand>();
+builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();
+builder.Services.AddScoped<IClassroomCommand, ClassroomCommand>();  
+builder.Services.AddScoped<IClassroomQuery, ClassroomQuery>();
+
+builder.Services.AddScoped<AcasService.Application.Mappers.SubjectMapper>();
+builder.Services.AddScoped<AcasService.Application.Mappers.ClassroomMapper>();
+builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
+builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
+builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
+builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
+
+
+builder.Services.AddScoped<ProgrammingLanguageMapper>();
+builder.Services.AddScoped<ExaminationMapper>();
+builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
+builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 

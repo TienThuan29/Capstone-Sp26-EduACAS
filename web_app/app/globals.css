@@ -3,3 +3,13 @@
 @source "../.flowbite-react/class-list.json";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+/* Smooth dark mode transitions */
+* {
+  @apply transition-colors duration-300;
+}
+
+/* Prevent transition on initial page load */
+.no-transition * {
+  transition: none !important;
+}
