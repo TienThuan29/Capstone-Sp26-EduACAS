@@ -45,3 +45,20 @@ public class VerifyEmailRequest
     [Required]
     public string Opt { get; set; } = string.Empty;
 }
+
+// Forgot password request
+public class ForgotPasswordRequest
+{
+    [Required]
+    [EmailAddress]
+    public string Email { get; set; } = string.Empty;
+}
+
+public class ResetPasswordRequest
+{
+    [Required]
+    public string Token { get; set; } = string.Empty;
+
+    [Required]
+    public string NewPassword { get; set; } = string.Empty;
+}

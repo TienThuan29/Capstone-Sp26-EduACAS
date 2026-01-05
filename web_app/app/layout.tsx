@@ -2,6 +2,8 @@ import { ThemeModeScript } from "flowbite-react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeInit } from "../.flowbite-react/init";
+import { ToastProvider } from "@/contexts/ToastContext";
+import { UserProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
@@ -34,9 +36,13 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <ThemeInit />
-        <ThemeProvider>
-          {children}
-        </ThemeProvider>
+        <ToastProvider>
+          <UserProvider>
+            <ThemeProvider>
+              {children}
+            </ThemeProvider>
+          </UserProvider>
+        </ToastProvider>
       </body>
     </html>
   );

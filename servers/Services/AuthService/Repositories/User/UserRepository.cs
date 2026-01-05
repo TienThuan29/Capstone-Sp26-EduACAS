@@ -78,12 +78,6 @@ public class UserRepository : DynamoRepository, IUserRepository
     {
         try
         {
-            // Log DynamoDB operation details
-            var region = _configuration["AWS:Region"] ?? "Unknown";
-            var regionEndpoint = _dynamoDBClient.Config.RegionEndpoint?.SystemName ?? "Unknown";
-            _logger.LogInformation("Finding user by email - Region: {Region} ({RegionEndpoint}), Table: {Table}, Email: {Email}",
-                region, regionEndpoint, _userTableName, email);
-
             var scanRequest = new ScanRequest
             {
                 TableName = _userTableName,
@@ -126,6 +120,42 @@ public class UserRepository : DynamoRepository, IUserRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error finding all users");
+            throw;
+        }
+    }
+
+    public async Task<Models.User?> UpdatePasswordAsync(Models.User user)
+    {
+        try
+        {
+            var hashedPassword = HashingUtil.HashString(user.Password, _configuration);
+            var updatedDate = DateTime.UtcNow;
+            
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                ["password"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = hashedPassword }
+                },
+                ["updatedDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                }
+            };
+            
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(user.Id), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(user.Id);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user password");
             throw;
         }
     }
