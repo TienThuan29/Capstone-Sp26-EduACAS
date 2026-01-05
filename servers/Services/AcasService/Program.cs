@@ -2,9 +2,12 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using AcasService.Application.Commands.Problem;
 using AcasService.Application.Commands.S3;
+using AcasService.Application.Queries.Problem;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
+using AcasService.Repositories.Problem;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using StackExchange.Redis;
@@ -77,6 +80,7 @@ builder.Services.AddScoped<IPrivateS3Repository, PrivateS3Repository>();
 builder.Services.AddScoped<IPublicS3Repository, PublicS3Repository>();
 builder.Services.AddScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>();
 builder.Services.AddScoped<IExaminationRepository, ExaminationRepository>();
+builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -89,6 +93,8 @@ builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>(
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
+builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
+builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
@@ -141,13 +147,6 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-<<<<<<< HEAD
-builder.Services.AddControllers().AddJsonOptions(options =>
-    {
-      
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-    });
-=======
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -159,7 +158,6 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddControllers();
->>>>>>> origin/main
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
