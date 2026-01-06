@@ -7,7 +7,7 @@ namespace AcasService.Web.Controllers.Problem;
 
 [ApiController]
 [Route("api/v1/problems")]
-[Authorize]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class ProblemQueryController : ControllerBase
 {
     private readonly IProblemQuery _problemQuery;
@@ -79,7 +79,6 @@ public class ProblemQueryController : ControllerBase
     }
 
     [HttpGet("lecturer/{lecturerId}")]
-    [Authorize(Roles = "LECTURER, ADMIN")]
     public async Task<ActionResult<ApiResponse<object>>> GetProblemsByLecturerId([FromRoute] string lecturerId)
     {
         try
@@ -107,7 +106,6 @@ public class ProblemQueryController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ApiResponse<object>>> GetAllProblems()
     {
         try

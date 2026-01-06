@@ -1,4 +1,4 @@
-using AcasService.Application.Responses.ProgrammingLanguage;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Repositories.ProgrammingLanguage;
 using Microsoft.Extensions.Logging;
@@ -16,16 +16,15 @@ public interface IProgrammingLanguageQuery
 }
 
 
-
-public class ProgrammingLanguageQuery : IProgrammingLanguageQuery
+public class ProgrammingLangQuery : IProgrammingLanguageQuery
 {
     private readonly IProgrammingLanguageRepository _repository;
-    private readonly ILogger<ProgrammingLanguageQuery> _logger;
+    private readonly ILogger<ProgrammingLangQuery> _logger;
 
     private readonly ProgrammingLanguageMapper _mapper;
-    public ProgrammingLanguageQuery(
+    public ProgrammingLangQuery(
         IProgrammingLanguageRepository repository,
-        ILogger<ProgrammingLanguageQuery> logger,
+        ILogger<ProgrammingLangQuery> logger,
         ProgrammingLanguageMapper mapper)
     {
         _repository = repository;

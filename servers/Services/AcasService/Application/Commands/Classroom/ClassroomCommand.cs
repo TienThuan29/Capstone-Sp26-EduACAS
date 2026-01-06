@@ -1,10 +1,9 @@
 ﻿using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
-using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Web.Requests;
 
-namespace AcasService.Application.Commands
+namespace AcasService.Application.Commands.Classroom
 {
     public interface IClassroomCommand
     {
@@ -29,7 +28,7 @@ namespace AcasService.Application.Commands
 
         public async Task<ClassroomResponse> CreateClassroomAsync(CreateClassroomRequest request)
         {
-            var newClassroom = new Classroom
+            var newClassroom = new Models.Classroom
             {
                 Id = Guid.NewGuid().ToString(),
                 ClassCode = request.ClassCode,
@@ -44,7 +43,7 @@ namespace AcasService.Application.Commands
                 IsDeleted = false
             };
             var createdClassroom = await _classroomRepository.CreateAsync(newClassroom);
-            if(createdClassroom == null)
+            if (createdClassroom == null)
             {
                 _logger.LogError("Failed to create classroom");
                 throw new Exception("Failed to create classroom");

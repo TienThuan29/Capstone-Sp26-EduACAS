@@ -1,13 +1,15 @@
-﻿using AcasService.Application.Commands;
+﻿using AcasService.Application.Commands.Subject;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcasService.Web.Controllers.Subject;
 
 [ApiController]
 [Route("api/v1/subjects")]
+[Authorize(Roles =  "ADMIN")]
 public class SubjectCommandController : ControllerBase
 {
     private readonly ISubjectCommand _subjectCommand;

@@ -8,8 +8,8 @@ namespace AcasService.Application.Commands.Examination;
 
 public interface IExaminationCommand
 {
-    Task<ExaminationResponseDTO?> CreateAsync(ExaminationRequestDTO exam);
-    Task<ExaminationResponseDTO?> UpdateAsync(string id, ExaminationRequestDTO exam);
+    Task<ExaminationResponse?> CreateAsync(ExaminationRequestDTO exam);
+    Task<ExaminationResponse?> UpdateAsync(string id, ExaminationRequestDTO exam);
     Task DeleteAsync(string id);
 }
 
@@ -26,7 +26,7 @@ public class ExaminationCommand : IExaminationCommand
         _logger = logger;
     }
 
-    public async Task<ExaminationResponseDTO?> CreateAsync(ExaminationRequestDTO examDto)
+    public async Task<ExaminationResponse?> CreateAsync(ExaminationRequestDTO examDto)
     {
         try
         {
@@ -41,7 +41,7 @@ public class ExaminationCommand : IExaminationCommand
         }
     }
 
-public async Task<ExaminationResponseDTO?> UpdateAsync(
+public async Task<ExaminationResponse?> UpdateAsync(
     string id,
     ExaminationRequestDTO examDto)
 {

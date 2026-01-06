@@ -13,7 +13,6 @@ using AcasService.Repositories.S3;
 using StackExchange.Redis;
 // using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi;
-using RabbitMQ.Client;
 using Amazon.DynamoDBv2;
 using Amazon;
 using Amazon.S3;
@@ -21,8 +20,8 @@ using Amazon.Extensions.NETCore.Setup;
 using AcasService.Application.Queries.S3;
 using AcasService.Repositories.DynamoDB;
 using AcasService.Repositories.Subject;
-using AcasService.Application.Commands;
-using AcasService.Application.Queries;
+using AcasService.Application.Commands.Classroom;
+using AcasService.Application.Queries.Classroom;
 using AcasService.Repositories.Classroom;
 using AcasService.Application.Commands.ProgrammingLanguage;
 using AcasService.Application.Commands.Examination;
@@ -31,7 +30,8 @@ using AcasService.Application.Queries.Examination;
 using AcasService.Repositories.ProgrammingLanguage;
 using AcasService.Repositories.Examination;
 using AcasService.Application.Mappers;
-using System.Text.Json.Serialization; 
+using AcasService.Application.Commands.Subject;
+using AcasService.Application.Queries.Subject;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -96,12 +96,12 @@ builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();
 builder.Services.AddScoped<IClassroomCommand, ClassroomCommand>();  
 builder.Services.AddScoped<IClassroomQuery, ClassroomQuery>();
 
-builder.Services.AddScoped<AcasService.Application.Mappers.SubjectMapper>();
-builder.Services.AddScoped<AcasService.Application.Mappers.ClassroomMapper>();
+builder.Services.AddScoped<SubjectMapper>();
+builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
-builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
-builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
+builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLangCommand>();
+builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLangQuery>();
 
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();

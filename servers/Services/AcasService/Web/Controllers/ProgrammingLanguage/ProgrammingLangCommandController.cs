@@ -1,13 +1,15 @@
 using AcasService.Application.Commands.ProgrammingLanguage;
 using AcasService.Application.Requests.ProgrammingLanguage;
-using AcasService.Application.Responses.ProgrammingLanguage;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcasService.Web.Controllers.ProgrammingLanguage;
 
 [ApiController]
 [Route("api/v1/programming-languages")]
+[Authorize(Roles = "ADMIN")]
 public class ProgrammingLanguageCommandController : ControllerBase
 {
     private readonly ILogger<ProgrammingLanguageCommandController> _logger;

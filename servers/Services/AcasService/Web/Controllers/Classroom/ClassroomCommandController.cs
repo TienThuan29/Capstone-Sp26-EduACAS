@@ -1,12 +1,14 @@
-﻿using AcasService.Application.Commands;
+﻿using AcasService.Application.Commands.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcasService.Web.Controllers.Classroom
 {
     [ApiController]
     [Route("api/v1/classrooms")]
+    [Authorize(Roles = "LECTURER, ADMIN")]
     public class ClassroomCommandController : ControllerBase
     {
         private readonly ILogger<ClassroomCommandController> _logger;
@@ -59,7 +61,7 @@ namespace AcasService.Web.Controllers.Classroom
             try
             {
                 var result = await _classroomCommand.DeleteClassroomAsync(id);
-                return ResponseUtil.Success(result!=null, "Classroom deleted successfully", 200);
+                return ResponseUtil.Success(result != null, "Classroom deleted successfully", 200);
             }
             catch (KeyNotFoundException ex)
             {

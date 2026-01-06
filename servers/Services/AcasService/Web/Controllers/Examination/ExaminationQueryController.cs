@@ -1,6 +1,7 @@
 using AcasService.Application.Queries.Examination;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -9,6 +10,7 @@ namespace AcasService.Web.Controllers.Examination;
 
 [ApiController]
 [Route("api/v1/examinations")]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class ExaminationQueryController : ControllerBase
 {
     private readonly ILogger<ExaminationQueryController> _logger;
@@ -23,26 +25,26 @@ public class ExaminationQueryController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<ApiResponse<ExaminationResponseDTO>>> GetById(string id)
+    public async Task<ActionResult<ApiResponse<ExaminationResponse>>> GetById(string id)
     {
         try
         {
             var exam = await _examinationQuery.GetByIdAsync(id);
             if (exam == null)
             {
-                return ResponseUtil.Error<ExaminationResponseDTO>("Examination not found",404);
+                return ResponseUtil.Error<ExaminationResponse>("Examination not found",404);
             }
             return ResponseUtil.Success(exam,"Examination retrieved successfully",200);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving examination by id");
-            return ResponseUtil.Error<ExaminationResponseDTO>("Internal Server Error",500);
+            return ResponseUtil.Error<ExaminationResponse>("Internal Server Error",500);
         }
     }
 
     [HttpGet]
-    public async Task<ActionResult<ApiResponse<List<ExaminationResponseDTO?>>>> GetAll()
+    public async Task<ActionResult<ApiResponse<List<ExaminationResponse?>>>> GetAll()
     {
         try
         {
@@ -52,7 +54,7 @@ public class ExaminationQueryController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving all examinations");
-            return ResponseUtil.Error<List<ExaminationResponseDTO?>>("Internal Server Error",500);
+            return ResponseUtil.Error<List<ExaminationResponse?>>("Internal Server Error",500);
         }
     }
 }

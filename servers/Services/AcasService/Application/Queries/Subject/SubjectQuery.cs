@@ -2,7 +2,7 @@
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Subject;
 
-namespace AcasService.Application.Queries
+namespace AcasService.Application.Queries.Subject
 {
    public interface ISubjectQuery
    {
