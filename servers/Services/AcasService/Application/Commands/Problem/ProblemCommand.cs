@@ -1,5 +1,6 @@
 using AcasService.Models;
 using AcasService.Web.Requests;
+using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
 
 namespace AcasService.Application.Commands.Problem;
 
@@ -37,12 +38,32 @@ public class ProblemCommand : IProblemCommand
                 Content = request.Content,
                 FileName = request.FileName,
                 Mark = request.Mark,
-                Difficulty = request.Difficulty,
+                Difficulty = Enum.Parse<Difficulty>(request.Difficulty),
                 CodeTemplate = request.CodeTemplate
             };
 
+            // Add test cases if provided
+            if (request.TestCases != null && request.TestCases.Any())
+            {
+                foreach (var testCaseRequest in request.TestCases)
+                {
+                    var testCase = new TestCase
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        InputData = testCaseRequest.InputData,
+                        ExpectedOutput = testCaseRequest.ExpectedOutput,
+                        IsPublic = testCaseRequest.IsPublic,
+                        IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
+                        IsRemovedSpace = testCaseRequest.IsRemovedSpace,
+                        IsDeleted = false
+                    };
+                    problem.TestCases.Add(testCase);
+                }
+            }
+
             var problemId = await _problemRepository.CreateAsync(problem);
-            _logger.LogInformation("Problem created with ID {ProblemId}", problemId);
+            _logger.LogInformation("Problem created with ID {ProblemId} and {TestCaseCount} test cases", 
+                problemId, problem.TestCases.Count);
             return problemId;
         }
         catch (Exception ex)
@@ -66,7 +87,7 @@ public class ProblemCommand : IProblemCommand
             problem.Content = request.Content;
             problem.FileName = request.FileName;
             problem.Mark = request.Mark;
-            problem.Difficulty = request.Difficulty;
+            problem.Difficulty = Enum.Parse<Difficulty>(request.Difficulty);
             problem.CodeTemplate = request.CodeTemplate;
 
             await _problemRepository.UpdateAsync(problem);

@@ -10,7 +10,6 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
 {
     private readonly IConfiguration _configuration;
     private readonly string _problemTableName;
-    private readonly string _testCaseTableName;
 
     public ProblemRepository(
         IAmazonDynamoDB dynamoDbClient,
@@ -18,21 +17,16 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         ILogger<DynamoRepository> logger) : base(dynamoDbClient, logger)
     {
         _configuration = configuration;
-        // Support both legacy keys (ProblemTable/TestCaseTable) and the current *TableName keys.
+        // Support both legacy keys (ProblemTable) and the current ProblemTableName key.
         _problemTableName =
             configuration["DynamoDB:ProblemTableName"] ??
             configuration["DynamoDB:ProblemTable"] ??
             throw new ArgumentNullException("DynamoDB:ProblemTableName is not configured");
-
-        _testCaseTableName =
-            configuration["DynamoDB:TestCaseTableName"] ??
-            configuration["DynamoDB:TestCaseTable"] ??
-            throw new ArgumentNullException("DynamoDB:TestCaseTableName is not configured");
         
         base.TableName = _problemTableName;
         var awsRegion = configuration["AWS:Region"] ?? "Not configured";
-        logger.LogInformation("ProblemRepository initialized - Region: {Region}, ProblemTable: {ProblemTable}, TestCaseTable: {TestCaseTable}", 
-            awsRegion, _problemTableName, _testCaseTableName);
+        logger.LogInformation("ProblemRepository initialized - Region: {Region}, ProblemTable: {ProblemTable}", 
+            awsRegion, _problemTableName);
     }
 
     public async Task<string> CreateAsync(Models.Problem problem)
@@ -111,7 +105,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         }
     }
 
-    public async Task<List<AcasService.Models.Problem>> GetByLecturerIdAsync(string lecturerId)
+    public async Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId)
     {
         try
         {
@@ -172,9 +166,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
-            var existingProblem = await GetByIdAsync(problem.Id);
-            if (existingProblem == null)
-                throw new KeyNotFoundException($"Problem {problem.Id} not found");
+            var existingProblem = await GetByIdAsync(problem.Id) ?? throw new InvalidOperationException();
 
             problem.UpdatedDate = DateTime.UtcNow;
             problem.CreatedDate = existingProblem.CreatedDate;
@@ -201,9 +193,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
-            var problem = await GetByIdAsync(problemId);
-            if (problem == null)
-                throw new KeyNotFoundException($"Problem {problemId} not found");
+            var problem = await GetByIdAsync(problemId) ?? throw new InvalidOperationException();
 
             problem.IsDeleted = true;
             problem.UpdatedDate = DateTime.UtcNow;
@@ -244,11 +234,16 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
+            var problem = await GetByIdAsync(problemId) ?? throw new InvalidOperationException();
+
             testCase.Id = Guid.NewGuid().ToString();
             testCase.IsDeleted = false;
 
-            var dynamoItem = DynamoMapper.TestCaseToDynamoItem(problemId, testCase);
-            var response = await PutItemAsync(dynamoItem, _testCaseTableName);
+            problem.TestCases.Add(testCase);
+            problem.UpdatedDate = DateTime.UtcNow;
+
+            var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
+            var response = await PutItemAsync(dynamoItem, _problemTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -269,12 +264,19 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
-            var existingTestCase = await GetTestCaseAsync(problemId, testCase.Id);
-            if (existingTestCase == null)
+            var problem = await GetByIdAsync(problemId);
+            if (problem == null)
+                throw new KeyNotFoundException($"Problem {problemId} not found");
+
+            var existingTestCaseIndex = problem.TestCases.FindIndex(tc => tc.Id == testCase.Id); //The zero-based index of the first occurrence of an element that matches the conditions defined by match, if found; otherwise, -1.
+            if (existingTestCaseIndex == -1)
                 throw new KeyNotFoundException($"Test case {testCase.Id} not found for problem {problemId}");
 
-            var dynamoItem = DynamoMapper.TestCaseToDynamoItem(problemId, testCase);
-            var response = await PutItemAsync(dynamoItem, _testCaseTableName);
+            problem.TestCases[existingTestCaseIndex] = testCase;
+            problem.UpdatedDate = DateTime.UtcNow;
+
+            var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
+            var response = await PutItemAsync(dynamoItem, _problemTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -295,13 +297,19 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
-            var testCase = await GetTestCaseAsync(problemId, testCaseId);
+            var problem = await GetByIdAsync(problemId);
+            if (problem == null)
+                throw new KeyNotFoundException($"Problem {problemId} not found");
+
+            var testCase = problem.TestCases.FirstOrDefault(tc => tc.Id == testCaseId);
             if (testCase == null)
                 throw new KeyNotFoundException($"Test case {testCaseId} not found for problem {problemId}");
 
             testCase.IsDeleted = true;
-            var dynamoItem = DynamoMapper.TestCaseToDynamoItem(problemId, testCase);
-            var response = await PutItemAsync(dynamoItem, _testCaseTableName);
+            problem.UpdatedDate = DateTime.UtcNow;
+
+            var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
+            var response = await PutItemAsync(dynamoItem, _problemTableName);
             
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -322,26 +330,11 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
-            var request = new QueryRequest
-            {
-                TableName = _testCaseTableName,
-                IndexName = "problemId-index",
-                KeyConditionExpression = "problemId = :problemId",
-                FilterExpression = "id = :id AND isDeleted = :false",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                {
-                    [":problemId"] = new AttributeValue { S = problemId },
-                    [":id"] = new AttributeValue { S = testCaseId },
-                    [":false"] = new AttributeValue { BOOL = false }
-                }
-            };
-
-            var response = await _dynamoDBClient.QueryAsync(request);
-
-            if (response.Items.Count == 0)
+            var problem = await GetByIdAsync(problemId);
+            if (problem == null)
                 return null;
 
-            return DynamoMapper.DynamoItemToTestCase(response.Items[0]);
+            return problem.TestCases.FirstOrDefault(tc => tc.Id == testCaseId && !tc.IsDeleted);
         }
         catch (Exception ex)
         {
@@ -354,23 +347,13 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
     {
         try
         {
-            var request = new QueryRequest
-            {
-                TableName = _testCaseTableName,
-                IndexName = "problemId-index",
-                KeyConditionExpression = "problemId = :problemId",
-                FilterExpression = "isDeleted = :false",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                {
-                    [":problemId"] = new AttributeValue { S = problemId },
-                    [":false"] = new AttributeValue { BOOL = false }
-                }
-            };
+            var problem = await GetByIdAsync(problemId);
+            if (problem == null)
+                return new List<TestCase>();
 
-            var response = await _dynamoDBClient.QueryAsync(request);
-            var testCases = response.Items.Select(DynamoMapper.DynamoItemToTestCase).ToList();
-
-            return testCases;
+            return problem.TestCases
+                .Where(tc => !tc.IsDeleted)
+                .ToList();
         }
         catch (Exception ex)
         {
