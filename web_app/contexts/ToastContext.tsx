@@ -38,7 +38,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
     // Remove from DOM after animation
     setTimeout(() => {
       setToasts((prev) => prev.filter((toast) => toast.id !== id));
-    }, 300);
+    }, 400);
   }, []);
 
   const showToast = useCallback((message: string, type: ToastType = 'info') => {
@@ -108,20 +108,32 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
           const config = getToastConfig(toast.type);
           const Icon = config.icon;
           return (
-            <Toast
+            <div
               key={toast.id}
-              className={`min-w-[300px] transition-all duration-300 ease-in-out ${
+              className={`min-w-[300px] ${
                 toast.isVisible
-                  ? 'translate-x-0 opacity-100'
-                  : 'translate-x-full opacity-0'
+                  ? 'translate-x-0 opacity-100 scale-100'
+                  : 'translate-x-[120%] opacity-0 scale-95'
               }`}
+              style={{
+                transform: toast.isVisible 
+                  ? 'translateX(0) scale(1)' 
+                  : 'translateX(120%) scale(0.95)',
+                opacity: toast.isVisible ? 1 : 0,
+                transitionProperty: 'transform, opacity',
+                transitionDuration: '400ms',
+                transitionTimingFunction: 'cubic-bezier(0.16, 1, 0.3, 1)',
+                willChange: 'transform, opacity',
+              }}
             >
-              <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.iconBg} ${config.iconText}`}>
-                <Icon className="h-5 w-5" />
-              </div>
-              <div className="ml-3 text-sm font-normal">{toast.message}</div>
-              <ToastToggle onDismiss={() => removeToast(toast.id)} />
-            </Toast>
+              <Toast className="min-w-[300px]">
+                <div className={`inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${config.iconBg} ${config.iconText}`}>
+                  <Icon className="h-5 w-5" />
+                </div>
+                <div className="ml-3 text-sm font-normal">{toast.message}</div>
+                <ToastToggle onDismiss={() => removeToast(toast.id)} />
+              </Toast>
+            </div>
           );
         })}
       </div>

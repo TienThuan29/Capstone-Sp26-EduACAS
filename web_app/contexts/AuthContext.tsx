@@ -16,6 +16,7 @@ type UserContextType = {
     user: UserProfile | null,
     authTokens: AuthTokens | null,
     login: (username: string, password: string) => void,
+    loginWithGoogle: (idToken: string) => void,
     logout: () => void,
     isLoggedIn: () => boolean,
     setUser: (user: UserProfile) => void,
@@ -196,6 +197,51 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         }
     }
 
+    const loginWithGoogle = async (idToken: string) => {
+        try {
+            const response = await axios.post(Api.BASE_API + Api.Auth.GOOGLE_LOGIN, { idToken });
+            if (response.status === HttpStatusCode.Ok) {
+                const tokens = {
+                    accessToken: response.data.dataResponse.accessToken,
+                    refreshToken: response.data.dataResponse.refreshToken
+                }
+                setAuthTokens(tokens);
+                localStorage.setItem(AUTH_TOKENS_KEY, JSON.stringify(tokens));
+
+                const userProfile = response.data.dataResponse.userProfile;
+
+                setUser(userProfile);
+                localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(userProfile));
+                const roleValidator = await validateUserRole(userProfile);
+
+                if (roleValidator.isStudent) {
+                    router.push(PageUrl.TEST_AUTH_PAGE);
+                }
+                else if (roleValidator.isLecturer) {
+                    router.push(PageUrl.TEST_AUTH_PAGE);
+                }
+                else if (roleValidator.isAdmin) {
+                    router.push(PageUrl.TEST_AUTH_PAGE);
+                }
+                else {
+                    toast.showError('Invalid role!');
+                }
+            }
+            else if (response.status === HttpStatusCode.Unauthorized) {
+                toast.showError(response.data.message);
+            }
+        }
+        catch (error) {
+            console.log(error);
+            if (axios.isAxiosError(error) && error.response) {
+                toast.showError(error.response.data.message || 'An error occurred');
+            } 
+            else {
+                toast.showError('An unexpected error occurred');
+            }
+        }
+    }
+
 
     const logout = async () => {
         setIsLoggingOut(true);
@@ -228,7 +274,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <UserContext.Provider value={{
-            login, user, authTokens, logout, isLoggedIn, setUser, setAuthTokens,
+            login, loginWithGoogle, user, authTokens, logout, isLoggedIn, setUser, setAuthTokens,
             sessionExpired, handleSessionExpired, isLoggingOut
         }}>
             {isReady ? children : null}
