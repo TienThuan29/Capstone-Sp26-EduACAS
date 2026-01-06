@@ -62,3 +62,9 @@ public class ResetPasswordRequest
     [Required]
     public string NewPassword { get; set; } = string.Empty;
 }
+
+public class GoogleLoginRequest
+{
+    [Required]
+    public string IdToken { get; set; } = string.Empty;
+}
