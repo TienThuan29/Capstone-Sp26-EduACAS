@@ -104,6 +104,36 @@ public class UserRepository : DynamoRepository, IUserRepository
         }
     }
 
+    public async Task<Models.User?> FindByGoogleIdAsync(string googleId)
+    {
+        try
+        {
+            var scanRequest = new ScanRequest
+            {
+                TableName = _userTableName,
+                FilterExpression = "googleId = :googleId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":googleId"] = new AttributeValue { S = googleId }
+                }
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(scanRequest);
+
+            if (response.Items.Count == 0)
+            {
+                return null;
+            }
+
+            return DynamoMapper.DynamoItemToUser(response.Items[0]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding user by Google ID: {GoogleId}", googleId);
+            throw;
+        }
+    }
+
     public async Task<List<Models.User>> FindAllAsync()
     {
         try
@@ -156,6 +186,41 @@ public class UserRepository : DynamoRepository, IUserRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user password");
+            throw;
+        }
+    }
+
+    public async Task<Models.User?> UpdateGoogleIdAsync(string userId, string googleId)
+    {
+        try
+        {
+            var updatedDate = DateTime.UtcNow;
+            
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                ["googleId"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = googleId }
+                },
+                ["updatedDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                }
+            };
+            
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user Google ID");
             throw;
         }
     }

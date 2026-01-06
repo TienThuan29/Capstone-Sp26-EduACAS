@@ -47,6 +47,38 @@ public class AuthCommandController : ControllerBase
         }
     }
 
+    [HttpPost("google-login")]
+    [EnableRateLimiting("AuthPolicy")]
+    public async Task<ActionResult<ApiResponse<AuthResponse>>> GoogleLogin([FromBody] GoogleLoginRequest googleLoginRequest)
+    {
+        try
+        {
+            var authResponse = await _userQuery.AuthenticateWithGoogleAsync(googleLoginRequest.IdToken);
+            return ResponseUtil.Success(authResponse, "Google login successful", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Invalid Google token"))
+        {
+            return ResponseUtil.Error<AuthResponse>("Invalid Google token", 401);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("User not found"))
+        {
+            return ResponseUtil.Error<AuthResponse>("User not found with this email", 404);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("User is forbidden"))
+        {
+            return ResponseUtil.Error<AuthResponse>("User is forbidden", 403);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Google ID does not match"))
+        {
+            return ResponseUtil.Error<AuthResponse>("Google ID does not match this account", 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Google login error");
+            return ResponseUtil.Error<AuthResponse>("Internal Server Error", 500);
+        }
+    }
+
     [HttpPost("register")]
     [EnableRateLimiting("AuthPolicy")]
     public async Task<ActionResult<ApiResponse<AuthResponse>>> CreateUser([FromBody] RegisterData registerData)
