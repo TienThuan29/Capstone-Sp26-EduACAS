@@ -2,11 +2,10 @@
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Classroom;
 
-namespace AcasService.Application.Queries
+namespace AcasService.Application.Queries.Classroom
 {
     public interface IClassroomQuery
     {
-        
         Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId);
         Task<List<ClassroomResponse>> GetAllClassroomsAsync();
     }
@@ -26,8 +25,6 @@ namespace AcasService.Application.Queries
             _classroomRepository = classroomRepository;
             _classroomMapper = classroomMapper;
         }
-
-
 
         
         public async Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId)
@@ -62,7 +59,7 @@ namespace AcasService.Application.Queries
             {
                 _logger.LogError(ex, "Error occurred while fetching all classrooms.");
                 throw;
-        }
+            }
         }
     }
 }

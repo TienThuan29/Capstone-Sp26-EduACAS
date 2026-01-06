@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Queries;
+﻿using AcasService.Application.Queries.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Mvc;
@@ -34,7 +34,7 @@ namespace AcasService.Web.Controllers.Classroom
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetClassroomById(string id)
-            {
+        {
             try
             {
                 var classroom = await _classroomQuery.GetClassroomByIdAsync(id);

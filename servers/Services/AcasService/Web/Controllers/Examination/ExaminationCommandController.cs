@@ -3,11 +3,13 @@ using AcasService.Application.Commands.Examination;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Web.Requests;
 using AcasService.Application.Utils;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AcasService.Web.Controllers.Examination;
 
 [ApiController]
 [Route("api/v1/examinations")]
+[Authorize(Roles = "LECTURER, ADMIN")]
 public class ExaminationController : ControllerBase
 {
     private readonly ILogger<ExaminationController> _logger;
@@ -22,7 +24,7 @@ public class ExaminationController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<ActionResult<ApiResponse<ExaminationResponseDTO>>> Create(
+    public async Task<ActionResult<ApiResponse<ExaminationResponse>>> Create(
     [FromBody] ExaminationRequestDTO examDto)
     {
         try
@@ -35,21 +37,21 @@ public class ExaminationController : ControllerBase
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
         {
-            return ResponseUtil.Error<ExaminationResponseDTO>("Examination already exists",400);
+            return ResponseUtil.Error<ExaminationResponse>("Examination already exists",400);
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
         {
-            return ResponseUtil.Error<ExaminationResponseDTO>("Related resource not found",400);
+            return ResponseUtil.Error<ExaminationResponse>("Related resource not found",400);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating examination");
-            return ResponseUtil.Error<ExaminationResponseDTO>("Internal Server Error",500);
+            return ResponseUtil.Error<ExaminationResponse>("Internal Server Error",500);
         }
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<ApiResponse<ExaminationResponseDTO>>> Update(
+    public async Task<ActionResult<ApiResponse<ExaminationResponse>>> Update(
         string id,
         [FromBody] ExaminationRequestDTO examDto)
     {
@@ -59,7 +61,7 @@ public class ExaminationController : ControllerBase
 
             if (updatedExam == null)
             {
-                return ResponseUtil.Error<ExaminationResponseDTO>("Examination not found",404);
+                return ResponseUtil.Error<ExaminationResponse>("Examination not found",404);
             }
 
             return ResponseUtil.Success(updatedExam,"Examination updated successfully",200);
@@ -67,12 +69,12 @@ public class ExaminationController : ControllerBase
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Update failed for examination {Id}", id);
-            return ResponseUtil.Error<ExaminationResponseDTO>(ex.Message,400);
+            return ResponseUtil.Error<ExaminationResponse>(ex.Message,400);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating examination {Id}", id);
-            return ResponseUtil.Error<ExaminationResponseDTO>("Internal Server Error",500);
+            return ResponseUtil.Error<ExaminationResponse>("Internal Server Error",500);
         }
     }
 

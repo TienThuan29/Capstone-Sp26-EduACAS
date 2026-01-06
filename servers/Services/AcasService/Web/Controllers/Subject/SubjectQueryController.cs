@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Queries;
+﻿using AcasService.Application.Queries.Subject;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Mvc;

@@ -5,9 +5,9 @@ namespace AcasService.Application.Mappers;
 
 public class ExaminationMapper
 {
-    public ExaminationResponseDTO ToExaminationResponse(Models.Examination exam)
+    public ExaminationResponse ToExaminationResponse(Models.Examination exam)
     {
-        return new ExaminationResponseDTO
+        return new ExaminationResponse
         {
             Id = exam.Id,
             ExamName = exam.ExamName,

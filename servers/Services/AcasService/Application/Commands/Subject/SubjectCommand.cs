@@ -1,10 +1,9 @@
 ﻿using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
-using AcasService.Models;
 using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
 
-namespace AcasService.Application.Commands
+namespace AcasService.Application.Commands.Subject
 {
     public interface ISubjectCommand
     {
@@ -32,7 +31,7 @@ namespace AcasService.Application.Commands
 
         public async Task<SubjectResponse> CreateSubjectAsync(CreateSubjectRequest request)
         {
-            var newSubject = new Subject
+            var newSubject = new Models.Subject
             {
                 Id = Guid.NewGuid().ToString(),
                 SubjectCode = request.SubjectCode,

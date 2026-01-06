@@ -1,12 +1,15 @@
 using AcasService.Application.Commands.Problem;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcasService.Web.Controllers.Problem;
 
 [ApiController]
 [Route("api/v1/problems")]
+[Authorize(Roles = "LECTURER, ADMIN")]
+
 public class ProblemCommandController : ControllerBase
 {
     private readonly IProblemCommand _problemCommand;

@@ -5,12 +5,12 @@ namespace AcasService.Application.Queries.Problem;
 
 public interface IProblemQuery
 {
-    Task<ProblemResponseDTO?> GetProblemByIdAsync(string problemId);
-    Task<List<ProblemBasicDTO>> GetProblemsByExamIdAsync(string examId);
-    Task<List<ProblemBasicDTO>> GetProblemsByLecturerIdAsync(string lecturerId);
-    Task<List<ProblemBasicDTO>> GetAllProblemsAsync();
-    Task<List<TestCaseResponseDTO>> GetTestCasesByProblemIdAsync(string problemId);
-    Task<TestCaseResponseDTO?> GetTestCaseAsync(string problemId, string testCaseId);
+    Task<ProblemResponse?> GetProblemByIdAsync(string problemId);
+    Task<List<ProblemBasicResponse>> GetProblemsByExamIdAsync(string examId);
+    Task<List<ProblemBasicResponse>> GetProblemsByLecturerIdAsync(string lecturerId);
+    Task<List<ProblemBasicResponse>> GetAllProblemsAsync();
+    Task<List<TestCaseResponse>> GetTestCasesByProblemIdAsync(string problemId);
+    Task<TestCaseResponse?> GetTestCaseAsync(string problemId, string testCaseId);
 }
 
 public class ProblemQuery : IProblemQuery
@@ -24,7 +24,7 @@ public class ProblemQuery : IProblemQuery
         _logger = logger;
     }
 
-    public async Task<ProblemResponseDTO?> GetProblemByIdAsync(string problemId)
+    public async Task<ProblemResponse?> GetProblemByIdAsync(string problemId)
     {
         try
         {
@@ -34,7 +34,7 @@ public class ProblemQuery : IProblemQuery
 
             var testCases = await _problemRepository.GetTestCasesByProblemIdAsync(problemId);
 
-            return new ProblemResponseDTO
+            return new ProblemResponse
             {
                 Id = problem.Id,
                 ExamId = problem.ExamId,
@@ -49,7 +49,7 @@ public class ProblemQuery : IProblemQuery
                 UpdatedDate = problem.UpdatedDate,
                 TestCases = testCases
                     .Where(tc => !tc.IsDeleted)
-                    .Select(tc => new TestCaseResponseDTO
+                    .Select(tc => new TestCaseResponse
                     {
                         Id = tc.Id,
                         InputData = tc.InputData,
@@ -68,14 +68,14 @@ public class ProblemQuery : IProblemQuery
         }
     }
 
-    public async Task<List<ProblemBasicDTO>> GetProblemsByExamIdAsync(string examId)
+    public async Task<List<ProblemBasicResponse>> GetProblemsByExamIdAsync(string examId)
     {
         try
         {
             var problems = await _problemRepository.GetByExamIdAsync(examId);
             return problems
                 .Where(p => !p.IsDeleted)
-                .Select(p => new ProblemBasicDTO
+                .Select(p => new ProblemBasicResponse
                 {
                     Id = p.Id,
                     ExamId = p.ExamId,
@@ -93,14 +93,14 @@ public class ProblemQuery : IProblemQuery
         }
     }
 
-    public async Task<List<ProblemBasicDTO>> GetProblemsByLecturerIdAsync(string lecturerId)
+    public async Task<List<ProblemBasicResponse>> GetProblemsByLecturerIdAsync(string lecturerId)
     {
         try
         {
             var problems = await _problemRepository.GetByLecturerIdAsync(lecturerId);
             return problems
                 .Where(p => !p.IsDeleted)
-                .Select(p => new ProblemBasicDTO
+                .Select(p => new ProblemBasicResponse
                 {
                     Id = p.Id,
                     ExamId = p.ExamId,
@@ -118,14 +118,14 @@ public class ProblemQuery : IProblemQuery
         }
     }
 
-    public async Task<List<ProblemBasicDTO>> GetAllProblemsAsync()
+    public async Task<List<ProblemBasicResponse>> GetAllProblemsAsync()
     {
         try
         {
             var problems = await _problemRepository.GetAllAsync();
             return problems
                 .Where(p => !p.IsDeleted)
-                .Select(p => new ProblemBasicDTO
+                .Select(p => new ProblemBasicResponse
                 {
                     Id = p.Id,
                     ExamId = p.ExamId,
@@ -143,14 +143,14 @@ public class ProblemQuery : IProblemQuery
         }
     }
 
-    public async Task<List<TestCaseResponseDTO>> GetTestCasesByProblemIdAsync(string problemId)
+    public async Task<List<TestCaseResponse>> GetTestCasesByProblemIdAsync(string problemId)
     {
         try
         {
             var testCases = await _problemRepository.GetTestCasesByProblemIdAsync(problemId);
             return testCases
                 .Where(tc => !tc.IsDeleted)
-                .Select(tc => new TestCaseResponseDTO
+                .Select(tc => new TestCaseResponse
                 {
                     Id = tc.Id,
                     InputData = tc.InputData,
@@ -168,7 +168,7 @@ public class ProblemQuery : IProblemQuery
         }
     }
 
-    public async Task<TestCaseResponseDTO?> GetTestCaseAsync(string problemId, string testCaseId)
+    public async Task<TestCaseResponse?> GetTestCaseAsync(string problemId, string testCaseId)
     {
         try
         {
@@ -176,7 +176,7 @@ public class ProblemQuery : IProblemQuery
             if (testCase == null || testCase.IsDeleted)
                 return null;
 
-            return new TestCaseResponseDTO
+            return new TestCaseResponse
             {
                 Id = testCase.Id,
                 InputData = testCase.InputData,

@@ -1,8 +1,8 @@
 using AcasService.Application.Requests.ProgrammingLanguage;
-using AcasService.Application.Responses.ProgrammingLanguage;
 using AcasService.Repositories.ProgrammingLanguage;
 using Microsoft.Extensions.Logging;
 using AcasService.Application.Mappers;
+using AcasService.Application.ResponseDTOs;
 
 namespace AcasService.Application.Commands.ProgrammingLanguage;
 
@@ -17,14 +17,14 @@ public interface IProgrammingLanguageCommand
     Task DeleteAsync(string id);
 }
 
-public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
+public class ProgrammingLangCommand : IProgrammingLanguageCommand
 {
     private readonly IProgrammingLanguageRepository _repository;
-    private readonly ILogger<ProgrammingLanguageCommand> _logger;
+    private readonly ILogger<ProgrammingLangCommand> _logger;
 
     private readonly ProgrammingLanguageMapper _programmingLanguageMapper;
 
-    public ProgrammingLanguageCommand(IProgrammingLanguageRepository repository,ILogger<ProgrammingLanguageCommand> logger, ProgrammingLanguageMapper programmingLanguageMapper)
+    public ProgrammingLangCommand(IProgrammingLanguageRepository repository,ILogger<ProgrammingLangCommand> logger, ProgrammingLanguageMapper programmingLanguageMapper)
     {
         _repository = repository;
         _logger = logger;

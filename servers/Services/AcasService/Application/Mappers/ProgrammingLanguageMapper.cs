@@ -1,5 +1,5 @@
 using AcasService.Application.Requests.ProgrammingLanguage;
-using AcasService.Application.Responses.ProgrammingLanguage;
+using AcasService.Application.ResponseDTOs;
 
 namespace AcasService.Application.Mappers;
 

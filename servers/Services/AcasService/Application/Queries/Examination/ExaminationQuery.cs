@@ -10,8 +10,8 @@ namespace AcasService.Application.Queries.Examination;
 
 public interface IExaminationQuery
 {
-    Task<ExaminationResponseDTO?> GetByIdAsync(string id);
-    Task<List<ExaminationResponseDTO?>> GetAllAsync();
+    Task<ExaminationResponse?> GetByIdAsync(string id);
+    Task<List<ExaminationResponse?>> GetAllAsync();
 
 }
 
@@ -28,7 +28,7 @@ public class ExaminationQuery : IExaminationQuery
         _logger = logger;
     }
 
-    public async Task<ExaminationResponseDTO?> GetByIdAsync(string id)
+    public async Task<ExaminationResponse?> GetByIdAsync(string id)
     {
         try
         {
@@ -47,12 +47,12 @@ public class ExaminationQuery : IExaminationQuery
         }
     }
 
- public async Task<List<ExaminationResponseDTO?>> GetAllAsync()
+ public async Task<List<ExaminationResponse?>> GetAllAsync()
     {
         try
         {
             var exams = await _examinationRepository.GetAllAsync();
-            var responseList = new List<ExaminationResponseDTO?>();
+            var responseList = new List<ExaminationResponse?>();
 
             if (exams == null || exams.Count == 0)
             {
