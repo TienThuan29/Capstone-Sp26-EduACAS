@@ -7,51 +7,7 @@ import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
 import { useAuth } from "@/contexts/AuthContext";
 import { config } from "@/configs/config";
-
-declare global {
-  interface Window {
-    google?: {
-      accounts: {
-        oauth2: {
-          initTokenClient: (config: {
-            client_id: string;
-            callback: (response: { access_token: string }) => void;
-            scope: string;
-          }) => {
-            requestAccessToken: () => void;
-          };
-        };
-        id: {
-          initialize: (config: {
-            client_id: string;
-            callback: (response: { credential: string }) => void;
-            auto_select?: boolean;
-            cancel_on_tap_outside?: boolean;
-          }) => void;
-          prompt: (notificationCallback?: (notification: {
-            isNotDisplayed: () => boolean;
-            isSkippedMoment: () => boolean;
-            getDismissedReason: () => string;
-            getMomentType: () => string;
-          }) => void) => void;
-          renderButton: (
-            element: HTMLElement,
-            config: {
-              type?: string;
-              theme?: string;
-              size?: string;
-              text?: string;
-              shape?: string;
-              logo_alignment?: string;
-              width?: string;
-              locale?: string;
-            }
-          ) => void;
-        };
-      };
-    };
-  }
-}
+import { handleGoogleLogin } from "./google-login";
 
 export default function LoginPage() {
   const { login, loginWithGoogle } = useAuth();
@@ -83,7 +39,6 @@ export default function LoginPage() {
         return;
       }
       
-      // Send the Google ID token directly to backend for verification
       await loginWithGoogle(response.credential);
     } catch (error) {
       console.error("Google login error:", error);
@@ -92,12 +47,9 @@ export default function LoginPage() {
   }, [loginWithGoogle]);
 
   useEffect(() => {
-    // Load Google Identity Services script
     if (!googleInitialized.current && config.GOOGLE_CLIENT_ID) {
-      // Check if script already exists
       const existingScript = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
       if (existingScript) {
-        // Script already loaded, just initialize
         if (window.google && config.GOOGLE_CLIENT_ID) {
           window.google.accounts.id.initialize({
             client_id: config.GOOGLE_CLIENT_ID,
@@ -139,123 +91,17 @@ export default function LoginPage() {
         // Cleanup if needed
       };
     } else if (!config.GOOGLE_CLIENT_ID) {
-      console.warn("Google Client ID is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in your .env file");
+      console.warn("Google Client ID is not configured");
     }
   }, [handleGoogleCredentialResponse]);
 
-  const handleGoogleLogin = async () => {
-    if (!config.GOOGLE_CLIENT_ID) {
-      console.error("Google Client ID is not configured. Please set NEXT_PUBLIC_GOOGLE_CLIENT_ID in your .env file");
-      alert("Google Client ID is not configured. Please check your environment variables.");
-      return;
-    }
-
-    console.log("Initiating Google login with Client ID:", config.GOOGLE_CLIENT_ID);
-    setIsGoogleLoading(true);
-
-    try {
-      // Wait for Google Identity Services to be ready
-      if (!window.google) {
-        console.log("Waiting for Google Identity Services to load...");
-        await new Promise((resolve) => {
-          const checkGoogle = setInterval(() => {
-            if (window.google) {
-              clearInterval(checkGoogle);
-              resolve(true);
-            }
-          }, 100);
-          setTimeout(() => {
-            clearInterval(checkGoogle);
-            resolve(false);
-          }, 5000);
-        });
-      }
-
-      if (!window.google) {
-        console.error("Google Identity Services not loaded. Please check your internet connection and try again.");
-        alert("Google Identity Services failed to load. Please refresh the page and try again.");
-        setIsGoogleLoading(false);
-        return;
-      }
-
-      // Initialize if not already initialized
-      if (!googleInitialized.current) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: config.GOOGLE_CLIENT_ID,
-            callback: handleGoogleCredentialResponse,
-            auto_select: false,
-            cancel_on_tap_outside: true,
-          });
-          googleInitialized.current = true;
-          console.log("Google Identity Services initialized");
-        } catch (error) {
-          console.error("Error initializing Google Identity Services:", error);
-          alert("Error initializing Google login. Please check your Google Client ID configuration.");
-          setIsGoogleLoading(false);
-          return;
-        }
-      }
-
-      // Use renderButton approach - more reliable and FedCM compatible
-      if (googleButtonRef.current && window.google && window.google.accounts.id.renderButton) {
-        console.log("Rendering Google sign-in button...");
-        
-        // Clear any existing button first
-        if (googleButtonRef.current.firstChild) {
-          googleButtonRef.current.innerHTML = '';
-        }
-        
-        try {
-          window.google.accounts.id.renderButton(googleButtonRef.current, {
-            type: "standard",
-            theme: "outline",
-            size: "large",
-            text: "signin_with",
-            width: "100%",
-            logo_alignment: "left",
-          });
-          
-          // Wait for button to render, then trigger click
-          setTimeout(() => {
-            const button = googleButtonRef.current?.querySelector('div[role="button"]') as HTMLElement;
-            if (button) {
-              console.log("Google button rendered, triggering click...");
-              button.click();
-            } else {
-              console.warn("Google button not found after rendering, trying prompt() as fallback...");
-              // Fallback to prompt if button rendering failed
-              if (window.google && window.google.accounts.id.prompt) {
-                window.google.accounts.id.prompt();
-              } else {
-                setIsGoogleLoading(false);
-              }
-            }
-          }, 300);
-        } catch (error) {
-          console.error("Error rendering Google button:", error);
-          // Fallback to prompt
-          if (window.google && window.google.accounts.id.prompt) {
-            window.google.accounts.id.prompt();
-          } else {
-            setIsGoogleLoading(false);
-          }
-        }
-      } else {
-        // Fallback to prompt if button ref not available
-        if (window.google && window.google.accounts.id.prompt) {
-          console.log("Using prompt() as fallback...");
-          window.google.accounts.id.prompt();
-        } else {
-          console.error("Google prompt method not available");
-          setIsGoogleLoading(false);
-        }
-      }
-    } catch (error) {
-      console.error("Error initiating Google login:", error);
-      alert("An error occurred while trying to sign in with Google. Please try again.");
-      setIsGoogleLoading(false);
-    }
+  const onGoogleLogin = () => {
+    handleGoogleLogin(
+      setIsGoogleLoading,
+      googleInitialized,
+      googleButtonRef,
+      handleGoogleCredentialResponse
+    );
   };
 
   return (
@@ -408,7 +254,7 @@ export default function LoginPage() {
               
               <Button
                 type="button"
-                onClick={handleGoogleLogin}
+                onClick={onGoogleLogin}
                 disabled={isGoogleLoading || isLoading}
                 className="w-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 cursor-pointer relative z-0"
               >
