@@ -14,12 +14,11 @@ namespace AcasService.Web.Requests
         public string SubjectId { get; set; } = string.Empty;  
         [Required(ErrorMessage = "Semester name must be not null")]
         public string SemesterName { get; set; } = string.Empty;
-        
-        [Required(ErrorMessage = "EnrolKey must be not null")]
+
         [RegularExpression(@"^(?=.*[^a-zA-Z0-9])\S{6,20}$",
             ErrorMessage = "EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces")]
-        public string EnrolKey { get; set; } = string.Empty;
-        
+        public string? EnrolKey { get; set; } = string.Empty;
+
         public DateTime EndDate { get; set; }
     }
 

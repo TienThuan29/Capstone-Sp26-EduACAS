@@ -2,6 +2,7 @@
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Classroom;
 using AcasService.Web.Requests;
+using Amazon.Runtime.Internal.Util;
 
 namespace AcasService.Application.Commands.Classroom
 {
@@ -28,15 +29,18 @@ namespace AcasService.Application.Commands.Classroom
 
         public async Task<ClassroomResponse> CreateClassroomAsync(CreateClassroomRequest request)
         {
+            string finalEnrolKey = !string.IsNullOrEmpty(request.EnrolKey) 
+                ? request.EnrolKey 
+                : "@" + (Guid.NewGuid().ToString("N")[..6]);
             var newClassroom = new Models.Classroom
             {
                 Id = Guid.NewGuid().ToString(),
                 ClassCode = request.ClassCode,
                 ClassName = request.ClassName,
-                LecturerId = request.LecturerId, 
+                LecturerId = request.LecturerId,
                 SubjectId = request.SubjectId,
                 SemesterName = request.SemesterName,
-                EnrolKey = request.EnrolKey,
+                EnrolKey = finalEnrolKey,
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = null,
                 EndDate = request.EndDate,
