@@ -33,7 +33,7 @@ namespace AcasService.Application.Commands.Classroom
                 Id = Guid.NewGuid().ToString(),
                 ClassCode = request.ClassCode,
                 ClassName = request.ClassName,
-                LecturerId = "LECTURER",
+                LecturerId = request.LecturerId, 
                 SubjectId = request.SubjectId,
                 SemesterName = request.SemesterName,
                 EnrolKey = request.EnrolKey,
