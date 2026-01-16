@@ -100,7 +100,31 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         }
     }
 
+    public async Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword)
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _classroomTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var allClassrooms = response.Items
+                .Select(item => DynamoMapper.DynamoItemToClassroom(item));
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                var lowerKeyword = keyword.ToLower().Trim();
+                return allClassrooms.Where(c =>
+                        (!string.IsNullOrEmpty(c.ClassCode) && c.ClassCode.ToLower().Contains(lowerKeyword))
+                  );
+            }
 
+            return allClassrooms;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving classrooms by keyword {Keyword}", keyword);
+            throw;
+        }
+    }
 
+ 
 
 }

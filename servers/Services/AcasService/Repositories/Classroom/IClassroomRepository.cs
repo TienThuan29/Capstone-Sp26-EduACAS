@@ -1,4 +1,8 @@
+using System.Collections;
+
 namespace AcasService.Repositories.Classroom;
+
+
 
 public interface IClassroomRepository
 {
@@ -7,4 +11,5 @@ public interface IClassroomRepository
     Task<List<Models.Classroom>> FindAllAsync();
     Task<Models.Classroom?> UpdateAsync(Models.Classroom classroom);
     Task DeleteAsync(string classroomId);
+    Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword);
 }

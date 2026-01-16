@@ -1,6 +1,7 @@
 ﻿using AcasService.Application.Queries.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
+using AcasService.Web.Requests;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcasService.Web.Controllers.Classroom
@@ -48,6 +49,22 @@ namespace AcasService.Web.Controllers.Classroom
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching classroom by id.");
+                return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
+            }
+        }
+
+        [HttpGet]
+        [Route("search")]
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> SearchClassrooms([FromBody] SearchClassroomRequest request)
+        {
+            try
+            {
+                var classrooms = await _classroomQuery.GetClassroomsByKeywordAsync(request);
+                return ResponseUtil.Success(classrooms, "Search classrooms successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while searching classrooms.");
                 return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
             }
         }

@@ -41,4 +41,10 @@ namespace AcasService.Web.Requests
         public string EnrolKey { get; set; } = string.Empty;
         public DateTime EndDate { get; set; }
     }
+
+    public class SearchClassroomRequest
+    {
+        public string ClassCode { get; set; }
+        
+    }
 }

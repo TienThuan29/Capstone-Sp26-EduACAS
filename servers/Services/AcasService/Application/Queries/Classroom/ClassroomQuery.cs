@@ -1,6 +1,8 @@
 ﻿using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Classroom;
+using AcasService.Web.Requests;
+using System.Collections;
 
 namespace AcasService.Application.Queries.Classroom
 {
@@ -8,6 +10,8 @@ namespace AcasService.Application.Queries.Classroom
     {
         Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId);
         Task<List<ClassroomResponse>> GetAllClassroomsAsync();
+        Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
+
     }
 
     public class ClassroomQuery : IClassroomQuery
@@ -58,6 +62,20 @@ namespace AcasService.Application.Queries.Classroom
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching all classrooms.");
+                throw;
+            }
+        }
+        
+        public async Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request)
+        {
+            try
+            {
+                var classrooms = await _classroomRepository.GetClassroomsByKeywordAsync(request.ClassCode);
+                return classrooms.Select(c => _classroomMapper.ToClassroomResponse(c)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching classrooms with keyword {Keyword}.", request.ClassCode);
                 throw;
             }
         }
