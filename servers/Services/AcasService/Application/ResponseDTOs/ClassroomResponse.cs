@@ -6,7 +6,7 @@ namespace AcasService.Application.ResponseDTOs
     {
         [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
-        
+
         [JsonPropertyName("classCode")]
         public string ClassCode { get; set; } = string.Empty;
 
@@ -16,8 +16,14 @@ namespace AcasService.Application.ResponseDTOs
         [JsonPropertyName("lecturerId")]
         public string LecturerId { get; set; } = string.Empty;
 
+        //[JsonPropertyName("lecturerName")]
+        //public string LecturerName { get; set; } = string.Empty;
+
         [JsonPropertyName("subjectId")]
         public string SubjectId { get; set; } = string.Empty;
+
+        [JsonPropertyName("subjectName")]
+        public string SubjectName { get; set; } = string.Empty;
 
         [JsonPropertyName("semesterName")]
         public string SemesterName { get; set; } = string.Empty;
@@ -33,8 +39,9 @@ namespace AcasService.Application.ResponseDTOs
 
         [JsonPropertyName("endDate")]
         public DateTime EndDate { get; set; }
-        
+
         [JsonPropertyName("isDeleted")]
         public bool IsDeleted { get; set; }
+
     }
 }
