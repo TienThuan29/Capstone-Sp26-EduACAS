@@ -1,4 +1,8 @@
+<<<<<<< Updated upstream
 using System.Collections;
+=======
+using AcasService.Models;
+>>>>>>> Stashed changes
 
 namespace AcasService.Repositories.Classroom;
 
@@ -11,5 +15,10 @@ public interface IClassroomRepository
     Task<List<Models.Classroom>> FindAllAsync();
     Task<Models.Classroom?> UpdateAsync(Models.Classroom classroom);
     Task DeleteAsync(string classroomId);
+<<<<<<< Updated upstream
     Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword);
+=======
+
+    Task<Models.Classroom?> FindByEnrollKeyAsync(string enrollKey);
+>>>>>>> Stashed changes
 }

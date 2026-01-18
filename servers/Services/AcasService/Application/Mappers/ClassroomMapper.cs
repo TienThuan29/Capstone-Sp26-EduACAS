@@ -22,6 +22,5 @@ namespace AcasService.Application.Mappers
                 IsDeleted = classroom.IsDeleted
             };
         }
-
     }
 }

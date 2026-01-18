@@ -1,6 +1,7 @@
 ﻿using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Classroom;
+using AcasService.Repositories.ClassroomEnrollment;
 using AcasService.Web.Requests;
 using Amazon.Runtime.Internal.Util;
 
@@ -14,15 +15,17 @@ namespace AcasService.Application.Commands.Classroom
     }
 
     public class ClassroomCommand : IClassroomCommand
-    {   
-       
+    {
+
         private readonly IClassroomRepository _classroomRepository;
+
+        
         private readonly ClassroomMapper _classroomMapper;
         private readonly ILogger<ClassroomCommand> _logger;
 
         public ClassroomCommand(IClassroomRepository classroomRepository, ClassroomMapper classroomMapper, ILogger<ClassroomCommand> logger)
         {
-            _classroomRepository = classroomRepository;
+            _classroomRepository = classroomRepository;    
             _classroomMapper = classroomMapper;
             _logger = logger;
         }
@@ -95,5 +98,6 @@ namespace AcasService.Application.Commands.Classroom
 
             return _classroomMapper.ToClassroomResponse(existingClassroom);
         }
+
     }
 }

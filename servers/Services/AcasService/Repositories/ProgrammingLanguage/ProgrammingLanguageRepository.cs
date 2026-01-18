@@ -10,7 +10,7 @@ using System.Net;
 public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLanguageRepository
 {
 
-    private readonly string _tableName;
+    private readonly string _programmingLanguageTableName;
     private readonly IConfiguration _configuration;
 
     public ProgrammingLanguageRepository(
@@ -21,12 +21,12 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
     {
         _configuration = configuration;
 
-        _tableName = configuration["DynamoDB:ProgrammingLanguageTableName"]?? 
+        _programmingLanguageTableName = configuration["DynamoDB:ProgrammingLanguageTableName"]?? 
         throw new ArgumentNullException("DynamoDB:ProgrammingLanguageTable is not configured");
-        base.TableName = _tableName;
+        base.TableName = _programmingLanguageTableName;
         var awsRegion = configuration["AWS:Region"] ?? "Not configured";
         logger.LogInformation(
-            "ProgrammingLanguageRepository initialized - Region: {Region}, Table: {Table}",awsRegion, _tableName);
+            "ProgrammingLanguageRepository initialized - Region: {Region}, Table: {Table}",awsRegion, _programmingLanguageTableName);
     }
 
      public async Task<ProgrammingLanguage?> CreateAsync(ProgrammingLanguage language)
@@ -40,7 +40,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
 
             var dynamoItem = DynamoMapper.ProgrammingLanguageToDynamoItem(language);
 
-            var response = await PutItemAsync(dynamoItem, _tableName);
+            var response = await PutItemAsync(dynamoItem, _programmingLanguageTableName);
 
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -61,7 +61,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
         try
         {
             var key = DynamoMapper.CreateKey(id);
-            var response = await GetItemAsync(key, _tableName);
+            var response = await GetItemAsync(key, _programmingLanguageTableName);
             if (response.Item == null || response.Item.Count == 0)
             {
                 return null;
@@ -81,7 +81,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
     {
         try
         {
-            var response = await ScanAsync(_tableName);
+            var response = await ScanAsync(_programmingLanguageTableName);
             var languages = response.Items.Select(DynamoMapper.DynamoItemToProgrammingLanguage);
             return languages;
         }
@@ -104,7 +104,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
 
             language.UpdatedDate = DateTime.UtcNow;
             var dynamoItem = DynamoMapper.ProgrammingLanguageToDynamoItem(language);
-            var response = await PutItemAsync(dynamoItem, _tableName);
+            var response = await PutItemAsync(dynamoItem, _programmingLanguageTableName);
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
                 return await GetByIdAsync(language.Id);
@@ -128,7 +128,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
                 throw new Exception("Programming language not found");
             }
             var key = DynamoMapper.CreateKey(id);
-            await DeleteItemAsync(key, _tableName);
+            await DeleteItemAsync(key, _programmingLanguageTableName);
         }
         catch (Exception ex)
         {

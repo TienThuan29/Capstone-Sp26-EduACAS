@@ -13,6 +13,8 @@ public interface IExaminationQuery
     Task<ExaminationResponse?> GetByIdAsync(string id);
     Task<List<ExaminationResponse?>> GetAllAsync();
 
+    Task<List<ExaminationResponse?>> GetByClassIdAsync(string classId);
+
 }
 
 public class ExaminationQuery : IExaminationQuery
@@ -72,4 +74,35 @@ public class ExaminationQuery : IExaminationQuery
             throw;
         }
     }
+
+    public async Task<List<ExaminationResponse?>> GetByClassIdAsync(string classId)
+{
+    try
+    {
+        var exams = await _examinationRepository.GetByClassIdAsync(classId);
+
+        if (exams == null || !exams.Any())
+        {
+            _logger.LogInformation(
+                "No examinations found for classId {ClassId}",
+                classId
+            );
+            return new List<ExaminationResponse?>();
+        }
+
+        return exams
+            .Select(exam =>
+                exam == null
+                    ? null
+                    : _examinationMapper.ToExaminationResponse(exam)
+            )
+            .ToList();
+    }
+    catch (Exception ex)
+    {
+        _logger.LogError(ex, "Error occurred while getting examinations by class Id");
+        throw;
+    }
+}
+
 }
