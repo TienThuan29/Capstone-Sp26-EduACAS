@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { Card, Spinner, Button, Select, TextInput } from "flowbite-react"
+import Link from "next/link"
 import HomeNavbar from "@/components/home-navbar"
 import Footer from "@/components/Footer"
 import useAxios from "@/hooks/useAxios"
@@ -235,20 +236,22 @@ export default function ListAllClassroomPage() {
 
     {/* Action */}
     <div className="mt-auto">
-      <Button
-        color="gray"
-        outline
-        className="
-          w-full
-          rounded-xl
-          border-gray-300 dark:border-gray-600
-          hover:bg-[#1F4E79]/5
-          dark:hover:bg-[#C9A24D]/10
-          font-semibold
-        "
-      >
-        Tham gia lớp học
-      </Button>
+      <Link href={`/all-classroom/${c.id}`} className="block w-full">
+        <Button
+            color="gray"
+            outline
+            className="
+            w-full
+            rounded-xl
+            border-gray-300 dark:border-gray-600
+            hover:bg-[#1F4E79]/5
+            dark:hover:bg-[#C9A24D]/10
+            font-semibold
+            "
+        >
+            Tham gia lớp học
+        </Button>
+      </Link>
     </div>
 
   </div>

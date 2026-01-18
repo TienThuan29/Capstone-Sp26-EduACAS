@@ -19,6 +19,12 @@ export const Api = {
     Classroom: {
         GET_STUDENT_CLASSROOMS: '/api/acas/v1/classrooms/student',
         GET_ALL_CLASSROOMS: '/api/acas/v1/classrooms',
+        GET_BY_ID: '/api/acas/v1/classrooms', // + /{id}
+        ENROLL: '/api/acas/v1/class-enrollments/enroll',
+    },
+
+    Examination: {
+        GET_BY_CLASS: '/api/acas/v1/examinations/by-class', // + /{classId}
     }
 
 }
