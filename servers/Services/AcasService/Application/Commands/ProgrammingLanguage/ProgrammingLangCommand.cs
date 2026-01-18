@@ -15,6 +15,8 @@ public interface IProgrammingLanguageCommand
     Task<ProgrammingLanguageResponse> UpdateAsync(string id, ProgrammingLanguageRequest request);
 
     Task DeleteAsync(string id);
+    
+    Task<ProgrammingLanguageResponse> ToggleEnableAsync(string id);
 }
 
 public class ProgrammingLangCommand : IProgrammingLanguageCommand
@@ -36,6 +38,13 @@ public class ProgrammingLangCommand : IProgrammingLanguageCommand
     {
         try
         {
+            // Validate if key already exists
+            var existingLanguage = await _repository.GetByKeyAsync(request.Key);
+            if (existingLanguage != null)
+            {
+                throw new InvalidOperationException($"Programming language with key '{request.Key}' already exists");
+            }
+
             var entity = _programmingLanguageMapper.ToProgrammingLanguageModel(request);
             var created = await _repository.CreateAsync(entity);
             return _programmingLanguageMapper.ToProgrammingLanguageResponse(created);
@@ -85,6 +94,23 @@ public class ProgrammingLangCommand : IProgrammingLanguageCommand
         catch (Exception ex)
         {
             _logger.LogError(ex,"Error deleting programming language: {Id}", id);
+            throw;
+        }
+    }
+
+    public async Task<ProgrammingLanguageResponse> ToggleEnableAsync(string id)
+    {
+        try
+        {
+            var result = await _repository.ToggleEnableAsync(id);
+            if (result == null)
+                throw new KeyNotFoundException("ProgrammingLanguage not found");
+            
+            return _programmingLanguageMapper.ToProgrammingLanguageResponse(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error toggling enable status for programming language: {Id}", id);
             throw;
         }
     }

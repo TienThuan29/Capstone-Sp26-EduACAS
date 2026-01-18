@@ -88,4 +88,27 @@ public class ProgrammingLanguageCommandController : ControllerBase
             return ResponseUtil.Error<object>("Internal Server Error",500);
         }
     }
+
+    [HttpPatch("{id}/toggle-enable")]
+    public async Task<ActionResult<ApiResponse<ProgrammingLanguageResponse>>> ToggleEnable(string id)
+    {
+        try
+        {
+            var result = await _programmingLanguageCommand.ToggleEnableAsync(id);
+
+            return ResponseUtil.Success(result,"Programming language status toggled successfully",200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex,"Programming language not found: {Id}", id);
+
+            return ResponseUtil.Error<ProgrammingLanguageResponse>(ex.Message,404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error toggling enable status: {Id}", id);
+
+            return ResponseUtil.Error<ProgrammingLanguageResponse>("Internal Server Error",500);
+        }
+    }
 }
