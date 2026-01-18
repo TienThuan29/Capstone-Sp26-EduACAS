@@ -14,6 +14,10 @@ export const Api = {
         RESET_PASSWORD: '/api/auth/v1/reset-password',
         GET_PROFILE: '/api/auth/v1/profile',
         GOOGLE_LOGIN: '/api/auth/v1/google-login',
+    },
+
+    Classroom: {
+        GET_STUDENT_CLASSROOMS: '/api/acas/v1/classrooms/student',
     }
 
 }
