@@ -100,7 +100,6 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         }
     }
 
-<<<<<<< Updated upstream
     public async Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword)
     {
         try
@@ -128,7 +127,6 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
 
  
 
-=======
     public async Task<Models.Classroom?> FindByEnrollKeyAsync(string enrolKey)
     {
         try
@@ -155,5 +153,4 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
             throw;
         }
     }
->>>>>>> Stashed changes
 }
