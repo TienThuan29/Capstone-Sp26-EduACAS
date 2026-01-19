@@ -16,15 +16,15 @@ public interface IProgrammingLanguageQuery
 }
 
 
-public class ProgrammingLangQuery : IProgrammingLanguageQuery
+public class ProgrammingLanguageQuery : IProgrammingLanguageQuery
 {
     private readonly IProgrammingLanguageRepository _repository;
-    private readonly ILogger<ProgrammingLangQuery> _logger;
+    private readonly ILogger<ProgrammingLanguageQuery> _logger;
 
     private readonly ProgrammingLanguageMapper _mapper;
-    public ProgrammingLangQuery(
+    public ProgrammingLanguageQuery(
         IProgrammingLanguageRepository repository,
-        ILogger<ProgrammingLangQuery> logger,
+        ILogger<ProgrammingLanguageQuery> logger,
         ProgrammingLanguageMapper mapper)
     {
         _repository = repository;

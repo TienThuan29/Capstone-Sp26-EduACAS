@@ -100,8 +100,8 @@ builder.Services.AddScoped<SubjectMapper>();
 builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
-builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLangCommand>();
-builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLangQuery>();
+builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
+builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
