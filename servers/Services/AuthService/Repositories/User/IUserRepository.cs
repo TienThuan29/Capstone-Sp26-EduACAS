@@ -9,5 +9,6 @@ public interface IUserRepository
 
     Task<Models.User?> UpdatePasswordAsync(Models.User user);
     Task<Models.User?> UpdateGoogleIdAsync(string userId, string googleId);
+    Task<Models.User?> UpdatePasswordAndFirstLoginAsync(string userId, string newPassword, bool firstLogin);
     
 }
