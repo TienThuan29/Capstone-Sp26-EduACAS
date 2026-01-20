@@ -3,7 +3,6 @@
 import { Card } from "flowbite-react"
 import Image from "next/image"
 import Link from "next/link"
-import { Carousel } from "flowbite-react";
 import {
   LaptopIcon,
   GraduateIcon,
@@ -13,6 +12,7 @@ import {
 import { heroStats, features, communityStats, programmingLanguages } from "@/MockData/landingPageData"
 import Footer from "@/components/Footer"
 import HomeNavbar from "@/components/home-navbar"
+import HeroCarousel from "@/components/carousel"
 
 export default function Home() {
 
@@ -23,113 +23,8 @@ export default function Home() {
 
       {/* Hero Section */}
       <section id="home" className="py-20 px-4 min-h-screen flex items-center bg-[#F5F7FA] dark:bg-gray-800 relative overflow-hidden">
-
-
         {/* Carousel Slider Background */}
-        <div className="absolute inset-0 overflow-hidden opacity-20 dark:opacity-15">
-          <style jsx>{`
-            @keyframes slideCarousel {
-              0% {
-                transform: translateX(0);
-              }
-              33.33% {
-                transform: translateX(0);
-              }
-              36.33% {
-                transform: translateX(-100%);
-              }
-              66.66% {
-                transform: translateX(-100%);
-              }
-              69.66% {
-                transform: translateX(-200%);
-              }
-              96.66% {
-                transform: translateX(-200%);
-              }
-              100% {
-                transform: translateX(-300%);
-              }
-            }
-          `}</style>
-          
-          {/* Carousel Container */}
-          <div 
-            className="absolute inset-0 flex"
-            style={{
-              animation: 'slideCarousel 18s ease-in-out infinite',
-              width: '400%'
-            }}
-          >
-            {/* Slide 1 */}
-            <div className="relative w-full h-full flex-shrink-0">
-              <img 
-                src="/hero-slide-images/code-1.jpg" 
-                alt="Code background 1"
-                className="w-full h-full object-cover"
-              />
-              {/* Overlay to blend with background */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(31, 78, 121, 0.7) 0%, rgba(201, 162, 77, 0.5) 100%)',
-                  mixBlendMode: 'multiply'
-                }}
-              />
-            </div>
-
-            {/* Slide 2 */}
-            <div className="relative w-full h-full flex-shrink-0">
-              <img 
-                src="/hero-slide-images/code-2.jpg" 
-                alt="Code background 2"
-                className="w-full h-full object-cover"
-              />
-              {/* Overlay to blend with background */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(201, 162, 77, 0.6) 0%, rgba(31, 78, 121, 0.6) 100%)',
-                  mixBlendMode: 'multiply'
-                }}
-              />
-            </div>
-
-            {/* Slide 3 */}
-            <div className="relative w-full h-full flex-shrink-0">
-              <img 
-                src="/hero-slide-images/code-3.jpg" 
-                alt="Code background 3"
-                className="w-full h-full object-cover"
-              />
-              {/* Overlay to blend with background */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(31, 78, 121, 0.65) 0%, rgba(201, 162, 77, 0.55) 100%)',
-                  mixBlendMode: 'multiply'
-                }}
-              />
-            </div>
-
-            {/* Slide 1 (repeat for seamless loop) */}
-            <div className="relative w-full h-full flex-shrink-0">
-              <img 
-                src="/hero-slide-images/code-1.jpg" 
-                alt="Code background 1"
-                className="w-full h-full object-cover"
-              />
-              {/* Overlay to blend with background */}
-              <div 
-                className="absolute inset-0"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(31, 78, 121, 0.7) 0%, rgba(201, 162, 77, 0.5) 100%)',
-                  mixBlendMode: 'multiply'
-                }}
-              />
-            </div>
-          </div>
-        </div>
+        <HeroCarousel />
 
         <div className="container mx-auto px-6 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">

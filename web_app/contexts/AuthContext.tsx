@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { AuthTokens, UserProfile } from '@/types/user';
 import axios, { HttpStatusCode } from 'axios';
 import { Api } from '@/configs/api';
-import { permanentRedirect,useRouter } from 'next/navigation'
+import { permanentRedirect, useRouter } from 'next/navigation'
 import { Constant } from '@/configs/constant';
 import { PageUrl } from '@/configs/page.url';
 import { validateUserRole } from '@/hooks/useRoleValidation';
@@ -170,13 +170,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 const roleValidator = await validateUserRole(userProfile);
 
                 if (roleValidator.isStudent) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isLecturer) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isAdmin) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else {
                     toast.showError('Invalid role!');
@@ -215,13 +215,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 const roleValidator = await validateUserRole(userProfile);
 
                 if (roleValidator.isStudent) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isLecturer) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isAdmin) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else {
                     toast.showError('Invalid role!');

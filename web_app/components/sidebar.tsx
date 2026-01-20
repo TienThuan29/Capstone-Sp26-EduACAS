@@ -85,11 +85,15 @@ const Sidebar = () => {
   )
 
   const menuItems = [
-    { icon: DashboardIcon, label: "Dashboard", href: "/dashboard" },
-    { icon: ClassesIcon, label: "Lớp học", href: "/classes" },
-    { icon: AssignmentsIcon, label: "Bài tập", href: "/assignments" },
-    { icon: AnnouncementsIcon, label: "Thông báo", href: "/announcements" },
-    { icon: UsersIcon, label: "Người dùng", href: "/users" },
+    { icon: DashboardIcon, label: "Trang quản trị", href: "/admin" },
+    { icon: ClassesIcon, label: "Quản lý lớp học", href: "/admin/classes" },
+    { icon: AssignmentsIcon, label: "Quản lý môn học", href: "/admin/subjects" },
+    { icon: () => (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+      </svg>
+    ), label: "Ngôn ngữ lập trình", href: "/admin/programming-languages" },
+    { icon: UsersIcon, label: "Quản lý người dùng", href: "/users" },
   ]
 
   const settingsItems = [
