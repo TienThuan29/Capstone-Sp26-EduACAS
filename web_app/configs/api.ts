@@ -12,6 +12,7 @@ export const Api = {
         VERIFY_EMAIL: '/api/auth/v1/verify-email',
         FORGOT_PASSWORD: '/api/auth/v1/forgot-password',
         RESET_PASSWORD: '/api/auth/v1/reset-password',
+        RESET_FIRST_LOGIN_PASSWORD: '/api/auth/v1/reset-first-login-password',
         GET_PROFILE: '/api/auth/v1/profile',
         GOOGLE_LOGIN: '/api/auth/v1/google-login',
     }
