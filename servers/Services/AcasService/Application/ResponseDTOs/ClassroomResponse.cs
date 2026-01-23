@@ -13,17 +13,11 @@ namespace AcasService.Application.ResponseDTOs
         [JsonPropertyName("className")]
         public string ClassName { get; set; } = string.Empty;
 
-        [JsonPropertyName("lecturerId")]
-        public string LecturerId { get; set; } = string.Empty;
+        [JsonPropertyName("lecturer")]
+        public LecturerLiteResponse Lecturer { get; set; } = new LecturerLiteResponse();
 
-        //[JsonPropertyName("lecturerName")]
-        //public string LecturerName { get; set; } = string.Empty;
-
-        [JsonPropertyName("subjectId")]
-        public string SubjectId { get; set; } = string.Empty;
-
-        [JsonPropertyName("subjectName")]
-        public string SubjectName { get; set; } = string.Empty;
+        [JsonPropertyName("subject")]
+        public SubjectLiteResponse Subject { get; set; } = new SubjectLiteResponse();   
 
         [JsonPropertyName("semesterName")]
         public string SemesterName { get; set; } = string.Empty;
@@ -43,5 +37,21 @@ namespace AcasService.Application.ResponseDTOs
         [JsonPropertyName("isDeleted")]
         public bool IsDeleted { get; set; }
 
+    }
+
+    public class SubjectLiteResponse
+    {
+        [JsonPropertyName("subjectId")]
+        public string Id { get; set; } = string.Empty;
+        [JsonPropertyName("subjectName")]
+        public string SubjectName { get; set; } = string.Empty;
+    }
+
+    public class LecturerLiteResponse
+    {
+        [JsonPropertyName("lecturerId")]
+        public string Id { get; set; } = string.Empty;
+        [JsonPropertyName("lecturerName")]
+        public string LecturerName { get; set; } = string.Empty;
     }
 }

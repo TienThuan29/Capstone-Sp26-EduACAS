@@ -1,5 +1,6 @@
 ﻿using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
+using AcasService.Messaging.User;
 using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.Subject;
@@ -22,17 +23,20 @@ namespace AcasService.Application.Queries.Classroom
         private readonly IClassroomRepository _classroomRepository;
         private readonly ISubjectRepository _subjectRepository;
         private readonly ClassroomMapper _classroomMapper;
+        private readonly UserRequestProducer _userRequestProducer;
 
         public ClassroomQuery(
             ILogger<ClassroomQuery> logger,
             IClassroomRepository classroomRepository,
             ISubjectRepository subjectRepository,
-            ClassroomMapper classroomMapper)
+            ClassroomMapper classroomMapper,
+            UserRequestProducer userRequestProducer)
         {
             _logger = logger;
             _classroomRepository = classroomRepository;
             _subjectRepository = subjectRepository;
             _classroomMapper = classroomMapper;
+            _userRequestProducer = userRequestProducer;
         }
 
         
@@ -52,21 +56,8 @@ namespace AcasService.Application.Queries.Classroom
                     _logger.LogWarning("Subject with ID {SubjectId} not found.", classroom.SubjectId);
                     throw new KeyNotFoundException($"Subject with ID {classroom.SubjectId} not found.");
                 }
-                ClassroomResponse response = new ClassroomResponse();
-                response.Id = classroom.Id;
-                response.ClassCode = classroom.ClassCode;
-                response.ClassName = classroom.ClassName;
-                response.LecturerId = classroom.LecturerId;
-                response.SubjectId = classroom.SubjectId;
-                response.SubjectName = subject.SubjectName;
-                _logger.LogWarning("{SubjectName} ", subject.SubjectName);
-                response.SemesterName = classroom.SemesterName;
-                response.EnrolKey = classroom.EnrolKey;
-                response.CreatedDate = classroom.CreatedDate;
-                response.UpdatedDate = classroom.UpdatedDate;
-                response.EndDate = classroom.EndDate;
-                response.IsDeleted = classroom.IsDeleted;
-                return response;
+                var lecturerProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                return _classroomMapper.ToClassroomResponse(classroom, subject, lecturerProfile);
 
             }
             catch (Exception ex)
@@ -85,26 +76,9 @@ namespace AcasService.Application.Queries.Classroom
 
                 foreach (var classroom in classrooms)
                 {
-                   var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
-
-                    ClassroomResponse response = new ClassroomResponse
-                    {
-                        Id = classroom.Id,
-                        ClassCode = classroom.ClassCode,
-                        ClassName = classroom.ClassName,
-                        LecturerId = classroom.LecturerId,
-                        SubjectId = classroom.SubjectId,
-                        SubjectName = subject.SubjectName, 
-                        SemesterName = classroom.SemesterName,
-                        EnrolKey = classroom.EnrolKey,
-                        CreatedDate = classroom.CreatedDate,
-                        UpdatedDate = classroom.UpdatedDate,
-                        EndDate = classroom.EndDate,
-                        IsDeleted = classroom.IsDeleted
-                    };
-
-                    _logger.LogWarning("SubjectName: {SubjectName}", response.SubjectName);
-
+                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
                     responses.Add(response);
                 }
 
@@ -128,25 +102,8 @@ namespace AcasService.Application.Queries.Classroom
                 foreach (var classroom in classrooms)
                 {
                     var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
-
-                    ClassroomResponse response = new ClassroomResponse
-                    {
-                        Id = classroom.Id,
-                        ClassCode = classroom.ClassCode,
-                        ClassName = classroom.ClassName,
-                        LecturerId = classroom.LecturerId,
-                        SubjectId = classroom.SubjectId,
-                        SubjectName = subject.SubjectName,
-                        SemesterName = classroom.SemesterName,
-                        EnrolKey = classroom.EnrolKey,
-                        CreatedDate = classroom.CreatedDate,
-                        UpdatedDate = classroom.UpdatedDate,
-                        EndDate = classroom.EndDate,
-                        IsDeleted = classroom.IsDeleted
-                    };
-
-                    _logger.LogWarning("SubjectName: {SubjectName}", response.SubjectName);
-
+                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
                     responses.Add(response);
                 }
 
