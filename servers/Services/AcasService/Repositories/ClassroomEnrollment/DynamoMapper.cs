@@ -19,12 +19,11 @@ public static class DynamoMapper
             ["isJoining"] = new AttributeValue
             {
                 BOOL = enrollment.IsJoining
-            },
-            ["movedOutDate"] = enrollment.MovedOutDate == default
+            },            ["movedOutDate"] = enrollment.MovedOutDate == null
                 ? new AttributeValue { NULL = true }          // 🔥 FIX
                 : new AttributeValue
                 {
-                    S = enrollment.MovedOutDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
+                    S = enrollment.MovedOutDate.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")
                 }
         };
     }
@@ -38,12 +37,11 @@ public static class DynamoMapper
             ClassId = item["classId"].S,
             StudentId = item["studentId"].S,
             JoinedDate = DateTime.Parse(item["joinedDate"].S),
-            IsJoining = item["isJoining"].BOOL,
-            MovedOutDate = item.ContainsKey("movedOutDate")
+            IsJoining = item["isJoining"].BOOL,            MovedOutDate = item.ContainsKey("movedOutDate")
                 && !item["movedOutDate"].NULL
                 && !string.IsNullOrEmpty(item["movedOutDate"].S)
                     ? DateTime.Parse(item["movedOutDate"].S)
-                    : default
+                    : null
         };
 
         return enrollment;

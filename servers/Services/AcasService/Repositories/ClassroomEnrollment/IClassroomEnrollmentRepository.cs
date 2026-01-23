@@ -11,4 +11,6 @@ public interface IClassroomEnrollmentRepository
     Task DeleteAsync(string enrollmentId);
 
     Task<List<Models.ClassEnrollment>> FindByStudentIdAsync(string studentId);
+    
+    Task<Models.ClassEnrollment?> FindByClassAndStudentIdAsync(string classId, string studentId);
 }

@@ -12,10 +12,9 @@ public class ClassEnrollment
     
     [Required]
     public string StudentId { get; set; } = string.Empty;
+      public DateTime JoinedDate { get; set; }
     
-    public DateTime JoinedDate { get; set; }
-    
-    public DateTime MovedOutDate { get; set; }
+    public DateTime? MovedOutDate { get; set; }
     
     public bool IsJoining { get; set; }
 }

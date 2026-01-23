@@ -11,6 +11,8 @@ namespace AcasService.Application.Commands.ClassroomEnrollment;
 public interface IClassEnrollmentsCommand
 {
     Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request);
+
+    Task<ClassEnrollmentsResponse> LeaveClass(ClassEnrollmentsRequest request);
 }
 
 
@@ -28,8 +30,6 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
 
     public async Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request)
     {
-
-
         var classroom = await _classroomRepository.FindByEnrollKeyAsync(request.EnrolKey);
         if (classroom == null)
         {
@@ -40,14 +40,20 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
             throw new InvalidOperationException("Enrollment key does not belong to this class");
         }
 
+        var existingEnrollment = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(request.ClassId, request.StudentId);
+        if (existingEnrollment != null)
+        {
+            throw new InvalidOperationException("Student is already enrolled in this class");
+        }
+    
         var enrollment = new ClassEnrollment
         {
             Id = Guid.NewGuid().ToString(),
             ClassId = classroom.Id,
-            StudentId = request.StudentId,
+            StudentId = request.StudentId,            
             JoinedDate = DateTime.UtcNow,
             IsJoining = true,
-            MovedOutDate = default
+            MovedOutDate = null
         };
 
         var createdEnrollment = await _classroomEnrollmentRepository.CreateAsync(enrollment);
@@ -68,5 +74,33 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
         };
         return response;
 
+    }
+
+    public async Task<ClassEnrollmentsResponse> LeaveClass(ClassEnrollmentsRequest request)
+    {
+        var classEnrollment = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(request.ClassId, request.StudentId);
+        if (classEnrollment == null)
+        {
+            throw new InvalidOperationException("Student is not enrolled in this class");
+        }
+        classEnrollment.MovedOutDate = DateTime.UtcNow;
+        classEnrollment.IsJoining = false;
+
+        var updatedEnrollment = await _classroomEnrollmentRepository.UpdateAsync(classEnrollment);
+        if (updatedEnrollment == null)
+        {
+            throw new Exception("Failed to leave class");
+        }
+        var response = new ClassEnrollmentsResponse
+        {
+            EnrollmentId = updatedEnrollment.Id,
+            ClassId = updatedEnrollment.ClassId,
+            StudentId = updatedEnrollment.StudentId,
+            JoinedDate = updatedEnrollment.JoinedDate,
+            IsJoining = updatedEnrollment.IsJoining,
+            MovedOutDate = updatedEnrollment.MovedOutDate
+        };
+
+        return response;
     }
 }

@@ -40,6 +40,10 @@ public class ClassEnrollmentsCommandController : ControllerBase
         {
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Failed to enroll in class", 500);
         }
+        catch (Exception ex) when (ex.Message.Contains("Student is already enrolled in this class"))
+        {
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is already enrolled in this class", 501);
+        }
         catch (InvalidOperationException ex)
     when (ex.Message.Contains("Enrollment key does not belong to this class"))
         {
@@ -54,4 +58,29 @@ public class ClassEnrollmentsCommandController : ControllerBase
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Internal Server Error", 500);
         }
     }
+
+
+    [HttpPut("leave")]
+    public async Task<ActionResult<ApiResponse<ClassEnrollmentsResponse>>> LeaveClass([FromBody] ClassEnrollmentsRequest request)
+    {
+        try
+        {
+            var response = await _classEnrollmentsCommand.LeaveClass(request);
+            return ResponseUtil.Success(response, "Left class successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Student is not enrolled in this class"))
+        {
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is not enrolled in this class", 404);
+        }
+        catch (Exception ex) when (ex.Message.Contains("Failed to leave class"))
+        {
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Failed to leave class", 500);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error leaving class");
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Internal Server Error", 500);
+        }
+    }
+
 }

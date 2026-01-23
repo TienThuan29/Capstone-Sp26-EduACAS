@@ -145,4 +145,43 @@ public class ClassroomEnrollmentRepository: DynamoRepository, IClassroomEnrollme
         throw;
     }
 }
+
+public async Task<Models.ClassEnrollment?> FindByClassAndStudentIdAsync(string classId, string studentId)
+{
+    try
+    {
+        Dictionary<string, AttributeValue>? lastKey = null;
+        do
+        {
+            var scanRequest = new ScanRequest
+            {
+                TableName = _classroomEnrollmentTableName,
+                FilterExpression = "classId = :classId AND studentId = :studentId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":classId"] = new AttributeValue { S = classId },
+                    [":studentId"] = new AttributeValue { S = studentId }
+                },
+                ExclusiveStartKey = lastKey
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(scanRequest);
+
+            foreach (var item in response.Items)
+            {
+                return DynamoMapper.DynamoItemToClassEnrollment(item);
+            }
+
+            lastKey = response.LastEvaluatedKey;
+
+        } while (lastKey != null && lastKey.Count > 0);
+
+        return null;
+    }
+    catch (Exception exception)
+    {
+        throw new Exception($"Error finding classroom enrollment for class {classId} and student {studentId}",
+            exception);
+    }
+}
 }
