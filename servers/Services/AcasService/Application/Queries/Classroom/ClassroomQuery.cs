@@ -1,6 +1,9 @@
 ﻿using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
+using AcasService.Messaging.User;
+using AcasService.Models;
 using AcasService.Repositories.Classroom;
+using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
 using System.Collections;
 using AcasService.Repositories.ClassroomEnrollment;
@@ -24,20 +27,27 @@ namespace AcasService.Application.Queries.Classroom
     {
         private readonly ILogger<ClassroomQuery> _logger;
         private readonly IClassroomRepository _classroomRepository;
+        private readonly ISubjectRepository _subjectRepository;
 
         private readonly IClassroomEnrollmentRepository _classroomEnrollmentRepository;
         private readonly ClassroomMapper _classroomMapper;
+        private readonly UserRequestProducer _userRequestProducer;
 
         public ClassroomQuery(
             ILogger<ClassroomQuery> logger,
             IClassroomRepository classroomRepository,
+            ISubjectRepository subjectRepository,
+            ClassroomMapper classroomMapper,
+            UserRequestProducer userRequestProducer)
             IClassroomEnrollmentRepository classroomEnrollmentRepository,
             ClassroomMapper classroomMapper)
         {
             _logger = logger;
             _classroomEnrollmentRepository = classroomEnrollmentRepository;
             _classroomRepository = classroomRepository;
+            _subjectRepository = subjectRepository;
             _classroomMapper = classroomMapper;
+            _userRequestProducer = userRequestProducer;
         }
 
 
@@ -51,7 +61,14 @@ namespace AcasService.Application.Queries.Classroom
                     _logger.LogWarning("Classroom with ID {ClassroomId} not found.", classroomId);
                     throw new KeyNotFoundException($"Classroom with ID {classroomId} not found.");
                 }
-                return _classroomMapper.ToClassroomResponse(classroom);
+                var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                if (subject == null)
+                    {
+                    _logger.LogWarning("Subject with ID {SubjectId} not found.", classroom.SubjectId);
+                    throw new KeyNotFoundException($"Subject with ID {classroom.SubjectId} not found.");
+                }
+                var lecturerProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                return _classroomMapper.ToClassroomResponse(classroom, subject, lecturerProfile);
 
             }
             catch (Exception ex)
@@ -66,7 +83,17 @@ namespace AcasService.Application.Queries.Classroom
             try
             {
                 var classrooms = await _classroomRepository.FindAllAsync();
-                return classrooms.Select(c => _classroomMapper.ToClassroomResponse(c)).ToList();
+                var responses = new List<ClassroomResponse>();
+
+                foreach (var classroom in classrooms)
+                {
+                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
+                    responses.Add(response);
+                }
+
+                return responses;
 
             }
             catch (Exception ex)
@@ -81,7 +108,17 @@ namespace AcasService.Application.Queries.Classroom
             try
             {
                 var classrooms = await _classroomRepository.GetClassroomsByKeywordAsync(request.ClassCode);
-                return classrooms.Select(c => _classroomMapper.ToClassroomResponse(c)).ToList();
+                var responses = new List<ClassroomResponse>();
+
+                foreach (var classroom in classrooms)
+                {
+                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
+                    responses.Add(response);
+                }
+
+                return responses;
             }
             catch (Exception ex)
             {
