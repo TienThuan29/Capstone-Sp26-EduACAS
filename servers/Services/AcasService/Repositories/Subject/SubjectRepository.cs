@@ -92,6 +92,36 @@ public class SubjectRepository : DynamoRepository, ISubjectRepository
         }
     }
 
+    public async Task SoftDeleteAsync(string subjectId)
+    {
+        try
+        {
+            var key = DynamoMapper.CreateKey(subjectId);
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                {
+                    "isDeleted", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { BOOL = true }
+                    }
+                },
+                {
+                    "updatedDate", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { S = DateTime.UtcNow.ToString("o") }
+                    }
+                }
+            };
+            await UpdateItemAsync(key, updates, _subjectTableName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting subject {Id}", subjectId);
+            throw;
+        }
+    }
 
     public async Task DeleteAsync(string subjectId)
     {
