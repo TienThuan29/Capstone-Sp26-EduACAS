@@ -224,4 +224,45 @@ public class UserRepository : DynamoRepository, IUserRepository
             throw;
         }
     }
+
+    public async Task<Models.User?> UpdatePasswordAndFirstLoginAsync(string userId, string newPassword, bool firstLogin)
+    {
+        try
+        {
+            var hashedPassword = HashingUtil.HashString(newPassword, _configuration);
+            var updatedDate = DateTime.UtcNow;
+            
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                ["password"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = hashedPassword }
+                },
+                ["firstLogin"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { BOOL = firstLogin }
+                },
+                ["updatedDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                }
+            };
+            
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user password and FirstLogin flag");
+            throw;
+        }
+    }
 }

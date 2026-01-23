@@ -7,6 +7,7 @@ export type UserProfile = {
     avatarUrl: string;
     birthday: string | null;
     role: string;
+    firstLogin: boolean;
     isEnable: boolean;
     lastLoginDate: string | null;
     createdDate: string;

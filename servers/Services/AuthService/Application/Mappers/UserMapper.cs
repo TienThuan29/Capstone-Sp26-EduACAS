@@ -17,6 +17,7 @@ public class UserMapper
             Birthday = user.Birthday,
             Role = user.Role.ToString(),
             IsEnable = user.IsEnable,
+            FirstLogin = user.FirstLogin,
             LastLoginDate = user.LastLoginDate,
             CreatedDate = user.CreatedDate,
             UpdatedDate = user.UpdatedDate

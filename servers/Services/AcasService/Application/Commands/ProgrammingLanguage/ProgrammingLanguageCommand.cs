@@ -19,14 +19,14 @@ public interface IProgrammingLanguageCommand
     Task<ProgrammingLanguageResponse> ToggleEnableAsync(string id);
 }
 
-public class ProgrammingLangCommand : IProgrammingLanguageCommand
+public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
 {
     private readonly IProgrammingLanguageRepository _repository;
-    private readonly ILogger<ProgrammingLangCommand> _logger;
+    private readonly ILogger<ProgrammingLanguageCommand> _logger;
 
     private readonly ProgrammingLanguageMapper _programmingLanguageMapper;
 
-    public ProgrammingLangCommand(IProgrammingLanguageRepository repository,ILogger<ProgrammingLangCommand> logger, ProgrammingLanguageMapper programmingLanguageMapper)
+    public ProgrammingLanguageCommand(IProgrammingLanguageRepository repository,ILogger<ProgrammingLanguageCommand> logger, ProgrammingLanguageMapper programmingLanguageMapper)
     {
         _repository = repository;
         _logger = logger;

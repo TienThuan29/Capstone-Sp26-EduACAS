@@ -76,7 +76,8 @@ public class UserQuery : IUserQuery
             {
                 UserProfile = _userMapper.ToUserResponse(user),
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                FirstLogin = user.FirstLogin ?? false
             };
         }
         catch (Exception ex)
