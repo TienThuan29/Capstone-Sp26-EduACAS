@@ -7,13 +7,22 @@ import Footer from "@/components/Footer"
 import useAxios from "@/hooks/useAxios"
 import { Api } from "@/configs/api"
 
+
+interface LecturerLite {
+  lecturerId: string
+  lecturerName: string
+}
+
+interface SubjectLite {
+  subjectId: string
+  subjectName: string
+}
 interface Classroom {
   id: string
   classCode: string
   className: string
-  lecturerId: string
-  subjectId: string
-  subjectName: string
+  lecturer: LecturerLite 
+  subject: SubjectLite
   semesterName: string
   createdDate: string
   endDate: string
@@ -215,18 +224,18 @@ export default function ListAllClassroomPage() {
     {/* Info */}
     <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-6">
       <p className="flex items-center gap-2">
-        <span className="text-[#1F4E79] dark:text-[#C9A24D]">GV:</span>
-        <span>{c.lecturerId}</span>
+        <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Giảng viên:</span>
+        <span className="font-medium text-gray-900 dark:text-gray-200">{c.lecturer.lecturerName}</span>
       </p>
 
       <p className="flex items-center gap-2">
-        <span className="text-[#1F4E79] dark:text-[#C9A24D]">Môn:</span>
-        <span>{c.subjectName}</span>
+        <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Môn:</span>
+        <span className="font-medium text-gray-900 dark:text-gray-200">{c.subject.subjectName}</span>
       </p>
 
       <p className="flex items-center gap-2">
-        <span className="text-[#1F4E79] dark:text-[#C9A24D]">📅</span>
-        <span>
+        <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Thời gian:</span>
+        <span className="font-medium text-gray-900 dark:text-gray-200">
           {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
           {new Date(c.endDate).toLocaleDateString("vi-VN")}
         </span>
@@ -242,8 +251,8 @@ export default function ListAllClassroomPage() {
           w-full
           rounded-xl
           border-gray-300 dark:border-gray-600
-          hover:bg-[#1F4E79]/5
-          dark:hover:bg-[#C9A24D]/10
+          hover:!bg-[#1F4E79] hover:!text-white hover:!border-[#1F4E79]
+          dark:hover:!bg-[#C9A24D] dark:hover:!text-white dark:hover:!border-[#C9A24D]
           font-semibold
         "
       >
