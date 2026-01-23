@@ -5,8 +5,6 @@ using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
-using System.Collections;
-
 namespace AcasService.Application.Queries.Classroom
 {
     public interface IClassroomQuery
@@ -14,7 +12,7 @@ namespace AcasService.Application.Queries.Classroom
         Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId);
         Task<List<ClassroomResponse>> GetAllClassroomsAsync();
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
-
+        Task<IEnumerable<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId);
     }
 
     public class ClassroomQuery : IClassroomQuery
@@ -39,7 +37,7 @@ namespace AcasService.Application.Queries.Classroom
             _userRequestProducer = userRequestProducer;
         }
 
-        
+
         public async Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId)
         {
             try
@@ -52,7 +50,7 @@ namespace AcasService.Application.Queries.Classroom
                 }
                 var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
                 if (subject == null)
-                    {
+                {
                     _logger.LogWarning("Subject with ID {SubjectId} not found.", classroom.SubjectId);
                     throw new KeyNotFoundException($"Subject with ID {classroom.SubjectId} not found.");
                 }
@@ -91,7 +89,7 @@ namespace AcasService.Application.Queries.Classroom
                 throw;
             }
         }
-        
+
         public async Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request)
         {
             try
@@ -112,6 +110,28 @@ namespace AcasService.Application.Queries.Classroom
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching classrooms with keyword {Keyword}.", request.ClassCode);
+                throw;
+            }
+        }
+
+        public async Task<IEnumerable<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId)
+        {
+            try
+            {
+                var classrooms = await _classroomRepository.GetClassroomsByLecturerIdAsync(lecturerId);
+                var responses = new List<ClassroomResponse>();
+                foreach (var classroom in classrooms)
+                {
+                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
+                    responses.Add(response);
+                }
+                return responses;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching classrooms for lecturer ID {LecturerId}.", lecturerId);
                 throw;
             }
         }

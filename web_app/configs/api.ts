@@ -1,7 +1,7 @@
 import { config } from "./config";
 
 export const Api = {
-    
+
     BASE_API: config.API_GATEWAY_BASE_URL || 'http://localhost:8080',
 
     Auth: {
@@ -18,7 +18,12 @@ export const Api = {
 
     Classroom: {
         GET_STUDENT_CLASSROOMS: '/api/acas/v1/classrooms/student',
+        GET_LECTURER_CLASSROOMS: '/api/acas/v1/classrooms/lecturer',
         GET_ALL_CLASSROOMS: '/api/acas/v1/classrooms',
-    }
+        CREATE_CLASSROOM: '/api/acas/v1/classrooms',
+    },
 
+    Subject: {
+        GET_ALL_SUBJECTS: '/api/acas/v1/subjects',
+    }
 }

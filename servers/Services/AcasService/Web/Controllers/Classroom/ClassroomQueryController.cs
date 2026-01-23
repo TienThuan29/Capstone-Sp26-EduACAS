@@ -68,6 +68,21 @@ namespace AcasService.Web.Controllers.Classroom
                 return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
             }
         }
+
+        [HttpGet("lecturer/{lecturerId}")]
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetClassroomsByLecturerId(string lecturerId)
+        {
+            try
+            {
+                var classrooms = await _classroomQuery.GetClassroomsByLecturerIdAsync(lecturerId);
+                return ResponseUtil.Success(classrooms, "Get classrooms by lecturerId successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching classrooms by lecturerId.");
+                return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
+            }
+        }
     }
 
 }

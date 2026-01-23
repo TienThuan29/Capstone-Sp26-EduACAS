@@ -1,8 +1,6 @@
 using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-using Amazon.Runtime.Internal.Transform;
-
 namespace AcasService.Repositories.Classroom;
 
 public class ClassroomRepository : DynamoRepository, IClassroomRepository
@@ -160,6 +158,23 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         }
     }
 
- 
+    public async Task<IEnumerable<Models.Classroom>> GetClassroomsByLecturerIdAsync(string lecturerId)
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _classroomTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var allClassrooms = response.Items
+                .Select(item => DynamoMapper.DynamoItemToClassroom(item));
+            return allClassrooms.Where(c => c.LecturerId == lecturerId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving classrooms by lecturerId {LecturerId}", lecturerId);
+            throw;
+        }
+    }
+
+
 
 }

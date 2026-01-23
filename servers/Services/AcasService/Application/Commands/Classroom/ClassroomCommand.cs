@@ -4,7 +4,6 @@ using AcasService.Messaging.User;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
-using Amazon.Runtime.Internal.Util;
 
 namespace AcasService.Application.Commands.Classroom
 {
@@ -45,6 +44,7 @@ namespace AcasService.Application.Commands.Classroom
             string finalEnrolKey = !string.IsNullOrEmpty(request.EnrolKey) 
                 ? request.EnrolKey 
                 : "@" + (Guid.NewGuid().ToString("N")[..6]);
+            
             var newClassroom = new Models.Classroom
             {
                 Id = Guid.NewGuid().ToString(),
@@ -78,6 +78,13 @@ namespace AcasService.Application.Commands.Classroom
                 _logger.LogError("Classroom not found");
                 throw new Exception("Classroom not found");
             }
+
+            if (request.EndDate <= existingClassroom.CreatedDate)
+            {
+                 _logger.LogError("End date must be after created date");
+                 throw new Exception("End date must be after created date");
+            }
+
             existingClassroom.ClassCode = request.ClassCode;
             existingClassroom.ClassName = request.ClassName;
             existingClassroom.SemesterName = request.SemesterName;
