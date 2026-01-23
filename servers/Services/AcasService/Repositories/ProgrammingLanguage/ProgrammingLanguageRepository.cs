@@ -1,4 +1,5 @@
 namespace AcasService.Repositories.ProgrammingLanguage;
+
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Amazon.DynamoDBv2;
@@ -7,7 +8,7 @@ using AcasService.Repositories.DynamoDb;
 using System.Net;
 
 
-public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLanguageRepository
+public class ProgrammingLanguageRepository : DynamoRepository, IProgrammingLanguageRepository
 {
 
     private readonly string _tableName;
@@ -21,15 +22,15 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
     {
         _configuration = configuration;
 
-        _tableName = configuration["DynamoDB:ProgrammingLanguageTableName"]?? 
+        _tableName = configuration["DynamoDB:ProgrammingLanguageTableName"] ??
         throw new ArgumentNullException("DynamoDB:ProgrammingLanguageTable is not configured");
         base.TableName = _tableName;
         var awsRegion = configuration["AWS:Region"] ?? "Not configured";
         logger.LogInformation(
-            "ProgrammingLanguageRepository initialized - Region: {Region}, Table: {Table}",awsRegion, _tableName);
+            "ProgrammingLanguageRepository initialized - Region: {Region}, Table: {Table}", awsRegion, _tableName);
     }
 
-     public async Task<ProgrammingLanguage?> CreateAsync(ProgrammingLanguage language)
+    public async Task<ProgrammingLanguage?> CreateAsync(ProgrammingLanguage language)
     {
         try
         {
@@ -56,7 +57,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
         }
     }
 
- public async Task<ProgrammingLanguage?> GetByIdAsync(string id)
+    public async Task<ProgrammingLanguage?> GetByIdAsync(string id)
     {
         try
         {
@@ -70,7 +71,7 @@ public class ProgrammingLanguageRepository: DynamoRepository, IProgrammingLangua
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, 
+            _logger.LogError(ex,
                 "Error getting programming language by ID: {Id}", id);
             throw;
         }
