@@ -10,6 +10,7 @@ public interface IClassroomRepository
     Task<Models.Classroom?> FindByIdAsync(string classroomId);
     Task<List<Models.Classroom>> FindAllAsync();
     Task<Models.Classroom?> UpdateAsync(Models.Classroom classroom);
+    Task SoftDeleteAsync(string classroomId);
     Task DeleteAsync(string classroomId);
     Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword);
 }

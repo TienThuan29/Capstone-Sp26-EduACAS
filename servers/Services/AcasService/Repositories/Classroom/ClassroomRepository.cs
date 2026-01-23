@@ -1,6 +1,7 @@
 using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using Amazon.Runtime.Internal.Transform;
 
 namespace AcasService.Repositories.Classroom;
 
@@ -81,6 +82,40 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating classroom {Id}", classroom.Id);
+            throw;
+        }
+    }
+
+    public async Task SoftDeleteAsync(string classroomId)
+    {
+        try
+        {
+          
+            var key = DynamoMapper.CreateKey(classroomId);
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                {
+                    "isDeleted", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { BOOL = true }
+                    }
+                },
+                {
+                    "updatedDate", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { S = DateTime.UtcNow.ToString("o") }
+                    }
+                } 
+                
+            };
+            await UpdateItemAsync(key, updates, _classroomTableName);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting classroom {Id}", classroomId);
             throw;
         }
     }

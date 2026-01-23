@@ -11,6 +11,7 @@ namespace AcasService.Application.Commands.Classroom
         Task<ClassroomResponse> CreateClassroomAsync(CreateClassroomRequest request);
         Task<ClassroomResponse> UpdateClassroomAsync(string classroomId, UpdateClassroomRequest request);
         Task<ClassroomResponse> DeleteClassroomAsync(string classroomId);
+        Task<ClassroomResponse> SoftDeleteClassroomAsync(string classroomId);
     }
 
     public class ClassroomCommand : IClassroomCommand
@@ -79,6 +80,20 @@ namespace AcasService.Application.Commands.Classroom
                 throw new Exception("Failed to update classroom");
             }
             return _classroomMapper.ToClassroomResponse(updatedClassroom);
+        }
+
+        public async Task<ClassroomResponse> SoftDeleteClassroomAsync(string classroomId)
+        {
+            var existingClassroom = await _classroomRepository.FindByIdAsync(classroomId);
+            if (existingClassroom == null)
+            {
+                _logger.LogError("Classroom not found");
+                throw new Exception("Classroom not found");
+            }
+            await _classroomRepository.SoftDeleteAsync(classroomId);
+            existingClassroom.IsDeleted = true;
+            existingClassroom.UpdatedDate = DateTime.UtcNow;
+            return _classroomMapper.ToClassroomResponse(existingClassroom);
         }
 
 
