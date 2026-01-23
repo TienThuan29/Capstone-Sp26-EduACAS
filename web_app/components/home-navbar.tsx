@@ -21,7 +21,6 @@ export default function HomeNavbar() {
     { name: "Home", href: "#home" },
     { name: "About Us", href: "#about" },
     { name: "Features", href: "#features" },
-    { name: "Languages", href: "#languages" },
     { name: "Contact", href: "#contact" },
   ]
 
