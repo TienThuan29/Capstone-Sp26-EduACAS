@@ -15,6 +15,7 @@ export const Api = {
         RESET_FIRST_LOGIN_PASSWORD: '/api/auth/v1/reset-first-login-password',
         GET_PROFILE: '/api/auth/v1/profile',
         GOOGLE_LOGIN: '/api/auth/v1/google-login',
+        GRANT_ACCOUNT: '/api/auth/v1/grant-account',
     },
 
     Subject: {
