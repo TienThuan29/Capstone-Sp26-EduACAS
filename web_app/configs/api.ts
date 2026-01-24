@@ -25,6 +25,8 @@ export const Api = {
     LEAVE: "/api/acas/v1/class-enrollments/leave",
     GET_LECTURER_CLASSROOMS: '/api/acas/v1/classrooms/lecturer',
     CREATE_CLASSROOM: '/api/acas/v1/classrooms',
+    UPDATE_CLASSROOM: '/api/acas/v1/classrooms', // + /:id
+    SOFT_DELETE_CLASSROOM: '/api/acas/v1/classrooms', // + /:id/soft-delete
   },
 
   Examination: {

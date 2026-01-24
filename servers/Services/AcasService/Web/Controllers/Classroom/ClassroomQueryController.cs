@@ -19,11 +19,11 @@ namespace AcasService.Web.Controllers.Classroom
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetAllClassrooms()
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetAllClassrooms([FromQuery] string userId)
         {
             try
             {
-                var classrooms = await _classroomQuery.GetAllClassroomsAsync();
+                var classrooms = await _classroomQuery.GetAllClassroomsAsync(userId);
                 return ResponseUtil.Success(classrooms, "Get all classrooms successfully", 200);
             }
             catch (Exception ex)
@@ -38,6 +38,7 @@ namespace AcasService.Web.Controllers.Classroom
         {
             try
             {
+               
                 var classroom = await _classroomQuery.GetClassroomByIdAsync(id);
                 return ResponseUtil.Success(classroom, "Get classroom successfully", 200);
             }

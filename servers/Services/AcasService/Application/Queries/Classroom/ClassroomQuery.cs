@@ -12,8 +12,8 @@ namespace AcasService.Application.Queries.Classroom
 {
     public interface IClassroomQuery
     {
-        Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId);
-        Task<List<ClassroomResponse>> GetAllClassroomsAsync();
+        Task<ClassroomResponse> GetClassroomByIdAsync(string id);
+        Task<List<ClassroomResponse>> GetAllClassroomsAsync(string userId);
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
 
 
@@ -51,15 +51,15 @@ namespace AcasService.Application.Queries.Classroom
         }
 
 
-        public async Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId)
+        public async Task<ClassroomResponse> GetClassroomByIdAsync(string id)
         {
             try
             {
-                var classroom = await _classroomRepository.FindByIdAsync(classroomId);
+                var classroom = await _classroomRepository.FindByIdAsync(id);
                 if (classroom == null)
                 {
-                    _logger.LogWarning("Classroom with ID {ClassroomId} not found.", classroomId);
-                    throw new KeyNotFoundException($"Classroom with ID {classroomId} not found.");
+                    _logger.LogWarning("Classroom with ID {ClassroomId} not found.", id);
+                    throw new KeyNotFoundException($"Classroom with ID {id} not found.");
                 }
                 var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
                 if (subject == null)
@@ -73,12 +73,12 @@ namespace AcasService.Application.Queries.Classroom
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while fetching classroom with ID {ClassroomId}.", classroomId);
+                _logger.LogError(ex, "Error occurred while fetching classroom with ID {ClassroomId}.", id);
                 throw;
             }
         }
 
-        public async Task<List<ClassroomResponse>> GetAllClassroomsAsync()
+        public async Task<List<ClassroomResponse>> GetAllClassroomsAsync(string userId)
         {
             try
             {
@@ -89,7 +89,8 @@ namespace AcasService.Application.Queries.Classroom
                 {
                     var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
                     var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
+                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classroom.Id,userId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile,enrollclass);
                     responses.Add(response);
                 }
 

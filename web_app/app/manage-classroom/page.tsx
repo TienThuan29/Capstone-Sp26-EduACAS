@@ -7,6 +7,7 @@ import Footer from "@/components/Footer"
 import useAxios from "@/hooks/useAxios"
 import { Api } from "@/configs/api"
 import { useAuth } from "@/contexts/AuthContext"
+import Link from "next/link"
 import { useToast } from "@/hooks/useToast"
 
 interface LecturerLite {
@@ -429,30 +430,22 @@ export default function ManageClassroomPage() {
 
                                     {/* Action */}
                                     <div className="mt-auto flex gap-2">
-                                        <Button
-                                            color="gray"
-                                            outline
-                                            className="
-                        flex-1
-                        rounded-xl
-                        border-gray-300 dark:border-gray-600
-                        hover:!bg-[#1F4E79] hover:!text-white hover:!border-[#1F4E79]
-                        dark:hover:!bg-[#C9A24D] dark:hover:!text-white dark:hover:!border-[#C9A24D]
-                        font-semibold
-                        "
-                                        >
-                                            Chi tiết
-                                        </Button>
-                                        <Button
-                                            color="failure"
-                                            outline
-                                            className="
-                        rounded-xl
-                        font-semibold
-                        "
-                                        >
-                                            Xóa
-                                        </Button>
+                                        <Link href={`/manage-classroom/${c.id}`} className="flex-1">
+                                            <Button
+                                                color="gray"
+                                                outline
+                                                className="
+                                                    w-full
+                                                    rounded-xl
+                                                    border-gray-300 dark:border-gray-600
+                                                    hover:!bg-[#1F4E79] hover:!text-white hover:!border-[#1F4E79]
+                                                    dark:hover:!bg-[#C9A24D] dark:hover:!text-white dark:hover:!border-[#C9A24D]
+                                                    font-semibold
+                                                "
+                                            >
+                                                Chi tiết
+                                            </Button>
+                                        </Link>
                                     </div>
 
                                 </div>

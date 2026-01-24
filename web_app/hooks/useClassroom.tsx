@@ -38,8 +38,11 @@ export interface Classroom {
 export const useClassroom = () => {
   const axiosInstance = useAxios();
 
-  const getAllClassrooms = useCallback(async () => {
-    const response = await axiosInstance.get(Api.Classroom.GET_ALL_CLASSROOMS);
+  const getAllClassrooms = useCallback(async (userId?: string) => {
+    const url = userId
+      ? `${Api.Classroom.GET_ALL_CLASSROOMS}?userId=${userId}`
+      : Api.Classroom.GET_ALL_CLASSROOMS;
+    const response = await axiosInstance.get(url);
     return response.data?.dataResponse || [];
   }, [axiosInstance]);
 
@@ -54,10 +57,11 @@ export const useClassroom = () => {
   );
 
   const getClassroomById = useCallback(
-    async (classId: string) => {
-      const response = await axiosInstance.get(
-        `${Api.Classroom.GET_BY_ID}/${classId}`,
-      );
+    async (classId: string, userId?: string) => {
+      const url = userId
+        ? `${Api.Classroom.GET_BY_ID}/${classId}?userId=${userId}`
+        : `${Api.Classroom.GET_BY_ID}/${classId}`;
+      const response = await axiosInstance.get(url);
       return response.data?.dataResponse || null;
     },
     [axiosInstance],

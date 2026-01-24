@@ -12,7 +12,7 @@ const Sidebar = () => {
   const { isDark: isDarkMode, toggleTheme } = useThemeContext();
 
   // Check if we are in a classroom detail page or related classroom subpage
-  const isClassroomRoute = pathname.includes("/my-classroom/");
+  const isClassroomRoute = pathname.includes("/my-classroom/") || pathname.includes("/manage-room/");
 
   const toggleSubmenu = (menuName: string) => {
     setExpandedMenu(expandedMenu === menuName ? null : menuName);
@@ -256,9 +256,8 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${
-        isExpanded ? "w-64" : "w-20"
-      } ${isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"} border-r`}
+      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${isExpanded ? "w-64" : "w-20"
+        } ${isDarkMode ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-white"} border-r`}
     >
       {/* Logo */}
       <div
@@ -315,11 +314,10 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                  isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <IconComponent />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -343,11 +341,10 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                  isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <IconComponent />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -364,11 +361,10 @@ const Sidebar = () => {
         {/* Dark Mode Toggle Button */}
         <button
           onClick={toggleTheme}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-            isDarkMode
+          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
               ? "text-gray-300 hover:bg-gray-800"
               : "text-gray-700 hover:bg-gray-100"
-          }`}
+            }`}
         >
           {isDarkMode ? <MoonIcon /> : <SunIcon />}
           {isExpanded && (
@@ -381,22 +377,20 @@ const Sidebar = () => {
         {/* Logout Button */}
         {isExpanded ? (
           <button
-            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              isDarkMode
+            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isDarkMode
                 ? "text-gray-300 hover:bg-red-900/20"
                 : "text-gray-700 hover:bg-red-50"
-            }`}
+              }`}
           >
             <LogoutIcon />
             Đăng xuất
           </button>
         ) : (
           <button
-            className={`flex w-full justify-center rounded-lg p-2 transition-colors ${
-              isDarkMode
+            className={`flex w-full justify-center rounded-lg p-2 transition-colors ${isDarkMode
                 ? "text-gray-300 hover:bg-red-900/20"
                 : "text-gray-700 hover:bg-red-50"
-            }`}
+              }`}
           >
             <LogoutIcon />
           </button>

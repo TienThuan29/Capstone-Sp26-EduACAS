@@ -48,7 +48,13 @@ namespace AcasService.Web.Requests
 
     public class SearchClassroomRequest
     {
-        public string ClassCode { get; set; }
+        public string ClassCode { get; set; } = string.Empty;
         
+    }
+
+    public class GetClassroomRequest
+    {
+        public string ClassroomId { get; set; } = string.Empty;
+        public string UserId { get; set; } = string.Empty;
     }
 }

@@ -6,8 +6,10 @@ import Link from "next/link";
 import HomeNavbar from "@/components/home-navbar";
 import Footer from "@/components/Footer";
 import { useClassroom, Classroom } from "@/hooks/useClassroom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function ListAllClassroomPage() {
+  const { user } = useAuth();
   const { getAllClassrooms } = useClassroom();
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,7 @@ export default function ListAllClassroomPage() {
     const fetchClassrooms = async () => {
       try {
         setLoading(true);
-        const data = await getAllClassrooms();
+        const data = await getAllClassrooms(user?.id);
         setClassrooms(data);
       } catch (err) {
         console.error("Fetch classrooms failed", err);
@@ -226,18 +228,33 @@ export default function ListAllClassroomPage() {
 
                 {/* Action */}
                 <div className="mt-auto">
-                  <Link
-                    href={`/all-classroom/${c.id}`}
-                    className="block w-full"
-                  >
-                    <Button
-                      color="gray"
-                      outline
-                      className="w-full rounded-xl border-gray-300 font-semibold hover:border-[#1F4E79]! hover:!bg-[#1F4E79] hover:!text-white dark:border-gray-600 dark:hover:border-[#C9A24D]! dark:hover:!bg-[#C9A24D] dark:hover:!text-white"
+                  {c.enrollment?.isJoining ? (
+                    <Link
+                      href={`/my-classroom/${c.id}`}
+                      className="block w-full"
                     >
-                      Tham gia lớp học
-                    </Button>
-                  </Link>
+                      <Button
+                        color="gray"
+                        outline
+                        className="w-full rounded-xl border-gray-300 font-bold !text-[#1F4E79] dark:!text-[#C9A24D] shadow-md transition-all hover:-translate-y-0.5 hover:!border-green-600 hover:!bg-green-600 hover:!text-white hover:shadow-lg focus:ring-4 focus:ring-green-300 dark:border-gray-600 dark:hover:!border-green-600 dark:hover:!bg-green-600 dark:focus:ring-green-800"
+                      >
+                        Truy cập
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Link
+                      href={`/all-classroom/${c.id}`}
+                      className="block w-full"
+                    >
+                      <Button
+                        color="gray"
+                        outline
+                        className="w-full rounded-xl border-gray-300 font-semibold text-[#1F4E79] dark:text-[#C9A24D] hover:border-[#1F4E79]! hover:!bg-[#1F4E79] hover:!text-white dark:border-gray-600 dark:hover:border-[#C9A24D]! dark:hover:!bg-[#C9A24D] dark:hover:!text-white"
+                      >
+                        Tham gia
+                      </Button>
+                    </Link>
+                  )}
                 </div>
               </div>
             </Card>
