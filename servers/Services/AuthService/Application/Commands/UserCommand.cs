@@ -93,7 +93,8 @@ public class UserCommand : IUserCommand
             {
                 UserProfile = _userMapper.ToUserResponse(createdUser),
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                FirstLogin = createdUser.FirstLogin ?? false
             };
         }
 
