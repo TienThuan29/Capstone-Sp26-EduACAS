@@ -4,13 +4,14 @@ using AcasService.Application.ResponseDTOs;
 using Amazon.DynamoDBv2;
 using System.Net;
 using AcasService.Models;
+using Amazon.DynamoDBv2.Model;
 
 namespace AcasService.Repositories.Examination;
 
 
 public class ExaminationRepository : DynamoRepository, IExaminationRepository
 {
-    private readonly string _tableName;
+    private readonly string _examinationTableName;
     private readonly IConfiguration _configuration;
 
     public ExaminationRepository(
@@ -20,11 +21,11 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
     ) : base(dynamoDbClient, logger)
     {
         _configuration = configuration;
-        _tableName = configuration["DynamoDB:ExaminationTableName"] ??
+        _examinationTableName = configuration["DynamoDB:ExaminationTableName"] ??
         throw new ArgumentNullException("DynamoDB:ExaminationTable is not configured");
-        base.TableName = _tableName;
+        base.TableName = _examinationTableName;
         var awsRegion = configuration["AWS:Region"] ?? "Not configured";
-        logger.LogInformation("ExaminationRepository initialized - Region: {Region}, Table: {Table}", awsRegion, _tableName);
+        logger.LogInformation("ExaminationRepository initialized - Region: {Region}, Table: {Table}", awsRegion, _examinationTableName);
     }
 
     public async Task<Models.Examination?> GetByIdAsync(string id)
@@ -32,7 +33,7 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
         try
         {
             var key = DynamoMapper.CreateKey(id);
-            var response = await GetItemAsync(key, _tableName);
+            var response = await GetItemAsync(key, _examinationTableName);
 
             if (response.Item == null || response.Item.Count == 0)
                 return null;
@@ -50,7 +51,7 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
     {
         try
         {
-            var response = await ScanAsync(_tableName);
+            var response = await ScanAsync(_examinationTableName);
             var list = new List<Models.Examination?>();
 
             foreach (var item in response.Items)
@@ -77,7 +78,7 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
             examination.UpdatedDate = DateTime.UtcNow;
 
             var dynamoItem = DynamoMapper.ExaminationToDynamoItem(examination);
-            var response = await PutItemAsync(dynamoItem, _tableName);
+            var response = await PutItemAsync(dynamoItem, _examinationTableName);
 
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
@@ -103,7 +104,7 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
             }
             examination.UpdatedDate = DateTime.UtcNow;
             var dynamoItem = DynamoMapper.ExaminationToDynamoItem(examination);
-            var response = await PutItemAsync(dynamoItem, _tableName);
+            var response = await PutItemAsync(dynamoItem, _examinationTableName);
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
                 return await GetByIdAsync(id);
@@ -127,7 +128,7 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
                 throw new Exception("Examination with given Id does not exist.");
             }
             var key = DynamoMapper.CreateKey(id);
-            await DeleteItemAsync(key, _tableName);
+            await DeleteItemAsync(key, _examinationTableName);
             if (await GetByIdAsync(id) != null)
             {
                 throw new Exception("Failed to delete the examination.");
@@ -139,4 +140,29 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
             throw;
         }
     }
+
+    public async Task<List<Models.Examination>> GetByClassIdAsync(string classId)
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _examinationTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var result = response.Items
+                .Where(item =>
+                    item.ContainsKey("classroomId") &&
+        item["classroomId"].S == classId
+                )
+                .Select(DynamoMapper.DynamoItemToExamination)
+                .ToList();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error occurred while getting examinations by class Id: {ClassId}",classId);
+            throw;
+        }
+    }
+
+
 }

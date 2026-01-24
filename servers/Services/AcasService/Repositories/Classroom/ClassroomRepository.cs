@@ -177,4 +177,30 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
 
 
 
+    public async Task<Models.Classroom?> FindByEnrollKeyAsync(string enrolKey)
+    {
+        try
+        {
+            var request = new QueryRequest
+            {
+                TableName = "acas-classrooms",
+                IndexName = "EnrolKeyIndex",
+                KeyConditionExpression = "enrolKey = :ek",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":ek", new AttributeValue { S = enrolKey } }
+                },
+                Limit = 1
+            };
+
+            var response = await _dynamoDBClient.QueryAsync(request);
+            if (response.Items.Count == 0) return null;
+            return DynamoMapper.DynamoItemToClassroom(response.Items[0]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding classroom by enroll key: {EnrolKey}", enrolKey);
+            throw;
+        }
+    }
 }

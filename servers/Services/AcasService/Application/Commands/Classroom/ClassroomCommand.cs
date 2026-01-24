@@ -3,6 +3,7 @@ using AcasService.Application.ResponseDTOs;
 using AcasService.Messaging.User;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.Subject;
+using AcasService.Repositories.ClassroomEnrollment;
 using AcasService.Web.Requests;
 
 namespace AcasService.Application.Commands.Classroom
@@ -16,8 +17,8 @@ namespace AcasService.Application.Commands.Classroom
     }
 
     public class ClassroomCommand : IClassroomCommand
-    {   
-       
+    {
+
         private readonly IClassroomRepository _classroomRepository;
         private readonly ISubjectRepository _subjectRepository;
         private readonly ClassroomMapper _classroomMapper;
@@ -26,7 +27,7 @@ namespace AcasService.Application.Commands.Classroom
 
         public ClassroomCommand(IClassroomRepository classroomRepository, ClassroomMapper classroomMapper, ILogger<ClassroomCommand> logger, UserRequestProducer userRequestProducer, ISubjectRepository subjectRepository)
         {
-            _classroomRepository = classroomRepository;
+            _classroomRepository = classroomRepository;    
             _classroomMapper = classroomMapper;
             _logger = logger;
             _userRequestProducer = userRequestProducer;
@@ -135,5 +136,6 @@ namespace AcasService.Application.Commands.Classroom
             var lecturerProfile = await _userRequestProducer.GetUserByIdAsync(existingClassroom.LecturerId);
             return _classroomMapper.ToClassroomResponse(existingClassroom, subject, lecturerProfile);
         }
+
     }
 }

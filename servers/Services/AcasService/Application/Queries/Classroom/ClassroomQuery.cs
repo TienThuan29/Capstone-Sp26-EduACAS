@@ -5,6 +5,9 @@ using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
+using System.Collections;
+using AcasService.Repositories.ClassroomEnrollment;
+
 namespace AcasService.Application.Queries.Classroom
 {
     public interface IClassroomQuery
@@ -12,6 +15,11 @@ namespace AcasService.Application.Queries.Classroom
         Task<ClassroomResponse> GetClassroomByIdAsync(string classroomId);
         Task<List<ClassroomResponse>> GetAllClassroomsAsync();
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
+
+
+        Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId);
+
+        // Task<ClassroomResponse>FindByStudentIdAndClassIdAsync(string studentId, string classId);
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId);
     }
 
@@ -20,6 +28,9 @@ namespace AcasService.Application.Queries.Classroom
         private readonly ILogger<ClassroomQuery> _logger;
         private readonly IClassroomRepository _classroomRepository;
         private readonly ISubjectRepository _subjectRepository;
+
+        private readonly IClassroomEnrollmentRepository _classroomEnrollmentRepository;
+
         private readonly ClassroomMapper _classroomMapper;
         private readonly UserRequestProducer _userRequestProducer;
 
@@ -28,9 +39,11 @@ namespace AcasService.Application.Queries.Classroom
             IClassroomRepository classroomRepository,
             ISubjectRepository subjectRepository,
             ClassroomMapper classroomMapper,
-            UserRequestProducer userRequestProducer)
+            UserRequestProducer userRequestProducer,
+            IClassroomEnrollmentRepository classroomEnrollmentRepository)
         {
             _logger = logger;
+            _classroomEnrollmentRepository = classroomEnrollmentRepository;
             _classroomRepository = classroomRepository;
             _subjectRepository = subjectRepository;
             _classroomMapper = classroomMapper;
@@ -113,6 +126,56 @@ namespace AcasService.Application.Queries.Classroom
                 throw;
             }
         }
+
+        public async Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId)
+        {
+            var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
+            if (!enrollments.Any())
+            {
+               return new List<ClassroomResponse>();
+            }
+
+            var classroomResponses = new List<ClassroomResponse>();
+            foreach (var enrollment in enrollments)
+            {
+                var classroom = await _classroomRepository.FindByIdAsync(enrollment.ClassId);
+                if (classroom != null)
+                {
+                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                    var lecturer = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(enrollment.ClassId,studentId);
+                    var classroomResponse = _classroomMapper.ToClassroomResponse(classroom,subject,lecturer,enrollclass);
+                    classroomResponses.Add(classroomResponse);
+                }
+            }
+
+            return classroomResponses;
+        }
+
+        // public async Task<ClassroomResponse> FindByStudentIdAndClassIdAsync(string studentId, string classId)
+        // {
+        //     var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
+        //     if (!enrollments.Any())
+        //     {
+        //         throw new KeyNotFoundException($"Student {studentId} has no enrollments");
+        //     }
+
+        //     var classroomResponses = new List<ClassroomResponse>();
+        //     foreach (var enrollment in enrollments)
+        //     {
+        //         if (enrollment.ClassId == classId)
+        //         {
+        //             var classroom = await _classroomRepository.FindByIdAsync(enrollment.ClassId);
+        //             if (classroom != null)
+        //             {
+        //                 var classroomResponse = _classroomMapper.ToClassroomResponse(classroom);
+        //                 return classroomResponse;
+        //             }
+        //         }
+        //     }
+
+        //     throw new KeyNotFoundException($"Classroom with ID {classId} not found for student {studentId}.");
+        // }
 
         public async Task<IEnumerable<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId)
         {
