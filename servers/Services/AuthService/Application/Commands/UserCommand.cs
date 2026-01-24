@@ -23,6 +23,8 @@ public interface IUserCommand
     public Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest, string requesterUserId);
 
     public Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest);
+    
+    public Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable);
 }
 
 public class UserCommand : IUserCommand
@@ -369,4 +371,23 @@ public class UserCommand : IUserCommand
                 </body>
             </html>
         ";
-    }}
+    }
+
+    public async Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable)
+    {
+        try
+        {
+            var updatedUser = await _userRepository.UpdateUserAsync(userId, fullname, roleNumber, role, isEnable);
+            if (updatedUser == null)
+            {
+                throw new InvalidOperationException("Failed to update user");
+            }
+            return _userMapper.ToUserResponse(updatedUser);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user");
+            throw;
+        }
+    }
+}

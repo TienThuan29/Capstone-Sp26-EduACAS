@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useThemeContext } from "@/components/ThemeProvider"
 import Sidebar from "@/components/sidebar"
-import { Button, Modal, Label, TextInput, Textarea, Select, Badge } from "flowbite-react"
+import { Button, Modal, TextInput, Textarea, Select, Badge, Spinner } from "flowbite-react"
 import {
   AcademicCapIcon,
   PlusIcon,
@@ -12,6 +12,9 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline'
+import useAxios from "@/hooks/useAxios"
+import { useToast } from "@/hooks/useToast"
+import { Api } from "@/configs/api"
 
 interface Subject {
   id: string
@@ -26,49 +29,11 @@ interface Subject {
 
 export default function SubjectsManagement() {
   const { isDark } = useThemeContext()
+  const axiosInstance = useAxios()
+  const toast = useToast()
   const [mounted, setMounted] = useState(false)
-  const [subjects, setSubjects] = useState<Subject[]>([
-    { 
-      id: '1', 
-      subjectCode: 'SWE201',
-      subjectName: 'Software Engineering', 
-      description: 'Học về quy trình phát triển phần mềm', 
-      createdBy: 'admin@eduacas.com',
-      isDeleted: false,
-      createdDate: new Date('2024-01-15'),
-      updatedDate: new Date('2024-01-15')
-    },
-    { 
-      id: '2', 
-      subjectCode: 'PRJ301',
-      subjectName: 'Java Web Application', 
-      description: 'Phát triển ứng dụng web với Java', 
-      createdBy: 'admin@eduacas.com',
-      isDeleted: false,
-      createdDate: new Date('2024-01-15'),
-      updatedDate: new Date('2024-01-15')
-    },
-    { 
-      id: '3', 
-      subjectCode: 'DBI202',
-      subjectName: 'Database Introduction', 
-      description: 'Cơ sở dữ liệu và SQL', 
-      createdBy: 'admin@eduacas.com',
-      isDeleted: false,
-      createdDate: new Date('2024-01-10'),
-      updatedDate: new Date('2024-01-10')
-    },
-    { 
-      id: '4', 
-      subjectCode: 'PRF192',
-      subjectName: 'Programming Fundamentals', 
-      description: 'Lập trình căn bản với C', 
-      createdBy: 'admin@eduacas.com',
-      isDeleted: false,
-      createdDate: new Date('2024-01-05'),
-      updatedDate: new Date('2024-01-05')
-    },
-  ])
+  const [subjects, setSubjects] = useState<Subject[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterDeleted, setFilterDeleted] = useState<string>('active')
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -83,7 +48,22 @@ export default function SubjectsManagement() {
 
   useEffect(() => {
     setMounted(true)
+    fetchSubjects()
   }, [])
+
+  const fetchSubjects = async () => {
+    try {
+      setLoading(true)
+      const response = await axiosInstance.get(Api.Subject.GET_ALL)
+      if (response.data?.dataResponse) {
+        setSubjects(response.data.dataResponse)
+      }
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || 'Không thể tải danh sách môn học')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!mounted) return null
 
@@ -120,42 +100,43 @@ export default function SubjectsManagement() {
     setIsModalOpen(true)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn đánh dấu xóa môn học này?')) {
-      setSubjects(subjects.map(subject => 
-        subject.id === id 
-          ? { ...subject, isDeleted: true, updatedDate: new Date() } 
-          : subject
-      ))
-    }
-  }
-
-  const handleRestore = (id: string) => {
-    setSubjects(subjects.map(subject => 
-      subject.id === id 
-        ? { ...subject, isDeleted: false, updatedDate: new Date() } 
-        : subject
-    ))
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (editingSubject) {
-      setSubjects(subjects.map(subject => 
-        subject.id === editingSubject.id 
-          ? { ...subject, ...formData, updatedDate: new Date() } 
-          : subject
-      ))
-    } else {
-      const newSubject: Subject = {
-        id: (subjects.length + 1).toString(),
-        ...formData,
-        createdDate: new Date(),
-        updatedDate: new Date()
+      try {
+        await axiosInstance.delete(Api.Subject.SOFT_DELETE(id))
+        toast.showSuccess('Xóa môn học thành công')
+        fetchSubjects()
+      } catch (error: any) {
+        toast.showError(error.response?.data?.message || 'Không thể xóa môn học')
       }
-      setSubjects([...subjects, newSubject])
     }
-    setIsModalOpen(false)
+  }
+
+  const handleRestore = async (id: string) => {
+    try {
+      await axiosInstance.put(Api.Subject.RESTORE(id))
+      toast.showSuccess('Khôi phục môn học thành công')
+      fetchSubjects()
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || 'Không thể khôi phục môn học')
+    }
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    try {
+      if (editingSubject) {
+        await axiosInstance.put(Api.Subject.UPDATE(editingSubject.id), formData)
+        toast.showSuccess('Cập nhật môn học thành công')
+      } else {
+        await axiosInstance.post(Api.Subject.CREATE, formData)
+        toast.showSuccess('Thêm môn học thành công')
+      }
+      setIsModalOpen(false)
+      fetchSubjects()
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || 'Có lỗi xảy ra')
+    }
   }
 
   const formatDate = (date: Date) => {
@@ -219,6 +200,12 @@ export default function SubjectsManagement() {
 
         {/* Table */}
         <div className={`overflow-x-auto shadow-md rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+          {loading ? (
+            <div className="flex justify-center items-center p-8">
+              <Spinner size="xl" />
+              <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Đang tải dữ liệu...</span>
+            </div>
+          ) : (
           <table className="w-full text-sm text-left">
             <thead className={`text-xs uppercase ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
               <tr>
@@ -291,6 +278,7 @@ export default function SubjectsManagement() {
               ))}
             </tbody>
           </table>
+          )}
         </div>
 
         {/* Modal */}
@@ -301,11 +289,9 @@ export default function SubjectsManagement() {
             </h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <div className="mb-2">
-                  <Label htmlFor="subjectCode">
-                    Mã môn học *
-                  </Label>
-                </div>
+                <label htmlFor="subjectCode" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Mã môn học *
+                </label>
                 <TextInput
                   id="subjectCode"
                   type="text"
@@ -316,11 +302,9 @@ export default function SubjectsManagement() {
                 />
               </div>
               <div>
-                <div className="mb-2">
-                  <Label htmlFor="subjectName">
-                    Tên môn học *
-                  </Label>
-                </div>
+                <label htmlFor="subjectName" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Tên môn học *
+                </label>
                 <TextInput
                   id="subjectName"
                   type="text"
@@ -331,11 +315,9 @@ export default function SubjectsManagement() {
                 />
               </div>
               <div>
-                <div className="mb-2">
-                  <Label htmlFor="description">
-                    Mô tả *
-                  </Label>
-                </div>
+                <label htmlFor="description" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Mô tả *
+                </label>
                 <Textarea
                   id="description"
                   required
@@ -346,11 +328,9 @@ export default function SubjectsManagement() {
                 />
               </div>
               <div>
-                <div className="mb-2">
-                  <Label htmlFor="createdBy">
-                    Người tạo *
-                  </Label>
-                </div>
+                <label htmlFor="createdBy" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                  Người tạo *
+                </label>
                 <TextInput
                   id="createdBy"
                   type="email"
@@ -362,11 +342,9 @@ export default function SubjectsManagement() {
               </div>
               {editingSubject && (
                 <div>
-                  <div className="mb-2">
-                    <Label htmlFor="isDeleted">
-                      Trạng thái *
-                    </Label>
-                  </div>
+                  <label htmlFor="isDeleted" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    Trạng thái *
+                  </label>
                   <Select
                     id="isDeleted"
                     value={formData.isDeleted.toString()}

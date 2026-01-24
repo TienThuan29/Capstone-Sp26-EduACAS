@@ -5,12 +5,11 @@ namespace AcasService.Web.Requests
     public class CreateSubjectRequest
     {
         [Required(ErrorMessage = "Subject code is required")]
-        [StringLength(20, MinimumLength = 2, ErrorMessage = "Subject code must be between 2 and 20 characters")]
-        [RegularExpression(@"^[A-Z0-9_-]+$", ErrorMessage = "Subject code must contain only uppercase letters, numbers, hyphens and underscores")]
+        [StringLength(20, MinimumLength = 1, ErrorMessage = "Subject code must be between 1 and 20 characters")]
         public string SubjectCode { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Subject name is required")]
-        [StringLength(200, MinimumLength = 3, ErrorMessage = "Subject name must be between 3 and 200 characters")]
+        [StringLength(200, MinimumLength = 1, ErrorMessage = "Subject name must be between 1 and 200 characters")]
         public string SubjectName { get; set; } = string.Empty;
 
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]
@@ -25,12 +24,11 @@ namespace AcasService.Web.Requests
     public class UpdateSubjectRequest
     {
         [Required(ErrorMessage = "Subject code is required")]
-        [StringLength(20, MinimumLength = 2, ErrorMessage = "Subject code must be between 2 and 20 characters")]
-        [RegularExpression(@"^[A-Z0-9_-]+$", ErrorMessage = "Subject code must contain only uppercase letters, numbers, hyphens and underscores")]
+        [StringLength(20, MinimumLength = 1, ErrorMessage = "Subject code must be between 1 and 20 characters")]
         public string SubjectCode { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Subject name is required")]
-        [StringLength(200, MinimumLength = 3, ErrorMessage = "Subject name must be between 3 and 200 characters")]
+        [StringLength(200, MinimumLength = 1, ErrorMessage = "Subject name must be between 1 and 200 characters")]
         public string SubjectName { get; set; } = string.Empty;
 
         [StringLength(1000, ErrorMessage = "Description cannot exceed 1000 characters")]

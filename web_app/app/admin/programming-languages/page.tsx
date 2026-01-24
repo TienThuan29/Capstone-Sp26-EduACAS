@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useThemeContext } from "@/components/ThemeProvider"
 import Sidebar from "@/components/sidebar"
-import { Button, Modal, Label, TextInput, Select, Badge } from "flowbite-react"
+import { Button, Modal, Label, TextInput, Select, Badge, Spinner } from "flowbite-react"
 import {
   CodeBracketIcon,
   PlusIcon,
@@ -11,6 +11,9 @@ import {
   TrashIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
+import useAxios from "@/hooks/useAxios"
+import { useToast } from "@/hooks/useToast"
+import { Api } from "@/configs/api"
 
 interface ProgrammingLanguage {
   id: string
@@ -24,63 +27,11 @@ interface ProgrammingLanguage {
 
 export default function ProgrammingLanguagesManagement() {
   const { isDark } = useThemeContext()
+  const axiosInstance = useAxios()
+  const toast = useToast()
   const [mounted, setMounted] = useState(false)
-  const [languages, setLanguages] = useState<ProgrammingLanguage[]>([
-    { 
-      id: '1', 
-      languageName: 'Java', 
-      key: 'java',
-      languageVersion: '21.0', 
-      isEnable: true,
-      createdDate: new Date('2024-01-15'),
-      updatedDate: new Date('2024-01-15')
-    },
-    { 
-      id: '2', 
-      languageName: 'Python', 
-      key: 'python',
-      languageVersion: '3.12', 
-      isEnable: true,
-      createdDate: new Date('2024-01-15'),
-      updatedDate: new Date('2024-01-15')
-    },
-    { 
-      id: '3', 
-      languageName: 'JavaScript', 
-      key: 'javascript',
-      languageVersion: 'ES2024', 
-      isEnable: true,
-      createdDate: new Date('2024-01-15'),
-      updatedDate: new Date('2024-01-15')
-    },
-    { 
-      id: '4', 
-      languageName: 'C++', 
-      key: 'cpp',
-      languageVersion: 'C++23', 
-      isEnable: true,
-      createdDate: new Date('2024-01-10'),
-      updatedDate: new Date('2024-01-10')
-    },
-    { 
-      id: '5', 
-      languageName: 'C#', 
-      key: 'csharp',
-      languageVersion: '12.0', 
-      isEnable: true,
-      createdDate: new Date('2024-01-10'),
-      updatedDate: new Date('2024-01-10')
-    },
-    { 
-      id: '6', 
-      languageName: 'Swift', 
-      key: 'swift',
-      languageVersion: '5.9', 
-      isEnable: false,
-      createdDate: new Date('2024-01-05'),
-      updatedDate: new Date('2024-01-18')
-    },
-  ])
+  const [languages, setLanguages] = useState<ProgrammingLanguage[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingLanguage, setEditingLanguage] = useState<ProgrammingLanguage | null>(null)
@@ -93,7 +44,22 @@ export default function ProgrammingLanguagesManagement() {
 
   useEffect(() => {
     setMounted(true)
+    fetchLanguages()
   }, [])
+
+  const fetchLanguages = async () => {
+    try {
+      setLoading(true)
+      const response = await axiosInstance.get(Api.ProgrammingLanguage.GET_ALL)
+      if (response.data?.dataResponse) {
+        setLanguages(response.data.dataResponse)
+      }
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || 'Không thể tải danh sách ngôn ngữ lập trình')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!mounted) return null
 
@@ -124,30 +90,62 @@ export default function ProgrammingLanguagesManagement() {
     setIsModalOpen(true)
   }
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn xóa ngôn ngữ lập trình này?')) {
-      setLanguages(languages.filter(lang => lang.id !== id))
+      try {
+        await axiosInstance.delete(Api.ProgrammingLanguage.DELETE(id))
+        toast.showSuccess('Xóa ngôn ngữ lập trình thành công')
+        fetchLanguages()
+      } catch (error: any) {
+        toast.showError(error.response?.data?.message || 'Không thể xóa ngôn ngữ lập trình')
+      }
     }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (editingLanguage) {
-      setLanguages(languages.map(lang => 
-        lang.id === editingLanguage.id 
-          ? { ...lang, ...formData, updatedDate: new Date() } 
-          : lang
-      ))
-    } else {
-      const newLanguage: ProgrammingLanguage = {
-        id: (languages.length + 1).toString(),
-        ...formData,
-        createdDate: new Date(),
-        updatedDate: new Date()
+    try {
+      // Map to backend expected format (PascalCase)
+      const payload = {
+        Key: formData.key,
+        LanguageName: formData.languageName,
+        LanguageVersion: formData.languageVersion,
+        IsEnable: formData.isEnable
       }
-      setLanguages([...languages, newLanguage])
+      
+      console.log('Sending data:', payload)
+      if (editingLanguage) {
+        const response = await axiosInstance.put(Api.ProgrammingLanguage.UPDATE(editingLanguage.id), payload)
+        console.log('Update response:', response.data)
+        toast.showSuccess('Cập nhật ngôn ngữ lập trình thành công')
+      } else {
+        const response = await axiosInstance.post(Api.ProgrammingLanguage.CREATE, payload)
+        console.log('Create response:', response.data)
+        toast.showSuccess('Thêm ngôn ngữ lập trình thành công')
+      }
+      setIsModalOpen(false)
+      fetchLanguages()
+    } catch (error: any) {
+      console.error('Error details:', error.response?.data)
+      console.error('Validation errors:', error.response?.data?.errors)
+      
+      // Extract validation errors
+      let errorMessage = 'Có lỗi xảy ra'
+      if (error.response?.data?.errors) {
+        const errors = error.response.data.errors
+        const errorList = Object.entries(errors)
+          .map(([field, messages]: [string, any]) => {
+            const msgs = Array.isArray(messages) ? messages.join(', ') : messages
+            return `${field}: ${msgs}`
+          })
+          .join('\n')
+        errorMessage = errorList
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message
+      }
+      
+      toast.showError(errorMessage)
     }
-    setIsModalOpen(false)
   }
 
   const formatDate = (date: Date) => {
@@ -198,6 +196,11 @@ export default function ProgrammingLanguagesManagement() {
 
         {/* Table */}
         <div className={`overflow-x-auto shadow-md rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+          {loading ? (
+            <div className="flex justify-center items-center p-8">
+              <Spinner size="xl" />
+            </div>
+          ) : (
           <table className="w-full text-sm text-left">
             <thead className={`text-xs uppercase ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
               <tr>
@@ -259,6 +262,7 @@ export default function ProgrammingLanguagesManagement() {
               ))}
             </tbody>
           </table>
+          )}
         </div>
 
         {/* Modal */}

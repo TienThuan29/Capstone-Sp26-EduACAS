@@ -42,7 +42,9 @@ public class JwtUtil
         {
             new Claim("id", payload.Id),
             new Claim("email", payload.Email),
-            new Claim("role", payload.Role)
+            new Claim("role", payload.Role),
+            new Claim(ClaimTypes.Name, payload.Email), // Add name claim for Identity.Name
+            new Claim(ClaimTypes.Role, payload.Role)   // Add standard role claim
         };
 
         var expires = ParseExpiration(expiration);

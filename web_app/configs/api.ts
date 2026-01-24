@@ -18,6 +18,11 @@ export const Api = {
         GRANT_ACCOUNT: '/api/auth/v1/grant-account',
     },
 
+    User: {
+        GET_ALL: '/api/auth/v1/users',
+        UPDATE: (id: string) => `/api/auth/v1/users/${id}`,
+    },
+
     Subject: {
         GET_ALL: '/api/acas/v1/subjects',
         GET_BY_ID: (id: string) => `/api/acas/v1/subjects/${id}`,

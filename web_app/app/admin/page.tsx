@@ -48,53 +48,10 @@ const StatCard = ({ title, value, icon, trend, bgColor }: StatCardProps) => {
 export default function AdminDashboard() {
   const { isDark } = useThemeContext()
   const [mounted, setMounted] = useState(false)
-  const [showGrantModal, setShowGrantModal] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const AxiosInstance = useAxios()
-  const { showToast } = useToast()
-
-  const [grantForm, setGrantForm] = useState({
-    email: "",
-    roleNumber: "",
-    fullname: "",
-    role: "STUDENT"
-  })
 
   useEffect(() => {
     setMounted(true)
   }, [])
-
-  const handleGrantAccount = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
-
-    try {
-      // Prepare request body theo đúng backend API
-      const requestBody = {
-        email: grantForm.email,
-        roleNumber: grantForm.roleNumber,
-        fullname: grantForm.fullname,
-        role: grantForm.role
-      }
-
-      const response = await AxiosInstance.post(Api.Auth.GRANT_ACCOUNT, requestBody)
-      
-      if (response.data) {
-        showToast('Cấp tài khoản thành công!', 'success')
-        setShowGrantModal(false)
-        setGrantForm({
-          email: "",
-          roleNumber: "",
-          fullname: "",
-          role: "STUDENT"
-        })
-      }
-    } catch (error: any) {
-      showToast(error.response?.data?.message || 'Có lỗi xảy ra khi cấp tài khoản!', 'error')
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   if (!mounted) return null
 
@@ -193,26 +150,13 @@ export default function AdminDashboard() {
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
         {/* Header */}
-        <div className="mb-8 flex justify-between items-center">
-          <div>
-            <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Trang quản trị
-            </h1>
-            <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Chào mừng bạn đến với bảng điều khiển quản lý hệ thống
-            </p>
-          </div>
-          
-          {/* Grant Account Button */}
-          <button
-            onClick={() => setShowGrantModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-            Cấp tài khoản
-          </button>
+        <div className="mb-8">
+          <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+            Trang quản trị
+          </h1>
+          <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            Chào mừng bạn đến với bảng điều khiển quản lý hệ thống
+          </p>
         </div>
 
         {/* Stats Grid */}
@@ -297,148 +241,6 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-
-        {/* Grant Account Modal */}
-        {showGrantModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className={`relative w-full max-w-md rounded-2xl shadow-2xl ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-              {/* Modal Header */}
-              <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Cấp tài khoản người dùng
-                </h3>
-                <button
-                  onClick={() => setShowGrantModal(false)}
-                  className={`rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
-              </div>
-
-              {/* Modal Body */}
-              <form onSubmit={handleGrantAccount} className="p-6 space-y-4">
-                {/* Email */}
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={grantForm.email}
-                    onChange={(e) => setGrantForm({...grantForm, email: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                    placeholder="example@email.com"
-                  />
-                </div>
-
-                {/* Full Name */}
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Họ và tên <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    minLength={2}
-                    maxLength={100}
-                    value={grantForm.fullname}
-                    onChange={(e) => setGrantForm({...grantForm, fullname: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                    placeholder="Nguyễn Văn A"
-                  />
-                </div>
-
-                {/* Role Number */}
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Mã số <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    pattern="^\d+$"
-                    value={grantForm.roleNumber}
-                    onChange={(e) => setGrantForm({...grantForm, roleNumber: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                    placeholder="20210001 (chỉ số)"
-                    title="Mã số phải là số"
-                  />
-                </div>
-
-                {/* Role */}
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Vai trò <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={grantForm.role}
-                    onChange={(e) => setGrantForm({...grantForm, role: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                  >
-                    <option value="STUDENT">Sinh viên</option>
-                    <option value="LECTURER">Giảng viên</option>
-                  </select>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowGrantModal(false)}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold text-white transition-all ${
-                      isLoading 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
-                    }`}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
-                        Đang xử lý...
-                      </span>
-                    ) : (
-                      'Cấp tài khoản'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </main>
     </div>
   )

@@ -5,16 +5,15 @@ namespace AcasService.Application.Requests.ProgrammingLanguage;
 public class ProgrammingLanguageRequest
 {
     [Required(ErrorMessage = "Language name is required")]
-    [StringLength(100, MinimumLength = 2, ErrorMessage = "Language name must be between 2 and 100 characters")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "Language name must be between 1 and 100 characters")]
     public string LanguageName { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Key is required")]
-    [StringLength(50, MinimumLength = 2, ErrorMessage = "Key must be between 2 and 50 characters")]
-    [RegularExpression(@"^[a-z0-9_-]+$", ErrorMessage = "Key must contain only lowercase letters, numbers, hyphens and underscores")]
+    [StringLength(50, MinimumLength = 1, ErrorMessage = "Key must be between 1 and 50 characters")]
     public string Key { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "Language version is required")]
-    [RegularExpression(@"^\d+(\.\d+)*$", ErrorMessage = "Language version must be in format: X.Y.Z (e.g., 8.0, 17.0.1)")]
+    [StringLength(50, ErrorMessage = "Language version must not exceed 50 characters")]
     public string LanguageVersion { get; set; } = string.Empty;
 }
 

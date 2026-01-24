@@ -269,4 +269,35 @@ public class AuthCommandController : ControllerBase
             return ResponseUtil.Error<object>("Internal Server Error", 500);
         }
     }
+
+
+    [HttpPut("users/{userId}")]
+    public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateUser(string userId, [FromBody] UpdateUserRequest updateUserRequest)
+    {
+        try
+        {
+            // Normalize empty strings to null
+            var fullname = string.IsNullOrWhiteSpace(updateUserRequest.Fullname) ? null : updateUserRequest.Fullname;
+            var roleNumber = string.IsNullOrWhiteSpace(updateUserRequest.RoleNumber) ? null : updateUserRequest.RoleNumber;
+            var role = updateUserRequest.GetRoleEnum();
+            
+            var updatedUser = await _userCommand.UpdateUserAsync(
+                userId,
+                fullname,
+                roleNumber,
+                role,
+                updateUserRequest.IsEnable
+            );
+            return ResponseUtil.Success(updatedUser, "User updated successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Failed to update user"))
+        {
+            return ResponseUtil.Error<UserProfileResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Update user error");
+            return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
+        }
+    }
 }

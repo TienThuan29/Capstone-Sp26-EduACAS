@@ -12,6 +12,7 @@ public interface IUserQuery
     public Task<AuthResponse> AuthenticateAsync(LoginCredentials credentials);
     public Task<AuthResponse> AuthenticateWithGoogleAsync(string idToken);
     public Task<UserProfileResponse> GetProfileAsync(string accessToken);
+    public Task<List<UserProfileResponse>> GetAllUsersAsync();
 }
 
 public class UserQuery : IUserQuery
@@ -162,6 +163,20 @@ public class UserQuery : IUserQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user profile");
+            throw;
+        }
+    }
+    
+    public async Task<List<UserProfileResponse>> GetAllUsersAsync()
+    {
+        try
+        {
+            var users = await _userRepository.FindAllAsync();
+            return users.Select(user => _userMapper.ToUserResponse(user)).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all users");
             throw;
         }
     }

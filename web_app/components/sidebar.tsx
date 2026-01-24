@@ -3,11 +3,13 @@
 import Link from "next/link"
 import { useState } from "react"
 import { useThemeContext } from "@/components/ThemeProvider"
+import { useAuth } from "@/contexts/AuthContext"
 
 const Sidebar = () => {
   const [isExpanded, setIsExpanded] = useState(true)
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null)
   const { isDark: isDarkMode, toggleTheme } = useThemeContext()
+  const { logout, isLoggingOut } = useAuth()
 
   const toggleSubmenu = (menuName: string) => {
     setExpandedMenu(expandedMenu === menuName ? null : menuName)
@@ -93,7 +95,7 @@ const Sidebar = () => {
         <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
       </svg>
     ), label: "Ngôn ngữ lập trình", href: "/admin/programming-languages" },
-    { icon: UsersIcon, label: "Quản lý người dùng", href: "/users" },
+    { icon: UsersIcon, label: "Quản lý người dùng", href: "/admin/users" },
   ]
 
   const settingsItems = [
@@ -212,18 +214,22 @@ const Sidebar = () => {
         {/* Logout Button */}
         {isExpanded ? (
           <button
+            onClick={logout}
+            disabled={isLoggingOut}
             className={`w-full px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
               isDarkMode ? "text-gray-300 hover:bg-red-900/20" : "text-gray-700 hover:bg-red-50"
-            }`}
+            } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <LogoutIcon />
-            Đăng xuất
+            {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
           </button>
         ) : (
           <button
+            onClick={logout}
+            disabled={isLoggingOut}
             className={`w-full flex justify-center p-2 rounded-lg transition-colors ${
               isDarkMode ? "text-gray-300 hover:bg-red-900/20" : "text-gray-700 hover:bg-red-50"
-            }`}
+            } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <LogoutIcon />
           </button>
