@@ -102,6 +102,16 @@ export default function ProgrammingLanguagesManagement() {
     }
   }
 
+  const handleToggleEnable = async (id: string, currentStatus: boolean) => {
+    try {
+      await axiosInstance.put(Api.ProgrammingLanguage.TOGGLE_ENABLE(id))
+      toast.showSuccess(`${currentStatus ? 'Vô hiệu hóa' : 'Kích hoạt'} ngôn ngữ lập trình thành công`)
+      fetchLanguages()
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || 'Không thể thay đổi trạng thái')
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
@@ -250,6 +260,14 @@ export default function ProgrammingLanguagesManagement() {
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
+                      <Button 
+                        size="xs" 
+                        color={lang.isEnable ? "warning" : "success"}
+                        onClick={() => handleToggleEnable(lang.id, lang.isEnable)}
+                        title={lang.isEnable ? "Vô hiệu hóa" : "Kích hoạt"}
+                      >
+                        {lang.isEnable ? "Tắt" : "Bật"}
+                      </Button>
                       <Button size="xs" color="info" onClick={() => handleEdit(lang)}>
                         <PencilIcon className="w-4 h-4" />
                       </Button>

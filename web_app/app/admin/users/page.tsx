@@ -144,7 +144,13 @@ export default function UsersManagement() {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
-      day: '2-digit',
+      day: '2-digit'
+    })
+  }
+
+  const formatTime = (dateString: string | null) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleTimeString('vi-VN', {
       hour: '2-digit',
       minute: '2-digit'
     })
@@ -413,8 +419,15 @@ export default function UsersManagement() {
                         {user.firstLogin ? 'Chưa đổi MK' : 'Đã đổi MK'}
                       </Badge>
                     </td>
-                    <td className={`px-6 py-4 text-xs ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                      {formatDate(user.createdDate)}
+                    <td className="px-6 py-4">
+                      <div className="flex flex-col">
+                        <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {formatDate(user.createdDate)}
+                        </span>
+                        <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                          {formatTime(user.createdDate)}
+                        </span>
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <button
