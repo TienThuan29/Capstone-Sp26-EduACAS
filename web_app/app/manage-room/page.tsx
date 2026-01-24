@@ -35,6 +35,7 @@ interface Subject {
     id: string
     subjectCode: string
     subjectName: string
+    isDeleted: boolean
 }
 
 interface Semester {
@@ -142,11 +143,13 @@ export default function ManageClassroomPage() {
             const fetchData = async () => {
                 try {
                     const subRes = await axiosInstance.get(Api.Subject.GET_ALL_SUBJECTS);
-                    setSubjects(subRes.data?.dataResponse || []);
+                    const allSubjects: Subject[] = subRes.data?.dataResponse || [];
+                    const activeSubjects = allSubjects.filter(s => !s.isDeleted);
+                    setSubjects(activeSubjects);
 
                     // Set default subject if available
-                    if (subRes.data?.dataResponse?.length > 0) {
-                        setFormData(prev => ({ ...prev, subjectId: subRes.data.dataResponse[0].id }));
+                    if (activeSubjects.length > 0) {
+                        setFormData(prev => ({ ...prev, subjectId: activeSubjects[0].id }));
                     }
 
                 } catch (error) {
