@@ -1,18 +1,24 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { Card, Spinner, Button, Select, TextInput } from "flowbite-react";
 import Link from "next/link";
+import { Spinner, TextInput, Select, Card, Button } from "flowbite-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { useClassroom, Classroom } from "@/hooks/useClassroom";
 import HomeNavbar from "@/components/home-navbar";
 import Footer from "@/components/Footer";
-import { useClassroom, Classroom } from "@/hooks/useClassroom";
-import { useAuth } from "@/contexts/AuthContext";
+import { CustomPagination } from "@/components/CustomPagination";
 
 export default function ListAllClassroomPage() {
   const { user } = useAuth();
   const { getAllClassrooms } = useClassroom();
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // -- Pagination States --
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const PAGE_SIZE = 9; // Display 9 items per page (3x3 grid)
 
   // -- Filter States --
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,8 +29,12 @@ export default function ListAllClassroomPage() {
     const fetchClassrooms = async () => {
       try {
         setLoading(true);
-        const data = await getAllClassrooms(user?.id);
-        setClassrooms(data);
+        // Note: Backend pagination is implemented, but for search/sort/filter on client side to work easily with mixed data, 
+        // we might ideally want server-side filtering. 
+        // However, sticking to the requested "getAll" pagination:
+        const data = await getAllClassrooms(user?.id, currentPage, PAGE_SIZE);
+        setClassrooms(data.items);
+        setTotalPages(data.totalPages);
       } catch (err) {
         console.error("Fetch classrooms failed", err);
       } finally {
@@ -33,9 +43,21 @@ export default function ListAllClassroomPage() {
     };
 
     fetchClassrooms();
-  }, [getAllClassrooms]);
+  }, [getAllClassrooms, user?.id, currentPage]);
 
-  // -- Logic Filter & Sort --
+  const onPageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // -- Logic Filter & Sort (Client-side on current page data - limitation of simple pagination without server-side filter) --
+  // For true robustness, search/filter should be passed to API. 
+  // Given current scope, we apply filters on the *fetched page* which might be weird, 
+  // OR we fetch ALL for filtering (defeats pagination purpose). 
+  // Assuming user wants Server Side Pagination, filtering only current page is technically correct for "Get All Paginated".
+  // But usually users expect Search to search EVERYTHING.
+  // Implementation below filters *currently fetched items*. 
+  // TODO: Upgrade API to accept search/filter params for true server-side processing.
+
   const filteredClassrooms = useMemo(() => {
     let result = [...classrooms];
 
@@ -79,7 +101,7 @@ export default function ListAllClassroomPage() {
     return result;
   }, [classrooms, searchTerm, selectedSemester, sortBy]);
 
-  // Get unique semesters for filter dropdown
+  // Get unique semesters for filter dropdown (from current page only)
   const semesters = useMemo(() => {
     const unique = new Set(classrooms.map((c) => c.semesterName));
     return ["All", ...Array.from(unique)];
@@ -260,6 +282,16 @@ export default function ListAllClassroomPage() {
             </Card>
           ))}
         </div>
+
+        {/* Pagination Controls */}
+        <div className="mt-8 flex justify-center">
+          <CustomPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={onPageChange}
+          />
+        </div>
+
       </main>
 
       <Footer />

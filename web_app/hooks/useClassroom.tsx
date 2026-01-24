@@ -35,16 +35,40 @@ export interface Classroom {
   enrollment?: Enrollment;
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
 export const useClassroom = () => {
   const axiosInstance = useAxios();
 
-  const getAllClassrooms = useCallback(async (userId?: string) => {
-    const url = userId
-      ? `${Api.Classroom.GET_ALL_CLASSROOMS}?userId=${userId}`
-      : Api.Classroom.GET_ALL_CLASSROOMS;
-    const response = await axiosInstance.get(url);
-    return response.data?.dataResponse || [];
-  }, [axiosInstance]);
+  const getAllClassrooms = useCallback(
+    async (userId?: string, pageIndex: number = 1, pageSize: number = 10) => {
+      let url = `${Api.Classroom.GET_ALL_CLASSROOMS}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+      if (userId) {
+        url += `&userId=${userId}`;
+      }
+      const response = await axiosInstance.get(url);
+      return (
+        response.data?.dataResponse || {
+          items: [],
+          totalCount: 0,
+          pageIndex: 1,
+          pageSize: 10,
+          totalPages: 0,
+          hasPreviousPage: false,
+          hasNextPage: false,
+        }
+      );
+    },
+    [axiosInstance],
+  );
 
   const getStudentClassrooms = useCallback(
     async (studentId: string) => {
@@ -91,11 +115,36 @@ export const useClassroom = () => {
     [axiosInstance],
   );
 
+  const getLecturerClassrooms = useCallback(
+    async (
+      lecturerId: string,
+      pageIndex: number = 1,
+      pageSize: number = 10,
+    ) => {
+      const response = await axiosInstance.get(
+        `${Api.Classroom.GET_LECTURER_CLASSROOMS}/${lecturerId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+      );
+      return (
+        response.data?.dataResponse || {
+          items: [],
+          totalCount: 0,
+          pageIndex: 1,
+          pageSize: 10,
+          totalPages: 0,
+          hasPreviousPage: false,
+          hasNextPage: false,
+        }
+      );
+    },
+    [axiosInstance],
+  );
+
   return {
     getAllClassrooms,
     getStudentClassrooms,
     getClassroomById,
     enrollClassroom,
     leaveClassroom,
+    getLecturerClassrooms,
   };
 };

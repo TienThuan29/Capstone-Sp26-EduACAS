@@ -19,17 +19,20 @@ namespace AcasService.Web.Controllers.Classroom
         }
 
         [HttpGet]
-        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetAllClassrooms([FromQuery] string userId)
+        public async Task<ActionResult<ApiResponse<PagedResult<ClassroomResponse>>>> GetAllClassrooms(
+            [FromQuery] string userId, 
+            [FromQuery] int pageIndex = 1, 
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var classrooms = await _classroomQuery.GetAllClassroomsAsync(userId);
-                return ResponseUtil.Success(classrooms, "Get all classrooms successfully", 200);
+                var pagedResult = await _classroomQuery.GetAllClassroomsAsync(userId, pageIndex, pageSize);
+                return ResponseUtil.Success(pagedResult, "Get all classrooms successfully", 200);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching all classrooms.");
-                return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
+                return ResponseUtil.Error<PagedResult<ClassroomResponse>>("Internal Server Error", 500);
             }
         }
 
@@ -115,17 +118,20 @@ namespace AcasService.Web.Controllers.Classroom
         // }
 
         [HttpGet("lecturer/{lecturerId}")]
-        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetClassroomsByLecturerId(string lecturerId)
+        public async Task<ActionResult<ApiResponse<PagedResult<ClassroomResponse>>>> GetClassroomsByLecturerId(
+            string lecturerId,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
-                var classrooms = await _classroomQuery.GetClassroomsByLecturerIdAsync(lecturerId);
+                var classrooms = await _classroomQuery.GetClassroomsByLecturerIdAsync(lecturerId, pageIndex, pageSize);
                 return ResponseUtil.Success(classrooms, "Get classrooms by lecturerId successfully", 200);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching classrooms by lecturerId.");
-                return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
+                return ResponseUtil.Error<PagedResult<ClassroomResponse>>("Internal Server Error", 500);
             }
         }
     }

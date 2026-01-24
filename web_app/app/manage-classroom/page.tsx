@@ -9,6 +9,8 @@ import { Api } from "@/configs/api"
 import { useAuth } from "@/contexts/AuthContext"
 import Link from "next/link"
 import { useToast } from "@/hooks/useToast"
+import { useClassroom } from "@/hooks/useClassroom"
+import { CustomPagination } from "@/components/CustomPagination"
 
 interface LecturerLite {
     lecturerId: string
@@ -76,6 +78,11 @@ export default function ManageClassroomPage() {
         return result;
     }, []);
 
+    // -- Pagination States --
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const PAGE_SIZE = 9;
+
     // -- Create Modal States --
     const [openModal, setOpenModal] = useState(false);
     const [subjects, setSubjects] = useState<Subject[]>([]);
@@ -91,6 +98,7 @@ export default function ManageClassroomPage() {
         dateEnd: ""   // Added dateEnd
     });
 
+    const { getLecturerClassrooms } = useClassroom();
 
     // Fetch Classrooms
     const fetchClassrooms = async () => {
@@ -112,20 +120,10 @@ export default function ManageClassroomPage() {
         if (!currentUserId) return;
 
         try {
-            setLoading(true)
-            const url = `${Api.Classroom.GET_LECTURER_CLASSROOMS}/${currentUserId}`;
-            console.log("Fetching classrooms from:", url);
-
-            const res = await axiosInstance.get(url)
-            console.log("API Response:", res.data);
-
-            if (res.data?.dataResponse) {
-                console.log("Setting classrooms state:", res.data.dataResponse);
-                setClassrooms(res.data?.dataResponse || [])
-            } else {
-                console.warn("No dataResponse in API result");
-                setClassrooms([])
-            }
+            setLoading(true);
+            const data = await getLecturerClassrooms(currentUserId, currentPage, PAGE_SIZE);
+            setClassrooms(data.items);
+            setTotalPages(data.totalPages);
         } catch (err) {
             console.error("Fetch classrooms failed", err)
         } finally {
@@ -135,7 +133,11 @@ export default function ManageClassroomPage() {
 
     useEffect(() => {
         fetchClassrooms()
-    }, [axiosInstance, user?.id])
+    }, [user?.id, currentPage])
+
+    const onPageChange = (page: number) => {
+        setCurrentPage(page);
+    };
 
 
     // Fetch Subjects when Modal opens
@@ -454,6 +456,15 @@ export default function ManageClassroomPage() {
                     )}
                 </div>
             </main>
+
+            {/* Pagination Controls */}
+            <div className="mb-12 flex justify-center">
+                <CustomPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={onPageChange}
+                />
+            </div>
 
             <Footer />
 

@@ -13,14 +13,14 @@ namespace AcasService.Application.Queries.Classroom
     public interface IClassroomQuery
     {
         Task<ClassroomResponse> GetClassroomByIdAsync(string id);
-        Task<List<ClassroomResponse>> GetAllClassroomsAsync(string userId);
+        Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string userId, int pageIndex, int pageSize);
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
 
 
         Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId);
 
         // Task<ClassroomResponse>FindByStudentIdAndClassIdAsync(string studentId, string classId);
-        Task<IEnumerable<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId);
+        Task<PagedResult<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId, int pageIndex, int pageSize);
     }
 
     public class ClassroomQuery : IClassroomQuery
@@ -78,23 +78,32 @@ namespace AcasService.Application.Queries.Classroom
             }
         }
 
-        public async Task<List<ClassroomResponse>> GetAllClassroomsAsync(string userId)
+        public async Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string userId, int pageIndex, int pageSize)
         {
             try
             {
-                var classrooms = await _classroomRepository.FindAllAsync();
+                var allClassrooms = await _classroomRepository.FindAllAsync();
+                
+                allClassrooms.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
+
+                var totalCount = allClassrooms.Count;
+                var itemsOnPage = allClassrooms
+                    .Skip((pageIndex - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
                 var responses = new List<ClassroomResponse>();
 
-                foreach (var classroom in classrooms)
+                foreach (var classroom in itemsOnPage)
                 {
                     var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
                     var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classroom.Id,userId);
-                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile,enrollclass);
+                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classroom.Id, userId);
+                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile, enrollclass);
                     responses.Add(response);
                 }
 
-                return responses;
+                return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);
 
             }
             catch (Exception ex)
@@ -178,20 +187,32 @@ namespace AcasService.Application.Queries.Classroom
         //     throw new KeyNotFoundException($"Classroom with ID {classId} not found for student {studentId}.");
         // }
 
-        public async Task<IEnumerable<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId)
+        public async Task<PagedResult<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId, int pageIndex, int pageSize)
         {
             try
             {
-                var classrooms = await _classroomRepository.GetClassroomsByLecturerIdAsync(lecturerId);
+                var classroomsEnumerable = await _classroomRepository.GetClassroomsByLecturerIdAsync(lecturerId);
+                var classrooms = classroomsEnumerable.ToList();
+                
+                // Sort by CreatedDate descending (newest first)
+                classrooms.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
+
+                var totalCount = classrooms.Count;
+                var itemsOnPage = classrooms
+                    .Skip((pageIndex - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList();
+
                 var responses = new List<ClassroomResponse>();
-                foreach (var classroom in classrooms)
+                foreach (var classroom in itemsOnPage)
                 {
                     var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
                     var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
                     var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
                     responses.Add(response);
                 }
-                return responses;
+                
+                return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);
             }
             catch (Exception ex)
             {
