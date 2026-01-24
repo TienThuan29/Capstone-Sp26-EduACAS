@@ -47,58 +47,104 @@ const StatCard = ({ title, value, icon, trend, bgColor }: StatCardProps) => {
 
 export default function AdminDashboard() {
   const { isDark } = useThemeContext()
+  const axiosInstance = useAxios()
+  const toast = useToast()
   const [mounted, setMounted] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({
+    classrooms: 0,
+    subjects: 0,
+    programmingLanguages: 0,
+    students: 0,
+    teachers: 0
+  })
 
   useEffect(() => {
     setMounted(true)
+    fetchStats()
   }, [])
+
+  const fetchStats = async () => {
+    try {
+      setLoading(true)
+      const [classroomsRes, subjectsRes, languagesRes, usersRes] = await Promise.all([
+        axiosInstance.get(Api.Classroom.GET_ALL),
+        axiosInstance.get(Api.Subject.GET_ALL),
+        axiosInstance.get(Api.ProgrammingLanguage.GET_ALL),
+        axiosInstance.get(Api.User.GET_ALL)
+      ])
+
+      const users = usersRes.data?.dataResponse || []
+      const students = users.filter((u: any) => u.role === 'STUDENT').length
+      const teachers = users.filter((u: any) => u.role === 'LECTURER').length
+
+      setStats({
+        classrooms: classroomsRes.data?.dataResponse?.length || 0,
+        subjects: subjectsRes.data?.dataResponse?.length || 0,
+        programmingLanguages: languagesRes.data?.dataResponse?.length || 0,
+        students,
+        teachers
+      })
+    } catch (error: any) {
+      toast.showError('Không thể tải thống kê')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   if (!mounted) return null
 
-  const stats = [
+  const statsData = [
     {
       title: "Tổng số lớp học",
-      value: "48",
+      value: loading ? "..." : stats.classrooms.toString(),
       icon: (
         <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
           <path d="M12 3L1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
         </svg>
       ),
-      trend: { value: "12%", isPositive: true },
       bgColor: "bg-gradient-to-br from-blue-500 to-blue-600"
     },
     {
       title: "Tổng số môn học",
-      value: "24",
+      value: loading ? "..." : stats.subjects.toString(),
       icon: (
         <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
           <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
         </svg>
       ),
-      trend: { value: "8%", isPositive: true },
       bgColor: "bg-gradient-to-br from-purple-500 to-purple-600"
     },
     {
       title: "Ngôn ngữ lập trình",
-      value: "12",
+      value: loading ? "..." : stats.programmingLanguages.toString(),
       icon: (
         <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
           <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
         </svg>
       ),
-      trend: { value: "4%", isPositive: true },
       bgColor: "bg-gradient-to-br from-green-500 to-green-600"
     },
     {
       title: "Tổng số sinh viên",
-      value: "1,234",
+      value: loading ? "..." : stats.students.toLocaleString('vi-VN'),
       icon: (
         <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
           <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
         </svg>
       ),
-      trend: { value: "18%", isPositive: true },
       bgColor: "bg-gradient-to-br from-orange-500 to-orange-600"
+    },
+    {
+      title: "Tổng số giảng viên",
+      value: loading ? "..." : stats.teachers.toLocaleString('vi-VN'),
+      icon: (
+        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+          <path d="M19 8h-2v3h-3v2h3v3h2v-3h3v-2h-3z" opacity="0.7"/>
+        </svg>
+      ),
+      bgColor: "bg-gradient-to-br from-pink-500 to-pink-600"
     },
   ]
 
@@ -160,8 +206,8 @@ export default function AdminDashboard() {
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
+          {statsData.map((stat, index) => (
             <StatCard key={index} {...stat} />
           ))}
         </div>

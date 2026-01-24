@@ -35,9 +35,8 @@ export const Api = {
         DELETE: (id: string) => `/api/acas/v1/subjects/${id}`,
         SOFT_DELETE: (id: string) => `/api/acas/v1/subjects/${id}/soft-delete`,
         RESTORE: (id: string) => `/api/acas/v1/subjects/${id}/restore`,
-        BULK_SOFT_DELETE: '/api/acas/v1/subjects/bulk-soft-delete',
-        BULK_RESTORE: '/api/acas/v1/subjects/bulk-restore',
-        BULK_DELETE: '/api/acas/v1/subjects/bulk-delete',
+        BULK_SOFT_DELETE: '/api/acas/v1/subjects/bulk/soft-delete',
+        BULK_RESTORE: '/api/acas/v1/subjects/bulk/restore',
     },
 
     ProgrammingLanguage: {
@@ -50,12 +49,12 @@ export const Api = {
         CREATE: '/api/acas/v1/programming-languages',
         UPDATE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
         DELETE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
-        SOFT_DELETE: (id: string) => `/api/acas/v1/programming-languages/${id}/soft-delete`,
-        RESTORE: (id: string) => `/api/acas/v1/programming-languages/${id}/restore`,
         TOGGLE_ENABLE: (id: string) => `/api/acas/v1/programming-languages/${id}/toggle-enable`,
-        BULK_SOFT_DELETE: '/api/acas/v1/programming-languages/bulk-soft-delete',
-        BULK_RESTORE: '/api/acas/v1/programming-languages/bulk-restore',
-        BULK_DELETE: '/api/acas/v1/programming-languages/bulk-delete',
+    },
+
+    Classroom: {
+        GET_ALL: '/api/acas/v1/classrooms',
+        GET_BY_ID: (id: string) => `/api/acas/v1/classrooms/${id}`,
     }
 
 }

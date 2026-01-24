@@ -103,7 +103,7 @@ export default function SubjectsManagement() {
   const handleDelete = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn đánh dấu xóa môn học này?')) {
       try {
-        await axiosInstance.delete(Api.Subject.SOFT_DELETE(id))
+        await axiosInstance.patch(Api.Subject.SOFT_DELETE(id))
         toast.showSuccess('Xóa môn học thành công')
         fetchSubjects()
       } catch (error: any) {
@@ -114,7 +114,7 @@ export default function SubjectsManagement() {
 
   const handleRestore = async (id: string) => {
     try {
-      await axiosInstance.put(Api.Subject.RESTORE(id))
+      await axiosInstance.patch(Api.Subject.RESTORE(id))
       toast.showSuccess('Khôi phục môn học thành công')
       fetchSubjects()
     } catch (error: any) {
