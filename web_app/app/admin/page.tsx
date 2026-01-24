@@ -180,8 +180,8 @@ export default function AdminDashboard() {
                   isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'
                 }`}
               >
-                <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                <div className={`relative rounded-lg p-3 w-fit mb-4 bg-gradient-to-br ${action.color}`}>
+                <div className={`absolute inset-0 bg-linear-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                <div className={`relative rounded-lg p-3 w-fit mb-4 bg-linear-to-br ${action.color}`}>
                   <div className="text-white">{action.icon}</div>
                 </div>
                 <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
