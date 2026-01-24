@@ -14,7 +14,6 @@ export function CustomPagination({
     totalPages,
     onPageChange,
 }: CustomPaginationProps) {
-    // Logic to determine which page numbers to show
     const getPageNumbers = () => {
         const pages = [];
         const maxVisiblePages = 5;
@@ -35,12 +34,10 @@ export function CustomPagination({
         return pages;
     };
 
-    // Do not render if there's only 1 page (or 0)
     if (totalPages <= 1) return null;
 
     return (
         <div className="flex items-center justify-center gap-2 py-4">
-            {/* Previous Button */}
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
@@ -50,7 +47,6 @@ export function CustomPagination({
                 <ChevronLeftIcon className="h-5 w-5" />
             </button>
 
-            {/* Page Numbers */}
             <div className="flex items-center gap-2 rounded-xl bg-gray-50 p-1 dark:bg-gray-800/50">
                 {getPageNumbers().map((page, index) => (
                     <React.Fragment key={index}>
@@ -58,8 +54,8 @@ export function CustomPagination({
                             <button
                                 onClick={() => onPageChange(page)}
                                 className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold transition-all duration-300 ${currentPage === page
-                                        ? "bg-gradient-to-br from-[#1F4E79] to-[#163A5C] text-white shadow-lg shadow-blue-900/20 scale-105 dark:from-[#C9A24D] dark:to-[#B08D43]"
-                                        : "bg-transparent text-gray-600 hover:bg-white hover:text-[#1F4E79] hover:shadow-sm dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-[#C9A24D]"
+                                    ? "bg-gradient-to-br from-[#1F4E79] to-[#163A5C] text-white shadow-lg shadow-blue-900/20 scale-105 dark:from-[#C9A24D] dark:to-[#B08D43]"
+                                    : "bg-transparent text-gray-600 hover:bg-white hover:text-[#1F4E79] hover:shadow-sm dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-[#C9A24D]"
                                     }`}
                             >
                                 {page}
@@ -73,7 +69,6 @@ export function CustomPagination({
                 ))}
             </div>
 
-            {/* Next Button */}
             <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}

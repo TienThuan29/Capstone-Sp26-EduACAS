@@ -15,12 +15,12 @@ export default function ListAllClassroomPage() {
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // -- Pagination States --
+
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const PAGE_SIZE = 9; // Display 9 items per page (3x3 grid)
+  const PAGE_SIZE = 9;
 
-  // -- Filter States --
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
@@ -29,9 +29,6 @@ export default function ListAllClassroomPage() {
     const fetchClassrooms = async () => {
       try {
         setLoading(true);
-        // Note: Backend pagination is implemented, but for search/sort/filter on client side to work easily with mixed data, 
-        // we might ideally want server-side filtering. 
-        // However, sticking to the requested "getAll" pagination:
         const data = await getAllClassrooms(user?.id, currentPage, PAGE_SIZE);
         setClassrooms(data.items);
         setTotalPages(data.totalPages);
@@ -49,19 +46,11 @@ export default function ListAllClassroomPage() {
     setCurrentPage(page);
   };
 
-  // -- Logic Filter & Sort (Client-side on current page data - limitation of simple pagination without server-side filter) --
-  // For true robustness, search/filter should be passed to API. 
-  // Given current scope, we apply filters on the *fetched page* which might be weird, 
-  // OR we fetch ALL for filtering (defeats pagination purpose). 
-  // Assuming user wants Server Side Pagination, filtering only current page is technically correct for "Get All Paginated".
-  // But usually users expect Search to search EVERYTHING.
-  // Implementation below filters *currently fetched items*. 
-  // TODO: Upgrade API to accept search/filter params for true server-side processing.
+
 
   const filteredClassrooms = useMemo(() => {
     let result = [...classrooms];
 
-    // 1. Search (Class Code or Class Name)
     if (searchTerm) {
       const lowerTerm = searchTerm.toLowerCase();
       result = result.filter(
@@ -71,12 +60,10 @@ export default function ListAllClassroomPage() {
       );
     }
 
-    // 2. Filter by Semester
     if (selectedSemester !== "All") {
       result = result.filter((c) => c.semesterName === selectedSemester);
     }
 
-    // 3. Sort
     result.sort((a, b) => {
       switch (sortBy) {
         case "newest":
@@ -101,7 +88,6 @@ export default function ListAllClassroomPage() {
     return result;
   }, [classrooms, searchTerm, selectedSemester, sortBy]);
 
-  // Get unique semesters for filter dropdown (from current page only)
   const semesters = useMemo(() => {
     const unique = new Set(classrooms.map((c) => c.semesterName));
     return ["All", ...Array.from(unique)];
@@ -124,7 +110,6 @@ export default function ListAllClassroomPage() {
       <HomeNavbar />
 
       <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Tất cả lớp học
@@ -134,10 +119,8 @@ export default function ListAllClassroomPage() {
           </p>
         </div>
 
-        {/* --- Toolbar: Search & Filters --- */}
         <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            {/* Search */}
             <div className="md:col-span-2">
               <TextInput
                 id="search"
@@ -164,7 +147,6 @@ export default function ListAllClassroomPage() {
               />
             </div>
 
-            {/* Filter Semester */}
             <div>
               <Select
                 value={selectedSemester}
@@ -178,7 +160,6 @@ export default function ListAllClassroomPage() {
               </Select>
             </div>
 
-            {/* Sort */}
             <div>
               <Select
                 value={sortBy}
@@ -193,7 +174,6 @@ export default function ListAllClassroomPage() {
           </div>
         </div>
 
-        {/* Grid */}
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredClassrooms.map((c) => (
             <Card
@@ -212,12 +192,10 @@ export default function ListAllClassroomPage() {
                   </span>
                 </div>
 
-                {/* Title */}
                 <h3 className="mb-3 text-lg leading-snug font-bold text-gray-900 dark:text-white">
                   {c.className}
                 </h3>
 
-                {/* Info */}
                 <div className="mb-6 space-y-2 text-sm text-gray-600 dark:text-gray-400">
                   <p className="flex items-center gap-2">
                     <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">
@@ -248,7 +226,6 @@ export default function ListAllClassroomPage() {
                   </p>
                 </div>
 
-                {/* Action */}
                 <div className="mt-auto">
                   {c.enrollment?.isJoining ? (
                     <Link
@@ -283,7 +260,6 @@ export default function ListAllClassroomPage() {
           ))}
         </div>
 
-        {/* Pagination Controls */}
         <div className="mt-8 flex justify-center">
           <CustomPagination
             currentPage={currentPage}

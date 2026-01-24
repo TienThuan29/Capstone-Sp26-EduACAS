@@ -29,42 +29,31 @@ export default function ManageSubjectPage() {
     const [loading, setLoading] = useState(true)
     const [actionLoading, setActionLoading] = useState(false)
 
-    // -- Search State --
     const [searchTerm, setSearchTerm] = useState("")
-    const [statusFilter, setStatusFilter] = useState("all") // "all" | "active" | "deleted"
+    const [statusFilter, setStatusFilter] = useState("all")
 
-    // -- Modal States --
     const [openModal, setOpenModal] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
     const [currentSubjectId, setCurrentSubjectId] = useState<string | null>(null)
 
-    // -- Form State --
     const [formData, setFormData] = useState({
         subjectCode: "",
         subjectName: "",
         description: ""
     })
 
-    // -- Delete Confirmation State --
     const [openDeleteModal, setOpenDeleteModal] = useState(false)
     const [subjectToDelete, setSubjectToDelete] = useState<Subject | null>(null)
 
-    // -- View Description State --
     const [openViewModal, setOpenViewModal] = useState(false)
     const [viewDescription, setViewDescription] = useState("")
     const [viewSubjectName, setViewSubjectName] = useState("")
 
-    // Fetch Subjects
     const fetchSubjects = async () => {
         try {
             setLoading(true)
             const res = await axiosInstance.get(Api.Subject.GET_ALL_SUBJECTS)
             if (res.data?.dataResponse) {
-                // Filter out deleted subjects if the API returns them (though usually soft-delete hides them, unless specified)
-                // If API returns all, we might want to filter client side or just show them with a status. 
-                // Creating a "Manage" page usually implies seeing active ones. 
-                // Based on User Request "xóa mềm", usually that means they disappear from the main list.
-                // Let's assume the GET_ALL returns everything or just active. I'll filter !isDeleted just in case.
                 const allSubjects: Subject[] = res.data.dataResponse
                 setSubjects(allSubjects)
             } else {
@@ -82,17 +71,14 @@ export default function ManageSubjectPage() {
         fetchSubjects()
     }, [axiosInstance])
 
-    // Filtered Subjects
     const filteredSubjects = useMemo(() => {
         let result = subjects
 
-        // Filter by Status
         if (statusFilter !== "all") {
             const isDeleting = statusFilter === "deleted"
             result = result.filter(s => s.isDeleted === isDeleting)
         }
 
-        // Filter by Search Term
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase()
             result = result.filter(s =>
@@ -104,7 +90,6 @@ export default function ManageSubjectPage() {
         return result
     }, [subjects, searchTerm, statusFilter])
 
-    // Open Modal for Create
     const handleOpenCreate = () => {
         setFormData({
             subjectCode: "",
@@ -116,7 +101,6 @@ export default function ManageSubjectPage() {
         setOpenModal(true)
     }
 
-    // Open Modal for Edit
     const handleOpenEdit = (subject: Subject) => {
         setFormData({
             subjectCode: subject.subjectCode,
@@ -128,7 +112,6 @@ export default function ManageSubjectPage() {
         setOpenModal(true)
     }
 
-    // Handle Submit (Create or Update)
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
@@ -153,9 +136,8 @@ export default function ManageSubjectPage() {
         try {
             setActionLoading(true)
             if (isEditing && currentSubjectId) {
-                // Update
                 const payload = {
-                    id: currentSubjectId, // Include ID in the body for backend validation
+                    id: currentSubjectId,
                     subjectCode: formData.subjectCode,
                     subjectName: formData.subjectName,
                     description: formData.description
@@ -163,7 +145,6 @@ export default function ManageSubjectPage() {
                 await axiosInstance.put(`${Api.Subject.UPDATE_SUBJECT}/${currentSubjectId}`, payload)
                 showSuccess("Cập nhật môn học thành công")
             } else {
-                // Create
                 const payload = {
                     subjectCode: formData.subjectCode,
                     subjectName: formData.subjectName,
@@ -184,7 +165,6 @@ export default function ManageSubjectPage() {
         }
     }
 
-    // Handle Delete
     const handleDeleteClick = (subject: Subject) => {
         setSubjectToDelete(subject)
         setOpenDeleteModal(true)
@@ -207,7 +187,6 @@ export default function ManageSubjectPage() {
         }
     }
 
-    // Handle View Description
     const handleViewDescription = (subject: Subject) => {
         setViewDescription(subject.description)
         setViewSubjectName(subject.subjectName)
@@ -231,7 +210,6 @@ export default function ManageSubjectPage() {
             <HomeNavbar />
 
             <main className="flex-grow container mx-auto px-4 pt-24 pb-12 max-w-7xl">
-                {/* Header */}
                 <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -250,7 +228,6 @@ export default function ManageSubjectPage() {
                     </Button>
                 </div>
 
-                {/* Search & Filter */}
                 <div className="mb-6 flex flex-col sm:flex-row gap-4">
                     <div className="max-w-md flex-grow">
                         <TextInput
@@ -279,7 +256,6 @@ export default function ManageSubjectPage() {
                     </div>
                 </div>
 
-                {/* Table */}
                 <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
                     <Table hoverable>
                         <TableHead>
@@ -362,7 +338,6 @@ export default function ManageSubjectPage() {
 
             <Footer />
 
-            {/* Create/Edit Modal */}
             <Modal show={openModal} onClose={() => setOpenModal(false)}>
                 <ModalHeader>{isEditing ? "Chỉnh sửa môn học" : "Tạo môn học mới"}</ModalHeader>
                 <ModalBody>
@@ -415,7 +390,6 @@ export default function ManageSubjectPage() {
                 </ModalBody>
             </Modal>
 
-            {/* Delete Confirmation Modal */}
             <Modal show={openDeleteModal} size="md" onClose={() => setOpenDeleteModal(false)} popup>
                 <ModalHeader />
                 <ModalBody>
@@ -443,7 +417,6 @@ export default function ManageSubjectPage() {
                 </ModalBody>
             </Modal>
 
-            {/* View Description Modal */}
             <Modal show={openViewModal} onClose={() => setOpenViewModal(false)}>
                 <ModalHeader>Mô tả môn học: {viewSubjectName}</ModalHeader>
                 <ModalBody>

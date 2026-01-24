@@ -194,7 +194,6 @@ namespace AcasService.Application.Queries.Classroom
                 var classroomsEnumerable = await _classroomRepository.GetClassroomsByLecturerIdAsync(lecturerId);
                 var classrooms = classroomsEnumerable.ToList();
                 
-                // Sort by CreatedDate descending (newest first)
                 classrooms.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
 
                 var totalCount = classrooms.Count;

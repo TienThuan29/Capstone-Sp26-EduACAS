@@ -55,12 +55,10 @@ export default function ManageClassroomPage() {
     const [classrooms, setClassrooms] = useState<Classroom[]>([])
     const [loading, setLoading] = useState(true)
 
-    // -- Filter States --
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedSemesterFilter, setSelectedSemesterFilter] = useState("All");
     const [sortBy, setSortBy] = useState("newest");
 
-    // Generate Semesters (Current Year & Next Year)
     const SEMESTERS = useMemo(() => {
         const currentYear = new Date().getFullYear();
         const years = [currentYear, currentYear + 1];
@@ -78,17 +76,13 @@ export default function ManageClassroomPage() {
         return result;
     }, []);
 
-    // -- Pagination States --
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const PAGE_SIZE = 9;
-
-    // -- Create Modal States --
     const [openModal, setOpenModal] = useState(false);
     const [subjects, setSubjects] = useState<Subject[]>([]);
     const [modalLoading, setModalLoading] = useState(false);
 
-    // -- Form States --
     const [formData, setFormData] = useState({
         classCode: "", // Added classCode
         className: "",
@@ -100,11 +94,9 @@ export default function ManageClassroomPage() {
 
     const { getLecturerClassrooms } = useClassroom();
 
-    // Fetch Classrooms
     const fetchClassrooms = async () => {
         let currentUserId = user?.id;
 
-        // Fallback to localStorage if user context is not yet ready
         if (!currentUserId) {
             const storedUser = localStorage.getItem("userProfile");
             if (storedUser) {
@@ -140,7 +132,6 @@ export default function ManageClassroomPage() {
     };
 
 
-    // Fetch Subjects when Modal opens
     useEffect(() => {
         if (openModal) {
             const fetchData = async () => {
@@ -150,7 +141,6 @@ export default function ManageClassroomPage() {
                     const activeSubjects = allSubjects.filter(s => !s.isDeleted);
                     setSubjects(activeSubjects);
 
-                    // Set default subject if available
                     if (activeSubjects.length > 0) {
                         setFormData(prev => ({ ...prev, subjectId: activeSubjects[0].id }));
                     }
@@ -164,13 +154,10 @@ export default function ManageClassroomPage() {
         }
     }, [openModal, axiosInstance]);
 
-
-    // Handle Create Submit
     const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
             setModalLoading(true);
-            // Get current user ID (Lecturer ID)
             let currentUserId = user?.id;
             if (!currentUserId) {
                 const storedUser = localStorage.getItem("userProfile");
@@ -190,7 +177,6 @@ export default function ManageClassroomPage() {
                 return;
             }
 
-            // Validation
             if (formData.className.length > 100) {
                 showError("Tên lớp học không được quá 100 ký tự.");
                 setModalLoading(false);
@@ -202,7 +188,6 @@ export default function ManageClassroomPage() {
                 return;
             }
 
-            // Construct payload - adjust based on actual API requirements
             const payload = {
                 classCode: formData.classCode,
                 className: formData.className,
@@ -210,15 +195,14 @@ export default function ManageClassroomPage() {
                 subjectId: formData.subjectId,
                 semesterName: formData.semesterName,
                 enrolKey: formData.enrolKey,
-                endDate: formData.dateEnd // Send as string or Date object depending on axios config, usually ISO string is safe
+                endDate: formData.dateEnd
             };
 
             await axiosInstance.post(Api.Classroom.CREATE_CLASSROOM, payload);
             showSuccess("Tạo lớp học thành công!");
             setOpenModal(false);
-            fetchClassrooms(); // Refresh list
+            fetchClassrooms();
 
-            // Reset form
             setFormData({
                 classCode: "",
                 className: "",
@@ -237,11 +221,9 @@ export default function ManageClassroomPage() {
     };
 
 
-    // -- Logic Filter & Sort --
     const filteredClassrooms = useMemo(() => {
         let result = [...classrooms];
 
-        // 1. Search (Class Code or Class Name)
         if (searchTerm) {
             const lowerTerm = searchTerm.toLowerCase();
             result = result.filter(c =>
@@ -250,12 +232,9 @@ export default function ManageClassroomPage() {
             );
         }
 
-        // 2. Filter by Semester
         if (selectedSemesterFilter !== "All") {
             result = result.filter(c => c.semesterName === selectedSemesterFilter);
         }
-
-        // 3. Sort
         result.sort((a, b) => {
             switch (sortBy) {
                 case "newest":
@@ -274,7 +253,6 @@ export default function ManageClassroomPage() {
         return result;
     }, [classrooms, searchTerm, selectedSemesterFilter, sortBy]);
 
-    // Get unique semesters for filter dropdown
     const semestersForFilter = useMemo(() => {
         const unique = new Set(classrooms.map(c => c.semesterName));
         return ["All", ...Array.from(unique)];
@@ -315,10 +293,8 @@ export default function ManageClassroomPage() {
                     </Button>
                 </div>
 
-                {/* --- Toolbar: Search & Filters --- */}
                 <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 sticky top-20 z-10">
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        {/* Search */}
                         <div className="md:col-span-2">
                             <TextInput
                                 id="search"
@@ -335,7 +311,6 @@ export default function ManageClassroomPage() {
                             />
                         </div>
 
-                        {/* Filter Semester */}
                         <div>
                             <Select
                                 value={selectedSemesterFilter}
@@ -349,7 +324,6 @@ export default function ManageClassroomPage() {
                             </Select>
                         </div>
 
-                        {/* Sort */}
                         <div>
                             <Select
                                 value={sortBy}
@@ -365,7 +339,6 @@ export default function ManageClassroomPage() {
                 </div>
 
 
-                {/* Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {filteredClassrooms.length === 0 ? (
                         <div className="col-span-full text-center py-12 text-gray-500 dark:text-gray-400">
@@ -376,17 +349,16 @@ export default function ManageClassroomPage() {
                             <Card
                                 key={c.id}
                                 className="
-                    rounded-2xl
-                    border border-gray-200 dark:border-gray-700
-                    bg-white dark:bg-gray-800
-                    shadow-sm
-                    transition-all duration-300
-                    hover:-translate-y-1 hover:shadow-xl
+                        rounded-2xl
+                        border border-gray-200 dark:border-gray-700
+                        bg-white dark:bg-gray-800
+                        shadow-sm
+                        transition-all duration-300
+                        hover:-translate-y-1 hover:shadow-xl
                 "
                             >
                                 <div className="flex flex-col h-full">
 
-                                    {/* Header */}
                                     <div className="flex items-center justify-between mb-4">
                                         <span className="
                         px-3 py-1
@@ -404,7 +376,6 @@ export default function ManageClassroomPage() {
                                         </span>
                                     </div>
 
-                                    {/* Title */}
                                     <h3 className="
                     text-lg font-bold
                     text-gray-900 dark:text-white
@@ -414,7 +385,6 @@ export default function ManageClassroomPage() {
                                         {c.className}
                                     </h3>
 
-                                    {/* Info */}
                                     <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-6">
                                         <p className="flex items-center gap-2">
                                             <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Môn:</span>
@@ -430,7 +400,6 @@ export default function ManageClassroomPage() {
                                         </p>
                                     </div>
 
-                                    {/* Action */}
                                     <div className="mt-auto flex gap-2">
                                         <Link href={`/manage-classroom/${c.id}`} className="flex-1">
                                             <Button
@@ -457,7 +426,6 @@ export default function ManageClassroomPage() {
                 </div>
             </main>
 
-            {/* Pagination Controls */}
             <div className="mb-12 flex justify-center">
                 <CustomPagination
                     currentPage={currentPage}
@@ -468,7 +436,6 @@ export default function ManageClassroomPage() {
 
             <Footer />
 
-            {/* Create Modal */}
             <Modal show={openModal} onClose={() => setOpenModal(false)}>
                 <ModalHeader>Tạo lớp học mới</ModalHeader>
                 <ModalBody>
@@ -566,7 +533,6 @@ export default function ManageClassroomPage() {
                             />
                         </div>
 
-                        {/* Optional Description or other fields can go here */}
 
                         <div className="flex justify-end gap-2 mt-6">
                             <Button color="gray" onClick={() => setOpenModal(false)}>

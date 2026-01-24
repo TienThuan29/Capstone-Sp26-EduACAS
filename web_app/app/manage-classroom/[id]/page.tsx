@@ -47,7 +47,6 @@ function ClassroomContent() {
 
     const classId = params.id as string;
 
-    // -- Update Form Data --
     const [formData, setFormData] = useState({
         classCode: "",
         className: "",
@@ -57,7 +56,6 @@ function ClassroomContent() {
         dateEnd: ""
     });
 
-    // Generate Semesters (Same as manage-room)
     const SEMESTERS = useMemo(() => {
         const currentYear = new Date().getFullYear();
         const years = [currentYear, currentYear + 1];
@@ -80,7 +78,6 @@ function ClassroomContent() {
             const data = await getClassroomById(classId);
             if (data) {
                 setClassroom(data);
-                // Initialize form data
                 setFormData({
                     classCode: data.classCode,
                     className: data.className,
@@ -121,7 +118,6 @@ function ClassroomContent() {
         fetchExaminations();
     }, [getExaminationsByClassId, activeTab, classId]);
 
-    // Fetch Subjects for Update Modal
     useEffect(() => {
         if (openUpdateModal) {
             const fetchSubjects = async () => {
@@ -150,7 +146,7 @@ function ClassroomContent() {
                 id: classroom.id,
                 classCode: formData.classCode,
                 className: formData.className,
-                lecturerId: user?.id, // Ensure lecturer ID is preserved or updated if needed
+                lecturerId: user?.id,
                 subjectId: formData.subjectId,
                 semesterName: formData.semesterName,
                 enrolKey: formData.enrolKey,
@@ -495,7 +491,6 @@ function ClassroomContent() {
             <Sidebar />
 
             <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
-                {/* Breadcrumb / Back Button */}
                 <div className="mb-10">
                     <Link
                         href="/manage-classroom"
@@ -521,7 +516,6 @@ function ClassroomContent() {
                 {renderTabContent()}
             </main>
 
-            {/* Update Modal */}
             <Modal show={openUpdateModal} onClose={() => setOpenUpdateModal(false)}>
                 <ModalHeader>Cập nhật thông tin lớp học</ModalHeader>
                 <ModalBody>
@@ -623,7 +617,6 @@ function ClassroomContent() {
                 </ModalBody>
             </Modal>
 
-            {/* Soft Delete Modal */}
             <Modal show={openDeleteModal} size="md" onClose={() => setOpenDeleteModal(false)} popup>
                 <ModalHeader />
                 <ModalBody>
