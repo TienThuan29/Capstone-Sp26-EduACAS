@@ -26,7 +26,7 @@ namespace AuthService.Models
         [Required]
         public bool IsEnable { get; set; }
 
-        public bool? FirstLogin { get; set; } = true;
+        public bool? FirstLogin { get; set; } = false;
         
         [Required]
         public Role Role { get; set; }

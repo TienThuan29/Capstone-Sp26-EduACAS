@@ -18,7 +18,7 @@ public static class DynamoMapper
             ["googleId"] = new AttributeValue { S = user.GoogleId },
             ["role"] = new AttributeValue { S = user.Role.ToString() },
             ["isEnable"] = new AttributeValue { BOOL = user.IsEnable },
-            ["firstLogin"] = new AttributeValue { BOOL = user.FirstLogin ?? true }
+            ["firstLogin"] = new AttributeValue { BOOL = user.FirstLogin ?? false }
         };
 
         if (user.Birthday.HasValue)
