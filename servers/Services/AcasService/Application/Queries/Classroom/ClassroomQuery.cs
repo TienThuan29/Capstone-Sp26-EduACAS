@@ -19,8 +19,7 @@ namespace AcasService.Application.Queries.Classroom
 
         Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId);
 
-
-        Task<ClassroomResponse>FindByStudentIdAndClassIdAsync(string studentId, string classId);
+        // Task<ClassroomResponse>FindByStudentIdAndClassIdAsync(string studentId, string classId);
     }
 
     public class ClassroomQuery : IClassroomQuery
@@ -30,6 +29,7 @@ namespace AcasService.Application.Queries.Classroom
         private readonly ISubjectRepository _subjectRepository;
 
         private readonly IClassroomEnrollmentRepository _classroomEnrollmentRepository;
+
         private readonly ClassroomMapper _classroomMapper;
         private readonly UserRequestProducer _userRequestProducer;
 
@@ -38,9 +38,8 @@ namespace AcasService.Application.Queries.Classroom
             IClassroomRepository classroomRepository,
             ISubjectRepository subjectRepository,
             ClassroomMapper classroomMapper,
-            UserRequestProducer userRequestProducer)
-            IClassroomEnrollmentRepository classroomEnrollmentRepository,
-            ClassroomMapper classroomMapper)
+            UserRequestProducer userRequestProducer,
+            IClassroomEnrollmentRepository classroomEnrollmentRepository)
         {
             _logger = logger;
             _classroomEnrollmentRepository = classroomEnrollmentRepository;
@@ -132,7 +131,7 @@ namespace AcasService.Application.Queries.Classroom
             var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
             if (!enrollments.Any())
             {
-                throw new KeyNotFoundException($"Student {studentId} has no enrollments");
+               return new List<ClassroomResponse>();
             }
 
             var classroomResponses = new List<ClassroomResponse>();
@@ -141,7 +140,10 @@ namespace AcasService.Application.Queries.Classroom
                 var classroom = await _classroomRepository.FindByIdAsync(enrollment.ClassId);
                 if (classroom != null)
                 {
-                    var classroomResponse = _classroomMapper.ToClassroomResponse(classroom);
+                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
+                    var lecturer = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
+                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(enrollment.ClassId,studentId);
+                    var classroomResponse = _classroomMapper.ToClassroomResponse(classroom,subject,lecturer,enrollclass);
                     classroomResponses.Add(classroomResponse);
                 }
             }
@@ -149,30 +151,30 @@ namespace AcasService.Application.Queries.Classroom
             return classroomResponses;
         }
 
-        public async Task<ClassroomResponse> FindByStudentIdAndClassIdAsync(string studentId, string classId)
-        {
-            var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
-            if (!enrollments.Any())
-            {
-                throw new KeyNotFoundException($"Student {studentId} has no enrollments");
-            }
+        // public async Task<ClassroomResponse> FindByStudentIdAndClassIdAsync(string studentId, string classId)
+        // {
+        //     var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
+        //     if (!enrollments.Any())
+        //     {
+        //         throw new KeyNotFoundException($"Student {studentId} has no enrollments");
+        //     }
 
-            var classroomResponses = new List<ClassroomResponse>();
-            foreach (var enrollment in enrollments)
-            {
-                if (enrollment.ClassId == classId)
-                {
-                    var classroom = await _classroomRepository.FindByIdAsync(enrollment.ClassId);
-                    if (classroom != null)
-                    {
-                        var classroomResponse = _classroomMapper.ToClassroomResponse(classroom);
-                        return classroomResponse;
-                    }
-                }
-            }
+        //     var classroomResponses = new List<ClassroomResponse>();
+        //     foreach (var enrollment in enrollments)
+        //     {
+        //         if (enrollment.ClassId == classId)
+        //         {
+        //             var classroom = await _classroomRepository.FindByIdAsync(enrollment.ClassId);
+        //             if (classroom != null)
+        //             {
+        //                 var classroomResponse = _classroomMapper.ToClassroomResponse(classroom);
+        //                 return classroomResponse;
+        //             }
+        //         }
+        //     }
 
-            throw new KeyNotFoundException($"Classroom with ID {classId} not found for student {studentId}.");
-        }
+        //     throw new KeyNotFoundException($"Classroom with ID {classId} not found for student {studentId}.");
+        // }
     }
 }
 

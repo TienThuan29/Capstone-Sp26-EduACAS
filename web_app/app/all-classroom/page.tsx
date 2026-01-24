@@ -1,274 +1,251 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useMemo } from "react"
-import { Card, Spinner, Button, Select, TextInput } from "flowbite-react"
-import Link from "next/link"
-import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
-import useAxios from "@/hooks/useAxios"
-import { Api } from "@/configs/api"
-
-
-interface LecturerLite {
-  lecturerId: string
-  lecturerName: string
-}
-
-interface SubjectLite {
-  subjectId: string
-  subjectName: string
-}
-interface Classroom {
-  id: string
-  classCode: string
-  className: string
-  lecturer: LecturerLite 
-  subject: SubjectLite
-  semesterName: string
-  createdDate: string
-  endDate: string
-}
+import { useEffect, useState, useMemo } from "react";
+import { Card, Spinner, Button, Select, TextInput } from "flowbite-react";
+import Link from "next/link";
+import HomeNavbar from "@/components/home-navbar";
+import Footer from "@/components/Footer";
+import { useClassroom, Classroom } from "@/hooks/useClassroom";
 
 export default function ListAllClassroomPage() {
-  const axiosInstance = useAxios()
-  const [classrooms, setClassrooms] = useState<Classroom[]>([])
-  const [loading, setLoading] = useState(true)
+  const { getAllClassrooms } = useClassroom();
+  const [classrooms, setClassrooms] = useState<Classroom[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // -- Filter States --
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("All");
-  const [sortBy, setSortBy] = useState("newest"); 
-
+  const [sortBy, setSortBy] = useState("newest");
 
   useEffect(() => {
     const fetchClassrooms = async () => {
       try {
-        setLoading(true)
-        const res = await axiosInstance.get(Api.Classroom.GET_ALL_CLASSROOMS)
-        setClassrooms(res.data?.dataResponse || [])
+        setLoading(true);
+        const data = await getAllClassrooms();
+        setClassrooms(data);
       } catch (err) {
-        console.error("Fetch classrooms failed", err)
+        console.error("Fetch classrooms failed", err);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchClassrooms()
-  }, [axiosInstance])
-
-
+    fetchClassrooms();
+  }, [getAllClassrooms]);
 
   // -- Logic Filter & Sort --
-    const filteredClassrooms = useMemo(() => {
-      let result = [...classrooms];
-  
-      // 1. Search (Class Code or Class Name)
-      if (searchTerm) {
-          const lowerTerm = searchTerm.toLowerCase();
-          result = result.filter(c => 
-              c.className.toLowerCase().includes(lowerTerm) || 
-              c.classCode.toLowerCase().includes(lowerTerm)
-          );
-      }
-  
-      // 2. Filter by Semester
-      if (selectedSemester !== "All") {
-          result = result.filter(c => c.semesterName === selectedSemester);
-      }
-  
-      // 3. Sort
-      result.sort((a, b) => {
-          switch (sortBy) {
-              case "newest":
-                  return new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime();
-              case "oldest":
-                  return new Date(a.createdDate).getTime() - new Date(b.createdDate).getTime();
-              case "name_asc":
-                  return a.className.localeCompare(b.className);
-              case "name_desc":
-                  return b.className.localeCompare(a.className);
-              default:
-                  return 0;
-          }
-      });
+  const filteredClassrooms = useMemo(() => {
+    let result = [...classrooms];
 
-         return result;
+    // 1. Search (Class Code or Class Name)
+    if (searchTerm) {
+      const lowerTerm = searchTerm.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.className.toLowerCase().includes(lowerTerm) ||
+          c.classCode.toLowerCase().includes(lowerTerm),
+      );
+    }
+
+    // 2. Filter by Semester
+    if (selectedSemester !== "All") {
+      result = result.filter((c) => c.semesterName === selectedSemester);
+    }
+
+    // 3. Sort
+    result.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return (
+            new Date(b.createdDate).getTime() -
+            new Date(a.createdDate).getTime()
+          );
+        case "oldest":
+          return (
+            new Date(a.createdDate).getTime() -
+            new Date(b.createdDate).getTime()
+          );
+        case "name_asc":
+          return a.className.localeCompare(b.className);
+        case "name_desc":
+          return b.className.localeCompare(a.className);
+        default:
+          return 0;
+      }
+    });
+
+    return result;
   }, [classrooms, searchTerm, selectedSemester, sortBy]);
 
   // Get unique semesters for filter dropdown
   const semesters = useMemo(() => {
-      const unique = new Set(classrooms.map(c => c.semesterName));
-      return ["All", ...Array.from(unique)];
+    const unique = new Set(classrooms.map((c) => c.semesterName));
+    return ["All", ...Array.from(unique)];
   }, [classrooms]);
 
   if (loading) {
     return (
-      <div className="min-h-screen flex flex-col">
+      <div className="flex min-h-screen flex-col">
         <HomeNavbar />
-        <div className="flex-grow flex justify-center items-center">
+        <div className="flex flex-grow items-center justify-center">
           <Spinner size="xl" color="info" />
         </div>
         <Footer />
       </div>
-    )
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
+    <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <HomeNavbar />
 
-      <main className="flex-grow container mx-auto px-4 pt-24 pb-12 max-w-7xl">
+      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
             Tất cả lớp học
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <p className="mt-2 text-gray-600 dark:text-gray-400">
             Danh sách toàn bộ lớp học đang mở trong hệ thống
           </p>
         </div>
 
         {/* --- Toolbar: Search & Filters --- */}
-        <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 mb-6 sticky top-20 z-10">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                {/* Search */}
-                <div className="md:col-span-2">
-                    <TextInput 
-                        id="search" 
-                        type="text" 
-                        placeholder="Tìm kiếm theo tên lớp hoặc mã lớp..." 
-                        required 
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        icon={() => (
-                            <svg className="w-5 h-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                        )}
+        <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+            {/* Search */}
+            <div className="md:col-span-2">
+              <TextInput
+                id="search"
+                type="text"
+                placeholder="Tìm kiếm theo tên lớp hoặc mã lớp..."
+                required
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                icon={() => (
+                  <svg
+                    className="h-5 w-5 text-gray-500"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                     />
-                </div>
-
-                {/* Filter Semester */}
-                <div>
-                    <Select 
-                        value={selectedSemester}
-                        onChange={(e) => setSelectedSemester(e.target.value)}
-                    >
-                        {semesters.map(sem => (
-                            <option key={sem} value={sem}>
-                                {sem === "All" ? "Tất cả học kỳ" : sem}
-                            </option>
-                        ))}
-                    </Select>
-                </div>
-
-                {/* Sort */}
-                <div>
-                    <Select 
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                    >
-                        <option value="newest">Mới nhất</option>
-                        <option value="oldest">Cũ nhất</option>
-                        <option value="name_asc">Tên (A-Z)</option>
-                        <option value="name_desc">Tên (Z-A)</option>
-                    </Select>
-                </div>
+                  </svg>
+                )}
+              />
             </div>
+
+            {/* Filter Semester */}
+            <div>
+              <Select
+                value={selectedSemester}
+                onChange={(e) => setSelectedSemester(e.target.value)}
+              >
+                {semesters.map((sem) => (
+                  <option key={sem} value={sem}>
+                    {sem === "All" ? "Tất cả học kỳ" : sem}
+                  </option>
+                ))}
+              </Select>
+            </div>
+
+            {/* Sort */}
+            <div>
+              <Select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="newest">Mới nhất</option>
+                <option value="oldest">Cũ nhất</option>
+                <option value="name_asc">Tên (A-Z)</option>
+                <option value="name_desc">Tên (Z-A)</option>
+              </Select>
+            </div>
+          </div>
         </div>
-                
 
         {/* Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3">
           {filteredClassrooms.map((c) => (
             <Card
-  key={c.id}
-  className="
-    rounded-2xl
-    border border-gray-200 dark:border-gray-700
-    bg-white dark:bg-gray-800
-    shadow-sm
-    transition-all duration-300
-    hover:-translate-y-1 hover:shadow-xl
-  "
->
-  <div className="flex flex-col h-full">
+              key={c.id}
+              className="rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
+            >
+              <div className="flex h-full flex-col">
+                {/* Header */}
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="rounded-full bg-gradient-to-r from-[#1F4E79] to-[#C9A24D] px-3 py-1 text-xs font-semibold tracking-wide text-white shadow">
+                    {c.classCode}
+                  </span>
 
-    {/* Header */}
-    <div className="flex items-center justify-between mb-4">
-      <span className="
-        px-3 py-1
-        rounded-full
-        text-xs font-semibold tracking-wide
-        bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]
-        text-white
-        shadow
-      ">
-        {c.classCode}
-      </span>
+                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+                    {c.semesterName}
+                  </span>
+                </div>
 
-      <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-        {c.semesterName}
-      </span>
-    </div>
+                {/* Title */}
+                <h3 className="mb-3 text-lg leading-snug font-bold text-gray-900 dark:text-white">
+                  {c.className}
+                </h3>
 
-    {/* Title */}
-    <h3 className="
-      text-lg font-bold
-      text-gray-900 dark:text-white
-      leading-snug
-      mb-3
-    ">
-      {c.className}
-    </h3>
+                {/* Info */}
+                <div className="mb-6 space-y-2 text-sm text-gray-600 dark:text-gray-400">
+                  <p className="flex items-center gap-2">
+                    <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">
+                      Giảng viên:
+                    </span>
+                    <span className="font-medium text-gray-900 dark:text-gray-200">
+                      {c.lecturer.lecturerName}
+                    </span>
+                  </p>
 
-    {/* Info */}
-    <div className="text-sm text-gray-600 dark:text-gray-400 space-y-2 mb-6">
-      <p className="flex items-center gap-2">
-        <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Giảng viên:</span>
-        <span className="font-medium text-gray-900 dark:text-gray-200">{c.lecturer.lecturerName}</span>
-      </p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">
+                      Môn:
+                    </span>
+                    <span className="font-medium text-gray-900 dark:text-gray-200">
+                      {c.subject.subjectName}
+                    </span>
+                  </p>
 
-      <p className="flex items-center gap-2">
-        <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Môn:</span>
-        <span className="font-medium text-gray-900 dark:text-gray-200">{c.subject.subjectName}</span>
-      </p>
+                  <p className="flex items-center gap-2">
+                    <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">
+                      Thời gian:
+                    </span>
+                    <span className="font-medium text-gray-900 dark:text-gray-200">
+                      {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
+                      {new Date(c.endDate).toLocaleDateString("vi-VN")}
+                    </span>
+                  </p>
+                </div>
 
-      <p className="flex items-center gap-2">
-        <span className="font-semibold text-[#1F4E79] dark:text-[#C9A24D]">Thời gian:</span>
-        <span className="font-medium text-gray-900 dark:text-gray-200">
-          {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
-          {new Date(c.endDate).toLocaleDateString("vi-VN")}
-        </span>
-      </p>
-    </div>
-
-    {/* Action */}
-    <div className="mt-auto">
-      <Button
-        color="gray"
-        outline
-        className="
-          w-full
-          rounded-xl
-          border-gray-300 dark:border-gray-600
-          hover:!bg-[#1F4E79] hover:!text-white hover:!border-[#1F4E79]
-          dark:hover:!bg-[#C9A24D] dark:hover:!text-white dark:hover:!border-[#C9A24D]
-          font-semibold
-        "
-      >
-        Tham gia lớp học
-      </Button>
-    </div>
-
-  </div>
-</Card>
-
+                {/* Action */}
+                <div className="mt-auto">
+                  <Link
+                    href={`/all-classroom/${c.id}`}
+                    className="block w-full"
+                  >
+                    <Button
+                      color="gray"
+                      outline
+                      className="w-full rounded-xl border-gray-300 font-semibold hover:border-[#1F4E79]! hover:!bg-[#1F4E79] hover:!text-white dark:border-gray-600 dark:hover:border-[#C9A24D]! dark:hover:!bg-[#C9A24D] dark:hover:!text-white"
+                    >
+                      Tham gia lớp học
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
           ))}
         </div>
       </main>
 
       <Footer />
     </div>
-  )
+  );
 }

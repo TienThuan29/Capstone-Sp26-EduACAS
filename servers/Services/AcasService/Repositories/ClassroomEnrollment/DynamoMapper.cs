@@ -9,7 +9,7 @@ public static class DynamoMapper
     {
         return new Dictionary<string, AttributeValue>
         {
-            ["id"] = new AttributeValue { S = enrollment.Id }, // 🔥 FIX
+            ["id"] = new AttributeValue { S = enrollment.Id }, 
             ["classId"] = new AttributeValue { S = enrollment.ClassId },
             ["studentId"] = new AttributeValue { S = enrollment.StudentId },
             ["joinedDate"] = new AttributeValue
@@ -20,7 +20,7 @@ public static class DynamoMapper
             {
                 BOOL = enrollment.IsJoining
             },            ["movedOutDate"] = enrollment.MovedOutDate == null
-                ? new AttributeValue { NULL = true }          // 🔥 FIX
+                ? new AttributeValue { NULL = true }          
                 : new AttributeValue
                 {
                     S = enrollment.MovedOutDate.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffZ")

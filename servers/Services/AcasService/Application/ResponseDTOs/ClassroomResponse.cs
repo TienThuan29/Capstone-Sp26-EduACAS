@@ -37,6 +37,10 @@ namespace AcasService.Application.ResponseDTOs
         [JsonPropertyName("isDeleted")]
         public bool IsDeleted { get; set; }
 
+         [JsonPropertyName("enrollment")]
+    public EnrollmentInfoResponse Enrollment { get; set; }
+        = new EnrollmentInfoResponse();
+
     }
 
     public class SubjectLiteResponse
@@ -54,4 +58,20 @@ namespace AcasService.Application.ResponseDTOs
         [JsonPropertyName("lecturerName")]
         public string LecturerName { get; set; } = string.Empty;
     }
+
+
+public class EnrollmentInfoResponse
+{
+    [JsonPropertyName("isJoining")]
+    public bool IsJoining { get; set; }
+
+    [JsonPropertyName("joinedDate")]
+    public DateTime? JoinedDate { get; set; }
+
+    [JsonPropertyName("movedOutDate")]
+    public DateTime? MovedOutDate { get; set; }
+}
+
+
+
 }

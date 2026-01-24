@@ -1,11 +1,12 @@
 
+using AcasService.Models;
 using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
 namespace AcasService.Repositories.ClassroomEnrollment;
 
-public class ClassroomEnrollmentRepository: DynamoRepository, IClassroomEnrollmentRepository
+public class ClassroomEnrollmentRepository : DynamoRepository, IClassroomEnrollmentRepository
 {
     private readonly string _classroomEnrollmentTableName;
     private readonly IConfiguration _configuration;
@@ -104,84 +105,128 @@ public class ClassroomEnrollmentRepository: DynamoRepository, IClassroomEnrollme
     }
 
 
-   public async Task<List<Models.ClassEnrollment>> FindByStudentIdAsync(string studentId)
-{
-    try
+    public async Task<List<Models.ClassEnrollment>> FindByStudentIdAsync(string studentId)
     {
-        var enrollments = new List<Models.ClassEnrollment>();
-        Dictionary<string, AttributeValue>? lastKey = null;
-
-        do
+        try
         {
-            var scanRequest = new ScanRequest
+            var enrollments = new List<Models.ClassEnrollment>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
             {
-                TableName = _classroomEnrollmentTableName,
-                FilterExpression = "studentId = :studentId",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                var scanRequest = new ScanRequest
                 {
-                    [":studentId"] = new AttributeValue { S = studentId }
-                },
-                ExclusiveStartKey = lastKey
-            };
+                    TableName = _classroomEnrollmentTableName,
+                    FilterExpression = "studentId = :studentId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":studentId"] = new AttributeValue { S = studentId }
+                    },
+                    ExclusiveStartKey = lastKey
+                };
 
-            var response = await _dynamoDBClient.ScanAsync(scanRequest);
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
 
-            foreach (var item in response.Items)
-            {
-                enrollments.Add(
-                    DynamoMapper.DynamoItemToClassEnrollment(item)
-                );
-            }
+                foreach (var item in response.Items)
+                {
+                    enrollments.Add(
+                        DynamoMapper.DynamoItemToClassEnrollment(item)
+                    );
+                }
 
-            lastKey = response.LastEvaluatedKey;
+                lastKey = response.LastEvaluatedKey;
 
-        } while (lastKey != null && lastKey.Count > 0);
+            } while (lastKey != null && lastKey.Count > 0);
 
-        return enrollments;
-    }
-    catch (Exception ex)
-    {
-        _logger.LogError(ex, "Error finding classroom enrollments for student {StudentId}", studentId);
-        throw;
-    }
-}
-
-public async Task<Models.ClassEnrollment?> FindByClassAndStudentIdAsync(string classId, string studentId)
-{
-    try
-    {
-        Dictionary<string, AttributeValue>? lastKey = null;
-        do
+            return enrollments;
+        }
+        catch (Exception ex)
         {
-            var scanRequest = new ScanRequest
-            {
-                TableName = _classroomEnrollmentTableName,
-                FilterExpression = "classId = :classId AND studentId = :studentId",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                {
-                    [":classId"] = new AttributeValue { S = classId },
-                    [":studentId"] = new AttributeValue { S = studentId }
-                },
-                ExclusiveStartKey = lastKey
-            };
-
-            var response = await _dynamoDBClient.ScanAsync(scanRequest);
-
-            foreach (var item in response.Items)
-            {
-                return DynamoMapper.DynamoItemToClassEnrollment(item);
-            }
-
-            lastKey = response.LastEvaluatedKey;
-
-        } while (lastKey != null && lastKey.Count > 0);
-
-        return null;
+            _logger.LogError(ex, "Error finding classroom enrollments for student {StudentId}", studentId);
+            throw;
+        }
     }
-    catch (Exception exception)
+
+    public async Task<Models.ClassEnrollment?> FindByClassAndStudentIdAsync(string classId, string studentId)
     {
-        throw new Exception($"Error finding classroom enrollment for class {classId} and student {studentId}",
-            exception);
+        try
+        {
+            Dictionary<string, AttributeValue>? lastKey = null;
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _classroomEnrollmentTableName,
+                    FilterExpression = "classId = :classId AND studentId = :studentId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":classId"] = new AttributeValue { S = classId },
+                        [":studentId"] = new AttributeValue { S = studentId }
+                    },
+                    ExclusiveStartKey = lastKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+
+                foreach (var item in response.Items)
+                {
+                    return DynamoMapper.DynamoItemToClassEnrollment(item);
+                }
+
+                lastKey = response.LastEvaluatedKey;
+
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return null;
+        }
+        catch (Exception exception)
+        {
+            throw new Exception($"Error finding classroom enrollment for class {classId} and student {studentId}",
+                exception);
+        }
     }
-}
+
+    public async Task<List<Models.ClassEnrollment>> FindByClassIdAsync(string classId)
+    {
+        try
+        {
+            var enrollments = new List<Models.ClassEnrollment>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _classroomEnrollmentTableName,
+                    FilterExpression = "classId = :classId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":classId"] = new AttributeValue { S = classId }
+                    },
+                    ExclusiveStartKey = lastKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+
+                foreach (var item in response.Items)
+                {
+                    enrollments.Add(
+                        DynamoMapper.DynamoItemToClassEnrollment(item)
+                    );
+                }
+
+                lastKey = response.LastEvaluatedKey;
+
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return enrollments;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Error finding classroom enrollments for class {ClassId}", classId);
+            throw;
+        }
+    }
+
 }

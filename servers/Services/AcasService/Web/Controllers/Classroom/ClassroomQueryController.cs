@@ -92,26 +92,26 @@ namespace AcasService.Web.Controllers.Classroom
         }
 
 
-        [HttpGet("student/{studentId}/class/{classId}")]
-        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetClassroomByStudentIdAndClassId(string studentId, string classId)
-        {
-            try
-            {
-                _logger.LogInformation("Fetching classroom for student id: {StudentId} and class id: {ClassId}", studentId, classId);
-                var classroom = await _classroomQuery.FindByStudentIdAndClassIdAsync(studentId, classId);
-                return ResponseUtil.Success(classroom, "Get classroom for student successfully", 200);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Classroom not found for student id: {StudentId} and class id: {ClassId}", studentId, classId);
-                return ResponseUtil.Error<ClassroomResponse>("Classroom not found for the student", 404);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching classroom for student.");
-                return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
-            }
-        }
+        // [HttpGet("student/{studentId}/class/{classId}")]
+        // public async Task<ActionResult<ApiResponse<ClassroomResponse>>> GetClassroomByStudentIdAndClassId(string studentId, string classId)
+        // {
+        //     try
+        //     {
+        //         _logger.LogInformation("Fetching classroom for student id: {StudentId} and class id: {ClassId}", studentId, classId);
+        //         var classroom = await _classroomQuery.FindByStudentIdAndClassIdAsync(studentId, classId);
+        //         return ResponseUtil.Success(classroom, "Get classroom for student successfully", 200);
+        //     }
+        //     catch (KeyNotFoundException ex)
+        //     {
+        //         _logger.LogWarning(ex, "Classroom not found for student id: {StudentId} and class id: {ClassId}", studentId, classId);
+        //         return ResponseUtil.Error<ClassroomResponse>("Classroom not found for the student", 404);
+        //     }
+        //     catch (Exception ex)
+        //     {
+        //         _logger.LogError(ex, "Error occurred while fetching classroom for student.");
+        //         return ResponseUtil.Error<ClassroomResponse>("Internal Server Error", 500);
+        //     }
+        // }
     }
 
 }

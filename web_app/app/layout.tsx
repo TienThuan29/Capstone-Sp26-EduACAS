@@ -19,7 +19,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Edu ACAS",
-  description: "Automated Console-based Programming Assessment System for University Education",
+  description:
+    "Automated Console-based Programming Assessment System for University Education",
 };
 
 export default function RootLayout({
@@ -34,13 +35,12 @@ export default function RootLayout({
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <ThemeInit />
         <ToastProvider>
           <UserProvider>
-            <ThemeProvider>
-              {children}
-            </ThemeProvider>
+            <ThemeProvider>{children}</ThemeProvider>
           </UserProvider>
         </ToastProvider>
       </body>

@@ -13,14 +13,15 @@ namespace AcasService.Application.Mappers
             {
                 subjectLite.Id = subject.Id;
                 subjectLite.SubjectName = subject.SubjectName;
-            } else
+            }
+            else
             {
                 subjectLite.Id = "UNKNOWN SUBJECT";
                 subjectLite.SubjectName = "UNKNOWN SUBJECT";
             }
 
             var lecturerLite = new LecturerLiteResponse();
-            if(lecturerProfile != null)
+            if (lecturerProfile != null)
             {
                 lecturerLite.Id = lecturerProfile.Id;
                 lecturerLite.LecturerName = lecturerProfile.Fullname;
@@ -46,5 +47,40 @@ namespace AcasService.Application.Mappers
                 IsDeleted = classroom.IsDeleted
             };
         }
+
+        public ClassroomResponse ToClassroomResponse(
+    Classroom classroom,
+    Subject subject,
+    UserProfileResponse? lecturerProfile,
+    ClassEnrollment? classEnrollment
+)
+        {
+            
+            var response = ToClassroomResponse(classroom, subject, lecturerProfile);
+
+            
+            var enrollmentInfo = new EnrollmentInfoResponse();
+
+            if (classEnrollment != null)
+            {
+                enrollmentInfo.IsJoining = classEnrollment.IsJoining;
+                enrollmentInfo.JoinedDate = classEnrollment.IsJoining
+                    ? classEnrollment.JoinedDate
+                    : null;
+                enrollmentInfo.MovedOutDate = classEnrollment.IsJoining
+                    ? null
+                    : classEnrollment.MovedOutDate;
+            }
+            else
+            {
+                enrollmentInfo.IsJoining = false;
+                enrollmentInfo.JoinedDate = null;
+                enrollmentInfo.MovedOutDate = null;
+            }
+
+            response.Enrollment = enrollmentInfo;
+            return response;
+        }
+
     }
 }
