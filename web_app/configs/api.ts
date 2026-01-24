@@ -25,5 +25,9 @@ export const Api = {
 
     Subject: {
         GET_ALL_SUBJECTS: '/api/acas/v1/subjects',
+        CREATE_SUBJECT: '/api/acas/v1/subjects',
+        UPDATE_SUBJECT: '/api/acas/v1/subjects', // + /:id
+        SOFT_DELETE_SUBJECT: '/api/acas/v1/subjects', // + /:id/soft-delete
+        DELETE_SUBJECT: '/api/acas/v1/subjects', // + /:id
     }
 }
