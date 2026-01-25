@@ -90,10 +90,7 @@ public class UserQuery : IUserQuery
     {
         try
         {
-            // Verify Google ID token
             var googlePayload = await _googleTokenVerifier.VerifyTokenAsync(idToken);
-            
-            // Find user by email
             var user = await _userRepository.FindByEmailAsync(googlePayload.Email);
 
             if (user == null)
@@ -125,8 +122,6 @@ public class UserQuery : IUserQuery
 
             var accessToken = _jwtUtil.GenerateAccessToken(tokenPayload);
             var refreshToken = _jwtUtil.GenerateRefreshToken(tokenPayload);
-
-            // Update last login date
             user.LastLoginDate = DateTime.UtcNow;
 
             return new AuthResponse
