@@ -48,4 +48,19 @@ public class AuthQueryController : ControllerBase
             return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
         }
     }
+    
+    [HttpGet("users")]
+    public async Task<ActionResult<ApiResponse<List<UserProfileResponse>>>> GetAllUsers()
+    {
+        try
+        {
+            var users = await _userQuery.GetAllUsersAsync();
+            return ResponseUtil.Success(users, "Users retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all users");
+            return ResponseUtil.Error<List<UserProfileResponse>>("Internal Server Error", 500);
+        }
+    }
 }

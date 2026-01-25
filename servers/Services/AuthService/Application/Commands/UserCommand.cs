@@ -19,6 +19,12 @@ public interface IUserCommand
     public Task<bool> SendForgotPasswordLinkAsync(ForgotPasswordRequest forgotPasswordRequest);
 
     public Task<bool> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest);
+
+    public Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest, string requesterUserId);
+
+    public Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest);
+    
+    public Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable);
 }
 
 public class UserCommand : IUserCommand
@@ -87,7 +93,8 @@ public class UserCommand : IUserCommand
             {
                 UserProfile = _userMapper.ToUserResponse(createdUser),
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                FirstLogin = createdUser.FirstLogin ?? false
             };
         }
 
@@ -183,5 +190,205 @@ public class UserCommand : IUserCommand
             throw new InvalidOperationException("Failed to update user password");
         }
         return true;
+    }
+
+    /// <summary>
+    /// Grant an account to a user (email-based)
+    /// Only Admin can grant accounts to Lecturer and Student
+    /// </summary>
+    public async Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest, string requesterUserId)
+    {
+        // Verify requester exists and get their role
+        var requester = await _userRepository.FindByIdAsync(requesterUserId);
+        if (requester == null)
+        {
+            throw new InvalidOperationException("Requester user not found");
+        }
+
+        // Validate permission - Only ADMIN can grant accounts
+        if (requester.Role != Role.ADMIN)
+        {
+            throw new InvalidOperationException("Only Admin can grant accounts");
+        }
+
+        var targetRole = Enum.Parse<Role>(grantAccountRequest.Role);
+        if (targetRole != Role.LECTURER && targetRole != Role.STUDENT)
+        {
+            throw new InvalidOperationException("Admin can only grant accounts to Lecturer or Student");
+        }
+
+        // Check if user already exists
+        var existingUser = await _userRepository.FindByEmailAsync(grantAccountRequest.Email);
+        if (existingUser != null)
+        {
+            throw new InvalidOperationException("User with this email already exists");
+        }
+
+        // Generate temporary password
+        var temporaryPassword = GenerateTemporaryPassword();
+
+        // Create new user with FirstLogin = true
+        var newUser = new User
+        {
+            Email = grantAccountRequest.Email,
+            RoleNumber = grantAccountRequest.RoleNumber,
+            Fullname = grantAccountRequest.Fullname,
+            Password = temporaryPassword,
+            Role = targetRole,
+            FirstLogin = true,
+        };
+
+        var createdUser = await _userRepository.CreateAsync(newUser);
+        if (createdUser == null)
+        {
+            throw new InvalidOperationException("Failed to create user account");
+        }
+
+        // Prepare email with login credentials
+        var emailSubject = "Your Account Credentials";
+        var emailBody = GenerateGrantAccountEmailBody(
+            createdUser.Email, 
+            temporaryPassword, 
+            createdUser.Fullname,
+            createdUser.Role.ToString()
+        );
+
+        // Send email with credentials
+        await _emailService.SendEmailAsync(
+            createdUser.Email, 
+            emailSubject, 
+            emailBody, 
+            EmailService.EmailPasswordResetTemplate
+        );
+
+        return new GrantAccountResponse
+        {
+            UserId = createdUser.Id,
+            Email = createdUser.Email,
+            Fullname = createdUser.Fullname,
+            Role = createdUser.Role.ToString(),
+            TemporaryPassword = temporaryPassword,
+            FirstLogin = true,
+            Message = $"Account created and credentials sent to {createdUser.Email}"
+        };
+    }
+
+    /// <summary>
+    /// Reset password after first login (when FirstLogin = true)
+    /// </summary>
+    public async Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest)
+    {
+        // Find user by email
+        var user = await _userRepository.FindByEmailAsync(resetFirstLoginRequest.Email);
+        if (user == null)
+        {
+            throw new InvalidOperationException("User not found");
+        }
+
+        // Check if FirstLogin is true
+        if (user.FirstLogin != true)
+        {
+            throw new InvalidOperationException("This endpoint is only for users on first login");
+        }
+
+        // Update password and set FirstLogin to false
+        var updatedUser = await _userRepository.UpdatePasswordAndFirstLoginAsync(
+            user.Id,
+            resetFirstLoginRequest.NewPassword,
+            false
+        );
+
+        if (updatedUser == null)
+        {
+            throw new InvalidOperationException("Failed to reset password");
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Generate a temporary password (8 characters, mix of upper, lower, digits, and special chars)
+    /// </summary>
+    private string GenerateTemporaryPassword()
+    {
+        const string uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const string lowercase = "abcdefghijklmnopqrstuvwxyz";
+        const string digits = "0123456789";
+        const string specialChars = "!@#$%^&*";
+
+        var random = new Random();
+        var password = new System.Text.StringBuilder();
+
+        // Ensure at least one character from each category
+        password.Append(uppercase[random.Next(uppercase.Length)]);
+        password.Append(lowercase[random.Next(lowercase.Length)]);
+        password.Append(digits[random.Next(digits.Length)]);
+        password.Append(specialChars[random.Next(specialChars.Length)]);
+
+        // Fill the rest with random characters from all categories
+        string allChars = uppercase + lowercase + digits + specialChars;
+        for (int i = password.Length; i < 10; i++)
+        {
+            password.Append(allChars[random.Next(allChars.Length)]);
+        }
+
+        // Shuffle the password
+        var passwordArray = password.ToString().ToCharArray();
+        for (int i = passwordArray.Length - 1; i > 0; i--)
+        {
+            int randomIndex = random.Next(i + 1);
+            (passwordArray[i], passwordArray[randomIndex]) = (passwordArray[randomIndex], passwordArray[i]);
+        }
+
+        return new string(passwordArray);
+    }
+
+    /// <summary>
+    /// Generate email body for account grant notification
+    /// </summary>
+    private string GenerateGrantAccountEmailBody(string email, string temporaryPassword, string fullname, string role)
+    {
+        return $@"
+            <html>
+                <body>
+                    <h2>Welcome {fullname}!</h2>
+                    <p>Your account has been created with the following credentials:</p>
+                    <table border='1' cellpadding='10'>
+                        <tr>
+                            <td><strong>Email:</strong></td>
+                            <td>{email}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Temporary Password:</strong></td>
+                            <td>{temporaryPassword}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Role:</strong></td>
+                            <td>{role}</td>
+                        </tr>
+                    </table>
+                    <p><strong>Important:</strong> Please log in immediately and change your password to a secure one.</p>
+                    <p>Best regards,<br/>EduACAS Team</p>
+                </body>
+            </html>
+        ";
+    }
+
+    public async Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable)
+    {
+        try
+        {
+            var updatedUser = await _userRepository.UpdateUserAsync(userId, fullname, roleNumber, role, isEnable);
+            if (updatedUser == null)
+            {
+                throw new InvalidOperationException("Failed to update user");
+            }
+            return _userMapper.ToUserResponse(updatedUser);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user");
+            throw;
+        }
     }
 }

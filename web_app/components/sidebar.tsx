@@ -4,12 +4,14 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { useThemeContext } from "@/components/ThemeProvider";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Sidebar = () => {
   const pathname = usePathname();
   const [isExpanded, setIsExpanded] = useState(true);
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const { isDark: isDarkMode, toggleTheme } = useThemeContext();
+  const { logout, isLoggingOut } = useAuth();
 
   // Check if we are in a classroom detail page or related classroom subpage
   const isClassroomRoute = pathname.includes("/my-classroom/") || pathname.includes("/manage-room/");
@@ -247,7 +249,21 @@ const Sidebar = () => {
     },
   ];
 
-  const menuItems = isClassroomRoute ? classroomMenuItems : defaultMenuItems;
+  const adminMenuItems = [
+    { icon: DashboardIcon, label: "Trang quản trị", href: "/admin" },
+    { icon: ClassesIcon, label: "Quản lý lớp học", href: "/admin/classes" },
+    { icon: AssignmentsIcon, label: "Quản lý môn học", href: "/admin/subjects" },
+    { icon: () => (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
+      </svg>
+    ), label: "Ngôn ngữ lập trình", href: "/admin/programming-languages" },
+    { icon: UsersIcon, label: "Quản lý người dùng", href: "/admin/users" },
+  ];
+
+  // Determine which menu to show based on route
+  const isAdminRoute = pathname.startsWith("/admin");
+  const menuItems = isClassroomRoute ? classroomMenuItems : isAdminRoute ? adminMenuItems : defaultMenuItems;
 
   const settingsItems = [
     { icon: NotificationIcon, label: "Thông báo", href: "/notifications" },
@@ -377,20 +393,22 @@ const Sidebar = () => {
         {/* Logout Button */}
         {isExpanded ? (
           <button
-            className={`flex w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isDarkMode
-                ? "text-gray-300 hover:bg-red-900/20"
-                : "text-gray-700 hover:bg-red-50"
-              }`}
+            onClick={logout}
+            disabled={isLoggingOut}
+            className={`w-full px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 ${
+              isDarkMode ? "text-gray-300 hover:bg-red-900/20" : "text-gray-700 hover:bg-red-50"
+            } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <LogoutIcon />
-            Đăng xuất
+            {isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}
           </button>
         ) : (
           <button
-            className={`flex w-full justify-center rounded-lg p-2 transition-colors ${isDarkMode
-                ? "text-gray-300 hover:bg-red-900/20"
-                : "text-gray-700 hover:bg-red-50"
-              }`}
+            onClick={logout}
+            disabled={isLoggingOut}
+            className={`w-full flex justify-center p-2 rounded-lg transition-colors ${
+              isDarkMode ? "text-gray-300 hover:bg-red-900/20" : "text-gray-700 hover:bg-red-50"
+            } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             <LogoutIcon />
           </button>

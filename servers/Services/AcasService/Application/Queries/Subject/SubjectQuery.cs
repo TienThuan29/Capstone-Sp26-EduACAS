@@ -9,9 +9,19 @@ namespace AcasService.Application.Queries.Subject
 
         Task<SubjectResponse> GetSubjectByIdAsync(string subjectId);
         Task<List<SubjectResponse>> GetAllSubjectsAsync();
+        Task<List<SubjectResponse>> SearchSubjectsAsync(
+            string? searchTerm = null,
+            bool? isDeleted = null,
+            string? createdBy = null);
+        Task<PagedSubjectResponse> GetPagedSubjectsAsync(
+            int page = 1,
+            int pageSize = 10,
+            string? sortBy = null,
+            bool ascending = true,
+            bool? includeDeleted = false);
     }
 
-    public class SubjectQuery : ISubjectQuery
+    public class SubjectQuery : ISubjectQuery 
     {
      
         private readonly ISubjectRepository _subjectRepository;
@@ -65,6 +75,57 @@ namespace AcasService.Application.Queries.Subject
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all subjects");
+                throw;
+            }
+        }
+
+        public async Task<List<SubjectResponse>> SearchSubjectsAsync(
+            string? searchTerm = null,
+            bool? isDeleted = null,
+            string? createdBy = null)
+        {
+            try
+            {
+                var subjects = await _subjectRepository.SearchAsync(searchTerm, isDeleted, createdBy);
+                return subjects.Select(s => _subjectMapper.ToSubjectResponse(s)).ToList();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error searching subjects");
+                throw;
+            }
+        }
+
+        public async Task<PagedSubjectResponse> GetPagedSubjectsAsync(
+            int page = 1,
+            int pageSize = 10,
+            string? sortBy = null,
+            bool ascending = true,
+            bool? includeDeleted = false)
+        {
+            try
+            {
+                if (page < 1) page = 1;
+                if (pageSize < 1) pageSize = 10;
+                if (pageSize > 100) pageSize = 100;
+
+                var (items, totalCount) = await _subjectRepository.GetPagedAsync(
+                    page, pageSize, sortBy, ascending, includeDeleted);
+
+                var responseList = items.Select(s => _subjectMapper.ToSubjectResponse(s)).ToList();
+
+                return new PagedSubjectResponse
+                {
+                    Items = responseList,
+                    Page = page,
+                    PageSize = pageSize,
+                    TotalCount = totalCount,
+                    TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting paged subjects");
                 throw;
             }
         }

@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { AuthTokens, UserProfile } from '@/types/user';
 import axios, { HttpStatusCode } from 'axios';
 import { Api } from '@/configs/api';
-import { permanentRedirect,useRouter } from 'next/navigation'
+import { permanentRedirect, useRouter } from 'next/navigation'
 import { Constant } from '@/configs/constant';
 import { PageUrl } from '@/configs/page.url';
 import { validateUserRole } from '@/hooks/useRoleValidation';
@@ -163,20 +163,30 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 setAuthTokens(tokens);
                 localStorage.setItem(AUTH_TOKENS_KEY, JSON.stringify(tokens));
 
-                const userProfile = response.data.dataResponse.userProfile;
+                const userProfile = {
+                    ...response.data.dataResponse.userProfile,
+                    firstLogin: response.data.dataResponse.firstLogin ?? response.data.dataResponse.userProfile.firstLogin ?? false
+                };
 
                 setUser(userProfile);
                 localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(userProfile));
+
+                // Check for first login
+                if (userProfile.firstLogin) {
+                    router.push(PageUrl.FIRST_LOGIN_PAGE);
+                    return;
+                }
+
                 const roleValidator = await validateUserRole(userProfile);
 
                 if (roleValidator.isStudent) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isLecturer) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isAdmin) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else {
                     toast.showError('Invalid role!');
@@ -215,13 +225,13 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                 const roleValidator = await validateUserRole(userProfile);
 
                 if (roleValidator.isStudent) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isLecturer) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isAdmin) {
-                    router.push(PageUrl.TEST_AUTH_PAGE);
+                    router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else {
                     toast.showError('Invalid role!');
@@ -249,10 +259,16 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             // Add a small delay to show the loading state
             await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Clear all authentication related data from localStorage
             localStorage.removeItem(AUTH_TOKENS_KEY);
             localStorage.removeItem(USER_PROFILE_KEY);
+            
+            // Clear state
             setUser(null);
             setAuthTokens(null);
+            setSessionExpired(false);
+            
             permanentRedirect(PageUrl.LOGIN_PAGE);
         } catch (error) {
             console.error('Error during logout:', error);
@@ -261,6 +277,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             localStorage.removeItem(USER_PROFILE_KEY);
             setUser(null);
             setAuthTokens(null);
+            setSessionExpired(false);
             permanentRedirect(PageUrl.LOGIN_PAGE);
         } finally {
             setIsLoggingOut(false);
