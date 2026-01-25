@@ -13,7 +13,7 @@ public abstract class DynamoRepository
     protected string TableName { get => _tableName; set => _tableName = value; }
 
     public DynamoRepository(
-        IAmazonDynamoDB dynamoDBClient, 
+        IAmazonDynamoDB dynamoDBClient,
         ILogger<DynamoRepository> logger
     )
     {
@@ -114,7 +114,7 @@ public abstract class DynamoRepository
             {
                 TableName = tableName
             };
-            
+
             if (!string.IsNullOrEmpty(filterExpression))
             {
                 request.FilterExpression = filterExpression;

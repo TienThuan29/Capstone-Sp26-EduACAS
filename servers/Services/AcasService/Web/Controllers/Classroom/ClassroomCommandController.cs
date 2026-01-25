@@ -55,6 +55,26 @@ namespace AcasService.Web.Controllers.Classroom
             }
         }
 
+        [HttpPatch("{id}/soft-delete")]
+        public async Task<ActionResult<ApiResponse<bool>>> SoftDeleteClassroom(string id)
+        {
+            try
+            {
+                var result = await _classroomCommand.SoftDeleteClassroomAsync(id);
+                return ResponseUtil.Success(result != null, "Classroom soft-deleted successfully", 200);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Classroom not found for soft deletion");
+                return ResponseUtil.Error<bool>("Classroom not found", 404);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error soft deleting classroom");
+                return ResponseUtil.Error<bool>("Failed to soft delete classroom", 500);
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse<bool>>> DeleteClassroom(string id)
         {
@@ -73,6 +93,6 @@ namespace AcasService.Web.Controllers.Classroom
                 _logger.LogError(ex, "Error deleting classroom");
                 return ResponseUtil.Error<bool>("Failed to delete classroom", 500);
             }
-        }
+        }   
     }
 }

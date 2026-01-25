@@ -1,7 +1,6 @@
 using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
-
 namespace AcasService.Repositories.Classroom;
 
 public class ClassroomRepository : DynamoRepository, IClassroomRepository
@@ -85,6 +84,40 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         }
     }
 
+    public async Task SoftDeleteAsync(string classroomId)
+    {
+        try
+        {
+          
+            var key = DynamoMapper.CreateKey(classroomId);
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                {
+                    "isDeleted", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { BOOL = true }
+                    }
+                },
+                {
+                    "updatedDate", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { S = DateTime.UtcNow.ToString("o") }
+                    }
+                } 
+                
+            };
+            await UpdateItemAsync(key, updates, _classroomTableName);
+
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting classroom {Id}", classroomId);
+            throw;
+        }
+    }
+
     public async Task DeleteAsync(string classroomId)
     {
         try
@@ -100,7 +133,74 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         }
     }
 
+    public async Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword)
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _classroomTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var allClassrooms = response.Items
+                .Select(item => DynamoMapper.DynamoItemToClassroom(item));
+            if (!string.IsNullOrEmpty(keyword))
+            {
+                var lowerKeyword = keyword.ToLower().Trim();
+                return allClassrooms.Where(c =>
+                        (!string.IsNullOrEmpty(c.ClassCode) && c.ClassCode.ToLower().Contains(lowerKeyword))
+                  );
+            }
+
+            return allClassrooms;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving classrooms by keyword {Keyword}", keyword);
+            throw;
+        }
+    }
+
+    public async Task<IEnumerable<Models.Classroom>> GetClassroomsByLecturerIdAsync(string lecturerId)
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _classroomTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var allClassrooms = response.Items
+                .Select(item => DynamoMapper.DynamoItemToClassroom(item));
+            return allClassrooms.Where(c => c.LecturerId == lecturerId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving classrooms by lecturerId {LecturerId}", lecturerId);
+            throw;
+        }
+    }
 
 
 
+    public async Task<Models.Classroom?> FindByEnrollKeyAsync(string enrolKey)
+    {
+        try
+        {
+            var request = new QueryRequest
+            {
+                TableName = "acas-classrooms",
+                IndexName = "EnrolKeyIndex",
+                KeyConditionExpression = "enrolKey = :ek",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    { ":ek", new AttributeValue { S = enrolKey } }
+                },
+                Limit = 1
+            };
+
+            var response = await _dynamoDBClient.QueryAsync(request);
+            if (response.Items.Count == 0) return null;
+            return DynamoMapper.DynamoItemToClassroom(response.Items[0]);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding classroom by enroll key: {EnrolKey}", enrolKey);
+            throw;
+        }
+    }
 }

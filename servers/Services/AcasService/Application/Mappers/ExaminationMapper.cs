@@ -5,15 +5,23 @@ namespace AcasService.Application.Mappers;
 
 public class ExaminationMapper
 {
-    public ExaminationResponse ToExaminationResponse(Models.Examination exam)
+    public ExaminationResponse ToExaminationResponse(Examination exam,Classroom classroom,ProgrammingLanguage programmingLanguage )
     {
+        var classroomLite = new ClassroomLiteResponse();
+        classroomLite.Id=classroom.Id;
+        classroomLite.ClassName=classroom.ClassName;
+
+        var programmingLanguageLite = new ProgrammingLanguageLiteResponse();
+        programmingLanguageLite.Id=programmingLanguage.Id;
+        programmingLanguageLite.Name=programmingLanguage.LanguageName;
+
         return new ExaminationResponse
         {
             Id = exam.Id,
             ExamName = exam.ExamName,
-            ProgrammingLanguageId = exam.ProgrammingLanguageId,
+           ProgrammingLanguage =programmingLanguageLite,
             ProblemIds = exam.ProblemIds,
-            ClassroomId = exam.ClassroomId,
+            Classroom = classroomLite,
             StartDatetime = exam.StartDatetime,
             EndDatetime = exam.EndDatetime,
             Description = exam.Description,

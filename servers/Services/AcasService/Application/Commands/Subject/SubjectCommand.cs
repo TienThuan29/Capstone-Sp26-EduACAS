@@ -9,6 +9,7 @@ namespace AcasService.Application.Commands.Subject
     {
         Task<SubjectResponse> CreateSubjectAsync(CreateSubjectRequest request);
         Task<SubjectResponse> UpdateSubjectAsync(string subjectId, UpdateSubjectRequest request);
+        Task<SubjectResponse> SoftDeleteSubjectAsync(string subjectId);
         Task<SubjectResponse> DeleteSubjectAsync(string subjectId);
     }
 
@@ -76,7 +77,20 @@ namespace AcasService.Application.Commands.Subject
             return _subjectMapper.ToSubjectResponse(result);
         }
 
-     
+        public async Task<SubjectResponse> SoftDeleteSubjectAsync(string subjectId)
+        {
+            var existingSubject = await _subjectRepository.FindByIdAsync(subjectId);
+            if (existingSubject == null)
+            {
+                _logger.LogError("Subject not found");
+                throw new Exception("Subject not found");
+            }
+            await _subjectRepository.SoftDeleteAsync(subjectId);
+            existingSubject.IsDeleted = true;
+            existingSubject.UpdatedDate = DateTime.UtcNow;
+            return _subjectMapper.ToSubjectResponse(existingSubject);
+        }
+
         public async Task<SubjectResponse> DeleteSubjectAsync(string subjectId)
         {
             var existingSubject = await _subjectRepository.FindByIdAsync(subjectId);

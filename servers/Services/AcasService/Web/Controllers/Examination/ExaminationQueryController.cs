@@ -57,4 +57,20 @@ public class ExaminationQueryController : ControllerBase
             return ResponseUtil.Error<List<ExaminationResponse?>>("Internal Server Error",500);
         }
     }
+
+
+    [HttpGet("by-class/{classId}")]
+    public async Task<ActionResult<ApiResponse<List<ExaminationResponse?>>>> GetByClassId(string classId)
+    {
+        try
+        {
+            var exams = await _examinationQuery.GetByClassIdAsync(classId);
+            return ResponseUtil.Success(exams, "Examinations retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving examinations by class id");
+            return ResponseUtil.Error<List<ExaminationResponse?>>("Internal Server Error", 500);
+        }
+    }
 }
