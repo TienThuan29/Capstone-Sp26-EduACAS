@@ -43,3 +43,5 @@ next-env.d.ts
 /.vscode/*
 ./.idea/*
 .vscode/*
+
+package-lock.json

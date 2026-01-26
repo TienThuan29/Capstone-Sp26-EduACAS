@@ -183,4 +183,121 @@ public class AuthCommandController : ControllerBase
             return ResponseUtil.Error<object>("Internal Server Error", 500);
         }
     }
+
+    [HttpPost("grant-account")]
+    [EnableRateLimiting("AuthPolicy")]
+    public async Task<ActionResult<ApiResponse<GrantAccountResponse>>> GrantAccount([FromBody] GrantAccountRequest grantAccountRequest)
+    {
+        try
+        {
+            // Get the requester's user ID from the Authorization header
+            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<GrantAccountResponse>("Authorization token is required", 401);
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var requesterProfile = await _userQuery.GetProfileAsync(accessToken);
+            
+            var grantResponse = await _userCommand.GrantAccountAsync(grantAccountRequest, requesterProfile.Id);
+            return ResponseUtil.Success(grantResponse, "Account granted successfully and credentials sent to email", 201);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Only Admin can grant"))
+        {
+            return ResponseUtil.Error<GrantAccountResponse>(ex.Message, 403);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Admin can only grant"))
+        {
+            return ResponseUtil.Error<GrantAccountResponse>(ex.Message, 403);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
+        {
+            return ResponseUtil.Error<GrantAccountResponse>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            return ResponseUtil.Error<GrantAccountResponse>(ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Grant account error");
+            return ResponseUtil.Error<GrantAccountResponse>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPost("reset-first-login-password")]
+    [EnableRateLimiting("AuthPolicy")]
+    public async Task<ActionResult<ApiResponse<object>>> ResetFirstLoginPassword([FromBody] ResetFirstLoginPasswordRequest resetFirstLoginRequest)
+    {
+        try
+        {
+            // Get the user's authentication token
+            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<object>("Authorization token is required", 401);
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            var userProfile = await _userQuery.GetProfileAsync(accessToken);
+            
+            // Verify that the user is resetting their own password
+            if (!userProfile.Email.Equals(resetFirstLoginRequest.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<object>("Information mismatch. You can only reset your own password", 403);
+            }
+            
+            var isReset = await _userCommand.ResetFirstLoginPasswordAsync(resetFirstLoginRequest);
+            return ResponseUtil.Success(new { }, "Password reset successfully. Please log in with your new password", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("User not found"))
+        {
+            return ResponseUtil.Error<object>("User not found", 404);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("only for users on first login"))
+        {
+            return ResponseUtil.Error<object>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Failed to reset password"))
+        {
+            return ResponseUtil.Error<object>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Reset first login password error");
+            return ResponseUtil.Error<object>("Internal Server Error", 500);
+        }
+    }
+
+
+    [HttpPut("users/{userId}")]
+    public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateUser(string userId, [FromBody] UpdateUserRequest updateUserRequest)
+    {
+        try
+        {
+            // Normalize empty strings to null
+            var fullname = string.IsNullOrWhiteSpace(updateUserRequest.Fullname) ? null : updateUserRequest.Fullname;
+            var roleNumber = string.IsNullOrWhiteSpace(updateUserRequest.RoleNumber) ? null : updateUserRequest.RoleNumber;
+            var role = updateUserRequest.GetRoleEnum();
+            
+            var updatedUser = await _userCommand.UpdateUserAsync(
+                userId,
+                fullname,
+                roleNumber,
+                role,
+                updateUserRequest.IsEnable
+            );
+            return ResponseUtil.Success(updatedUser, "User updated successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Failed to update user"))
+        {
+            return ResponseUtil.Error<UserProfileResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Update user error");
+            return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
+        }
+    }
 }

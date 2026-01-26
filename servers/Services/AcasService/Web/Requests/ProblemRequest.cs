@@ -1,5 +1,5 @@
-using AcasService.Models;
 using System.ComponentModel.DataAnnotations;
+using AcasService.Models;
 
 namespace AcasService.Web.Requests;
 
@@ -31,11 +31,13 @@ public class CreateProblemRequest
     public float Mark { get; set; }
 
     [Required(ErrorMessage = "Difficulty is required")]
-    [EnumDataType(typeof(Difficulty), ErrorMessage = "Invalid difficulty level")]
-    public Difficulty Difficulty { get; set; }
+    [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
+    public string Difficulty { get; set; } = string.Empty;
 
     [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
     public string CodeTemplate { get; set; } = string.Empty;
+
+    public List<CreateTestCaseRequest>? TestCases { get; set; }
 }
 
 public class UpdateProblemRequest
@@ -58,8 +60,8 @@ public class UpdateProblemRequest
     public float Mark { get; set; }
 
     [Required(ErrorMessage = "Difficulty is required")]
-    [EnumDataType(typeof(Difficulty), ErrorMessage = "Invalid difficulty level")]
-    public Difficulty Difficulty { get; set; }
+    [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
+    public string Difficulty { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "CodeTemplate is required")]
     [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]

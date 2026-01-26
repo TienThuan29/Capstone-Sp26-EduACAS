@@ -18,11 +18,10 @@ export default function HomeNavbar() {
   }, [])
 
   const navLinks = [
-    { name: "Home", href: "#home" },
-    { name: "About Us", href: "#about" },
-    { name: "Features", href: "#features" },
-    { name: "Languages", href: "#languages" },
-    { name: "Contact", href: "#contact" },
+    { name: "Home", href: "/" },
+    { name: "About Us", href: "/other/about-us" },
+    { name: "Features", href: "/other/features" },
+    { name: "Contact", href: "/other/contact" },
   ]
 
   return (
@@ -55,13 +54,13 @@ export default function HomeNavbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 className="text-sm font-medium transition-colors hover:text-[#C9A24D] text-gray-700 dark:text-white"
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
           </div>
 
@@ -114,14 +113,14 @@ export default function HomeNavbar() {
         <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
           <div className="px-4 pt-2 pb-4 space-y-2">
             {navLinks.map((link) => (
-              <a
+              <Link
                 key={link.name}
                 href={link.href}
                 className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 onClick={() => setIsMobileMenuOpen(false)}
               >
                 {link.name}
-              </a>
+              </Link>
             ))}
             <div className="pt-2 space-y-2">
               <Link

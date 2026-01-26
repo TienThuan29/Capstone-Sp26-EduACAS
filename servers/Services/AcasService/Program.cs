@@ -29,9 +29,11 @@ using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.Examination;
 using AcasService.Repositories.ProgrammingLanguage;
 using AcasService.Repositories.Examination;
+using AcasService.Repositories.ClassroomEnrollment;
 using AcasService.Application.Mappers;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Queries.Subject;
+using AcasService.Application.Commands.ClassroomEnrollment;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -87,6 +89,7 @@ builder.Services.AddScoped<IClassroomRepository, ClassroomRepository>();
 builder.Services.AddScoped<IProgrammingLanguageRepository, ProgrammingLanguageRepository>();
 builder.Services.AddScoped<IExaminationRepository, ExaminationRepository>();
 builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
+builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -100,14 +103,16 @@ builder.Services.AddScoped<SubjectMapper>();
 builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
-builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLangCommand>();
-builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLangQuery>();
+builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
+builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
+builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
+
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 
