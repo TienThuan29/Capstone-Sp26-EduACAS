@@ -7,6 +7,7 @@ import Link from "next/link"
 import { Api } from "@/configs/api"
 import useAxios from "@/hooks/useAxios"
 import { useToast } from "@/hooks/useToast"
+import { Card, Badge } from "flowbite-react"
 
 interface StatCardProps {
   title: string
@@ -23,16 +24,16 @@ const StatCard = ({ title, value, icon, trend, bgColor }: StatCardProps) => {
   const { isDark } = useThemeContext()
   
   return (
-    <div className={`rounded-xl p-6 shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'} border ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
+    <Card className="rounded-xl">
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{title}</p>
           <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}</h3>
           {trend && (
             <div className="mt-2 flex items-center gap-1">
-              <span className={`text-sm font-semibold ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
+              <Badge color={trend.isPositive ? 'success' : 'failure'} className="text-sm font-semibold">
                 {trend.isPositive ? '↑' : '↓'} {trend.value}
-              </span>
+              </Badge>
               <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>vs tháng trước</span>
             </div>
           )}
@@ -41,7 +42,7 @@ const StatCard = ({ title, value, icon, trend, bgColor }: StatCardProps) => {
           {icon}
         </div>
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -68,7 +69,7 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       const [classroomsRes, subjectsRes, languagesRes, usersRes] = await Promise.all([
-        axiosInstance.get(Api.Classroom.GET_ALL),
+        axiosInstance.get(Api.Classroom.GET_ALL_CLASSROOMS),
         axiosInstance.get(Api.Subject.GET_ALL),
         axiosInstance.get(Api.ProgrammingLanguage.GET_ALL),
         axiosInstance.get(Api.User.GET_ALL)
@@ -219,29 +220,25 @@ export default function AdminDashboard() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {quickActions.map((action, index) => (
-              <Link
-                key={index}
-                href={action.href}
-                className={`group relative overflow-hidden rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 ${
-                  isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'
-                }`}
-              >
-                <div className={`absolute inset-0 bg-linear-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                <div className={`relative rounded-lg p-3 w-fit mb-4 bg-linear-to-br ${action.color}`}>
-                  <div className="text-white">{action.icon}</div>
-                </div>
-                <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {action.title}
-                </h3>
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {action.description}
-                </p>
-                <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-blue-500">
-                  Truy cập
-                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-                  </svg>
-                </div>
+              <Link key={index} href={action.href}>
+                <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:scale-105">
+                  <div className={`absolute inset-0 bg-gradient-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
+                  <div className={`relative rounded-lg p-3 w-fit mb-4 bg-gradient-to-br ${action.color}`}>
+                    <div className="text-white">{action.icon}</div>
+                  </div>
+                  <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    {action.title}
+                  </h3>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                    {action.description}
+                  </p>
+                  <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-blue-500">
+                    Truy cập
+                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                  </div>
+                </Card>
               </Link>
             ))}
           </div>
@@ -252,7 +249,7 @@ export default function AdminDashboard() {
           <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Hoạt động gần đây
           </h2>
-          <div className={`rounded-xl shadow-lg overflow-hidden ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+          <Card className="rounded-xl">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {recentActivities.map((activity, index) => (
                 <div key={index} className={`p-4 hover:bg-opacity-50 transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
@@ -278,14 +275,14 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                     </div>
-                    <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <Badge color="gray" className="text-sm">
                       {activity.time}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       </main>
     </div>

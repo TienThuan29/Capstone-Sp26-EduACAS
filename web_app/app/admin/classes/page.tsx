@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react"
 import { useThemeContext } from "@/components/ThemeProvider"
 import Sidebar from "@/components/sidebar"
+import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Badge, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Card } from "flowbite-react"
+import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 interface ClassData {
   id: string
@@ -104,15 +106,15 @@ export default function ClassesManagement() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig = {
-      active: { label: 'Đang hoạt động', color: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-      inactive: { label: 'Tạm ngưng', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
-      completed: { label: 'Hoàn thành', color: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300' },
+      active: { label: 'Đang hoạt động', color: 'success' as const },
+      inactive: { label: 'Tạm ngưng', color: 'warning' as const },
+      completed: { label: 'Hoàn thành', color: 'gray' as const },
     }
     const config = statusConfig[status as keyof typeof statusConfig]
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-semibold ${config.color}`}>
+      <Badge color={config.color}>
         {config.label}
-      </span>
+      </Badge>
     )
   }
 
@@ -130,262 +132,191 @@ export default function ClassesManagement() {
               Quản lý tất cả các lớp học trong hệ thống
             </p>
           </div>
-          <button
-            onClick={handleAddNew}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-semibold shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-            </svg>
+          <Button color="blue" onClick={handleAddNew}>
+            <PlusIcon className="w-5 h-5 mr-2" />
             Thêm lớp học mới
-          </button>
+          </Button>
         </div>
 
         {/* Filters */}
-        <div className={`mb-6 p-4 rounded-xl ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'} shadow-lg`}>
+        <Card className="mb-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
-              <input
+              <TextInput
                 type="text"
                 placeholder="Tìm kiếm lớp học, mã lớp, giảng viên..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full px-4 py-2 rounded-lg border ${
-                  isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                icon={MagnifyingGlassIcon}
               />
             </div>
-            <select
+            <Select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className={`px-4 py-2 rounded-lg border ${
-                isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="active">Đang hoạt động</option>
               <option value="inactive">Tạm ngưng</option>
               <option value="completed">Hoàn thành</option>
-            </select>
+            </Select>
           </div>
-        </div>
+        </Card>
 
         {/* Classes Table */}
-        <div className={`rounded-xl shadow-lg overflow-hidden ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+        <Card className="rounded-xl overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className={`${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
-                <tr>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Mã lớp
-                  </th>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Tên lớp
-                  </th>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Môn học
-                  </th>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Giảng viên
-                  </th>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Số sinh viên
-                  </th>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Trạng thái
-                  </th>
-                  <th className={`px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+            <Table>
+              <TableHead>
+                <TableHeadCell>Mã lớp</TableHeadCell>
+                <TableHeadCell>Tên lớp</TableHeadCell>
+                <TableHeadCell>Môn học</TableHeadCell>
+                <TableHeadCell>Giảng viên</TableHeadCell>
+                <TableHeadCell>Số sinh viên</TableHeadCell>
+                <TableHeadCell>Trạng thái</TableHeadCell>
+                <TableHeadCell>Thao tác</TableHeadCell>
+              </TableHead>
+              <TableBody>
                 {filteredClasses.map((cls) => (
-                  <tr key={cls.id} className={`hover:bg-opacity-50 transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
-                    <td className={`px-6 py-4 whitespace-nowrap font-semibold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                  <TableRow key={cls.id}>
+                    <TableCell className={`font-semibold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
                       {cls.code}
-                    </td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {cls.name}
-                    </td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {cls.subject}
-                    </td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {cls.teacher}
-                    </td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      {cls.students}
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>{cls.name}</TableCell>
+                    <TableCell>{cls.subject}</TableCell>
+                    <TableCell>{cls.teacher}</TableCell>
+                    <TableCell>{cls.students}</TableCell>
+                    <TableCell>
                       {getStatusBadge(cls.status)}
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-2">
-                        <button
-                          onClick={() => handleEdit(cls)}
-                          className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
-                        >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(cls.id)}
-                          className="p-2 rounded-lg bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
-                        >
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                          </svg>
-                        </button>
+                        <Button size="xs" color="info" onClick={() => handleEdit(cls)}>
+                          <PencilIcon className="w-4 h-4" />
+                        </Button>
+                        <Button size="xs" color="failure" onClick={() => handleDelete(cls.id)}>
+                          <TrashIcon className="w-4 h-4" />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
-        </div>
+        </Card>
 
         {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className={`rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`sticky top-0 px-6 py-4 border-b ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
-                <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {editingClass ? 'Chỉnh sửa lớp học' : 'Thêm lớp học mới'}
-                </h2>
+        <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          <ModalHeader>
+            {editingClass ? 'Chỉnh sửa lớp học' : 'Thêm lớp học mới'}
+          </ModalHeader>
+          <form onSubmit={handleSubmit}>
+            <ModalBody>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="col-span-2">
+                  <div className="mb-2">
+                    <Label htmlFor="name">Tên lớp học *</Label>
+                  </div>
+                  <TextInput
+                    id="name"
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData({...formData, name: e.target.value})}
+                    placeholder="Nhập tên lớp học"
+                  />
+                </div>
+                <div>
+                  <div className="mb-2">
+                    <Label htmlFor="code">Mã lớp *</Label>
+                  </div>
+                  <TextInput
+                    id="code"
+                    type="text"
+                    required
+                    value={formData.code}
+                    onChange={(e) => setFormData({...formData, code: e.target.value})}
+                    placeholder="VD: SE1801"
+                  />
+                </div>
+                <div>
+                  <div className="mb-2">
+                    <Label htmlFor="subject">Môn học *</Label>
+                  </div>
+                  <TextInput
+                    id="subject"
+                    type="text"
+                    required
+                    value={formData.subject}
+                    onChange={(e) => setFormData({...formData, subject: e.target.value})}
+                    placeholder="Nhập tên môn học"
+                  />
+                </div>
+                <div>
+                  <div className="mb-2">
+                    <Label htmlFor="teacher">Giảng viên *</Label>
+                  </div>
+                  <TextInput
+                    id="teacher"
+                    type="text"
+                    required
+                    value={formData.teacher}
+                    onChange={(e) => setFormData({...formData, teacher: e.target.value})}
+                    placeholder="Tên giảng viên"
+                  />
+                </div>
+                <div>
+                  <div className="mb-2">
+                    <Label htmlFor="students">Số sinh viên *</Label>
+                  </div>
+                  <TextInput
+                    id="students"
+                    type="number"
+                    required
+                    value={formData.students}
+                    onChange={(e) => setFormData({...formData, students: parseInt(e.target.value)})}
+                    placeholder="0"
+                  />
+                </div>
+                <div>
+                  <div className="mb-2">
+                    <Label htmlFor="semester">Học kỳ *</Label>
+                  </div>
+                  <TextInput
+                    id="semester"
+                    type="text"
+                    required
+                    value={formData.semester}
+                    onChange={(e) => setFormData({...formData, semester: e.target.value})}
+                    placeholder="Học kỳ 1 - 2024"
+                  />
+                </div>
+                <div>
+                  <div className="mb-2">
+                    <Label htmlFor="status">Trạng thái *</Label>
+                  </div>
+                  <Select
+                    id="status"
+                    value={formData.status}
+                    onChange={(e) => setFormData({...formData, status: e.target.value as 'active' | 'inactive' | 'completed'})}
+                  >
+                    <option value="active">Đang hoạt động</option>
+                    <option value="inactive">Tạm ngưng</option>
+                    <option value="completed">Hoàn thành</option>
+                  </Select>
+                </div>
               </div>
-              <form onSubmit={handleSubmit} className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="col-span-2">
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Tên lớp học *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.name}
-                      onChange={(e) => setFormData({...formData, name: e.target.value})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      placeholder="Nhập tên lớp học"
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Mã lớp *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.code}
-                      onChange={(e) => setFormData({...formData, code: e.target.value})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      placeholder="VD: SE1801"
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Môn học *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.subject}
-                      onChange={(e) => setFormData({...formData, subject: e.target.value})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      placeholder="Nhập tên môn học"
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Giảng viên *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.teacher}
-                      onChange={(e) => setFormData({...formData, teacher: e.target.value})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      placeholder="Tên giảng viên"
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Số sinh viên *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={formData.students}
-                      onChange={(e) => setFormData({...formData, students: parseInt(e.target.value)})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Học kỳ *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={formData.semester}
-                      onChange={(e) => setFormData({...formData, semester: e.target.value})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                      placeholder="Học kỳ 1 - 2024"
-                    />
-                  </div>
-                  <div>
-                    <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                      Trạng thái *
-                    </label>
-                    <select
-                      value={formData.status}
-                      onChange={(e) => setFormData({...formData, status: e.target.value as 'active' | 'inactive' | 'completed'})}
-                      className={`w-full px-4 py-2 rounded-lg border ${
-                        isDark ? 'bg-gray-700 border-gray-600 text-white' : 'bg-white border-gray-300 text-gray-900'
-                      } focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
-                    >
-                      <option value="active">Đang hoạt động</option>
-                      <option value="inactive">Tạm ngưng</option>
-                      <option value="completed">Hoàn thành</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="flex gap-4 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className={`flex-1 px-6 py-3 rounded-lg font-semibold transition-colors ${
-                      isDark ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-gray-200 text-gray-900 hover:bg-gray-300'
-                    }`}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    className="flex-1 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
-                  >
-                    {editingClass ? 'Cập nhật' : 'Thêm mới'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+            </ModalBody>
+            <ModalFooter>
+              <Button color="gray" onClick={() => setIsModalOpen(false)}>
+                Hủy
+              </Button>
+              <Button type="submit" color="blue">
+                {editingClass ? 'Cập nhật' : 'Thêm mới'}
+              </Button>
+            </ModalFooter>
+          </form>
+        </Modal>
       </main>
     </div>
   )

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useThemeContext } from "@/components/ThemeProvider"
 import Sidebar from "@/components/sidebar"
-import { Badge, Spinner } from "flowbite-react"
+import { Badge, Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react"
 import {
   UserIcon,
   MagnifyingGlassIcon,
@@ -210,20 +210,17 @@ export default function UsersManagement() {
             </p>
           </div>
           
-          <button
-            onClick={() => setShowGrantModal(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <Button color="blue" onClick={() => setShowGrantModal(true)}>
+            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
               <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
             Cấp tài khoản
-          </button>
+          </Button>
         </div>
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <div className={`rounded-xl p-6 shadow-lg ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+          <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tổng số</p>
@@ -235,9 +232,9 @@ export default function UsersManagement() {
                 <UserIcon className="w-8 h-8 text-purple-600" />
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className={`rounded-xl p-6 shadow-lg ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+          <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Sinh viên</p>
@@ -249,9 +246,9 @@ export default function UsersManagement() {
                 <UserCircleIcon className="w-8 h-8 text-green-600" />
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className={`rounded-xl p-6 shadow-lg ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+          <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Giảng viên</p>
@@ -263,9 +260,9 @@ export default function UsersManagement() {
                 <AcademicCapIcon className="w-8 h-8 text-blue-600" />
               </div>
             </div>
-          </div>
+          </Card>
 
-          <div className={`rounded-xl p-6 shadow-lg ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+          <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
                 <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Quản trị</p>
@@ -277,98 +274,78 @@ export default function UsersManagement() {
                 <ShieldCheckIcon className="w-8 h-8 text-red-600" />
               </div>
             </div>
-          </div>
+          </Card>
         </div>
 
         {/* Toolbar */}
         <div className="mb-6 flex items-center justify-between gap-4">
           <div className="flex gap-4 flex-1">
-            <div className="flex-1 max-w-md relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
-              </div>
-              <input
+            <div className="flex-1 max-w-md">
+              <TextInput
                 type="text"
-                className={`pl-10 block w-full rounded-lg border ${
-                  isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-purple-500 focus:border-transparent p-2.5`}
+                icon={MagnifyingGlassIcon}
                 placeholder="Tìm kiếm người dùng..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <select
+            <Select
               value={filterRole}
               onChange={(e) => setFilterRole(e.target.value)}
-              className={`rounded-lg border ${
-                isDark 
-                  ? 'bg-gray-700 border-gray-600 text-white' 
-                  : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-purple-500 focus:border-transparent p-2.5 min-w-[150px] cursor-pointer`}
+              className="min-w-[150px]"
             >
               <option value="all">Tất cả vai trò</option>
               <option value="STUDENT">Sinh viên</option>
               <option value="LECTURER">Giảng viên</option>
               <option value="ADMIN">Quản trị</option>
-            </select>
-            <select
+            </Select>
+            <Select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className={`rounded-lg border ${
-                isDark 
-                  ? 'bg-gray-700 border-gray-600 text-white' 
-                  : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-purple-500 focus:border-transparent p-2.5 min-w-[150px] cursor-pointer`}
+              className="min-w-[150px]"
             >
               <option value="all">Tất cả trạng thái</option>
               <option value="active">Đang hoạt động</option>
               <option value="disabled">Đã vô hiệu hóa</option>
-            </select>
+            </Select>
           </div>
         </div>
 
         {/* Table */}
-        <div className={`overflow-x-auto shadow-md rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+        <Card className="overflow-x-auto shadow-md rounded-lg">
           {loading ? (
             <div className="flex justify-center items-center p-8">
               <Spinner size="xl" />
               <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Đang tải dữ liệu...</span>
             </div>
           ) : (
-          <table className="w-full text-sm text-left">
-            <thead className={`text-xs uppercase ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
-              <tr>
-                <th scope="col" className="px-6 py-3">Người dùng</th>
-                <th scope="col" className="px-6 py-3">Mã số</th>
-                <th scope="col" className="px-6 py-3">Email</th>
-                <th scope="col" className="px-6 py-3">Vai trò</th>
-                <th scope="col" className="px-6 py-3">Trạng thái</th>
-                <th scope="col" className="px-6 py-3">Đăng nhập lần đầu</th>
-                <th scope="col" className="px-6 py-3">Ngày tạo</th>
-                <th scope="col" className="px-6 py-3">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table>
+            <TableHead>
+              <TableHeadCell>Người dùng</TableHeadCell>
+              <TableHeadCell>Mã số</TableHeadCell>
+              <TableHeadCell>Email</TableHeadCell>
+              <TableHeadCell>Vai trò</TableHeadCell>
+              <TableHeadCell>Trạng thái</TableHeadCell>
+              <TableHeadCell>Đăng nhập lần đầu</TableHeadCell>
+              <TableHeadCell>Ngày tạo</TableHeadCell>
+              <TableHeadCell>Thao tác</TableHeadCell>
+            </TableHead>
+            <TableBody>
               {filteredUsers.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="px-6 py-8 text-center">
-                    <div className="flex flex-col items-center justify-center">
+                <TableRow>
+                  <TableCell colSpan={8} className="text-center">
+                    <div className="flex flex-col items-center justify-center py-8">
                       <UserIcon className={`w-12 h-12 mb-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
                       <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
                         Không tìm thấy người dùng nào
                       </p>
                     </div>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ) : (
                 filteredUsers.map((user) => (
-                  <tr 
-                    key={user.id}
-                    className={`border-b ${
-                      isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-200 hover:bg-gray-50'
-                    }`}
-                  >
-                    <td className="px-6 py-4">
+                  <TableRow key={user.id}>
+                    <TableCell>
                       <div className="flex items-center gap-3">
                         {user.avatarUrl ? (
                           <img 
@@ -394,32 +371,30 @@ export default function UsersManagement() {
                           )}
                         </div>
                       </div>
-                    </td>
-                    <td className={`px-6 py-4 font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                    </TableCell>
+                    <TableCell className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                       {user.roleNumber}
-                    </td>
-                    <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                      {user.email}
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>{user.email}</TableCell>
+                    <TableCell>
                       <div className="flex items-center gap-2">
                         {getRoleIcon(user.role)}
                         <Badge color={getRoleBadgeColor(user.role)}>
                           {getRoleText(user.role)}
                         </Badge>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>
                       <Badge color={user.isEnable ? 'success' : 'failure'}>
                         {user.isEnable ? 'Hoạt động' : 'Vô hiệu hóa'}
                       </Badge>
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>
                       <Badge color={user.firstLogin ? 'warning' : 'gray'}>
                         {user.firstLogin ? 'Chưa đổi MK' : 'Đã đổi MK'}
                       </Badge>
-                    </td>
-                    <td className="px-6 py-4">
+                    </TableCell>
+                    <TableCell>
                       <div className="flex flex-col">
                         <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                           {formatDate(user.createdDate)}
@@ -428,317 +403,219 @@ export default function UsersManagement() {
                           {formatTime(user.createdDate)}
                         </span>
                       </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <button
-                        onClick={() => handleEdit(user)}
-                        className="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                      >
+                    </TableCell>
+                    <TableCell>
+                      <Button size="xs" color="blue" onClick={() => handleEdit(user)}>
+                        <PencilIcon className="w-4 h-4 mr-1" />
                         Chỉnh sửa
-                      </button>
-                    </td>
-                  </tr>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
           )}
-        </div>
+        </Card>
 
         {/* Summary */}
         {!loading && filteredUsers.length > 0 && (
-          <div className={`mt-4 p-4 rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'} shadow`}>
+          <Card className="mt-4">
             <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
               Hiển thị <span className="font-semibold">{filteredUsers.length}</span> trong tổng số{' '}
               <span className="font-semibold">{users.length}</span> người dùng
             </p>
-          </div>
+          </Card>
         )}
 
         {/* Grant Account Modal */}
-        {showGrantModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className={`relative w-full max-w-md rounded-2xl shadow-2xl ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Cấp tài khoản người dùng
-                </h3>
-                <button
-                  onClick={() => setShowGrantModal(false)}
-                  className={`rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
+        <Modal show={showGrantModal} onClose={() => setShowGrantModal(false)}>
+          <ModalHeader>Cấp tài khoản người dùng</ModalHeader>
+          <form onSubmit={handleGrantAccount}>
+            <ModalBody className="space-y-4">
+              <div>
+                <div className="mb-2">
+                  <Label htmlFor="grant-email">
+                    Email <span className="text-red-500">*</span>
+                  </Label>
+                </div>
+                <TextInput
+                  id="grant-email"
+                  type="email"
+                  required
+                  value={grantForm.email}
+                  onChange={(e) => setGrantForm({...grantForm, email: e.target.value})}
+                  placeholder="example@email.com"
+                />
               </div>
 
-              <form onSubmit={handleGrantAccount} className="p-6 space-y-4">
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    required
-                    value={grantForm.email}
-                    onChange={(e) => setGrantForm({...grantForm, email: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                    placeholder="example@email.com"
-                  />
-                </div>
-
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <div>
+                <div className="mb-2">
+                  <Label htmlFor="grant-fullname">
                     Họ và tên <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    minLength={2}
-                    maxLength={100}
-                    value={grantForm.fullname}
-                    onChange={(e) => setGrantForm({...grantForm, fullname: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                    placeholder="Nguyễn Văn A"
-                  />
+                  </Label>
                 </div>
+                <TextInput
+                  id="grant-fullname"
+                  type="text"
+                  required
+                  minLength={2}
+                  maxLength={100}
+                  value={grantForm.fullname}
+                  onChange={(e) => setGrantForm({...grantForm, fullname: e.target.value})}
+                  placeholder="Nguyễn Văn A"
+                />
+              </div>
 
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <div>
+                <div className="mb-2">
+                  <Label htmlFor="grant-roleNumber">
                     Mã số <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    pattern="^\d+$"
-                    value={grantForm.roleNumber}
-                    onChange={(e) => setGrantForm({...grantForm, roleNumber: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                    placeholder="20210001 (chỉ số)"
-                    title="Mã số phải là số"
-                  />
+                  </Label>
                 </div>
+                <TextInput
+                  id="grant-roleNumber"
+                  type="text"
+                  required
+                  pattern="^\d+$"
+                  value={grantForm.roleNumber}
+                  onChange={(e) => setGrantForm({...grantForm, roleNumber: e.target.value})}
+                  placeholder="20210001 (chỉ số)"
+                  title="Mã số phải là số"
+                />
+              </div>
 
-                <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+              <div>
+                <div className="mb-2">
+                  <Label htmlFor="grant-role">
                     Vai trò <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    required
-                    value={grantForm.role}
-                    onChange={(e) => setGrantForm({...grantForm, role: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
-                  >
-                    <option value="STUDENT">Sinh viên</option>
-                    <option value="LECTURER">Giảng viên</option>
-                  </select>
+                  </Label>
                 </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowGrantModal(false)}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold text-white transition-all ${
-                      isLoading 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
-                    }`}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
-                        Đang xử lý...
-                      </span>
-                    ) : (
-                      'Cấp tài khoản'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+                <Select
+                  id="grant-role"
+                  required
+                  value={grantForm.role}
+                  onChange={(e) => setGrantForm({...grantForm, role: e.target.value})}
+                >
+                  <option value="STUDENT">Sinh viên</option>
+                  <option value="LECTURER">Giảng viên</option>
+                </Select>
+              </div>
+            </ModalBody>
+            <ModalFooter>
+              <Button color="gray" onClick={() => setShowGrantModal(false)}>
+                Hủy
+              </Button>
+              <Button type="submit" color="blue" disabled={isLoading}>
+                {isLoading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <Spinner size="sm" />
+                    Đang xử lý...
+                  </span>
+                ) : (
+                  'Cấp tài khoản'
+                )}
+              </Button>
+            </ModalFooter>
+          </form>
+        </Modal>
 
         {/* Edit User Modal */}
-        {showEditModal && editingUser && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-            <div className={`relative w-full max-w-md rounded-2xl shadow-2xl ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
-              <div className={`flex items-center justify-between p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-                <h3 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Chỉnh sửa người dùng
-                </h3>
-                <button
-                  onClick={() => {
-                    setShowEditModal(false)
-                    setEditingUser(null)
-                  }}
-                  className={`rounded-lg p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${isDark ? 'text-gray-400' : 'text-gray-600'}`}
-                >
-                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                  </svg>
-                </button>
-              </div>
-
-              <form onSubmit={handleUpdateUser} className="p-6 space-y-4">
+        <Modal show={showEditModal} onClose={() => {
+          setShowEditModal(false)
+          setEditingUser(null)
+        }}>
+          <ModalHeader>Chỉnh sửa người dùng</ModalHeader>
+          {editingUser && (
+            <form onSubmit={handleUpdateUser}>
+              <ModalBody className="space-y-4">
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Email (không thể thay đổi)
-                  </label>
-                  <input
+                  <div className="mb-2">
+                    <Label htmlFor="edit-email">Email (không thể thay đổi)</Label>
+                  </div>
+                  <TextInput
+                    id="edit-email"
                     type="email"
                     disabled
                     value={editingUser.email}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors bg-gray-100 dark:bg-gray-700 cursor-not-allowed ${
-                      isDark 
-                        ? 'border-gray-600 text-gray-400' 
-                        : 'border-gray-300 text-gray-500'
-                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Họ và tên
-                  </label>
-                  <input
+                  <div className="mb-2">
+                    <Label htmlFor="edit-fullname">Họ và tên</Label>
+                  </div>
+                  <TextInput
+                    id="edit-fullname"
                     type="text"
                     maxLength={100}
                     value={editForm.fullname}
                     onChange={(e) => setEditForm({...editForm, fullname: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Mã số
-                  </label>
-                  <input
+                  <div className="mb-2">
+                    <Label htmlFor="edit-roleNumber">Mã số</Label>
+                  </div>
+                  <TextInput
+                    id="edit-roleNumber"
                     type="text"
                     value={editForm.roleNumber}
                     onChange={(e) => setEditForm({...editForm, roleNumber: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
                   />
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Vai trò
-                  </label>
-                  <select
+                  <div className="mb-2">
+                    <Label htmlFor="edit-role">Vai trò</Label>
+                  </div>
+                  <Select
+                    id="edit-role"
                     value={editForm.role}
                     onChange={(e) => setEditForm({...editForm, role: e.target.value})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
                   >
                     <option value="STUDENT">Sinh viên</option>
                     <option value="LECTURER">Giảng viên</option>
                     <option value="ADMIN">Quản trị viên</option>
-                  </select>
+                  </Select>
                 </div>
 
                 <div>
-                  <label className={`block text-sm font-semibold mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-                    Trạng thái tài khoản
-                  </label>
-                  <select
+                  <div className="mb-2">
+                    <Label htmlFor="edit-isEnable">Trạng thái tài khoản</Label>
+                  </div>
+                  <Select
+                    id="edit-isEnable"
                     value={editForm.isEnable.toString()}
                     onChange={(e) => setEditForm({...editForm, isEnable: e.target.value === 'true'})}
-                    className={`w-full px-4 py-3 rounded-lg border transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 border-gray-600 text-white focus:border-blue-500' 
-                        : 'bg-white border-gray-300 text-gray-900 focus:border-blue-500'
-                    } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50`}
                   >
                     <option value="true">Hoạt động</option>
                     <option value="false">Vô hiệu hóa</option>
-                  </select>
+                  </Select>
                 </div>
-
-                <div className="flex gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowEditModal(false)
-                      setEditingUser(null)
-                    }}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold transition-colors ${
-                      isDark 
-                        ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' 
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                  >
-                    Hủy
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isLoading}
-                    className={`flex-1 px-4 py-3 rounded-lg font-semibold text-white transition-all ${
-                      isLoading 
-                        ? 'bg-gray-400 cursor-not-allowed' 
-                        : 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-lg hover:shadow-xl'
-                    }`}
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center justify-center gap-2">
-                        <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"/>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                        </svg>
-                        Đang xử lý...
-                      </span>
-                    ) : (
-                      'Cập nhật'
-                    )}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+              </ModalBody>
+              <ModalFooter>
+                <Button color="gray" onClick={() => {
+                  setShowEditModal(false)
+                  setEditingUser(null)
+                }}>
+                  Hủy
+                </Button>
+                <Button type="submit" color="blue" disabled={isLoading}>
+                  {isLoading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Spinner size="sm" />
+                      Đang xử lý...
+                    </span>
+                  ) : (
+                    'Cập nhật'
+                  )}
+                </Button>
+              </ModalFooter>
+            </form>
+          )}
+        </Modal>
       </main>
     </div>
   )
