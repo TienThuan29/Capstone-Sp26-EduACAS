@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Commands.Subject;
+using AcasService.Application.Commands.Subject;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
@@ -63,26 +63,6 @@ public class SubjectCommandController : ControllerBase
         {
             _logger.LogError(ex, "Error updating subject");
             return ResponseUtil.Error<SubjectResponse>("Failed to update subject", 500);
-        }
-    }
-
-    [HttpPatch("{id}/soft-delete")]
-    public async Task<ActionResult<ApiResponse<bool>>> SoftDeleteSubject(string id)
-    {
-        try
-        {
-            var result = await _subjectCommand.SoftDeleteSubjectAsync(id);
-            return ResponseUtil.Success(result != null, "Subject soft-deleted successfully",200);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            _logger.LogWarning(ex, "Subject not found for soft delete");
-            return ResponseUtil.Error<bool>("Subject not found", 404);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error soft deleting subject");
-            return ResponseUtil.Error<bool>("Failed to soft delete subject", 500);
         }
     }
 
