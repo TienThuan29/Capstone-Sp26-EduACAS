@@ -1,4 +1,4 @@
-﻿using AcasService.Repositories.DynamoDb;
+using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 using System.Net;
@@ -88,37 +88,6 @@ public class SubjectRepository : DynamoRepository, ISubjectRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating subject {Id}", subject.Id);
-            throw;
-        }
-    }
-
-    public async Task SoftDeleteAsync(string subjectId)
-    {
-        try
-        {
-            var key = DynamoMapper.CreateKey(subjectId);
-            var updates = new Dictionary<string, AttributeValueUpdate>
-            {
-                {
-                    "isDeleted", new AttributeValueUpdate
-                    {
-                        Action = AttributeAction.PUT,
-                        Value = new AttributeValue { BOOL = true }
-                    }
-                },
-                {
-                    "updatedDate", new AttributeValueUpdate
-                    {
-                        Action = AttributeAction.PUT,
-                        Value = new AttributeValue { S = DateTime.UtcNow.ToString("o") }
-                    }
-                }
-            };
-            await UpdateItemAsync(key, updates, _subjectTableName);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error soft deleting subject {Id}", subjectId);
             throw;
         }
     }
