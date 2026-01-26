@@ -105,7 +105,7 @@ builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
-
+builder.Services.AddScoped<ProblemMapper>();
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
@@ -179,12 +179,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    // c.SwaggerDoc("v1", new()
-    // {
-    //     Title = "ACAS Service API",
-    //     Version = "v1",
-    //     Description = "ACAS Service API"
-    // });
     c.SwaggerDoc("v1", new OpenApiInfo  
     {
         Title = "ACAS Service API",
@@ -192,15 +186,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "ACAS Service API"
     });
 
-    // c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    // {
-    //     Name = "Authorization",
-    //     Type = SecuritySchemeType.Http,
-    //     Scheme = "bearer",
-    //     BearerFormat = "JWT",
-    //     In = ParameterLocation.Header,
-    //     Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
-    // });
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",
@@ -211,14 +196,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'"
     });
 
-    // c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
-    // {
-    //     {
-    //         new OpenApiSecuritySchemeReference("Bearer", hostDocument: null, externalResource
-    //         ),
-    //         new List<string>()
-    //     }
-    // });
     c.AddSecurityRequirement(_ => new OpenApiSecurityRequirement
     {
         {

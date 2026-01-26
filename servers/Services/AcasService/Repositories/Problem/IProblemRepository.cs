@@ -8,7 +8,7 @@ public interface IProblemRepository
     Task<List<Models.Problem>> GetByExamIdAsync(string examId);
     Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId);
     Task<List<Models.Problem>> GetAllAsync();
-    Task<string> CreateAsync(Models.Problem problem);
+    Task<Models.Problem> CreateAsync(Models.Problem problem);
     Task UpdateAsync(Models.Problem problem);
     Task DeleteAsync(string problemId);
     Task<bool> ExistsAsync(string problemId);

@@ -1,8 +1,5 @@
-using System.Collections;
-using AcasService.Models;
 
 namespace AcasService.Repositories.Classroom;
-
 
 
 public interface IClassroomRepository
@@ -14,7 +11,6 @@ public interface IClassroomRepository
     Task SoftDeleteAsync(string classroomId);
     Task DeleteAsync(string classroomId);
     Task<IEnumerable<Models.Classroom>> GetClassroomsByKeywordAsync(string keyword);
-
     Task<Models.Classroom?> FindByEnrollKeyAsync(string enrollKey);
     Task<IEnumerable<Models.Classroom>> GetClassroomsByLecturerIdAsync(string lecturerId);
 }

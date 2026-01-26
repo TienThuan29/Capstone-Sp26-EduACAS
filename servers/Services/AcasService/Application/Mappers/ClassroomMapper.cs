@@ -49,16 +49,16 @@ namespace AcasService.Application.Mappers
         }
 
         public ClassroomResponse ToClassroomResponse(
-    Classroom classroom,
-    Subject subject,
-    UserProfileResponse? lecturerProfile,
-    ClassEnrollment? classEnrollment
-)
+            Classroom classroom,
+            Subject subject,
+            UserProfileResponse? lecturerProfile,
+            ClassEnrollment? classEnrollment
+        )
         {
-            
+
             var response = ToClassroomResponse(classroom, subject, lecturerProfile);
 
-            
+
             var enrollmentInfo = new EnrollmentInfoResponse();
 
             if (classEnrollment != null)

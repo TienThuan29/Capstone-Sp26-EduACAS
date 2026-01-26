@@ -37,7 +37,7 @@ public class ExaminationController : ControllerBase
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
         {
-            return ResponseUtil.Error<ExaminationResponse>("Examination already exists",400);
+            return ResponseUtil.Error<ExaminationResponse>("Examination already exists",409);
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
         {
@@ -69,7 +69,7 @@ public class ExaminationController : ControllerBase
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, "Update failed for examination {Id}", id);
-            return ResponseUtil.Error<ExaminationResponse>(ex.Message,400);
+            return ResponseUtil.Error<ExaminationResponse>(ex.Message, 500);
         }
         catch (Exception ex)
         {

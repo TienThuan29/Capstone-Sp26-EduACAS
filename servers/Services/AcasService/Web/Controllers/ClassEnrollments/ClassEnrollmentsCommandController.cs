@@ -36,21 +36,13 @@ public class ClassEnrollmentsCommandController : ControllerBase
         {
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Invalid enrollment key", 400);
         }
-        catch (Exception ex) when (ex.Message.Contains("Failed to enroll in class"))
-        {
-            return ResponseUtil.Error<ClassEnrollmentsResponse>("Failed to enroll in class", 500);
-        }
         catch (Exception ex) when (ex.Message.Contains("Student is already enrolled in this class"))
         {
-            return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is already enrolled in this class", 501);
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is already enrolled in this class", 409);
         }
-        catch (InvalidOperationException ex)
-    when (ex.Message.Contains("Enrollment key does not belong to this class"))
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Enrollment key does not belong to this class"))
         {
-            return ResponseUtil.Error<ClassEnrollmentsResponse>(
-                "Enrollment key does not belong to this class",
-                400
-            );
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Enrollment key does not belong to this class", 400);
         }
         catch (Exception ex)
         {
@@ -71,10 +63,6 @@ public class ClassEnrollmentsCommandController : ControllerBase
         catch (InvalidOperationException ex) when (ex.Message.Contains("Student is not enrolled in this class"))
         {
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is not enrolled in this class", 404);
-        }
-        catch (Exception ex) when (ex.Message.Contains("Failed to leave class"))
-        {
-            return ResponseUtil.Error<ClassEnrollmentsResponse>("Failed to leave class", 500);
         }
         catch (Exception ex)
         {

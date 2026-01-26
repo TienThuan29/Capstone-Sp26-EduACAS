@@ -1,3 +1,5 @@
+using AcasService.Application.Mappers;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Web.Requests;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
@@ -6,7 +8,7 @@ namespace AcasService.Application.Commands.Problem;
 
 public interface IProblemCommand
 {
-    Task<string> CreateProblemAsync(CreateProblemRequest request);
+    Task<ProblemResponse> CreateProblemAsync(CreateProblemRequest request);
     Task UpdateProblemAsync(string problemId, UpdateProblemRequest request);
     Task DeleteProblemAsync(string problemId);
     Task AddTestCaseAsync(string problemId, CreateTestCaseRequest request);
@@ -19,14 +21,19 @@ public class ProblemCommand : IProblemCommand
 {
     private readonly Repositories.Problem.IProblemRepository _problemRepository;
     private readonly ILogger<ProblemCommand> _logger;
+    private readonly ProblemMapper _problemMapper;
 
-    public ProblemCommand(Repositories.Problem.IProblemRepository problemRepository, ILogger<ProblemCommand> logger)
+    public ProblemCommand(
+        Repositories.Problem.IProblemRepository problemRepository,
+        ILogger<ProblemCommand> logger,
+        ProblemMapper problemMapper)
     {
         _problemRepository = problemRepository;
         _logger = logger;
+        _problemMapper = problemMapper;
     }
 
-    public async Task<string> CreateProblemAsync(CreateProblemRequest request)
+    public async Task<ProblemResponse> CreateProblemAsync(CreateProblemRequest request)
     {
         try
         {
@@ -61,10 +68,10 @@ public class ProblemCommand : IProblemCommand
                 }
             }
 
-            var problemId = await _problemRepository.CreateAsync(problem);
+            var createdProblem = await _problemRepository.CreateAsync(problem);
             _logger.LogInformation("Problem created with ID {ProblemId} and {TestCaseCount} test cases", 
-                problemId, problem.TestCases.Count);
-            return problemId;
+                createdProblem.Id, createdProblem.TestCases.Count);
+            return _problemMapper.ToProblemResponse(createdProblem);
         }
         catch (Exception ex)
         {
