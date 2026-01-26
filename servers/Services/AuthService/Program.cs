@@ -145,7 +145,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = globalPolicy.GetValue<int>("QueueLimit", 0)
             }));
 
-    // Policy for authentication endpoints (more restrictive)
+    // Policy for authentication endpoints
     options.AddPolicy("AuthPolicy", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",

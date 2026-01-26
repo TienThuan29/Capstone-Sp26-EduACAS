@@ -175,6 +175,65 @@ public class EmailService : IEmailService
             </div>
             </body>
             </html>";
+      
+      // Template that just passes through the body (for pre-formatted HTML emails)
+      public static string EmailBodyOnlyTemplate = @"{1}";
+      
+      public static string EmailGrantAccountTemplate = @"<!DOCTYPE html>
+            <html>
+            <head>
+            <meta charset=""UTF-8"" />
+            <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+            <style>
+                  body {{ font-family: 'Segoe UI', Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 24px; }}
+                  .card {{ max-width: 640px; margin: 0 auto; background: #ffffff; border-radius: 12px; padding: 40px 32px; box-shadow: 0 8px 30px rgba(0,0,0,0.06); }}
+                  .title {{ font-size: 24px; font-weight: 700; color: #111827; margin: 0 0 8px; text-align: center; }}
+                  .subtitle {{ font-size: 15px; color: #6b7280; margin: 0 0 32px; text-align: center; }}
+                  .message {{ font-size: 15px; line-height: 1.6; color: #1f2937; margin: 0 0 28px; }}
+                  .credentials-container {{ background: #f9fafb; border: 2px solid #e5e7eb; border-radius: 12px; padding: 24px; margin: 32px 0; }}
+                  .credentials-table {{ width: 100%; border-collapse: collapse; }}
+                  .credentials-table td {{ padding: 12px; border-bottom: 1px solid #e5e7eb; }}
+                  .credentials-table td:first-child {{ font-weight: 600; color: #374151; width: 40%; }}
+                  .credentials-table td:last-child {{ color: #111827; }}
+                  .credentials-table tr:last-child td {{ border-bottom: none; }}
+                  .warning {{ font-size: 14px; color: #dc2626; margin: 24px 0 0; padding: 12px; background: #fef2f2; border-radius: 8px; border-left: 3px solid #dc2626; }}
+                  .footer {{ font-size: 12px; color: #9ca3af; margin-top: 32px; border-top: 1px solid #e5e7eb; padding-top: 16px; text-align: center; line-height: 1.5; }}
+            </style>
+            </head>
+            <body>
+            <div class=""card"">
+                  <div class=""title"">Welcome {2}!</div>
+                  <div class=""subtitle"">Your EduACAS Account Credentials</div>
+                  <div class=""message"">
+                  Your account has been created with the following credentials:
+                  </div>
+                  <div class=""credentials-container"">
+                        <table class=""credentials-table"">
+                              <tr>
+                                    <td><strong>Email:</strong></td>
+                                    <td>{0}</td>
+                              </tr>
+                              <tr>
+                                    <td><strong>Temporary Password:</strong></td>
+                                    <td>{1}</td>
+                              </tr>
+                              <tr>
+                                    <td><strong>Role:</strong></td>
+                                    <td>{3}</td>
+                              </tr>
+                        </table>
+                  </div>
+                  <div class=""warning"">
+                  <strong>Important:</strong> Please log in immediately and change your password to a secure one.
+                  </div>
+                  <div class=""footer"">
+                  Best regards,<br />EduACAS Team<br />
+                  This is an automated message, please do not reply.
+                  </div>
+            </div>
+            </body>
+            </html>";
+      
 }
 
 public class EmailSettings

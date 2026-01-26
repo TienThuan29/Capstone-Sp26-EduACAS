@@ -3,6 +3,7 @@ using AuthService.Application.Queries;
 using AuthService.Application.ResponseDTOs;
 using AuthService.Application.Utils;
 using AuthService.Web.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -185,22 +186,23 @@ public class AuthCommandController : ControllerBase
     }
 
     [HttpPost("grant-account")]
+    [Authorize(Roles = "ADMIN")]
     [EnableRateLimiting("AuthPolicy")]
     public async Task<ActionResult<ApiResponse<GrantAccountResponse>>> GrantAccount([FromBody] GrantAccountRequest grantAccountRequest)
     {
         try
         {
             // Get the requester's user ID from the Authorization header
-            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
-            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            {
-                return ResponseUtil.Error<GrantAccountResponse>("Authorization token is required", 401);
-            }
+            // var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            // if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            // {
+            //     return ResponseUtil.Error<GrantAccountResponse>("Authorization token is required", 401);
+            // }
 
-            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
-            var requesterProfile = await _userQuery.GetProfileAsync(accessToken);
+            // var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            // var requesterProfile = await _userQuery.GetProfileAsync(accessToken);
             
-            var grantResponse = await _userCommand.GrantAccountAsync(grantAccountRequest, requesterProfile.Id);
+            var grantResponse = await _userCommand.GrantAccountAsync(grantAccountRequest);
             return ResponseUtil.Success(grantResponse, "Account granted successfully and credentials sent to email", 201);
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("Only Admin can grant"))
