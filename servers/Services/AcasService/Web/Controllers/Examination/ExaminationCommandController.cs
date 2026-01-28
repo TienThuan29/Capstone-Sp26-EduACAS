@@ -10,13 +10,13 @@ namespace AcasService.Web.Controllers.Examination;
 [ApiController]
 [Route("api/v1/examinations")]
 [Authorize(Roles = "LECTURER, ADMIN")]
-public class ExaminationController : ControllerBase
+public class ExaminationCommandController : ControllerBase
 {
-    private readonly ILogger<ExaminationController> _logger;
+    private readonly ILogger<ExaminationCommandController> _logger;
     private readonly IExaminationCommand _examinationCommand;
 
-    public ExaminationController(
-        ILogger<ExaminationController> logger,
+    public ExaminationCommandController(
+        ILogger<ExaminationCommandController> logger,
         IExaminationCommand examinationCommand)
     {
         _logger = logger;
