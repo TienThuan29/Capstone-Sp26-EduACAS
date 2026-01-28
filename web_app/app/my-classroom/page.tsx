@@ -2,10 +2,11 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Card, Spinner, TextInput, Select, Button } from "flowbite-react";
+import { CalendarIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/contexts/AuthContext";
 import HomeNavbar from "@/components/home-navbar";
-import Footer from "@/components/Footer";
-import { useClassroom, Classroom } from "@/hooks/useClassroom";
+import Footer from "@/components/footer";
+import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
 import Link from "next/link";
 
 export default function ListClassroomPage() {
@@ -103,26 +104,26 @@ export default function ListClassroomPage() {
           </div>
 
           <div className="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
-            <button
+            <Button
               onClick={() => setActiveTab("joining")}
-              className={`rounded-md px-4 py-2 text-sm font-bold transition-all ${
+              className={`rounded-md px-4 py-2 text-sm font-bold transition-all bg-transparent border-0 ${
                 activeTab === "joining"
                   ? "bg-white text-[#1F4E79] shadow-sm dark:bg-gray-700 dark:text-white"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >
               Đang học
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => setActiveTab("left")}
-              className={`rounded-md px-4 py-2 text-sm font-bold transition-all ${
+              className={`rounded-md px-4 py-2 text-sm font-bold transition-all bg-transparent border-0 ${
                 activeTab === "left"
                   ? "bg-white text-[#1F4E79] shadow-sm dark:bg-gray-700 dark:text-white"
                   : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
               }`}
             >
               Đã rời lớp
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -243,9 +244,7 @@ export default function ListClassroomPage() {
                       <span>{c.subject.subjectName}</span>
                     </p>
                     <p className="flex items-center gap-2">
-                      <span className="text-[#1F4E79] dark:text-[#C9A24D]">
-                        📅
-                      </span>
+                      <CalendarIcon className="h-5 w-5 text-[#1F4E79] dark:text-[#C9A24D]" />
                       <span>
                         {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
                         {new Date(c.endDate).toLocaleDateString("vi-VN")}

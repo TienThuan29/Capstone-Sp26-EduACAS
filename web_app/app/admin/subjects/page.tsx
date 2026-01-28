@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useThemeContext } from "@/components/ThemeProvider"
+import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import { Button, Modal, TextInput, Textarea, Select, Badge, Spinner } from "flowbite-react"
 import {

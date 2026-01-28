@@ -3,13 +3,14 @@
 import { useEffect, useState, useMemo } from "react"
 import { Card, Spinner, Button, Select, TextInput, Modal, ModalHeader, ModalBody, Label, Textarea } from "flowbite-react"
 import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
-import useAxios from "@/hooks/useAxios"
-import { Api } from "@/configs/api"
+import Footer from "@/components/footer"
 import { useAuth } from "@/contexts/AuthContext"
 import Link from "next/link"
 import { useToast } from "@/hooks/useToast"
-import { useClassroom } from "@/hooks/useClassroom"
+import { useClassroom } from "@/hooks/classroom/useClassroom"
+import { useSubject } from "@/hooks/subject/useSubject"
+import useAxios from "@/hooks/useAxios"
+import { Api } from "@/configs/api"
 import { CustomPagination } from "@/components/CustomPagination"
 
 interface LecturerLite {
@@ -50,8 +51,9 @@ interface Semester {
 
 export default function ManageClassroomPage() {
     const { showSuccess, showError } = useToast()
-    const axiosInstance = useAxios()
     const { user } = useAuth()
+    const axiosInstance = useAxios()
+    const { getActiveSubjects } = useSubject()
     const [classrooms, setClassrooms] = useState<Classroom[]>([])
     const [loading, setLoading] = useState(true)
 
@@ -59,7 +61,7 @@ export default function ManageClassroomPage() {
     const [selectedSemesterFilter, setSelectedSemesterFilter] = useState("All");
     const [sortBy, setSortBy] = useState("newest");
 
-    const SEMESTERS = useMemo(() => {
+    const semesters = useMemo(() => {
         const currentYear = new Date().getFullYear();
         const years = [currentYear, currentYear + 1];
         const seasons = ["Spring", "Summer", "Fall"];
@@ -87,7 +89,7 @@ export default function ManageClassroomPage() {
         classCode: "", // Added classCode
         className: "",
         subjectId: "",
-        semesterName: SEMESTERS[0].semesterName,
+        semesterName: semesters[0].semesterName,
         enrolKey: "", // Added enrolKey
         dateEnd: ""   // Added dateEnd
     });
@@ -136,9 +138,7 @@ export default function ManageClassroomPage() {
         if (openModal) {
             const fetchData = async () => {
                 try {
-                    const subRes = await axiosInstance.get(Api.Subject.GET_ALL_SUBJECTS);
-                    const allSubjects: Subject[] = subRes.data?.dataResponse || [];
-                    const activeSubjects = allSubjects.filter(s => !s.isDeleted);
+                    const activeSubjects = await getActiveSubjects();
                     setSubjects(activeSubjects);
 
                     if (activeSubjects.length > 0) {
@@ -152,7 +152,7 @@ export default function ManageClassroomPage() {
             };
             fetchData();
         }
-    }, [openModal, axiosInstance]);
+    }, [openModal, getActiveSubjects, showError]);
 
     const handleCreateSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -207,7 +207,7 @@ export default function ManageClassroomPage() {
                 classCode: "",
                 className: "",
                 subjectId: subjects[0]?.id || "",
-                semesterName: SEMESTERS[0].semesterName,
+                semesterName: semesters[0].semesterName,
                 enrolKey: "",
                 dateEnd: ""
             });
@@ -496,7 +496,7 @@ export default function ManageClassroomPage() {
                                 value={formData.semesterName}
                                 onChange={(e) => setFormData({ ...formData, semesterName: e.target.value })}
                             >
-                                {SEMESTERS.map(sem => (
+                                {semesters.map(sem => (
                                     <option key={sem.id} value={sem.semesterName}>{sem.semesterName}</option>
                                 ))}
                             </Select>

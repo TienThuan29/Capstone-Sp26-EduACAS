@@ -66,9 +66,12 @@ export default function HomePage() {
           <div className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Lớp học của tôi</h2>
-              <button className="px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors font-medium text-sm">
+              <Button
+                color="gray"
+                className="px-4 py-2 font-medium text-sm"
+              >
                 Tất cả lớp học
-              </button>
+              </Button>
             </div>
 
             {/* Search Bar */}
@@ -104,12 +107,12 @@ export default function HomePage() {
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">{course.name}</h3>
                           <p className="text-sm text-gray-600 dark:text-gray-400">{course.instructor}</p>
                         </div>
-                        <button
-                          className="w-fit px-6 py-2 rounded-lg text-white font-medium transition-colors hover:opacity-90 text-sm"
+                        <Button
+                          className="w-fit px-6 py-2 font-medium text-sm"
                           style={{ backgroundColor: "#1F4E79" }}
                         >
                           Vào lớp học
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>

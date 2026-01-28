@@ -6,7 +6,7 @@ import { Api } from '@/configs/api';
 import { permanentRedirect, useRouter } from 'next/navigation'
 import { Constant } from '@/configs/constant';
 import { PageUrl } from '@/configs/page.url';
-import { validateUserRole } from '@/hooks/useRoleValidation';
+import { validateUserRole } from '@/hooks/authorization/useRoleValidation';
 import { useToast } from '@/hooks/useToast';
 
 const AUTH_TOKENS_KEY = Constant.AUTH_TOKEN_KEY;

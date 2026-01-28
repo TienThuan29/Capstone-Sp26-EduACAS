@@ -4,9 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Spinner, TextInput, Select, Card, Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useClassroom, Classroom } from "@/hooks/useClassroom";
+import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
 import HomeNavbar from "@/components/home-navbar";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
 import { CustomPagination } from "@/components/CustomPagination";
 
 export default function ListAllClassroomPage() {

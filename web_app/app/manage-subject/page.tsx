@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, TextInput, Modal, ModalHeader, ModalBody, ModalFooter, Label, Textarea, Spinner, Select } from "flowbite-react"
 import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
+import Footer from "@/components/footer"
 import useAxios from "@/hooks/useAxios"
 import { Api } from "@/configs/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -52,7 +52,7 @@ export default function ManageSubjectPage() {
     const fetchSubjects = async () => {
         try {
             setLoading(true)
-            const res = await axiosInstance.get(Api.Subject.GET_ALL_SUBJECTS)
+            const res = await axiosInstance.get(Api.Subject.GET_ALL)
             if (res.data?.dataResponse) {
                 const allSubjects: Subject[] = res.data.dataResponse
                 setSubjects(allSubjects)
@@ -142,7 +142,7 @@ export default function ManageSubjectPage() {
                     subjectName: formData.subjectName,
                     description: formData.description
                 }
-                await axiosInstance.put(`${Api.Subject.UPDATE_SUBJECT}/${currentSubjectId}`, payload)
+                await axiosInstance.put(`${Api.Subject.UPDATE(currentSubjectId)}`, payload)
                 showSuccess("Cập nhật môn học thành công")
             } else {
                 const payload = {
@@ -151,7 +151,7 @@ export default function ManageSubjectPage() {
                     description: formData.description,
                     createdBy: currentUserId
                 }
-                await axiosInstance.post(Api.Subject.CREATE_SUBJECT, payload)
+                await axiosInstance.post(Api.Subject.CREATE, payload)
                 showSuccess("Tạo môn học thành công")
             }
             setOpenModal(false)
@@ -174,7 +174,7 @@ export default function ManageSubjectPage() {
         if (!subjectToDelete) return
         try {
             setActionLoading(true)
-            await axiosInstance.patch(`${Api.Subject.SOFT_DELETE_SUBJECT}/${subjectToDelete.id}/soft-delete`)
+            await axiosInstance.patch(`${Api.Subject.SOFT_DELETE(subjectToDelete.id)}`)
             showSuccess("Xóa môn học thành công")
             setOpenDeleteModal(false)
             setSubjectToDelete(null)

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useThemeContext } from "@/components/ThemeProvider"
+import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import { Badge, Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react"
 import {

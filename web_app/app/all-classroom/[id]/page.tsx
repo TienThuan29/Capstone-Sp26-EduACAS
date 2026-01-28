@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, Button, TextInput, Spinner } from "flowbite-react";
 import HomeNavbar from "@/components/home-navbar";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { useClassroom, Classroom } from "@/hooks/useClassroom";
+import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
 
 export default function EnrollClassPage() {
   const { id } = useParams();

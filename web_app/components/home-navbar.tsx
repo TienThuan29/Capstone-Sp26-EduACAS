@@ -1,146 +1,162 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarCollapse,
+  NavbarLink,
+  NavbarToggle,
+  DarkThemeToggle,
+  Button,
+  Dropdown,
+  Avatar,
+  DropdownHeader,
+  DropdownItem,
+  DropdownDivider,
+} from "flowbite-react"
 import Link from "next/link"
-import { DarkThemeToggle } from "flowbite-react"
 import Image from "next/image"
+import { usePathname, useRouter } from "next/navigation"
+import { useAuth } from "@/contexts/AuthContext"
+import { useToast } from "@/hooks/useToast"
+import { PageUrl } from "@/configs/page.url"
 
 export default function HomeNavbar() {
-  const [isScrolled, setIsScrolled] = useState(false)
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+  const { user, logout, isLoggedIn } = useAuth()
+  const { showSuccess } = useToast()
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20)
-    }
-    window.addEventListener("scroll", handleScroll)
-    return () => window.removeEventListener("scroll", handleScroll)
-  }, [])
+  const handleLogout = () => {
+    logout()
+    showSuccess("Đăng xuất thành công")
+  }
 
   const navLinks = [
-    { name: "Home", href: "/" },
-    { name: "About Us", href: "/other/about-us" },
-    { name: "Features", href: "/other/features" },
-    { name: "Contact", href: "/other/contact" },
+    { href: PageUrl.HOME_PAGE, label: "Home" },
+    { href: PageUrl.ABOUT_US_PAGE, label: "About Us" },
+    { href: PageUrl.FEATURES_PAGE, label: "Features" },
+    { href: PageUrl.CONTACT_PAGE, label: "Contact" },
   ]
 
+  const studentNavLinks = [
+    { href: PageUrl.HOME_PAGE, label: "My Dashboard" },
+  ];
+
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? "bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-md"
-          : "bg-white dark:bg-transparent"
-      }`}
-    >
-      {/* Top gradient bar */}
-      <div
-        className="absolute top-0 left-0 right-0 h-1"
-        style={{ background: `linear-gradient(90deg, #1F4E79 0%, #C9A24D 50%, #1F4E79 100%)` }}
-      />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-3 group">
-            <Image
-              src="/images/Edu-ACAS logo.png"
-              alt="Edu-ACAS Logo"
-              width={100}
-              height={100}
-              className="h-full w-full transition-all duration-300 hover:scale-110"
-            />
-          </Link>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="text-sm font-medium transition-colors hover:text-[#C9A24D] text-gray-700 dark:text-white"
-              >
-                {link.name}
-              </Link>
-            ))}
-          </div>
-
-          {/* Right side buttons */}
-          <div className="hidden md:flex items-center space-x-4">
-            <DarkThemeToggle />
-            <Link
-              href="/login"
-              className="px-4 py-2 text-sm font-medium rounded-lg transition-all text-[#1F4E79] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-[#1F4E79] to-[#C9A24D] rounded-lg hover:shadow-lg hover:scale-105 transition-all"
-            >
-              Register
-            </Link>
-          </div>
-
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center space-x-2">
-            <DarkThemeToggle />
-            <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-lg transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                {isMobileMenuOpen ? (
-                  <path d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
-          <div className="px-4 pt-2 pb-4 space-y-2">
-            {navLinks.map((link) => (
-              <Link
-                key={link.name}
-                href={link.href}
-                className="block px-4 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {link.name}
-              </Link>
-            ))}
-            <div className="pt-2 space-y-2">
-              <Link
-                href="/login"
-                className="block px-4 py-2 text-center text-[#1F4E79] dark:text-white hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Login
-              </Link>
-              <Link
-                href="/register"
-                className="block px-4 py-2 text-center text-white bg-gradient-to-r from-[#1F4E79] to-[#C9A24D] rounded-lg hover:shadow-lg transition-all"
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                Register
-              </Link>
+    <div className="fixed top-4 right-0 left-0 z-50 w-full px-4">
+      <div className="relative mx-auto max-w-7xl overflow-visible rounded-full border border-white/30 bg-white/70 shadow-2xl shadow-black/10 backdrop-blur-2xl backdrop-saturate-150 dark:border-gray-600/40 dark:bg-gray-800/70 dark:shadow-black/40">
+        {/* Glass overlay gradient */}
+        <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-b from-white/20 to-transparent dark:from-gray-700/30 dark:to-transparent"></div>
+        <Navbar fluid className="relative bg-transparent px-6 py-3">
+          <NavbarBrand as={Link} href="/" className="mr-4">
+            <div className="flex items-center space-x-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-[#1F4E79] to-[#C9A24D] p-2">
+                <Image
+                  src="/logo-single.png"
+                  alt="Edu-ACAS Logo"
+                  width={24}
+                  height={24}
+                  className="h-6 w-6"
+                  priority
+                />
+              </div>
+              <div className="flex flex-col">
+                <span className="self-center text-lg font-bold whitespace-nowrap text-gray-900 dark:text-white">
+                  Edu-ACAS
+                </span>
+              </div>
             </div>
+          </NavbarBrand>
+          <NavbarCollapse className="mt-0!">
+            {navLinks.map((link) => (
+              <NavbarLink
+                key={link.href}
+                as={Link}
+                href={link.href}
+                active={pathname === link.href}
+                className={`rounded-full transition-all duration-200 ${
+                  pathname === link.href
+                    ? "bg-[#1F4E79] px-10 py-4 font-bold text-white dark:bg-[#C9A24D]"
+                    : "px-4 py-2 font-bold text-gray-700 hover:bg-gray-100 hover:text-[#1F4E79] dark:text-gray-300 dark:hover:bg-gray-800 dark:hover:text-[#C9A24D]"
+                }`}
+              >
+                {link.label}
+              </NavbarLink>
+            ))}
+            <div className="mt-4 border-t border-gray-200/50 pt-4 lg:hidden dark:border-gray-700/50">
+              <DarkThemeToggle />
+            </div>
+          </NavbarCollapse>
+          <div className="flex items-center gap-3">
+            <DarkThemeToggle className="hidden lg:flex" />
+            <NavbarToggle className="lg:hidden" />
+            {isLoggedIn() && user ? (
+              <Dropdown
+                inline
+                label={
+                  <div className="flex items-center gap-2">
+                    {user.avatarUrl ? (
+                      <Avatar
+                        rounded
+                        img={user.avatarUrl}
+                        alt="User avatar"
+                        className="ring-2 ring-[#1F4E79]/20 dark:ring-[#C9A24D]/30"
+                      />
+                    ) : (
+                      <div
+                        className="flex h-10 w-10 items-center justify-center rounded-full text-white font-bold text-sm shadow-lg ring-2 ring-[#1F4E79]/20 dark:ring-[#C9A24D]/30"
+                        style={{
+                          background: "linear-gradient(135deg, #1F4E79 0%, #C9A24D 100%)",
+                        }}
+                      >
+                        {user.fullname?.[0]?.toUpperCase() ?? "U"}
+                      </div>
+                    )}
+                    <div className="hidden flex-col text-left sm:flex">
+                      <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                        {user.fullname}
+                      </span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">
+                        {user.role}
+                      </span>
+                    </div>
+                  </div>
+                }
+              >
+                <DropdownHeader>
+                  <span className="block text-sm">{user.fullname}</span>
+                  <span className="block truncate text-sm font-medium">
+                    {user.email}
+                  </span>
+                </DropdownHeader>
+                <DropdownItem as={Link} href="/profile">
+                  User profile
+                </DropdownItem>
+                <DropdownDivider />
+                <DropdownItem onClick={handleLogout}>Logout</DropdownItem>
+              </Dropdown>
+            ) : (
+              <>
+                <Button
+                  className="hidden cursor-pointer rounded-full border-0 bg-transparent text-[#1F4E79] hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800 sm:flex"
+                  as={Link}
+                  href="/login"
+                >
+                  Sign in
+                </Button>
+                <Button
+                  className="hidden cursor-pointer rounded-full border-0 bg-linear-to-r from-[#1F4E79] to-[#C9A24D] text-white shadow-lg shadow-[#1F4E79]/30 hover:from-[#1F4E79]/90 hover:to-[#C9A24D]/90 sm:flex dark:shadow-[#1F4E79]/20"
+                  as={Link}
+                  href={PageUrl.REGISTER_PAGE}
+                >
+                  Register
+                </Button>
+              </>
+            )}
           </div>
-        </div>
-      )}
-    </nav>
+        </Navbar>
+      </div>
+    </div>
   )
 }

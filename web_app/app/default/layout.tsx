@@ -1,5 +1,5 @@
 import Sidebar from "@/components/sidebar"
-import ProtectedPageWrapper from "@/components/ProtectedPageWrapper"
+import ProtectedPageWrapper from "@/components/protected-page-wrapper"
 import type React from "react"
 
 export default function DefaultLayout({

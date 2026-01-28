@@ -7,8 +7,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   useClassroom,
   Classroom as ClassroomDetail,
-} from "@/hooks/useClassroom";
-import { useExamination, Examination } from "@/hooks/useExamination";
+} from "@/hooks/classroom/useClassroom";
+import { useExamination, Examination } from "@/hooks/exam/useExamination";
 import Link from "next/link";
 import Sidebar from "@/components/sidebar";
 

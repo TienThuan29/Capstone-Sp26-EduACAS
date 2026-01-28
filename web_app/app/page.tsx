@@ -10,7 +10,7 @@ import {
   ChartStatsIcon,
 } from "@/components/svg-icons"
 import { heroStats, features, communityStats, programmingLanguages } from "@/MockData/landingPageData"
-import Footer from "@/components/Footer"
+import Footer from "@/components/footer"
 import HomeNavbar from "@/components/home-navbar"
 import HeroCarousel from "@/components/carousel"
 

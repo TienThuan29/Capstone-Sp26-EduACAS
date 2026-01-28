@@ -2,7 +2,7 @@
 
 import { Card } from "flowbite-react"
 import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
+import Footer from "@/components/footer"
 import {
   LaptopIcon,
   GraduateIcon,

@@ -7,7 +7,7 @@ import axios, { HttpStatusCode } from "axios";
 import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFirstLoginPageProtection } from "@/hooks/useFirstLoginProtection";
+import { useFirstLoginPageProtection } from "@/hooks/authorization/useFirstLoginProtection";
 import { Api } from "@/configs/api";
 import { useToast } from "@/hooks/useToast";
 

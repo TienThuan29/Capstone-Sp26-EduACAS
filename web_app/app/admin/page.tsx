@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useThemeContext } from "@/components/ThemeProvider"
+import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import Link from "next/link"
 import { Api } from "@/configs/api"

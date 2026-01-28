@@ -8,11 +8,13 @@ import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
 import { Api } from "@/configs/api";
 import { useToast } from "@/hooks/useToast";
+import useAxios from "@/hooks/useAxios";
 
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { showToast } = useToast();
+  const axiosInstance = useAxios();
   
   const [email, setEmail] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -100,27 +102,16 @@ function ResetPasswordContent() {
         return;
       }
 
-      const response = await fetch(
-        `${Api.BASE_API}${Api.Auth.RESET_FIRST_LOGIN_PASSWORD}`,
+      await axiosInstance.post(Api.Auth.RESET_FIRST_LOGIN_PASSWORD, {
+          email,
+          newPassword,
+          confirmPassword,},
         {
-          method: "POST",
           headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            email,
-            newPassword,
-            confirmPassword,
-          }),
         }
       );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Đặt lại mật khẩu thất bại");
-      }
 
       showToast("Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.", "success");
       
@@ -131,10 +122,10 @@ function ResetPasswordContent() {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Reset password error:", error);
       showToast(
-        error instanceof Error ? error.message : "Đặt lại mật khẩu thất bại",
+        error?.response?.data?.message || error?.message || "Đặt lại mật khẩu thất bại",
         "error"
       );
     } finally {
