@@ -3,7 +3,21 @@
 import { useState, useEffect } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
-import { Button, Modal, TextInput, Textarea, Select, Badge, Spinner } from "flowbite-react"
+import { 
+  Button, 
+  Modal, 
+  TextInput, 
+  Textarea, 
+  Select, 
+  Badge, 
+  Spinner, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeadCell, 
+  TableRow 
+} from "flowbite-react"
 import {
   AcademicCapIcon,
   PlusIcon,
@@ -15,6 +29,25 @@ import {
 import { useToast } from "@/hooks/useToast"
 import { useSubject, Subject } from "@/hooks/subject/useSubject"
 import { useAuth } from "@/contexts/AuthContext"
+
+type SubjectFormData = {
+  subjectCode: string
+  subjectName: string
+  description: string
+  createdBy: string
+  isDeleted: boolean
+}
+
+type SubjectModalProps = {
+  show: boolean
+  onClose: () => void
+  isDark: boolean
+  editingSubject: Subject | null
+  formData: SubjectFormData
+  setFormData: React.Dispatch<React.SetStateAction<SubjectFormData>>
+  onSubmit: (e: React.FormEvent) => void
+}
+
 
 export default function SubjectsManagement() {
 
@@ -50,7 +83,7 @@ export default function SubjectsManagement() {
       setSubjects(data)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.showError(error.response?.data?.message || 'Không thể tải danh sách môn học')
+      toast.showError(error.response?.data?.message || 'Cannot load subject list')
     } finally {
       setLoading(false)
     }
@@ -73,7 +106,7 @@ export default function SubjectsManagement() {
       subjectCode: '',
       subjectName: '',
       description: '',
-      createdBy: 'admin@eduacas.com',
+      createdBy: user?.id || '',
       isDeleted: false
     })
     setIsModalOpen(true)
@@ -92,14 +125,14 @@ export default function SubjectsManagement() {
   }
 
   const handleDelete = async (id: string) => {
-    if (confirm('Bạn có chắc chắn muốn đánh dấu xóa môn học này?')) {
+    if (confirm('Are you sure you want to mark this subject as deleted?')) {
       try {
         await softDeleteSubject(id)
-        toast.showSuccess('Xóa môn học thành công')
+        toast.showSuccess('Delete subject successfully')
         fetchSubjects()
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        toast.showError(error.response?.data?.message || 'Không thể xóa môn học')
+        toast.showError(error.response?.data?.message || 'Cannot delete subject!')
       }
     }
   }
@@ -107,11 +140,11 @@ export default function SubjectsManagement() {
   const handleRestore = async (id: string) => {
     try {
       await restoreSubject(id)
-      toast.showSuccess('Khôi phục môn học thành công')
+      toast.showSuccess('Restore subject successfully')
       fetchSubjects();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.showError(error.response?.data?.message || 'Không thể khôi phục môn học')
+      toast.showError(error.response?.data?.message || 'Cannot restore subject!')
     }
   }
 
@@ -126,16 +159,16 @@ export default function SubjectsManagement() {
       
       if (editingSubject) {
         await updateSubject(editingSubject.id, payload)
-        toast.showSuccess('Cập nhật môn học thành công')
+        toast.showSuccess('Update subject successfully')
       } else {
         await createSubject(payload)
-        toast.showSuccess('Thêm môn học thành công')
+        toast.showSuccess('Create subject successfully')
       }
       setIsModalOpen(false)
       fetchSubjects()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-      toast.showError(error.response?.data?.message || 'Có lỗi xảy ra')
+      toast.showError(error.response?.data?.message || 'Something went wrong!')
     }
   }
 
@@ -154,47 +187,39 @@ export default function SubjectsManagement() {
         {/* Header */}
         <div className="mb-8">
           <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Quản lý môn học
+            Manage Subjects
           </h1>
           <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Quản lý tất cả các môn học trong hệ thống
+            Manage all subjects in the system
           </p>
         </div>
 
         {/* Toolbar */}
         <div className="mb-6 flex items-center justify-between gap-4">
           <div className="flex gap-4 flex-1">
-            <div className="flex-1 max-w-md relative">
-              <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                <MagnifyingGlassIcon className="w-5 h-5 text-gray-400" />
-              </div>
-              <input
+            <div className="flex-1 max-w-md">
+              <TextInput
                 type="text"
-                className={`pl-10 block w-full rounded-lg border ${
-                  isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'
-                } focus:ring-2 focus:ring-purple-500 focus:border-transparent p-2.5`}
-                placeholder="Tìm kiếm môn học..."
+                icon={MagnifyingGlassIcon}
+                placeholder="Search subject..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
               />
             </div>
-            <select
+            <Select
               value={filterDeleted}
               onChange={(e) => setFilterDeleted(e.target.value)}
-              className={`rounded-lg border ${
-                isDark 
-                  ? 'bg-gray-700 border-gray-600 text-white' 
-                  : 'bg-white border-gray-300 text-gray-900'
-              } focus:ring-2 focus:ring-purple-500 focus:border-transparent p-2.5 min-w-[180px] cursor-pointer`}
+              className="min-w-[180px]"
             >
-              <option value="active">Đang hoạt động</option>
-              <option value="deleted">Đã xóa</option>
-              <option value="all">Tất cả</option>
-            </select>
+              <option value="active">Active</option>
+              <option value="deleted">Deleted</option>
+              <option value="all">All</option>
+            </Select>
           </div>
-          <Button color="purple" onClick={handleAddNew}>
+          <Button color="purple" onClick={handleAddNew} className="cursor-pointer">
             <PlusIcon className="w-5 h-5 mr-2" />
-            Thêm môn học mới
+            Add new subject
           </Button>
         </div>
 
@@ -203,170 +228,168 @@ export default function SubjectsManagement() {
           {loading ? (
             <div className="flex justify-center items-center p-8">
               <Spinner size="xl" />
-              <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Đang tải dữ liệu...</span>
+              <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Loading data...</span>
             </div>
           ) : (
-          <table className="w-full text-sm text-left">
-            <thead className={`text-xs uppercase ${isDark ? 'bg-gray-700 text-gray-400' : 'bg-gray-50 text-gray-700'}`}>
-              <tr>
-                <th scope="col" className="px-6 py-3">Mã môn học</th>
-                <th scope="col" className="px-6 py-3">Tên môn học</th>
-                <th scope="col" className="px-6 py-3">Mô tả</th>
-                <th scope="col" className="px-6 py-3">Người tạo</th>
-                <th scope="col" className="px-6 py-3">Trạng thái</th>
-                <th scope="col" className="px-6 py-3">Ngày tạo</th>
-                <th scope="col" className="px-6 py-3">Ngày cập nhật</th>
-                <th scope="col" className="px-6 py-3">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredSubjects.map((subject) => (
-                <tr 
-                  key={subject.id}
-                  className={`border-b ${
-                    isDark ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-200 hover:bg-gray-50'
-                  }`}
-                >
-                  <td className="px-6 py-4 font-medium whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      <AcademicCapIcon className="w-5 h-5 text-purple-600" />
-                      <span className={isDark ? 'text-white' : 'text-gray-900'}>
-                        {subject.subjectCode}
-                      </span>
-                    </div>
-                  </td>
-                  <td className={`px-6 py-4 font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    {subject.subjectName}
-                  </td>
-                  <td className={`px-6 py-4 max-w-xs truncate ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    {subject.description}
-                  </td>
-                  <td className={`px-6 py-4 text-sm ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    {subject.createdBy}
-                  </td>
-                  <td className="px-6 py-4">
-                    <Badge color={subject.isDeleted ? 'failure' : 'success'}>
-                      {subject.isDeleted ? 'Đã xóa' : 'Hoạt động'}
-                    </Badge>
-                  </td>
-                  <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    {subject.createdDate ? formatDate(new Date(subject.createdDate)) : 'N/A'}
-                  </td>
-                  <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    {subject.updatedDate ? formatDate(new Date(subject.updatedDate)) : 'N/A'}
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      {!subject.isDeleted ? (
-                        <>
-                          <Button size="xs" color="info" onClick={() => handleEdit(subject)}>
-                            <PencilIcon className="w-4 h-4" />
+            <Table>
+              <TableHead>
+                <TableHeadCell>Subject Code</TableHeadCell>
+                <TableHeadCell>Subject Name</TableHeadCell>
+                <TableHeadCell>Description</TableHeadCell>
+                <TableHeadCell>Status</TableHeadCell>
+                <TableHeadCell>Created Date</TableHeadCell>
+                <TableHeadCell>Updated Date</TableHeadCell>
+                <TableHeadCell>Actions</TableHeadCell>
+              </TableHead>
+              <TableBody>
+                {filteredSubjects.map((subject) => (
+                  <TableRow key={subject.id}>
+                    <TableCell className="font-medium whitespace-nowrap">
+                      <div className="flex items-center gap-2">
+                        <AcademicCapIcon className="w-5 h-5 text-purple-600" />
+                        <span className={isDark ? 'text-white' : 'text-gray-900'}>
+                          {subject.subjectCode}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {subject.subjectName}
+                    </TableCell>
+                    <TableCell className={`max-w-xs truncate ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
+                      {subject.description}
+                    </TableCell>
+                    <TableCell>
+                      <Badge color={subject.isDeleted ? 'failure' : 'success'}>
+                        {subject.isDeleted ? 'Deleted' : 'Active'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className={isDark ? 'text-gray-300' : 'text-gray-900'}>
+                      {subject.createdDate ? formatDate(new Date(subject.createdDate)) : 'N/A'}
+                    </TableCell>
+                    <TableCell className={isDark ? 'text-gray-300' : 'text-gray-900'}>
+                      {subject.updatedDate ? formatDate(new Date(subject.updatedDate)) : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        {!subject.isDeleted ? (
+                          <>
+                            <Button size="xs" color="info" onClick={() => handleEdit(subject)}>
+                              <PencilIcon className="w-4 h-4" />
+                            </Button>
+                            <Button size="xs" color="failure" onClick={() => handleDelete(subject.id)}>
+                              <TrashIcon className="w-4 h-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <Button size="xs" color="success" onClick={() => handleRestore(subject.id)}>
+                            <ArrowPathIcon className="w-4 h-4 mr-1" />
+                            Restore
                           </Button>
-                          <Button size="xs" color="failure" onClick={() => handleDelete(subject.id)}>
-                            <TrashIcon className="w-4 h-4" />
-                          </Button>
-                        </>
-                      ) : (
-                        <Button size="xs" color="success" onClick={() => handleRestore(subject.id)}>
-                          <ArrowPathIcon className="w-4 h-4 mr-1" />
-                          Khôi phục
-                        </Button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </div>
 
-        {/* Modal */}
-        <Modal show={isModalOpen} onClose={() => setIsModalOpen(false)}>
-          <div className="p-6">
-            <h3 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              {editingSubject ? 'Chỉnh sửa môn học' : 'Thêm môn học mới'}
-            </h3>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <label htmlFor="subjectCode" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Mã môn học *
-                </label>
-                <TextInput
-                  id="subjectCode"
-                  type="text"
-                  required
-                  value={formData.subjectCode}
-                  onChange={(e) => setFormData({...formData, subjectCode: e.target.value})}
-                  placeholder="VD: SWE201"
-                />
-              </div>
-              <div>
-                <label htmlFor="subjectName" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Tên môn học *
-                </label>
-                <TextInput
-                  id="subjectName"
-                  type="text"
-                  required
-                  value={formData.subjectName}
-                  onChange={(e) => setFormData({...formData, subjectName: e.target.value})}
-                  placeholder="VD: Software Engineering"
-                />
-              </div>
-              <div>
-                <label htmlFor="description" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Mô tả *
-                </label>
-                <Textarea
-                  id="description"
-                  required
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Nhập mô tả môn học"
-                  rows={4}
-                />
-              </div>
-              {/* <div>
-                <label htmlFor="createdBy" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  Người tạo *
-                </label>
-                <TextInput
-                  id="createdBy"
-                  type="email"
-                  required
-                  value={formData.createdBy}
-                  onChange={(e) => setFormData({...formData, createdBy: e.target.value})}
-                  placeholder="Email người tạo"
-                />
-              </div> */}
-              {editingSubject && (
-                <div>
-                  <label htmlFor="isDeleted" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                    Trạng thái *
-                  </label>
-                  <Select
-                    id="isDeleted"
-                    value={formData.isDeleted.toString()}
-                    onChange={(e) => setFormData({...formData, isDeleted: e.target.value === 'true'})}
-                  >
-                    <option value="false">Hoạt động</option>
-                    <option value="true">Đã xóa</option>
-                  </Select>
-                </div>
-              )}
-              <div className="flex gap-4 justify-end pt-4">
-                <Button color="gray" onClick={() => setIsModalOpen(false)}>
-                  Hủy
-                </Button>
-                <Button type="submit" color="purple">
-                  {editingSubject ? 'Cập nhật' : 'Thêm mới'}
-                </Button>
-              </div>
-            </form>
-          </div>
-        </Modal>
+        <SubjectModal
+          show={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          isDark={isDark}
+          editingSubject={editingSubject}
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleSubmit}
+        />
       </main>
     </div>
+  )
+}
+
+
+function SubjectModal({
+  show,
+  onClose,
+  isDark,
+  editingSubject,
+  formData,
+  setFormData,
+  onSubmit,
+}: SubjectModalProps) {
+  return (
+    <Modal show={show} onClose={onClose}>
+      <div className="p-6">
+        <h3 className={`text-xl font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+          {editingSubject ? 'Edit subject' : 'Add new subject'}
+        </h3>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="subjectCode" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Subject Code *
+            </label>
+            <TextInput
+              id="subjectCode"
+              type="text"
+              required
+              value={formData.subjectCode}
+              onChange={(e) => setFormData({ ...formData, subjectCode: e.target.value })}
+              placeholder="Example: SWE201"
+            />
+          </div>
+          <div>
+            <label htmlFor="subjectName" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Subject Name *
+            </label>
+            <TextInput
+              id="subjectName"
+              type="text"
+              required
+              value={formData.subjectName}
+              onChange={(e) => setFormData({ ...formData, subjectName: e.target.value })}
+              placeholder="Example: Software Engineering"
+            />
+          </div>
+          <div>
+            <label htmlFor="description" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              Description *
+            </label>
+            <Textarea
+              id="description"
+              required
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="Enter subject description"
+              rows={4}
+            />
+          </div>
+          {editingSubject && (
+            <div>
+              <label htmlFor="isDeleted" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                Status *
+              </label>
+              <Select
+                id="isDeleted"
+                value={formData.isDeleted.toString()}
+                onChange={(e) => setFormData({ ...formData, isDeleted: e.target.value === 'true' })}
+              >
+                <option value="false">Active</option>
+                <option value="true">Deleted</option>
+              </Select>
+            </div>
+          )}
+          <div className="flex gap-4 justify-end pt-4">
+            <Button color="gray" onClick={onClose} className="cursor-pointer">
+              Cancel
+            </Button>
+            <Button type="submit" color="purple" className="cursor-pointer">
+              {editingSubject ? 'Update' : 'Add new'}
+            </Button>
+          </div>
+        </form>
+      </div>
+    </Modal>
   )
 }

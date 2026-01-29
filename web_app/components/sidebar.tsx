@@ -76,7 +76,7 @@ const Sidebar = () => {
   const adminMenuItems = [
     { icon: Squares2X2Icon, label: "Admin Dashboard", href: PageUrl.ADMIN_PAGE },
     { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.ADMIN_CLASSES_PAGE },
-    { icon: DocumentTextIcon, label: "Manage Subjects", href: PageUrl.ADMIN_SUBJECTS_PAGE },
+    { icon: BookOpenIcon, label: "Manage Subjects", href: PageUrl.ADMIN_SUBJECTS_PAGE },
     { icon: CodeBracketSquareIcon, label: "Manage Programming Languages", href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE },
     { icon: UsersIcon, label: "Manage Users", href: PageUrl.ADMIN_USERS_PAGE },
   ];

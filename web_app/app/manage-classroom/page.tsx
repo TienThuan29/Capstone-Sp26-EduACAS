@@ -25,7 +25,9 @@ import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 interface LecturerLite {
   lecturerId: string;
-  lecturerName: string;
+  fullname: string;
+  email: string;
+  avatarUrl: string;
 }
 
 interface SubjectLite {

@@ -1,9 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
-import { Badge, Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react"
+import { Avatar, Badge, Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react"
 import {
   UserIcon,
   MagnifyingGlassIcon,
@@ -12,15 +12,39 @@ import {
   UserCircleIcon,
   PencilIcon,
 } from '@heroicons/react/24/outline'
-import useAxios from "@/hooks/useAxios"
+import { useUserManagement } from "@/hooks/user/useUserManagement"
 import { useToast } from "@/hooks/useToast"
-import { Api } from "@/configs/api"
 import { UserProfile } from "@/types/user"
+
+type GrantFormData = {
+  email: string
+  roleNumber: string
+  fullname: string
+  role: string
+}
+
+type EditFormData = {
+  fullname: string
+  roleNumber: string
+  role: string
+  isEnable: boolean
+}
+
+type GrantAccountModalProps = {
+  show: boolean
+  onClose: () => void
+  grantForm: GrantFormData
+  setGrantForm: React.Dispatch<React.SetStateAction<GrantFormData>>
+  onSubmit: (e: React.FormEvent) => void
+  isLoading: boolean
+}
+
+
 
 export default function UsersManagement() {
   const { isDark } = useThemeContext()
-  const axiosInstance = useAxios()
   const toast = useToast()
+  const { getAllUsers, grantAccount, updateUser } = useUserManagement()
   const [mounted, setMounted] = useState(false)
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
@@ -44,24 +68,23 @@ export default function UsersManagement() {
     isEnable: true
   })
 
-  useEffect(() => {
-    setMounted(true)
-    fetchUsers()
-  }, [])
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
-      const response = await axiosInstance.get(Api.User.GET_ALL)
-      if (response.data?.dataResponse) {
-        setUsers(response.data.dataResponse)
-      }
-    } catch (error: any) {
-      toast.showError(error.response?.data?.message || 'Không thể tải danh sách người dùng')
+      const data = await getAllUsers()
+      setUsers(data)
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      toast.showError(err.response?.data?.message || 'Cannot load user list')
     } finally {
       setLoading(false)
     }
-  }
+  }, [getAllUsers, toast])
+
+  useEffect(() => {
+    setMounted(true)
+    fetchUsers()
+  }, [fetchUsers])
 
   const handleGrantAccount = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -72,24 +95,21 @@ export default function UsersManagement() {
         email: grantForm.email,
         roleNumber: grantForm.roleNumber,
         fullname: grantForm.fullname,
-        role: grantForm.role
+        role: grantForm.role,
       }
-
-      const response = await axiosInstance.post(Api.Auth.GRANT_ACCOUNT, requestBody)
-      
-      if (response.data) {
-        toast.showSuccess('Cấp tài khoản thành công!')
-        setShowGrantModal(false)
-        setGrantForm({
-          email: "",
-          roleNumber: "",
-          fullname: "",
-          role: "STUDENT"
-        })
-        fetchUsers()
-      }
-    } catch (error: any) {
-      toast.showError(error.response?.data?.message || 'Có lỗi xảy ra khi cấp tài khoản!')
+      await grantAccount(requestBody)
+      toast.showSuccess('Grant account successfully!')
+      setShowGrantModal(false)
+      setGrantForm({
+        email: "",
+        roleNumber: "",
+        fullname: "",
+        role: "STUDENT"
+      })
+      fetchUsers()
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      toast.showError(err.response?.data?.message || 'Something went wrong when granting account!')
     } finally {
       setIsLoading(false)
     }
@@ -109,18 +129,17 @@ export default function UsersManagement() {
   const handleUpdateUser = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingUser) return
-    
+
     setIsLoading(true)
     try {
-      const response = await axiosInstance.put(Api.User.UPDATE(editingUser.id), editForm)
-      if (response.data) {
-        toast.showSuccess('Cập nhật người dùng thành công!')
-        setShowEditModal(false)
-        setEditingUser(null)
-        fetchUsers()
-      }
-    } catch (error: any) {
-      toast.showError(error.response?.data?.message || 'Có lỗi xảy ra khi cập nhật!')
+      await updateUser(editingUser.id, editForm)
+      toast.showSuccess('Update user successfully!')
+      setShowEditModal(false)
+      setEditingUser(null)
+      fetchUsers()
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } }
+      toast.showError(err.response?.data?.message || 'Something went wrong when updating user!')
     } finally {
       setIsLoading(false)
     }
@@ -140,7 +159,7 @@ export default function UsersManagement() {
   })
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Chưa có'
+    if (!dateString) return 'No data'
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: '2-digit',
@@ -185,11 +204,11 @@ export default function UsersManagement() {
   const getRoleText = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'Quản trị viên'
+        return 'Admin'
       case 'LECTURER':
-        return 'Giảng viên'
+        return 'Lecturer'
       case 'STUDENT':
-        return 'Sinh viên'
+        return 'Student'
       default:
         return role
     }
@@ -203,10 +222,10 @@ export default function UsersManagement() {
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-              Quản lý người dùng
+              Manage Users
             </h1>
             <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              Quản lý tất cả người dùng trong hệ thống
+              Manage all users in the system
             </p>
           </div>
           
@@ -214,7 +233,7 @@ export default function UsersManagement() {
             <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
               <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
             </svg>
-            Cấp tài khoản
+            Grant Account
           </Button>
         </div>
 
@@ -223,7 +242,7 @@ export default function UsersManagement() {
           <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Tổng số</p>
+                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Total</p>
                 <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {users.length}
                 </h3>
@@ -237,7 +256,7 @@ export default function UsersManagement() {
           <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Sinh viên</p>
+                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Student</p>
                 <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {users.filter(u => u.role === 'STUDENT').length}
                 </h3>
@@ -251,7 +270,7 @@ export default function UsersManagement() {
           <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Giảng viên</p>
+                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Lecturer</p>
                 <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {users.filter(u => u.role === 'LECTURER').length}
                 </h3>
@@ -265,7 +284,7 @@ export default function UsersManagement() {
           <Card className="rounded-xl">
             <div className="flex items-center justify-between">
               <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Quản trị</p>
+                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Admin</p>
                 <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {users.filter(u => u.role === 'ADMIN').length}
                 </h3>
@@ -284,7 +303,7 @@ export default function UsersManagement() {
               <TextInput
                 type="text"
                 icon={MagnifyingGlassIcon}
-                placeholder="Tìm kiếm người dùng..."
+                placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -294,19 +313,19 @@ export default function UsersManagement() {
               onChange={(e) => setFilterRole(e.target.value)}
               className="min-w-[150px]"
             >
-              <option value="all">Tất cả vai trò</option>
-              <option value="STUDENT">Sinh viên</option>
-              <option value="LECTURER">Giảng viên</option>
-              <option value="ADMIN">Quản trị</option>
+              <option value="all">All roles</option>
+              <option value="STUDENT">Student</option>
+              <option value="LECTURER">Lecturer</option>
+              <option value="ADMIN">Admin</option>
             </Select>
             <Select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
               className="min-w-[150px]"
             >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">Đang hoạt động</option>
-              <option value="disabled">Đã vô hiệu hóa</option>
+              <option value="all">All status</option>
+              <option value="active">Active</option>
+              <option value="disabled">Disabled</option>
             </Select>
           </div>
         </div>
@@ -314,30 +333,30 @@ export default function UsersManagement() {
         {/* Table */}
         <Card className="overflow-x-auto">
           {loading ? (
-            <div className="flex justify-center items-center p-8">
+            <div className="flex justify-center items-center">
               <Spinner size="xl" />
-              <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Đang tải dữ liệu...</span>
+              <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Loading data...</span>
             </div>
           ) : (
           <Table>
             <TableHead>
-              <TableHeadCell>Người dùng</TableHeadCell>
-              <TableHeadCell>Mã số</TableHeadCell>
+              <TableHeadCell>User</TableHeadCell>
+              <TableHeadCell>Role Number</TableHeadCell>
               <TableHeadCell>Email</TableHeadCell>
-              <TableHeadCell>Vai trò</TableHeadCell>
-              <TableHeadCell>Trạng thái</TableHeadCell>
-              <TableHeadCell>Đăng nhập lần đầu</TableHeadCell>
-              <TableHeadCell>Ngày tạo</TableHeadCell>
-              <TableHeadCell>Thao tác</TableHeadCell>
+              <TableHeadCell>Role</TableHeadCell>
+              <TableHeadCell>Status</TableHeadCell>
+              <TableHeadCell>First Login</TableHeadCell>
+              <TableHeadCell>Created Date</TableHeadCell>
+              <TableHeadCell>Action</TableHeadCell>
             </TableHead>
             <TableBody>
               {filteredUsers.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={8} className="text-center">
-                    <div className="flex flex-col items-center justify-center py-8">
+                    <div className="flex flex-col items-center justify-center">
                       <UserIcon className={`w-12 h-12 mb-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
                       <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
-                        Không tìm thấy người dùng nào
+                        No users found
                       </p>
                     </div>
                   </TableCell>
@@ -347,19 +366,13 @@ export default function UsersManagement() {
                   <TableRow key={user.id}>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        {user.avatarUrl ? (
-                          <img 
-                            src={user.avatarUrl} 
-                            alt={user.fullname}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            isDark ? 'bg-gray-600' : 'bg-gray-300'
-                          }`}>
-                            <UserIcon className="w-6 h-6 text-gray-500" />
-                          </div>
-                        )}
+                        <Avatar
+                          img={user.avatarUrl}
+                          alt={user.fullname}
+                          rounded
+                          size="md"
+                          className="shrink-0"
+                        />
                         <div>
                           <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
                             {user.fullname}
@@ -386,12 +399,12 @@ export default function UsersManagement() {
                     </TableCell>
                     <TableCell>
                       <Badge color={user.isEnable ? 'success' : 'failure'}>
-                        {user.isEnable ? 'Hoạt động' : 'Vô hiệu hóa'}
+                        {user.isEnable ? 'Active' : 'Disabled'}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <Badge color={user.firstLogin ? 'warning' : 'gray'}>
-                        {user.firstLogin ? 'Chưa đổi MK' : 'Đã đổi MK'}
+                        {user.firstLogin ? 'Not changed password' : 'Changed password'}
                       </Badge>
                     </TableCell>
                     <TableCell>
@@ -407,7 +420,7 @@ export default function UsersManagement() {
                     <TableCell>
                       <Button size="xs" color="blue" onClick={() => handleEdit(user)}>
                         <PencilIcon className="w-4 h-4 mr-1" />
-                        Chỉnh sửa
+                        Edit
                       </Button>
                     </TableCell>
                   </TableRow>
@@ -422,201 +435,241 @@ export default function UsersManagement() {
         {!loading && filteredUsers.length > 0 && (
           <Card className="mt-4">
             <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Hiển thị <span className="font-semibold">{filteredUsers.length}</span> trong tổng số{' '}
-              <span className="font-semibold">{users.length}</span> người dùng
+              Display <span className="font-semibold">{filteredUsers.length}</span> out of <span className="font-semibold">{users.length}</span> users
             </p>
           </Card>
         )}
 
-        {/* Grant Account Modal */}
-        <Modal show={showGrantModal} onClose={() => setShowGrantModal(false)}>
-          <ModalHeader>Cấp tài khoản người dùng</ModalHeader>
-          <form onSubmit={handleGrantAccount}>
-            <ModalBody className="space-y-4">
-              <div>
-                <div className="mb-2">
-                  <Label htmlFor="grant-email">
-                    Email <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-                <TextInput
-                  id="grant-email"
-                  type="email"
-                  required
-                  value={grantForm.email}
-                  onChange={(e) => setGrantForm({...grantForm, email: e.target.value})}
-                  placeholder="example@email.com"
-                />
-              </div>
+        <GrantAccountModal
+          show={showGrantModal}
+          onClose={() => setShowGrantModal(false)}
+          grantForm={grantForm}
+          setGrantForm={setGrantForm}
+          onSubmit={handleGrantAccount}
+          isLoading={isLoading}
+        />
 
-              <div>
-                <div className="mb-2">
-                  <Label htmlFor="grant-fullname">
-                    Họ và tên <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-                <TextInput
-                  id="grant-fullname"
-                  type="text"
-                  required
-                  minLength={2}
-                  maxLength={100}
-                  value={grantForm.fullname}
-                  onChange={(e) => setGrantForm({...grantForm, fullname: e.target.value})}
-                  placeholder="Nguyễn Văn A"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2">
-                  <Label htmlFor="grant-roleNumber">
-                    Mã số <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-                <TextInput
-                  id="grant-roleNumber"
-                  type="text"
-                  required
-                  pattern="^\d+$"
-                  value={grantForm.roleNumber}
-                  onChange={(e) => setGrantForm({...grantForm, roleNumber: e.target.value})}
-                  placeholder="20210001 (chỉ số)"
-                  title="Mã số phải là số"
-                />
-              </div>
-
-              <div>
-                <div className="mb-2">
-                  <Label htmlFor="grant-role">
-                    Vai trò <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-                <Select
-                  id="grant-role"
-                  required
-                  value={grantForm.role}
-                  onChange={(e) => setGrantForm({...grantForm, role: e.target.value})}
-                >
-                  <option value="STUDENT">Sinh viên</option>
-                  <option value="LECTURER">Giảng viên</option>
-                </Select>
-              </div>
-            </ModalBody>
-            <ModalFooter>
-              <Button color="gray" onClick={() => setShowGrantModal(false)}>
-                Hủy
-              </Button>
-              <Button type="submit" color="blue" disabled={isLoading}>
-                {isLoading ? (
-                  <span className="flex items-center justify-center gap-2">
-                    <Spinner size="sm" />
-                    Đang xử lý...
-                  </span>
-                ) : (
-                  'Cấp tài khoản'
-                )}
-              </Button>
-            </ModalFooter>
-          </form>
-        </Modal>
-
-        {/* Edit User Modal */}
-        <Modal show={showEditModal} onClose={() => {
-          setShowEditModal(false)
-          setEditingUser(null)
-        }}>
-          <ModalHeader>Chỉnh sửa người dùng</ModalHeader>
-          {editingUser && (
-            <form onSubmit={handleUpdateUser}>
-              <ModalBody className="space-y-4">
-                <div>
-                  <div className="mb-2">
-                    <Label htmlFor="edit-email">Email (không thể thay đổi)</Label>
-                  </div>
-                  <TextInput
-                    id="edit-email"
-                    type="email"
-                    disabled
-                    value={editingUser.email}
-                  />
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <Label htmlFor="edit-fullname">Họ và tên</Label>
-                  </div>
-                  <TextInput
-                    id="edit-fullname"
-                    type="text"
-                    maxLength={100}
-                    value={editForm.fullname}
-                    onChange={(e) => setEditForm({...editForm, fullname: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <Label htmlFor="edit-roleNumber">Mã số</Label>
-                  </div>
-                  <TextInput
-                    id="edit-roleNumber"
-                    type="text"
-                    value={editForm.roleNumber}
-                    onChange={(e) => setEditForm({...editForm, roleNumber: e.target.value})}
-                  />
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <Label htmlFor="edit-role">Vai trò</Label>
-                  </div>
-                  <Select
-                    id="edit-role"
-                    value={editForm.role}
-                    onChange={(e) => setEditForm({...editForm, role: e.target.value})}
-                  >
-                    <option value="STUDENT">Sinh viên</option>
-                    <option value="LECTURER">Giảng viên</option>
-                    <option value="ADMIN">Quản trị viên</option>
-                  </Select>
-                </div>
-
-                <div>
-                  <div className="mb-2">
-                    <Label htmlFor="edit-isEnable">Trạng thái tài khoản</Label>
-                  </div>
-                  <Select
-                    id="edit-isEnable"
-                    value={editForm.isEnable.toString()}
-                    onChange={(e) => setEditForm({...editForm, isEnable: e.target.value === 'true'})}
-                  >
-                    <option value="true">Hoạt động</option>
-                    <option value="false">Vô hiệu hóa</option>
-                  </Select>
-                </div>
-              </ModalBody>
-              <ModalFooter>
-                <Button color="gray" onClick={() => {
-                  setShowEditModal(false)
-                  setEditingUser(null)
-                }}>
-                  Hủy
-                </Button>
-                <Button type="submit" color="blue" disabled={isLoading}>
-                  {isLoading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <Spinner size="sm" />
-                      Đang xử lý...
-                    </span>
-                  ) : (
-                    'Cập nhật'
-                  )}
-                </Button>
-              </ModalFooter>
-            </form>
-          )}
-        </Modal>
+        <EditUserModal
+          show={showEditModal}
+          onClose={() => {
+            setShowEditModal(false)
+            setEditingUser(null)
+          }}
+          editingUser={editingUser}
+          editForm={editForm}
+          setEditForm={setEditForm}
+          onSubmit={handleUpdateUser}
+          isLoading={isLoading}
+        />
       </main>
     </div>
+  )
+}
+
+
+function GrantAccountModal({
+  show,
+  onClose,
+  grantForm,
+  setGrantForm,
+  onSubmit,
+  isLoading,
+}: GrantAccountModalProps) {
+  return (
+    <Modal show={show} onClose={onClose}>
+      <ModalHeader>Grant user account</ModalHeader>
+      <form onSubmit={onSubmit}>
+        <ModalBody className="space-y-4">
+          <div>
+            <div className="mb-2">
+              <Label htmlFor="grant-email">
+                Email <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              id="grant-email"
+              type="email"
+              required
+              value={grantForm.email}
+              onChange={(e) => setGrantForm({ ...grantForm, email: e.target.value })}
+              placeholder="example@email.com"
+            />
+          </div>
+          <div>
+            <div className="mb-2">
+              <Label htmlFor="grant-fullname">
+                Fullname <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              id="grant-fullname"
+              type="text"
+              required
+              minLength={2}
+              maxLength={100}
+              value={grantForm.fullname}
+              onChange={(e) => setGrantForm({ ...grantForm, fullname: e.target.value })}
+              placeholder="Nguyen Van A"
+            />
+          </div>
+          <div>
+            <div className="mb-2">
+              <Label htmlFor="grant-roleNumber">
+                Role Number <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              id="grant-roleNumber"
+              type="text"
+              required
+              pattern="^\d+$"
+              value={grantForm.roleNumber}
+              onChange={(e) => setGrantForm({ ...grantForm, roleNumber: e.target.value })}
+              placeholder="20210001 (Role Number)"
+              title="Role Number must be a number"
+            />
+          </div>
+          <div>
+            <div className="mb-2">
+              <Label htmlFor="grant-role">
+                Role <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <Select
+              id="grant-role"
+              required
+              value={grantForm.role}
+              onChange={(e) => setGrantForm({ ...grantForm, role: e.target.value })}
+            >
+              <option value="STUDENT">Student</option>
+              <option value="LECTURER">Lecturer</option>
+            </Select>
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button color="gray" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button type="submit" color="blue" disabled={isLoading}>
+            {isLoading ? (
+              <span className="flex items-center justify-center gap-2">
+                <Spinner size="sm" />
+                Processing...
+              </span>
+            ) : (
+              'Grant account'
+            )}
+          </Button>
+        </ModalFooter>
+      </form>
+    </Modal>
+  )
+}
+
+type EditUserModalProps = {
+  show: boolean
+  onClose: () => void
+  editingUser: UserProfile | null
+  editForm: EditFormData
+  setEditForm: React.Dispatch<React.SetStateAction<EditFormData>>
+  onSubmit: (e: React.FormEvent) => void
+  isLoading: boolean
+}
+
+function EditUserModal({
+  show,
+  onClose,
+  editingUser,
+  editForm,
+  setEditForm,
+  onSubmit,
+  isLoading,
+}: EditUserModalProps) {
+  return (
+    <Modal show={show} onClose={onClose}>
+      <ModalHeader>Edit user</ModalHeader>
+      {editingUser && (
+        <form onSubmit={onSubmit}>
+          <ModalBody className="space-y-4">
+            <div>
+              <div className="mb-2">
+                <Label htmlFor="edit-email">Email (cannot be changed)</Label>
+              </div>
+              <TextInput
+                id="edit-email"
+                type="email"
+                disabled
+                value={editingUser.email}
+              />
+            </div>
+            <div>
+              <div className="mb-2">
+                <Label htmlFor="edit-fullname">Fullname</Label>
+              </div>
+              <TextInput
+                id="edit-fullname"
+                type="text"
+                maxLength={100}
+                value={editForm.fullname}
+                onChange={(e) => setEditForm({ ...editForm, fullname: e.target.value })}
+              />
+            </div>
+            <div>
+              <div className="mb-2">
+                <Label htmlFor="edit-roleNumber">Role Number</Label>
+              </div>
+              <TextInput
+                id="edit-roleNumber"
+                type="text"
+                value={editForm.roleNumber}
+                onChange={(e) => setEditForm({ ...editForm, roleNumber: e.target.value })}
+              />
+            </div>
+            <div>
+              <div className="mb-2">
+                <Label htmlFor="edit-role">Vai trò</Label>
+              </div>
+              <Select
+                id="edit-role"
+                value={editForm.role}
+                onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
+              >
+                <option value="STUDENT">Student</option>
+                <option value="LECTURER">Lecturer</option>
+                <option value="ADMIN">Admin</option>
+              </Select>
+            </div>
+            <div>
+              <div className="mb-2">
+                <Label htmlFor="edit-isEnable">Account status</Label>
+              </div>
+              <Select
+                id="edit-isEnable"
+                value={editForm.isEnable.toString()}
+                onChange={(e) => setEditForm({ ...editForm, isEnable: e.target.value === 'true' })}
+              >
+                <option value="true">Active</option>
+                <option value="false">Disabled</option>
+              </Select>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <Button color="gray" onClick={onClose}>
+              Cancel
+            </Button>
+            <Button type="submit" color="blue" disabled={isLoading}>
+              {isLoading ? (
+                <span className="flex items-center justify-center gap-2">
+                  <Spinner size="sm" />
+                  Processing...
+                </span>
+              ) : (
+                'Update'
+              )}
+            </Button>
+          </ModalFooter>
+        </form>
+      )}
+    </Modal>
   )
 }

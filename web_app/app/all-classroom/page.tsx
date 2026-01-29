@@ -202,7 +202,7 @@ export default function ListAllClassroomPage() {
                       Giảng viên:
                     </span>
                     <span className="font-medium text-gray-900 dark:text-gray-200">
-                      {c.lecturer.lecturerName}
+                      {c.lecturer.fullname}
                     </span>
                   </p>
 

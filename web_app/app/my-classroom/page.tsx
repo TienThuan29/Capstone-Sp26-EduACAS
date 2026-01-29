@@ -241,14 +241,14 @@ export default function ListClassroomPage() {
                   <div className="mb-3 space-y-3 rounded-xl border border-gray-100 bg-gray-50/50 p-4 dark:border-gray-700 dark:bg-gray-800/50">
                     <div className="flex items-center gap-3">
                       <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#1F4E79]/10 text-sm font-bold text-[#1F4E79] dark:bg-[#C9A24D]/20 dark:text-[#C9A24D]">
-                        {c.lecturer.lecturerName.charAt(0).toUpperCase()}
+                        {c.lecturer.fullname.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
                           Lecturer
                         </p>
                         <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-                          {c.lecturer.lecturerName}
+                          {c.lecturer.fullname}
                         </p>
                       </div>
                     </div>

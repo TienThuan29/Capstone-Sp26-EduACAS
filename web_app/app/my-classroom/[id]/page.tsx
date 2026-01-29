@@ -301,14 +301,14 @@ function ClassroomContent() {
 
                   <div className="mt-8 flex items-center gap-5 border border-gray-100 bg-gray-50/80 p-5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/40">
                     <div className="flex h-12 w-12 items-center justify-center bg-linear-to-br from-[#1F4E79] to-[#2A6BA3] text-xl font-bold text-white">
-                      {classroom.lecturer.lecturerName.charAt(0).toUpperCase()}
+                      {classroom.lecturer.fullname.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <span className="mb-1 block text-[8px] font-black tracking-[0.25em] text-[#1F4E79] uppercase dark:text-[#C9A24D]">
                         Lecturer
                       </span>
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-                        {classroom.lecturer.lecturerName}
+                        {classroom.lecturer.fullname}
                       </h3>
                     </div>
                   </div>

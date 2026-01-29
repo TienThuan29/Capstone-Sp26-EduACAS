@@ -6,7 +6,9 @@ import { Api } from "@/configs/api";
 
 export interface LecturerLite {
   lecturerId: string;
-  lecturerName: string;
+  fullname: string;
+  email: string;
+  avatarUrl: string;
 }
 
 export interface SubjectLite {
