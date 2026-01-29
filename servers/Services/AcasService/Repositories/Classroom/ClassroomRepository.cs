@@ -166,7 +166,7 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
             var response = await _dynamoDBClient.ScanAsync(request);
             var allClassrooms = response.Items
                 .Select(item => DynamoMapper.DynamoItemToClassroom(item));
-            return allClassrooms.Where(c => c.LecturerId == lecturerId);
+            return allClassrooms.Where(c => c.LecturerId == lecturerId && c.IsDeleted == false);
         }
         catch (Exception ex)
         {
