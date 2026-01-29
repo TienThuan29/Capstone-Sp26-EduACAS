@@ -48,6 +48,15 @@ public static class DynamoMapper
             IsEnable = item["isEnable"].BOOL
         };
 
+        if (item.ContainsKey("roleNumber"))
+            user.RoleNumber = item["roleNumber"].S ?? string.Empty;
+
+        if (item.ContainsKey("avatarUrl"))
+            user.AvatarUrl = item["avatarUrl"].S ?? string.Empty;
+
+        if (item.ContainsKey("googleId"))
+            user.GoogleId = item["googleId"].S ?? string.Empty;
+
         if (item.ContainsKey("dateOfBirth") && !string.IsNullOrEmpty(item["dateOfBirth"].S))
             user.Birthday = DateTime.Parse(item["dateOfBirth"].S);
 
