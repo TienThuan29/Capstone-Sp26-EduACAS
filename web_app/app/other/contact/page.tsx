@@ -1,7 +1,7 @@
 "use client"
 
 import { Card, TextInput, Textarea, Button, Label } from "flowbite-react"
-import HomeNavbar from "@/components/home-navbar"
+import HomeNavbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { SparklesIcon } from "@/components/svg-icons"
 
@@ -14,7 +14,7 @@ export default function ContactPage() {
       <section className="pt-24 pb-12 px-4 bg-gradient-to-br from-[#F5F7FA] to-white dark:from-gray-800 dark:to-gray-900">
         <div className="container mx-auto max-w-7xl text-center">
           <div
-            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D] shadow-lg"
+            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D]"
           >
             <SparklesIcon /> LIÊN HỆ
           </div>
@@ -217,7 +217,7 @@ export default function ContactPage() {
                 </div>
                 <Button
                   type="submit"
-                  className="w-full px-6 py-4 font-bold rounded-lg hover:scale-105 transition-all shadow-lg text-lg"
+                  className="w-full px-6 py-4 font-bold rounded-lg hover:scale-105 transition-all text-lg"
                   style={{ background: "linear-gradient(90deg, #1F4E79 0%, #C9A24D 100%)" }}
                 >
                   Gửi tin nhắn

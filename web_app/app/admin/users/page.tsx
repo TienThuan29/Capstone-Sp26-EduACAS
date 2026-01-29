@@ -312,7 +312,7 @@ export default function UsersManagement() {
         </div>
 
         {/* Table */}
-        <Card className="overflow-x-auto shadow-md rounded-lg">
+        <Card className="overflow-x-auto">
           {loading ? (
             <div className="flex justify-center items-center p-8">
               <Spinner size="xl" />

@@ -75,6 +75,14 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         setSessionExpired(false);
     };
     
+    const clearAuthData = () => {
+        localStorage.removeItem(AUTH_TOKENS_KEY);
+        localStorage.removeItem(USER_PROFILE_KEY);
+        setUser(null);
+        setAuthTokens(null);
+        setSessionExpired(true);
+    };
+
     const fetchUser = async (tokens: AuthTokens) => {
         try {
             const response = await axios.get(Api.BASE_API + Api.Auth.GET_PROFILE, {
@@ -94,12 +102,15 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             return response.data.dataResponse;
         } 
         catch (error) {
-            if (axios.isAxiosError(error) && error.response?.status === HttpStatusCode.Unauthorized) {
-                // Check if it's due to token expiration
-                if (checkTokenExpiration()) {
+            if (axios.isAxiosError(error)) {
+                const status = error.response?.status;
+                
+                // Handle token-related errors (401 Unauthorized or 500 with token issues)
+                if (status === HttpStatusCode.Unauthorized || status === HttpStatusCode.InternalServerError) {
+                    // Clear all auth data when token is invalid/expired
+                    clearAuthData();
                     return;
                 }
-                logout();
             }
         }
     };
@@ -111,7 +122,11 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             
             // Check if tokens are missing or expired
             if (!tokens || (tokens && isRefreshTokenExpired(tokens.refreshToken))) {
-                setSessionExpired(true);
+                // Clear any stale data from localStorage
+                localStorage.removeItem(AUTH_TOKENS_KEY);
+                localStorage.removeItem(USER_PROFILE_KEY);
+                setUser(null);
+                setAuthTokens(null);
                 setIsReady(true);
                 return;
             }
@@ -186,7 +201,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isAdmin) {
-                    router.push(PageUrl.DEFAULT_PAGE);
+                    router.push(PageUrl.ADMIN_PAGE);
                 }
                 else {
                     toast.showError('Invalid role!');
@@ -228,10 +243,10 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     router.push(PageUrl.DEFAULT_PAGE);
                 }
                 else if (roleValidator.isLecturer) {
-                    router.push(PageUrl.DEFAULT_PAGE);
+                    router.push(PageUrl.MANAGE_CLASSROOM_PAGE);
                 }
                 else if (roleValidator.isAdmin) {
-                    router.push(PageUrl.DEFAULT_PAGE);
+                    router.push(PageUrl.ADMIN_PAGE);
                 }
                 else {
                     toast.showError('Invalid role!');

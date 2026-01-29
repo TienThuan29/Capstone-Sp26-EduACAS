@@ -122,6 +122,7 @@ function ResetPasswordContent() {
       setTimeout(() => {
         router.push("/login");
       }, 2000);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Reset password error:", error);
       showToast(
@@ -315,7 +316,7 @@ function ResetPasswordContent() {
               <Button
                 type="submit"
                 disabled={isLoading || newPassword !== confirmPassword || !newPassword || !confirmPassword}
-                className="w-full text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
                 {isLoading ? "Đang xử lý..." : "Đặt lại mật khẩu"}

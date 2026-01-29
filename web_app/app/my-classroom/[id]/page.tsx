@@ -2,15 +2,41 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Spinner, Button, Card } from "flowbite-react";
+import {
+  Spinner,
+  Button,
+  Badge,
+  Card,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  Timeline,
+  TimelineBody,
+  TimelineContent,
+  TimelineItem,
+  TimelinePoint,
+  TimelineTime,
+  TimelineTitle,
+} from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
   useClassroom,
   Classroom as ClassroomDetail,
 } from "@/hooks/classroom/useClassroom";
 import { useExamination, Examination } from "@/hooks/exam/useExamination";
-import Link from "next/link";
+import {
+  ArrowLeftIcon,
+  ArrowRightEndOnRectangleIcon,
+} from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
+import { PageUrl } from "@/configs/page.url";
+
+type LeaveClassConfirmModalProps = {
+  show: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isLeaving: boolean;
+};
 
 function ClassroomContent() {
   const params = useParams();
@@ -26,26 +52,28 @@ function ClassroomContent() {
   const [examinations, setExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
   const [examsLoading, setExamsLoading] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [leaveLoading, setLeaveLoading] = useState(false);
 
   const studentId = user?.id;
   const classId = params.id as string;
 
   const handleLeaveClass = async () => {
-    if (!window.confirm("Bạn có chắc chắn muốn rời lớp học này không?")) {
-      return;
-    }
-
     try {
+      setLeaveLoading(true);
       const payload = {
         classId: classId,
         studentId: studentId!,
         enrolKey: classroom?.enrolKey,
       };
       await leaveClassroom(payload);
+      setShowLeaveModal(false);
       router.push("/my-classroom");
     } catch (error) {
       console.error("Failed to leave class:", error);
       alert("Rời lớp học thất bại. Vui lòng thử lại sau.");
+    } finally {
+      setLeaveLoading(false);
     }
   };
 
@@ -104,10 +132,10 @@ function ClassroomContent() {
         <Sidebar />
         <div className="container mx-auto ml-20 flex flex-grow flex-col items-center justify-center bg-gray-50 px-4 pt-24 pb-8 lg:ml-64 dark:bg-gray-900">
           <h2 className="mb-4 text-2xl font-bold text-gray-700 dark:text-gray-300">
-            Không tìm thấy lớp học
+            No class found
           </h2>
           <Button color="gray" onClick={() => router.back()}>
-            Quay lại
+            Go Back
           </Button>
         </div>
       </div>
@@ -128,7 +156,7 @@ function ClassroomContent() {
                 <Spinner size="xl" />
               </div>
             ) : examinations.length === 0 ? (
-              <div className="rounded-4xl border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
+              <div className="border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
                 <p className="cursor-default font-medium text-gray-500">
                   Hiện tại chưa có bài kiểm tra nào cho lớp học này.
                 </p>
@@ -148,7 +176,7 @@ function ClassroomContent() {
                   return (
                     <Card
                       key={exam.id}
-                      className="rounded-3xl border border-gray-100 shadow-xl transition-all duration-300 hover:shadow-2xl dark:border-gray-700"
+                      className="border border-gray-100 transition-all duration-300 hover:shadow-2xl dark:border-gray-700"
                     >
                       <div className="space-y-4">
                         <div className="flex items-start justify-between">
@@ -156,17 +184,17 @@ function ClassroomContent() {
                             {exam.examName}
                           </h3>
                           {isActive && (
-                            <span className="rounded-full bg-green-100 px-2 py-1 text-[10px] font-black text-green-700 uppercase">
+                            <span className="bg-green-100 px-2 py-1 text-[10px] font-black text-green-700 uppercase">
                               Đang diễn ra
                             </span>
                           )}
                           {isUpcoming && (
-                            <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-700 uppercase">
+                            <span className="bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-700 uppercase">
                               Sắp tới
                             </span>
                           )}
                           {isExpired && (
-                            <span className="rounded-full bg-gray-100 px-2 py-1 text-[10px] font-black text-gray-700 uppercase">
+                            <span className="bg-gray-100 px-2 py-1 text-[10px] font-black text-gray-700 uppercase">
                               Đã kết thúc
                             </span>
                           )}
@@ -190,7 +218,7 @@ function ClassroomContent() {
                           </div>
                         </div>
                         <Button
-                          className={`mt-4 w-full rounded-2xl font-bold ${isActive ? "bg-[#1F4E79]" : "bg-gray-200 text-gray-500"}`}
+                          className={`mt-4 w-full font-bold ${isActive ? "bg-[#1F4E79]" : "bg-gray-200 text-gray-500"}`}
                           disabled={!isActive}
                         >
                           {isActive
@@ -236,31 +264,48 @@ function ClassroomContent() {
         return (
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
             <div className="space-y-8 lg:col-span-2">
-              <div className="relative overflow-hidden rounded-[2.5rem] border border-gray-100 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
-                <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 rounded-full bg-linear-to-bl from-[#1F4E79]/10 to-transparent opacity-50 blur-3xl" />
-                <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 rounded-full bg-linear-to-tr from-[#C9A24D]/10 to-transparent opacity-50 blur-3xl" />
+              <div className="relative overflow-hidden border border-gray-100 bg-white dark:border-gray-700 dark:bg-gray-800">
+                <div className="absolute top-0 right-0 -mt-20 -mr-20 h-64 w-64 bg-linear-to-bl from-[#1F4E79]/10 to-transparent opacity-50 blur-3xl" />
+                <div className="absolute bottom-0 left-0 -mb-20 -ml-20 h-64 w-64 bg-linear-to-tr from-[#C9A24D]/10 to-transparent opacity-50 blur-3xl" />
 
                 <div className="relative p-8 md:p-10">
                   <div className="mb-6 flex flex-wrap items-center gap-3">
-                    <div className="-rotate-1 transform cursor-default rounded-xl bg-[#1F4E79] px-3.5 py-1.5 text-xs font-bold tracking-widest text-white uppercase shadow-md shadow-[#1F4E79]/20 transition-transform hover:rotate-0">
+                    <Badge
+                      color="info"
+                      className="cursor-default px-3.5 py-1 text-xs font-bold uppercase tracking-widest"
+                    >
                       {classroom.classCode}
-                    </div>
-                    <div className="cursor-default rounded-xl border border-[#C9A24D]/30 px-3.5 py-1.5 text-xs font-semibold text-[#C9A24D] dark:border-[#C9A24D]/50">
+                    </Badge>
+                    <Badge
+                      color="warning"
+                      className="cursor-default border border-[#C9A24D]/30 px-3.5 py-1 text-xs font-semibold text-[#C9A24D] dark:border-[#C9A24D]/50 dark:!text-[#C9A24D]"
+                    >
                       {classroom.semesterName}
-                    </div>
+                    </Badge>
                   </div>
 
                   <h1 className="mb-5 text-2xl leading-tight font-bold tracking-tight text-gray-900 md:text-3xl lg:text-4xl dark:text-white">
                     {classroom.className}
                   </h1>
 
-                  <div className="mt-8 flex items-center gap-5 rounded-3xl border border-gray-100 bg-gray-50/80 p-5 shadow-sm backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/40">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-linear-to-br from-[#1F4E79] to-[#2A6BA3] text-xl font-bold text-white shadow-xl">
+                  <div className="mt-6 flex flex-wrap gap-x-6 gap-y-1 text-sm text-gray-600 dark:text-gray-400">
+                    <span>
+                      <span className="font-medium text-gray-500 dark:text-gray-500">Subject:</span>{" "}
+                      {classroom.subject.subjectName}
+                    </span>
+                    <span>
+                      <span className="font-medium text-gray-500 dark:text-gray-500">Semester:</span>{" "}
+                      {classroom.semesterName}
+                    </span>
+                  </div>
+
+                  <div className="mt-8 flex items-center gap-5 border border-gray-100 bg-gray-50/80 p-5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/40">
+                    <div className="flex h-12 w-12 items-center justify-center bg-linear-to-br from-[#1F4E79] to-[#2A6BA3] text-xl font-bold text-white">
                       {classroom.lecturer.lecturerName.charAt(0).toUpperCase()}
                     </div>
                     <div>
                       <span className="mb-1 block text-[8px] font-black tracking-[0.25em] text-[#1F4E79] uppercase dark:text-[#C9A24D]">
-                        Giảng viên phụ trách
+                        Lecturer
                       </span>
                       <h3 className="text-lg font-bold text-gray-900 dark:text-white">
                         {classroom.lecturer.lecturerName}
@@ -269,105 +314,62 @@ function ClassroomContent() {
                   </div>
                 </div>
               </div>
-
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="group rounded-4xl border border-gray-100 bg-white p-8 shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800">
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-[#1F4E79] dark:bg-blue-900/20">
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                      />
-                    </svg>
-                  </div>
-                  <h4 className="mb-2 text-xs font-black tracking-widest text-gray-400 uppercase">
-                    Thông tin môn học
-                  </h4>
-                  <p className="text-xl leading-relaxed font-bold text-gray-900 dark:text-white">
-                    {classroom.subject.subjectName}
-                  </p>
-                </div>
-
-                <div className="group rounded-4xl border border-gray-100 bg-white p-8 shadow-xl transition-all hover:-translate-y-1 hover:shadow-2xl dark:border-gray-700 dark:bg-gray-800">
-                  <div className="mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-[#C9A24D] dark:bg-amber-900/20">
-                    <svg
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                      />
-                    </svg>
-                  </div>
-                  <h4 className="mb-2 text-xs font-black tracking-widest text-gray-400 uppercase">
-                    Học kỳ
-                  </h4>
-                  <p className="text-xl leading-relaxed font-bold text-gray-900 dark:text-white">
-                    {classroom.semesterName}
-                  </p>
-                </div>
-              </div>
             </div>
 
             <div className="space-y-8">
-              <div className="relative overflow-hidden rounded-[2.5rem] bg-linear-to-br from-gray-900 to-gray-800 p-8 text-white shadow-2xl">
-                <div
-                  className="pointer-events-none absolute inset-0 opacity-10"
-                  style={{
-                    backgroundImage:
-                      "radial-gradient(circle at 1px 1px, white 1px, transparent 0)",
-                    backgroundSize: "24px 24px",
-                  }}
-                />
-
-                <h3 className="relative z-10 mb-8 flex items-center gap-2 text-lg font-bold">
-                  <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-green-400 ring-4 ring-green-400/20" />
-                  Trạng thái lớp học
+              <div className="border border-gray-100 bg-white p-8 dark:border-gray-700 dark:bg-gray-800">
+                <h3 className="relative z-10 mb-8 flex items-center gap-2 text-lg font-bold text-gray-900 dark:text-white">
+                  <span className="h-2.5 w-2.5 animate-pulse rounded-2xl bg-green-400 ring-4 ring-green-400/20" />
+                  Classroom Status
                 </h3>
 
-                <div className="relative z-10 space-y-8 pl-2">
-                  <div className="relative border-l-2 border-gray-700/50 pl-8">
-                    <div className="absolute top-0 left-[-9px] h-4 w-4 rounded-full border-4 border-gray-800 bg-[#1F4E79] shadow-lg shadow-[#1F4E79]/40" />
-                    <p className="mb-1 text-xs font-black tracking-widest text-gray-500 uppercase">
-                      Ngày bắt đầu
-                    </p>
-                    <p className="text-lg font-bold text-gray-100">
-                      {new Date(classroom.createdDate).toLocaleDateString(
-                        "vi-VN",
-                        { day: "numeric", month: "long", year: "numeric" },
-                      )}
-                    </p>
-                  </div>
+                <Timeline className="relative z-10 border-gray-200 dark:border-gray-600">
+                  <TimelineItem>
+                    <TimelinePoint className="border-0 bg-[#1F4E79]" />
+                    <TimelineContent>
+                      <TimelineTime className="text-gray-500 dark:text-gray-400">
+                        {new Date(classroom.createdDate).toLocaleDateString(
+                          "vi-VN",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )}
+                      </TimelineTime>
+                      <TimelineTitle className="text-gray-900 dark:text-gray-100">
+                        Start Date
+                      </TimelineTitle>
+                      <TimelineBody className="text-gray-600 dark:text-gray-300">
+                        The class started on this date.
+                      </TimelineBody>
+                    </TimelineContent>
+                  </TimelineItem>
+                  <TimelineItem>
+                    <TimelinePoint className="border-0 bg-[#C9A24D]" />
+                    <TimelineContent>
+                      <TimelineTime className="text-gray-500 dark:text-gray-400">
+                        {new Date(classroom.endDate).toLocaleDateString(
+                          "vi-VN",
+                          {
+                            day: "numeric",
+                            month: "long",
+                            year: "numeric",
+                          },
+                        )}
+                      </TimelineTime>
+                      <TimelineTitle className="text-gray-900 dark:text-gray-100">
+                        End Date
+                      </TimelineTitle>
+                      <TimelineBody className="text-gray-600 dark:text-gray-300">
+                        The class is expected to end on this date.
+                      </TimelineBody>
+                    </TimelineContent>
+                  </TimelineItem>
+                </Timeline>
 
-                  <div className="relative border-l-2 border-gray-700/50 pl-8">
-                    <div className="absolute top-0 left-[-9px] h-4 w-4 rounded-full border-4 border-gray-800 bg-[#C9A24D] shadow-lg shadow-[#C9A24D]/40" />
-                    <p className="mb-1 text-xs font-black tracking-widest text-gray-500 uppercase">
-                      Dự kiến kết thúc
-                    </p>
-                    <p className="text-lg font-bold text-gray-100">
-                      {new Date(classroom.endDate).toLocaleDateString("vi-VN", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="group relative z-10 mt-12 cursor-default rounded-3xl border border-white/10 bg-white/5 p-6 transition-all hover:bg-white/10">
-                  <p className="text-sm leading-relaxed text-gray-300 italic">
+                <div className="group relative z-10 mt-12 cursor-default border border-gray-200 bg-gray-50 p-6 transition-all hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:bg-gray-700">
+                  <p className="text-sm leading-relaxed text-gray-600 italic dark:text-gray-300">
                     &quot;Chào mừng bạn đến với học phần **{classroom.className}
                     **. Chúc bạn có một kỳ học hiệu quả và đạt kết quả
                     cao!&quot;
@@ -375,27 +377,21 @@ function ClassroomContent() {
                 </div>
               </div>
 
-              <div className="rounded-4xl border border-gray-100 bg-white p-6 shadow-xl dark:border-gray-700 dark:bg-gray-800">
-                <button
-                  onClick={handleLeaveClass}
-                  className="group flex w-full items-center justify-center gap-3 rounded-2xl bg-red-50 py-4 font-bold text-red-600 transition-all duration-300 hover:bg-red-600 hover:text-white dark:bg-red-900/10 dark:text-red-500 dark:hover:bg-red-600 dark:hover:text-white"
-                >
-                  <svg
-                    className="h-5 w-5 transition-transform group-hover:rotate-12"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-                    />
-                  </svg>
-                  Rời khỏi lớp học
-                </button>
-              </div>
+              <Button
+                color="red"
+                onClick={() => setShowLeaveModal(true)}
+                className="group w-full justify-center gap-3 py-4 font-bold cursor-pointer"
+              >
+                <ArrowRightEndOnRectangleIcon className="h-5 w-5" />
+                Leave Class
+              </Button>
+
+              <LeaveClassConfirmModal
+                show={showLeaveModal}
+                onClose={() => setShowLeaveModal(false)}
+                onConfirm={handleLeaveClass}
+                isLeaving={leaveLoading}
+              />
             </div>
           </div>
         );
@@ -406,32 +402,21 @@ function ClassroomContent() {
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
-      <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
+      <div className="ml-20 flex-grow p-4 lg:ml-64 lg:p-8">
         {/* Breadcrumb / Back Button */}
         <div className="mb-10">
-          <Link
-            href="/my-classroom"
-            className="group flex w-fit items-center gap-3 rounded-full border border-gray-100 bg-white px-6 py-2.5 text-sm font-bold text-[#1F4E79] shadow-sm transition-all hover:bg-[#1F4E79] hover:text-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
+          <Button
+            color="light"
+            onClick={() => router.push(PageUrl.MY_CLASSROOM_PAGE)}
+            className="group inline-flex w-fit items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:border-[#1F4E79] dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900 dark:hover:border-[#C9A24D] cursor-pointer"
           >
-            <svg
-              className="h-4 w-4 transition-transform group-hover:-translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Tất cả lớp học
-          </Link>
+            <ArrowLeftIcon className="h-4 w-4" />
+            All classes
+          </Button>
         </div>
 
         {renderTabContent()}
-      </main>
+      </div>
     </div>
   );
 }
@@ -447,5 +432,51 @@ export default function ClassroomDetailPage() {
     >
       <ClassroomContent />
     </Suspense>
+  );
+}
+
+
+function LeaveClassConfirmModal({
+  show,
+  onClose,
+  onConfirm,
+  isLeaving,
+}: LeaveClassConfirmModalProps) {
+  return (
+    <Modal show={show} size="md" onClose={onClose} popup>
+      <ModalHeader />
+      <ModalBody>
+        <div className="text-center">
+          <p className="mb-6 text-gray-500 dark:text-gray-400">
+            Confirm to move out of this class!
+          </p>
+          <div className="flex justify-end gap-4">
+            <Button
+              color="red"
+              onClick={onConfirm}
+              disabled={isLeaving}
+              className="px-4 cursor-pointer"
+            >
+              {isLeaving ? (
+                <>
+                  <Spinner size="sm" className="mr-2" />
+                  Processing...
+                </>
+              ) : (
+                "Confirm"
+              )}
+            </Button>
+            <Button
+              color="gray"
+              onClick={onClose}
+              disabled={isLeaving}
+              className="px-4 cursor-pointer"
+            >
+              Cancel
+            </Button>
+          </div>
+        </div>
+      </ModalBody>
+    </Modal>
   );
 }

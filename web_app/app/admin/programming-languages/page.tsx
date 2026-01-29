@@ -205,7 +205,7 @@ export default function ProgrammingLanguagesManagement() {
         </div>
 
         {/* Table */}
-        <div className={`overflow-x-auto shadow-md rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className={`overflow-x-auto rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
           {loading ? (
             <div className="flex justify-center items-center p-8">
               <Spinner size="xl" />

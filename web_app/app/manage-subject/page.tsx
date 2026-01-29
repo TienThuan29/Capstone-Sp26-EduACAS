@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, TextInput, Modal, ModalHeader, ModalBody, ModalFooter, Label, Textarea, Spinner, Select } from "flowbite-react"
-import HomeNavbar from "@/components/home-navbar"
+import HomeNavbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import useAxios from "@/hooks/useAxios"
 import { Api } from "@/configs/api"
@@ -256,7 +256,7 @@ export default function ManageSubjectPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+                <div className="overflow-x-auto relative sm:rounded-lg">
                     <Table hoverable>
                         <TableHead>
                             <TableHeadCell className="text-center">Mã môn</TableHeadCell>

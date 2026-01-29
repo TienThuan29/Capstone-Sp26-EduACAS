@@ -26,7 +26,7 @@ export default function AuthWallpaper() {
       {/* Content */}
       <div className="relative z-10 text-center px-12 max-w-2xl">
         <div className="mb-8">
-          <div className="inline-block p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 shadow-xl mb-6">
+          <div className="inline-block p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 mb-6">
             <img 
               src="/images/Edu-ACAS logo.png" 
               alt="Edu-ACAS Logo" 

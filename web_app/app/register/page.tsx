@@ -204,7 +204,7 @@ export default function RegisterPage() {
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="w-full text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
                 {isLoading ? "Đang đăng ký..." : "Đăng ký"}
@@ -238,7 +238,7 @@ export default function RegisterPage() {
               <Button
                 type="button"
                 onClick={handleGoogleRegister}
-                className="w-full border border-gray-300 bg-white text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                className="w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
                 <svg
                   className="mr-2 h-5 w-5"

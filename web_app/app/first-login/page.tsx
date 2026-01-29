@@ -147,7 +147,7 @@ export default function FirstLoginPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting || !password || !confirmPassword}
-                className="w-full text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
                 {isSubmitting ? "Đang xử lý..." : "Đổi mật khẩu"}

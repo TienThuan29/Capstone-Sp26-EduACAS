@@ -2,7 +2,7 @@
 
 import { Card } from "flowbite-react"
 import Link from "next/link"
-import HomeNavbar from "@/components/home-navbar"
+import HomeNavbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { SparklesIcon } from "@/components/svg-icons"
 import { features } from "@/MockData/landingPageData"
@@ -16,7 +16,7 @@ export default function FeaturesPage() {
       <section className="pt-24 pb-12 px-4 bg-gradient-to-br from-[#F5F7FA] to-white dark:from-gray-800 dark:to-gray-900">
         <div className="container mx-auto max-w-7xl text-center">
           <div
-            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#C9A24D] shadow-lg"
+            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#C9A24D]"
           >
             <SparklesIcon /> TÍNH NĂNG NỔI BẬT
           </div>
@@ -182,7 +182,7 @@ export default function FeaturesPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register"
-              className="px-8 py-4 bg-white text-[#1F4E79] rounded-lg font-bold text-lg hover:scale-105 transition-all shadow-lg"
+              className="px-8 py-4 bg-white text-[#1F4E79] rounded-lg font-bold text-lg hover:scale-105 transition-all"
             >
               Đăng ký ngay
             </Link>

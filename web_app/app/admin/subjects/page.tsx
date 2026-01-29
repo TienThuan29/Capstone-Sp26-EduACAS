@@ -12,25 +12,16 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline'
-import useAxios from "@/hooks/useAxios"
 import { useToast } from "@/hooks/useToast"
-import { Api } from "@/configs/api"
-
-interface Subject {
-  id: string
-  subjectCode: string
-  subjectName: string
-  description: string
-  createdBy: string
-  isDeleted: boolean
-  createdDate: Date
-  updatedDate: Date
-}
+import { useSubject, Subject } from "@/hooks/subject/useSubject"
+import { useAuth } from "@/contexts/AuthContext"
 
 export default function SubjectsManagement() {
+
+  const { user } = useAuth()
   const { isDark } = useThemeContext()
-  const axiosInstance = useAxios()
   const toast = useToast()
+  const { getAllSubjects, createSubject, updateSubject, softDeleteSubject, restoreSubject } = useSubject()
   const [mounted, setMounted] = useState(false)
   const [subjects, setSubjects] = useState<Subject[]>([])
   const [loading, setLoading] = useState(true)
@@ -42,22 +33,22 @@ export default function SubjectsManagement() {
     subjectCode: '',
     subjectName: '',
     description: '',
-    createdBy: 'admin@eduacas.com',
+    createdBy: user?.id || '',
     isDeleted: false
   })
 
   useEffect(() => {
     setMounted(true)
     fetchSubjects()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const fetchSubjects = async () => {
     try {
       setLoading(true)
-      const response = await axiosInstance.get(Api.Subject.GET_ALL)
-      if (response.data?.dataResponse) {
-        setSubjects(response.data.dataResponse)
-      }
+      const data = await getAllSubjects()
+      setSubjects(data)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.showError(error.response?.data?.message || 'Không thể tải danh sách môn học')
     } finally {
@@ -93,8 +84,8 @@ export default function SubjectsManagement() {
     setFormData({
       subjectCode: subject.subjectCode,
       subjectName: subject.subjectName,
-      description: subject.description,
-      createdBy: subject.createdBy,
+      description: subject.description || '',
+      createdBy: (subject.createdBy || user?.id || '') as string,
       isDeleted: subject.isDeleted
     })
     setIsModalOpen(true)
@@ -103,9 +94,10 @@ export default function SubjectsManagement() {
   const handleDelete = async (id: string) => {
     if (confirm('Bạn có chắc chắn muốn đánh dấu xóa môn học này?')) {
       try {
-        await axiosInstance.patch(Api.Subject.SOFT_DELETE(id))
+        await softDeleteSubject(id)
         toast.showSuccess('Xóa môn học thành công')
         fetchSubjects()
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         toast.showError(error.response?.data?.message || 'Không thể xóa môn học')
       }
@@ -114,9 +106,10 @@ export default function SubjectsManagement() {
 
   const handleRestore = async (id: string) => {
     try {
-      await axiosInstance.patch(Api.Subject.RESTORE(id))
+      await restoreSubject(id)
       toast.showSuccess('Khôi phục môn học thành công')
-      fetchSubjects()
+      fetchSubjects();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.showError(error.response?.data?.message || 'Không thể khôi phục môn học')
     }
@@ -125,15 +118,22 @@ export default function SubjectsManagement() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
+      // Ensure createdBy is always a string
+      const payload = {
+        ...formData,
+        createdBy: formData.createdBy || user?.id || ''
+      }
+      
       if (editingSubject) {
-        await axiosInstance.put(Api.Subject.UPDATE(editingSubject.id), formData)
+        await updateSubject(editingSubject.id, payload)
         toast.showSuccess('Cập nhật môn học thành công')
       } else {
-        await axiosInstance.post(Api.Subject.CREATE, formData)
+        await createSubject(payload)
         toast.showSuccess('Thêm môn học thành công')
       }
       setIsModalOpen(false)
       fetchSubjects()
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       toast.showError(error.response?.data?.message || 'Có lỗi xảy ra')
     }
@@ -199,7 +199,7 @@ export default function SubjectsManagement() {
         </div>
 
         {/* Table */}
-        <div className={`overflow-x-auto shadow-md rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className={`overflow-x-auto ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
           {loading ? (
             <div className="flex justify-center items-center p-8">
               <Spinner size="xl" />
@@ -250,10 +250,10 @@ export default function SubjectsManagement() {
                     </Badge>
                   </td>
                   <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    {formatDate(subject.createdDate)}
+                    {subject.createdDate ? formatDate(new Date(subject.createdDate)) : 'N/A'}
                   </td>
                   <td className={`px-6 py-4 ${isDark ? 'text-gray-300' : 'text-gray-900'}`}>
-                    {formatDate(subject.updatedDate)}
+                    {subject.updatedDate ? formatDate(new Date(subject.updatedDate)) : 'N/A'}
                   </td>
                   <td className="px-6 py-4">
                     <div className="flex gap-2">
@@ -327,7 +327,7 @@ export default function SubjectsManagement() {
                   rows={4}
                 />
               </div>
-              <div>
+              {/* <div>
                 <label htmlFor="createdBy" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   Người tạo *
                 </label>
@@ -339,7 +339,7 @@ export default function SubjectsManagement() {
                   onChange={(e) => setFormData({...formData, createdBy: e.target.value})}
                   placeholder="Email người tạo"
                 />
-              </div>
+              </div> */}
               {editingSubject && (
                 <div>
                   <label htmlFor="isDeleted" className={`block mb-2 text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>

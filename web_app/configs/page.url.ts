@@ -11,7 +11,21 @@ export const PageUrl = {
     FEATURES_PAGE: '/other/features',
     CONTACT_PAGE: '/other/contact',
 
-    Student: {
-        default: '/default',
-    }
+    // Dashboard routes
+    DASHBOARD_PAGE: '/dashboard',
+    MY_CLASSROOM_PAGE: '/my-classroom',
+    ASSIGNMENTS_PAGE: '/assignments',
+    ANNOUNCEMENTS_PAGE: '/announcements',
+    PROFILE_PAGE: '/profile',
+
+    // Lecturer routes
+    MANAGE_CLASSROOM_PAGE: '/manage-classroom',
+
+    // Admin routes
+    ADMIN_PAGE: '/admin',
+    ADMIN_CLASSES_PAGE: '/admin/classes',
+    ADMIN_SUBJECTS_PAGE: '/admin/subjects',
+    ADMIN_PROGRAMMING_LANGUAGES_PAGE: '/admin/programming-languages',
+    ADMIN_USERS_PAGE: '/admin/users',
+
 }
