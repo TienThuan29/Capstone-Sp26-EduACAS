@@ -6,26 +6,18 @@ import type { Examination } from "@/hooks/exam/useExamination";
 type ExamsTabProps = {
   examinations: Examination[];
   examsLoading: boolean;
-  onCreateExam?: () => void;
 };
 
 export function ExamsTab({
   examinations,
   examsLoading,
-  onCreateExam,
 }: ExamsTabProps) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="mb-8 border-l-8 border-[#1F4E79] pl-4 text-3xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
-          Bài Kiểm Tra
+          Examinations
         </h2>
-        <Button
-          className="bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]"
-          onClick={onCreateExam}
-        >
-          + Tạo bài kiểm tra
-        </Button>
       </div>
 
       {examsLoading ? (
@@ -35,7 +27,7 @@ export function ExamsTab({
       ) : examinations.length === 0 ? (
         <div className="rounded-4xl border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
           <p className="cursor-default font-medium text-gray-500">
-            Hiện tại chưa có bài kiểm tra nào cho lớp học này.
+            There are no examinations for this class currently.
           </p>
         </div>
       ) : (
@@ -62,33 +54,33 @@ export function ExamsTab({
                     </h3>
                     {isActive && (
                       <span className="rounded-full bg-green-100 px-2 py-1 text-[10px] font-black text-green-700 uppercase">
-                        Đang diễn ra
+                        Ongoing
                       </span>
                     )}
                     {isUpcoming && (
                       <span className="rounded-full bg-amber-100 px-2 py-1 text-[10px] font-black text-amber-700 uppercase">
-                        Sắp tới
+                        Upcoming
                       </span>
                     )}
                     {isExpired && (
                       <span className="rounded-full bg-gray-100 px-2 py-1 text-[10px] font-black text-gray-700 uppercase">
-                        Đã kết thúc
+                        Ended
                       </span>
                     )}
                   </div>
                   <p className="line-clamp-2 text-sm text-gray-500">
                     {exam.description ||
-                      "Không có mô tả cho bài kiểm tra này."}
+                      "There is no description for this examination."}
                   </p>
                   <div className="space-y-2 border-t border-gray-50 pt-4 text-xs font-medium text-gray-600 dark:text-gray-400">
                     <div className="flex justify-between">
-                      <span>Bắt đầu:</span>
+                      <span>Start:</span>
                       <span className="font-bold">
                         {startDate.toLocaleString("vi-VN")}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Thời gian:</span>
+                      <span>Time:</span>
                       <span className="font-bold">
                         {durationMinutes} phút
                       </span>
@@ -96,7 +88,7 @@ export function ExamsTab({
                   </div>
                   <div className="flex gap-2">
                     <Button size="sm" color="gray" className="flex-1">
-                      Chi tiết
+                      Details
                     </Button>
                   </div>
                 </div>
