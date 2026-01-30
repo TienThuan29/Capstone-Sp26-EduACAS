@@ -93,6 +93,7 @@ builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRe
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
+builder.Services.AddScoped<IPublicS3Command, PublicS3Command>();
 builder.Services.AddScoped<IPrivateS3Query, PrivateS3Query>();
 builder.Services.AddScoped<ISubjectCommand, SubjectCommand>();
 builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();

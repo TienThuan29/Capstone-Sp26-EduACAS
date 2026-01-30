@@ -273,6 +273,47 @@ public class AuthCommandController : ControllerBase
     }
 
 
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateProfile([FromBody] UpdateProfileRequest updateProfileRequest)
+    {
+        try
+        {
+            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<UserProfileResponse>("Authorization token is required", 401);
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return ResponseUtil.Error<UserProfileResponse>("User not authenticated", 401);
+            }
+
+            var fullname = string.IsNullOrWhiteSpace(updateProfileRequest.Fullname) ? null : updateProfileRequest.Fullname.Trim();
+            var avatarUrl = string.IsNullOrWhiteSpace(updateProfileRequest.AvatarUrl) ? null : updateProfileRequest.AvatarUrl.Trim();
+
+            DateTime? birthday = null;
+            if (!string.IsNullOrWhiteSpace(updateProfileRequest.Birthday) && DateTime.TryParse(updateProfileRequest.Birthday, out var parsedBirthday))
+            {
+                birthday = parsedBirthday;
+            }
+
+            var updatedProfile = await _userCommand.UpdateProfileAsync(accessToken, fullname, birthday, avatarUrl);
+            return ResponseUtil.Success(updatedProfile, "Profile updated successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Failed to update profile"))
+        {
+            return ResponseUtil.Error<UserProfileResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Update profile error");
+            return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
+        }
+    }
+
     [HttpPut("users/{userId}")]
     public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateUser(string userId, [FromBody] UpdateUserRequest updateUserRequest)
     {

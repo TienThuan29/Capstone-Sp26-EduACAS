@@ -3,6 +3,7 @@
 import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
+  Avatar,
   Spinner,
   Button,
   Badge,
@@ -301,9 +302,22 @@ function ClassroomContent() {
                   </div>
 
                   <div className="mt-8 flex items-center gap-5 border border-gray-100 bg-gray-50/80 p-5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/40">
-                    <div className="flex h-12 w-12 items-center justify-center bg-linear-to-br from-[#1F4E79] to-[#2A6BA3] text-xl font-bold text-white">
-                      {classroom.lecturer.fullname.charAt(0).toUpperCase()}
-                    </div>
+                    {classroom.lecturer.avatarUrl ? (
+                      <Avatar
+                        img={classroom.lecturer.avatarUrl}
+                        alt={classroom.lecturer.fullname}
+                        rounded
+                        size="sm"
+                        className="shrink-0"
+                      />
+                    ) : (
+                      <div
+                        className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-[#1F4E79] to-[#2A6BA3] text-xl font-bold text-white"
+                        aria-label={classroom.lecturer.fullname}
+                      >
+                        {classroom.lecturer.fullname.charAt(0).toUpperCase()}
+                      </div>
+                    )}
                     <div>
                       <span className="mb-1 block text-[8px] font-black tracking-[0.25em] text-[#1F4E79] uppercase dark:text-[#C9A24D]">
                         Lecturer

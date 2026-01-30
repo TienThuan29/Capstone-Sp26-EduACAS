@@ -25,6 +25,8 @@ public interface IUserCommand
     public Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest);
     
     public Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable);
+
+    public Task<UserProfileResponse> UpdateProfileAsync(string accessToken, string? fullname, DateTime? birthday, string? avatarUrl);
 }
 
 public class UserCommand : IUserCommand
@@ -349,6 +351,26 @@ public class UserCommand : IUserCommand
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user");
+            throw;
+        }
+    }
+
+    public async Task<UserProfileResponse> UpdateProfileAsync(string accessToken, string? fullname, DateTime? birthday, string? avatarUrl)
+    {
+        try
+        {
+            var decoded = await _jwtUtil.VerifyAsync(accessToken);
+            var userId = decoded.Id;
+            var updatedUser = await _userRepository.UpdateProfileAsync(userId, fullname, birthday, avatarUrl);
+            if (updatedUser == null)
+            {
+                throw new InvalidOperationException("Failed to update profile");
+            }
+            return _userMapper.ToUserResponse(updatedUser);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating profile");
             throw;
         }
     }

@@ -12,5 +12,6 @@ public interface IUserRepository
     Task<Models.User?> UpdateGoogleIdAsync(string userId, string googleId);
     Task<Models.User?> UpdatePasswordAndFirstLoginAsync(string userId, string newPassword, bool firstLogin);
     Task<Models.User?> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Models.Role? role, bool? isEnable);
-    
+
+    Task<Models.User?> UpdateProfileAsync(string userId, string? fullname, DateTime? birthday, string? avatarUrl);
 }
