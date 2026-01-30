@@ -24,12 +24,16 @@ namespace AcasService.Application.Mappers
             if (lecturerProfile != null)
             {
                 lecturerLite.Id = lecturerProfile.Id;
-                lecturerLite.LecturerName = lecturerProfile.Fullname;
+                lecturerLite.Fullname = lecturerProfile.Fullname;
+                lecturerLite.Email = lecturerProfile.Email;
+                lecturerLite.AvatarUrl = lecturerProfile.AvatarUrl;
             }
             else
             {
                 lecturerLite.Id = "UNKNOWN LECTURER";
-                lecturerLite.LecturerName = "UNKNOWN LECTURER";
+                lecturerLite.Fullname = "UNKNOWN LECTURER";
+                lecturerLite.Email = "UNKNOWN LECTURER";
+                lecturerLite.AvatarUrl = "UNKNOWN LECTURER";
             }
 
             return new ClassroomResponse
