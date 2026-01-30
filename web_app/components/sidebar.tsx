@@ -27,6 +27,7 @@ import {
   BookOpenIcon,
   PencilSquareIcon,
   PuzzlePieceIcon,
+  UserGroupIcon,
 } from "@heroicons/react/24/outline";
 import { Constant } from "@/configs/constant";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
@@ -68,10 +69,11 @@ const Sidebar = () => {
   ];
 
   const lecturerMenuItems = [
-    { icon: AcademicCapIcon, label: "Overview", href: "#" },
-    { icon: Squares2X2Icon, label: "Dashboard", href: PageUrl.DASHBOARD_PAGE },
-    { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
-    { icon: DocumentTextIcon, label: "Manage Assignments", href: PageUrl.ASSIGNMENTS_PAGE },
+    { icon: AcademicCapIcon, label: "Overview", href: `${pathname}?tab=overview` },
+    { icon: Squares2X2Icon, label: "Dashboard", href: `${pathname}?tab=dashboard` },
+    // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
+    { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
+    { icon: UserGroupIcon, label: "Manage Students", href: `${pathname}?tab=students` },
   ];
 
   const adminMenuItems = [

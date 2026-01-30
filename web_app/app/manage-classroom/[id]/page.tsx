@@ -20,18 +20,22 @@ import {
   SubjectOption,
 } from "@/hooks/classroom/useClassroom";
 import { useExamination, Examination } from "@/hooks/exam/useExamination";
-import Link from "next/link";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HomeNavbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import Sidebar from "@/components/sidebar";
+import { DefaultCustomButton, DefaultOutlineCustomButton } from "@/components/ui/custom-button";
+import { useToast } from "@/hooks/useToast";
+import { PageUrl } from "@/configs/page.url";
 import {
+  OverviewTab,
   ExamsTab,
   MaterialsTab,
   AssignmentsTab,
-} from "@/app/my-classroom/tabs";
-import { useToast } from "@/hooks/useToast";
-import { PageUrl } from "@/configs/page.url";
-import { OverviewTab } from "../tabs/overview-tab";
+  PractiseTab,
+  StudentTab,
+} from "@/app/manage-classroom/tabs";
+import { DashboardTab } from "../tabs/dashboard-tab";
 
 function ClassroomContent() {
   const params = useParams();
@@ -231,15 +235,18 @@ function ClassroomContent() {
           <ExamsTab
             examinations={examinations}
             examsLoading={examsLoading}
-            onCreateExam={() => {
-              /* Navigate to create exam or open modal */
-            }}
           />
         );
       case "materials":
         return <MaterialsTab />;
       case "assignments":
         return <AssignmentsTab />;
+      case "practise":
+        return <PractiseTab />;
+      case "students":
+        return <StudentTab />;
+      case "dashboard":
+        return <DashboardTab />;
       default:
         return (
           <OverviewTab
@@ -257,25 +264,11 @@ function ClassroomContent() {
 
       <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
         <div className="mb-10">
-          <Link
-            href={PageUrl.MANAGE_CLASSROOM_PAGE}
-            className="group flex w-fit items-center gap-3 rounded-full border border-gray-100 bg-white px-6 py-2.5 text-sm font-bold text-[#1F4E79] transition-all hover:bg-[#1F4E79] hover:text-white hover:shadow-md dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
-          >
-            <svg
-              className="h-4 w-4 transition-transform group-hover:-translate-x-1"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
-            Manage classrooms
-          </Link>
+          <DefaultOutlineCustomButton
+            label="Manage classrooms"
+            icon={<ArrowLeftIcon className="h-4 w-4" />}
+            onClick={() => router.push(PageUrl.MANAGE_CLASSROOM_PAGE)}
+          />
         </div>
 
         {renderTabContent()}
