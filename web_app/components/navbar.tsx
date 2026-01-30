@@ -163,6 +163,16 @@ export default function HomeNavbar() {
                     </DropdownItem>
                   )
                 }
+                {
+                  isAdmin && (
+                    <DropdownItem as={Link} href={PageUrl.ADMIN_PAGE}>
+                      <span className="flex items-center gap-2">
+                        <Squares2X2Icon className="h-4 w-4" />
+                        Admin Dashboard
+                      </span>
+                    </DropdownItem>
+                  )
+                }
                 <DropdownItem as={Link} href="/profile">
                   <span className="flex items-center gap-2">
                     <UserCircleIcon className="h-4 w-4" />

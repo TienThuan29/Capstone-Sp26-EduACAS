@@ -75,6 +75,7 @@ export const useClassroom = () => {
         url += `&userId=${userId}`;
       }
       const response = await axiosInstance.get(url);
+      console.log(response.data);
       return (
         response.data?.dataResponse || {
           items: [],

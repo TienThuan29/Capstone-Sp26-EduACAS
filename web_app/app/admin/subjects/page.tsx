@@ -233,13 +233,15 @@ export default function SubjectsManagement() {
           ) : (
             <Table>
               <TableHead>
-                <TableHeadCell>Subject Code</TableHeadCell>
-                <TableHeadCell>Subject Name</TableHeadCell>
-                <TableHeadCell>Description</TableHeadCell>
-                <TableHeadCell>Status</TableHeadCell>
-                <TableHeadCell>Created Date</TableHeadCell>
-                <TableHeadCell>Updated Date</TableHeadCell>
-                <TableHeadCell>Actions</TableHeadCell>
+                <TableRow>
+                  <TableHeadCell>Subject Code</TableHeadCell>
+                  <TableHeadCell>Subject Name</TableHeadCell>
+                  <TableHeadCell>Description</TableHeadCell>
+                  <TableHeadCell>Status</TableHeadCell>
+                  <TableHeadCell>Created Date</TableHeadCell>
+                  <TableHeadCell>Updated Date</TableHeadCell>
+                  <TableHeadCell>Actions</TableHeadCell>
+                </TableRow>
               </TableHead>
               <TableBody>
                 {filteredSubjects.map((subject) => (

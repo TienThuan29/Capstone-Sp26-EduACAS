@@ -8,6 +8,11 @@ import {
   Select,
   Button,
   Badge,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  Label,
 } from "flowbite-react";
 import {
   CalendarIcon,
@@ -21,25 +26,38 @@ import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
 import Link from "next/link";
 
 export default function ListClassroomPage() {
-  const { getStudentClassrooms } = useClassroom();
+  const { getStudentClassrooms, getAllClassrooms, enrollClassroom } =
+    useClassroom();
   const { user } = useAuth();
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const [activeTab, setActiveTab] = useState<"joining" | "left">("joining");
+  const [activeTab, setActiveTab] = useState<"all" | "joining" | "left">("joining");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSemester, setSelectedSemester] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
+
+  const [enrollModalClassroom, setEnrollModalClassroom] =
+    useState<Classroom | null>(null);
+  const [enrollKeyInput, setEnrollKeyInput] = useState("");
+  const [enrollSubmitting, setEnrollSubmitting] = useState(false);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
 
   const studentId = user?.id;
 
   useEffect(() => {
     const fetchClassrooms = async () => {
-      if (!studentId) return;
       try {
         setLoading(true);
-        const data = await getStudentClassrooms(studentId);
-        setClassrooms(data);
+        if (activeTab === "all") {
+          if (!studentId) return;
+          const result = await getAllClassrooms(studentId);
+          setClassrooms(result.items ?? []);
+        } else {
+          if (!studentId) return;
+          const data = await getStudentClassrooms(studentId);
+          setClassrooms(data);
+        }
       } catch (error) {
         console.error("Failed to fetch classrooms:", error);
       } finally {
@@ -47,16 +65,26 @@ export default function ListClassroomPage() {
       }
     };
 
-    fetchClassrooms();
-  }, [getStudentClassrooms, studentId]);
+    if (studentId) {
+      fetchClassrooms();
+    }
+  }, [activeTab, getStudentClassrooms, getAllClassrooms, studentId]);
+
+  const isJoining = (c: Classroom) => c.enrollment?.isJoining === true;
+  const isMovedOut = (c: Classroom) =>
+    c.enrollment != null &&
+    c.enrollment.isJoining === false &&
+    c.enrollment.joinedDate != null;
 
   const filteredClassrooms = useMemo(() => {
-    let result = classrooms.filter((c) =>
-      activeTab === "joining"
-        ? c.enrollment?.isJoining
-        : !c.enrollment?.isJoining,
-    );
+    let result =
+      activeTab === "all"
+        ? [...classrooms]
+        : activeTab === "joining"
+          ? classrooms.filter(isJoining)
+          : classrooms.filter(isMovedOut);
 
+    console.log(result);
     if (searchTerm) {
       const lowerTerm = searchTerm.toLowerCase();
       result = result.filter(
@@ -90,7 +118,7 @@ export default function ListClassroomPage() {
           return 0;
       }
     });
-
+    console.log(result);
     return result;
   }, [classrooms, searchTerm, selectedSemester, sortBy, activeTab]);
 
@@ -98,6 +126,53 @@ export default function ListClassroomPage() {
     const unique = new Set(classrooms.map((c) => c.semesterName));
     return ["All", ...Array.from(unique)];
   }, [classrooms]);
+
+  const openEnrollModal = (classroom: Classroom) => {
+    setEnrollModalClassroom(classroom);
+    setEnrollKeyInput("");
+    setEnrollError(null);
+  };
+
+  const closeEnrollModal = () => {
+    setEnrollModalClassroom(null);
+    setEnrollKeyInput("");
+    setEnrollError(null);
+  };
+
+  const handleEnrollSubmit = async () => {
+    if (!enrollModalClassroom || !studentId || !enrollKeyInput.trim()) {
+      setEnrollError("Please enter the enrollment key.");
+      return;
+    }
+    setEnrollSubmitting(true);
+    setEnrollError(null);
+    try {
+      await enrollClassroom({
+        classId: enrollModalClassroom.id,
+        studentId,
+        enrolKey: enrollKeyInput.trim(),
+      });
+      closeEnrollModal();
+      if (activeTab === "all") {
+        const result = await getAllClassrooms(studentId, 1, 500);
+        setClassrooms(result.items ?? []);
+      } else {
+        const data = await getStudentClassrooms(studentId);
+        setClassrooms(data);
+      }
+    } catch (err: unknown) {
+      const message =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { data?: { message?: string } } }).response
+              ?.data?.message
+          : null;
+      setEnrollError(
+        message || "Failed to join class. Check the enrollment key and try again.",
+      );
+    } finally {
+      setEnrollSubmitting(false);
+    }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
@@ -115,6 +190,16 @@ export default function ListClassroomPage() {
           </div>
 
           <div className="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+            <Button
+              onClick={() => setActiveTab("all")}
+              className={`rounded-md px-4 py-2 text-sm font-bold transition-all bg-transparent border-0 ${
+                activeTab === "all"
+                  ? "bg-white text-[#1F4E79] dark:bg-gray-700 dark:text-white"
+                  : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+              }`}
+            >
+              All
+            </Button>
             <Button
               onClick={() => setActiveTab("joining")}
               className={`rounded-md px-4 py-2 text-sm font-bold transition-all bg-transparent border-0 ${
@@ -275,7 +360,7 @@ export default function ListClassroomPage() {
                   </div>
 
                   <div className="mt-auto pt-2">
-                    {c.enrollment?.isJoining ? (
+                    {isJoining(c) ? (
                       <Link
                         href={`/my-classroom/${c.id}`}
                         className="block w-full"
@@ -288,13 +373,22 @@ export default function ListClassroomPage() {
                           Access
                         </Button>
                       </Link>
-                    ) : (
+                    ) : isMovedOut(c) ? (
                       <Button
                         disabled
                         color="gray"
                         className="w-full rounded-xl border border-gray-200 bg-gray-50 font-semibold text-gray-400 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-500 cursor-not-allowed"
                       >
                         Moved Out
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => openEnrollModal(c)}
+                        color="gray"
+                        outline
+                        className="w-full rounded-xl border-2 border-gray-300 font-semibold transition-colors hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-600 dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900 cursor-pointer"
+                      >
+                        Join class
                       </Button>
                     )}
                   </div>
@@ -304,6 +398,52 @@ export default function ListClassroomPage() {
           </div>
         )}
       </main>
+
+      <Modal
+        show={enrollModalClassroom != null}
+        onClose={closeEnrollModal}
+        size="md"
+      >
+        <ModalHeader>
+          Join class: {enrollModalClassroom?.className}
+        </ModalHeader>
+        <ModalBody className="space-y-4">
+          <p className="text-sm text-gray-500 dark:text-gray-400">
+            Enter the enrollment key provided by your lecturer to join this
+            class.
+          </p>
+          <div>
+            <Label htmlFor="enrolKey">Enrollment key</Label>
+            <TextInput
+              id="enrolKey"
+              type="text"
+              placeholder="e.g. @2b12ff"
+              value={enrollKeyInput}
+              onChange={(e) => setEnrollKeyInput(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleEnrollSubmit()}
+              className="mt-1"
+              autoFocus
+            />
+          </div>
+          {enrollError && (
+            <p className="text-sm text-red-600 dark:text-red-400">
+              {enrollError}
+            </p>
+          )}
+        </ModalBody>
+        <ModalFooter>
+          <Button color="gray" onClick={closeEnrollModal} outline>
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEnrollSubmit}
+            disabled={enrollSubmitting || !enrollKeyInput.trim()}
+            className="bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90"
+          >
+            {enrollSubmitting ? "Joining…" : "Join class"}
+          </Button>
+        </ModalFooter>
+      </Modal>
 
       <Footer />
     </div>

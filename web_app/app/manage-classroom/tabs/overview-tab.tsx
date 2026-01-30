@@ -179,8 +179,8 @@ export function OverviewTab({
 
           <div className="group relative z-10 mt-12 cursor-default border border-gray-200 bg-gray-50 p-6 transition-all hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:bg-gray-700">
             <p className="text-sm leading-relaxed text-gray-600 italic dark:text-gray-300">
-              &quot;Chào mừng bạn đến với học phần **{classroom.className}
-              **. Chúc bạn có một kỳ học hiệu quả và đạt kết quả cao!&quot;
+              &quot;Welcome to **{classroom.className}
+              **. Wishing you an effective semester and great results!&quot;
             </p>
           </div>
         </div>

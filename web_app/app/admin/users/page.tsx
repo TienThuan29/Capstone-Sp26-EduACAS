@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import { Avatar, Badge, Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react"
@@ -15,6 +15,13 @@ import {
 import { useUserManagement } from "@/hooks/user/useUserManagement"
 import { useToast } from "@/hooks/useToast"
 import { UserProfile } from "@/types/user"
+
+const userStatsAccentStyles: Record<string, { border: string; iconBg: string; iconColor: string }> = {
+  purple: { border: 'border-l-purple-500', iconBg: 'bg-purple-50 dark:bg-purple-500/10', iconColor: 'text-purple-600 dark:text-purple-400' },
+  green: { border: 'border-l-green-500', iconBg: 'bg-green-50 dark:bg-green-500/10', iconColor: 'text-green-600 dark:text-green-400' },
+  blue: { border: 'border-l-blue-500', iconBg: 'bg-blue-50 dark:bg-blue-500/10', iconColor: 'text-blue-600 dark:text-blue-400' },
+  red: { border: 'border-l-red-500', iconBg: 'bg-red-50 dark:bg-red-500/10', iconColor: 'text-red-600 dark:text-red-400' },
+}
 
 type GrantFormData = {
   email: string
@@ -45,6 +52,8 @@ export default function UsersManagement() {
   const { isDark } = useThemeContext()
   const toast = useToast()
   const { getAllUsers, grantAccount, updateUser } = useUserManagement()
+  const toastRef = useRef(toast)
+  toastRef.current = toast
   const [mounted, setMounted] = useState(false)
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
@@ -75,11 +84,11 @@ export default function UsersManagement() {
       setUsers(data)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
-      toast.showError(err.response?.data?.message || 'Cannot load user list')
+      toastRef.current.showError(err.response?.data?.message || 'Cannot load user list')
     } finally {
       setLoading(false)
     }
-  }, [getAllUsers, toast])
+  }, [getAllUsers])
 
   useEffect(() => {
     setMounted(true)
@@ -108,6 +117,7 @@ export default function UsersManagement() {
       })
       fetchUsers()
     } catch (error: unknown) {
+      console.log(error)
       const err = error as { response?: { data?: { message?: string } } }
       toast.showError(err.response?.data?.message || 'Something went wrong when granting account!')
     } finally {
@@ -146,6 +156,13 @@ export default function UsersManagement() {
   }
 
   if (!mounted) return null
+
+  const statsCardsData = [
+    { title: 'Total', value: users.length, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
+    { title: 'Student', value: users.filter(u => u.role === 'STUDENT').length, icon: <UserCircleIcon className="h-6 w-6" />, accent: 'green' },
+    { title: 'Lecturer', value: users.filter(u => u.role === 'LECTURER').length, icon: <AcademicCapIcon className="h-6 w-6" />, accent: 'blue' },
+    { title: 'Admin', value: users.filter(u => u.role === 'ADMIN').length, icon: <ShieldCheckIcon className="h-6 w-6" />, accent: 'red' },
+  ]
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -238,62 +255,35 @@ export default function UsersManagement() {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-          <Card className="rounded-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Total</p>
-                <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {users.length}
-                </h3>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 mb-6">
+          {statsCardsData.map((stat) => {
+            const style = userStatsAccentStyles[stat.accent]
+            return (
+              <div
+                key={stat.title}
+                className={`
+                  overflow-hidden rounded-xl border border-gray-200 bg-white
+                  dark:border-gray-700 dark:bg-gray-800
+                  border-l-4 ${style.border}
+                  transition-colors
+                `}
+              >
+                <div className="flex items-center gap-4 p-5">
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${style.iconBg} ${style.iconColor}`}>
+                    {stat.icon}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className={`truncate text-xs font-medium uppercase tracking-wider ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                      {stat.title}
+                    </p>
+                    <p className={`mt-1 truncate text-2xl font-semibold tabular-nums tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                      {stat.value}
+                    </p>
+                  </div>
+                </div>
               </div>
-              <div className="rounded-lg p-3 bg-purple-100">
-                <UserIcon className="w-8 h-8 text-purple-600" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="rounded-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Student</p>
-                <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {users.filter(u => u.role === 'STUDENT').length}
-                </h3>
-              </div>
-              <div className="rounded-lg p-3 bg-green-100">
-                <UserCircleIcon className="w-8 h-8 text-green-600" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="rounded-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Lecturer</p>
-                <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {users.filter(u => u.role === 'LECTURER').length}
-                </h3>
-              </div>
-              <div className="rounded-lg p-3 bg-blue-100">
-                <AcademicCapIcon className="w-8 h-8 text-blue-600" />
-              </div>
-            </div>
-          </Card>
-
-          <Card className="rounded-xl">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Admin</p>
-                <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {users.filter(u => u.role === 'ADMIN').length}
-                </h3>
-              </div>
-              <div className="rounded-lg p-3 bg-red-100">
-                <ShieldCheckIcon className="w-8 h-8 text-red-600" />
-              </div>
-            </div>
-          </Card>
+            )
+          })}
         </div>
 
         {/* Toolbar */}
@@ -340,14 +330,16 @@ export default function UsersManagement() {
           ) : (
           <Table>
             <TableHead>
-              <TableHeadCell>User</TableHeadCell>
-              <TableHeadCell>Role Number</TableHeadCell>
-              <TableHeadCell>Email</TableHeadCell>
-              <TableHeadCell>Role</TableHeadCell>
-              <TableHeadCell>Status</TableHeadCell>
-              <TableHeadCell>First Login</TableHeadCell>
-              <TableHeadCell>Created Date</TableHeadCell>
-              <TableHeadCell>Action</TableHeadCell>
+              <TableRow>
+                <TableHeadCell>User</TableHeadCell>
+                <TableHeadCell>Role Number</TableHeadCell>
+                <TableHeadCell>Email</TableHeadCell>
+                <TableHeadCell>Role</TableHeadCell>
+                <TableHeadCell>Status</TableHeadCell>
+                <TableHeadCell>First Login</TableHeadCell>
+                <TableHeadCell>Created Date</TableHeadCell>
+                <TableHeadCell>Action</TableHeadCell>
+              </TableRow>
             </TableHead>
             <TableBody>
               {filteredUsers.length === 0 ? (
@@ -547,10 +539,10 @@ function GrantAccountModal({
           </div>
         </ModalBody>
         <ModalFooter>
-          <Button color="gray" onClick={onClose}>
+          <Button color="gray" onClick={onClose} className='cursor-pointer'>
             Cancel
           </Button>
-          <Button type="submit" color="blue" disabled={isLoading}>
+          <Button type="submit" color="blue" disabled={isLoading} className='cursor-pointer'>
             {isLoading ? (
               <span className="flex items-center justify-center gap-2">
                 <Spinner size="sm" />
@@ -654,10 +646,10 @@ function EditUserModal({
             </div>
           </ModalBody>
           <ModalFooter>
-            <Button color="gray" onClick={onClose}>
+            <Button color="gray" onClick={onClose} className='cursor-pointer'>
               Cancel
             </Button>
-            <Button type="submit" color="blue" disabled={isLoading}>
+            <Button type="submit" color="blue" disabled={isLoading} className='cursor-pointer'>
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <Spinner size="sm" />

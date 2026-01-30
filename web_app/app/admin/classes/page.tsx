@@ -233,13 +233,15 @@ export default function ClassesManagement() {
             <div className="overflow-x-auto">
               <Table>
                 <TableHead>
-                  <TableHeadCell>Mã lớp</TableHeadCell>
-                  <TableHeadCell>Tên lớp</TableHeadCell>
-                  <TableHeadCell>Môn học</TableHeadCell>
-                  <TableHeadCell>Giảng viên</TableHeadCell>
-                  <TableHeadCell>Số sinh viên</TableHeadCell>
-                  <TableHeadCell>Trạng thái</TableHeadCell>
-                  <TableHeadCell>Thao tác</TableHeadCell>
+                  <TableRow>
+                    <TableHeadCell>Mã lớp</TableHeadCell>
+                    <TableHeadCell>Tên lớp</TableHeadCell>
+                    <TableHeadCell>Môn học</TableHeadCell>
+                    <TableHeadCell>Giảng viên</TableHeadCell>
+                    <TableHeadCell>Số sinh viên</TableHeadCell>
+                    <TableHeadCell>Trạng thái</TableHeadCell>
+                    <TableHeadCell>Thao tác</TableHeadCell>
+                  </TableRow>
                 </TableHead>
                 <TableBody>
                   {filteredClasses.map((cls) => (

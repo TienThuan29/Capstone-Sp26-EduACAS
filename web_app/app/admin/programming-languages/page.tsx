@@ -203,13 +203,15 @@ export default function ProgrammingLanguagesManagement() {
           ) : (
             <Table>
               <TableHead>
-                <TableHeadCell>Language Name</TableHeadCell>
-                <TableHeadCell>Key</TableHeadCell>
-                <TableHeadCell>Language Version</TableHeadCell>
-                <TableHeadCell>Status</TableHeadCell>
-                <TableHeadCell>Created Date</TableHeadCell>
-                <TableHeadCell>Updated Date</TableHeadCell>
-                <TableHeadCell>Action</TableHeadCell>
+                <TableRow>
+                  <TableHeadCell>Language Name</TableHeadCell>
+                  <TableHeadCell>Key</TableHeadCell>
+                  <TableHeadCell>Language Version</TableHeadCell>
+                  <TableHeadCell>Status</TableHeadCell>
+                  <TableHeadCell>Created Date</TableHeadCell>
+                  <TableHeadCell>Updated Date</TableHeadCell>
+                  <TableHeadCell>Action</TableHeadCell>
+                </TableRow>
               </TableHead>
               <TableBody>
                 {filteredLanguages.map((lang) => (

@@ -30,6 +30,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
 import { PageUrl } from "@/configs/page.url";
+import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 
 type LeaveClassConfirmModalProps = {
   show: boolean;
@@ -370,9 +371,8 @@ function ClassroomContent() {
 
                 <div className="group relative z-10 mt-12 cursor-default border border-gray-200 bg-gray-50 p-6 transition-all hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700/50 dark:hover:bg-gray-700">
                   <p className="text-sm leading-relaxed text-gray-600 italic dark:text-gray-300">
-                    &quot;Chào mừng bạn đến với học phần **{classroom.className}
-                    **. Chúc bạn có một kỳ học hiệu quả và đạt kết quả
-                    cao!&quot;
+                    &quot;Welcome to **{classroom.className}
+                    **. Wishing you an effective semester and great results!&quot;
                   </p>
                 </div>
               </div>
@@ -403,16 +403,13 @@ function ClassroomContent() {
       <Sidebar />
 
       <div className="ml-20 flex-grow p-4 lg:ml-64 lg:p-8">
-        {/* Breadcrumb / Back Button */}
         <div className="mb-10">
-          <Button
-            color="light"
+          <DefaultOutlineCustomButton
+            label="All classes"
+            icon={<ArrowLeftIcon className="h-4 w-4" />}
             onClick={() => router.push(PageUrl.MY_CLASSROOM_PAGE)}
             className="group inline-flex w-fit items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:border-[#1F4E79] dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900 dark:hover:border-[#C9A24D] cursor-pointer"
-          >
-            <ArrowLeftIcon className="h-4 w-4" />
-            All classes
-          </Button>
+          />
         </div>
 
         {renderTabContent()}

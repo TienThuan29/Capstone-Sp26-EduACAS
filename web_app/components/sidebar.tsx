@@ -26,6 +26,7 @@ import {
   ClipboardDocumentListIcon,
   BookOpenIcon,
   PencilSquareIcon,
+  PuzzlePieceIcon,
 } from "@heroicons/react/24/outline";
 import { Constant } from "@/configs/constant";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
@@ -69,7 +70,7 @@ const Sidebar = () => {
   const lecturerMenuItems = [
     { icon: AcademicCapIcon, label: "Overview", href: "#" },
     { icon: Squares2X2Icon, label: "Dashboard", href: PageUrl.DASHBOARD_PAGE },
-    { icon: AcademicCapIcon, label: "Manage Students", href: PageUrl.MANAGE_CLASSROOM_PAGE },
+    { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
     { icon: DocumentTextIcon, label: "Manage Assignments", href: PageUrl.ASSIGNMENTS_PAGE },
   ];
 
@@ -83,13 +84,14 @@ const Sidebar = () => {
 
   const classroomMenuItems = [
     { icon: AcademicCapIcon, label: "Overview", href: `${pathname}?tab=overview` },
-    { icon: ClipboardDocumentListIcon, label: "Exams", href: `${pathname}?tab=exams` },
+    { icon: ClipboardDocumentListIcon, label: "Examinations", href: `${pathname}?tab=exams` },
+    { icon: PuzzlePieceIcon, label: "Practise Exercises", href: `${pathname}?tab=practise` },
     { icon: BookOpenIcon, label: "Materials", href: `${pathname}?tab=materials` },
     { icon: PencilSquareIcon, label: "Assignments", href: `${pathname}?tab=assignments` },
   ];
 
   const settingsItems = [
-    { icon: UsersIcon, label: "Profile", href: "#" },
+    { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
       { icon: BellIcon, label: "Notifications", href: "#" },
       { icon: Cog6ToothIcon, label: "Settings", href: "#" },
   ];

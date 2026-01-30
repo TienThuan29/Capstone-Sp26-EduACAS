@@ -260,14 +260,16 @@ export default function ManageSubjectPage() {
                 <div className="overflow-x-auto relative sm:rounded-lg">
                     <Table hoverable>
                         <TableHead>
-                            <TableHeadCell className="text-center">Mã môn</TableHeadCell>
-                            <TableHeadCell className="text-center">Tên môn học</TableHeadCell>
-                            <TableHeadCell className="text-center">Mô tả</TableHeadCell>
-                            <TableHeadCell className="text-center">Trạng thái</TableHeadCell>
-                            <TableHeadCell className="text-center">Ngày tạo</TableHeadCell>
-                            <TableHeadCell className="text-center">
-                                <span className="sr-only">Hành động</span>
-                            </TableHeadCell>
+                            <TableRow>
+                                <TableHeadCell className="text-center">Mã môn</TableHeadCell>
+                                <TableHeadCell className="text-center">Tên môn học</TableHeadCell>
+                                <TableHeadCell className="text-center">Mô tả</TableHeadCell>
+                                <TableHeadCell className="text-center">Trạng thái</TableHeadCell>
+                                <TableHeadCell className="text-center">Ngày tạo</TableHeadCell>
+                                <TableHeadCell className="text-center">
+                                    <span className="sr-only">Hành động</span>
+                                </TableHeadCell>
+                            </TableRow>
                         </TableHead>
                         <TableBody className="divide-y">
                             {filteredSubjects.length === 0 ? (
@@ -402,7 +404,7 @@ export default function ManageSubjectPage() {
                             Xác nhận xóa
                         </h3>
                         <p className="mb-6 text-gray-500 dark:text-gray-400">
-                            Bạn có chắc chắn muốn xóa môn học <span className="font-semibold text-gray-900 dark:text-white">"{subjectToDelete?.subjectName}"</span> không?
+                            Bạn có chắc chắn muốn xóa môn học <span className="font-semibold text-gray-900 dark:text-white">&quot;{subjectToDelete?.subjectName}&quot;</span> không?
                             <br />
                             This action will change the status to &quot;Deleted&quot;.
                         </p>

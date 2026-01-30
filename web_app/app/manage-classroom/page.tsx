@@ -22,6 +22,7 @@ import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
 import { CustomPagination } from "@/components/custom-pagination";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { DefaultCustomButton } from "@/components/ui/custom-button";
 
 interface LecturerLite {
   lecturerId: string;
@@ -309,12 +310,10 @@ export default function ManageClassroomPage() {
               List of classrooms you are responsible for
             </p>
           </div>
-          <Button
-            className="cursor-pointer bg-[#1F4E79] text-white hover:bg-[#1F4E79]/90"
+          <DefaultCustomButton
+            label="+ Create new classroom"
             onClick={() => setOpenModal(true)}
-          >
-            + Create new classroom
-          </Button>
+          />
         </div>
 
         <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
@@ -369,11 +368,11 @@ export default function ManageClassroomPage() {
             <>
               {/* List header (desktop) */}
               <div className="hidden grid-cols-5 gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400 md:grid">
-                <div>Mã lớp / Lớp</div>
-                <div>Môn học</div>
-                <div>Học kỳ</div>
-                <div>Thời gian</div>
-                <div className="text-right">Thao tác</div>
+                <div>Classroom code / Classroom name</div>
+                <div>Subject</div>
+                <div>Semester</div>
+                <div>Time</div>
+                <div className="text-right">Action</div>
               </div>
               {/* List rows */}
               {filteredClassrooms.map((c) => (
@@ -390,15 +389,15 @@ export default function ManageClassroomPage() {
                     </span>
                   </div>
                   <div className="text-sm text-gray-700 dark:text-gray-300">
-                    <span className="md:hidden">Môn: </span>
+                    <span className="md:hidden">Subject: </span>
                     {c.subject.subjectName}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="md:hidden">Học kỳ: </span>
+                    <span className="md:hidden">Semester: </span>
                     {c.semesterName}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <span className="md:hidden">Thời gian: </span>
+                    <span className="md:hidden">Time: </span>
                     {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
                     {new Date(c.endDate).toLocaleDateString("vi-VN")}
                   </div>
@@ -521,7 +520,7 @@ export default function ManageClassroomPage() {
               </div>
               <TextInput
                 id="enrolKey"
-                placeholder="6-20 ký tự, phải có ký tự đặc biệt, không khoảng trắng"
+                placeholder=""
                 type="password"
                 value={formData.enrolKey}
                 onChange={(e) =>
@@ -530,10 +529,10 @@ export default function ManageClassroomPage() {
                 pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
                 title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
               />
-              <p className="mt-1 text-xs text-gray-500">
-                6-20 ký tự, bao gồm ít nhất 1 ký tự đặc biệt, không có khoảng
-                trắng.
-              </p>
+              <ul className="mt-1 list-disc list-inside space-y-0.5 text-xs text-gray-500">
+                <li>6-20 characters, must contain at least one special character, and must not contain spaces.</li>
+                <li>If you don&apos;t want to set an enrol key, it is automatically generated.</li>
+              </ul>
             </div>
 
             <div>
@@ -555,19 +554,13 @@ export default function ManageClassroomPage() {
 
             <div className="mt-6 flex justify-end gap-2">
               <Button color="gray" onClick={() => setOpenModal(false)}>
-                Hủy
+                Cancel
               </Button>
-              <Button
+              <DefaultCustomButton
+                label={modalLoading ? "Creating..." : "Create classroom"}
                 type="submit"
                 disabled={modalLoading}
-                className="bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]"
-              >
-                {modalLoading ? (
-                  <Spinner size="sm" className="mr-2" />
-                ) : (
-                  "Tạo lớp học"
-                )}
-              </Button>
+              />
             </div>
           </form>
         </ModalBody>

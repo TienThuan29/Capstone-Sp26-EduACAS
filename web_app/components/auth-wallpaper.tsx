@@ -41,19 +41,19 @@ export default function AuthWallpaper() {
         </h1>
         
         <p className="text-xl text-white/90 mb-4 leading-relaxed">
-          Nền tảng E-Learning Lập trình chuyên nghiệp
+          Professional Programming Learning Platform
         </p>
         
         <p className="text-lg text-white/70 leading-relaxed">
-          Kết nối giảng viên và sinh viên trong việc giảng dạy, học tập và thực hành các ngôn ngữ lập trình
+          Connect teachers and students in teaching, learning and practicing programming languages
         </p>
         
         {/* Stats */}
         <div className="grid grid-cols-3 gap-6 mt-12">
           {[
-            { number: "4+", label: "Ngôn ngữ" },
-            { number: "∞", label: "Bài tập" },
-            { number: "24/7", label: "Hỗ trợ" },
+            { number: "4+", label: "Programming Languages" },
+            { number: "∞", label: "Exercises" },
+            { number: "24/7", label: "Support" },
           ].map((stat, index) => (
             <div key={index} className="text-center">
               <div className="text-4xl font-bold font-mono text-[#C9A24D] mb-2">
