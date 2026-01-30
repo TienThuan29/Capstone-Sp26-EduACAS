@@ -11,6 +11,7 @@ import {
   TrashIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
+import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { useProgrammingLanguage, ProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage"
 import { useToast } from "@/hooks/useToast"
 
@@ -188,10 +189,11 @@ export default function ProgrammingLanguagesManagement() {
               className="w-full"
             />
           </div>
-          <Button color="success" onClick={handleAddNew}>
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Add new programming language
-          </Button>
+          <DefaultCustomButton
+            label="Add new programming language"
+            icon={<PlusIcon className="h-5 w-5" />}
+            onClick={handleAddNew}
+          />
         </div>
 
         {/* Table */}

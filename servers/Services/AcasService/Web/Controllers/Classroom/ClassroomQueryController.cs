@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Queries.Classroom;
+using AcasService.Application.Queries.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
@@ -20,7 +20,7 @@ namespace AcasService.Web.Controllers.Classroom
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PagedResult<ClassroomResponse>>>> GetAllClassrooms(
-            [FromQuery] string userId, 
+            [FromQuery] string? userId = null, 
             [FromQuery] int pageIndex = 1, 
             [FromQuery] int pageSize = 10)
         {

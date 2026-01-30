@@ -55,7 +55,8 @@ const Sidebar = () => {
   };
 
   // Check if we are in a classroom detail page or related classroom subpage
-  const isClassroomRoute = pathname.includes("/my-classroom/") || pathname.includes("/manage-classroom/");
+  const isClassroomRoute = pathname.includes("/my-classroom/");
+  const isLecturerClassroomRoute = /^\/manage-classroom\/[^/]+$/.test(pathname);
 
   const toggleSubmenu = (menuName: string) => {
     setExpandedMenu(expandedMenu === menuName ? null : menuName);
@@ -69,6 +70,10 @@ const Sidebar = () => {
   ];
 
   const lecturerMenuItems = [
+    { icon: AcademicCapIcon, label: "My Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
+  ];
+
+  const lecturerClassroomMenuItems = [
     { icon: AcademicCapIcon, label: "Overview", href: `${pathname}?tab=overview` },
     { icon: Squares2X2Icon, label: "Dashboard", href: `${pathname}?tab=dashboard` },
     // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
@@ -98,10 +103,13 @@ const Sidebar = () => {
       { icon: Cog6ToothIcon, label: "Settings", href: "#" },
   ];
 
-  // Determine which menu to show based on role and route. All roles have settingsItems.
+  // justify sidebar options
   let menuItems = studentMenuItems;
   if (isAdmin) {
     menuItems = adminMenuItems;
+  }
+  else if (isLecturer && isLecturerClassroomRoute) {
+    menuItems = lecturerClassroomMenuItems;
   }
   else if (isLecturer) {
     menuItems = lecturerMenuItems;

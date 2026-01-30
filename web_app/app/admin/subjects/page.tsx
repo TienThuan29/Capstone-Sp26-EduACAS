@@ -26,6 +26,7 @@ import {
   MagnifyingGlassIcon,
   ArrowPathIcon,
 } from '@heroicons/react/24/outline'
+import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { useToast } from "@/hooks/useToast"
 import { useSubject, Subject } from "@/hooks/subject/useSubject"
 import { useAuth } from "@/contexts/AuthContext"
@@ -217,10 +218,12 @@ export default function SubjectsManagement() {
               <option value="all">All</option>
             </Select>
           </div>
-          <Button color="purple" onClick={handleAddNew} className="cursor-pointer">
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Add new subject
-          </Button>
+          <DefaultCustomButton
+            label="Add new subject"
+            icon={<PlusIcon className="h-5 w-5" />}
+            onClick={handleAddNew}
+            className="cursor-pointer"
+          />
         </div>
 
         {/* Table */}

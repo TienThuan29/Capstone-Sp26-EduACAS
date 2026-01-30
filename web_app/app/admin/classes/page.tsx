@@ -6,6 +6,7 @@ import Sidebar from "@/components/sidebar"
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Badge, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Card, Spinner } from "flowbite-react"
 import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
 import { useClassroom, type Classroom } from "@/hooks/classroom/useClassroom"
+import { DefaultCustomButton } from "@/components/ui/custom-button"
 
 interface ClassData {
   id: string
@@ -189,10 +190,12 @@ export default function ClassesManagement() {
               Manage all classrooms in the system
             </p>
           </div>
-          <Button color="blue" onClick={handleAddNew} className="cursor-pointer">
-            <PlusIcon className="w-5 h-5 mr-2" />
-            Add New Classroom
-          </Button>
+          <DefaultCustomButton
+            label="Add New Classroom"
+            icon={<PlusIcon className="h-5 w-5" />}
+            onClick={handleAddNew}
+            className="cursor-pointer"
+          />
         </div>
 
         {/* Filters */}

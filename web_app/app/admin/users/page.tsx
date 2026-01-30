@@ -11,10 +11,12 @@ import {
   AcademicCapIcon,
   UserCircleIcon,
   PencilIcon,
+  PlusIcon,
 } from '@heroicons/react/24/outline'
 import { useUserManagement } from "@/hooks/user/useUserManagement"
 import { useToast } from "@/hooks/useToast"
 import { UserProfile } from "@/types/user"
+import { DefaultCustomButton } from "@/components/ui/custom-button"
 
 const userStatsAccentStyles: Record<string, { border: string; iconBg: string; iconColor: string }> = {
   purple: { border: 'border-l-purple-500', iconBg: 'bg-purple-50 dark:bg-purple-500/10', iconColor: 'text-purple-600 dark:text-purple-400' },
@@ -246,12 +248,12 @@ export default function UsersManagement() {
             </p>
           </div>
           
-          <Button color="blue" onClick={() => setShowGrantModal(true)}>
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-            </svg>
-            Grant Account
-          </Button>
+          <DefaultCustomButton
+            label="Grant Account"
+            icon={<PlusIcon className="h-5 w-5" />}
+            onClick={() => setShowGrantModal(true)}
+            className="cursor-pointer"
+          />
         </div>
 
         {/* Stats Cards */}
