@@ -14,6 +14,9 @@ using StackExchange.Redis;
 using RabbitMQ.Client;
 using Microsoft.OpenApi;
 using AuthService.Application.Notifications;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -71,6 +74,29 @@ builder.Services.AddScoped<JwtUtil>();
 builder.Services.AddScoped<GoogleTokenVerifier>();
 builder.Services.AddScoped<IUserQuery, UserQuery>();
 builder.Services.AddScoped<IUserCommand, UserCommand>();
+
+// JWT Bearer authentication (required for [Authorize] endpoints e.g. grant-account)
+var jwtSecret = builder.Configuration["Jwt:JwtSecret"] ??
+    throw new InvalidOperationException("Jwt:JwtSecret is not configured");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "AuthService";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "AcasService";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(jwtSecret)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
 // controllers
 builder.Services.AddCors(options =>
 {
@@ -145,7 +171,7 @@ builder.Services.AddRateLimiter(options =>
                 QueueLimit = globalPolicy.GetValue<int>("QueueLimit", 0)
             }));
 
-    // Policy for authentication endpoints (more restrictive)
+    // Policy for authentication endpoints
     options.AddPolicy("AuthPolicy", context =>
         RateLimitPartition.GetFixedWindowLimiter(
             partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",

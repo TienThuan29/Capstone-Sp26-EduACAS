@@ -30,7 +30,7 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
 
     public async Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request)
     {
-        var classroom = await _classroomRepository.FindByEnrollKeyAsync(request.EnrolKey);
+        var classroom = await _classroomRepository.FindByEnrollKeyAsync(request.EnrolKey); // ??????????
         if (classroom == null)
         {
             throw new InvalidOperationException("Invalid enrollment key");

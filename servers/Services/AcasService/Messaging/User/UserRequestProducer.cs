@@ -83,7 +83,9 @@ public class UserRequestProducer
                         }
                         else
                         {
-                            var userProfile = JsonSerializer.Deserialize<UserProfileResponse>(message);
+                            // var userProfile = JsonSerializer.Deserialize<UserProfileResponse>(message);
+                            var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                            var userProfile = JsonSerializer.Deserialize<UserProfileResponse>(message, options);
                             responseReceived.SetResult(userProfile);
                         }
                     }

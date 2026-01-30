@@ -10,8 +10,8 @@ import {
   ChartStatsIcon,
 } from "@/components/svg-icons"
 import { heroStats, features, communityStats, programmingLanguages } from "@/MockData/landingPageData"
-import Footer from "@/components/Footer"
-import HomeNavbar from "@/components/home-navbar"
+import Footer from "@/components/footer"
+import HomeNavbar from "@/components/navbar"
 import HeroCarousel from "@/components/carousel"
 
 export default function Home() {
@@ -38,7 +38,7 @@ export default function Home() {
                 />
                 
                 <div
-                  className="relative p-8 rounded-2xl shadow-xl bg-white/95 backdrop-blur-sm transform hover:scale-105 transition-transform duration-300"
+                  className="relative p-8 rounded-2xl bg-white/95 backdrop-blur-sm transform hover:scale-105 transition-transform duration-300"
                   style={{ border: "3px solid #C9A24D" }}
                 >
                   <Image
@@ -73,7 +73,7 @@ export default function Home() {
             {/* Content Section */}
             <div className="space-y-6">
               <div
-                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold animate-pulse shadow-lg"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold animate-pulse"
                 style={{ 
                   backgroundColor: "#C9A24D", 
                   color: "#FFFFFF",
@@ -102,7 +102,7 @@ export default function Home() {
               <div className="flex items-center gap-4">
                 <Link href="/login">
                   <button
-                    className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl relative overflow-hidden group"
+                    className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-all duration-300 hover:shadow-2xl relative overflow-hidden group"
                     style={{ backgroundColor: "#1F4E79" }}
                   >
                     {/* Button shine effect */}

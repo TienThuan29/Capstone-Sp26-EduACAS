@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import Image from "next/image"
 
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -62,11 +63,12 @@ export default function HeroCarousel() {
           >
             {/* Image with smooth loading */}
             <div className="relative w-full h-full">
-              <img
+              <Image
                 src={slide.src}
                 alt={slide.alt}
-                className="w-full h-full object-cover transform scale-105 animate-ken-burns"
-                loading="lazy"
+                fill
+                className="object-cover transform scale-105 animate-ken-burns"
+                sizes="100vw"
               />
               {/* Gradient Overlay */}
               <div

@@ -323,4 +323,57 @@ public class UserRepository : DynamoRepository, IUserRepository
             throw;
         }
     }
+
+    public async Task<Models.User?> UpdateProfileAsync(string userId, string? fullname, DateTime? birthday, string? avatarUrl)
+    {
+        try
+        {
+            var updatedDate = DateTime.UtcNow;
+            var updates = new Dictionary<string, AttributeValueUpdate>();
+
+            if (fullname != null)
+            {
+                updates["fullname"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = fullname }
+                };
+            }
+            if (birthday.HasValue)
+            {
+                updates["dateOfBirth"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = birthday.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                };
+            }
+            if (avatarUrl != null)
+            {
+                updates["avatarUrl"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = avatarUrl }
+                };
+            }
+
+            updates["updatedDate"] = new AttributeValueUpdate
+            {
+                Action = AttributeAction.PUT,
+                Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+            };
+
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user profile");
+            throw;
+        }
+    }
 }

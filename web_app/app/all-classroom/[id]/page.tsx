@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, Button, TextInput, Spinner } from "flowbite-react";
-import HomeNavbar from "@/components/home-navbar";
-import Footer from "@/components/Footer";
+import HomeNavbar from "@/components/navbar";
+import Footer from "@/components/footer";
 import { useAuth } from "@/contexts/AuthContext";
-import { useClassroom, Classroom } from "@/hooks/useClassroom";
+import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
 
 export default function EnrollClassPage() {
   const { id } = useParams();
@@ -101,7 +101,7 @@ export default function EnrollClassPage() {
       <HomeNavbar />
 
       <main className="container mx-auto flex flex-grow items-center justify-center px-4 pt-24 pb-12">
-        <Card className="w-full max-w-md rounded-2xl border-none shadow-lg">
+        <Card className="w-full max-w-md rounded-2xl border-none">
           <div className="mb-6 text-center">
             <h2 className="mb-2 text-2xl font-bold text-[#1F4E79] dark:text-[#C9A24D]">
               Tham gia lớp học
@@ -119,9 +119,9 @@ export default function EnrollClassPage() {
 
             <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
               <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-bold">
-                {classroom.lecturer.lecturerName.substring(0, 2).toUpperCase()}
+                {classroom.lecturer.fullname.substring(0, 2).toUpperCase()}
               </div>
-              <span>{classroom.lecturer.lecturerName}</span>
+              <span>{classroom.lecturer.fullname}</span>
             </div>
           </div>
 

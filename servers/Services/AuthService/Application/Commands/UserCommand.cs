@@ -20,11 +20,13 @@ public interface IUserCommand
 
     public Task<bool> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest);
 
-    public Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest, string requesterUserId);
+    public Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest);
 
     public Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest);
     
     public Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable);
+
+    public Task<UserProfileResponse> UpdateProfileAsync(string accessToken, string? fullname, DateTime? birthday, string? avatarUrl);
 }
 
 public class UserCommand : IUserCommand
@@ -196,21 +198,8 @@ public class UserCommand : IUserCommand
     /// Grant an account to a user (email-based)
     /// Only Admin can grant accounts to Lecturer and Student
     /// </summary>
-    public async Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest, string requesterUserId)
+    public async Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest)
     {
-        // Verify requester exists and get their role
-        var requester = await _userRepository.FindByIdAsync(requesterUserId);
-        if (requester == null)
-        {
-            throw new InvalidOperationException("Requester user not found");
-        }
-
-        // Validate permission - Only ADMIN can grant accounts
-        if (requester.Role != Role.ADMIN)
-        {
-            throw new InvalidOperationException("Only Admin can grant accounts");
-        }
-
         var targetRole = Enum.Parse<Role>(grantAccountRequest.Role);
         if (targetRole != Role.LECTURER && targetRole != Role.STUDENT)
         {
@@ -247,18 +236,18 @@ public class UserCommand : IUserCommand
         // Prepare email with login credentials
         var emailSubject = "Your Account Credentials";
         var emailBody = GenerateGrantAccountEmailBody(
-            createdUser.Email, 
-            temporaryPassword, 
+            createdUser.Email,
+            temporaryPassword,
             createdUser.Fullname,
             createdUser.Role.ToString()
         );
 
         // Send email with credentials
         await _emailService.SendEmailAsync(
-            createdUser.Email, 
-            emailSubject, 
-            emailBody, 
-            EmailService.EmailPasswordResetTemplate
+            createdUser.Email,
+            emailSubject,
+            emailBody,
+            EmailService.EmailBodyOnlyTemplate
         );
 
         return new GrantAccountResponse
@@ -269,8 +258,13 @@ public class UserCommand : IUserCommand
             Role = createdUser.Role.ToString(),
             TemporaryPassword = temporaryPassword,
             FirstLogin = true,
-            Message = $"Account created and credentials sent to {createdUser.Email}"
+            // Message = $"Account created and credentials sent to {createdUser.Email}"
         };
+    }
+    
+    private static string GenerateGrantAccountEmailBody(string email, string temporaryPassword, string fullname, string role)
+    {
+        return string.Format(EmailService.EmailGrantAccountTemplate, email, temporaryPassword, fullname, role);
     }
 
     /// <summary>
@@ -343,37 +337,6 @@ public class UserCommand : IUserCommand
         return new string(passwordArray);
     }
 
-    /// <summary>
-    /// Generate email body for account grant notification
-    /// </summary>
-    private string GenerateGrantAccountEmailBody(string email, string temporaryPassword, string fullname, string role)
-    {
-        return $@"
-            <html>
-                <body>
-                    <h2>Welcome {fullname}!</h2>
-                    <p>Your account has been created with the following credentials:</p>
-                    <table border='1' cellpadding='10'>
-                        <tr>
-                            <td><strong>Email:</strong></td>
-                            <td>{email}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Temporary Password:</strong></td>
-                            <td>{temporaryPassword}</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Role:</strong></td>
-                            <td>{role}</td>
-                        </tr>
-                    </table>
-                    <p><strong>Important:</strong> Please log in immediately and change your password to a secure one.</p>
-                    <p>Best regards,<br/>EduACAS Team</p>
-                </body>
-            </html>
-        ";
-    }
-
     public async Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable)
     {
         try
@@ -388,6 +351,26 @@ public class UserCommand : IUserCommand
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user");
+            throw;
+        }
+    }
+
+    public async Task<UserProfileResponse> UpdateProfileAsync(string accessToken, string? fullname, DateTime? birthday, string? avatarUrl)
+    {
+        try
+        {
+            var decoded = await _jwtUtil.VerifyAsync(accessToken);
+            var userId = decoded.Id;
+            var updatedUser = await _userRepository.UpdateProfileAsync(userId, fullname, birthday, avatarUrl);
+            if (updatedUser == null)
+            {
+                throw new InvalidOperationException("Failed to update profile");
+            }
+            return _userMapper.ToUserResponse(updatedUser);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating profile");
             throw;
         }
     }

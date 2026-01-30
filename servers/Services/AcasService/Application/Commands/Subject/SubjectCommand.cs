@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Mappers;
+using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
@@ -11,7 +11,6 @@ namespace AcasService.Application.Commands.Subject
         Task<SubjectResponse> UpdateSubjectAsync(string subjectId, UpdateSubjectRequest request);
         Task<SubjectResponse> SoftDeleteSubjectAsync(string subjectId);
         Task<SubjectResponse> DeleteSubjectAsync(string subjectId);
-        Task<SubjectResponse> SoftDeleteSubjectAsync(string subjectId);
         Task<SubjectResponse> RestoreSubjectAsync(string subjectId);
         Task<BulkOperationResult> BulkSoftDeleteAsync(List<string> subjectIds);
         Task<BulkOperationResult> BulkRestoreAsync(List<string> subjectIds);
@@ -93,20 +92,6 @@ namespace AcasService.Application.Commands.Subject
             }
 
             return _subjectMapper.ToSubjectResponse(result);
-        }
-
-        public async Task<SubjectResponse> SoftDeleteSubjectAsync(string subjectId)
-        {
-            var existingSubject = await _subjectRepository.FindByIdAsync(subjectId);
-            if (existingSubject == null)
-            {
-                _logger.LogError("Subject not found");
-                throw new Exception("Subject not found");
-            }
-            await _subjectRepository.SoftDeleteAsync(subjectId);
-            existingSubject.IsDeleted = true;
-            existingSubject.UpdatedDate = DateTime.UtcNow;
-            return _subjectMapper.ToSubjectResponse(existingSubject);
         }
 
         public async Task<SubjectResponse> DeleteSubjectAsync(string subjectId)

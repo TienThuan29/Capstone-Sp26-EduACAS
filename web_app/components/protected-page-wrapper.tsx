@@ -1,7 +1,7 @@
 'use client'
 
 import { ReactNode } from 'react'
-import { useFirstLoginProtection } from '@/hooks/useFirstLoginProtection'
+import { useFirstLoginProtection } from '@/hooks/authorization/useFirstLoginProtection'
 
 export default function ProtectedPageWrapper({ children }: { children: ReactNode }) {
   const { isProtected, isLoading } = useFirstLoginProtection()

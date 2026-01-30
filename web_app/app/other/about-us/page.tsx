@@ -1,8 +1,8 @@
 "use client"
 
 import { Card } from "flowbite-react"
-import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
+import HomeNavbar from "@/components/navbar"
+import Footer from "@/components/footer"
 import {
   LaptopIcon,
   GraduateIcon,
@@ -20,7 +20,7 @@ export default function AboutUsPage() {
       <section className="pt-24 pb-12 px-4 bg-gradient-to-br from-[#F5F7FA] to-white dark:from-gray-800 dark:to-gray-900">
         <div className="container mx-auto max-w-7xl text-center">
           <div
-            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D] shadow-lg"
+            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D]"
           >
             <GraduateIcon /> VỀ CHÚNG TÔI
           </div>
@@ -46,7 +46,7 @@ export default function AboutUsPage() {
                   style={{ background: 'linear-gradient(135deg, #1F4E79 0%, #C9A24D 100%)' }}
                 />
                 <div
-                  className="relative p-8 rounded-2xl shadow-xl bg-white dark:bg-gray-800 transform hover:scale-105 transition-transform duration-300"
+                  className="relative p-8 rounded-2xl bg-white dark:bg-gray-800 transform hover:scale-105 transition-transform duration-300"
                   style={{ border: "3px solid #C9A24D" }}
                 >
                   <Image

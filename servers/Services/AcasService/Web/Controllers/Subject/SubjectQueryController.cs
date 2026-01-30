@@ -1,12 +1,14 @@
 ﻿using AcasService.Application.Queries.Subject;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AcasService.Web.Controllers.Subject;
 
 [ApiController]
 [Route("api/v1/subjects")]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class SubjectQueryController : ControllerBase
 {
     private readonly ISubjectQuery _subjectQuery;

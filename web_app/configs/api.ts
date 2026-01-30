@@ -13,6 +13,7 @@ export const Api = {
         RESET_PASSWORD: '/api/auth/v1/reset-password',
         RESET_FIRST_LOGIN_PASSWORD: '/api/auth/v1/reset-first-login-password',
         GET_PROFILE: '/api/auth/v1/profile',
+        UPDATE_PROFILE: '/api/auth/v1/profile',
         GOOGLE_LOGIN: '/api/auth/v1/google-login',
         GRANT_ACCOUNT: '/api/auth/v1/grant-account',
     },
@@ -65,6 +66,10 @@ export const Api = {
 
   Examination: {
     GET_BY_CLASS: "/api/acas/v1/examinations/by-class",
+  },
+
+  S3: {
+    UPLOAD_AVATAR: "/api/acas/v1/public-s3/upload",
   },
 
   // Subject: {

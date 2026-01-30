@@ -7,7 +7,7 @@ import axios, { HttpStatusCode } from "axios";
 import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
 import { useAuth } from "@/contexts/AuthContext";
-import { useFirstLoginPageProtection } from "@/hooks/useFirstLoginProtection";
+import { useFirstLoginPageProtection } from "@/hooks/authorization/useFirstLoginProtection";
 import { Api } from "@/configs/api";
 import { useToast } from "@/hooks/useToast";
 
@@ -147,7 +147,7 @@ export default function FirstLoginPage() {
               <Button
                 type="submit"
                 disabled={isSubmitting || !password || !confirmPassword}
-                className="w-full text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
                 {isSubmitting ? "Đang xử lý..." : "Đổi mật khẩu"}

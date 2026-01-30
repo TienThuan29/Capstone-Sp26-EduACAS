@@ -2,8 +2,8 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, TextInput, Modal, ModalHeader, ModalBody, ModalFooter, Label, Textarea, Spinner, Select } from "flowbite-react"
-import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
+import HomeNavbar from "@/components/navbar"
+import Footer from "@/components/footer"
 import useAxios from "@/hooks/useAxios"
 import { Api } from "@/configs/api"
 import { useAuth } from "@/contexts/AuthContext"
@@ -52,7 +52,7 @@ export default function ManageSubjectPage() {
     const fetchSubjects = async () => {
         try {
             setLoading(true)
-            const res = await axiosInstance.get(Api.Subject.GET_ALL_SUBJECTS)
+            const res = await axiosInstance.get(Api.Subject.GET_ALL)
             if (res.data?.dataResponse) {
                 const allSubjects: Subject[] = res.data.dataResponse
                 setSubjects(allSubjects)
@@ -61,7 +61,7 @@ export default function ManageSubjectPage() {
             }
         } catch (err) {
             console.error("Fetch subjects failed", err)
-            showError("Không thể tải danh sách môn học")
+            showError("Cannot load subject list")
         } finally {
             setLoading(false)
         }
@@ -129,7 +129,7 @@ export default function ManageSubjectPage() {
         }
 
         if (!currentUserId && !isEditing) {
-            showError("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.")
+            showError("Cannot find user information. Please login again.")
             return
         }
 
@@ -142,8 +142,8 @@ export default function ManageSubjectPage() {
                     subjectName: formData.subjectName,
                     description: formData.description
                 }
-                await axiosInstance.put(`${Api.Subject.UPDATE_SUBJECT}/${currentSubjectId}`, payload)
-                showSuccess("Cập nhật môn học thành công")
+                await axiosInstance.put(`${Api.Subject.UPDATE(currentSubjectId)}`, payload)
+                showSuccess("Update subject successfully")
             } else {
                 const payload = {
                     subjectCode: formData.subjectCode,
@@ -151,14 +151,15 @@ export default function ManageSubjectPage() {
                     description: formData.description,
                     createdBy: currentUserId
                 }
-                await axiosInstance.post(Api.Subject.CREATE_SUBJECT, payload)
-                showSuccess("Tạo môn học thành công")
+                await axiosInstance.post(Api.Subject.CREATE, payload)
+                showSuccess("Create subject successfully")
             }
             setOpenModal(false)
             fetchSubjects()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Submit subject failed", error)
-            const errorMsg = error.response?.data?.message || (isEditing ? "Cập nhật thất bại" : "Tạo mới thất bại")
+            const errorMsg = error.response?.data?.message || (isEditing ? "Update subject failed" : "Create subject failed")
             showError(errorMsg)
         } finally {
             setActionLoading(false)
@@ -174,14 +175,14 @@ export default function ManageSubjectPage() {
         if (!subjectToDelete) return
         try {
             setActionLoading(true)
-            await axiosInstance.patch(`${Api.Subject.SOFT_DELETE_SUBJECT}/${subjectToDelete.id}/soft-delete`)
-            showSuccess("Xóa môn học thành công")
+            await axiosInstance.patch(`${Api.Subject.SOFT_DELETE(subjectToDelete.id)}`)
+            showSuccess("Delete subject successfully")
             setOpenDeleteModal(false)
             setSubjectToDelete(null)
             fetchSubjects()
         } catch (error) {
             console.error("Delete subject failed", error)
-            showError("Xóa thất bại")
+            showError("Delete subject failed")
         } finally {
             setActionLoading(false)
         }
@@ -256,17 +257,19 @@ export default function ManageSubjectPage() {
                     </div>
                 </div>
 
-                <div className="overflow-x-auto relative shadow-md sm:rounded-lg">
+                <div className="overflow-x-auto relative sm:rounded-lg">
                     <Table hoverable>
                         <TableHead>
-                            <TableHeadCell className="text-center">Mã môn</TableHeadCell>
-                            <TableHeadCell className="text-center">Tên môn học</TableHeadCell>
-                            <TableHeadCell className="text-center">Mô tả</TableHeadCell>
-                            <TableHeadCell className="text-center">Trạng thái</TableHeadCell>
-                            <TableHeadCell className="text-center">Ngày tạo</TableHeadCell>
-                            <TableHeadCell className="text-center">
-                                <span className="sr-only">Hành động</span>
-                            </TableHeadCell>
+                            <TableRow>
+                                <TableHeadCell className="text-center">Mã môn</TableHeadCell>
+                                <TableHeadCell className="text-center">Tên môn học</TableHeadCell>
+                                <TableHeadCell className="text-center">Mô tả</TableHeadCell>
+                                <TableHeadCell className="text-center">Trạng thái</TableHeadCell>
+                                <TableHeadCell className="text-center">Ngày tạo</TableHeadCell>
+                                <TableHeadCell className="text-center">
+                                    <span className="sr-only">Hành động</span>
+                                </TableHeadCell>
+                            </TableRow>
                         </TableHead>
                         <TableBody className="divide-y">
                             {filteredSubjects.length === 0 ? (
@@ -401,9 +404,9 @@ export default function ManageSubjectPage() {
                             Xác nhận xóa
                         </h3>
                         <p className="mb-6 text-gray-500 dark:text-gray-400">
-                            Bạn có chắc chắn muốn xóa môn học <span className="font-semibold text-gray-900 dark:text-white">"{subjectToDelete?.subjectName}"</span> không?
+                            Bạn có chắc chắn muốn xóa môn học <span className="font-semibold text-gray-900 dark:text-white">&quot;{subjectToDelete?.subjectName}&quot;</span> không?
                             <br />
-                            Hành động này sẽ chuyển trạng thái sang "Đã xóa".
+                            This action will change the status to &quot;Deleted&quot;.
                         </p>
                         <div className="flex justify-center gap-4">
                             <Button color="failure" onClick={confirmDelete} disabled={actionLoading} className="px-4">

@@ -41,7 +41,7 @@ export function CustomPagination({
             <button
                 onClick={() => onPageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="group flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white disabled:hover:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-[#C9A24D] dark:hover:border-[#C9A24D]"
+                className="group flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white disabled:hover:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-[#C9A24D] dark:hover:border-[#C9A24D]"
                 aria-label="Previous Page"
             >
                 <ChevronLeftIcon className="h-5 w-5" />
@@ -54,8 +54,8 @@ export function CustomPagination({
                             <button
                                 onClick={() => onPageChange(page)}
                                 className={`flex h-9 w-9 items-center justify-center rounded-lg text-sm font-bold transition-all duration-300 ${currentPage === page
-                                    ? "bg-gradient-to-br from-[#1F4E79] to-[#163A5C] text-white shadow-lg shadow-blue-900/20 scale-105 dark:from-[#C9A24D] dark:to-[#B08D43]"
-                                    : "bg-transparent text-gray-600 hover:bg-white hover:text-[#1F4E79] hover:shadow-sm dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-[#C9A24D]"
+                                    ? "bg-gradient-to-br from-[#1F4E79] to-[#163A5C] text-white shadow-blue-900/20 scale-105 dark:from-[#C9A24D] dark:to-[#B08D43]"
+                                    : "bg-transparent text-gray-600 hover:bg-white hover:text-[#1F4E79] dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-[#C9A24D]"
                                     }`}
                             >
                                 {page}
@@ -72,7 +72,7 @@ export function CustomPagination({
             <button
                 onClick={() => onPageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="group flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white disabled:hover:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-[#C9A24D] dark:hover:border-[#C9A24D]"
+                className="group flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-0.5 hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:shadow-md disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:bg-white disabled:hover:text-gray-400 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-[#C9A24D] dark:hover:border-[#C9A24D]"
                 aria-label="Next Page"
             >
                 <ChevronRightIcon className="h-5 w-5" />

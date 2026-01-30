@@ -6,7 +6,6 @@ public interface ISubjectRepository
     Task<Models.Subject?> FindByIdAsync(string subjectId);
     Task<List<Models.Subject>> FindAllAsync(); 
     Task<Models.Subject?> UpdateAsync(Models.Subject subject);
-    Task SoftDeleteAsync(string subjectId);
     Task DeleteAsync(string subjectId);
     
     // Soft Delete & Restore

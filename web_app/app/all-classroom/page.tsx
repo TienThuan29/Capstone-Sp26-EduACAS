@@ -4,10 +4,10 @@ import { useEffect, useState, useMemo } from "react";
 import Link from "next/link";
 import { Spinner, TextInput, Select, Card, Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useClassroom, Classroom } from "@/hooks/useClassroom";
-import HomeNavbar from "@/components/home-navbar";
-import Footer from "@/components/Footer";
-import { CustomPagination } from "@/components/CustomPagination";
+import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
+import HomeNavbar from "@/components/navbar";
+import Footer from "@/components/footer";
+import { CustomPagination } from "@/components/custom-pagination";
 
 export default function ListAllClassroomPage() {
   const { user } = useAuth();
@@ -119,7 +119,7 @@ export default function ListAllClassroomPage() {
           </p>
         </div>
 
-        <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
             <div className="md:col-span-2">
               <TextInput
@@ -178,7 +178,7 @@ export default function ListAllClassroomPage() {
           {filteredClassrooms.map((c) => (
             <Card
               key={c.id}
-              className="rounded-2xl border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
+              className="rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-700 dark:bg-gray-800"
             >
               <div className="flex h-full flex-col">
                 {/* Header */}
@@ -202,7 +202,7 @@ export default function ListAllClassroomPage() {
                       Giảng viên:
                     </span>
                     <span className="font-medium text-gray-900 dark:text-gray-200">
-                      {c.lecturer.lecturerName}
+                      {c.lecturer.fullname}
                     </span>
                   </p>
 
@@ -235,7 +235,7 @@ export default function ListAllClassroomPage() {
                       <Button
                         color="gray"
                         outline
-                        className="w-full rounded-xl border-gray-300 font-bold !text-[#1F4E79] dark:!text-[#C9A24D] shadow-md transition-all hover:-translate-y-0.5 hover:!border-green-600 hover:!bg-green-600 hover:!text-white hover:shadow-lg focus:ring-4 focus:ring-green-300 dark:border-gray-600 dark:hover:!border-green-600 dark:hover:!bg-green-600 dark:focus:ring-green-800"
+                        className="w-full rounded-xl border-gray-300 font-bold !text-[#1F4E79] dark:!text-[#C9A24D] transition-all hover:-translate-y-0.5 hover:!border-green-600 hover:!bg-green-600 hover:!text-white hover:shadow-lg focus:ring-4 focus:ring-green-300 dark:border-gray-600 dark:hover:!border-green-600 dark:hover:!bg-green-600 dark:focus:ring-green-800"
                       >
                         Truy cập
                       </Button>

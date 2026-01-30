@@ -3,6 +3,7 @@ using AuthService.Application.Queries;
 using AuthService.Application.ResponseDTOs;
 using AuthService.Application.Utils;
 using AuthService.Web.Requests;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
@@ -185,22 +186,23 @@ public class AuthCommandController : ControllerBase
     }
 
     [HttpPost("grant-account")]
+    [Authorize(Roles = "ADMIN")]
     [EnableRateLimiting("AuthPolicy")]
     public async Task<ActionResult<ApiResponse<GrantAccountResponse>>> GrantAccount([FromBody] GrantAccountRequest grantAccountRequest)
     {
         try
         {
             // Get the requester's user ID from the Authorization header
-            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
-            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-            {
-                return ResponseUtil.Error<GrantAccountResponse>("Authorization token is required", 401);
-            }
+            // var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            // if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            // {
+            //     return ResponseUtil.Error<GrantAccountResponse>("Authorization token is required", 401);
+            // }
 
-            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
-            var requesterProfile = await _userQuery.GetProfileAsync(accessToken);
+            // var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            // var requesterProfile = await _userQuery.GetProfileAsync(accessToken);
             
-            var grantResponse = await _userCommand.GrantAccountAsync(grantAccountRequest, requesterProfile.Id);
+            var grantResponse = await _userCommand.GrantAccountAsync(grantAccountRequest);
             return ResponseUtil.Success(grantResponse, "Account granted successfully and credentials sent to email", 201);
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("Only Admin can grant"))
@@ -270,6 +272,47 @@ public class AuthCommandController : ControllerBase
         }
     }
 
+
+    [HttpPut("profile")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateProfile([FromBody] UpdateProfileRequest updateProfileRequest)
+    {
+        try
+        {
+            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<UserProfileResponse>("Authorization token is required", 401);
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return ResponseUtil.Error<UserProfileResponse>("User not authenticated", 401);
+            }
+
+            var fullname = string.IsNullOrWhiteSpace(updateProfileRequest.Fullname) ? null : updateProfileRequest.Fullname.Trim();
+            var avatarUrl = string.IsNullOrWhiteSpace(updateProfileRequest.AvatarUrl) ? null : updateProfileRequest.AvatarUrl.Trim();
+
+            DateTime? birthday = null;
+            if (!string.IsNullOrWhiteSpace(updateProfileRequest.Birthday) && DateTime.TryParse(updateProfileRequest.Birthday, out var parsedBirthday))
+            {
+                birthday = parsedBirthday;
+            }
+
+            var updatedProfile = await _userCommand.UpdateProfileAsync(accessToken, fullname, birthday, avatarUrl);
+            return ResponseUtil.Success(updatedProfile, "Profile updated successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Failed to update profile"))
+        {
+            return ResponseUtil.Error<UserProfileResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Update profile error");
+            return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
+        }
+    }
 
     [HttpPut("users/{userId}")]
     public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateUser(string userId, [FromBody] UpdateUserRequest updateUserRequest)

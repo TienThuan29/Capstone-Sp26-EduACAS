@@ -1,44 +1,96 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { useThemeContext } from "@/components/ThemeProvider"
+import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import Link from "next/link"
 import { Api } from "@/configs/api"
+import { Constant } from "@/configs/constant"
 import useAxios from "@/hooks/useAxios"
 import { useToast } from "@/hooks/useToast"
+import { Card, Badge } from "flowbite-react"
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  CodeBracketIcon,
+  UserGroupIcon,
+  UserPlusIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/solid"
+import { PageUrl } from "@/configs/page.url"
+
+type AccentKey = "blue" | "purple" | "green" | "orange" | "pink" | "gray"
 
 interface StatCardProps {
   title: string
   value: string | number
   icon: React.ReactNode
-  trend?: {
-    value: string
-    isPositive: boolean
-  }
-  bgColor: string
+  accent: AccentKey
 }
 
-const StatCard = ({ title, value, icon, trend, bgColor }: StatCardProps) => {
+const accentStyles: Record<AccentKey, { border: string; iconBg: string; iconColor: string }> = {
+  blue: {
+    border: "border-l-blue-500",
+    iconBg: "bg-blue-50 dark:bg-blue-500/10",
+    iconColor: "text-blue-600 dark:text-blue-400",
+  },
+  purple: {
+    border: "border-l-purple-500",
+    iconBg: "bg-purple-50 dark:bg-purple-500/10",
+    iconColor: "text-purple-600 dark:text-purple-400",
+  },
+  green: {
+    border: "border-l-green-500",
+    iconBg: "bg-green-50 dark:bg-green-500/10",
+    iconColor: "text-green-600 dark:text-green-400",
+  },
+  orange: {
+    border: "border-l-orange-500",
+    iconBg: "bg-orange-50 dark:bg-orange-500/10",
+    iconColor: "text-orange-600 dark:text-orange-400",
+  },
+  pink: {
+    border: "border-l-pink-500",
+    iconBg: "bg-pink-50 dark:bg-pink-500/10",
+    iconColor: "text-pink-600 dark:text-pink-400",
+  },
+  gray: {
+    border: "border-l-gray-500",
+    iconBg: "bg-gray-50 dark:bg-gray-500/10",
+    iconColor: "text-gray-600 dark:text-gray-400",
+  },
+}
+
+const StatCard = ({ title, value, icon, accent }: StatCardProps) => {
   const { isDark } = useThemeContext()
-  
+  const style = accentStyles[accent] ?? accentStyles.gray
+
   return (
-    <div className={`rounded-xl p-6 shadow-lg ${isDark ? 'bg-gray-800' : 'bg-white'} border ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <p className={`text-sm font-medium ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{title}</p>
-          <h3 className={`mt-2 text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{value}</h3>
-          {trend && (
-            <div className="mt-2 flex items-center gap-1">
-              <span className={`text-sm font-semibold ${trend.isPositive ? 'text-green-500' : 'text-red-500'}`}>
-                {trend.isPositive ? '↑' : '↓'} {trend.value}
-              </span>
-              <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>vs tháng trước</span>
-            </div>
-          )}
-        </div>
-        <div className={`rounded-lg p-3 ${bgColor}`}>
+    <div
+      className={`
+        overflow-hidden rounded-xl border border-gray-200 bg-white
+        dark:border-gray-700 dark:bg-gray-800
+        border-l-4 ${style.border}
+        transition-colors
+      `}
+    >
+      <div className="flex items-center gap-4 p-5">
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${style.iconBg} ${style.iconColor}`}
+        >
           {icon}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p
+            className={`truncate text-xs font-medium uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}
+          >
+            {title}
+          </p>
+          <p
+            className={`mt-1 truncate text-2xl font-semibold tabular-nums tracking-tight ${isDark ? "text-white" : "text-gray-900"}`}
+          >
+            {value}
+          </p>
         </div>
       </div>
     </div>
@@ -68,15 +120,16 @@ export default function AdminDashboard() {
     try {
       setLoading(true)
       const [classroomsRes, subjectsRes, languagesRes, usersRes] = await Promise.all([
-        axiosInstance.get(Api.Classroom.GET_ALL),
+        axiosInstance.get(Api.Classroom.GET_ALL_CLASSROOMS),
         axiosInstance.get(Api.Subject.GET_ALL),
         axiosInstance.get(Api.ProgrammingLanguage.GET_ALL),
         axiosInstance.get(Api.User.GET_ALL)
       ])
 
-      const users = usersRes.data?.dataResponse || []
-      const students = users.filter((u: any) => u.role === 'STUDENT').length
-      const teachers = users.filter((u: any) => u.role === 'LECTURER').length
+      type UserWithRole = { role: string }
+      const users: UserWithRole[] = usersRes.data?.dataResponse ?? []
+      const students = users.filter((u) => u.role === Constant.ROLES.STUDENT).length
+      const teachers = users.filter((u) => u.role === Constant.ROLES.LECTURER).length
 
       setStats({
         classrooms: classroomsRes.data?.dataResponse?.length || 0,
@@ -85,7 +138,7 @@ export default function AdminDashboard() {
         students,
         teachers
       })
-    } catch (error: any) {
+    } catch {
       toast.showError('Không thể tải thống kê')
     } finally {
       setLoading(false)
@@ -98,97 +151,64 @@ export default function AdminDashboard() {
     {
       title: "Tổng số lớp học",
       value: loading ? "..." : stats.classrooms.toString(),
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 3L1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
-        </svg>
-      ),
-      bgColor: "bg-gradient-to-br from-blue-500 to-blue-600"
+      icon: <AcademicCapIcon className="h-6 w-6" />,
+      accent: "blue" as const,
     },
     {
       title: "Tổng số môn học",
       value: loading ? "..." : stats.subjects.toString(),
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-        </svg>
-      ),
-      bgColor: "bg-gradient-to-br from-purple-500 to-purple-600"
+      icon: <BookOpenIcon className="h-6 w-6" />,
+      accent: "purple" as const,
     },
     {
       title: "Ngôn ngữ lập trình",
       value: loading ? "..." : stats.programmingLanguages.toString(),
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-        </svg>
-      ),
-      bgColor: "bg-gradient-to-br from-green-500 to-green-600"
+      icon: <CodeBracketIcon className="h-6 w-6" />,
+      accent: "green" as const,
     },
     {
       title: "Tổng số sinh viên",
-      value: loading ? "..." : stats.students.toLocaleString('vi-VN'),
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
-        </svg>
-      ),
-      bgColor: "bg-gradient-to-br from-orange-500 to-orange-600"
+      value: loading ? "..." : stats.students.toLocaleString("vi-VN"),
+      icon: <UserGroupIcon className="h-6 w-6" />,
+      accent: "orange" as const,
     },
     {
       title: "Tổng số giảng viên",
-      value: loading ? "..." : stats.teachers.toLocaleString('vi-VN'),
-      icon: (
-        <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-          <path d="M19 8h-2v3h-3v2h3v3h2v-3h3v-2h-3z" opacity="0.7"/>
-        </svg>
-      ),
-      bgColor: "bg-gradient-to-br from-pink-500 to-pink-600"
+      value: loading ? "..." : stats.teachers.toLocaleString("vi-VN"),
+      icon: <UserPlusIcon className="h-6 w-6" />,
+      accent: "pink" as const,
     },
   ]
 
   const quickActions = [
     {
-      title: "Quản lý lớp học",
-      description: "Thêm, sửa, xóa lớp học",
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 3L1 9l11 6 9-4.91V17h2V9M5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z"/>
-        </svg>
-      ),
-      href: "/admin/classes",
-      color: "from-blue-500 to-blue-600"
+      title: "Manage Classrooms",
+      description: "Add, edit, delete classroom",
+      icon: <AcademicCapIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_CLASSES_PAGE,
+      accent: "gray" as const,
     },
     {
-      title: "Quản lý môn học",
-      description: "Thêm, sửa, xóa môn học",
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M19 3h-4.18C14.4 1.84 13.3 1 12 1c-1.3 0-2.4.84-2.82 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-7 0c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/>
-        </svg>
-      ),
-      href: "/admin/subjects",
-      color: "from-purple-500 to-purple-600"
+      title: "Manage Subjects",
+      description: "Add, edit, delete subject",
+      icon: <BookOpenIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_SUBJECTS_PAGE,
+      accent: "gray" as const,
     },
     {
-      title: "Quản lý ngôn ngữ",
-      description: "Thêm, sửa, xóa ngôn ngữ lập trình",
-      icon: (
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"/>
-        </svg>
-      ),
-      href: "/admin/programming-languages",
-      color: "from-green-500 to-green-600"
+      title: "Manage Programming Languages",
+      description: "Add, edit, delete programming language",
+      icon: <CodeBracketIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
+      accent: "gray" as const,
     },
   ]
 
   const recentActivities = [
-    { action: "Thêm lớp học mới", detail: "SE1801 - Software Engineering", time: "2 phút trước", type: "class" },
-    { action: "Cập nhật môn học", detail: "PRJ301 - Java Web Application", time: "15 phút trước", type: "subject" },
-    { action: "Thêm ngôn ngữ lập trình", detail: "Rust Programming", time: "1 giờ trước", type: "language" },
-    { action: "Xóa lớp học", detail: "SE1701 - Expired", time: "2 giờ trước", type: "class" },
+    { action: "Add new classroom", detail: "SE1801 - Software Engineering", time: "2 minutes ago", type: "class" },
+    { action: "Update subject", detail: "PRJ301 - Java Web Application", time: "15 minutes ago", type: "subject" },
+    { action: "Add new programming language", detail: "Rust Programming", time: "1 hour ago", type: "language" },
+    { action: "Delete classroom", detail: "SE1701 - Expired", time: "2 hours ago", type: "class" },
   ]
 
   return (
@@ -198,61 +218,68 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="mb-8">
           <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Trang quản trị
+            Admin Dashboard
           </h1>
           <p className={`text-lg ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-            Chào mừng bạn đến với bảng điều khiển quản lý hệ thống
+            Welcome to the admin dashboard
           </p>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 mb-8">
-          {statsData.map((stat, index) => (
-            <StatCard key={index} {...stat} />
-          ))}
-        </div>
-
-        {/* Quick Actions */}
-        <div className="mb-8">
-          <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Thao tác nhanh
+        <section className="mb-8">
+          <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+            Overview
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {quickActions.map((action, index) => (
-              <Link
-                key={index}
-                href={action.href}
-                className={`group relative overflow-hidden rounded-xl p-6 shadow-lg transition-all duration-300 hover:shadow-2xl hover:scale-105 ${
-                  isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'
-                }`}
-              >
-                <div className={`absolute inset-0 bg-linear-to-br ${action.color} opacity-0 group-hover:opacity-10 transition-opacity duration-300`}></div>
-                <div className={`relative rounded-lg p-3 w-fit mb-4 bg-linear-to-br ${action.color}`}>
-                  <div className="text-white">{action.icon}</div>
-                </div>
-                <h3 className={`text-xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                  {action.title}
-                </h3>
-                <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                  {action.description}
-                </p>
-                <div className="mt-4 flex items-center gap-2 text-sm font-semibold text-blue-500">
-                  Truy cập
-                  <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-                  </svg>
-                </div>
-              </Link>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+            {statsData.map((stat, index) => (
+              <StatCard key={index} {...stat} />
             ))}
           </div>
-        </div>
+        </section>
+
+        {/* Quick Actions */}
+        <section className="mb-8">
+          <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+            Quick Actions
+          </h2>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+            {quickActions.map((action, index) => {
+              const style = accentStyles[action.accent] ?? accentStyles.gray
+              return (
+                <Link key={index} href={action.href}>
+                  <div
+                    className={`
+                      group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4
+                      transition-colors hover:border-gray-300
+                      dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600
+                      border-l-4 ${style.border}
+                    `}
+                  >
+                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.iconBg} ${style.iconColor}`}>
+                      {action.icon}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {action.title}
+                      </h3>
+                      <p className={`mt-0.5 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        {action.description}
+                      </p>
+                    </div>
+                    <ArrowRightIcon className={`h-5 w-5 shrink-0 ${isDark ? "text-gray-500 group-hover:text-gray-400" : "text-gray-400 group-hover:text-gray-600"}`} />
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        </section>
 
         {/* Recent Activities */}
         <div>
           <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-            Hoạt động gần đây
+            Recent Activities
           </h2>
-          <div className={`rounded-xl shadow-lg overflow-hidden ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-100'}`}>
+          <Card className="rounded-xl">
             <div className="divide-y divide-gray-200 dark:divide-gray-700">
               {recentActivities.map((activity, index) => (
                 <div key={index} className={`p-4 hover:bg-opacity-50 transition-colors ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}>
@@ -278,14 +305,14 @@ export default function AdminDashboard() {
                         </p>
                       </div>
                     </div>
-                    <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <Badge color="gray" className="text-sm">
                       {activity.time}
-                    </span>
+                    </Badge>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </Card>
         </div>
       </main>
     </div>

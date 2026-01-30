@@ -6,7 +6,9 @@ import { Api } from "@/configs/api";
 
 export interface LecturerLite {
   lecturerId: string;
-  lecturerName: string;
+  fullname: string;
+  email: string;
+  avatarUrl: string;
 }
 
 export interface SubjectLite {
@@ -45,6 +47,24 @@ export interface PagedResult<T> {
   hasNextPage: boolean;
 }
 
+export interface SubjectOption {
+  id: string;
+  subjectCode: string;
+  subjectName: string;
+  isDeleted: boolean;
+}
+
+export type UpdateClassroomPayload = {
+  id: string;
+  classCode: string;
+  className: string;
+  lecturerId: string | undefined;
+  subjectId: string;
+  semesterName: string;
+  enrolKey: string;
+  endDate: string;
+};
+
 export const useClassroom = () => {
   const axiosInstance = useAxios();
 
@@ -55,6 +75,7 @@ export const useClassroom = () => {
         url += `&userId=${userId}`;
       }
       const response = await axiosInstance.get(url);
+      console.log(response.data);
       return (
         response.data?.dataResponse || {
           items: [],
@@ -139,6 +160,33 @@ export const useClassroom = () => {
     [axiosInstance],
   );
 
+  const getSubjects = useCallback(async (): Promise<SubjectOption[]> => {
+    const response = await axiosInstance.get(Api.Subject.GET_ALL);
+    const all: SubjectOption[] = response.data?.dataResponse || [];
+    return all.filter((s) => !s.isDeleted);
+  }, [axiosInstance]);
+
+  const updateClassroom = useCallback(
+    async (classroomId: string, payload: UpdateClassroomPayload) => {
+      const response = await axiosInstance.put(
+        `${Api.Classroom.UPDATE_CLASSROOM}/${classroomId}`,
+        payload,
+      );
+      return response.data;
+    },
+    [axiosInstance],
+  );
+
+  const softDeleteClassroom = useCallback(
+    async (classroomId: string) => {
+      const response = await axiosInstance.patch(
+        `${Api.Classroom.SOFT_DELETE_CLASSROOM}/${classroomId}/soft-delete`,
+      );
+      return response.data;
+    },
+    [axiosInstance],
+  );
+
   return {
     getAllClassrooms,
     getStudentClassrooms,
@@ -146,5 +194,8 @@ export const useClassroom = () => {
     enrollClassroom,
     leaveClassroom,
     getLecturerClassrooms,
+    getSubjects,
+    updateClassroom,
+    softDeleteClassroom,
   };
 };

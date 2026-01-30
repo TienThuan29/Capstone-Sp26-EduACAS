@@ -29,7 +29,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             awsRegion, _problemTableName);
     }
 
-    public async Task<string> CreateAsync(Models.Problem problem)
+    public async Task<Models.Problem> CreateAsync(Models.Problem problem)
     {
         try
         {
@@ -43,7 +43,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
                 _logger.LogInformation("Problem {ProblemId} created successfully", problem.Id);
-                return problem.Id;
+                return await GetByIdAsync(problem.Id);
             }
 
             throw new Exception("Failed to create problem in DynamoDB");

@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Mappers;
+using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Messaging.User;
 using AcasService.Models;
@@ -13,7 +13,7 @@ namespace AcasService.Application.Queries.Classroom
     public interface IClassroomQuery
     {
         Task<ClassroomResponse> GetClassroomByIdAsync(string id);
-        Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string userId, int pageIndex, int pageSize);
+        Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, int pageIndex, int pageSize);
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
 
 
@@ -78,7 +78,7 @@ namespace AcasService.Application.Queries.Classroom
             }
         }
 
-        public async Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string userId, int pageIndex, int pageSize)
+        public async Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, int pageIndex, int pageSize)
         {
             try
             {
@@ -98,7 +98,11 @@ namespace AcasService.Application.Queries.Classroom
                 {
                     var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
                     var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classroom.Id, userId);
+                    ClassEnrollment? enrollclass = null;
+                    if (!string.IsNullOrEmpty(userId))
+                    {
+                        enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classroom.Id, userId);
+                    }
                     var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile, enrollclass);
                     responses.Add(response);
                 }

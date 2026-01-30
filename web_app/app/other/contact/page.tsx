@@ -1,8 +1,8 @@
 "use client"
 
-import { Card } from "flowbite-react"
-import HomeNavbar from "@/components/home-navbar"
-import Footer from "@/components/Footer"
+import { Card, TextInput, Textarea, Button, Label } from "flowbite-react"
+import HomeNavbar from "@/components/navbar"
+import Footer from "@/components/footer"
 import { SparklesIcon } from "@/components/svg-icons"
 
 export default function ContactPage() {
@@ -14,7 +14,7 @@ export default function ContactPage() {
       <section className="pt-24 pb-12 px-4 bg-gradient-to-br from-[#F5F7FA] to-white dark:from-gray-800 dark:to-gray-900">
         <div className="container mx-auto max-w-7xl text-center">
           <div
-            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D] shadow-lg"
+            className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D]"
           >
             <SparklesIcon /> LIÊN HỆ
           </div>
@@ -157,71 +157,71 @@ export default function ContactPage() {
               </h3>
               <form className="space-y-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="fullname" className="mb-2">
                     Họ và tên <span className="text-red-500">*</span>
-                  </label>
-                  <input
+                  </Label>
+                  <TextInput
+                    id="fullname"
                     type="text"
                     required
-                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-[#C9A24D] bg-white dark:bg-gray-700 dark:text-white transition-all"
                     placeholder="Nhập họ tên của bạn"
-                    style={{ borderColor: "#E5E7EB" }}
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="email" className="mb-2">
                     Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
+                  </Label>
+                  <TextInput
+                    id="email"
                     type="email"
                     required
-                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-[#C9A24D] bg-white dark:bg-gray-700 dark:text-white transition-all"
                     placeholder="email@example.com"
-                    style={{ borderColor: "#E5E7EB" }}
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="phone" className="mb-2">
                     Số điện thoại
-                  </label>
-                  <input
+                  </Label>
+                  <TextInput
+                    id="phone"
                     type="tel"
-                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-[#C9A24D] bg-white dark:bg-gray-700 dark:text-white transition-all"
                     placeholder="(+84) 123 456 789"
-                    style={{ borderColor: "#E5E7EB" }}
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="subject" className="mb-2">
                     Chủ đề <span className="text-red-500">*</span>
-                  </label>
-                  <input
+                  </Label>
+                  <TextInput
+                    id="subject"
                     type="text"
                     required
-                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-[#C9A24D] bg-white dark:bg-gray-700 dark:text-white transition-all"
                     placeholder="Chủ đề tin nhắn"
-                    style={{ borderColor: "#E5E7EB" }}
+                    className="mt-1"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <Label htmlFor="message" className="mb-2">
                     Nội dung <span className="text-red-500">*</span>
-                  </label>
-                  <textarea
+                  </Label>
+                  <Textarea
+                    id="message"
                     rows={6}
                     required
-                    className="w-full px-4 py-3 rounded-lg border-2 focus:outline-none focus:border-[#C9A24D] resize-none bg-white dark:bg-gray-700 dark:text-white transition-all"
                     placeholder="Nhập nội dung tin nhắn của bạn..."
-                    style={{ borderColor: "#E5E7EB" }}
+                    className="mt-1 resize-none"
                   />
                 </div>
-                <button
+                <Button
                   type="submit"
-                  className="w-full px-6 py-4 text-white font-bold rounded-lg hover:scale-105 transition-all shadow-lg text-lg"
+                  className="w-full px-6 py-4 font-bold rounded-lg hover:scale-105 transition-all text-lg"
                   style={{ background: "linear-gradient(90deg, #1F4E79 0%, #C9A24D 100%)" }}
                 >
                   Gửi tin nhắn
-                </button>
+                </Button>
               </form>
             </Card>
           </div>
@@ -246,7 +246,7 @@ export default function ContactPage() {
                 Làm thế nào để đăng ký tài khoản?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Bạn có thể đăng ký tài khoản bằng cách click vào nút "Đăng ký" ở góc trên bên phải và điền thông tin cần thiết.
+                Bạn có thể đăng ký tài khoản bằng cách click vào nút &quot;Đăng ký&quot; ở góc trên bên phải và điền thông tin cần thiết.
               </p>
             </Card>
 
@@ -273,7 +273,7 @@ export default function ContactPage() {
                 Tôi quên mật khẩu, phải làm sao?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Bạn có thể click vào "Quên mật khẩu" ở trang đăng nhập và làm theo hướng dẫn để khôi phục mật khẩu.
+                Bạn có thể click vào &quot;Quên mật khẩu&quot; ở trang đăng nhập và làm theo hướng dẫn để khôi phục mật khẩu.
               </p>
             </Card>
           </div>
