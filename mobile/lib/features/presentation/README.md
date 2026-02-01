@@ -1,0 +1,1 @@
+<!-- Chỗ này để tạo ra các folder cho giao diện cụ thể. Trong mỗi folder có thể tạo các folder nhỏ để chứa các components được thiết kế dành riêng cho trang đó. Không sử dụng folder components ngoài cùng nếu cái đó các trang không sử dụng chung.Ví dụ trong folder auth-->
