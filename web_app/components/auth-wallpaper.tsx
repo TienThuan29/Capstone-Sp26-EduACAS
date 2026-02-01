@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
 
 export default function AuthWallpaper() {
   return (
@@ -27,10 +28,12 @@ export default function AuthWallpaper() {
       <div className="relative z-10 text-center px-12 max-w-2xl">
         <div className="mb-8">
           <div className="inline-block p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 mb-6">
-            <img 
+            <Image 
               src="/images/Edu-ACAS logo.png" 
               alt="Edu-ACAS Logo" 
-              className="h-24 w-auto"
+              width={240}
+              height={96}
+              className="h-24 w-auto object-contain"
             />
           </div>
         </div>

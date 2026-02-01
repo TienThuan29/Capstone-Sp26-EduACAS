@@ -16,7 +16,7 @@ import {
 } from "flowbite-react"
 import Link from "next/link"
 import Image from "next/image"
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/useToast"
 import { PageUrl } from "@/configs/page.url"
@@ -29,7 +29,6 @@ import { useRoleValidator } from "@/hooks/authorization/useRoleValidation"
 
 export default function HomeNavbar() {
   const pathname = usePathname()
-  const router = useRouter()
   const { user, logout, isLoggedIn } = useAuth()
   const { showSuccess } = useToast()
   const { isAdmin, isLecturer, isStudent } = useRoleValidator(user);

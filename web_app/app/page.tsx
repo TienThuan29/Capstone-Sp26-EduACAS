@@ -5,7 +5,6 @@ import Image from "next/image"
 import Link from "next/link"
 import {
   LaptopIcon,
-  GraduateIcon,
   SparklesIcon,
   ChartStatsIcon,
 } from "@/components/svg-icons"

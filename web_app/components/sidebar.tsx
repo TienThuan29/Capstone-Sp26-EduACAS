@@ -28,8 +28,8 @@ import {
   PencilSquareIcon,
   PuzzlePieceIcon,
   UserGroupIcon,
+  ClockIcon,
 } from "@heroicons/react/24/outline";
-import { Constant } from "@/configs/constant";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
 type LogoutConfirmModalProps = {
@@ -77,7 +77,9 @@ const Sidebar = () => {
     { icon: AcademicCapIcon, label: "Overview", href: `${pathname}?tab=overview` },
     { icon: Squares2X2Icon, label: "Dashboard", href: `${pathname}?tab=dashboard` },
     // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
-    { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
+    // { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
+    { icon: ClockIcon, label: "Manage Slots", href: `${pathname}?tab=slots` },
+    { icon: BookOpenIcon, label: "Manage Materials", href: `${pathname}?tab=materials` },
     { icon: UserGroupIcon, label: "Manage Students", href: `${pathname}?tab=students` },
   ];
 

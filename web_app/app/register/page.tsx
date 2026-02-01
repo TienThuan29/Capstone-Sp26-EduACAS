@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import { Button, DarkThemeToggle, Label, TextInput, Select } from "flowbite-react";
-import Image from "next/image";
 import Link from "next/link";
 import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
