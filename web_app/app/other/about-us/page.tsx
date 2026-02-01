@@ -7,7 +7,6 @@ import {
   LaptopIcon,
   GraduateIcon,
   SparklesIcon,
-  ChartStatsIcon,
 } from "@/components/svg-icons"
 import Image from "next/image"
 

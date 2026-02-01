@@ -120,7 +120,7 @@ export default function LandingPage() {
                   Bắt đầu →
                 </button>
                 <span className="font-mono text-sm opacity-60" style={{ color: "#1F4E79" }}>
-                  // Miễn phí tham gia
+                  {"// Miễn phí tham gia"}
                 </span>
               </div>
 
