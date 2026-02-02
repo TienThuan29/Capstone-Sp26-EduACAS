@@ -26,7 +26,6 @@ export interface Problem {
   title: string;
   content: string;
   fileName: string;
-  mark: number;
   difficulty: number;
   codeTemplate: string;
   testCases: TestCase[];
@@ -38,7 +37,7 @@ export interface Examination {
   id: string;
   examName: string;
   programmingLanguage: ProgrammingLanguageLite;
-  problemIds: string[];
+  examProblems: ExamProblem[];
   problems: Problem[];
   classroom: ClassroomLite;
   startDatetime: string;
@@ -69,4 +68,9 @@ export interface ExaminationRequest {
   totalMark: number;
   status: ExaminationStatus;
   mode: ExaminationMode;
+}
+
+export interface ExamProblem {
+  problemId: string;
+  mark: number;
 }

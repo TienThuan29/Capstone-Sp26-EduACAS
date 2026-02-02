@@ -22,6 +22,7 @@ import {
   TableHeadCell,
   TableRow,
   Label,
+  Tooltip,
 } from "flowbite-react";
 import {
   PlusIcon,
@@ -34,13 +35,12 @@ import {
 import { useToast } from "@/hooks/useToast";
 import { useProblem } from "@/hooks/problem/useProblem";
 import { useAuth } from "@/contexts/AuthContext";
-import type {
-  ProblemBasicResponse,
-  ProblemResponse,
-  Difficulty,
-} from "@/types/problem";
+import type { ProblemBasicResponse, Difficulty } from "@/types/problem";
 import { DIFFICULTY, normalizeDifficulty } from "@/types/problem";
-import type { CreateProblemPayload, UpdateProblemPayload } from "@/hooks/problem/useProblem";
+import type {
+  CreateProblemPayload,
+  UpdateProblemPayload,
+} from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 
 type ProblemFormData = {
@@ -48,7 +48,6 @@ type ProblemFormData = {
   title: string;
   content: string;
   fileName: string;
-  mark: string;
   difficulty: Difficulty;
   codeTemplate: string;
 };
@@ -58,12 +57,14 @@ const initialFormData: ProblemFormData = {
   title: "",
   content: "",
   fileName: "",
-  mark: "",
   difficulty: "EASY",
   codeTemplate: "",
 };
 
-const difficultyBadgeColor: Record<Difficulty, "success" | "warning" | "failure"> = {
+const difficultyBadgeColor: Record<
+  Difficulty,
+  "success" | "warning" | "failure"
+> = {
   EASY: "success",
   MEDIUM: "warning",
   HARD: "failure",
@@ -76,7 +77,6 @@ export default function ProblemBanksPage() {
   const toast = useToast();
   const {
     getProblemsByLecturerId,
-    getProblemById,
     createProblem,
     updateProblem,
     deleteProblem,
@@ -88,11 +88,10 @@ export default function ProblemBanksPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const [editingProblem, setEditingProblem] = useState<ProblemBasicResponse | null>(null);
-  const [detailProblem, setDetailProblem] = useState<ProblemResponse | null>(null);
-  const [problemToDelete, setProblemToDelete] = useState<ProblemBasicResponse | null>(null);
+  const [editingProblem] = useState<ProblemBasicResponse | null>(null);
+  const [problemToDelete, setProblemToDelete] =
+    useState<ProblemBasicResponse | null>(null);
   const [formData, setFormData] = useState<ProblemFormData>(initialFormData);
   const [submitting, setSubmitting] = useState(false);
 
@@ -118,45 +117,17 @@ export default function ProblemBanksPage() {
   if (!mounted) return null;
 
   const filteredProblems = problems.filter((p) => {
-    const matchesSearch = p.title.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = p.title
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
     const normalized = normalizeDifficulty(p.difficulty);
-    const matchesDifficulty = difficultyFilter === "all" || normalized === difficultyFilter;
+    const matchesDifficulty =
+      difficultyFilter === "all" || normalized === difficultyFilter;
     return matchesSearch && matchesDifficulty;
   });
 
-  const handleEdit = async (row: ProblemBasicResponse) => {
-    try {
-      const full = await getProblemById(row.id);
-      if (!full) {
-        toast.showError("Problem not found");
-        return;
-      }
-      setEditingProblem(row);
-      setFormData({
-        lecturerId: full.lecturerId,
-        title: full.title,
-        content: full.content,
-        fileName: full.fileName,
-        mark: String(full.mark),
-        difficulty: normalizeDifficulty(full.difficulty),
-        codeTemplate: full.codeTemplate,
-      });
-      setIsModalOpen(true);
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.showError(err.response?.data?.message ?? "Failed to load problem");
-    }
-  };
-
-  const handleViewDetail = async (row: ProblemBasicResponse) => {
-    try {
-      const full = await getProblemById(row.id);
-      setDetailProblem(full ?? null);
-      setIsDetailOpen(true);
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } } };
-      toast.showError(err.response?.data?.message ?? "Failed to load problem");
-    }
+  const handleViewDetail = (row: ProblemBasicResponse) => {
+    router.push(PageUrl.PROBLEM_BANKS_VIEW_PAGE(row.id));
   };
 
   const handleDeleteClick = (row: ProblemBasicResponse) => {
@@ -174,17 +145,14 @@ export default function ProblemBanksPage() {
       fetchProblems();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
-      toast.showError(err.response?.data?.message ?? "Failed to delete problem");
+      toast.showError(
+        err.response?.data?.message ?? "Failed to delete problem",
+      );
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const markNum = parseFloat(formData.mark);
-    if (Number.isNaN(markNum) || markNum < 0.1 || markNum > 100) {
-      toast.showError("Mark must be between 0.1 and 100");
-      return;
-    }
     setSubmitting(true);
     try {
       if (editingProblem) {
@@ -192,7 +160,6 @@ export default function ProblemBanksPage() {
           title: formData.title,
           content: formData.content,
           fileName: formData.fileName,
-          mark: markNum,
           difficulty: formData.difficulty,
           codeTemplate: formData.codeTemplate,
         };
@@ -204,7 +171,6 @@ export default function ProblemBanksPage() {
           title: formData.title,
           content: formData.content,
           fileName: formData.fileName,
-          mark: markNum,
           difficulty: formData.difficulty,
           codeTemplate: formData.codeTemplate,
         };
@@ -233,20 +199,18 @@ export default function ProblemBanksPage() {
     <div className="p-8">
       <div className="mb-8">
         <h1
-          className={`text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}
+          className={`mb-2 text-4xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
         >
           Problem Bank
         </h1>
-        <p
-          className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}
-        >
+        <p className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}>
           Create and manage coding problems
         </p>
       </div>
 
       <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
-        <div className="flex flex-wrap gap-4 flex-1 min-w-0">
-          <div className="flex-1 min-w-[200px] max-w-md">
+        <div className="flex min-w-0 flex-1 flex-wrap gap-4">
+          <div className="max-w-md min-w-[200px] flex-1">
             <TextInput
               type="text"
               icon={MagnifyingGlassIcon}
@@ -271,7 +235,7 @@ export default function ProblemBanksPage() {
           label="Add problem"
           icon={<PlusIcon className="h-5 w-5" />}
           onClick={() => router.push(PageUrl.PROBLEM_BANKS_CREATE_PAGE)}
-          className="cursor-pointer shrink-0"
+          className="shrink-0 cursor-pointer"
         />
       </div>
 
@@ -279,7 +243,7 @@ export default function ProblemBanksPage() {
         className={`overflow-x-auto rounded-lg ${isDark ? "bg-gray-800" : "bg-white"} border ${isDark ? "border-gray-700" : "border-gray-200"}`}
       >
         {loading ? (
-          <div className="flex justify-center items-center p-12">
+          <div className="flex items-center justify-center p-12">
             <Spinner size="xl" />
             <span
               className={`ml-3 ${isDark ? "text-gray-300" : "text-gray-700"}`}
@@ -292,7 +256,6 @@ export default function ProblemBanksPage() {
             <TableHead>
               <TableRow>
                 <TableHeadCell>Title</TableHeadCell>
-                <TableHeadCell>Mark</TableHeadCell>
                 <TableHeadCell>Difficulty</TableHeadCell>
                 <TableHeadCell>Created</TableHeadCell>
                 <TableHeadCell>Actions</TableHeadCell>
@@ -303,7 +266,7 @@ export default function ProblemBanksPage() {
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className={`text-center py-8 ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                    className={`py-8 text-center ${isDark ? "text-gray-400" : "text-gray-500"}`}
                   >
                     No problems found. Create one to get started.
                   </TableCell>
@@ -312,7 +275,7 @@ export default function ProblemBanksPage() {
                 filteredProblems.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell
-                      className={`font-medium max-w-xs truncate ${isDark ? "text-white" : "text-gray-900"}`}
+                      className={`max-w-xs truncate font-medium ${isDark ? "text-white" : "text-gray-900"}`}
                     >
                       <button
                         type="button"
@@ -322,35 +285,45 @@ export default function ProblemBanksPage() {
                         {p.title}
                       </button>
                     </TableCell>
-                    <TableCell className={isDark ? "text-gray-300" : "text-gray-900"}>
-                      {p.mark}
-                    </TableCell>
                     <TableCell>
-                      <Badge color={difficultyBadgeColor[normalizeDifficulty(p.difficulty)]}>
+                      <Badge
+                        color={
+                          difficultyBadgeColor[
+                            normalizeDifficulty(p.difficulty)
+                          ]
+                        }
+                      >
                         {normalizeDifficulty(p.difficulty)}
                       </Badge>
                     </TableCell>
-                    <TableCell className={isDark ? "text-gray-300" : "text-gray-900"}>
+                    <TableCell
+                      className={isDark ? "text-gray-300" : "text-gray-900"}
+                    >
                       {formatDate(p.createdDate)}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button
-                          size="xs"
-                          color="light"
-                          onClick={() => handleViewDetail(p)}
-                          title="View"
-                        >
-                          <DocumentTextIcon className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          size="xs"
-                          color="failure"
-                          onClick={() => handleDeleteClick(p)}
-                          title="Delete"
-                        >
-                          <TrashIcon className="w-4 h-4" />
-                        </Button>
+                        <Tooltip content="View" placement="top">
+                          <Button
+                            type="button"
+                            size="xs"
+                            color="light"
+                            onClick={() => handleViewDetail(p)}
+                            className="cursor-pointer"
+                          >
+                            <DocumentTextIcon className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip content="Delete" placement="top">
+                          <Button
+                            size="xs"
+                            color="failure"
+                            onClick={() => handleDeleteClick(p)}
+                            className="cursor-pointer"
+                          >
+                            <TrashIcon className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -383,11 +356,11 @@ export default function ProblemBanksPage() {
         <ModalHeader>Delete problem</ModalHeader>
         <ModalBody>
           <p className={isDark ? "text-gray-300" : "text-gray-600"}>
-            Are you sure you want to delete &quot;{problemToDelete?.title}&quot;?
-            This action cannot be undone.
+            Are you sure you want to delete &quot;{problemToDelete?.title}
+            &quot;? This action cannot be undone.
           </p>
         </ModalBody>
-        <ModalFooter>
+        <ModalFooter className="flex justify-end">
           <Button
             color="gray"
             onClick={() => {
@@ -398,7 +371,11 @@ export default function ProblemBanksPage() {
           >
             Cancel
           </Button>
-          <Button color="failure" onClick={handleDeleteConfirm} className="cursor-pointer">
+          <Button
+            color="red"
+            onClick={handleDeleteConfirm}
+            className="cursor-pointer"
+          >
             Delete
           </Button>
         </ModalFooter>
@@ -456,13 +433,18 @@ function ProblemFormModal({
             </div>
           )}
           <div>
-            <Label htmlFor="title" className={isDark ? "text-white" : "text-gray-900"}>
+            <Label
+              htmlFor="title"
+              className={isDark ? "text-white" : "text-gray-900"}
+            >
               Title <span className="text-red-500">*</span>
             </Label>
             <TextInput
               id="title"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
               placeholder="Problem title (3–500 characters)"
               required
               minLength={3}
@@ -471,7 +453,10 @@ function ProblemFormModal({
             />
           </div>
           <div>
-            <Label htmlFor="content" className={isDark ? "text-white" : "text-gray-900"}>
+            <Label
+              htmlFor="content"
+              className={isDark ? "text-white" : "text-gray-900"}
+            >
               Content <span className="text-red-500">*</span>
             </Label>
             <Textarea
@@ -486,44 +471,25 @@ function ProblemFormModal({
               className="mt-1"
             />
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label
-                htmlFor="fileName"
-                className={isDark ? "text-white" : "text-gray-900"}
-              >
-                File name <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="fileName"
-                value={formData.fileName}
-                onChange={(e) =>
-                  setFormData({ ...formData, fileName: e.target.value })
-                }
-                placeholder="e.g. Main.java"
-                required
-                className="mt-1"
-              />
-            </div>
-            <div>
-              <Label htmlFor="mark" className={isDark ? "text-white" : "text-gray-900"}>
-                Mark (0-10) <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="mark"
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="100"
-                value={formData.mark}
-                onChange={(e) =>
-                  setFormData({ ...formData, mark: e.target.value })
-                }
-                required
-                className="mt-1"
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Label
+              htmlFor="fileName"
+              className={isDark ? "text-white" : "text-gray-900"}
+            >
+              File name <span className="text-red-500">*</span>
+            </Label>
+            <TextInput
+              id="fileName"
+              value={formData.fileName}
+              onChange={(e) =>
+                setFormData({ ...formData, fileName: e.target.value })
+              }
+              placeholder="e.g. Main.java"
+              required
+              className="mt-1"
+            />
           </div>
+          <div></div>
           <div>
             <Label
               htmlFor="difficulty"
@@ -565,11 +531,21 @@ function ProblemFormModal({
               className="mt-1 font-mono text-sm"
             />
           </div>
-          <div className="flex gap-4 justify-end pt-4">
-            <Button type="button" color="gray" onClick={onClose} className="cursor-pointer">
+          <div className="flex justify-end gap-4 pt-4">
+            <Button
+              type="button"
+              color="gray"
+              onClick={onClose}
+              className="cursor-pointer"
+            >
               Cancel
             </Button>
-            <Button type="submit" color="purple" disabled={submitting} className="cursor-pointer">
+            <Button
+              type="submit"
+              color="purple"
+              disabled={submitting}
+              className="cursor-pointer"
+            >
               {submitting ? (
                 <>
                   <Spinner size="sm" className="mr-2" />
@@ -587,4 +563,3 @@ function ProblemFormModal({
     </Modal>
   );
 }
-

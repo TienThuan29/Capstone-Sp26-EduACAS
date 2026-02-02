@@ -38,7 +38,6 @@ const initialFormData = {
   title: "",
   content: "",
   fileName: "",
-  mark: "",
   difficulty: "EASY" as Difficulty,
   codeTemplate: "",
 };
@@ -114,11 +113,6 @@ export default function CreateProblemPage() {
       toast.showError("Please upload a template file first");
       return;
     }
-    const markNum = parseFloat(formData.mark);
-    if (Number.isNaN(markNum) || markNum < 0.1 || markNum > 100) {
-      toast.showError("Mark must be between 0.1 and 100");
-      return;
-    }
     setSubmitting(true);
     try {
       const payload: CreateProblemPayload = {
@@ -126,7 +120,6 @@ export default function CreateProblemPage() {
         title: formData.title,
         content: formData.content,
         fileName: formData.fileName,
-        mark: markNum,
         difficulty: formData.difficulty,
         codeTemplate: formData.codeTemplate,
         testCases: testCases.length > 0 ? testCases : undefined,
@@ -282,28 +275,7 @@ export default function CreateProblemPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
-              <Label
-                htmlFor="mark"
-                className={isDark ? "text-white" : "text-gray-900"}
-              >
-                Mark (0-10) <span className="text-red-500">*</span>
-              </Label>
-              <TextInput
-                id="mark"
-                type="number"
-                step="0.1"
-                min="0.1"
-                max="100"
-                value={formData.mark}
-                onChange={(e) =>
-                  setFormData({ ...formData, mark: e.target.value })
-                }
-                required
-                className="mt-1"
-              />
-            </div>
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <Label
                 htmlFor="difficulty"

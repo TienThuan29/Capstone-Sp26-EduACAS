@@ -1,11 +1,19 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using AcasService.Models;
 
 
 
 namespace AcasService.Web.Requests;
 
+public class ExaminationProblemDTO
+{
+    [Required]
+    public string ProblemId { get; set; } = string.Empty;
+
+    [Required]
+    public float Mark { get; set; }
+}
 
 public class ExaminationRequestDTO
 {
@@ -15,7 +23,7 @@ public class ExaminationRequestDTO
     [Required]
     public string ProgrammingLanguageId { get; set; } = string.Empty;
 
-    public string[] ProblemIds { get; set; } = Array.Empty<string>();
+    public List<ExaminationProblemDTO> Problems { get; set; } = new();
 
     [Required]
     public string ClassroomId { get; set; } = string.Empty;

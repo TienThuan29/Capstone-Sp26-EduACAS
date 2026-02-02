@@ -14,11 +14,11 @@ public class ExaminationResponse
     [JsonPropertyName("programmingLanguage")]
     public ProgrammingLanguageLiteResponse ProgrammingLanguage { get; set; } = new ProgrammingLanguageLiteResponse();
 
-    [JsonPropertyName("problemIds")]
-    public string[] ProblemIds { get; set; } = Array.Empty<string>();
+    // [JsonPropertyName("problemIds")]
+    // public string[] ProblemIds { get; set; } = Array.Empty<string>();
 
-    [JsonPropertyName("problems")]
-    public List<ProblemResponse> Problems { get; set; } = new();
+    [JsonPropertyName("examProblems")]
+    public List<ExaminationProblemResponse> ExamProblems { get; set; } = new();
 
   [JsonPropertyName("classroom")]
     public ClassroomLiteResponse Classroom { get; set; } = new ClassroomLiteResponse();
@@ -52,6 +52,15 @@ public class ExaminationResponse
     [JsonPropertyName("updatedDate")]
     public DateTime UpdatedDate { get; set; }
 
+}
+
+public class ExaminationProblemResponse
+{
+    [JsonPropertyName("problemId")]
+    public string ProblemId { get; set; } = string.Empty;
+
+    [JsonPropertyName("mark")]
+    public float Mark { get; set; }
 }
 
 public class ClassroomLiteResponse

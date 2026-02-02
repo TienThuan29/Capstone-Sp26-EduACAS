@@ -14,7 +14,10 @@ import type { Difficulty } from "@/types/problem";
 import { normalizeDifficulty } from "@/types/problem";
 import type { ProblemResponse } from "@/types/problem";
 
-const difficultyBadgeColor: Record<Difficulty, "success" | "warning" | "failure"> = {
+const difficultyBadgeColor: Record<
+  Difficulty,
+  "success" | "warning" | "failure"
+> = {
   EASY: "success",
   MEDIUM: "warning",
   HARD: "failure",
@@ -66,7 +69,9 @@ export default function ProblemViewPage() {
         }
       } catch (error: unknown) {
         const err = error as { response?: { data?: { message?: string } } };
-        toast.showError(err.response?.data?.message ?? "Failed to load problem");
+        toast.showError(
+          err.response?.data?.message ?? "Failed to load problem",
+        );
       } finally {
         setLoading(false);
       }
@@ -90,13 +95,8 @@ export default function ProblemViewPage() {
   if (!problem) {
     return (
       <div className="p-8">
-        <Button
-          as={Link}
-          href={PageUrl.QUESTION_BANKS_PAGE}
-          color="light"
-          className="cursor-pointer"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
+        <Button as={Link} href={PageUrl.QUESTION_BANKS_PAGE} color="light">
+          <ArrowLeftIcon className="mr-2 h-5 w-5" />
           Back to problem banks
         </Button>
         <p className={`mt-4 ${isDark ? "text-gray-400" : "text-gray-600"}`}>
@@ -106,168 +106,172 @@ export default function ProblemViewPage() {
     );
   }
 
-  const difficulty = normalizeDifficulty(problem.difficulty);
-
   return (
     <div className="p-8">
+      {/* Header Section */}
       <div className="mb-8 flex flex-wrap items-center gap-4">
-        <Button
-          as={Link}
-          href={PageUrl.QUESTION_BANKS_PAGE}
-          color="light"
-          className="cursor-pointer"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
+        <Button as={Link} href={PageUrl.QUESTION_BANKS_PAGE} color="light">
+          <ArrowLeftIcon className="mr-2 h-5 w-5" />
           Back
         </Button>
         <Button
           as={Link}
-          href={PageUrl.PROBLEM_BANKS_EDIT_PAGE(id)}
+          href={PageUrl.PROBLEM_BANKS_EDIT_PAGE(id)} // 
           color="purple"
-          className="cursor-pointer bg-[#1F4E79] hover:bg-[#1F4E79]/90"
+          className="bg-[#1F4E79] hover:bg-[#1F4E79]/90"
         >
-          <PencilIcon className="h-5 w-5" />
+          <PencilIcon className="mr-2 h-5 w-5" />
           Edit
         </Button>
-        <div className="min-w-0 flex-1">
-          <h1
-            className={`text-4xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
-          >
-            {problem.title}
-          </h1>
-          <div className="mt-2 flex flex-wrap items-center gap-2">
-            <Badge color={difficultyBadgeColor[difficulty]}>{difficulty}</Badge>
-            <span className={isDark ? "text-gray-400" : "text-gray-600"}>
-              Mark: {problem.mark}
-            </span>
-            {problem.fileName && (
-              <span
-                className={`font-mono text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-              >
-                File: {problem.fileName}
-              </span>
-            )}
-          </div>
-        </div>
       </div>
 
-      <div
-        className={`space-y-6 rounded-lg border p-6 ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
-      >
-        <div>
-          <Label className={isDark ? "text-white" : "text-gray-900"}>
-            Content
-          </Label>
-          <div
-            className={`mt-1 whitespace-pre-wrap rounded border p-4 ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
+      {/* Main Content: Split Layout */}
+      <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
+        {/* LEFT COLUMN: Attributes & Test Cases */}
+        <div className="space-y-6 lg:col-span-1">
+          <section
+            className={`border p-6 ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
           >
-            {problem.content || "—"}
-          </div>
-        </div>
-
-        {(problem.fileName && (pdfUrl || pdfLoading)) && (
-          <div>
+            <div className="min-w-0 flex-1">
+              <h1
+                className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
+              >
+                {problem.title}
+              </h1>
+              {/* <div className="mt-2 flex flex-wrap items-center gap-2">
+                <Badge color={difficultyBadgeColor[difficulty]}>
+                  {difficulty}
+                </Badge>
+                {problem.fileName && (
+                  <span
+                    className={`font-mono text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  >
+                    File: {problem.fileName}
+                  </span>
+                )}
+              </div> */}
+            </div>
             <Label className={isDark ? "text-white" : "text-gray-900"}>
-              Attachment preview
+              Content
             </Label>
             <div
-              className={`mt-1 overflow-hidden rounded border ${isDark ? "border-gray-600" : "border-gray-200"}`}
+              className={`mt-2 rounded border p-4 whitespace-pre-wrap ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
             >
-              {pdfLoading ? (
-                <div
-                  className={`flex h-[480px] w-full items-center justify-center ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-                >
-                  <Spinner size="xl" />
-                  <span
-                    className={`ml-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
-                    Loading preview...
-                  </span>
-                </div>
-              ) : pdfUrl ? (
-                <iframe
-                  src={pdfUrl}
-                  title="Problem attachment"
-                  className="h-[480px] w-full"
-                />
-              ) : null}
+              {problem.content || "—"}
             </div>
-          </div>
-        )}
 
-        {problem.codeTemplate && (
-          <div>
-            <Label className={isDark ? "text-white" : "text-gray-900"}>
-              Code template
-            </Label>
-            <pre
-              className={`mt-1 overflow-x-auto rounded border p-4 font-mono text-sm ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
-            >
-              {problem.codeTemplate}
-            </pre>
-          </div>
-        )}
-
-        {problem.testCases && problem.testCases.length > 0 && (
-          <div>
-            <Label className={isDark ? "text-white" : "text-gray-900"}>
-              Test cases ({problem.testCases.length})
-            </Label>
-            <div className="mt-2 space-y-3">
-              {problem.testCases.map((tc, index) => (
-                <div
-                  key={tc.id}
-                  className={`rounded border p-4 ${isDark ? "border-gray-600 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
+            {problem.codeTemplate && (
+              <div className="mt-6">
+                <Label className={isDark ? "text-white" : "text-gray-900"}>
+                  Code template
+                </Label>
+                <pre
+                  className={`mt-2 overflow-x-auto rounded border p-4 font-mono text-sm ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
                 >
+                  {problem.codeTemplate}
+                </pre>
+              </div>
+            )}
+          </section>
+
+          {problem.testCases && problem.testCases.length > 0 ? (
+            <section
+              className={`border p-6 ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
+            >
+              <Label className={isDark ? "text-white" : "text-gray-900"}>
+                Test cases ({problem.testCases.length})
+              </Label>
+              <div className="mt-4 space-y-4">
+                {problem.testCases.map((tc, index) => (
                   <div
-                    className={`mb-2 text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    key={tc.id}
+                    className={`rounded border p-4 ${isDark ? "border-gray-600 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
                   >
-                    Test case {index + 1}
-                    {tc.isPublic && (
-                      <Badge color="info" className="ml-2">
-                        Public
-                      </Badge>
-                    )}
-                  </div>
-                  <div className="grid gap-2 text-sm">
-                    <div>
-                      <span
-                        className={isDark ? "text-gray-500" : "text-gray-500"}
-                      >
-                        Input:
-                      </span>
-                      <pre
-                        className={`mt-0.5 font-mono ${isDark ? "text-gray-300" : "text-gray-800"}`}
-                      >
-                        {tc.inputData || "—"}
-                      </pre>
+                    <div
+                      className={`mb-2 flex items-center justify-between text-sm font-bold ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    >
+                      <span>Test case {index + 1}</span>
+                      {tc.isPublic && <Badge color="info">Public</Badge>}
                     </div>
-                    <div>
-                      <span
-                        className={isDark ? "text-gray-500" : "text-gray-500"}
-                      >
-                        Expected output:
-                      </span>
-                      <pre
-                        className={`mt-0.5 font-mono ${isDark ? "text-gray-300" : "text-gray-800"}`}
-                      >
-                        {tc.expectedOutput || "—"}
-                      </pre>
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      {tc.isCaseInsensitive && (
-                        <Badge color="gray">Case insensitive</Badge>
-                      )}
-                      {tc.isRemovedSpace && (
-                        <Badge color="gray">Spaces removed</Badge>
-                      )}
+                    <div className="grid gap-3 text-sm">
+                      <div>
+                        <span className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                          Input
+                        </span>
+                        <pre
+                          className={`mt-1 rounded p-2 font-mono ${isDark ? "bg-black/30 text-gray-300" : "bg-white text-gray-800"}`}
+                        >
+                          {tc.inputData || "—"}
+                        </pre>
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold tracking-wider text-gray-500 uppercase">
+                          Expected Output
+                        </span>
+                        <pre
+                          className={`mt-1 rounded p-2 font-mono ${isDark ? "bg-black/30 text-gray-300" : "bg-white text-gray-800"}`}
+                        >
+                          {tc.expectedOutput || "—"}
+                        </pre>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
+            </section>
+          ): (
+            <div className="border border-dashed p-12 text-center">
+              No test cases provided for this problem.
             </div>
-          </div>
-        )}
+          )}
+        </div>
+
+        {/* RIGHT COLUMN: PDF Preview (Sticky) */}
+        <div className="lg:sticky lg:top-8 lg:col-span-2">
+          {problem.fileName && (pdfUrl || pdfLoading) ? (
+            <div
+              className={`overflow-hidden border ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
+            >
+              <div
+                className={`border-b p-4 ${isDark ? "border-gray-700" : "border-gray-200"}`}
+              >
+                <Label className={isDark ? "text-white" : "text-gray-900"}>
+                  Attachment preview
+                </Label>
+              </div>
+              <div className="p-0">
+                {pdfLoading ? (
+                  <div
+                    className={`flex h-[70vh] w-full items-center justify-center ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
+                  >
+                    <Spinner size="xl" />
+                    <span
+                      className={`ml-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                    >
+                      Loading preview...
+                    </span>
+                  </div>
+                ) : pdfUrl ? (
+                  <iframe
+                    src={pdfUrl}
+                    title="Problem attachment"
+                    className="h-[75vh] w-full"
+                  />
+                ) : (
+                  <div className="p-8 text-center text-gray-500">
+                    No preview available
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div
+              className={`rounded-lg border border-dashed p-12 text-center ${isDark ? "border-gray-700 text-gray-500" : "border-gray-300 text-gray-400"}`}
+            >
+              No PDF attachment provided for this problem.
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

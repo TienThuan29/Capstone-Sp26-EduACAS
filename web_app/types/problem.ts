@@ -39,7 +39,6 @@ export type ProblemResponse = {
   fileName: string;
   /** Presigned URL for the file (private S3). Use for download/display. */
   fileUrl?: string;
-  mark: number;
   difficulty: number | Difficulty;
   codeTemplate: string;
   testCases: TestCaseResponse[];
@@ -51,7 +50,6 @@ export type ProblemResponse = {
 export type ProblemBasicResponse = {
   id: string;
   title: string;
-  mark: number;
   difficulty: number | Difficulty;
   createdDate: string;
 };

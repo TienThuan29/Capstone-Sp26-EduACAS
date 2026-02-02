@@ -61,7 +61,6 @@ public class ProblemQuery : IProblemQuery
                 Content = problem.Content,
                 FileName = problem.FileName,
                 FileUrl = fileUrl,
-                Mark = problem.Mark,
                 Difficulty = problem.Difficulty,
                 CodeTemplate = problem.CodeTemplate,
                 CreatedDate = problem.CreatedDate,
@@ -98,7 +97,6 @@ public class ProblemQuery : IProblemQuery
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Mark = p.Mark,
                     Difficulty = p.Difficulty,
                     CreatedDate = p.CreatedDate
                 })
@@ -122,7 +120,6 @@ public class ProblemQuery : IProblemQuery
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Mark = p.Mark,
                     Difficulty = p.Difficulty,
                     CreatedDate = p.CreatedDate
                 })
@@ -146,7 +143,6 @@ public class ProblemQuery : IProblemQuery
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Mark = p.Mark,
                     Difficulty = p.Difficulty,
                     CreatedDate = p.CreatedDate
                 })

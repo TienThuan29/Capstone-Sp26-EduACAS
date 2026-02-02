@@ -19,8 +19,8 @@ public class Problem
     [Required]
     public string FileName { get; set; } = string.Empty;
 
-    [Required]
-    public float Mark { get; set; }
+    // [Required]
+    // public float Mark { get; set; }
     
     public List<TestCase> TestCases { get; set; } = new List<TestCase>();
     

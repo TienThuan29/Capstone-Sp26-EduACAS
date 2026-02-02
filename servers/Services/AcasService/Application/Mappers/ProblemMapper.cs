@@ -14,7 +14,6 @@ public class ProblemMapper
             Title = problem.Title,
             Content = problem.Content,
             FileName = problem.FileName,
-            Mark = problem.Mark,
             Difficulty = problem.Difficulty,
             CodeTemplate = problem.CodeTemplate,
             TestCases = problem.TestCases

@@ -26,9 +26,6 @@ public class ProblemResponse
     [JsonPropertyName("fileUrl")]
     public string FileUrl { get; set; } = string.Empty;
 
-    [JsonPropertyName("mark")]
-    public float Mark { get; set; }
-
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }
 
@@ -73,9 +70,6 @@ public class ProblemBasicResponse
 
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
-
-    [JsonPropertyName("mark")]
-    public float Mark { get; set; }
 
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }

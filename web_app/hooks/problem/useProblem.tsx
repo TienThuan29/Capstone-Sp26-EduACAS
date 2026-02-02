@@ -22,7 +22,6 @@ export type CreateProblemPayload = {
   title: string;
   content: string;
   fileName: string;
-  mark: number;
   difficulty: Difficulty;
   codeTemplate: string;
   testCases?: CreateTestCasePayload[];
@@ -32,9 +31,9 @@ export type UpdateProblemPayload = {
   title: string;
   content: string;
   fileName: string;
-  mark: number;
   difficulty: Difficulty;
   codeTemplate: string;
+  testCases?: CreateTestCasePayload[];
 };
 
 
