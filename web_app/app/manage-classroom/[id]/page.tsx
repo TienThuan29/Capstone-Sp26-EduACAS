@@ -14,12 +14,10 @@ import {
   Checkbox,
 } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  useClassroom,
-  Classroom as ClassroomDetail,
-  SubjectOption,
-} from "@/hooks/classroom/useClassroom";
-import { useExamination, Examination } from "@/hooks/exam/useExamination";
+import { useClassroom, SubjectOption } from "@/hooks/classroom/useClassroom";
+import type { Classroom as ClassroomDetail } from "@/types/classroom";
+import { useExamination } from "@/hooks/exam/useExamination";
+import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HomeNavbar from "@/components/navbar";
 import Footer from "@/components/footer";
@@ -241,7 +239,7 @@ function ClassroomContent() {
         return <MaterialsTab />;
       case "assignments":
         return <AssignmentsTab />;
-      case "practise":
+      case "practise-ex":
         return <PractiseTab />;
       case "students":
         return <StudentTab />;

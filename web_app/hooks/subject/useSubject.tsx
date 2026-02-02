@@ -3,17 +3,7 @@
 import { useCallback } from "react";
 import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
-
-export interface Subject {
-  id: string;
-  subjectCode: string;
-  subjectName: string;
-  description?: string;
-  createdBy?: string;
-  isDeleted: boolean;
-  createdDate?: string | Date;
-  updatedDate?: string | Date;
-}
+import type { Subject } from "@/types/subject";
 
 export interface CreateSubjectPayload {
   subjectCode: string;

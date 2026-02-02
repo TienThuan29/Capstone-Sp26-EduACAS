@@ -4,39 +4,6 @@ import { useCallback } from "react";
 import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
 
-export interface LecturerLite {
-  lecturerId: string;
-  fullname: string;
-  email: string;
-  avatarUrl: string;
-}
-
-export interface SubjectLite {
-  subjectId: string;
-  subjectName: string;
-}
-
-export interface Enrollment {
-  isJoining: boolean;
-  joinedDate: string;
-  movedOutDate: string | null;
-}
-
-export interface Classroom {
-  id: string;
-  classCode: string;
-  className: string;
-  lecturer: LecturerLite;
-  subject: SubjectLite;
-  semesterName: string;
-  enrolKey: string;
-  createdDate: string;
-  updatedDate: string | null;
-  endDate: string;
-  isDeleted: boolean;
-  enrollment?: Enrollment;
-}
-
 export interface PagedResult<T> {
   items: T[];
   totalCount: number;

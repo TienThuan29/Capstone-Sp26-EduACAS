@@ -79,6 +79,7 @@ const Sidebar = () => {
     // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
     // { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
     { icon: ClockIcon, label: "Manage Slots", href: `${pathname}?tab=slots` },
+    { icon: PuzzlePieceIcon, label: "Manage Practise Exercises", href: `${pathname}?tab=practise-ex` },
     { icon: BookOpenIcon, label: "Manage Materials", href: `${pathname}?tab=materials` },
     { icon: UserGroupIcon, label: "Manage Students", href: `${pathname}?tab=students` },
   ];
