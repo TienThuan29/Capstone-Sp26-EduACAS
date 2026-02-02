@@ -131,6 +131,7 @@ function ClassroomContent() {
           <ExamsTab
             examinations={examinations}
             examsLoading={examsLoading}
+            classId={classId}
           />
         );
       case "materials":
