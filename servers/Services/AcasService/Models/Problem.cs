@@ -8,9 +8,6 @@ public class Problem
     public string Id { get; set; } = string.Empty;
 
     [Required]
-    public string ExamId { get; set; } = string.Empty;
-
-    [Required]
     public string LecturerId { get; set; } = string.Empty;
 
     [Required]

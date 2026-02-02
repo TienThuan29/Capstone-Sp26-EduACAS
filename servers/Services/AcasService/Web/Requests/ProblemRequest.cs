@@ -5,10 +5,6 @@ namespace AcasService.Web.Requests;
 
 public class CreateProblemRequest
 {
-    [Required(ErrorMessage = "ExamId is required")]
-    [StringLength(100, ErrorMessage = "ExamId cannot exceed 100 characters")]
-    public string ExamId { get; set; } = string.Empty;
-
     [Required(ErrorMessage = "LecturerId is required")]
     [StringLength(100, ErrorMessage = "LecturerId cannot exceed 100 characters")]
     public string LecturerId { get; set; } = string.Empty;
@@ -63,8 +59,6 @@ public class UpdateProblemRequest
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
     public string Difficulty { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "CodeTemplate is required")]
-    [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
     public string CodeTemplate { get; set; } = string.Empty;
 }
 

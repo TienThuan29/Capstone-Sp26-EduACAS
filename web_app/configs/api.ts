@@ -74,6 +74,18 @@ export const Api = {
 
   S3: {
     UPLOAD_AVATAR: "/api/acas/v1/public-s3/upload",
+    PRIVATE_UPLOAD: "/api/acas/v1/private-s3/upload",
+    PRIVATE_GET_FILE_URL: (filename: string) =>
+      `/api/acas/v1/private-s3/file/${encodeURIComponent(filename)}`,
+  },
+
+  Problem: {
+    GET_ALL: '/api/acas/v1/problems',
+    GET_BY_ID: (id: string) => `/api/acas/v1/problems/${id}`,
+    GET_BY_LECTURER: (lecturerId: string) => `/api/acas/v1/problems/lecturer/${lecturerId}`,
+    CREATE: '/api/acas/v1/problems',
+    UPDATE: (id: string) => `/api/acas/v1/problems/${id}`,
+    DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
   },
 
   // Subject: {

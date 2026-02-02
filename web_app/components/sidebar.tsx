@@ -73,6 +73,7 @@ const Sidebar = () => {
 
   const lecturerMenuItems = [
     { icon: AcademicCapIcon, label: "My Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
+    { icon: QuestionMarkCircleIcon, label: "Problem Banks", href: PageUrl.QUESTION_BANKS_PAGE },
   ];
 
   const lecturerClassroomMenuItems = [

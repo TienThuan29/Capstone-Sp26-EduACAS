@@ -39,7 +39,6 @@ public class ProblemCommand : IProblemCommand
         {
             var problem = new Models.Problem
             {
-                ExamId = request.ExamId,
                 LecturerId = request.LecturerId,
                 Title = request.Title,
                 Content = request.Content,

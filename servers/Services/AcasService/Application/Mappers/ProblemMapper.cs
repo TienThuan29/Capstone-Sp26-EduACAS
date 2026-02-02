@@ -10,7 +10,6 @@ public class ProblemMapper
         return new ProblemResponse
         {
             Id = problem.Id,
-            ExamId = problem.ExamId,
             LecturerId = problem.LecturerId,
             Title = problem.Title,
             Content = problem.Content,

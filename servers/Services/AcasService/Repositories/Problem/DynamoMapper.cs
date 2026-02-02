@@ -11,7 +11,6 @@ public static class DynamoMapper
         var item = new Dictionary<string, AttributeValue>
         {
             ["id"] = new AttributeValue { S = problem.Id },
-            ["examId"] = new AttributeValue { S = problem.ExamId },
             ["lecturerId"] = new AttributeValue { S = problem.LecturerId },
             ["title"] = new AttributeValue { S = problem.Title },
             ["content"] = new AttributeValue { S = problem.Content },
@@ -39,7 +38,6 @@ public static class DynamoMapper
         var problem = new Models.Problem
         {
             Id = item["id"].S,
-            ExamId = item["examId"].S,
             LecturerId = item["lecturerId"].S,
             Title = item["title"].S,
             Content = item["content"].S,
