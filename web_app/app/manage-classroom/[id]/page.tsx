@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useMemo } from "react";
+import { useCallback, useEffect, useState, Suspense, useMemo } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   Spinner,
@@ -29,11 +29,10 @@ import {
   OverviewTab,
   ExamsTab,
   MaterialsTab,
-  AssignmentsTab,
-  PractiseTab,
   StudentTab,
 } from "@/app/manage-classroom/tabs";
 import { DashboardTab } from "../tabs/dashboard-tab";
+import { SlotsTab } from "../tabs/slot-tab";
 
 function ClassroomContent() {
   const params = useParams();
@@ -120,23 +119,24 @@ function ClassroomContent() {
     }
   }, [getClassroomById, classId]);
 
-  useEffect(() => {
-    const fetchExaminations = async () => {
-      if (activeTab === "exams" && classId) {
-        try {
-          setExamsLoading(true);
-          const data = await getExaminationsByClassId(classId);
-          setExaminations(data);
-        } catch (error) {
-          console.error("Failed to fetch exams:", error);
-        } finally {
-          setExamsLoading(false);
-        }
-      }
-    };
+  const fetchExaminations = useCallback(async () => {
+    if (!classId) return;
+    try {
+      setExamsLoading(true);
+      const data = await getExaminationsByClassId(classId);
+      setExaminations(data);
+    } catch (error) {
+      console.error("Failed to fetch exams:", error);
+    } finally {
+      setExamsLoading(false);
+    }
+  }, [getExaminationsByClassId, classId]);
 
-    fetchExaminations();
-  }, [getExaminationsByClassId, activeTab, classId]);
+  useEffect(() => {
+    if ((activeTab === "exams" || activeTab === "practise-ex") && classId) {
+      fetchExaminations();
+    }
+  }, [activeTab, classId, fetchExaminations]);
 
   useEffect(() => {
     if (openUpdateModal) {
@@ -228,23 +228,23 @@ function ClassroomContent() {
 
   const renderTabContent = () => {
     switch (activeTab) {
+      case "materials":
+        return <MaterialsTab />;
       case "exams":
         return (
           <ExamsTab
+            classId={classId}
             examinations={examinations}
-            examsLoading={examsLoading}
+            loading={examsLoading}
+            onRefetch={fetchExaminations}
           />
         );
-      case "materials":
-        return <MaterialsTab />;
-      case "assignments":
-        return <AssignmentsTab />;
-      case "practise-ex":
-        return <PractiseTab />;
       case "students":
         return <StudentTab />;
       case "dashboard":
         return <DashboardTab />;
+        case "slots":
+        return <SlotsTab />;
       default:
         return (
           <OverviewTab
@@ -261,7 +261,7 @@ function ClassroomContent() {
       <Sidebar />
 
       <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
-        <div className="mb-10">
+        <div className="mb-5">
           <DefaultOutlineCustomButton
             label="Manage classrooms"
             icon={<ArrowLeftIcon className="h-4 w-4" />}
@@ -461,13 +461,13 @@ function UpdateClassroomModal({
           </div>
 
           <div className="mt-6 flex justify-end gap-2">
-            <Button color="gray" onClick={onClose}>
+            <Button color="gray" onClick={onClose} className="cursor-pointer">
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={actionLoading}
-              className="bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]"
+              className="bg-gradient-to-r from-[#1F4E79] to-[#C9A24D] cursor-pointer"
             >
               {actionLoading ? (
                 <Spinner size="sm" className="mr-2" />
@@ -517,7 +517,7 @@ function DeleteClassroomModal({
               color="red"
               onClick={onConfirm}
               disabled={actionLoading}
-              className="px-4"
+              className="cursor-pointer px-4"
             >
               {actionLoading ? (
                 <Spinner size="sm" className="mr-2" />
@@ -525,7 +525,7 @@ function DeleteClassroomModal({
                 "Delete classroom"
               )}
             </Button>
-            <Button color="gray" onClick={onClose} className="px-4">
+            <Button color="gray" onClick={onClose} className="cursor-pointer px-4">
               Cancel
             </Button>
           </div>

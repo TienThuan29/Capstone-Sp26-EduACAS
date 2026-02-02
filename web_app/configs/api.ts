@@ -66,6 +66,10 @@ export const Api = {
 
   Examination: {
     GET_BY_CLASS: "/api/acas/v1/examinations/by-class",
+    GET_BY_ID: (id: string) => `/api/acas/v1/examinations/${id}`,
+    CREATE: "/api/acas/v1/examinations",
+    UPDATE: (id: string) => `/api/acas/v1/examinations/${id}`,
+    DELETE: (id: string) => `/api/acas/v1/examinations/${id}`,
   },
 
   S3: {

@@ -29,6 +29,8 @@ import {
   PuzzlePieceIcon,
   UserGroupIcon,
   ClockIcon,
+  BanknotesIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -79,9 +81,10 @@ const Sidebar = () => {
     // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
     // { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
     { icon: ClockIcon, label: "Manage Slots", href: `${pathname}?tab=slots` },
-    { icon: PuzzlePieceIcon, label: "Manage Practise Exercises", href: `${pathname}?tab=practise-ex` },
+    { icon: PuzzlePieceIcon, label: "Manage Examinations", href: `${pathname}?tab=exams` },
     { icon: BookOpenIcon, label: "Manage Materials", href: `${pathname}?tab=materials` },
     { icon: UserGroupIcon, label: "Manage Students", href: `${pathname}?tab=students` },
+    // {icon: QuestionMarkCircleIcon, label: "Question Banks", href: `${pathname}?tab=question-banks` },
   ];
 
   const adminMenuItems = [
@@ -101,7 +104,7 @@ const Sidebar = () => {
   ];
 
   const settingsItems = [
-    { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
+      { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
       { icon: BellIcon, label: "Notifications", href: "#" },
       { icon: Cog6ToothIcon, label: "Settings", href: "#" },
   ];

@@ -52,3 +52,21 @@ export interface Examination {
   createdDate: string;
   updatedDate: string;
 }
+
+/** Payload for create/update examination (matches backend ExaminationRequestDTO) */
+export type ExaminationStatus = "PENDING" | "ONGOING" | "COMPLETED";
+export type ExaminationMode = "PRACTICAL" | "EXAMINATION";
+
+export interface ExaminationRequest {
+  examName: string;
+  programmingLanguageId: string;
+  problemIds: string[];
+  classroomId: string;
+  startDatetime: string;
+  endDatetime: string;
+  description: string;
+  isPublicResult: boolean;
+  totalMark: number;
+  status: ExaminationStatus;
+  mode: ExaminationMode;
+}
