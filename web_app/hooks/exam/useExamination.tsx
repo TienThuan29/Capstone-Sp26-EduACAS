@@ -39,10 +39,13 @@ export const useExamination = () => {
 
   const updateExamination = useCallback(
     async (id: string, payload: ExaminationRequest): Promise<Examination> => {
+      // console.log("Sending PUT request to:", Api.Examination.UPDATE(id));
+      // console.log("Request payload:", JSON.stringify(payload, null, 2));
       const response = await axiosInstance.put(
         Api.Examination.UPDATE(id),
         payload,
       );
+      console.log("Response data:", JSON.stringify(response.data, null, 2));
       return response.data?.dataResponse;
     },
     [axiosInstance],

@@ -56,10 +56,15 @@ export interface Examination {
 export type ExaminationStatus = "PENDING" | "ONGOING" | "COMPLETED";
 export type ExaminationMode = "PRACTICAL" | "EXAMINATION";
 
+export interface ExamProblemDTO {
+  problemId: string;
+  mark: number;
+}
+
 export interface ExaminationRequest {
   examName: string;
   programmingLanguageId: string;
-  problemIds: string[];
+  problems: ExamProblemDTO[];
   classroomId: string;
   startDatetime: string;
   endDatetime: string;
