@@ -19,6 +19,9 @@ public class Examination
     public string ClassroomId { get; set; } = string.Empty;
     
     [Required]
+    public string SlotId { get; set; } = string.Empty;
+    
+    [Required]
     public DateTime StartDatetime { get; set; }
     
     [Required]
