@@ -62,7 +62,8 @@ const MODE_OPTIONS: ExaminationRequest["mode"][] = [
 const emptyForm: ExaminationRequest = {
   examName: "",
   programmingLanguageId: "",
-  problemIds: [],
+  problems: [],
+  // problemIds: [],
   classroomId: "",
   startDatetime: "",
   endDatetime: "",
@@ -137,7 +138,7 @@ export function ExamsTab({
     setFormData({
       examName: exam.examName,
       programmingLanguageId: exam.programmingLanguage.id,
-      problemIds: exam.problemIds ?? [],
+      problems: [],
       classroomId: exam.classroom.id,
       startDatetime: exam.startDatetime.slice(0, 16),
       endDatetime: exam.endDatetime.slice(0, 16),

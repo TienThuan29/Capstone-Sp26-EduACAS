@@ -1,7 +1,7 @@
 "use client";
 
 import { Button, Card, Spinner } from "flowbite-react";
-import type { Examination } from "@/hooks/exam/useExamination";
+import type { Examination } from "@/types/examination";
 
 type ExamsTabProps = {
   examinations: Examination[];
