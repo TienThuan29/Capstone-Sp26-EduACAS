@@ -17,7 +17,6 @@ public class CreateProblemRequest
     [StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
     public string Content { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "FileName is required")]
     [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
     [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
     public string FileName { get; set; } = string.Empty;
@@ -42,7 +41,6 @@ public class UpdateProblemRequest
     [StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
     public string Content { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "FileName is required")]
     [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
     [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
     public string FileName { get; set; } = string.Empty;
