@@ -18,4 +18,6 @@ public class SlotMapper
             UpdatedDate = slot.UpdatedDate
         };
     }
+
+    
 }

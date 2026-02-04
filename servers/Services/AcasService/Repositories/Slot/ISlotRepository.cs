@@ -10,4 +10,8 @@ public interface ISlotRepository
     Task DeleteAsync(string slotId);
     Task<IEnumerable<Models.Slot>> GetSlotsByClassroomIdAsync(string classroomId);
     Task<IEnumerable<Models.Slot>> GetSlotsByKeywordAsync(string keyword);
+
+    Task AddRangeAsync(List<Models.Slot> slots);
+
+
 }

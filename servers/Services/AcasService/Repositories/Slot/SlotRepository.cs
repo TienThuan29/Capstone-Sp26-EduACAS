@@ -155,4 +155,23 @@ public class SlotRepository : DynamoRepository, ISlotRepository
             throw;
         }
     }
+
+
+    public async Task AddRangeAsync(List<Models.Slot> slots)
+    {
+        try
+        {
+            foreach (var slot in slots)
+            {
+                var item = DynamoMapper.SlotToDynamoItem(slot);
+                await PutItemAsync(item, _slotTableName);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating slot range");
+            throw;
+        }
+    }
+
 }

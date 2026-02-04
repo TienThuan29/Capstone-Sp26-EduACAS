@@ -17,6 +17,7 @@ public static class DynamoMapper
             ["enrolKey"] = new AttributeValue { S = classroom.EnrolKey },
             ["createdDate"] = new AttributeValue { S = classroom.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["endDate"] = new AttributeValue { S = classroom.EndDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
+            ["maxSlot"] = new AttributeValue { N = classroom.MaxSlot.ToString() },
             ["isDeleted"] = new AttributeValue { BOOL = classroom.IsDeleted }
         };
         if (classroom.UpdatedDate.HasValue)
@@ -44,6 +45,9 @@ public static class DynamoMapper
             CreatedDate = DateTime.Parse(item["createdDate"].S),
             EndDate = DateTime.Parse(item["endDate"].S),
             IsDeleted = item["isDeleted"].BOOL,
+            MaxSlot = item.ContainsKey("maxSlot")
+    ? int.Parse(item["maxSlot"].N)
+    : 0,
             UpdatedDate = item.ContainsKey("updatedDate") && !item["updatedDate"].NULL && !string.IsNullOrEmpty(item["updatedDate"].S)
                 ? DateTime.Parse(item["updatedDate"].S)
                 : null
