@@ -1,17 +1,26 @@
 "use client";
 
-import { Button, Card, Spinner } from "flowbite-react";
-import type { Examination } from "@/hooks/exam/useExamination";
+import { useRouter } from "next/navigation";
+import { Button, Card, Spinner, Badge } from "flowbite-react";
+import type { Examination } from "@/types/examination";
+
+const MODE_LABELS: Record<number, string> = {
+  0: "PRACTICAL",
+  1: "EXAMINATION",
+};
 
 type ExamsTabProps = {
   examinations: Examination[];
   examsLoading: boolean;
+  classId: string;
 };
 
 export function ExamsTab({
   examinations,
   examsLoading,
+  classId,
 }: ExamsTabProps) {
+  const router = useRouter();
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -41,11 +50,13 @@ export function ExamsTab({
             const isUpcoming = startDate > new Date();
             const isExpired = endDate < new Date();
             const isActive = !isUpcoming && !isExpired;
+            const modeLabel = MODE_LABELS[exam.mode as 0 | 1] ?? "PRACTICAL";
+            const problemCount = exam.examProblems?.length ?? 0;
 
             return (
               <Card
                 key={exam.id}
-                className="rounded-3xl border border-gray-100 transition-all duration-300 hover:shadow-2xl dark:border-gray-700"
+                className="rounded-xs border border-gray-100 transition-all duration-300 dark:border-gray-700"
               >
                 <div className="space-y-4">
                   <div className="flex items-start justify-between">
@@ -68,11 +79,34 @@ export function ExamsTab({
                       </span>
                     )}
                   </div>
+
+                  {/* Mode & Language Badges */}
+                  <div className="flex flex-wrap gap-2">
+                    <Badge color="info">{modeLabel}</Badge>
+                    {exam.programmingLanguage && (
+                      <Badge color="purple">
+                        {exam.programmingLanguage.languageName}
+                      </Badge>
+                    )}
+                    {exam.isPublicResult && (
+                      <Badge color="success">Public Result</Badge>
+                    )}
+                  </div>
+
                   <p className="line-clamp-2 text-sm text-gray-500">
                     {exam.description ||
                       "There is no description for this examination."}
                   </p>
-                  <div className="space-y-2 border-t border-gray-50 pt-4 text-xs font-medium text-gray-600 dark:text-gray-400">
+
+                  <div className="space-y-2 border-t border-gray-100 pt-4 text-xs font-medium text-gray-600 dark:border-gray-700 dark:text-gray-400">
+                    {exam.classroom && (
+                      <div className="flex justify-between">
+                        <span>Classroom:</span>
+                        <span className="max-w-[60%] truncate font-bold">
+                          {exam.classroom.className}
+                        </span>
+                      </div>
+                    )}
                     <div className="flex justify-between">
                       <span>Start:</span>
                       <span className="font-bold">
@@ -80,14 +114,34 @@ export function ExamsTab({
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Time:</span>
+                      <span>End:</span>
                       <span className="font-bold">
-                        {durationMinutes} phút
+                        {endDate.toLocaleString("vi-VN")}
                       </span>
                     </div>
+                    <div className="flex justify-between">
+                      <span>Duration:</span>
+                      <span className="font-bold">{durationMinutes} mins</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Total Mark:</span>
+                      <span className="font-bold">{exam.totalMark}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Problems:</span>
+                      <span className="font-bold">{problemCount}</span>
+                    </div>
                   </div>
+
                   <div className="flex gap-2">
-                    <Button size="sm" color="gray" className="flex-1">
+                    <Button
+                      size="sm"
+                      color="gray"
+                      className="flex-1 cursor-pointer"
+                      onClick={() =>
+                        router.push(`/my-classroom/${classId}/exam/${exam.id}`)
+                      }
+                    >
                       Details
                     </Button>
                   </div>

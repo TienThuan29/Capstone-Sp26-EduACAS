@@ -105,29 +105,54 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         }
     }
 
+    // public async Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId)
+    // {
+    //     try
+    //     {
+    //         var request = new QueryRequest
+    //         {
+    //             TableName = _problemTableName,
+    //             IndexName = "lecturerId-index",
+    //             KeyConditionExpression = "lecturerId = :lecturerId",
+    //             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+    //             {
+    //                 [":lecturerId"] = new AttributeValue { S = lecturerId }
+    //             }
+    //         };
+
+    //         var response = await _dynamoDBClient.QueryAsync(request);
+
+    //         var problems = response.Items
+    //             .Where(item => item.ContainsKey("isDeleted") && item["isDeleted"].BOOL == false)
+    //             .Select(DynamoMapper.DynamoItemToProblem)
+    //             .ToList();
+
+    //         return problems;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error retrieving problems for lecturer {LecturerId}", lecturerId);
+    //         throw;
+    //     }
+    // }
+
     public async Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId)
     {
         try
         {
-            var request = new QueryRequest
+            var request = new ScanRequest
             {
                 TableName = _problemTableName,
-                IndexName = "lecturerId-index",
-                KeyConditionExpression = "lecturerId = :lecturerId",
+                FilterExpression = "lecturerId = :lecturerId AND isDeleted = :false",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    [":lecturerId"] = new AttributeValue { S = lecturerId }
+                    [":lecturerId"] = new AttributeValue { S = lecturerId },
+                    [":false"] = new AttributeValue { BOOL = false }
                 }
             };
 
-            var response = await _dynamoDBClient.QueryAsync(request);
-
-            var problems = response.Items
-                .Where(item => item.ContainsKey("isDeleted") && item["isDeleted"].BOOL == false)
-                .Select(DynamoMapper.DynamoItemToProblem)
-                .ToList();
-
-            return problems;
+            var response = await _dynamoDBClient.ScanAsync(request);
+            return response.Items.Select(DynamoMapper.DynamoItemToProblem).ToList();
         }
         catch (Exception ex)
         {

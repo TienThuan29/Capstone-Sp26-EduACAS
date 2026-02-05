@@ -17,7 +17,7 @@ import {
   TimelineTitle,
 } from "flowbite-react";
 import { ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
-import type { Classroom } from "@/hooks/classroom/useClassroom";
+import type { Classroom } from "@/types/classroom";
 
 type LeaveClassConfirmModalProps = {
   show: boolean;
