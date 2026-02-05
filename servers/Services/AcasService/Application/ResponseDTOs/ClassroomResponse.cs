@@ -1,4 +1,4 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace AcasService.Application.ResponseDTOs
 {
@@ -36,6 +36,9 @@ namespace AcasService.Application.ResponseDTOs
 
         [JsonPropertyName("isDeleted")]
         public bool IsDeleted { get; set; }
+        
+        [JsonPropertyName("maxSlot")]
+        public int MaxSlot { get; set; }
 
         [JsonPropertyName("enrollment")]
         public EnrollmentInfoResponse Enrollment { get; set; }

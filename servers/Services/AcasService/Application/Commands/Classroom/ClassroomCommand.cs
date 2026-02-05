@@ -54,6 +54,7 @@ namespace AcasService.Application.Commands.Classroom
                 LecturerId = request.LecturerId,
                 SubjectId = request.SubjectId,
                 SemesterName = request.SemesterName,
+                MaxSlot = request.MaxSlot,
                 EnrolKey = finalEnrolKey,
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = null,
@@ -91,6 +92,7 @@ namespace AcasService.Application.Commands.Classroom
             existingClassroom.SemesterName = request.SemesterName;
             existingClassroom.SubjectId = request.SubjectId;
             existingClassroom.EndDate = request.EndDate;
+            existingClassroom.MaxSlot = request.MaxSlot;
             existingClassroom.EnrolKey = request.EnrolKey;
             existingClassroom.UpdatedDate = DateTime.UtcNow;
 

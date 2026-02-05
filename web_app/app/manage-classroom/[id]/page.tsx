@@ -22,7 +22,10 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HomeNavbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import Sidebar from "@/components/sidebar";
-import { DefaultCustomButton, DefaultOutlineCustomButton } from "@/components/ui/custom-button";
+import {
+  DefaultCustomButton,
+  DefaultOutlineCustomButton,
+} from "@/components/ui/custom-button";
 import { useToast } from "@/hooks/useToast";
 import { PageUrl } from "@/configs/page.url";
 import {
@@ -33,6 +36,16 @@ import {
 } from "@/app/manage-classroom/tabs";
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
+
+type UpdateClassroomFormData = {
+  classCode: string;
+  className: string;
+  subjectId: string;
+  semesterName: string;
+  enrolKey: string;
+  dateEnd: string;
+  maxSlot: number | "";
+};
 
 function ClassroomContent() {
   const params = useParams();
@@ -64,13 +77,14 @@ function ClassroomContent() {
 
   const classId = params.id as string;
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<UpdateClassroomFormData>({
     classCode: "",
     className: "",
     subjectId: "",
     semesterName: "",
     enrolKey: "",
     dateEnd: "",
+    maxSlot: "",
   });
 
   const SEMESTERS = useMemo(() => {
@@ -104,6 +118,7 @@ function ClassroomContent() {
           dateEnd: data.endDate
             ? new Date(data.endDate).toISOString().split("T")[0]
             : "",
+          maxSlot: data.maxSlot || 0,
         });
       }
     } catch (error) {
@@ -157,6 +172,12 @@ function ClassroomContent() {
     e.preventDefault();
     if (!classroom) return;
 
+    const slotVal = Number(formData.maxSlot);
+    if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
+      showError("Số lượng chỗ (Max Slot) phải từ 2 trở lên.");
+      return;
+    }
+
     try {
       setActionLoading(true);
       const payload = {
@@ -168,6 +189,7 @@ function ClassroomContent() {
         semesterName: formData.semesterName,
         enrolKey: formData.enrolKey,
         endDate: formData.dateEnd,
+        maxSlot: slotVal,
       };
 
       await updateClassroom(classroom.id, payload);
@@ -243,8 +265,8 @@ function ClassroomContent() {
         return <StudentTab />;
       case "dashboard":
         return <DashboardTab />;
-        case "slots":
-        return <SlotsTab />;
+      case "slots":
+        return <SlotsTab maxSlot={classroom.maxSlot} />;
       default:
         return (
           <OverviewTab
@@ -297,15 +319,6 @@ function ClassroomContent() {
 }
 
 // -----------------------------------------------------------------
-
-type UpdateClassroomFormData = {
-  classCode: string;
-  className: string;
-  subjectId: string;
-  semesterName: string;
-  enrolKey: string;
-  dateEnd: string;
-};
 
 type UpdateClassroomModalProps = {
   show: boolean;
@@ -395,26 +408,51 @@ function UpdateClassroomModal({
             </Select>
           </div>
 
-          <div>
-            <div className="mb-2 block">
-              <Label htmlFor="semester">
-                Semester <span className="text-red-500">*</span>
-              </Label>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="semester">
+                  Semester <span className="text-red-500">*</span>
+                </Label>
+              </div>
+              <Select
+                id="semester"
+                required
+                value={formData.semesterName}
+                onChange={(e) =>
+                  setFormData({ ...formData, semesterName: e.target.value })
+                }
+              >
+                {semesters.map((sem) => (
+                  <option key={sem.id} value={sem.semesterName}>
+                    {sem.semesterName}
+                  </option>
+                ))}
+              </Select>
             </div>
-            <Select
-              id="semester"
-              required
-              value={formData.semesterName}
-              onChange={(e) =>
-                setFormData({ ...formData, semesterName: e.target.value })
-              }
-            >
-              {semesters.map((sem) => (
-                <option key={sem.id} value={sem.semesterName}>
-                  {sem.semesterName}
-                </option>
-              ))}
-            </Select>
+
+            <div>
+              <div className="mb-2 block">
+                <Label htmlFor="maxSlot">
+                  Max Slot <span className="text-red-500">*</span>
+                </Label>
+              </div>
+              <TextInput
+                id="maxSlot"
+                type="number"
+                placeholder="Enter max slot (e.g. 30)"
+                required
+                value={formData.maxSlot}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    maxSlot:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
+                }
+                min={2}
+              />
+            </div>
           </div>
 
           <div>
@@ -437,7 +475,10 @@ function UpdateClassroomModal({
                 checked={showEnrolKey}
                 onChange={(e) => setShowEnrolKey(e.target.checked)}
               />
-              <Label htmlFor="showEnrolKey" className="cursor-pointer font-normal">
+              <Label
+                htmlFor="showEnrolKey"
+                className="cursor-pointer font-normal"
+              >
                 Show enrol key
               </Label>
             </div>
@@ -467,7 +508,7 @@ function UpdateClassroomModal({
             <Button
               type="submit"
               disabled={actionLoading}
-              className="bg-gradient-to-r from-[#1F4E79] to-[#C9A24D] cursor-pointer"
+              className="cursor-pointer bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]"
             >
               {actionLoading ? (
                 <Spinner size="sm" className="mr-2" />
@@ -525,7 +566,11 @@ function DeleteClassroomModal({
                 "Delete classroom"
               )}
             </Button>
-            <Button color="gray" onClick={onClose} className="cursor-pointer px-4">
+            <Button
+              color="gray"
+              onClick={onClose}
+              className="cursor-pointer px-4"
+            >
               Cancel
             </Button>
           </div>
