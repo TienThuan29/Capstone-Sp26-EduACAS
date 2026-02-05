@@ -88,6 +88,16 @@ export const Api = {
     DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
   },
 
+  Slot: {
+    CREATE: "/api/v1/slots",
+    CREATE_ALL_SLOTS: (classroomId: string) =>
+      `/api/v1/slots/create-all-slots/${classroomId}`,
+    GET_BY_CLASSROOM: (classroomId: string) =>
+      `/api/v1/slots/classroom/${classroomId}`,
+    UPDATE: (id: string) => `/api/v1/slots/${id}`,
+    DELETE: (id: string) => `/api/v1/slots/${id}`,
+  },
+
   // Subject: {
   //   GET_ALL_SUBJECTS: '/api/acas/v1/subjects',
   //   CREATE_SUBJECT: '/api/acas/v1/subjects',
