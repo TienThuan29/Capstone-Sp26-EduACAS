@@ -8,9 +8,6 @@ public class Problem
     public string Id { get; set; } = string.Empty;
 
     [Required]
-    public string ExamId { get; set; } = string.Empty;
-
-    [Required]
     public string LecturerId { get; set; } = string.Empty;
 
     [Required]
@@ -22,8 +19,8 @@ public class Problem
     [Required]
     public string FileName { get; set; } = string.Empty;
 
-    [Required]
-    public float Mark { get; set; }
+    // [Required]
+    // public float Mark { get; set; }
     
     public List<TestCase> TestCases { get; set; } = new List<TestCase>();
     

@@ -8,9 +8,6 @@ public class ProblemResponse
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
-    [JsonPropertyName("examId")]
-    public string ExamId { get; set; } = string.Empty;
-
     [JsonPropertyName("lecturerId")]
     public string LecturerId { get; set; } = string.Empty;
 
@@ -23,8 +20,11 @@ public class ProblemResponse
     [JsonPropertyName("fileName")]
     public string FileName { get; set; } = string.Empty;
 
-    [JsonPropertyName("mark")]
-    public float Mark { get; set; }
+    /// <summary>
+    /// Presigned URL for the file (from private S3). Use for download/display.
+    /// </summary>
+    [JsonPropertyName("fileUrl")]
+    public string FileUrl { get; set; } = string.Empty;
 
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }
@@ -68,14 +68,8 @@ public class ProblemBasicResponse
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
-    [JsonPropertyName("examId")]
-    public string ExamId { get; set; } = string.Empty;
-
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
-
-    [JsonPropertyName("mark")]
-    public float Mark { get; set; }
 
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }

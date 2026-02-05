@@ -28,7 +28,8 @@ import {
 } from '@heroicons/react/24/outline'
 import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { useToast } from "@/hooks/useToast"
-import { useSubject, Subject } from "@/hooks/subject/useSubject"
+import { useSubject } from "@/hooks/subject/useSubject"
+import type { Subject } from "@/types/subject"
 import { useAuth } from "@/contexts/AuthContext"
 
 type SubjectFormData = {

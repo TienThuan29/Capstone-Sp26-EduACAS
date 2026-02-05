@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@monaco-editor/react": "^4.7.0",
     "axios": "^1.13.2",
     "dayjs": "^1.11.19",
     "flowbite-react": "^0.12.4",
