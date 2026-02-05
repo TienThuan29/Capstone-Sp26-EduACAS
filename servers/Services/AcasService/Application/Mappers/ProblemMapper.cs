@@ -10,12 +10,10 @@ public class ProblemMapper
         return new ProblemResponse
         {
             Id = problem.Id,
-            ExamId = problem.ExamId,
             LecturerId = problem.LecturerId,
             Title = problem.Title,
             Content = problem.Content,
             FileName = problem.FileName,
-            Mark = problem.Mark,
             Difficulty = problem.Difficulty,
             CodeTemplate = problem.CodeTemplate,
             TestCases = problem.TestCases

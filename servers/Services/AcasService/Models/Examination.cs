@@ -13,7 +13,7 @@ public class Examination
     [Required]
     public string ProgrammingLanguageId { get; set; } = string.Empty;
     
-    public string[] ProblemIds { get; set; } = Array.Empty<string>();
+    public List<ExaminationProblem> Problems { get; set; } = new List<ExaminationProblem>();
     
     [Required]
     public string ClassroomId { get; set; } = string.Empty;
@@ -46,6 +46,15 @@ public class Examination
     public DateTime CreatedDate { get; set; }
     
     public DateTime UpdatedDate { get; set; }
+}
+
+public class ExaminationProblem
+{
+    [Required]
+    public string ProblemId { get; set; } = string.Empty;
+    
+    [Required]
+    public float Mark { get; set; }
 }
 
 public enum Mode

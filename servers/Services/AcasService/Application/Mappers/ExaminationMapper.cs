@@ -1,6 +1,8 @@
+using System.Linq;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Web.Requests;
 using AcasService.Models;
+
 namespace AcasService.Application.Mappers;
 
 public class ExaminationMapper
@@ -19,8 +21,8 @@ public class ExaminationMapper
         {
             Id = exam.Id,
             ExamName = exam.ExamName,
-           ProgrammingLanguage =programmingLanguageLite,
-            ProblemIds = exam.ProblemIds,
+            ProgrammingLanguage = programmingLanguageLite,
+            ExamProblems = exam.Problems?.Select(p => new ExaminationProblemResponse { ProblemId = p.ProblemId, Mark = p.Mark }).ToList() ?? new List<ExaminationProblemResponse>(),
             Classroom = classroomLite,
             StartDatetime = exam.StartDatetime,
             EndDatetime = exam.EndDatetime,
@@ -45,7 +47,7 @@ public class ExaminationMapper
         {
             ExamName = examRequest.ExamName,
             ProgrammingLanguageId = examRequest.ProgrammingLanguageId,
-            ProblemIds = examRequest.ProblemIds,
+            Problems = examRequest.Problems?.Select(p => new ExaminationProblem { ProblemId = p.ProblemId, Mark = p.Mark }).ToList() ?? new List<ExaminationProblem>(),
             ClassroomId = examRequest.ClassroomId,
             StartDatetime = examRequest.StartDatetime,
             EndDatetime = examRequest.EndDatetime,

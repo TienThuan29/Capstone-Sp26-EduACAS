@@ -11,12 +11,10 @@ public static class DynamoMapper
         var item = new Dictionary<string, AttributeValue>
         {
             ["id"] = new AttributeValue { S = problem.Id },
-            ["examId"] = new AttributeValue { S = problem.ExamId },
             ["lecturerId"] = new AttributeValue { S = problem.LecturerId },
             ["title"] = new AttributeValue { S = problem.Title },
             ["content"] = new AttributeValue { S = problem.Content },
             ["fileName"] = new AttributeValue { S = problem.FileName },
-            ["mark"] = new AttributeValue { N = problem.Mark.ToString() },
             ["difficulty"] = new AttributeValue { S = problem.Difficulty.ToString() },
             ["codeTemplate"] = new AttributeValue { S = problem.CodeTemplate },
             ["createdDate"] = new AttributeValue { S = problem.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
@@ -39,12 +37,11 @@ public static class DynamoMapper
         var problem = new Models.Problem
         {
             Id = item["id"].S,
-            ExamId = item["examId"].S,
             LecturerId = item["lecturerId"].S,
             Title = item["title"].S,
             Content = item["content"].S,
             FileName = item["fileName"].S,
-            Mark = float.Parse(item["mark"].N),
+            // Mark = float.Parse(item["mark"].N),
             Difficulty = Enum.Parse<Difficulty>(item["difficulty"].S),
             CodeTemplate = item["codeTemplate"].S,
             CreatedDate = DateTime.Parse(item["createdDate"].S),

@@ -1,3 +1,4 @@
+
 using AcasService.Application.ResponseDTOs;
 using AcasService.Web.Requests;
 using AcasService.Application.Mappers;
@@ -69,7 +70,12 @@ public class ExaminationCommand : IExaminationCommand
 
             existingExam.ExamName = examDto.ExamName;
             existingExam.ProgrammingLanguageId = examDto.ProgrammingLanguageId;
-            existingExam.ProblemIds = examDto.ProblemIds;
+            existingExam.Problems = examDto.Problems?.Select(
+                p => new ExaminationProblem { 
+                    ProblemId = p.ProblemId, 
+                    Mark = p.Mark 
+                    }).ToList() 
+                    ?? new List<ExaminationProblem>();
             existingExam.ClassroomId = examDto.ClassroomId;
             existingExam.StartDatetime = examDto.StartDatetime;
             existingExam.EndDatetime = examDto.EndDatetime;

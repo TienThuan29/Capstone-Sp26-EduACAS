@@ -11,14 +11,16 @@ import {
   TimelinePoint,
   TimelineTime,
   TimelineTitle,
+  Tooltip,
 } from "flowbite-react";
-import { PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
 import {
+  ClipboardDocumentIcon,
   EyeIcon,
   EyeSlashIcon,
   KeyIcon,
 } from "@heroicons/react/24/outline";
-import type { Classroom } from "@/hooks/classroom/useClassroom";
+import type { Classroom } from "@/types/classroom";
 
 type OverviewTabProps = {
   classroom: Classroom;
@@ -26,14 +28,25 @@ type OverviewTabProps = {
   onOpenDeleteModal: () => void;
 };
 
-
 export function OverviewTab({
   classroom,
   onOpenUpdateModal,
   onOpenDeleteModal,
 }: OverviewTabProps) {
   const [showEnrolKey, setShowEnrolKey] = useState(false);
+  const [copied, setCopied] = useState(false);
   const enrolKey = classroom.enrolKey ?? "";
+
+  const handleCopyKey = async () => {
+    if (!enrolKey) return;
+    try {
+      await navigator.clipboard.writeText(enrolKey);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // ignore clipboard errors
+    }
+  };
 
   return (
     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -46,7 +59,7 @@ export function OverviewTab({
             <div className="mb-6 flex flex-wrap items-center gap-3">
               <Badge
                 color="info"
-                className="cursor-default px-3.5 py-1 text-xs font-bold uppercase tracking-widest"
+                className="cursor-default px-3.5 py-1 text-xs font-bold tracking-widest uppercase"
               >
                 {classroom.classCode}
               </Badge>
@@ -99,31 +112,51 @@ export function OverviewTab({
                 </div>
                 <div>
                   <span className="mb-1 block text-[8px] font-black tracking-[0.25em] text-[#1F4E79] uppercase dark:text-[#C9A24D]">
-                    Mã tham gia (Enrol Key)
+                    Enrol Key
                   </span>
                   <p className="font-mono text-lg font-semibold tracking-wide text-gray-900 dark:text-white">
                     {showEnrolKey ? enrolKey || "—" : "••••••••"}
                   </p>
                 </div>
               </div>
-              <Button
-                color="gray"
-                size="sm"
-                onClick={() => setShowEnrolKey((v) => !v)}
-                className="inline-flex items-center gap-2 cursor-pointer"
-              >
-                {showEnrolKey ? (
-                  <>
-                    <EyeSlashIcon className="h-4 w-4" />
-                    Hide
-                  </>
-                ) : (
-                  <>
-                    <EyeIcon className="h-4 w-4" />
-                    Show key
-                  </>
-                )}
-              </Button>
+              <div className="flex flex-wrap items-center gap-2">
+                <Tooltip
+                  content={copied ? "Copied!" : "Copy enrol key"}
+                  placement="top"
+                >
+                  <Button
+                    color="gray"
+                    size="sm"
+                    onClick={handleCopyKey}
+                    disabled={!enrolKey}
+                    className="inline-flex cursor-pointer items-center gap-2"
+                  >
+                    {copied ? (
+                      <CheckIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
+                    ) : (
+                      <ClipboardDocumentIcon className="h-4 w-4" />
+                    )}
+                  </Button>
+                </Tooltip>
+                <Button
+                  color="gray"
+                  size="sm"
+                  onClick={() => setShowEnrolKey((v) => !v)}
+                  className="inline-flex cursor-pointer items-center gap-2"
+                >
+                  {showEnrolKey ? (
+                    <>
+                      <EyeSlashIcon className="h-4 w-4" />
+                      Hide
+                    </>
+                  ) : (
+                    <>
+                      <EyeIcon className="h-4 w-4" />
+                      Show key
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -189,7 +222,7 @@ export function OverviewTab({
           <Button
             color="gray"
             onClick={onOpenUpdateModal}
-            className="group w-full justify-center gap-3 py-4 font-bold cursor-pointer"
+            className="group w-full cursor-pointer justify-center gap-3 py-4 font-bold"
           >
             <PencilIcon className="h-5 w-5" />
             Edit classroom information
@@ -197,7 +230,7 @@ export function OverviewTab({
           <Button
             color="red"
             onClick={onOpenDeleteModal}
-            className="group w-full justify-center gap-3 py-4 font-bold cursor-pointer"
+            className="group w-full cursor-pointer justify-center gap-3 py-4 font-bold"
           >
             <TrashIcon className="h-5 w-5" />
             Delete classroom

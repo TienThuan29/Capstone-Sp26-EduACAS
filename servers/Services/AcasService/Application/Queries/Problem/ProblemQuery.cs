@@ -1,3 +1,4 @@
+using AcasService.Application.Queries.S3;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 
@@ -16,11 +17,16 @@ public interface IProblemQuery
 public class ProblemQuery : IProblemQuery
 {
     private readonly Repositories.Problem.IProblemRepository _problemRepository;
+    private readonly IPrivateS3Query _privateS3Query;
     private readonly ILogger<ProblemQuery> _logger;
 
-    public ProblemQuery(Repositories.Problem.IProblemRepository problemRepository, ILogger<ProblemQuery> logger)
+    public ProblemQuery(
+        Repositories.Problem.IProblemRepository problemRepository,
+        IPrivateS3Query privateS3Query,
+        ILogger<ProblemQuery> logger)
     {
         _problemRepository = problemRepository;
+        _privateS3Query = privateS3Query;
         _logger = logger;
     }
 
@@ -34,15 +40,27 @@ public class ProblemQuery : IProblemQuery
 
             var testCases = await _problemRepository.GetTestCasesByProblemIdAsync(problemId);
 
+            string fileUrl = string.Empty;
+            if (!string.IsNullOrWhiteSpace(problem.FileName))
+            {
+                try
+                {
+                    fileUrl = await _privateS3Query.GetFileUrlAsync(problem.FileName);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Could not generate presigned URL for file {FileName}", problem.FileName);
+                }
+            }
+
             return new ProblemResponse
             {
                 Id = problem.Id,
-                ExamId = problem.ExamId,
                 LecturerId = problem.LecturerId,
                 Title = problem.Title,
                 Content = problem.Content,
                 FileName = problem.FileName,
-                Mark = problem.Mark,
+                FileUrl = fileUrl,
                 Difficulty = problem.Difficulty,
                 CodeTemplate = problem.CodeTemplate,
                 CreatedDate = problem.CreatedDate,
@@ -78,9 +96,7 @@ public class ProblemQuery : IProblemQuery
                 .Select(p => new ProblemBasicResponse
                 {
                     Id = p.Id,
-                    ExamId = p.ExamId,
                     Title = p.Title,
-                    Mark = p.Mark,
                     Difficulty = p.Difficulty,
                     CreatedDate = p.CreatedDate
                 })
@@ -103,9 +119,7 @@ public class ProblemQuery : IProblemQuery
                 .Select(p => new ProblemBasicResponse
                 {
                     Id = p.Id,
-                    ExamId = p.ExamId,
                     Title = p.Title,
-                    Mark = p.Mark,
                     Difficulty = p.Difficulty,
                     CreatedDate = p.CreatedDate
                 })
@@ -128,9 +142,7 @@ public class ProblemQuery : IProblemQuery
                 .Select(p => new ProblemBasicResponse
                 {
                     Id = p.Id,
-                    ExamId = p.ExamId,
                     Title = p.Title,
-                    Mark = p.Mark,
                     Difficulty = p.Difficulty,
                     CreatedDate = p.CreatedDate
                 })

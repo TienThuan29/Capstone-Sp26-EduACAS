@@ -5,10 +5,6 @@ namespace AcasService.Web.Requests;
 
 public class CreateProblemRequest
 {
-    [Required(ErrorMessage = "ExamId is required")]
-    [StringLength(100, ErrorMessage = "ExamId cannot exceed 100 characters")]
-    public string ExamId { get; set; } = string.Empty;
-
     [Required(ErrorMessage = "LecturerId is required")]
     [StringLength(100, ErrorMessage = "LecturerId cannot exceed 100 characters")]
     public string LecturerId { get; set; } = string.Empty;
@@ -25,10 +21,6 @@ public class CreateProblemRequest
     [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
     [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
     public string FileName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Mark is required")]
-    [Range(0.1, 100, ErrorMessage = "Mark must be between 0.1 and 100")]
-    public float Mark { get; set; }
 
     [Required(ErrorMessage = "Difficulty is required")]
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
@@ -55,17 +47,13 @@ public class UpdateProblemRequest
     [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
     public string FileName { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Mark is required")]
-    [Range(0, 10, ErrorMessage = "Mark must be between 0 and 10")]
-    public float Mark { get; set; }
-
     [Required(ErrorMessage = "Difficulty is required")]
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
     public string Difficulty { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "CodeTemplate is required")]
-    [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
     public string CodeTemplate { get; set; } = string.Empty;
+
+    public List<CreateTestCaseRequest>? TestCases { get; set; }
 }
 
 public class CreateTestCaseRequest
