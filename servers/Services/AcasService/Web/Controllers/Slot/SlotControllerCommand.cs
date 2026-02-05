@@ -53,7 +53,7 @@ public class SlotCommandController : ControllerBase
     }
 
 
-    [HttpPost("classrooms/{classroomId}/slots/init")]
+    [HttpPost("create-all-slots/{classroomId}")]
     public async Task<ActionResult<ApiResponse<List<SlotResponse>>>> InitSlots(
         [FromRoute] string classroomId)
     {

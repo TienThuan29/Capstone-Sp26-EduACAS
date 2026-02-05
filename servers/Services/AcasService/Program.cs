@@ -36,6 +36,7 @@ using AcasService.Application.Queries.Subject;
 using AcasService.Application.Commands.ClassroomEnrollment;
 using AcasService.Application.Commands.SlotCommand;
 using AcasService.Repositories.Slot;
+using AcasService.Application.Queries.Slot;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -110,6 +111,7 @@ builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<ProblemMapper>();
+builder.Services.AddScoped<SlotMapper>();
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
@@ -117,6 +119,7 @@ builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
 builder.Services.AddScoped<ISlotCommand, SlotCommand>();
+builder.Services.AddScoped<ISlotQuery, SlotQuery>();
 
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);

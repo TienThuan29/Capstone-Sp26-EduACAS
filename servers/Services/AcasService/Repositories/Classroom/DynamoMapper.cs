@@ -45,9 +45,7 @@ public static class DynamoMapper
             CreatedDate = DateTime.Parse(item["createdDate"].S),
             EndDate = DateTime.Parse(item["endDate"].S),
             IsDeleted = item["isDeleted"].BOOL,
-            MaxSlot = item.ContainsKey("maxSlot")
-    ? int.Parse(item["maxSlot"].N)
-    : 0,
+            MaxSlot = int.Parse(item["maxSlot"].N),
             UpdatedDate = item.ContainsKey("updatedDate") && !item["updatedDate"].NULL && !string.IsNullOrEmpty(item["updatedDate"].S)
                 ? DateTime.Parse(item["updatedDate"].S)
                 : null
