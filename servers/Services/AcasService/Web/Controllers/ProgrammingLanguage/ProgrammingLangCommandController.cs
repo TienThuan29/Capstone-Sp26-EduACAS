@@ -1,5 +1,5 @@
 using AcasService.Application.Commands.ProgrammingLanguage;
-using AcasService.Application.Requests.ProgrammingLanguage;
+using AcasService.Web.Requests;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -40,6 +40,55 @@ public class ProgrammingLanguageCommandController : ControllerBase
         {
             _logger.LogError(ex, "Error syncing programming languages");
             return ResponseUtil.Error<List<ProgrammingLanguageResponse>>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPut("{id}/status")]
+    public async Task<ActionResult<ApiResponse<ProgrammingLanguageResponse>>> UpdateStatus(
+        string id,
+        [FromBody] UpdateStatusRequest request)
+    {
+        try
+        {
+            var result = await _programmingLanguageCommand.UpdateStatusAsync(id, request.Status);
+            return ResponseUtil.Success(result, "Programming language status updated successfully", 200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Programming language not found: {Id}", id);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>(ex.Message, 404);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid status value for language: {Id}", id);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating status for programming language: {Id}", id);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPut("{id}/logo")]
+    public async Task<ActionResult<ApiResponse<ProgrammingLanguageResponse>>> UpdateLogoUrl(
+        string id,
+        [FromBody] UpdateLogoUrlRequest request)
+    {
+        try
+        {
+            var result = await _programmingLanguageCommand.UpdateLogoUrlAsync(id, request.LogoFileUrl);
+            return ResponseUtil.Success(result, "Programming language logo updated successfully", 200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Programming language not found: {Id}", id);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>(ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating logo for programming language: {Id}", id);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>("Internal Server Error", 500);
         }
     }
 

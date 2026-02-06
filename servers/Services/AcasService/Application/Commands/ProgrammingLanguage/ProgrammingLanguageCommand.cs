@@ -1,9 +1,9 @@
-using AcasService.Application.Requests.ProgrammingLanguage;
+using AcasService.Web.Requests;
 using AcasService.Repositories.ProgrammingLanguage;
 using Microsoft.Extensions.Logging;
 using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
-using AcasService.Application.Services;
+using AcasService.Application.CodeRunner;
 using AcasService.Models;
 using Microsoft.Extensions.Configuration;
 
@@ -14,6 +14,10 @@ namespace AcasService.Application.Commands.ProgrammingLanguage;
 public interface IProgrammingLanguageCommand
 {
     Task<List<ProgrammingLanguageResponse>> SyncProgrammingLanguagesAsync();
+
+    Task<ProgrammingLanguageResponse> UpdateStatusAsync(string id, string status);
+
+    Task<ProgrammingLanguageResponse> UpdateLogoUrlAsync(string id, string logoFileUrl);
 }
 
 public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
@@ -22,7 +26,6 @@ public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
     private readonly ICodeRunnerService _codeRunnerService;
     private readonly ILogger<ProgrammingLanguageCommand> _logger;
     private readonly ProgrammingLanguageMapper _programmingLanguageMapper;
-    private readonly string _logoBaseUrl;
 
     public ProgrammingLanguageCommand(
         IProgrammingLanguageRepository repository,
@@ -35,7 +38,6 @@ public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
         _codeRunnerService = codeRunnerService;
         _logger = logger;
         _programmingLanguageMapper = programmingLanguageMapper;
-        _logoBaseUrl = configuration["CodeRunner:LogoBaseUrl"] ?? string.Empty;
     }
 
     public async Task<List<ProgrammingLanguageResponse>> SyncProgrammingLanguagesAsync()
@@ -91,7 +93,7 @@ public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
                     // Preserve status from existing record
                     language.Status = existingLang.Status;
                     language.CreatedDate = existingLang.CreatedDate;
-                    
+
                     var updated = await _repository.UpdateAsync(externalLang.Id, language);
                     if (updated != null)
                     {
@@ -103,7 +105,7 @@ public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
                 {
                     // New language - set default status
                     language.Status = PLStatus.DISABLE;
-                    
+
                     var created = await _repository.CreateAsync(language);
                     if (created != null)
                     {
@@ -122,5 +124,44 @@ public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
             _logger.LogError(ex, "Error syncing programming languages");
             throw;
         }
+    }
+
+    public async Task<ProgrammingLanguageResponse> UpdateLogoUrlAsync(string id, string logoFileUrl)
+    {
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null)
+        {
+            throw new KeyNotFoundException($"Programming language with ID '{id}' not found");
+        }
+
+        existing.LogoFileUrl = logoFileUrl;
+        existing.UpdatedDate = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(id, existing);
+        _logger.LogInformation("Updated logo URL for language: {LanguageId}", id);
+
+        return _programmingLanguageMapper.ToProgrammingLanguageResponse(updated!);
+    }
+
+    public async Task<ProgrammingLanguageResponse> UpdateStatusAsync(string id, string status)
+    {
+        var existing = await _repository.GetByIdAsync(id);
+        if (existing == null)
+        {
+            throw new KeyNotFoundException($"Programming language with ID '{id}' not found");
+        }
+
+        if (!Enum.TryParse<PLStatus>(status, true, out var parsedStatus))
+        {
+            throw new ArgumentException($"Invalid status value: '{status}'. Valid values are: {string.Join(", ", Enum.GetNames<PLStatus>())}");
+        }
+
+        existing.Status = parsedStatus;
+        existing.UpdatedDate = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(id, existing);
+        _logger.LogInformation("Updated status for language: {LanguageId} to {Status}", id, status);
+
+        return _programmingLanguageMapper.ToProgrammingLanguageResponse(updated!);
     }
 }

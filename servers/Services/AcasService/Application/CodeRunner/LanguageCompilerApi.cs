@@ -1,9 +1,9 @@
 using System.Text.Json;
-using AcasService.Application.ExternalDTOs;
+using AcasService.Application.ResponseDTOs.External;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
-namespace AcasService.Application.Services;
+namespace AcasService.Application.CodeRunner;
 
 public interface ICodeRunnerService
 {

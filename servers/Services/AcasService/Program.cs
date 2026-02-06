@@ -28,13 +28,13 @@ using AcasService.Application.Commands.Examination;
 using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.Examination;
 using AcasService.Repositories.ProgrammingLanguage;
-using AcasService.Application.Services;
+using AcasService.Application.CodeRunner;
 using AcasService.Repositories.Examination;
 using AcasService.Repositories.ClassroomEnrollment;
 using AcasService.Application.Mappers;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Queries.Subject;
-using AcasService.Application.Commands.ClassroomEnrollment;
+using AcasService.Application.Commands.ClassEnrollments;
 
 
 var builder = WebApplication.CreateBuilder(args);

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AcasService.Application.Requests.ProgrammingLanguage;
+namespace AcasService.Web.Requests;
 
 public class ProgrammingLanguageRequest
 {
@@ -18,3 +18,14 @@ public class ProgrammingLanguageRequest
 }
 
 
+public class UpdateStatusRequest
+{
+    [Required(ErrorMessage = "Status is required")]
+    public string Status { get; set; } = string.Empty;
+}
+
+public class UpdateLogoUrlRequest
+{
+    [Required(ErrorMessage = "LogoFileUrl is required")]
+    public string LogoFileUrl { get; set; } = string.Empty;
+}

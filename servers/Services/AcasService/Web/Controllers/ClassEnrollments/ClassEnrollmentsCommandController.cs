@@ -1,5 +1,5 @@
-using AcasService.Application.Commands.ClassroomEnrollment;
-using AcasService.Application.ClassroomEnrollment.ResponseDTOs;
+using AcasService.Application.Commands.ClassEnrollments;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
 using Microsoft.AspNetCore.Authorization;

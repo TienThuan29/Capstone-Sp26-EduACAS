@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using AcasService.Application.Utils;
 
-namespace AcasService.Web.Controllers;
+namespace AcasService.Web.Controllers.S3;
 
 [ApiController]
 [Route("api/v1/private-s3")]

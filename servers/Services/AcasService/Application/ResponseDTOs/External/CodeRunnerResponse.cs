@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AcasService.Application.ExternalDTOs;
+namespace AcasService.Application.ResponseDTOs.External;
 
 /// <summary>
 /// DTO for language response from code-runner service
