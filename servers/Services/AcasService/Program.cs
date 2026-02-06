@@ -28,6 +28,7 @@ using AcasService.Application.Commands.Examination;
 using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.Examination;
 using AcasService.Repositories.ProgrammingLanguage;
+using AcasService.Application.Services;
 using AcasService.Repositories.Examination;
 using AcasService.Repositories.ClassroomEnrollment;
 using AcasService.Application.Mappers;
@@ -114,6 +115,8 @@ builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
 
+// code runner service 
+builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 

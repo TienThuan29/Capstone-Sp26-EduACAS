@@ -55,23 +55,23 @@ public class ProgrammingLanguageQueryController : ControllerBase
         }
     }
 
-    [HttpGet("search")]
-    public async Task<ActionResult<ApiResponse<List<ProgrammingLanguageResponse>>>> Search(
-        [FromQuery] string? searchTerm = null,
-        [FromQuery] bool? isEnable = null)
-    {
-        try
-        {
-            var languages = await _programmingLanguageQuery.SearchAsync(searchTerm, isEnable);
-            return ResponseUtil.Success(languages,"Programming languages search completed successfully",200);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,"Error searching programming languages");
+    // [HttpGet("search")]
+    // public async Task<ActionResult<ApiResponse<List<ProgrammingLanguageResponse>>>> Search(
+    //     [FromQuery] string? searchTerm = null,
+    //     [FromQuery] bool? isEnable = null)
+    // {
+    //     try
+    //     {
+    //         var languages = await _programmingLanguageQuery.SearchAsync(searchTerm, isEnable);
+    //         return ResponseUtil.Success(languages,"Programming languages search completed successfully",200);
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex,"Error searching programming languages");
 
-            return ResponseUtil.Error<List<ProgrammingLanguageResponse>>("Internal Server Error", 500);
-        }
-    }
+    //         return ResponseUtil.Error<List<ProgrammingLanguageResponse>>("Internal Server Error", 500);
+    //     }
+    // }
 
     [HttpGet("paged")]
     public async Task<ActionResult<ApiResponse<PagedProgrammingLanguageResponse>>> GetPaged(

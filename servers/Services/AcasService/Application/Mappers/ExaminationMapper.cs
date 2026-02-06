@@ -15,7 +15,7 @@ public class ExaminationMapper
 
         var programmingLanguageLite = new ProgrammingLanguageLiteResponse();
         programmingLanguageLite.Id=programmingLanguage.Id;
-        programmingLanguageLite.Name=programmingLanguage.LanguageName;
+        programmingLanguageLite.Name=programmingLanguage.Name;
 
         return new ExaminationResponse
         {

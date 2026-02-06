@@ -13,7 +13,7 @@ public interface IProgrammingLanguageQuery
 
     Task<List<ProgrammingLanguageResponse>> GetAllAsync();
     
-    Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null);
+    // Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null);
     
     Task<PagedProgrammingLanguageResponse> GetPagedAsync(
         int page = 1, int pageSize = 10, string? sortBy = null, bool ascending = true);
@@ -80,26 +80,26 @@ public class ProgrammingLanguageQuery : IProgrammingLanguageQuery
         }
     }
 
-    public async Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null)
-    {
-        try
-        {
-            var entities = await _repository.SearchAsync(searchTerm, isEnable);
-            var responseList = new List<ProgrammingLanguageResponse>();
+    // public async Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null)
+    // {
+    //     try
+    //     {
+    //         var entities = await _repository.SearchAsync(searchTerm, isEnable);
+    //         var responseList = new List<ProgrammingLanguageResponse>();
             
-            foreach (var entity in entities)
-            {
-                responseList.Add(_mapper.ToProgrammingLanguageResponse(entity));
-            }
+    //         foreach (var entity in entities)
+    //         {
+    //             responseList.Add(_mapper.ToProgrammingLanguageResponse(entity));
+    //         }
             
-            return responseList;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error searching programming languages");
-            throw;
-        }
-    }
+    //         return responseList;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error searching programming languages");
+    //         throw;
+    //     }
+    // }
 
     public async Task<PagedProgrammingLanguageResponse> GetPagedAsync(
         int page = 1, int pageSize = 10, string? sortBy = null, bool ascending = true)
