@@ -2,8 +2,10 @@
 
 import React, { useState } from 'react';
 import { Sun, Moon, Plus, Minus, RefreshCw } from 'lucide-react';
+import { Cog6ToothIcon } from '@heroicons/react/24/outline';
 import { useEditorContext } from '@/contexts/EditorContext';
 import { ConfirmModal } from './confirm-modal';
+import { EditorSettingsModal } from './editor-settings-modal';
 import { Button, Dropdown, DropdownItem } from 'flowbite-react';
 
 export function HeaderToolbar() {
@@ -11,6 +13,7 @@ export function HeaderToolbar() {
     useEditorContext();
 
   const [showResetModal, setShowResetModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
 
   return (
     <>
@@ -35,7 +38,7 @@ export function HeaderToolbar() {
           {/* Font Size Controls - not change this button style */}
           <div className="flex items-center gap-1 rounded-md border border-gray-600 bg-gray-800">
             <button
-              onClick={() => setFontSize(Math.max(10, editorState.fontSize - 2))}
+              onClick={() => setFontSize(Math.max(1, editorState.fontSize - 2))}
               className="p-1.5 text-gray-400 transition-colors hover:text-white cursor-pointer"
               title="Decrease font size"
             >
@@ -45,7 +48,7 @@ export function HeaderToolbar() {
               {editorState.fontSize}px
             </span>
             <button
-              onClick={() => setFontSize(Math.min(24, editorState.fontSize + 2))}
+              onClick={() => setFontSize(Math.min(32, editorState.fontSize + 2))}
               className="p-1.5 text-gray-400 transition-colors hover:text-white cursor-pointer"
               title="Increase font size"
             >
@@ -65,8 +68,16 @@ export function HeaderToolbar() {
           </Button>
         </div>
 
-        {/* Right Section - Theme Toggle */}
+        {/* Right Section - Settings & Theme */}
         <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowSettingsModal(true)}
+            className="rounded-md border border-gray-600 bg-gray-800 p-2 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white cursor-pointer"
+            title="Editor settings"
+          >
+            <Cog6ToothIcon className="h-5 w-5" />
+          </button>
           <Button
             size='sm'
             onClick={toggleTheme}
@@ -102,7 +113,13 @@ export function HeaderToolbar() {
         }}
         title="Reset Code"
         message="Are you sure you want to reset your code to the initial boilerplate? This action cannot be undone."
-        confirmText="Reset Code"  
+        confirmText="Reset Code"
+      />
+
+      {/* Editor Settings Modal */}
+      <EditorSettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
       />
     </>
   );

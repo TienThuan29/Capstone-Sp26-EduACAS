@@ -21,11 +21,20 @@ import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
 /**
  * state for monaco code editor
  */
+/** Monaco cursorBlinking option values */
+export type CursorBlinking = 'blink' | 'smooth' | 'phase' | 'expand' | 'solid';
+
 export interface EditorState {
   code: string;
   language: ProgrammingLanguage;
   fontSize: number;
   theme: 'vs-dark' | 'vs-light';
+  tabSize: number;
+  wordWrap: boolean;
+  minimapEnabled: boolean;
+  fontFamily: string;
+  cursorBlinking: CursorBlinking;
+  cursorSmoothCaretAnimation: boolean;
 }
 
 /**
@@ -44,6 +53,13 @@ interface EditorContextType {
   setCode: (code: string) => void;
   setLanguage: (language: ProgrammingLanguage) => void;
   setFontSize: (size: number) => void;
+  setTheme: (theme: 'vs-dark' | 'vs-light') => void;
+  setTabSize: (size: number) => void;
+  setWordWrap: (enabled: boolean) => void;
+  setMinimapEnabled: (enabled: boolean) => void;
+  setFontFamily: (fontFamily: string) => void;
+  setCursorBlinking: (value: CursorBlinking) => void;
+  setCursorSmoothCaretAnimation: (enabled: boolean) => void;
   toggleTheme: () => void;
   resetCode: () => void;
 
@@ -139,6 +155,12 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     language: DEFAULT_PROGRAMMING_LANGUAGE,
     fontSize: 14,
     theme: 'vs-dark',
+    tabSize: 4,
+    wordWrap: false,
+    minimapEnabled: true,
+    fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
+    cursorBlinking: 'smooth',
+    cursorSmoothCaretAnimation: true,
   });
 
   // Problem State
@@ -222,6 +244,34 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   const setFontSize = useCallback((fontSize: number) => {
     setEditorState((prev) => ({ ...prev, fontSize }));
+  }, []);
+
+  const setTheme = useCallback((theme: 'vs-dark' | 'vs-light') => {
+    setEditorState((prev) => ({ ...prev, theme }));
+  }, []);
+
+  const setTabSize = useCallback((tabSize: number) => {
+    setEditorState((prev) => ({ ...prev, tabSize }));
+  }, []);
+
+  const setWordWrap = useCallback((wordWrap: boolean) => {
+    setEditorState((prev) => ({ ...prev, wordWrap }));
+  }, []);
+
+  const setMinimapEnabled = useCallback((minimapEnabled: boolean) => {
+    setEditorState((prev) => ({ ...prev, minimapEnabled }));
+  }, []);
+
+  const setFontFamily = useCallback((fontFamily: string) => {
+    setEditorState((prev) => ({ ...prev, fontFamily }));
+  }, []);
+
+  const setCursorBlinking = useCallback((cursorBlinking: CursorBlinking) => {
+    setEditorState((prev) => ({ ...prev, cursorBlinking }));
+  }, []);
+
+  const setCursorSmoothCaretAnimation = useCallback((cursorSmoothCaretAnimation: boolean) => {
+    setEditorState((prev) => ({ ...prev, cursorSmoothCaretAnimation }));
   }, []);
 
   const toggleTheme = useCallback(() => {
@@ -359,6 +409,13 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setCode,
     setLanguage,
     setFontSize,
+    setTheme,
+    setTabSize,
+    setWordWrap,
+    setMinimapEnabled,
+    setFontFamily,
+    setCursorBlinking,
+    setCursorSmoothCaretAnimation,
     toggleTheme,
     resetCode,
     problem,
