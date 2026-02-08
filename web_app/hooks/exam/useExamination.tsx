@@ -3,7 +3,7 @@
 import { useCallback } from "react";
 import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
-import type { Examination, ExaminationRequest } from "@/types/examination";
+import type { Examination, ExaminationRequest, ExaminationSpecificProblemResponse } from "@/types/examination";
 
 export const useExamination = () => {
   const axiosInstance = useAxios();
@@ -58,11 +58,26 @@ export const useExamination = () => {
     [axiosInstance],
   );
 
+  const getExaminationWithSpecificProblem = useCallback(
+    async (examId: string, problemId: string): Promise<ExaminationSpecificProblemResponse | null> => {
+      try {
+        const response = await axiosInstance.get(
+          Api.Examination.GET_WITH_SPECIFIC_PROBLEM(examId, problemId)
+        );
+        return response.data?.dataResponse ?? null;
+      } catch {
+        return null;
+      }
+    },
+    [axiosInstance],
+  );
+
   return {
     getExaminationsByClassId,
     getExaminationById,
     createExamination,
     updateExamination,
     deleteExamination,
+    getExaminationWithSpecificProblem,
   };
 };

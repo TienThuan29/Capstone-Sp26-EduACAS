@@ -12,6 +12,8 @@ public interface IProgrammingLanguageQuery
     Task<ProgrammingLanguageResponse?> GetByIdAsync(string id);
 
     Task<List<ProgrammingLanguageResponse>> GetAllAsync();
+
+    Task<List<ProgrammingLanguageResponse>> GetEnabledAsync();
     
     // Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null);
     
@@ -57,6 +59,25 @@ public class ProgrammingLanguageQuery : IProgrammingLanguageQuery
         {
             _logger.LogError(ex,
                 "Error getting all programming languages");
+            throw;
+        }
+    }
+
+    public async Task<List<ProgrammingLanguageResponse>> GetEnabledAsync()
+    {
+        try
+        {
+            var entities = await _repository.GetAllAsync();
+            var enabledLanguages = entities
+                .Where(e => e.Status == PLStatus.ENABLE)
+                .Select(e => _mapper.ToProgrammingLanguageResponse(e))
+                .ToList();
+            
+            return enabledLanguages;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting enabled programming languages");
             throw;
         }
     }

@@ -22,7 +22,7 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
   const [formData, setFormData] = useState<CreateTestCasePayload>(initialTestCase);
 
   const handleAdd = () => {
-    if (!formData.inputData.trim() || !formData.expectedOutput.trim()) return;
+    if (!formData.expectedOutput.trim()) return;
     onAdd(formData);
     setFormData(initialTestCase);
   };
@@ -42,7 +42,7 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
             htmlFor="tc-input"
             className={isDark ? "text-white" : "text-gray-900"}
           >
-            Input data *
+            Input data
           </Label>
           <Textarea
             id="tc-input"
@@ -51,7 +51,6 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
               setFormData((prev) => ({ ...prev, inputData: e.target.value }))
             }
             placeholder="e.g. 1 2"
-            required
             rows={3}
             className="mt-1 font-mono text-sm"
           />
@@ -61,7 +60,7 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
             htmlFor="tc-expected"
             className={isDark ? "text-white" : "text-gray-900"}
           >
-            Expected output *
+            Expected output <span className="text-red-500">*</span>
           </Label>
           <Textarea
             id="tc-expected"

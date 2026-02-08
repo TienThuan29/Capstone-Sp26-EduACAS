@@ -73,4 +73,26 @@ public class ExaminationQueryController : ControllerBase
             return ResponseUtil.Error<List<ExaminationResponse?>>("Internal Server Error", 500);
         }
     }
+
+
+    [HttpGet("{examId}/with-problem/{problemId}")]
+    public async Task<ActionResult<ApiResponse<ExaminationSpecProblemResponse>>> GetExaminationWithSpecificProblems(
+        string examId,
+        string problemId
+    ) {
+        try
+        {
+            var response = await _examinationQuery.GetExaminationProblemResponseAsync(examId, problemId);
+            if (response == null)
+            {
+                return ResponseUtil.Error<ExaminationSpecProblemResponse>("Examination or problem not found", 404);
+            }
+            return ResponseUtil.Success(response, "Examination with specific problem retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving examination with specific problem");
+            return ResponseUtil.Error<ExaminationSpecProblemResponse>("Internal Server Error", 500);
+        }
+    }
 }

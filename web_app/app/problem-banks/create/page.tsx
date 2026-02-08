@@ -212,7 +212,7 @@ export default function CreateProblemPage() {
                 htmlFor="dropzone-file"
                 className={isDark ? "text-white" : "text-gray-900"}
               >
-                Upload Problem File <span className="text-red-500">*</span>
+                Upload Problem File
               </Label>
               <div
                 onDrop={handleDrop}

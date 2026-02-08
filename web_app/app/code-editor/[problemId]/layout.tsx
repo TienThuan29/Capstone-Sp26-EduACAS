@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
-import { EditorProvider } from '../../../hooks/editor/EditorContext';
+import { EditorProvider } from '@/contexts/EditorContext';
 
 export const metadata: Metadata = {
   title: 'Coding Workspace | Edu-ACAS',
-  description: 'Automated Console-based Programming Assessment System - Coding Workspace',
+  description: '',
 };
 
 export default function CodeEditorLayout({

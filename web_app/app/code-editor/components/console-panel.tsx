@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { Spinner } from 'flowbite-react';
 import clsx from 'clsx';
-import { useEditorContext } from '../../../hooks/editor/EditorContext';
-import { TestCaseStatus } from '../types';
+import { useEditorContext } from '@/contexts/EditorContext';
+import { TestCase } from '@/types/examination';
 
 // Dynamic import for Monaco Diff Editor
 const MonacoDiffEditor = dynamic(
@@ -34,18 +34,18 @@ const MonacoDiffEditor = dynamic(
 
 type ConsoleTab = 'testcases' | 'custom' | 'output';
 
-function getStatusIcon(status: TestCaseStatus) {
-  switch (status) {
-    case 'pass':
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case 'fail':
-      return <XCircle className="h-4 w-4 text-red-500" />;
-    case 'error':
-      return <XCircle className="h-4 w-4 text-orange-500" />;
-    default:
-      return <Circle className="h-4 w-4 text-gray-500" />;
-  }
-}
+// function getStatusIcon(status: TestCaseStatus) {
+//   switch (status) {
+//     case 'pass':
+//       return <CheckCircle className="h-4 w-4 text-green-500" />;
+//     case 'fail':
+//       return <XCircle className="h-4 w-4 text-red-500" />;
+//     case 'error':
+//       return <XCircle className="h-4 w-4 text-orange-500" />;
+//     default:
+//       return <Circle className="h-4 w-4 text-gray-500" />;
+//   }
+// }
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -138,7 +138,7 @@ export function ConsolePanel() {
         {activeTab === 'testcases' && (
           <div className="flex h-full flex-col">
             {/* Test Case Tabs */}
-            <div className="flex items-center gap-1 border-b border-gray-800 px-3 py-2">
+            {/* <div className="flex items-center gap-1 border-b border-gray-800 px-3 py-2">
               {testCases.map((tc) => (
                 <button
                   key={tc.id}
@@ -154,13 +154,13 @@ export function ConsolePanel() {
                   <span>Case {tc.id}</span>
                 </button>
               ))}
-            </div>
+            </div> */}
 
             {/* Test Case Details */}
             {activeTestCase && (
               <div className="flex-1 overflow-y-auto p-4">
                 {/* Show Diff View if available and test failed */}
-                {showDiffView && diffContent && activeTestCase.status === 'fail' ? (
+                {/* {showDiffView && diffContent && activeTestCase.status === 'fail' ? (
                   <div className="h-full">
                     <div className="mb-2 flex items-center justify-between">
                       <h4 className="text-sm font-medium text-white">
@@ -198,10 +198,10 @@ export function ConsolePanel() {
                       <span>Your Output</span>
                     </div>
                   </div>
-                ) : (
+                ) : ( */}
                   <div className="space-y-4">
                     {/* Input */}
-                    <div>
+                    {/* <div>
                       <div className="mb-1.5 flex items-center justify-between">
                         <label className="text-xs font-medium text-gray-400">
                           Input
@@ -213,7 +213,7 @@ export function ConsolePanel() {
                           {activeTestCase.input}
                         </pre>
                       </div>
-                    </div>
+                    </div> */}
 
                     {/* Expected Output */}
                     <div>
@@ -231,7 +231,7 @@ export function ConsolePanel() {
                     </div>
 
                     {/* Actual Output (if tested) */}
-                    {activeTestCase.actualOutput !== undefined && (
+                    {/* {activeTestCase.actualOutput !== undefined && (
                       <div>
                         <div className="mb-1.5 flex items-center justify-between">
                           <label className="text-xs font-medium text-gray-400">
@@ -248,8 +248,8 @@ export function ConsolePanel() {
                             )}
                             <CopyButton text={activeTestCase.actualOutput} />
                           </div>
-                        </div>
-                        <div
+                        </div> */}
+                        {/* <div
                           className={clsx(
                             'rounded-md p-3',
                             activeTestCase.status === 'pass'
@@ -267,12 +267,12 @@ export function ConsolePanel() {
                           >
                             {activeTestCase.actualOutput}
                           </pre>
-                        </div>
+                        </div> */}
                       </div>
-                    )}
+                    {/* )} */}
 
                     {/* Execution Stats */}
-                    {activeTestCase.executionTime !== undefined && (
+                    {/* {activeTestCase.executionTime !== undefined && (
                       <div className="flex gap-4 text-xs text-gray-500">
                         <span>
                           Runtime: {activeTestCase.executionTime.toFixed(2)}ms
@@ -283,10 +283,9 @@ export function ConsolePanel() {
                           </span>
                         )}
                       </div>
-                    )}
+                    )} */}
                   </div>
-                )}
-              </div>
+              // </div>
             )}
           </div>
         )}

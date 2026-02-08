@@ -8,7 +8,7 @@ import {
 } from 'react-resizable-panels';
 import { PanelLeftClose, PanelLeft } from 'lucide-react';
 import clsx from 'clsx';
-import { useEditorContext } from '../../../hooks/editor/EditorContext';
+import { useEditorContext } from '@/contexts/EditorContext';
 import {
   HeaderToolbar,
   EditorPanel,
@@ -16,7 +16,7 @@ import {
   ConsolePanel,
   ActionFooter,
 } from '.';
-import { Button, Tooltip } from 'flowbite-react';
+import { Button } from 'flowbite-react';
 
 // Custom resize handle component
 function ResizeHandle({

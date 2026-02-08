@@ -1,8 +1,4 @@
-/** Lite response nested in ExaminationResponse */
-export interface ProgrammingLanguageLite {
-  id: string;
-  languageName: string;
-}
+import { ProgrammingLanguage } from "./language";
 
 /** Lite response nested in ExaminationResponse */
 export interface ClassroomLite {
@@ -33,10 +29,15 @@ export interface Problem {
   updatedDate: string;
 }
 
+/** Boilerplate code for the editor; sourced from Problem.codeTemplate when a problem is set. */
+export function getBoilerplateCode(problem: Problem | null): string {
+  return problem?.codeTemplate?.trim() ?? '';
+}
+
 export interface Examination {
   id: string;
   examName: string;
-  programmingLanguage: ProgrammingLanguageLite;
+  programmingLanguage: ProgrammingLanguage;
   examProblems: ExamProblem[];
   problems: Problem[];
   classroom: ClassroomLite;
@@ -78,4 +79,21 @@ export interface ExaminationRequest {
 export interface ExamProblem {
   problemId: string;
   mark: number;
+}
+
+export interface ExaminationSpecificProblemResponse {
+  id: string;
+  examName: string;
+  programmingLanguage: ProgrammingLanguage;
+  problem: Problem;
+  classroom: ClassroomLite;
+  startDatetime: string;
+  endDatetime: string;
+  description: string;
+  mode: Mode;
+}
+
+export enum Mode {
+  PRACTICAL,
+  EXAMINATION,
 }

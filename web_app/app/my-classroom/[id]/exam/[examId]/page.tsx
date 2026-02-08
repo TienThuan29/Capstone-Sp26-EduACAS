@@ -164,7 +164,7 @@ function ExamDetailContent() {
                 <Badge color="info">{modeLabel}</Badge>
                 {examination.programmingLanguage && (
                   <Badge color="purple">
-                    {examination.programmingLanguage.languageName}
+                    {examination.programmingLanguage?.name}
                   </Badge>
                 )}
                 {examination.isPublicResult && (
@@ -261,16 +261,16 @@ function ExamDetailContent() {
                         {problem.title}
                       </h3>
                       <p className="mt-1 text-sm text-green-600 dark:text-green-400">
-                        {normalized}, {examination.programmingLanguage?.languageName ?? "Unknown"}, Max Score: {mark}
+                        {normalized}, {examination.programmingLanguage?.name ?? "Unknown"}, Max Score: {mark}
                       </p>
                     </div>
 
                     {/* Right side - Star and Solve button */}
                     <div className="flex items-center gap-4">
                       <Button
-                        className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
                         onClick={() => {
-                          // TODO: Navigate to solve problem page
+                          router.push(`/code-editor/${problem.id}?examId=${examId}`);
                         }}
                       >
                         Solve

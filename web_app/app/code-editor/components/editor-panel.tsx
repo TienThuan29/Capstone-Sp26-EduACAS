@@ -2,12 +2,37 @@
 
 import React, { useCallback, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
+import { loader } from '@monaco-editor/react';
 import type { OnMount, OnChange } from '@monaco-editor/react';
 import type * as monaco from 'monaco-editor';
-import { useEditorContext } from '../../../hooks/editor/EditorContext';
-import { useAntiCheat } from '../../../hooks/editor/useAntiCheat';
-import { LANGUAGE_CONFIG } from '../types';
-import { WarningModal } from './warning-modal';
+import { useEditorContext } from '@/contexts/EditorContext';
+
+// Ensure Monaco loads with correct worker paths so syntax highlighting works (e.g. in Next.js)
+loader.config({
+  paths: {
+    vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.52.2/min/vs',
+  },
+});
+
+// Backend sometimes returns wrong monaco id (e.g. "nc" instead of "c"); map to correct Monaco language IDs
+const MONACO_ID_FIXES: Record<string, string> = {
+  nc: 'c',
+  ncpp: 'cpp',
+};
+
+/** Monaco built-in language ids; fall back to language.id if backend monaco value is invalid */
+const KNOWN_MONACO_IDS = new Set([
+  'c', 'cpp', 'csharp', 'css', 'go', 'html', 'java', 'javascript', 'json',
+  'markdown', 'php', 'python', 'r', 'ruby', 'rust', 'sql', 'typescript', 'xml', 'plaintext',
+]);
+
+function getMonacoLanguageId(monaco: string | undefined, languageId: string): string {
+  const raw = (monaco ?? '').toLowerCase().trim();
+  const fixed = MONACO_ID_FIXES[raw] ?? raw;
+  if (KNOWN_MONACO_IDS.has(fixed)) return fixed;
+  const fallback = (languageId || 'plaintext').toLowerCase().trim();
+  return KNOWN_MONACO_IDS.has(fallback) ? fallback : 'plaintext';
+}
 
 // Dynamic import for Monaco Editor to handle SSR
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -23,54 +48,26 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 });
 
 export function EditorPanel() {
-  const { editorState, setCode, isExamMode } = useEditorContext();
+  const { editorState, setCode } = useEditorContext();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const previousCodeRef = useRef(editorState.code);
 
-  const {
-    showFocusWarning,
-    showPasteWarning,
-    lastPastedText,
-    handlePaste,
-    dismissFocusWarning,
-    dismissPasteWarning,
-  } = useAntiCheat({
-    isExamMode,
-    pasteThreshold: 50,
-  });
-
   const handleEditorMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
-    // Focus the editor
     editor.focus();
-    // Add paste detection
-    editor.onDidPaste((e) => {
-      const model = editor.getModel();
-      if (model) {
-        const pastedText = model.getValueInRange(e.range);
-        // handlePaste(pastedText);
-      }
-    });
 
-    // Custom keyboard shortcuts
     editor.addCommand(
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
       () => {
-        // Prevent default save behavior
         console.log('Save shortcut captured');
       }
     );
-  }, [handlePaste]);
+  }, []);
 
   // Handle code changes
   const handleEditorChange: OnChange = useCallback(
     (value) => {
       if (value !== undefined) {
-        // Detect large pastes by comparing with previous code
-        const lengthDiff = value.length - previousCodeRef.current.length;
-        if (lengthDiff > 50) {
-          // Could be a paste - the onDidPaste handler will catch actual pastes
-        }
         previousCodeRef.current = value;
         setCode(value);
       }
@@ -83,11 +80,16 @@ export function EditorPanel() {
     previousCodeRef.current = editorState.code;
   }, [editorState.language, editorState.code]);
 
+  const monacoLanguage = getMonacoLanguageId(
+    editorState.language.monaco,
+    editorState.language.id
+  );
+
   return (
     <div className="relative h-full w-full">
       <MonacoEditor
         height="100%"
-        language={LANGUAGE_CONFIG[editorState.language].monacoLanguage}
+        language={monacoLanguage}
         value={editorState.code}
         theme={editorState.theme}
         onChange={handleEditorChange}
@@ -129,15 +131,6 @@ export function EditorPanel() {
           formatOnType: true,
         }}
       />
-
-      {/* Paste Warning Modal */}
-      {/* <WarningModal
-        isOpen={showPasteWarning}
-        onClose={dismissPasteWarning}
-        title="Large Paste Detected"
-        message={`Pasting large code blocks (${lastPastedText.length} characters) is monitored. This activity has been logged for review.`}
-        variant="warning"
-      /> */}
     </div>
   );
 }

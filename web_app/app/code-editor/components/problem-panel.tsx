@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -16,12 +16,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 import clsx from "clsx";
-import { useEditorContext } from "../../../hooks/editor/EditorContext";
-import { SubmissionStatus } from "../types";
-import { MOCK_HINTS, MOCK_PROBLEM_DESCRIPTION } from "../[problemId]/mockdata";
-import { Button } from "flowbite-react";
+import { Spinner } from "flowbite-react";
+import { useEditorContext } from "@/contexts/EditorContext";
+import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
+import { DIFFICULTY } from "@/types/problem";
 
-type ProblemTab = "problem" | "submissions" ; // | "hints";
+type ProblemTab = "problem" | "submissions" ;
 
 function CodeBlock({
   children,
@@ -64,38 +64,38 @@ function CodeBlock({
   );
 }
 
-function getStatusIcon(status: SubmissionStatus) {
-  switch (status) {
-    case "accepted":
-      return <CheckCircle className="h-4 w-4 text-green-500" />;
-    case "wrong_answer":
-      return <XCircle className="h-4 w-4 text-red-500" />;
-    case "tle":
-      return <Clock className="h-4 w-4 text-yellow-500" />;
-    case "runtime_error":
-    case "compilation_error":
-      return <AlertCircle className="h-4 w-4 text-orange-500" />;
-    default:
-      return <Clock className="h-4 w-4 text-gray-400" />;
-  }
-}
+// function getStatusIcon(status: SubmissionStatus) {
+//   switch (status) {
+//     case "accepted":
+//       return <CheckCircle className="h-4 w-4 text-green-500" />;
+//     case "wrong_answer":
+//       return <XCircle className="h-4 w-4 text-red-500" />;
+//     case "tle":
+//       return <Clock className="h-4 w-4 text-yellow-500" />;
+//     case "runtime_error":
+//     case "compilation_error":
+//       return <AlertCircle className="h-4 w-4 text-orange-500" />;
+//     default:
+//       return <Clock className="h-4 w-4 text-gray-400" />;
+//   }
+// }
 
-function getStatusLabel(status: SubmissionStatus) {
-  switch (status) {
-    case "accepted":
-      return "Accepted";
-    case "wrong_answer":
-      return "Wrong Answer";
-    case "tle":
-      return "Time Limit Exceeded";
-    case "runtime_error":
-      return "Runtime Error";
-    case "compilation_error":
-      return "Compilation Error";
-    default:
-      return status;
-  }
-}
+// function getStatusLabel(status: SubmissionStatus) {
+//   switch (status) {
+//     case "accepted":
+//       return "Accepted";
+//     case "wrong_answer":
+//       return "Wrong Answer";
+//     case "tle":
+//       return "Time Limit Exceeded";
+//     case "runtime_error":
+//       return "Runtime Error";
+//     case "compilation_error":
+//       return "Compilation Error";
+//     default:
+//       return status;
+//   }
+// }
 
 const TABS = [
   { id: "problem" as const, label: "Problem", icon: FileText },
@@ -142,6 +142,32 @@ export function ProblemPanel() {
 
 function DescriptionTab() {
   const { problem } = useEditorContext();
+  const { getFileUrl } = usePrivateS3();
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [pdfLoading, setPdfLoading] = useState(false);
+
+  useEffect(() => {
+    if (!problem?.fileName?.trim()) {
+      setPdfUrl(null);
+      return;
+    }
+    let cancelled = false;
+    setPdfLoading(true);
+    setPdfUrl(null);
+    getFileUrl(problem.fileName)
+      .then((url) => {
+        if (!cancelled) setPdfUrl(url);
+      })
+      .catch(() => {
+        if (!cancelled) setPdfUrl(null);
+      })
+      .finally(() => {
+        if (!cancelled) setPdfLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [problem?.fileName, getFileUrl]);
 
   return (
     <div className="prose prose-invert max-w-none">
@@ -153,23 +179,23 @@ function DescriptionTab() {
         <span
           className={clsx(
             "rounded px-2 py-0.5 text-xs font-medium",
-            (problem?.difficulty || "Easy") === "Easy" &&
+            (problem?.difficulty || DIFFICULTY.EASY) === DIFFICULTY.EASY &&
               "bg-green-500/20 text-green-500",
-            (problem?.difficulty || "Easy") === "Medium" &&
+            (problem?.difficulty || DIFFICULTY.MEDIUM) === DIFFICULTY.MEDIUM &&
               "bg-yellow-500/20 text-yellow-500",
-            (problem?.difficulty || "Easy") === "Hard" &&
+            (problem?.difficulty || DIFFICULTY.HARD) === DIFFICULTY.HARD &&
               "bg-red-500/20 text-red-500",
           )}
         >
-          {problem?.difficulty || "Easy"}
+          {problem?.difficulty || DIFFICULTY.EASY}
         </span>
       </div>
 
       {/* Time & Memory Limits */}
-      <div className="mb-4 flex gap-4 text-sm text-gray-400">
+      {/* <div className="mb-4 flex gap-4 text-sm text-gray-400">
         <span>Time Limit: {problem?.timeLimit || 2}s</span>
         <span>Memory Limit: {problem?.memoryLimit || 256}MB</span>
-      </div>
+      </div> */}
 
       {/* Markdown Content */}
       <ReactMarkdown
@@ -226,68 +252,96 @@ function DescriptionTab() {
           },
         }}
       >
-        {problem?.description || MOCK_PROBLEM_DESCRIPTION}
+        {problem?.content || ''}
       </ReactMarkdown>
+
+      {/* Attach file: display PDF when problem.fileName is set */}
+      {problem?.fileName?.trim() ? (
+        <div className="mt-6 rounded-lg border border-gray-700 bg-gray-800/50">
+          <div className="border-b border-gray-700 px-4 py-2 text-sm font-medium text-gray-300">
+            Problem attachment
+          </div>
+          <div className="min-h-[200px] p-2">
+            {pdfLoading ? (
+              <div className="flex min-h-[40vh] items-center justify-center gap-3 text-gray-400">
+                <Spinner size="lg" />
+                <span className="text-sm">Loading preview...</span>
+              </div>
+            ) : pdfUrl ? (
+              <iframe
+                src={pdfUrl}
+                title="Problem attachment"
+                className="h-[75vh] w-full rounded border-0"
+              />
+            ) : (
+              <div className="flex min-h-[40vh] items-center justify-center p-8 text-center text-sm text-gray-500">
+                No preview available
+              </div>
+            )}
+          </div>
+        </div>
+      ) : null}
+
     </div>
   );
 }
 
 function SubmissionsTab() {
-  const { submissions } = useEditorContext();
+  // const { submissions } = useEditorContext();
 
-  if (submissions.length === 0) {
+  // if (submissions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-gray-400">
         <History className="mb-3 h-12 w-12 opacity-50" />
         <p className="text-sm">No submissions yet</p>
       </div>
     );
-  }
+  // }
 
-  return (
-    <div className="space-y-3">
-      {submissions.map((submission) => (
-        <div
-          key={submission.id}
-          className="rounded-lg border border-gray-700 bg-gray-800 p-4 transition-colors hover:border-gray-600"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              {getStatusIcon(submission.status)}
-              <span
-                className={clsx(
-                  "font-medium",
-                  submission.status === "accepted"
-                    ? "text-green-500"
-                    : "text-red-500",
-                )}
-              >
-                {getStatusLabel(submission.status)}
-              </span>
-            </div>
-            <span className="text-xs text-gray-500">
-              {submission.timestamp.toLocaleString()}
-            </span>
-          </div>
-          <div className="mt-2 flex gap-4 text-xs text-gray-400">
-            <span>Language: {submission.language}</span>
-            {submission.executionTime && (
-              <span>Runtime: {submission.executionTime.toFixed(0)}ms</span>
-            )}
-            {submission.memoryUsed && (
-              <span>Memory: {submission.memoryUsed.toFixed(1)}MB</span>
-            )}
-            {submission.passedTestCases !== undefined && (
-              <span>
-                Test Cases: {submission.passedTestCases}/
-                {submission.totalTestCases}
-              </span>
-            )}
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  // return (
+  //   <div className="space-y-3">
+  //     {submissions.map((submission) => (
+  //       <div
+  //         key={submission.id}
+  //         className="rounded-lg border border-gray-700 bg-gray-800 p-4 transition-colors hover:border-gray-600"
+  //       >
+  //         <div className="flex items-center justify-between">
+  //           <div className="flex items-center gap-2">
+  //             {getStatusIcon(submission.status)}
+  //             <span
+  //               className={clsx(
+  //                 "font-medium",
+  //                 submission.status === "accepted"
+  //                   ? "text-green-500"
+  //                   : "text-red-500",
+  //               )}
+  //             >
+  //               {getStatusLabel(submission.status)}
+  //             </span>
+  //           </div>
+  //           <span className="text-xs text-gray-500">
+  //             {submission.timestamp.toLocaleString()}
+  //           </span>
+  //         </div>
+  //         <div className="mt-2 flex gap-4 text-xs text-gray-400">
+  //           <span>Language: {submission.language}</span>
+  //           {submission.executionTime && (
+  //             <span>Runtime: {submission.executionTime.toFixed(0)}ms</span>
+  //           )}
+  //           {submission.memoryUsed && (
+  //             <span>Memory: {submission.memoryUsed.toFixed(1)}MB</span>
+  //           )}
+  //           {submission.passedTestCases !== undefined && (
+  //             <span>
+  //               Test Cases: {submission.passedTestCases}/
+  //               {submission.totalTestCases}
+  //             </span>
+  //           )}
+  //         </div>
+  //       </div>
+  //     ))}
+  //   </div>
+  // );
 }
 
 // function HintsTab() {
