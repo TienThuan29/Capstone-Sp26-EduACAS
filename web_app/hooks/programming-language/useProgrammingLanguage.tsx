@@ -3,29 +3,20 @@
 import { useCallback } from "react";
 import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
-
-export interface ProgrammingLanguage {
-  id: string;
-  languageName: string;
-  key: string;
-  languageVersion: string;
-  isEnable: boolean;
-  createdDate: Date;
-  updatedDate: Date;
-}
+import type { ProgrammingLanguage } from "@/types/language";
 
 export interface CreateProgrammingLanguagePayload {
-  Key: string;
-  LanguageName: string;
-  LanguageVersion: string;
-  IsEnable: boolean;
+  key: string;
+  languageName: string;
+  languageVersion: string;
+  isEnable: boolean;
 }
 
 export interface UpdateProgrammingLanguagePayload {
-  Key: string;
-  LanguageName: string;
-  LanguageVersion: string;
-  IsEnable: boolean;
+  key: string;
+  languageName: string;
+  languageVersion: string;
+  isEnable: boolean;
 }
 
 export const useProgrammingLanguage = () => {

@@ -39,12 +39,10 @@ public class ProblemCommand : IProblemCommand
         {
             var problem = new Models.Problem
             {
-                ExamId = request.ExamId,
                 LecturerId = request.LecturerId,
                 Title = request.Title,
                 Content = request.Content,
                 FileName = request.FileName,
-                Mark = request.Mark,
                 Difficulty = Enum.Parse<Difficulty>(request.Difficulty),
                 CodeTemplate = request.CodeTemplate
             };
@@ -93,9 +91,33 @@ public class ProblemCommand : IProblemCommand
             problem.Title = request.Title;
             problem.Content = request.Content;
             problem.FileName = request.FileName;
-            problem.Mark = request.Mark;
             problem.Difficulty = Enum.Parse<Difficulty>(request.Difficulty);
             problem.CodeTemplate = request.CodeTemplate;
+
+            // Update test cases if provided - replace all existing test cases with new ones
+            if (request.TestCases != null)
+            {
+                // Clear existing test cases and add new ones
+                problem.TestCases.Clear();
+                
+                foreach (var testCaseRequest in request.TestCases)
+                {
+                    var testCase = new TestCase
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        InputData = testCaseRequest.InputData,
+                        ExpectedOutput = testCaseRequest.ExpectedOutput,
+                        IsPublic = testCaseRequest.IsPublic,
+                        IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
+                        IsRemovedSpace = testCaseRequest.IsRemovedSpace,
+                        IsDeleted = false
+                    };
+                    problem.TestCases.Add(testCase);
+                }
+                
+                _logger.LogInformation("Problem {ProblemId} test cases replaced with {TestCaseCount} new test cases", 
+                    problemId, request.TestCases.Count);
+            }
 
             await _problemRepository.UpdateAsync(problem);
             _logger.LogInformation("Problem {ProblemId} updated successfully", problemId);

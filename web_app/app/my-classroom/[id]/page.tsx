@@ -4,11 +4,10 @@ import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Spinner, Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  useClassroom,
-  Classroom as ClassroomDetail,
-} from "@/hooks/classroom/useClassroom";
-import { useExamination, Examination } from "@/hooks/exam/useExamination";
+import { useClassroom } from "@/hooks/classroom/useClassroom";
+import type { Classroom as ClassroomDetail } from "@/types/classroom";
+import { useExamination } from "@/hooks/exam/useExamination";
+import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
 import { PageUrl } from "@/configs/page.url";
@@ -132,6 +131,7 @@ function ClassroomContent() {
           <ExamsTab
             examinations={examinations}
             examsLoading={examsLoading}
+            classId={classId}
           />
         );
       case "materials":

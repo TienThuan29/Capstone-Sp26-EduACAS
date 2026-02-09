@@ -22,7 +22,8 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import HomeNavbar from "@/components/navbar";
 import Footer from "@/components/footer";
-import { useClassroom, Classroom } from "@/hooks/classroom/useClassroom";
+import { useClassroom } from "@/hooks/classroom/useClassroom";
+import type { Classroom } from "@/types/classroom";
 import Link from "next/link";
 
 export default function ListClassroomPage() {

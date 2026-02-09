@@ -1,7 +1,6 @@
+using System.Linq;
 using Amazon.DynamoDBv2.Model;
 using AcasService.Models;
-
-
 
 namespace AcasService.Repositories.Examination;
 
@@ -28,9 +27,19 @@ namespace AcasService.Repositories.Examination;
                 ["description"] = new AttributeValue { S = exam.Description ?? string.Empty }
             };
 
-            if (exam.ProblemIds != null && exam.ProblemIds.Length > 0)
+            if (exam.Problems != null && exam.Problems.Count > 0)
             {
-               item["problemIds"] = new AttributeValue { SS = exam.ProblemIds.ToList() };
+                item["problems"] = new AttributeValue
+                {
+                    L = exam.Problems.Select(p => new AttributeValue
+                    {
+                        M = new Dictionary<string, AttributeValue>
+                        {
+                            ["problemId"] = new AttributeValue { S = p.ProblemId },
+                            ["mark"] = new AttributeValue { N = p.Mark.ToString() }
+                        }
+                    }).ToList()
+                };
             }
 
             return item;
@@ -56,13 +65,21 @@ namespace AcasService.Repositories.Examination;
                 Description = item.ContainsKey("description") ? item["description"].S : string.Empty
             };
 
-            if (item.ContainsKey("problemIds") && item["problemIds"].SS.Count > 0)
+            if (item.ContainsKey("problems") && item["problems"].L.Count > 0)
             {
-                exam.ProblemIds = item["problemIds"].SS.ToArray();
+                exam.Problems = item["problems"].L.Select(av =>
+                {
+                    var m = av.M;
+                    return new ExaminationProblem
+                    {
+                        ProblemId = m["problemId"].S,
+                        Mark = float.Parse(m["mark"].N)
+                    };
+                }).ToList();
             }
             else
             {
-                exam.ProblemIds = Array.Empty<string>();
+                exam.Problems = new List<ExaminationProblem>();
             }
 
             return exam;

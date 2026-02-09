@@ -12,7 +12,8 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 import { DefaultCustomButton } from "@/components/ui/custom-button"
-import { useProgrammingLanguage, ProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage"
+import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage"
+import type { ProgrammingLanguage } from "@/types/language"
 import { useToast } from "@/hooks/useToast"
 
 export default function ProgrammingLanguagesManagement() {
@@ -113,10 +114,10 @@ export default function ProgrammingLanguagesManagement() {
     e.preventDefault()
     try {
       const payload = {
-        Key: formData.key,
-        LanguageName: formData.languageName,
-        LanguageVersion: formData.languageVersion,
-        IsEnable: formData.isEnable,
+        key: formData.key,
+        languageName: formData.languageName,
+        languageVersion: formData.languageVersion,
+        isEnable: formData.isEnable,
       }
       if (editingLanguage) {
         await updateProgrammingLanguage(editingLanguage.id, payload)

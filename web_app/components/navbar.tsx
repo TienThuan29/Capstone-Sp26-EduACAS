@@ -24,6 +24,7 @@ import {
   Squares2X2Icon,
   UserCircleIcon,
   ArrowRightEndOnRectangleIcon,
+  QuestionMarkCircleIcon,
 } from "@heroicons/react/24/outline"
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation"
 
@@ -154,12 +155,20 @@ export default function HomeNavbar() {
                 }
                 {
                   isLecturer && (
-                    <DropdownItem as={Link} href={PageUrl.MANAGE_CLASSROOM_PAGE}>
-                      <span className="flex items-center gap-2">
-                        <Squares2X2Icon className="h-4 w-4" />
-                        My classes
-                      </span>
-                    </DropdownItem>
+                    <>
+                      <DropdownItem as={Link} href={PageUrl.MANAGE_CLASSROOM_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <Squares2X2Icon className="h-4 w-4" />
+                          My classes
+                        </span>
+                      </DropdownItem>
+                      <DropdownItem as={Link} href={PageUrl.QUESTION_BANKS_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <QuestionMarkCircleIcon className="h-4 w-4" />
+                          Problem Banks
+                        </span>
+                      </DropdownItem>
+                    </>
                   )
                 }
                 {

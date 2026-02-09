@@ -5,7 +5,8 @@ import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Badge, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Card, Spinner } from "flowbite-react"
 import { PlusIcon, PencilIcon, TrashIcon, MagnifyingGlassIcon } from "@heroicons/react/24/outline"
-import { useClassroom, type Classroom } from "@/hooks/classroom/useClassroom"
+import { useClassroom } from "@/hooks/classroom/useClassroom"
+import type { Classroom } from "@/types/classroom"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
 
 interface ClassData {
