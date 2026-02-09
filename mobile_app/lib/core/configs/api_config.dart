@@ -3,17 +3,12 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
   static String get baseUrl {
-    try {
-      const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
-      if (apiBaseUrl.isNotEmpty) {
-        debugPrint('Using dart-define API_BASE_URL: $apiBaseUrl');
-        return apiBaseUrl;
-      } else {
-        throw Exception('API_BASE_URL is not set');
-      }
-    } catch (e) {
-      debugPrint('Error getting base URL: $e');
-      throw Exception('Error getting base URL: $e');
+    final apiBaseUrl = dotenv.env['API_BASE_URL'];
+    if (apiBaseUrl != null && apiBaseUrl.isNotEmpty) {
+      debugPrint('Using API_BASE_URL from .env: $apiBaseUrl');
+      return apiBaseUrl;
+    } else {
+      throw Exception('API_BASE_URL is not set in .env file');
     }
   }
 

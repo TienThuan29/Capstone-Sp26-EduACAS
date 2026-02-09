@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/core/theme/app_colors.dart';
+import 'package:mobile/core/utils/role_navigator.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/core/widgets/enhanced_button.dart';
 import 'package:mobile/core/widgets/text_field.dart';
@@ -115,8 +116,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         });
 
         if (loginResponse.success && loginResponse.dataResponse != null) {
-          // final accessToken = loginResponse.dataResponse!.accessToken;
-          // final userProfile = loginResponse.dataResponse!.userProfile;
+          final userProfile = loginResponse.dataResponse!.userProfile;
+
+          // Save user name and role for later use
+          await TokenStorage.saveUserName(userProfile.fullname);
+          await TokenStorage.saveUserRole(userProfile.role);
 
           // Handle remember me preference
           if (_rememberMe) {
@@ -128,8 +132,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           }
 
           if (mounted) {
-            // Navigate to home page (tokens are already saved by AuthService)
-            Navigator.pushReplacementNamed(context, '/home');
+            // Navigate based on user role
+            RoleNavigator.navigateByRole(context, userProfile.role);
           }
         } else {
           if (mounted) {
