@@ -251,7 +251,7 @@ function ClassroomContent() {
   const renderTabContent = () => {
     switch (activeTab) {
       case "materials":
-        return <MaterialsTab />;
+        return <MaterialsTab classId={classId} />;
       case "exams":
         return (
           <ExamsTab
