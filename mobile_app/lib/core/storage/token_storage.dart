@@ -5,6 +5,8 @@ class TokenStorage {
   static const String _refreshTokenKey = 'refresh_token';
   static const String _rememberMeKey = 'remember_me';
   static const String _savedEmailKey = 'saved_email';
+  static const String _userNameKey = 'user_name';
+  static const String _userRoleKey = 'user_role';
 
   /// Save access token to local storage
   static Future<void> saveAccessToken(String token) async {
@@ -88,5 +90,41 @@ class TokenStorage {
       prefs.remove(_rememberMeKey),
       prefs.remove(_savedEmailKey),
     ]);
+  }
+
+  /// Save user name
+  static Future<void> saveUserName(String name) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userNameKey, name);
+  }
+
+  /// Get user name
+  static Future<String?> getUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userNameKey);
+  }
+
+  /// Clear user name
+  static Future<void> clearUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_userNameKey);
+  }
+
+  /// Save user role
+  static Future<void> saveUserRole(String role) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userRoleKey, role);
+  }
+
+  /// Get user role
+  static Future<String?> getUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userRoleKey);
+  }
+
+  /// Clear user role
+  static Future<void> clearUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_userRoleKey);
   }
 }
