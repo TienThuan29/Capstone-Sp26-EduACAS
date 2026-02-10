@@ -135,7 +135,7 @@ function ClassroomContent() {
           />
         );
       case "materials":
-        return <MaterialsTab />;
+        return <MaterialsTab classId={classId} />;
       case "assignments":
         return <AssignmentsTab />;
       case "practise":
