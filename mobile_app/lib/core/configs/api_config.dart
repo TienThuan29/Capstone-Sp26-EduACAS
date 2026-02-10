@@ -3,31 +3,26 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ApiConfig {
   static String get baseUrl {
-    try {
-      const apiBaseUrl = String.fromEnvironment('API_BASE_URL');
-      if (apiBaseUrl.isNotEmpty) {
-        debugPrint('Using dart-define API_BASE_URL: $apiBaseUrl');
-        return apiBaseUrl;
-      } else {
-        throw Exception('API_BASE_URL is not set');
-      }
-    } catch (e) {
-      debugPrint('Error getting base URL: $e');
-      throw Exception('Error getting base URL: $e');
+    final apiBaseUrl = dotenv.env['API_BASE_URL'];
+    if (apiBaseUrl != null && apiBaseUrl.isNotEmpty) {
+      debugPrint('Using API_BASE_URL from .env: $apiBaseUrl');
+      return apiBaseUrl;
+    } else {
+      throw Exception('API_BASE_URL is not set in .env file');
     }
   }
 
-  static String get loginEndpoint => '/api/auth/v1/login';
-  static String get registerEndpoint => '/api/auth/v1/register/patient';
+  static String get loginEndpoint => '/api/auth/v1/authenticate';
+  // static String get registerEndpoint => '/api/auth/v1/register';
   static String get userProfileEndpoint => '/api/auth/v1/profile';
   static String get refreshTokenEndpoint => '/api/auth/v1/refresh';
 
-  // Blog endpoints
-  static String get blogsEndpoint => '/api/patients/v1/blogs';
+  // // Blog endpoints
+  // static String get blogsEndpoint => '/api/patients/v1/blogs';
 
-  // Patient Report endpoints
-  static String get patientReportsEndpoint =>
-      '/api/patients/v1/patient-reports';
+  // // Patient Report endpoints
+  // static String get patientReportsEndpoint =>
+  //     '/api/patients/v1/patient-reports';
 
   static Duration get requestTimeout {
     try {
