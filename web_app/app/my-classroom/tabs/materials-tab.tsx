@@ -118,7 +118,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
             No materials yet
           </h3>
           <p className="text-sm text-gray-500">
-            The lecturer hasn't uploaded any materials for this class yet
+            The lecturer haưsn&apos;t uploaded any materials for this class yet
           </p>
         </div>
       ) : (

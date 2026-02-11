@@ -33,7 +33,8 @@ export function TipTapToolbar({ editor, isDark }: TipTapToolbarProps) {
         const { state } = editor;
         const { $from } = state.selection;
 
-        let codeBlock = null;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        let codeBlock: any = null;
         let codeBlockDepth = -1;
 
         for (let d = $from.depth; d > 0; d--) {
@@ -56,6 +57,7 @@ export function TipTapToolbar({ editor, isDark }: TipTapToolbarProps) {
             const language = codeBlock.attrs.language || '';
 
             let parser = 'babel';
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const plugins: any[] = [prettierPluginBabel, prettierPluginEstree];
 
             const langLower = language.toLowerCase();
@@ -91,12 +93,13 @@ export function TipTapToolbar({ editor, isDark }: TipTapToolbarProps) {
                     tabWidth: 2,
                     trailingComma: 'es5',
                 });
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
             } catch (prettierError: any) {
                 console.warn('Prettier formatting failed, using basic indentation:', prettierError.message);
 
                 const lines = code.split('\n');
                 let indentLevel = 0;
-                formatted = lines.map(line => {
+                formatted = lines.map((line: string) => {
                     const trimmed = line.trim();
 
                     if (trimmed.startsWith('}') || trimmed.startsWith(']') || trimmed.startsWith(')')) {
@@ -128,6 +131,7 @@ export function TipTapToolbar({ editor, isDark }: TipTapToolbarProps) {
                 .setTextSelection(pos + 1)
                 .run();
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error('Format error:', error);
         } finally {
