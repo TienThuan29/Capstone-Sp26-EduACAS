@@ -18,6 +18,7 @@ import {
   ClipboardDocumentIcon,
   EyeIcon,
   EyeSlashIcon,
+  HashtagIcon,
   KeyIcon,
 } from "@heroicons/react/24/outline";
 import type { Classroom } from "@/types/classroom";
@@ -156,6 +157,20 @@ export function OverviewTab({
                     </>
                   )}
                 </Button>
+              </div>
+            </div>
+            {/* Slot Number */}
+            <div className="mt-2 flex items-center gap-4 border border-gray-100 bg-gray-50/80 p-5 backdrop-blur-sm dark:border-gray-700 dark:bg-gray-900/40">
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-[#1F4E79]/10 text-[#1F4E79] dark:bg-[#C9A24D]/10 dark:text-[#C9A24D]">
+                <HashtagIcon className="h-6 w-6" />
+              </div>
+              <div>
+                <span className="mb-1 block text-[8px] font-black tracking-[0.25em] text-[#1F4E79] uppercase dark:text-[#C9A24D]">
+                  Slot Number
+                </span>
+                <p className="text-lg font-bold text-gray-900 dark:text-white">
+                  {classroom.maxSlot} Slots
+                </p>
               </div>
             </div>
           </div>

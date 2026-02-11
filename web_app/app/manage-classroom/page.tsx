@@ -46,6 +46,7 @@ interface Classroom {
   semesterName: string;
   createdDate: string;
   endDate: string;
+  maxSlot: number;
 }
 
 interface Subject {
@@ -61,6 +62,16 @@ interface Semester {
   startDate: string;
   endDate: string;
 }
+
+type CreateClassroomFormData = {
+  classCode: string;
+  className: string;
+  subjectId: string;
+  semesterName: string;
+  enrolKey: string;
+  dateEnd: string;
+  maxSlot: number | "";
+};
 
 export default function ManageClassroomPage() {
   const { showSuccess, showError } = useToast();
@@ -98,13 +109,14 @@ export default function ManageClassroomPage() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [modalLoading, setModalLoading] = useState(false);
 
-  const [formData, setFormData] = useState({
-    classCode: "", // Added classCode
+  const [formData, setFormData] = useState<CreateClassroomFormData>({
+    classCode: "",
     className: "",
     subjectId: "",
     semesterName: semesters[0].semesterName,
-    enrolKey: "", // Added enrolKey
-    dateEnd: "", // Added dateEnd
+    enrolKey: "",
+    dateEnd: "",
+    maxSlot: "",
   });
 
   const { getLecturerClassrooms } = useClassroom();
@@ -158,7 +170,7 @@ export default function ManageClassroomPage() {
           setSubjects(activeSubjects);
 
           if (activeSubjects.length > 0) {
-            setFormData((prev) => ({
+            setFormData((prev: CreateClassroomFormData) => ({
               ...prev,
               subjectId: activeSubjects[0].id,
             }));
@@ -208,6 +220,13 @@ export default function ManageClassroomPage() {
         return;
       }
 
+      const slotVal = Number(formData.maxSlot);
+      if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
+        showError("Số lượng chỗ (Max Slot) phải từ 2 trở lên.");
+        setModalLoading(false);
+        return;
+      }
+
       const payload = {
         classCode: formData.classCode,
         className: formData.className,
@@ -216,6 +235,7 @@ export default function ManageClassroomPage() {
         semesterName: formData.semesterName,
         enrolKey: formData.enrolKey,
         endDate: formData.dateEnd,
+        maxSlot: slotVal,
       };
 
       await axiosInstance.post(Api.Classroom.CREATE_CLASSROOM, payload);
@@ -230,6 +250,7 @@ export default function ManageClassroomPage() {
         semesterName: semesters[0].semesterName,
         enrolKey: "",
         dateEnd: "",
+        maxSlot: "",
       });
     } catch (error) {
       console.error("Create classroom failed", error);
@@ -300,7 +321,7 @@ export default function ManageClassroomPage() {
       <HomeNavbar />
 
       <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
-        {/* Header */}  
+        {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -367,7 +388,7 @@ export default function ManageClassroomPage() {
           ) : (
             <>
               {/* List header (desktop) */}
-              <div className="hidden grid-cols-5 gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 text-xs font-semibold uppercase tracking-wider text-gray-600 dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400 md:grid">
+              <div className="hidden grid-cols-5 gap-4 border-b border-gray-200 bg-gray-50 px-4 py-3 text-xs font-semibold tracking-wider text-gray-600 uppercase md:grid dark:border-gray-700 dark:bg-gray-800/80 dark:text-gray-400">
                 <div>Classroom code / Classroom name</div>
                 <div>Subject</div>
                 <div>Semester</div>
@@ -378,13 +399,13 @@ export default function ManageClassroomPage() {
               {filteredClassrooms.map((c) => (
                 <div
                   key={c.id}
-                  className="grid grid-cols-1 gap-3 border-b border-gray-100 px-4 py-4 last:border-b-0 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50 md:grid-cols-5 md:items-center md:gap-4"
+                  className="grid grid-cols-1 gap-3 border-b border-gray-100 px-4 py-4 last:border-b-0 hover:bg-gray-50 md:grid-cols-5 md:items-center md:gap-4 dark:border-gray-700 dark:hover:bg-gray-800/50"
                 >
                   <div className="grid grid-cols-2 gap-2 md:items-center">
                     <span className="w-fit rounded-full bg-gradient-to-r from-[#1F4E79] to-[#C9A24D] px-2.5 py-0.5 text-xs font-semibold text-white">
                       {c.classCode}
                     </span>
-                    <span className="text-sm font-bold text-gray-900 dark:text-white md:font-semibold">
+                    <span className="text-sm font-bold text-gray-900 md:font-semibold dark:text-white">
                       {c.className}
                     </span>
                   </div>
@@ -407,7 +428,7 @@ export default function ManageClassroomPage() {
                         color="gray"
                         size="sm"
                         outline
-                        className="rounded-lg border-gray-300 font-semibold hover:!border-[#1F4E79] hover:!bg-[#1F4E79] hover:!text-white dark:border-gray-600 dark:hover:!border-[#C9A24D] dark:hover:!bg-[#C9A24D] dark:hover:!text-white cursor-pointer"
+                        className="cursor-pointer rounded-lg border-gray-300 font-semibold hover:!border-[#1F4E79] hover:!bg-[#1F4E79] hover:!text-white dark:border-gray-600 dark:hover:!border-[#C9A24D] dark:hover:!bg-[#C9A24D] dark:hover:!text-white"
                       >
                         Details
                       </Button>
@@ -467,7 +488,9 @@ export default function ManageClassroomPage() {
                 }
                 maxLength={100}
               />
-              <p className="mt-1 text-xs text-gray-500">Maximum 100 characters.</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Maximum 100 characters.
+              </p>
             </div>
 
             <div>
@@ -492,26 +515,51 @@ export default function ManageClassroomPage() {
               </Select>
             </div>
 
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="semester">
-                  Semester <span className="text-red-500">*</span>
-                </Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="semester">
+                    Semester <span className="text-red-500">*</span>
+                  </Label>
+                </div>
+                <Select
+                  id="semester"
+                  required
+                  value={formData.semesterName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, semesterName: e.target.value })
+                  }
+                >
+                  {semesters.map((sem) => (
+                    <option key={sem.id} value={sem.semesterName}>
+                      {sem.semesterName}
+                    </option>
+                  ))}
+                </Select>
               </div>
-              <Select
-                id="semester"
-                required
-                value={formData.semesterName}
-                onChange={(e) =>
-                  setFormData({ ...formData, semesterName: e.target.value })
-                }
-              >
-                {semesters.map((sem) => (
-                  <option key={sem.id} value={sem.semesterName}>
-                    {sem.semesterName}
-                  </option>
-                ))}
-              </Select>
+
+              <div>
+                <div className="mb-2 block">
+                  <Label htmlFor="maxSlot">
+                    Max Slot <span className="text-red-500">*</span>
+                  </Label>
+                </div>
+                <TextInput
+                  id="maxSlot"
+                  type="number"
+                  placeholder="Enter max slot (e.g. 30)"
+                  required
+                  value={formData.maxSlot}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      maxSlot:
+                        e.target.value === "" ? "" : Number(e.target.value),
+                    })
+                  }
+                  min={2}
+                />
+              </div>
             </div>
 
             <div>
@@ -529,9 +577,15 @@ export default function ManageClassroomPage() {
                 pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
                 title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
               />
-              <ul className="mt-1 list-disc list-inside space-y-0.5 text-xs text-gray-500">
-                <li>6-20 characters, must contain at least one special character, and must not contain spaces.</li>
-                <li>If you don&apos;t want to set an enrol key, it is automatically generated.</li>
+              <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs text-gray-500">
+                <li>
+                  6-20 characters, must contain at least one special character,
+                  and must not contain spaces.
+                </li>
+                <li>
+                  If you don&apos;t want to set an enrol key, it is
+                  automatically generated.
+                </li>
               </ul>
             </div>
 
@@ -551,7 +605,6 @@ export default function ManageClassroomPage() {
                 }
               />
             </div>
-
             <div className="mt-6 flex justify-end gap-2">
               <Button color="gray" onClick={() => setOpenModal(false)}>
                 Cancel

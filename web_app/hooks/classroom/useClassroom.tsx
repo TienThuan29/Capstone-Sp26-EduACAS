@@ -30,6 +30,7 @@ export type UpdateClassroomPayload = {
   semesterName: string;
   enrolKey: string;
   endDate: string;
+  maxSlot: number;
 };
 
 export const useClassroom = () => {
