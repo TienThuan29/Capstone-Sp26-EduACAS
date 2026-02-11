@@ -24,6 +24,8 @@ public class Classroom
     
     [Required]
     public string EnrolKey { get; set; } = string.Empty;
+
+    public int MaxSlot {get; set; } 
     
     public DateTime CreatedDate { get; set; }
     

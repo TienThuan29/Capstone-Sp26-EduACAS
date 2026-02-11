@@ -66,72 +66,142 @@ const Sidebar = () => {
 
   const studentMenuItems = [
     { icon: Squares2X2Icon, label: "Dashboard", href: PageUrl.DASHBOARD_PAGE },
-    { icon: AcademicCapIcon, label: "Classrooms", href: PageUrl.MY_CLASSROOM_PAGE },
+    {
+      icon: AcademicCapIcon,
+      label: "Classrooms",
+      href: PageUrl.MY_CLASSROOM_PAGE,
+    },
     // { icon: DocumentTextIcon, label: "Assignments", href: PageUrl.ASSIGNMENTS_PAGE },
-    { icon: MegaphoneIcon, label: "Announcements", href: PageUrl.ANNOUNCEMENTS_PAGE },
+    {
+      icon: MegaphoneIcon,
+      label: "Announcements",
+      href: PageUrl.ANNOUNCEMENTS_PAGE,
+    },
   ];
 
   const lecturerMenuItems = [
-    { icon: AcademicCapIcon, label: "My Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
-    { icon: QuestionMarkCircleIcon, label: "Problem Banks", href: PageUrl.QUESTION_BANKS_PAGE },
+    {
+      icon: AcademicCapIcon,
+      label: "My Classrooms",
+      href: PageUrl.MANAGE_CLASSROOM_PAGE,
+    },
+    {
+      icon: QuestionMarkCircleIcon,
+      label: "Problem Banks",
+      href: PageUrl.QUESTION_BANKS_PAGE,
+    },
   ];
 
   const lecturerClassroomMenuItems = [
-    { icon: AcademicCapIcon, label: "Overview", href: `${pathname}?tab=overview` },
-    { icon: Squares2X2Icon, label: "Dashboard", href: `${pathname}?tab=dashboard` },
+    {
+      icon: AcademicCapIcon,
+      label: "Overview",
+      href: `${pathname}?tab=overview`,
+    },
+    {
+      icon: Squares2X2Icon,
+      label: "Dashboard",
+      href: `${pathname}?tab=dashboard`,
+    },
     // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
     // { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
     { icon: ClockIcon, label: "Manage Slots", href: `${pathname}?tab=slots` },
-    { icon: PuzzlePieceIcon, label: "Manage Examinations", href: `${pathname}?tab=exams` },
-    { icon: BookOpenIcon, label: "Manage Materials", href: `${pathname}?tab=materials` },
-    { icon: UserGroupIcon, label: "Manage Students", href: `${pathname}?tab=students` },
+    {
+      icon: PuzzlePieceIcon,
+      label: "Manage Examinations",
+      href: `${pathname}?tab=exams`,
+    },
+    {
+      icon: BookOpenIcon,
+      label: "Manage Materials",
+      href: `${pathname}?tab=materials`,
+    },
+    {
+      icon: UserGroupIcon,
+      label: "Manage Students",
+      href: `${pathname}?tab=students`,
+    },
     // {icon: QuestionMarkCircleIcon, label: "Question Banks", href: `${pathname}?tab=question-banks` },
   ];
 
   const adminMenuItems = [
-    { icon: Squares2X2Icon, label: "Admin Dashboard", href: PageUrl.ADMIN_PAGE },
-    { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.ADMIN_CLASSES_PAGE },
-    { icon: BookOpenIcon, label: "Manage Subjects", href: PageUrl.ADMIN_SUBJECTS_PAGE },
-    { icon: CodeBracketSquareIcon, label: "Manage Programming Languages", href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE },
+    {
+      icon: Squares2X2Icon,
+      label: "Admin Dashboard",
+      href: PageUrl.ADMIN_PAGE,
+    },
+    {
+      icon: AcademicCapIcon,
+      label: "Manage Classrooms",
+      href: PageUrl.ADMIN_CLASSES_PAGE,
+    },
+    {
+      icon: BookOpenIcon,
+      label: "Manage Subjects",
+      href: PageUrl.ADMIN_SUBJECTS_PAGE,
+    },
+    {
+      icon: CodeBracketSquareIcon,
+      label: "Manage Programming Languages",
+      href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
+    },
     { icon: UsersIcon, label: "Manage Users", href: PageUrl.ADMIN_USERS_PAGE },
   ];
 
   const classroomMenuItems = [
-    { icon: AcademicCapIcon, label: "Overview", href: `${pathname}?tab=overview` },
-    { icon: ClipboardDocumentListIcon, label: "Examinations", href: `${pathname}?tab=exams` },
-    { icon: PuzzlePieceIcon, label: "Practise Exercises", href: `${pathname}?tab=practise` },
-    { icon: BookOpenIcon, label: "Materials", href: `${pathname}?tab=materials` },
-    { icon: PencilSquareIcon, label: "Assignments", href: `${pathname}?tab=assignments` },
+    {
+      icon: AcademicCapIcon,
+      label: "Overview",
+      href: `${pathname}?tab=overview`,
+    },
+    {
+      icon: ClipboardDocumentListIcon,
+      label: "Examinations",
+      href: `${pathname}?tab=exams`,
+    },
+    {
+      icon: PuzzlePieceIcon,
+      label: "Practise Exercises",
+      href: `${pathname}?tab=practise`,
+    },
+    { icon: ClockIcon, label: "Slots", href: `${pathname}?tab=slots` },
+    {
+      icon: BookOpenIcon,
+      label: "Materials",
+      href: `${pathname}?tab=materials`,
+    },
+    {
+      icon: PencilSquareIcon,
+      label: "Assignments",
+      href: `${pathname}?tab=assignments`,
+    },
   ];
 
   const settingsItems = [
-      { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
-      { icon: BellIcon, label: "Notifications", href: "#" },
-      { icon: Cog6ToothIcon, label: "Settings", href: "#" },
+    { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
+    { icon: BellIcon, label: "Notifications", href: "#" },
+    { icon: Cog6ToothIcon, label: "Settings", href: "#" },
   ];
 
   // justify sidebar options
   let menuItems = studentMenuItems;
   if (isAdmin) {
     menuItems = adminMenuItems;
-  }
-  else if (isLecturer && isLecturerClassroomRoute) {
+  } else if (isLecturer && isLecturerClassroomRoute) {
     menuItems = lecturerClassroomMenuItems;
-  }
-  else if (isLecturer) {
+  } else if (isLecturer) {
     menuItems = lecturerMenuItems;
-  }
-  else if (isStudent) {
+  } else if (isStudent) {
     menuItems = isClassroomRoute ? classroomMenuItems : studentMenuItems;
-  }
-  else {
+  } else {
     menuItems = isClassroomRoute ? classroomMenuItems : studentMenuItems;
   }
 
   return (
     <aside
-      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${isExpanded ? "w-64" : "w-20"
-        } ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"} border-r`}
+      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${
+        isExpanded ? "w-64" : "w-20"
+      } ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"} border-r`}
     >
       {/* Logo */}
       <div
@@ -146,7 +216,7 @@ const Sidebar = () => {
                   alt="Edu-ACAS Logo"
                   width={142}
                   height={64}
-                  className="object-contain cursor-pointer"
+                  className="cursor-pointer object-contain"
                 />
               </Link>
             </div>
@@ -166,7 +236,7 @@ const Sidebar = () => {
                 alt="Edu-ACAS Logo"
                 width={64}
                 height={64}
-                className="object-contain cursor-pointer"
+                className="cursor-pointer object-contain"
               />
             </Link>
             <button
@@ -196,10 +266,11 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+                  isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                }`}
               >
                 <IconComponent className="h-5 w-5 shrink-0" />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -223,10 +294,11 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+                  isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                }`}
               >
                 <IconComponent className="h-5 w-5 shrink-0" />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -243,12 +315,17 @@ const Sidebar = () => {
         {/* Dark Mode Toggle Button */}
         <button
           onClick={toggleTheme}
-          className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 transition-colors cursor-pointer ${isDarkMode
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+            isDarkMode
               ? "text-gray-300 hover:bg-gray-800"
               : "text-gray-700 hover:bg-gray-100"
-            }`}
+          }`}
         >
-          {isDarkMode ? <MoonIcon className="h-5 w-5 shrink-0" /> : <SunIcon className="h-5 w-5 shrink-0" />}
+          {isDarkMode ? (
+            <MoonIcon className="h-5 w-5 shrink-0" />
+          ) : (
+            <SunIcon className="h-5 w-5 shrink-0" />
+          )}
           {isExpanded && (
             <span className="text-sm">
               {isDarkMode ? "Light Mode" : "Dark Mode"}
@@ -261,9 +338,11 @@ const Sidebar = () => {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLoggingOut}
-            className={`w-full px-3 py-2 rounded-lg transition-colors text-sm font-medium flex items-center gap-2 cursor-pointer ${
-              isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-50"
-            } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              isDarkMode
+                ? "text-red-400 hover:bg-red-900/20"
+                : "text-red-600 hover:bg-red-50"
+            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
             {isLoggingOut ? "Logging out..." : "Logout"}
@@ -272,9 +351,11 @@ const Sidebar = () => {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLoggingOut}
-            className={`w-full flex justify-center p-2 rounded-lg transition-colors cursor-pointer ${
-              isDarkMode ? "text-red-400 hover:bg-red-900/20" : "text-red-600 hover:bg-red-50"
-            } ${isLoggingOut ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${
+              isDarkMode
+                ? "text-red-400 hover:bg-red-900/20"
+                : "text-red-600 hover:bg-red-50"
+            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
           </button>
@@ -293,8 +374,12 @@ const Sidebar = () => {
 
 export default Sidebar;
 
-
-const LogoutConfirmModal = ({ show, onClose, onConfirm, isLoggingOut }: LogoutConfirmModalProps) => (
+const LogoutConfirmModal = ({
+  show,
+  onClose,
+  onConfirm,
+  isLoggingOut,
+}: LogoutConfirmModalProps) => (
   <Modal show={show} size="md" onClose={onClose} popup>
     <ModalHeader />
     <ModalBody>
@@ -303,10 +388,19 @@ const LogoutConfirmModal = ({ show, onClose, onConfirm, isLoggingOut }: LogoutCo
           Are you sure you want to log out?
         </p>
         <div className="flex justify-end gap-4">
-          <Button color="red" onClick={onConfirm} disabled={isLoggingOut} className="px-4 cursor-pointer">
+          <Button
+            color="red"
+            onClick={onConfirm}
+            disabled={isLoggingOut}
+            className="cursor-pointer px-4"
+          >
             {isLoggingOut ? "Logging out..." : "Log out"}
           </Button>
-          <Button color="failure" onClick={onClose} className="px-4 cursor-pointer">
+          <Button
+            color="failure"
+            onClick={onClose}
+            className="cursor-pointer px-4"
+          >
             Cancel
           </Button>
         </div>

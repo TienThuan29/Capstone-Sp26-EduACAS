@@ -47,6 +47,7 @@ namespace AcasService.Application.Mappers
                 EnrolKey = classroom.EnrolKey,
                 CreatedDate = classroom.CreatedDate,
                 UpdatedDate = classroom.UpdatedDate,
+                MaxSlot = classroom.MaxSlot,
                 EndDate = classroom.EndDate,
                 IsDeleted = classroom.IsDeleted
             };

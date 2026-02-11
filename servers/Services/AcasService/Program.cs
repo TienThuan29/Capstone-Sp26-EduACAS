@@ -34,6 +34,12 @@ using AcasService.Application.Mappers;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Queries.Subject;
 using AcasService.Application.Commands.ClassroomEnrollment;
+using AcasService.Application.Commands.SlotCommand;
+using AcasService.Repositories.Slot;
+using AcasService.Application.Queries.Slot;
+using AcasService.Application.Commands.Material;
+using AcasService.Application.Queries.Material;
+using AcasService.Repositories.Material;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -90,6 +96,8 @@ builder.Services.AddScoped<IProgrammingLanguageRepository, ProgrammingLanguageRe
 builder.Services.AddScoped<IExaminationRepository, ExaminationRepository>();
 builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRepository>();
+builder.Services.AddScoped<ISlotRepository,SlotRepository>();
+builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -107,12 +115,20 @@ builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<ProblemMapper>();
+builder.Services.AddScoped<SlotMapper>();
 
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
+builder.Services.AddScoped<ISlotCommand, SlotCommand>();
+builder.Services.AddScoped<ISlotQuery, SlotQuery>();
+
+// Material services
+builder.Services.AddScoped<MaterialMapper>();
+builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
+builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
 
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
