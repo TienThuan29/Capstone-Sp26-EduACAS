@@ -352,7 +352,11 @@ export default function CreateProblemPage() {
                 htmlFor="content"
                 className={isDark ? "text-white" : "text-gray-900"}
               >
+<<<<<<< HEAD
+                Upload Problem File
+=======
                 Content <span className="text-red-500">*</span>
+>>>>>>> 09e6001afc6d2ca335e5d0605e4ebe64f9755a8a
               </Label>
 
               <div className={`mt-1 rounded-lg border ${isDark ? "border-gray-600 bg-gray-700" : "border-gray-300 bg-white"}`}>

@@ -1,4 +1,16 @@
 services:
+
+  code-runner:    
+    image: tienthuan29/code-runner-nestjs:latest    
+    container_name: code-runner-api    
+    ports:    
+      - "5000:5000"    
+    environment:    
+      - NODE_ENV=   
+      - PORT=5000    
+    restart: unless-stopped
+    networks:
+      - acas-network
   
   rabbitmq:
     image: rabbitmq:3-management-alpine

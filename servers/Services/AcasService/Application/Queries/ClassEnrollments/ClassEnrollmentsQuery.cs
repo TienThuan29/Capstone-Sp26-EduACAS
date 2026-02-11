@@ -1,6 +1,4 @@
-
-
-using AcasService.Application.ClassroomEnrollment.ResponseDTOs;
+using AcasService.Application.ResponseDTOs;
 
 namespace AcasService.Application.Queries.ClassEnrollments
 {

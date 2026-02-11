@@ -63,8 +63,6 @@ public class UpdateProblemRequest
 
 public class CreateTestCaseRequest
 {
-    [Required(ErrorMessage = "InputData is required")]
-    [StringLength(10000, ErrorMessage = "InputData cannot exceed 10000 characters")]
     public string InputData { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "ExpectedOutput is required")]
@@ -83,8 +81,6 @@ public class CreateTestCaseRequest
 
 public class UpdateTestCaseRequest
 {
-    [Required(ErrorMessage = "InputData is required")]
-    [StringLength(10000, ErrorMessage = "InputData cannot exceed 10000 characters")]
     public string InputData { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "ExpectedOutput is required")]

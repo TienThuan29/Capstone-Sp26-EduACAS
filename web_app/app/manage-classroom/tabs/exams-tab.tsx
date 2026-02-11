@@ -20,8 +20,6 @@ import {
   TableHeadCell,
   TableRow,
   Badge,
-  Tabs,
-  TabItem,
   Tooltip,
 } from "flowbite-react";
 import {
@@ -93,8 +91,8 @@ export function ExamsTab({
     updateExamination,
     deleteExamination,
   } = useExamination();
-  const { getAllProgrammingLanguages } = useProgrammingLanguage();
 
+  const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
   const [languages, setLanguages] = useState<ProgrammingLanguage[]>([]);
   const [openFormModal, setOpenFormModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -106,13 +104,13 @@ export function ExamsTab({
 
   const loadLanguages = useCallback(async () => {
     try {
-      const list = await getAllProgrammingLanguages();
+      const list = await getEnabledProgrammingLanguages();
       setLanguages(list);
     } catch (e) {
       console.error("Failed to load programming languages", e);
       showError("Failed to load programming languages");
     }
-  }, [getAllProgrammingLanguages, showError]);
+  }, [getEnabledProgrammingLanguages, showError]);
 
   useEffect(() => {
     loadLanguages();
@@ -302,7 +300,7 @@ export function ExamsTab({
                     <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
                       {exam.examName}
                     </TableCell>
-                    <TableCell>{exam.programmingLanguage?.languageName ?? "—"}</TableCell>
+                    <TableCell>{exam.programmingLanguage?.name ?? "—"}</TableCell>
                     <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
                       {start.toLocaleString("vi-VN")}
                     </TableCell>
@@ -393,7 +391,9 @@ export function ExamsTab({
   );
 }
 
-
+/**
+ * Modal for creating/editing an examination
+ */
 type ExaminationFormModalProps = {
   show: boolean;
   onClose: () => void;
@@ -458,10 +458,9 @@ function ExaminationFormModal({
             >
               <option value="">Select language</option>
               {languages
-                .filter((l) => l.isEnable)
                 .map((l) => (
                   <option key={l.id} value={l.id}>
-                    {l.languageName}
+                    {l.name}
                   </option>
                 ))}
             </Select>
@@ -582,12 +581,12 @@ function ExaminationFormModal({
           </div>
         </ModalBody>
         <ModalFooter className="shrink-0 border-t border-gray-200 dark:border-gray-600">
-          <Button type="button" color="gray" onClick={onClose}>
+          <Button type="button" color="gray" onClick={onClose} className="cursor-pointer">
             Cancel
           </Button>
           <Button
             type="submit"
-            className="bg-[#1F4E79] hover:bg-[#2A6BA3]"
+            className="bg-[#1F4E79] hover:bg-[#2A6BA3] cursor-pointer"
             disabled={actionLoading}
           >
             {actionLoading ? (
@@ -601,6 +600,9 @@ function ExaminationFormModal({
   );
 }
 
+/**
+ * Modal for confirming deletion of an examination
+ */
 type DeleteExaminationModalProps = {
   show: boolean;
   onClose: () => void;

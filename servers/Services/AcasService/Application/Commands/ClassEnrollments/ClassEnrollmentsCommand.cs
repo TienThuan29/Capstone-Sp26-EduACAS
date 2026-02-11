@@ -1,12 +1,10 @@
-
 using AcasService.Repositories.ClassroomEnrollment;
-using AcasService.Application.ClassroomEnrollment;
-using AcasService.Application.ClassroomEnrollment.ResponseDTOs;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Web.Requests;
 
-namespace AcasService.Application.Commands.ClassroomEnrollment;
+namespace AcasService.Application.Commands.ClassEnrollments;
 
 public interface IClassEnrollmentsCommand
 {

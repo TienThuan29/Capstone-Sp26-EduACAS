@@ -1,5 +1,4 @@
 using AcasService.Application.Commands.Classroom;
-using AcasService.Application.Commands.ClassroomEnrollment;
 using AcasService.Application.Commands.Examination;
 using AcasService.Application.Commands.OCR;
 using AcasService.Application.Commands.Problem;
@@ -36,23 +35,8 @@ using Microsoft.OpenApi;
 using StackExchange.Redis;
 using System.Text;
 using System.Threading.RateLimiting;
-using AcasService.Application.Queries.S3;
-using AcasService.Repositories.DynamoDB;
-using AcasService.Repositories.Subject;
-using AcasService.Application.Commands.Classroom;
-using AcasService.Application.Queries.Classroom;
-using AcasService.Repositories.Classroom;
-using AcasService.Application.Commands.ProgrammingLanguage;
-using AcasService.Application.Commands.Examination;
-using AcasService.Application.Queries.ProgrammingLanguage;
-using AcasService.Application.Queries.Examination;
-using AcasService.Repositories.ProgrammingLanguage;
-using AcasService.Repositories.Examination;
-using AcasService.Repositories.ClassroomEnrollment;
-using AcasService.Application.Mappers;
-using AcasService.Application.Commands.Subject;
-using AcasService.Application.Queries.Subject;
-using AcasService.Application.Commands.ClassroomEnrollment;
+using AcasService.Application.CodeRunner;
+using AcasService.Application.Commands.ClassEnrollments;
 using AcasService.Application.Commands.SlotCommand;
 using AcasService.Repositories.Slot;
 using AcasService.Application.Queries.Slot;
@@ -126,31 +110,31 @@ builder.Services.AddScoped<ISubjectCommand, SubjectCommand>();
 builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();
 builder.Services.AddScoped<IClassroomCommand, ClassroomCommand>();  
 builder.Services.AddScoped<IClassroomQuery, ClassroomQuery>();
-
-builder.Services.AddScoped<SubjectMapper>();
-builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
-builder.Services.AddScoped<ProblemMapper>();
-builder.Services.AddScoped<SlotMapper>();
-
-builder.Services.AddScoped<ProgrammingLanguageMapper>();
-builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
 builder.Services.AddScoped<ISlotCommand, SlotCommand>();
 builder.Services.AddScoped<ISlotQuery, SlotQuery>();
-
-// Material services
-builder.Services.AddScoped<MaterialMapper>();
 builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
 builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
-
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
+
+// mapper
+builder.Services.AddScoped<ProblemMapper>();
+builder.Services.AddScoped<SlotMapper>();
+builder.Services.AddScoped<SubjectMapper>();
+builder.Services.AddScoped<ClassroomMapper>();
+builder.Services.AddScoped<ProgrammingLanguageMapper>();
+builder.Services.AddScoped<ExaminationMapper>();
+builder.Services.AddScoped<MaterialMapper>();
+
+// code runner service 
+builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 
 // Azure Form Recognizer configuration
 var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??
