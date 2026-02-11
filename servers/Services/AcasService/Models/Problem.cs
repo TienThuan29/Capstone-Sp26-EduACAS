@@ -13,11 +13,11 @@ public class Problem
     [Required]
     public string Title { get; set; } = string.Empty;
 
-    [Required]
-    public string Content { get; set; } = string.Empty; // markdown content
+    //[Required]
+    public string? Content { get; set; }// markdown content
 
-    [Required]
-    public string FileName { get; set; } = string.Empty;
+    //[Required]
+    public string? FileName { get; set; }
 
     // [Required]
     // public float Mark { get; set; }

@@ -169,6 +169,40 @@ public class PrivateS3Repository : IPrivateS3Repository
         }
     }
 
+    public async Task<byte[]> DownloadFileAsync(string fileName)
+    {
+        ValidateArguments(fileName);
+        try
+        {
+            var request = new GetObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = fileName
+            };
+            using var response = await _s3Client.GetObjectAsync(request);
+            if (response.HttpStatusCode != HttpStatusCode.OK)
+            {
+                throw new InvalidOperationException(
+                    $"Failed to download file. HTTP Status: {response.HttpStatusCode}"
+                );
+            }
+            using var memoryStream = new MemoryStream();
+            await response.ResponseStream.CopyToAsync(memoryStream);
+            _logger.LogInformation("File downloaded from private bucket: {FileName}", fileName);
+            return memoryStream.ToArray();
+        }
+        catch (AmazonS3Exception ex) when (ex.StatusCode == HttpStatusCode.NotFound)
+        {
+            _logger.LogWarning("File not found in private bucket: {FileName}", fileName);
+            throw new FileNotFoundException("File not found", fileName, ex);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error downloading file from private bucket: {FileName}", fileName);
+            throw;
+        }
+    }
+
     private static void ValidateArguments(string fileName, int? expiresInSeconds = null)
     {
         if (string.IsNullOrWhiteSpace(fileName))

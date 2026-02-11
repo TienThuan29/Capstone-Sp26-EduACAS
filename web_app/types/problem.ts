@@ -7,6 +7,13 @@ export const DIFFICULTY = {
   HARD: 'HARD',
 } as const satisfies Record<string, Difficulty>;
 
+export type ProblemMode = "MANUAL" | "FROM_FILE";
+
+export const PROBLEM_MODE = {
+  MANUAL: "MANUAL",
+  FROM_FILE: "FROM_FILE",
+} as const satisfies Record<string, ProblemMode>;
+
 /** Backend serializes enum as number (0=EASY, 1=MEDIUM, 2=HARD). Normalize to string for display. */
 const DIFFICULTY_BY_INDEX: Record<number, Difficulty> = {
   0: 'EASY',

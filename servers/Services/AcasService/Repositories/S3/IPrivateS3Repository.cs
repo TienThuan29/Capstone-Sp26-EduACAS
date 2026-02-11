@@ -9,4 +9,6 @@ public interface IPrivateS3Repository
       Task<string> UploadFileAsync(byte[] file, string fileName, string contentType);
 
       Task<bool> DeleteFileAsync(string fileName);
+      Task<byte[]> DownloadFileAsync(string fileName);
+
 }

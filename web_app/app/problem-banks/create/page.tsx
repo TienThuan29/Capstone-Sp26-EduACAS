@@ -24,14 +24,30 @@ import { useProblem } from "@/hooks/problem/useProblem";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import { useAuth } from "@/contexts/AuthContext";
 import { PageUrl } from "@/configs/page.url";
-import type { Difficulty } from "@/types/problem";
-import { DIFFICULTY } from "@/types/problem";
+import type { Difficulty, ProblemMode } from "@/types/problem";
+import { DIFFICULTY, PROBLEM_MODE } from "@/types/problem";
 import type {
   CreateProblemPayload,
   CreateTestCasePayload,
 } from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { TestcaseBlock } from "../components/testcase-block";
+import { TipTapToolbar } from "@/components/tiptap-toolbar";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TextAlign from '@tiptap/extension-text-align';
+import { TextStyle } from '@tiptap/extension-text-style';
+import Underline from '@tiptap/extension-underline';
+import TipTapLink from '@tiptap/extension-link';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { createLowlight, all } from 'lowlight';
+import TurndownService from 'turndown';
+import { markdownToHtml } from '@/utils/markdown-converter';
+import { formatMarkdownCode } from '@/utils/markdown-formatter';
 
 const initialFormData = {
   lecturerId: "",
@@ -48,7 +64,7 @@ export default function CreateProblemPage() {
   const { isDark } = useThemeContext();
   const toast = useToast();
   const { uploadFile } = usePrivateS3();
-  const { createProblem } = useProblem();
+  const { createProblem, extractOcrContent } = useProblem();
 
   const [mounted, setMounted] = useState(false);
   const [formData, setFormData] = useState(initialFormData);
@@ -59,6 +75,56 @@ export default function CreateProblemPage() {
   );
   const [testCases, setTestCases] = useState<CreateTestCasePayload[]>([]);
   const [showTestcaseForm, setShowTestcaseForm] = useState(false);
+
+  const [mode, setMode] = useState<ProblemMode>("MANUAL");
+  const [extracting, setExtracting] = useState(false);
+  const [extractedMarkdown, setExtractedMarkdown] = useState("");
+  const [showEditor, setShowEditor] = useState(false);
+  const [editorHtml, setEditorHtml] = useState("");
+
+  const lowlight = createLowlight(all);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: {
+          class: 'hljs',
+        },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
+      }),
+      TextStyle,
+      Underline,
+      TipTapLink.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse table-auto w-full',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: editorHtml,
+    onUpdate: ({ editor }) => {
+      setEditorHtml(editor.getHTML());
+    },
+    editable: true,
+    immediatelyRender: false,
+  });
+
 
   useEffect(() => {
     setMounted(true);
@@ -105,25 +171,89 @@ export default function CreateProblemPage() {
     e.stopPropagation();
   };
 
+  const handleExtractAndEdit = async () => {
+    if (!formData.fileName) {
+      toast.showError("Please upload a file first");
+      return;
+    }
+
+    setExtracting(true);
+    try {
+      const markdown = await extractOcrContent(formData.fileName);
+
+      setExtractedMarkdown(markdown);
+
+      const formattedMarkdown = await formatMarkdownCode(markdown);
+
+      const html = markdownToHtml(formattedMarkdown);
+      setEditorHtml(html);
+
+      if (editor) {
+        editor.commands.setContent(html);
+      }
+
+      setShowEditor(true);
+
+      toast.showSuccess("Content extracted successfully!");
+    } catch (error: any) {
+      toast.showError(error.message || "Failed to extract content");
+      console.error("OCR extraction error:", error);
+    } finally {
+      setExtracting(false);
+    }
+  };
+
   if (!mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fileName?.trim()) {
-      toast.showError("Please upload a template file first");
-      return;
-    }
+
     setSubmitting(true);
     try {
+      let finalContent = "";
+      let finalFileName = "";
+
+      if (mode === "MANUAL") {
+        if (editor) {
+          const html = editor.getHTML();
+          const turndownService = new TurndownService();
+          finalContent = turndownService.turndown(html);
+        }
+        finalFileName = formData.fileName || "manual_problem.txt";
+
+        if (!finalContent.trim()) {
+          toast.showError("Please enter problem content");
+          return;
+        }
+      } else {
+        if (!formData.fileName?.trim()) {
+          toast.showError("Please upload a file first");
+          return;
+        }
+
+        finalFileName = formData.fileName;
+
+        if (showEditor && editor) {
+          const html = editor.getHTML();
+          const turndownService = new TurndownService();
+          finalContent = turndownService.turndown(html);
+        } else {
+          finalContent = "";
+        }
+      }
+
       const payload: CreateProblemPayload = {
         lecturerId: formData.lecturerId || (user?.id ?? ""),
         title: formData.title,
-        content: formData.content,
-        fileName: formData.fileName,
+        content: finalContent,
+        fileName: finalFileName,
         difficulty: formData.difficulty,
         codeTemplate: formData.codeTemplate,
         testCases: testCases.length > 0 ? testCases : undefined,
+        mode: mode,
+        wantsToEdit: showEditor,
       };
+
       await createProblem(payload);
       toast.showSuccess("Problem created successfully");
       router.push(PageUrl.QUESTION_BANKS_PAGE);
@@ -160,6 +290,36 @@ export default function CreateProblemPage() {
           </p>
         </div>
       </div>
+      <div className="mb-4 flex justify-end">
+        <div className="inline-flex rounded-lg border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 p-1">
+          <button
+            type="button"
+            onClick={() => {
+              setMode(PROBLEM_MODE.MANUAL);
+              setShowEditor(false);
+            }}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${mode === PROBLEM_MODE.MANUAL
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+              }`}
+          >
+            Manual
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode(PROBLEM_MODE.FROM_FILE);
+              setShowEditor(false);
+            }}
+            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${mode === PROBLEM_MODE.FROM_FILE
+              ? "bg-blue-600 text-white shadow-sm"
+              : "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-600"
+              }`}
+          >
+            Upload File
+          </button>
+        </div>
+      </div>
 
       <div
         className={`p-6 ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
@@ -186,94 +346,177 @@ export default function CreateProblemPage() {
             />
           </div>
 
-          <div>
-            <Label
-              htmlFor="content"
-              className={isDark ? "text-white" : "text-gray-900"}
-            >
-              Content <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) =>
-                setFormData({ ...formData, content: e.target.value })
-              }
-              placeholder="Problem description (10–50000 characters)"
-              required
-              rows={6}
-              className="mt-1"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
+          {mode === PROBLEM_MODE.MANUAL && (
             <div>
               <Label
-                htmlFor="dropzone-file"
+                htmlFor="content"
                 className={isDark ? "text-white" : "text-gray-900"}
               >
-                Upload Problem File <span className="text-red-500">*</span>
+                Content <span className="text-red-500">*</span>
               </Label>
-              <div
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                className="mt-1 flex w-full items-center justify-center"
-              >
+
+              <div className={`mt-1 rounded-lg border ${isDark ? "border-gray-600 bg-gray-700" : "border-gray-300 bg-white"}`}>
+                {editor && <TipTapToolbar editor={editor} isDark={isDark} />}
+                <EditorContent
+                  editor={editor}
+                  className={`prose max-w-none p-4 min-h-[300px] ${isDark ? 'prose-invert' : ''
+                    } 
+                  [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-blue-600 dark:[&_h1]:text-blue-400 [&_h1]:mb-4
+                  [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-blue-500 dark:[&_h2]:text-blue-300 [&_h2]:mb-3
+                  [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-700 dark:[&_h3]:text-gray-300 [&_h3]:mb-2
+                  [&_p]:text-gray-900 dark:[&_p]:text-gray-100
+                  [&_li]:text-gray-900 dark:[&_li]:text-gray-100
+                  [&_td]:text-gray-900 dark:[&_td]:text-gray-100
+                  [&_th]:text-gray-900 dark:[&_th]:text-gray-100
+                  [&_pre]:bg-gray-50 dark:[&_pre]:bg-transparent [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-gray-200 dark:[&_pre]:border-gray-600
+                  [&_code]:text-sm [&_code]:font-mono
+                  [&_pre_code]:bg-transparent [&_pre_code]:text-gray-900 dark:[&_pre_code]:text-gray-100
+                  [&_.hljs-keyword]:text-purple-600 dark:[&_.hljs-keyword]:text-purple-400
+                  [&_.hljs-string]:text-green-600 dark:[&_.hljs-string]:text-green-400
+                  [&_.hljs-comment]:text-gray-500 dark:[&_.hljs-comment]:text-gray-400 [&_.hljs-comment]:italic
+                  [&_.hljs-number]:text-orange-600 dark:[&_.hljs-number]:text-orange-400
+                  [&_.hljs-title]:text-blue-600 dark:[&_.hljs-title]:text-blue-400
+                  focus:outline-none`}
+                />
+              </div>
+
+              <p className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                Use the toolbar to format your problem description
+              </p>
+            </div>
+          )}
+
+          {mode === PROBLEM_MODE.FROM_FILE && (
+            <div className="space-y-4">
+              <div>
                 <Label
                   htmlFor="dropzone-file"
-                  className={`flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${isDark ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600" : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"}`}
+                  className={isDark ? "text-white" : "text-gray-900"}
                 >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    {uploading ? (
-                      <Spinner size="lg" />
+                  Upload Problem File <span className="text-red-500">*</span>
+                </Label>
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  className="mt-1 flex w-full items-center justify-center"
+                >
+                  <Label
+                    htmlFor="dropzone-file"
+                    className={`flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${isDark ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600" : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"}`}
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {uploading ? (
+                        <Spinner size="lg" />
+                      ) : (
+                        <>
+                          <CloudArrowUpIcon className="mb-4 h-10 w-10 text-gray-500 dark:text-gray-400" />
+                          <p
+                            className={`mb-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          >
+                            <span className="font-semibold">Click to upload</span>{" "}
+                            or drag and drop
+                          </p>
+                          <p
+                            className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          >
+                            Problem files (e.g. file.pdf, ...)
+                          </p>
+                          {formData.fileName && (
+                            <p className="mt-2 text-xs font-medium text-green-600 dark:text-green-400">
+                              Saved: {formData.fileName}
+                            </p>
+                          )}
+                          {selectedFileLabel && !formData.fileName && (
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                              Selected: {selectedFileLabel}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <FileInput
+                      id="dropzone-file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      accept=".pdf, .docx, .doc, .txt"
+                    />
+                  </Label>
+                </div>
+                {formData.fileName && (
+                  <p
+                    className={`mt-2 text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  >
+                    File saved: <span className="font-mono font-medium">{formData.fileName}</span>
+                  </p>
+                )}
+              </div>
+
+              {formData.fileName && !showEditor && (
+                <div>
+                  <Button
+                    type="button"
+                    color="purple"
+                    onClick={handleExtractAndEdit}
+                    disabled={extracting}
+                    className="cursor-pointer"
+                  >
+                    {extracting ? (
+                      <>
+                        <Spinner size="sm" className="mr-2" />
+                        Extracting content...
+                      </>
                     ) : (
                       <>
-                        <CloudArrowUpIcon className="mb-4 h-10 w-10 text-gray-500 dark:text-gray-400" />
-                        <p
-                          className={`mb-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                        >
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
-                        </p>
-                        <p
-                          className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                        >
-                          Problem files (e.g. file.pdf, ...)
-                        </p>
-                        {formData.fileName && (
-                          <p className="mt-2 text-xs font-medium text-green-600 dark:text-green-400">
-                            Saved: {formData.fileName}
-                          </p>
-                        )}
-                        {selectedFileLabel && !formData.fileName && (
-                          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Selected: {selectedFileLabel}
-                          </p>
-                        )}
+                        Extract & Edit Content
                       </>
                     )}
+                  </Button>
+                  <p className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                    Extract problem content from the file using OCR and edit it before creating
+                  </p>
+                </div>
+              )}
+
+              {showEditor && editor && (
+                <div>
+                  <Label className={isDark ? "text-white" : "text-gray-900"}>
+                    Edit Extracted Content
+                  </Label>
+
+                  <div className={`mt-2 rounded-lg border ${isDark ? "border-gray-600 bg-gray-700" : "border-gray-300 bg-white"}`}>
+                    <TipTapToolbar editor={editor} isDark={isDark} />
+
+                    <EditorContent
+                      editor={editor}
+                      className={`prose max-w-none p-4 min-h-[300px] ${isDark ? 'prose-invert' : ''
+                        } 
+                      [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-blue-600 dark:[&_h1]:text-blue-400 [&_h1]:mb-4
+                      [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-blue-500 dark:[&_h2]:text-blue-300 [&_h2]:mb-3
+                      [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-700 dark:[&_h3]:text-gray-300 [&_h3]:mb-2
+                      [&_p]:text-gray-900 dark:[&_p]:text-gray-100
+                      [&_li]:text-gray-900 dark:[&_li]:text-gray-100
+                      [&_td]:text-gray-900 dark:[&_td]:text-gray-100
+                      [&_th]:text-gray-900 dark:[&_th]:text-gray-100
+                      [&_pre]:bg-gray-50 dark:[&_pre]:bg-transparent [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-gray-200 dark:[&_pre]:border-gray-600
+                      [&_code]:text-sm [&_code]:font-mono
+                      [&_pre_code]:bg-transparent [&_pre_code]:text-gray-900 dark:[&_pre_code]:text-gray-100
+                      [&_.hljs-keyword]:text-purple-600 dark:[&_.hljs-keyword]:text-purple-400
+                      [&_.hljs-string]:text-green-600 dark:[&_.hljs-string]:text-green-400
+                      [&_.hljs-comment]:text-gray-500 dark:[&_.hljs-comment]:text-gray-400 [&_.hljs-comment]:italic
+                      [&_.hljs-number]:text-orange-600 dark:[&_.hljs-number]:text-orange-400
+                      [&_.hljs-title]:text-blue-600 dark:[&_.hljs-title]:text-blue-400
+                      focus:outline-none`}
+                    />
                   </div>
-                  <FileInput
-                    id="dropzone-file"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={uploading}
-                    accept=".pdf, .docx, .doc, .txt"
-                  />
-                </Label>
-              </div>
-              {formData.fileName && (
-                <p
-                  className={`mt-1 text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                >
-                  File name for problem:{" "}
-                  <span className="font-mono font-medium">
-                    {formData.fileName}
-                  </span>
-                </p>
+
+                  <p className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                    Review and edit the extracted content before creating the problem
+                  </p>
+                </div>
               )}
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-1 gap-4">
             <div>

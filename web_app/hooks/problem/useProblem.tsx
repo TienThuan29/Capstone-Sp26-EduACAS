@@ -25,6 +25,8 @@ export type CreateProblemPayload = {
   difficulty: Difficulty;
   codeTemplate: string;
   testCases?: CreateTestCasePayload[];
+  mode: string;
+  wantsToEdit?: boolean;
 };
 
 export type UpdateProblemPayload = {
@@ -86,6 +88,29 @@ export const useProblem = () => {
     [axiosInstance],
   );
 
+  const extractOcrContent = useCallback(
+    async (fileName: string): Promise<string> => {
+      try {
+        const response = await axiosInstance.post(
+          Api.Problem.OCR_EXTRACT,
+          { fileName }
+        );
+
+        const content = response.data?.dataResponse?.content;
+
+        if (typeof content !== 'string') {
+          throw new Error('Invalid OCR response format');
+        }
+
+        return content;
+      } catch (error: any) {
+        console.error('OCR extraction failed:', error);
+        throw new Error(error.response?.data?.message || 'Failed to extract content from file');
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     // getAllProblems,
     getProblemsByLecturerId,
@@ -93,5 +118,6 @@ export const useProblem = () => {
     createProblem,
     updateProblem,
     deleteProblem,
+    extractOcrContent,
   };
 };
