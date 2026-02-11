@@ -85,7 +85,7 @@ export function ExamsTab({
                     <Badge color="info">{modeLabel}</Badge>
                     {exam.programmingLanguage && (
                       <Badge color="purple">
-                        {exam.programmingLanguage.languageName}
+                        {exam.programmingLanguage.name}
                       </Badge>
                     )}
                     {exam.isPublicResult && (

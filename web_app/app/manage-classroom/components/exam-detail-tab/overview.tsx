@@ -113,7 +113,7 @@ export function OverviewTabContent({
         label="Programming language"
         value={
           examination.programmingLanguage
-            ? `${examination.programmingLanguage.languageName}`
+            ? `${examination.programmingLanguage.name}`
             : "—"
         }
       />
