@@ -1,4 +1,3 @@
-import { get } from "http";
 import { config } from "./config";
 
 export const Api = {
@@ -48,14 +47,13 @@ export const Api = {
     GET_PAGED: "/api/acas/v1/programming-languages/paged",
 
     // admin
+    CREATE: "/api/acas/v1/programming-languages",
     SYNC: "/api/acas/v1/programming-languages/sync",
-    UPDATE_STATUS: (id: string) =>
-      `/api/acas/v1/programming-languages/${id}/status`,
-    UPDATE_LOGO: (id: string) =>
-      `/api/acas/v1/programming-languages/${id}/logo`,
+    UPDATE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
+    UPDATE_STATUS: (id: string) => `/api/acas/v1/programming-languages/${id}/status`,
+    UPDATE_LOGO: (id: string) => `/api/acas/v1/programming-languages/${id}/logo`,
     DELETE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
-    TOGGLE_ENABLE: (id: string) =>
-      `/api/acas/v1/programming-languages/${id}/toggle-enable`,
+    TOGGLE_ENABLE: (id: string) => `/api/acas/v1/programming-languages/${id}/toggle-enable`,
   },
 
   Classroom: {
@@ -76,32 +74,41 @@ export const Api = {
     CREATE: "/api/acas/v1/examinations",
     UPDATE: (id: string) => `/api/acas/v1/examinations/${id}`,
     DELETE: (id: string) => `/api/acas/v1/examinations/${id}`,
-    GET_WITH_SPECIFIC_PROBLEM: (examId: string, problemId: string) =>
-      `/api/acas/v1/examinations/${examId}/with-problem/${problemId}`,
+    GET_WITH_SPECIFIC_PROBLEM: (examId: string, problemId: string) => `/api/acas/v1/examinations/${examId}/with-problem/${problemId}`,
   },
 
   S3: {
     UPLOAD_AVATAR: "/api/acas/v1/public-s3/upload",
     PRIVATE_UPLOAD: "/api/acas/v1/private-s3/upload",
-    PRIVATE_GET_FILE_URL: (filename: string) =>
-      `/api/acas/v1/private-s3/file/${encodeURIComponent(filename)}`,
+    PRIVATE_GET_FILE_URL: (filename: string) => `/api/acas/v1/private-s3/file/${encodeURIComponent(filename)}`,
   },
 
   Problem: {
     GET_ALL: "/api/acas/v1/problems",
     GET_BY_ID: (id: string) => `/api/acas/v1/problems/${id}`,
-    GET_BY_LECTURER: (lecturerId: string) =>
-      `/api/acas/v1/problems/lecturer/${lecturerId}`,
+    GET_BY_LECTURER: (lecturerId: string) => `/api/acas/v1/problems/lecturer/${lecturerId}`,
     CREATE: "/api/acas/v1/problems",
     UPDATE: (id: string) => `/api/acas/v1/problems/${id}`,
     DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
+    OCR_EXTRACT: '/api/acas/v1/ocr/extract',
   },
 
-  // Subject: {
-  //   GET_ALL_SUBJECTS: '/api/acas/v1/subjects',
-  //   CREATE_SUBJECT: '/api/acas/v1/subjects',
-  //   UPDATE_SUBJECT: '/api/acas/v1/subjects',
-  //   SOFT_DELETE_SUBJECT: '/api/acas/v1/subjects',
-  //   DELETE_SUBJECT: '/api/acas/v1/subjects',
-  // }
+  Slot: {
+    CREATE: "/api/v1/slots",
+    CREATE_ALL_SLOTS: (classroomId: string) =>
+      `/api/v1/slots/create-all-slots/${classroomId}`,
+    GET_BY_CLASSROOM: (classroomId: string) =>
+      `/api/v1/slots/classroom/${classroomId}`,
+    UPDATE: (id: string) => `/api/v1/slots/${id}`,
+    DELETE: (id: string) => `/api/v1/slots/${id}`,
+  },
+
+  Material: {
+    CREATE: '/api/acas/v1/materials',
+    UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
+    DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
+  },
+  
 };

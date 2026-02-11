@@ -13,13 +13,14 @@ public class CreateProblemRequest
     [StringLength(500, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 500 characters")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Content is required")]
-    [StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
-    public string Content { get; set; } = string.Empty;
+    //[Required(ErrorMessage = "Content is required")]
+    //[StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
+    public string? Content { get; set; }
 
-    [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
-    [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
-    public string FileName { get; set; } = string.Empty;
+    //[Required(ErrorMessage = "FileName is required")]
+    //[StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
+    //[RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
+    public string? FileName { get; set; } 
 
     [Required(ErrorMessage = "Difficulty is required")]
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
@@ -28,6 +29,11 @@ public class CreateProblemRequest
     [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
     public string CodeTemplate { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Mode is required")]
+    [RegularExpression("^(MANUAL|FROM_FILE)$", ErrorMessage = "Mode must be MANUAL or FROM_FILE")]
+    public string Mode { get; set; } = "MANUAL";
+
+    public bool WantsToEdit { get; set; } = false;
     public List<CreateTestCaseRequest>? TestCases { get; set; }
 }
 
@@ -37,13 +43,14 @@ public class UpdateProblemRequest
     [StringLength(500, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 500 characters")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Content is required")]
-    [StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
-    public string Content { get; set; } = string.Empty;
+    //[Required(ErrorMessage = "Content is required")]
+    //[StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
+    public string? Content { get; set; }
 
-    [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
-    [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
-    public string FileName { get; set; } = string.Empty;
+    //[Required(ErrorMessage = "FileName is required")]
+    //[StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
+    //[RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
+    public string? FileName { get; set; }
 
     [Required(ErrorMessage = "Difficulty is required")]
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
@@ -88,4 +95,11 @@ public class UpdateTestCaseRequest
 
     [Required(ErrorMessage = "IsRemovedSpace is required")]
     public bool IsRemovedSpace { get; set; } = false;
+}
+
+public class ExtractOcrRequest
+{
+    [Required(ErrorMessage = "FileName is required")]
+    [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
+    public string FileName { get; set; } = string.Empty;
 }

@@ -18,6 +18,7 @@ import {
   AssignmentsTab,
   PractiseTab,
   OverviewTab,
+  SlotTab,
 } from "@/app/my-classroom/tabs";
 
 function ClassroomContent() {
@@ -81,13 +82,15 @@ function ClassroomContent() {
 
   useEffect(() => {
     const fetchExaminations = async () => {
-      if (activeTab === "exams" && classId) {
+      if ((activeTab === "exams" || activeTab === "slots") && classId) {
         try {
-          setExamsLoading(true);
-          const data = await getExaminationsByClassId(classId);
-          setExaminations(data);
+          if (activeTab === "exams") {
+            setExamsLoading(true);
+            const data = await getExaminationsByClassId(classId);
+            setExaminations(data);
+          }
         } catch (error) {
-          console.error("Failed to fetch exams:", error);
+          console.error("Failed to fetch data:", error);
         } finally {
           setExamsLoading(false);
         }
@@ -135,11 +138,13 @@ function ClassroomContent() {
           />
         );
       case "materials":
-        return <MaterialsTab />;
+        return <MaterialsTab classId={classId} />;
       case "assignments":
         return <AssignmentsTab />;
       case "practise":
         return <PractiseTab />;
+      case "slots":
+        return <SlotTab />;
       default:
         return (
           <OverviewTab
@@ -164,7 +169,7 @@ function ClassroomContent() {
             label="All classes"
             icon={<ArrowLeftIcon className="h-4 w-4" />}
             onClick={() => router.push(PageUrl.MY_CLASSROOM_PAGE)}
-            className="group inline-flex w-fit items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:bg-[#1F4E79] hover:text-white hover:border-[#1F4E79] dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900 dark:hover:border-[#C9A24D] cursor-pointer"
+            className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
           />
         </div>
 

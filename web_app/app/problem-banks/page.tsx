@@ -36,7 +36,7 @@ import { useToast } from "@/hooks/useToast";
 import { useProblem } from "@/hooks/problem/useProblem";
 import { useAuth } from "@/contexts/AuthContext";
 import type { ProblemBasicResponse, Difficulty } from "@/types/problem";
-import { DIFFICULTY, normalizeDifficulty } from "@/types/problem";
+import { DIFFICULTY, PROBLEM_MODE, normalizeDifficulty } from "@/types/problem";
 import type {
   CreateProblemPayload,
   UpdateProblemPayload,
@@ -98,8 +98,7 @@ export default function ProblemBanksPage() {
   useEffect(() => {
     setMounted(true);
     fetchProblems();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [])
 
   const fetchProblems = async () => {
     try {
@@ -173,6 +172,7 @@ export default function ProblemBanksPage() {
           fileName: formData.fileName,
           difficulty: formData.difficulty,
           codeTemplate: formData.codeTemplate,
+          mode: PROBLEM_MODE.MANUAL,
         };
         await createProblem(payload);
         toast.showSuccess("Problem created successfully");
@@ -286,15 +286,16 @@ export default function ProblemBanksPage() {
                       </button>
                     </TableCell>
                     <TableCell>
-                      <Badge
-                        color={
-                          difficultyBadgeColor[
-                            normalizeDifficulty(p.difficulty)
-                          ]
-                        }
+                      <span
+                        className={`font-medium ${normalizeDifficulty(p.difficulty) === "EASY"
+                          ? "text-green-600"
+                          : normalizeDifficulty(p.difficulty) === "MEDIUM"
+                            ? "text-yellow-600"
+                            : "text-red-600"
+                          }`}
                       >
                         {normalizeDifficulty(p.difficulty)}
-                      </Badge>
+                      </span>
                     </TableCell>
                     <TableCell
                       className={isDark ? "text-gray-300" : "text-gray-900"}

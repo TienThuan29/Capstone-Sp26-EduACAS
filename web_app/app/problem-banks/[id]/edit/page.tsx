@@ -31,6 +31,22 @@ import type { UpdateProblemPayload } from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { TestcaseBlock } from "../../components/testcase-block";
 import type { CreateTestCasePayload } from "@/hooks/problem/useProblem";
+import { TipTapToolbar } from "@/components/tiptap-toolbar";
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import TextAlign from '@tiptap/extension-text-align';
+import { TextStyle } from '@tiptap/extension-text-style';
+import Underline from '@tiptap/extension-underline';
+import TipTapLink from '@tiptap/extension-link';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableCell } from '@tiptap/extension-table-cell';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { CodeBlockLowlight } from '@tiptap/extension-code-block-lowlight';
+import { createLowlight, all } from 'lowlight';
+import TurndownService from 'turndown';
+import { markdownToHtml } from '@/utils/markdown-converter';
+
 
 const initialFormData = {
   title: "",
@@ -61,12 +77,56 @@ export default function EditProblemPage() {
   );
   const [testCases, setTestCases] = useState<CreateTestCasePayload[]>([]);
   const [showTestcaseForm, setShowTestcaseForm] = useState(false);
+  const [editorHtml, setEditorHtml] = useState("");
+
+  const lowlight = createLowlight(all);
+
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({
+        codeBlock: false,
+      }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: {
+          class: 'hljs',
+        },
+      }),
+      TextAlign.configure({
+        types: ['heading', 'paragraph'],
+        alignments: ['left', 'center', 'right', 'justify'],
+      }),
+      TextStyle,
+      Underline,
+      TipTapLink.configure({
+        openOnClick: false,
+        HTMLAttributes: {
+          class: 'text-blue-600 underline',
+        },
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: {
+          class: 'border-collapse table-auto w-full',
+        },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+
+    ],
+    content: editorHtml,
+    onUpdate: ({ editor }) => {
+      setEditorHtml(editor.getHTML());
+    },
+    editable: true,
+    immediatelyRender: false,
+  });
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Load existing problem data
   useEffect(() => {
     if (!id) return;
     const loadProblem = async () => {
@@ -81,6 +141,15 @@ export default function EditProblemPage() {
             difficulty: normalizeDifficulty(data.difficulty),
             codeTemplate: data.codeTemplate || "",
           });
+
+          if (!data.fileName && data.content) {
+            const html = markdownToHtml(data.content);
+            setEditorHtml(html);
+            if (editor) {
+              editor.commands.setContent(html);
+            }
+          }
+
           if (data.testCases && data.testCases.length > 0) {
             setTestCases(
               data.testCases.map((tc) => ({
@@ -107,7 +176,7 @@ export default function EditProblemPage() {
       }
     };
     loadProblem();
-  }, [id, getProblemById, toast, router]);
+  }, [id, getProblemById, toast, router, editor]);
 
   const uploadFileToS3 = async (file: File) => {
     setUploading(true);
@@ -159,20 +228,36 @@ export default function EditProblemPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.fileName?.trim()) {
-      toast.showError("Please upload a template file first");
-      return;
-    }
+
     setSubmitting(true);
     try {
+      let finalContent = "";
+      const hasAttachment = Boolean(formData.fileName?.trim());
+
+      if (!hasAttachment) {
+        if (editor) {
+          const html = editor.getHTML();
+          const turndownService = new TurndownService();
+          finalContent = turndownService.turndown(html);
+        }
+
+        if (!finalContent.trim()) {
+          toast.showError("Please enter problem content");
+          return;
+        }
+      } else {
+        finalContent = "";
+      }
+
       const payload: UpdateProblemPayload = {
         title: formData.title,
-        content: formData.content,
+        content: finalContent,
         fileName: formData.fileName,
         difficulty: formData.difficulty,
         codeTemplate: formData.codeTemplate,
         testCases: testCases.length > 0 ? testCases : undefined,
       };
+
       await updateProblem(id, payload);
       toast.showSuccess("Problem updated successfully");
       router.push(PageUrl.QUESTION_BANKS_PAGE);
@@ -235,94 +320,116 @@ export default function EditProblemPage() {
             />
           </div>
 
-          <div>
-            <Label
-              htmlFor="content"
-              className={isDark ? "text-white" : "text-gray-900"}
-            >
-              Content <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="content"
-              value={formData.content}
-              onChange={(e) =>
-                setFormData({ ...formData, content: e.target.value })
-              }
-              placeholder="Problem description (10–50000 characters)"
-              required
-              rows={6}
-              className="mt-1"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-4">
+          {!formData.fileName && (
             <div>
               <Label
-                htmlFor="dropzone-file"
+                htmlFor="content"
                 className={isDark ? "text-white" : "text-gray-900"}
               >
-                Upload Problem File
+                Content <span className="text-red-500">*</span>
               </Label>
-              <div
-                onDrop={handleDrop}
-                onDragOver={handleDragOver}
-                className="mt-1 flex w-full items-center justify-center"
-              >
+
+              <div className={`mt-1 rounded-lg border ${isDark ? "border-gray-600 bg-gray-700" : "border-gray-300 bg-white"}`}>
+                {editor && <TipTapToolbar editor={editor} isDark={isDark} />}
+                <EditorContent
+                  editor={editor}
+                  className={`prose max-w-none p-4 min-h-[300px] ${isDark ? 'prose-invert' : ''
+                    } 
+                  [&_h1]:text-3xl [&_h1]:font-bold [&_h1]:text-blue-600 dark:[&_h1]:text-blue-400 [&_h1]:mb-4
+                  [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:text-blue-500 dark:[&_h2]:text-blue-300 [&_h2]:mb-3
+                  [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:text-gray-700 dark:[&_h3]:text-gray-300 [&_h3]:mb-2
+                  [&_p]:text-gray-900 dark:[&_p]:text-gray-100
+                  [&_li]:text-gray-900 dark:[&_li]:text-gray-100
+                  [&_td]:text-gray-900 dark:[&_td]:text-gray-100
+                  [&_th]:text-gray-900 dark:[&_th]:text-gray-100
+                  [&_pre]:bg-gray-50 dark:[&_pre]:bg-transparent [&_pre]:p-4 [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-gray-200 dark:[&_pre]:border-gray-600
+                  [&_code]:text-sm [&_code]:font-mono
+                  [&_pre_code]:bg-transparent [&_pre_code]:text-gray-900 dark:[&_pre_code]:text-gray-100
+                  [&_.hljs-keyword]:text-purple-600 dark:[&_.hljs-keyword]:text-purple-400
+                  [&_.hljs-string]:text-green-600 dark:[&_.hljs-string]:text-green-400
+                  [&_.hljs-comment]:text-gray-500 dark:[&_.hljs-comment]:text-gray-400 [&_.hljs-comment]:italic
+                  [&_.hljs-number]:text-orange-600 dark:[&_.hljs-number]:text-orange-400
+                  [&_.hljs-title]:text-blue-600 dark:[&_.hljs-title]:text-blue-400
+                  focus:outline-none`}
+                />
+              </div>
+
+              <p className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                Use the toolbar to format your problem description
+              </p>
+            </div>
+          )}
+
+          {formData.fileName && (
+            <div className="grid grid-cols-1 gap-4">
+              <div>
                 <Label
                   htmlFor="dropzone-file"
-                  className={`flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${isDark ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600" : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"}`}
+                  className={isDark ? "text-white" : "text-gray-900"}
                 >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    {uploading ? (
-                      <Spinner size="lg" />
-                    ) : (
-                      <>
-                        <CloudArrowUpIcon className="mb-4 h-10 w-10 text-gray-500 dark:text-gray-400" />
-                        <p
-                          className={`mb-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                        >
-                          <span className="font-semibold">Click to upload</span>{" "}
-                          or drag and drop
-                        </p>
-                        <p
-                          className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
-                        >
-                          Problem files (e.g. file.pdf, ...)
-                        </p>
-                        {formData.fileName && (
-                          <p className="mt-2 text-xs font-medium text-green-600 dark:text-green-400">
-                            Current: {formData.fileName}
-                          </p>
-                        )}
-                        {selectedFileLabel && !formData.fileName && (
-                          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-                            Selected: {selectedFileLabel}
-                          </p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  <FileInput
-                    id="dropzone-file"
-                    className="hidden"
-                    onChange={handleFileUpload}
-                    disabled={uploading}
-                    accept=".pdf, .docx, .doc, .txt"
-                  />
+                  Upload Problem File
                 </Label>
-              </div>
-              {formData.fileName && (
-                <p
-                  className={`mt-1 text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  className="mt-1 flex w-full items-center justify-center"
                 >
-                  File name for problem:{" "}
-                  <span className="font-mono font-medium">
-                    {formData.fileName}
-                  </span>
-                </p>
-              )}
+                  <Label
+                    htmlFor="dropzone-file"
+                    className={`flex h-40 w-full cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed ${isDark ? "border-gray-600 bg-gray-700 hover:border-gray-500 hover:bg-gray-600" : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100"}`}
+                  >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      {uploading ? (
+                        <Spinner size="lg" />
+                      ) : (
+                        <>
+                          <CloudArrowUpIcon className="mb-4 h-10 w-10 text-gray-500 dark:text-gray-400" />
+                          <p
+                            className={`mb-2 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          >
+                            <span className="font-semibold">Click to upload</span>{" "}
+                            or drag and drop
+                          </p>
+                          <p
+                            className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}
+                          >
+                            Problem files (e.g. file.pdf, ...)
+                          </p>
+                          {formData.fileName && (
+                            <p className="mt-2 text-xs font-medium text-green-600 dark:text-green-400">
+                              Current: {formData.fileName}
+                            </p>
+                          )}
+                          {selectedFileLabel && !formData.fileName && (
+                            <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
+                              Selected: {selectedFileLabel}
+                            </p>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    <FileInput
+                      id="dropzone-file"
+                      className="hidden"
+                      onChange={handleFileUpload}
+                      disabled={uploading}
+                      accept=".pdf, .docx, .doc, .txt"
+                    />
+                  </Label>
+                </div>
+                {formData.fileName && (
+                  <p
+                    className={`mt-1 text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                  >
+                    File name for problem:{" "}
+                    <span className="font-mono font-medium">
+                      {formData.fileName}
+                    </span>
+                  </p>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="grid grid-cols-1 gap-4">
             <div>

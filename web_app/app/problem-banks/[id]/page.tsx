@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useThemeContext } from "@/components/theme-provider";
@@ -13,6 +13,7 @@ import { PageUrl } from "@/configs/page.url";
 import type { Difficulty } from "@/types/problem";
 import { normalizeDifficulty } from "@/types/problem";
 import type { ProblemResponse } from "@/types/problem";
+import { markdownToHtml } from "@/utils/markdown-converter";
 
 const difficultyBadgeColor: Record<
   Difficulty,
@@ -37,16 +38,24 @@ export default function ProblemViewPage() {
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
   const [pdfLoading, setPdfLoading] = useState(false);
 
+  const idRef = useRef<string>("");
+
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
     if (!id) return;
-    const load = async () => {
+
+    const isIdChanged = idRef.current !== id;
+    if (isIdChanged) {
       setLoading(true);
       setProblem(null);
       setPdfUrl(null);
+      idRef.current = id;
+    }
+
+    const load = async () => {
       try {
         const data = await getProblemById(id);
         if (data) {
@@ -106,9 +115,12 @@ export default function ProblemViewPage() {
     );
   }
 
+  const hasAttachment = Boolean(problem.fileName);
+  const hasContent = Boolean(problem.content && problem.content.trim());
+  const contentHtml = hasContent ? markdownToHtml(problem.content) : "";
+
   return (
     <div className="p-8">
-      {/* Header Section */}
       <div className="mb-8 flex flex-wrap items-center gap-4">
         <Button as={Link} href={PageUrl.QUESTION_BANKS_PAGE} color="light">
           <ArrowLeftIcon className="mr-2 h-5 w-5" />
@@ -125,53 +137,16 @@ export default function ProblemViewPage() {
         </Button>
       </div>
 
-      {/* Main Content: Split Layout */}
       <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-3">
-        {/* LEFT COLUMN: Attributes & Test Cases */}
-        <div className="space-y-6 lg:col-span-1">
+        <div className="space-y-6">
           <section
             className={`border p-6 ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
           >
-            <div className="min-w-0 flex-1">
-              <h1
-                className={`text-3xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
-              >
-                {problem.title}
-              </h1>
-              {/* <div className="mt-2 flex flex-wrap items-center gap-2">
-                <Badge color={difficultyBadgeColor[difficulty]}>
-                  {difficulty}
-                </Badge>
-                {problem.fileName && (
-                  <span
-                    className={`font-mono text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-                  >
-                    File: {problem.fileName}
-                  </span>
-                )}
-              </div> */}
-            </div>
-            <Label className={isDark ? "text-white" : "text-gray-900"}>
-              Content
-            </Label>
-            <div
-              className={`mt-2 rounded border p-4 whitespace-pre-wrap ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
+            <h1
+              className={`text-center text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
             >
-              {problem.content || "—"}
-            </div>
-
-            {problem.codeTemplate && (
-              <div className="mt-6">
-                <Label className={isDark ? "text-white" : "text-gray-900"}>
-                  Code template
-                </Label>
-                <pre
-                  className={`mt-2 overflow-x-auto rounded border p-4 font-mono text-sm ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
-                >
-                  {problem.codeTemplate}
-                </pre>
-              </div>
-            )}
+              {problem.title}
+            </h1>
           </section>
 
           {problem.testCases && problem.testCases.length > 0 ? (
@@ -219,59 +194,91 @@ export default function ProblemViewPage() {
                 ))}
               </div>
             </section>
-          ): (
-            <div className="border border-dashed p-12 text-center">
+          ) : (
+            <div className={`border border-dashed p-12 text-center ${isDark ? "border-gray-700 text-gray-500" : "border-gray-300 text-gray-400"}`}>
               No test cases provided for this problem.
             </div>
           )}
         </div>
 
-        {/* RIGHT COLUMN: PDF Preview (Sticky) */}
-        <div className="lg:sticky lg:top-8 lg:col-span-2">
-          {problem.fileName && (pdfUrl || pdfLoading) ? (
-            <div
-              className={`overflow-hidden border ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
-            >
+        <div className="lg:col-span-2">
+          {hasAttachment ? (
+            pdfUrl || pdfLoading ? (
               <div
-                className={`border-b p-4 ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                className={`overflow-hidden border ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
               >
-                <Label className={isDark ? "text-white" : "text-gray-900"}>
-                  Attachment preview
-                </Label>
-              </div>
-              <div className="p-0">
-                {pdfLoading ? (
-                  <div
-                    className={`flex h-[70vh] w-full items-center justify-center ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
-                  >
-                    <Spinner size="xl" />
-                    <span
-                      className={`ml-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                <div
+                  className={`border-b p-4 ${isDark ? "border-gray-700" : "border-gray-200"}`}
+                >
+                  <Label className={isDark ? "text-white" : "text-gray-900"}>
+                    Attachment preview
+                  </Label>
+                </div>
+                <div className="p-0">
+                  {pdfLoading ? (
+                    <div
+                      className={`flex h-[70vh] w-full items-center justify-center ${isDark ? "bg-gray-900" : "bg-gray-50"}`}
                     >
-                      Loading preview...
-                    </span>
-                  </div>
-                ) : pdfUrl ? (
-                  <iframe
-                    src={pdfUrl}
-                    title="Problem attachment"
-                    className="h-[75vh] w-full"
-                  />
-                ) : (
-                  <div className="p-8 text-center text-gray-500">
-                    No preview available
-                  </div>
-                )}
+                      <Spinner size="xl" />
+                      <span
+                        className={`ml-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}
+                      >
+                        Loading preview...
+                      </span>
+                    </div>
+                  ) : pdfUrl ? (
+                    <iframe
+                      src={pdfUrl}
+                      title="Problem attachment"
+                      className="h-[75vh] w-full"
+                    />
+                  ) : (
+                    <div className="p-8 text-center text-gray-500">
+                      No preview available
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
+            ) : (
+              <div
+                className={`rounded-lg border border-dashed p-12 text-center ${isDark ? "border-gray-700 text-gray-500" : "border-gray-300 text-gray-400"}`}
+              >
+                Could not load attachment preview.
+              </div>
+            )
           ) : (
-            <div
-              className={`rounded-lg border border-dashed p-12 text-center ${isDark ? "border-gray-700 text-gray-500" : "border-gray-300 text-gray-400"}`}
+            <section
+              className={`border p-6 ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}
             >
-              No PDF attachment provided for this problem.
-            </div>
+              {hasContent && (
+                <>
+                  <Label className={`mt-4 ${isDark ? "text-white" : "text-gray-900"}`}>
+                    Content
+                  </Label>
+                  <div
+                    className={`mt-2 rounded border p-4 prose max-w-none ProseMirror ${isDark ? 'prose-invert border-gray-600 bg-gray-900' : 'border-gray-200 bg-gray-50'}`}
+                    dangerouslySetInnerHTML={{ __html: contentHtml }}
+                  />
+                </>
+              )}
+
+              {problem.codeTemplate && (
+                <div className="mt-6">
+                  <Label className={isDark ? "text-white" : "text-gray-900"}>
+                    Code template
+                  </Label>
+                  <pre
+                    className={`mt-2 overflow-x-auto rounded border p-4 font-mono text-sm ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
+                  >
+                    {problem.codeTemplate}
+                  </pre>
+                </div>
+              )}
+            </section>
           )}
         </div>
+
+
       </div>
     </div>
   );

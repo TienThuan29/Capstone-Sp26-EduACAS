@@ -1,40 +1,48 @@
-using System.Threading.RateLimiting;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
+using AcasService.Application.Commands.Classroom;
+using AcasService.Application.Commands.Examination;
+using AcasService.Application.Commands.OCR;
 using AcasService.Application.Commands.Problem;
+using AcasService.Application.Commands.ProgrammingLanguage;
 using AcasService.Application.Commands.S3;
+using AcasService.Application.Commands.Subject;
+using AcasService.Application.Mappers;
+using AcasService.Application.Queries.Classroom;
+using AcasService.Application.Queries.Examination;
 using AcasService.Application.Queries.Problem;
+using AcasService.Application.Queries.ProgrammingLanguage;
+using AcasService.Application.Queries.S3;
+using AcasService.Application.Queries.Subject;
+using AcasService.Application.Utils;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
+using AcasService.Repositories.Classroom;
+using AcasService.Repositories.ClassroomEnrollment;
+using AcasService.Repositories.DynamoDB;
+using AcasService.Repositories.Examination;
 using AcasService.Repositories.Problem;
+using AcasService.Repositories.ProgrammingLanguage;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
-using StackExchange.Redis;
+using AcasService.Repositories.Subject;
+using Amazon;
+using Amazon.DynamoDBv2;
+using Amazon.Extensions.NETCore.Setup;
+using Amazon.S3;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 // using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi;
-using Amazon.DynamoDBv2;
-using Amazon;
-using Amazon.S3;
-using Amazon.Extensions.NETCore.Setup;
-using AcasService.Application.Queries.S3;
-using AcasService.Repositories.DynamoDB;
-using AcasService.Repositories.Subject;
-using AcasService.Application.Commands.Classroom;
-using AcasService.Application.Queries.Classroom;
-using AcasService.Repositories.Classroom;
-using AcasService.Application.Commands.ProgrammingLanguage;
-using AcasService.Application.Commands.Examination;
-using AcasService.Application.Queries.ProgrammingLanguage;
-using AcasService.Application.Queries.Examination;
-using AcasService.Repositories.ProgrammingLanguage;
+using StackExchange.Redis;
+using System.Text;
+using System.Threading.RateLimiting;
 using AcasService.Application.CodeRunner;
-using AcasService.Repositories.Examination;
-using AcasService.Repositories.ClassroomEnrollment;
-using AcasService.Application.Mappers;
-using AcasService.Application.Commands.Subject;
-using AcasService.Application.Queries.Subject;
 using AcasService.Application.Commands.ClassEnrollments;
+using AcasService.Application.Commands.SlotCommand;
+using AcasService.Repositories.Slot;
+using AcasService.Application.Queries.Slot;
+using AcasService.Application.Commands.Material;
+using AcasService.Application.Queries.Material;
+using AcasService.Repositories.Material;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -91,6 +99,8 @@ builder.Services.AddScoped<IProgrammingLanguageRepository, ProgrammingLanguageRe
 builder.Services.AddScoped<IExaminationRepository, ExaminationRepository>();
 builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRepository>();
+builder.Services.AddScoped<ISlotRepository,SlotRepository>();
+builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -100,23 +110,43 @@ builder.Services.AddScoped<ISubjectCommand, SubjectCommand>();
 builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();
 builder.Services.AddScoped<IClassroomCommand, ClassroomCommand>();  
 builder.Services.AddScoped<IClassroomQuery, ClassroomQuery>();
-
-builder.Services.AddScoped<SubjectMapper>();
-builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
-builder.Services.AddScoped<ProblemMapper>();
-
-builder.Services.AddScoped<ProgrammingLanguageMapper>();
-builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
+builder.Services.AddScoped<ISlotCommand, SlotCommand>();
+builder.Services.AddScoped<ISlotQuery, SlotQuery>();
+builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
+builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
+builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
+builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
+
+// mapper
+builder.Services.AddScoped<ProblemMapper>();
+builder.Services.AddScoped<SlotMapper>();
+builder.Services.AddScoped<SubjectMapper>();
+builder.Services.AddScoped<ClassroomMapper>();
+builder.Services.AddScoped<ProgrammingLanguageMapper>();
+builder.Services.AddScoped<ExaminationMapper>();
+builder.Services.AddScoped<MaterialMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
+
+// Azure Form Recognizer configuration
+var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??
+                   throw new InvalidOperationException("AzureFormRecognizer:Endpoint is not configured");
+var azureApiKey = builder.Configuration["AzureFormRecognizer:ApiKey"] ??
+                 throw new InvalidOperationException("AzureFormRecognizer:ApiKey is not configured");
+
+builder.Services.AddSingleton(new AzureFormRecognizerConfig
+{
+    Endpoint = azureEndpoint,
+    ApiKey = azureApiKey
+});
 
 var key = Encoding.UTF8.GetBytes(jwtSecret);
 

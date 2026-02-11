@@ -29,4 +29,5 @@ export interface Classroom {
   endDate: string;
   isDeleted: boolean;
   enrollment?: Enrollment;
+  maxSlot: number;
 }
