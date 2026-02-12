@@ -18,6 +18,8 @@ public interface IProgrammingLanguageCommand
     Task<ProgrammingLanguageResponse> UpdateStatusAsync(string id, string status);
 
     Task<ProgrammingLanguageResponse> UpdateLogoUrlAsync(string id, string logoFileUrl);
+
+    Task<ProgrammingLanguageResponse> UpdateCompilerNameAsync(string languageId, string compilerId, string name);
 }
 
 public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
@@ -161,6 +163,29 @@ public class ProgrammingLanguageCommand : IProgrammingLanguageCommand
 
         var updated = await _repository.UpdateAsync(id, existing);
         _logger.LogInformation("Updated status for language: {LanguageId} to {Status}", id, status);
+
+        return _programmingLanguageMapper.ToProgrammingLanguageResponse(updated!);
+    }
+
+    public async Task<ProgrammingLanguageResponse> UpdateCompilerNameAsync(string languageId, string compilerId, string name)
+    {
+        var existing = await _repository.GetByIdAsync(languageId);
+        if (existing == null)
+        {
+            throw new KeyNotFoundException($"Programming language with ID '{languageId}' not found");
+        }
+
+        var compiler = existing.Compilers?.FirstOrDefault(c => string.Equals(c.Id, compilerId, StringComparison.OrdinalIgnoreCase));
+        if (compiler == null)
+        {
+            throw new KeyNotFoundException($"Compiler with ID '{compilerId}' not found in language '{languageId}'");
+        }
+
+        compiler.Name = name ?? string.Empty;
+        existing.UpdatedDate = DateTime.UtcNow;
+
+        var updated = await _repository.UpdateAsync(languageId, existing);
+        _logger.LogInformation("Updated compiler name for language: {LanguageId}, compiler: {CompilerId}", languageId, compilerId);
 
         return _programmingLanguageMapper.ToProgrammingLanguageResponse(updated!);
     }

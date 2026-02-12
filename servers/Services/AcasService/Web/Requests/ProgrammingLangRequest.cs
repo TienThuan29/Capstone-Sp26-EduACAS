@@ -29,3 +29,10 @@ public class UpdateLogoUrlRequest
     [Required(ErrorMessage = "LogoFileUrl is required")]
     public string LogoFileUrl { get; set; } = string.Empty;
 }
+
+public class UpdateCompilerNameRequest
+{
+    [Required(ErrorMessage = "Name is required")]
+    [StringLength(200, ErrorMessage = "Compiler name must not exceed 200 characters")]
+    public string Name { get; set; } = string.Empty;
+}

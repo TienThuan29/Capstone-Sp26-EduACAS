@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import { 
@@ -91,13 +91,15 @@ export default function ProgrammingLanguagesManagement() {
 
   const handleUpdateLanguage = async (updatedLanguage: ProgrammingLanguage) => {
     try {
-      await updateProgrammingLanguage(updatedLanguage.id, { status: updatedLanguage.status })
-      toast.showSuccess('Updated programming language successfully')
-      // Update local state
-      setLanguages(prev => prev.map(lang => 
-        lang.id === updatedLanguage.id ? { ...lang, status: updatedLanguage.status } : lang
+      const statusChanged = selectedLanguage?.status !== updatedLanguage.status
+      if (statusChanged) {
+        await updateProgrammingLanguage(updatedLanguage.id, { status: updatedLanguage.status })
+      }
+      toast.showSuccess(statusChanged ? 'Updated programming language successfully' : 'Updated successfully')
+      setLanguages(prev => prev.map(lang =>
+        lang.id === updatedLanguage.id ? updatedLanguage : lang
       ))
-      setSelectedLanguage({ ...updatedLanguage })
+      setSelectedLanguage(updatedLanguage)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       toast.showError(err.response?.data?.message || 'Cannot update programming language')
@@ -237,7 +239,7 @@ export default function ProgrammingLanguagesManagement() {
                           {formatDate(lang.updatedDate)}
                         </TableCell>
                         <TableCell>
-                          <Button className="cursor-pointer" size="xs" color="info" onClick={(e) => { e.stopPropagation(); handleViewDetail(lang); }}>
+                          <Button className="cursor-pointer" size="xs" color="info" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewDetail(lang); }}>
                             View Detail
                           </Button>
                         </TableCell>

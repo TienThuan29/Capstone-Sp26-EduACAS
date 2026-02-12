@@ -52,6 +52,7 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
     UPDATE_STATUS: (id: string) => `/api/acas/v1/programming-languages/${id}/status`,
     UPDATE_LOGO: (id: string) => `/api/acas/v1/programming-languages/${id}/logo`,
+    UPDATE_COMPILER_NAME: (id: string, compilerId: string) => `/api/acas/v1/programming-languages/${id}/compilers/${compilerId}/name`,
     DELETE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
     TOGGLE_ENABLE: (id: string) => `/api/acas/v1/programming-languages/${id}/toggle-enable`,
   },
