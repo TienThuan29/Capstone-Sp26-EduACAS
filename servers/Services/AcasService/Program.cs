@@ -43,6 +43,7 @@ using AcasService.Application.Queries.Slot;
 using AcasService.Application.Commands.Material;
 using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
+using AcasService.Application.Commands.Submission;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -123,6 +124,7 @@ builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
 builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
+builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -135,6 +137,7 @@ builder.Services.AddScoped<MaterialMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
+builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
 
 // Azure Form Recognizer configuration
 var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??

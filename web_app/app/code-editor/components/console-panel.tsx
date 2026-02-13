@@ -17,6 +17,7 @@ import {
 import { Spinner } from 'flowbite-react';
 import clsx from 'clsx';
 import { useEditorContext } from '@/contexts/EditorContext';
+import { useCustomTest } from '@/hooks/coding/useCustomTest';
 import { TestCase } from '@/types/examination';
 
 // Dynamic import for Monaco Diff Editor
@@ -85,8 +86,13 @@ export function ConsolePanel() {
     diffContent,
     editorState,
   } = useEditorContext();
-
+  const { runCustomTest, isRunning } = useCustomTest();
   const activeTestCase = testCases.find((tc) => tc.id === activeTestCaseId);
+
+  const handleRunCustomTest = () => {
+    runCustomTest();
+    setActiveTab('output');
+  };
 
   const tabs = [
     { id: 'testcases' as const, label: 'Test Cases', icon: Play },
@@ -299,11 +305,31 @@ export function ConsolePanel() {
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)}
               placeholder="Enter your custom test input here..."
-              className="flex-1 resize-none rounded-md border border-gray-700 bg-gray-800 p-3 font-mono text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="min-h-[120px] flex-1 resize-none rounded-md border border-gray-700 bg-gray-800 p-3 font-mono text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <p className="mt-2 text-xs text-gray-500">
-              Enter custom input to test your code against specific scenarios.
-            </p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <p className="text-xs text-gray-500">
+                Enter custom input to test your code. Stdout and stderr will appear in the Output tab.
+              </p>
+              <button
+                type="button"
+                onClick={handleRunCustomTest}
+                disabled={isRunning}
+                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRunning ? (
+                  <>
+                    <Spinner size="sm" color="info" aria-label="Running..." />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Run
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
 

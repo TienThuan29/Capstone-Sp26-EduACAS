@@ -24,7 +24,7 @@ function getExamDuration(startDatetime: string, endDatetime: string): number {
 export function CodeEditorClient({
   examination,
 }: CodeEditorClientProps) {
-  const { setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer } = useEditorContext();
+  const { setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer, setExamBackLink } = useEditorContext();
 
   useEffect(() => {
     if (!examination) return;
@@ -32,6 +32,7 @@ export function CodeEditorClient({
     console.log('Examination:', examination);
 
     setProblem(examination.problem);
+    setExamBackLink(examination.id, examination.classroom?.id ?? null);
     setTestCases(examination.problem.testCases);
 
     // Use the examination's allowed programming language for the editor
@@ -44,7 +45,7 @@ export function CodeEditorClient({
       setExamMode(true, getExamDuration(examination.startDatetime, examination.endDatetime));
       startTimer();
     }
-  }, [examination, setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer]);
+  }, [examination, setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer, setExamBackLink]);
 
   return <CodingWorkspace />;
 }

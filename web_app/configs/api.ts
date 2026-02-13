@@ -111,5 +111,8 @@ export const Api = {
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
   },
-  
+
+  Submission: {
+    EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
+  },
 };
