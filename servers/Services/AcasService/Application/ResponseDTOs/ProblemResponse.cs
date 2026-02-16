@@ -29,11 +29,14 @@ public class ProblemResponse
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }
 
-    [JsonPropertyName("codeTemplate")]
-    public string CodeTemplate { get; set; } = string.Empty;
+    [JsonPropertyName("codeTemplates")]
+    public Dictionary<string, string> CodeTemplates { get; set; } = new Dictionary<string, string>();
 
     [JsonPropertyName("testCases")]
     public List<TestCaseResponse> TestCases { get; set; } = new List<TestCaseResponse>();
+
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new List<string>();
 
     [JsonPropertyName("createdDate")]
     public DateTime CreatedDate { get; set; }

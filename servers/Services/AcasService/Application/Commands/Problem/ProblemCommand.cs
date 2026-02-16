@@ -46,7 +46,8 @@ public class ProblemCommand : IProblemCommand
                 //Content = request.Content,
                 //FileName = request.FileName,
                 Difficulty = Enum.Parse<Difficulty>(request.Difficulty),
-                CodeTemplates = string.IsNullOrEmpty(request.CodeTemplate) ? new Dictionary<string, string>() : new Dictionary<string, string> { ["default"] = request.CodeTemplate }
+                CodeTemplates = request.CodeTemplates ?? new Dictionary<string, string>(),
+                Tags = request.Tags?.ToArray() ?? Array.Empty<string>()
             };
 
             if (request.Mode == "MANUAL")
@@ -126,7 +127,8 @@ public class ProblemCommand : IProblemCommand
 
             problem.Title = request.Title;
             problem.Difficulty = Enum.Parse<Difficulty>(request.Difficulty);
-            problem.CodeTemplates = string.IsNullOrEmpty(request.CodeTemplate) ? new Dictionary<string, string>() : new Dictionary<string, string> { ["default"] = request.CodeTemplate };
+            problem.CodeTemplates = request.CodeTemplates ?? new Dictionary<string, string>();
+            problem.Tags = request.Tags?.ToArray() ?? Array.Empty<string>();
 
             
             if (!string.IsNullOrWhiteSpace(request.FileName))

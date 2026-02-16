@@ -62,7 +62,8 @@ public class ProblemQuery : IProblemQuery
                 FileName = problem.FileName,
                 FileUrl = fileUrl,
                 Difficulty = problem.Difficulty,
-                CodeTemplate = problem.CodeTemplates != null && problem.CodeTemplates.TryGetValue("default", out var ct) ? ct : (problem.CodeTemplates?.Values.FirstOrDefault() ?? string.Empty),
+                CodeTemplates = problem.CodeTemplates ?? new Dictionary<string, string>(),
+                Tags = problem.Tags?.ToList() ?? new List<string>(),
                 CreatedDate = problem.CreatedDate,
                 UpdatedDate = problem.UpdatedDate,
                 TestCases = testCases

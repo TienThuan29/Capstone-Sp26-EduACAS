@@ -15,11 +15,12 @@ public class ProblemMapper
             Content = problem.Content,
             FileName = problem.FileName,
             Difficulty = problem.Difficulty,
-            CodeTemplate = problem.CodeTemplates != null && problem.CodeTemplates.TryGetValue("default", out var template) ? template : (problem.CodeTemplates?.Values.FirstOrDefault() ?? string.Empty),
+            CodeTemplates = problem.CodeTemplates ?? new Dictionary<string, string>(),
             TestCases = problem.TestCases
                 .Where(tc => !tc.IsDeleted)
                 .Select(ToTestCaseResponse)
                 .ToList(),
+            Tags = problem.Tags?.ToList() ?? new List<string>(),
             CreatedDate = problem.CreatedDate,
             UpdatedDate = problem.UpdatedDate
         };

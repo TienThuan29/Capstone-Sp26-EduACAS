@@ -28,6 +28,8 @@ public class Problem
 
     public DateTime UpdatedDate { get; set; }
 
+    public string[] Tags { get; set; } = [];
+
     public bool IsDeleted { get; set; }
 }
 

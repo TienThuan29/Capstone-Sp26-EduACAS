@@ -17,6 +17,7 @@ public static class DynamoMapper
             ["fileName"] = new AttributeValue { S = problem.FileName },
             ["difficulty"] = new AttributeValue { S = problem.Difficulty.ToString() },
             ["codeTemplates"] = new AttributeValue { S = JsonSerializer.Serialize(problem.CodeTemplates ?? new Dictionary<string, string>()) },
+            ["tags"] = new AttributeValue { S = JsonSerializer.Serialize(problem.Tags ?? Array.Empty<string>()) },
             ["createdDate"] = new AttributeValue { S = problem.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["updatedDate"] = new AttributeValue { S = problem.UpdatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["isDeleted"] = new AttributeValue { BOOL = problem.IsDeleted },
@@ -45,6 +46,12 @@ public static class DynamoMapper
             codeTemplates = new Dictionary<string, string> { ["default"] = legacyCodeTemplate.S };
         }
 
+        string[] tags = Array.Empty<string>();
+        if (item.TryGetValue("tags", out var tagsVal) && !string.IsNullOrEmpty(tagsVal.S))
+        {
+            tags = JsonSerializer.Deserialize<string[]>(tagsVal.S) ?? Array.Empty<string>();
+        }
+
         var problem = new Models.Problem
         {
             Id = item["id"].S,
@@ -55,6 +62,7 @@ public static class DynamoMapper
             // Mark = float.Parse(item["mark"].N),
             Difficulty = Enum.Parse<Difficulty>(item["difficulty"].S),
             CodeTemplates = codeTemplates,
+            Tags = tags,
             CreatedDate = DateTime.Parse(item["createdDate"].S),
             UpdatedDate = DateTime.Parse(item["updatedDate"].S),
             IsDeleted = item["isDeleted"].BOOL,
