@@ -34,11 +34,11 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
     <div
       className={`rounded-lg border p-4 ${isDark ? "border-gray-600 bg-gray-800" : "border-gray-200 bg-gray-50"}`}
     >
-      <h4
-        className={`mb-4 text-sm font-semibold ${isDark ? "text-white" : "text-gray-900"}`}
+      <h2
+        className={`mb-4 text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}
       >
         New test case
-      </h4>
+      </h2>
       <div className="space-y-4">
         <div>
           <Label

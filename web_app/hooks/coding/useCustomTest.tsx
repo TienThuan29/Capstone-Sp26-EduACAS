@@ -22,8 +22,7 @@ function formatExecResult(result: CompilationResult): string {
 
 export function useCustomTest() {
   const axiosInstance = useAxios();
-  const { editorState, selectedCompiler, customInput, setConsoleOutput } =
-    useEditorContext();
+  const { editorState, selectedCompiler, customInput, setConsoleOutput } = useEditorContext();
 
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -50,6 +49,7 @@ export function useCustomTest() {
     const normalizedSource = (editorState.code ?? '')
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n');
+
     const normalizedStdin = (customInput ?? '')
       .replace(/\r\n/g, '\n')
       .replace(/\r/g, '\n');
@@ -59,7 +59,7 @@ export function useCustomTest() {
       options: {
         compilerOptions: {},
         executeParameters: { stdin: normalizedStdin },
-        filters: { execute: true },
+        filters: { execute: true }, // execute = true -> means run the program with stdin
       },
       lang,
     };
@@ -85,16 +85,18 @@ export function useCustomTest() {
         return;
       }
 
-      // Code-runner puts execution stdout/stderr in execResult when it runs with stdin
       const resultToShow = data.execResult ?? data;
       const text = formatExecResult(resultToShow);
       const timedOut = data.timedOut || resultToShow.timedOut;
       const code = resultToShow.code ?? data.code;
+
       if (timedOut) {
         setConsoleOutput((text ? text + '\n\n' : '') + '(Timed out)');
-      } else if (code !== 0 && !text) {
+      } 
+      else if (code !== 0 && !text) {
         setConsoleOutput(`Exit code: ${code}`);
-      } else {
+      } 
+      else {
         setConsoleOutput(text || '(No output)');
       }
     } catch (err: unknown) {

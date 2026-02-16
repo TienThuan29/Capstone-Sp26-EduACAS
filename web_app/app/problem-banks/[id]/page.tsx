@@ -262,16 +262,20 @@ export default function ProblemViewPage() {
                 </>
               )}
 
-              {problem.codeTemplate && (
-                <div className="mt-6">
-                  <Label className={isDark ? "text-white" : "text-gray-900"}>
-                    Code template
-                  </Label>
-                  <pre
-                    className={`mt-2 overflow-x-auto rounded border p-4 font-mono text-sm ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
-                  >
-                    {problem.codeTemplate}
-                  </pre>
+              {problem.codeTemplates && Object.keys(problem.codeTemplates).length > 0 && (
+                <div className="mt-6 space-y-4">
+                  {Object.entries(problem.codeTemplates).map(([langId, template]) => (
+                    <div key={langId}>
+                      <Label className={isDark ? "text-white" : "text-gray-900"}>
+                        Code template ({langId})
+                      </Label>
+                      <pre
+                        className={`mt-2 overflow-x-auto rounded border p-4 font-mono text-sm ${isDark ? "border-gray-600 bg-gray-900 text-gray-300" : "border-gray-200 bg-gray-50 text-gray-800"}`}
+                      >
+                        {template}
+                      </pre>
+                    </div>
+                  ))}
                 </div>
               )}
             </section>

@@ -110,7 +110,7 @@ export function ConsolePanel() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={clsx(
-                'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ',
                 activeTab === tab.id
                   ? 'border-b-2 border-blue-500 text-blue-500'
                   : 'text-gray-400 hover:text-gray-200'
