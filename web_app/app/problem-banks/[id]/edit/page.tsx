@@ -24,6 +24,8 @@ import { useToast } from "@/hooks/useToast";
 import { useProblem } from "@/hooks/problem/useProblem";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage";
+import type { ProgrammingLanguage } from "@/types/language";
 import { PageUrl } from "@/configs/page.url";
 import type { Difficulty } from "@/types/problem";
 import { DIFFICULTY, normalizeDifficulty } from "@/types/problem";
@@ -53,7 +55,8 @@ const initialFormData = {
   content: "",
   fileName: "",
   difficulty: "EASY" as Difficulty,
-  codeTemplate: "",
+  codeTemplates: {} as Record<string, string>,
+  tags: [] as string[],
 };
 
 export default function EditProblemPage() {
@@ -64,6 +67,7 @@ export default function EditProblemPage() {
   const toast = useToast();
   const { uploadFile, getFileUrl } = usePrivateS3();
   const { getProblemById, updateProblem } = useProblem();
+  const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
 
   const id = typeof params.id === "string" ? params.id : "";
 
@@ -78,6 +82,9 @@ export default function EditProblemPage() {
   const [testCases, setTestCases] = useState<CreateTestCasePayload[]>([]);
   const [showTestcaseForm, setShowTestcaseForm] = useState(false);
   const [editorHtml, setEditorHtml] = useState("");
+  const [tagInput, setTagInput] = useState("");
+  const [programmingLanguages, setProgrammingLanguages] = useState<ProgrammingLanguage[]>([]);
+  const [selectedLanguageId, setSelectedLanguageId] = useState<string>("");
 
   const lowlight = createLowlight(all);
 
@@ -128,6 +135,18 @@ export default function EditProblemPage() {
   }, []);
 
   useEffect(() => {
+    const loadLanguages = async () => {
+      try {
+        const langs = await getEnabledProgrammingLanguages();
+        setProgrammingLanguages(langs);
+      } catch (error) {
+        console.error("Failed to load programming languages:", error);
+      }
+    };
+    loadLanguages();
+  }, [getEnabledProgrammingLanguages]);
+
+  useEffect(() => {
     if (!id) return;
     const loadProblem = async () => {
       setLoading(true);
@@ -139,7 +158,8 @@ export default function EditProblemPage() {
             content: data.content,
             fileName: data.fileName,
             difficulty: normalizeDifficulty(data.difficulty),
-            codeTemplate: data.codeTemplate || "",
+            codeTemplates: data.codeTemplates || {},
+            tags: data.tags || [],
           });
 
           if (!data.fileName && data.content) {
@@ -157,7 +177,10 @@ export default function EditProblemPage() {
                 expectedOutput: tc.expectedOutput,
                 isPublic: tc.isPublic,
                 isCaseInsensitive: tc.isCaseInsensitive,
-                isRemovedSpace: tc.isRemovedSpace,
+                isFloatingPoint: tc.isFloatingPoint ?? false,
+                floatingPointTolerance: tc.floatingPointTolerance ?? 0.0001,
+                decimalPlaces: tc.decimalPlaces ?? 2,
+                isTokenComparision: tc.isTokenComparision ?? false,
               })),
             );
           }
@@ -254,8 +277,9 @@ export default function EditProblemPage() {
         content: finalContent,
         fileName: formData.fileName,
         difficulty: formData.difficulty,
-        codeTemplate: formData.codeTemplate,
+        codeTemplates: Object.keys(formData.codeTemplates).length > 0 ? formData.codeTemplates : undefined,
         testCases: testCases.length > 0 ? testCases : undefined,
+        tags: formData.tags.length > 0 ? formData.tags : undefined,
       };
 
       await updateProblem(id, payload);
@@ -459,21 +483,172 @@ export default function EditProblemPage() {
 
           <div>
             <Label
-              htmlFor="codeTemplate"
               className={isDark ? "text-white" : "text-gray-900"}
             >
-              Code template
+              Code Templates (by Language)
             </Label>
-            <Textarea
-              id="codeTemplate"
-              value={formData.codeTemplate}
-              onChange={(e) =>
-                setFormData({ ...formData, codeTemplate: e.target.value })
-              }
-              placeholder="Starter code for the solution"
-              rows={8}
-              className="mt-1 font-mono text-sm"
-            />
+            <div className="mt-2 space-y-4">
+              {Object.entries(formData.codeTemplates).map(([langId, template]) => {
+                const lang = programmingLanguages.find(l => l.id === langId);
+                return (
+                  <div key={langId} className={`rounded-lg border p-4 ${isDark ? "border-gray-600 bg-gray-800" : "border-gray-200 bg-gray-50"}`}>
+                    <div className="mb-2 flex items-center justify-between">
+                      <span className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {lang?.name || langId}
+                      </span>
+                      <Button
+                        type="button"
+                        size="xs"
+                        color="failure"
+                        onClick={() => {
+                          const newTemplates = { ...formData.codeTemplates };
+                          delete newTemplates[langId];
+                          setFormData({ ...formData, codeTemplates: newTemplates });
+                        }}
+                        className="cursor-pointer"
+                      >
+                        <TrashIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    <Textarea
+                      value={template}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          codeTemplates: {
+                            ...formData.codeTemplates,
+                            [langId]: e.target.value,
+                          },
+                        });
+                      }}
+                      placeholder={`Starter code for ${lang?.name || langId}`}
+                      rows={6}
+                      className="font-mono text-sm"
+                    />
+                  </div>
+                );
+              })}
+              <div className="flex gap-2">
+                <Select
+                  value={selectedLanguageId}
+                  onChange={(e) => setSelectedLanguageId(e.target.value)}
+                  className="flex-1"
+                >
+                  <option value="">Select a language...</option>
+                  {programmingLanguages
+                    .filter(lang => !formData.codeTemplates[lang.id])
+                    .map((lang) => (
+                      <option key={lang.id} value={lang.id}>
+                        {lang.name}
+                      </option>
+                    ))}
+                </Select>
+                <Button
+                  type="button"
+                  color="blue"
+                  onClick={() => {
+                    if (selectedLanguageId && !formData.codeTemplates[selectedLanguageId]) {
+                      setFormData({
+                        ...formData,
+                        codeTemplates: {
+                          ...formData.codeTemplates,
+                          [selectedLanguageId]: "",
+                        },
+                      });
+                      setSelectedLanguageId("");
+                    }
+                  }}
+                  disabled={!selectedLanguageId}
+                  className="cursor-pointer"
+                >
+                  <PlusIcon className="h-5 w-5" /> Add Template
+                </Button>
+              </div>
+            </div>
+            <p className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Add starter code templates for different programming languages
+            </p>
+          </div>
+
+          <div>
+            <Label
+              htmlFor="tags"
+              className={isDark ? "text-white" : "text-gray-900"}
+            >
+              Tags
+            </Label>
+            <div className="mt-1 flex flex-wrap gap-2">
+              {formData.tags.map((tag, index) => (
+                <span
+                  key={index}
+                  className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium ${
+                    isDark
+                      ? "bg-blue-900 text-blue-200"
+                      : "bg-blue-100 text-blue-800"
+                  }`}
+                >
+                  {tag}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        tags: formData.tags.filter((_, i) => i !== index),
+                      });
+                    }}
+                    className={`ml-1 rounded-full hover:bg-opacity-80 ${
+                      isDark ? "text-blue-200 hover:text-blue-100" : "text-blue-800 hover:text-blue-900"
+                    }`}
+                  >
+                    <span className="sr-only">Remove tag</span>
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="mt-2 flex gap-2">
+              <TextInput
+                id="tags"
+                type="text"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    const trimmed = tagInput.trim();
+                    if (trimmed && !formData.tags.includes(trimmed)) {
+                      setFormData({
+                        ...formData,
+                        tags: [...formData.tags, trimmed],
+                      });
+                      setTagInput("");
+                    }
+                  }
+                }}
+                placeholder="Type a tag and press Enter"
+                className="flex-1"
+              />
+              <Button
+                type="button"
+                color="blue"
+                onClick={() => {
+                  const trimmed = tagInput.trim();
+                  if (trimmed && !formData.tags.includes(trimmed)) {
+                    setFormData({
+                      ...formData,
+                      tags: [...formData.tags, trimmed],
+                    });
+                    setTagInput("");
+                  }
+                }}
+                className="cursor-pointer"
+              >
+                Add Tag
+              </Button>
+            </div>
+            <p className={`mt-1 text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Add tags to categorize your problem (e.g., "arrays", "dynamic-programming", "graph")
+            </p>
           </div>
 
           {testCases.length > 0 && (
@@ -510,7 +685,8 @@ export default function EditProblemPage() {
                       <span className={`ml-2 text-xs ${isDark ? "text-gray-500" : "text-gray-500"}`}>
                         {tc.isPublic && "Public"}
                         {tc.isCaseInsensitive && " · Case insensitive"}
-                        {tc.isRemovedSpace && " · No spaces"}
+                        {tc.isFloatingPoint && " · Floating point"}
+                        {tc.isTokenComparision && " · Token comparison"}
                       </span>
                     </div>
                     <Button
