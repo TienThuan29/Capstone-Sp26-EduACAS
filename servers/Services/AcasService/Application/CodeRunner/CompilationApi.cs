@@ -58,7 +58,6 @@ public class CompilationApi : ICompilationApi
             {
                 throw new ArgumentException("Language is required. Provide it either in the request body or as a query parameter.");
             }
-
             // Build URL with optional lang query parameter
             var urlBuilder = new StringBuilder($"{_baseUrl}/api/compiler/{compilerId}/compile");
             if (!string.IsNullOrWhiteSpace(lang))
@@ -67,16 +66,12 @@ public class CompilationApi : ICompilationApi
             }
 
             var url = urlBuilder.ToString();
-
             // Serialize request body
             var jsonContent = JsonSerializer.Serialize(compileRequest, _jsonOptions);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            _logger.LogInformation(
-                "Calling code-runner compile API: CompilerId={CompilerId}, Language={Language}, Url={Url}",
-                compilerId, language, url);
-
-            // Make POST request
+            // _logger.LogInformation(
+            //     "Calling code-runner compile API: CompilerId={CompilerId}, Language={Language}, Url={Url}",
+            //     compilerId, language, url);
             var response = await _httpClient.PostAsync(url, content);
             response.EnsureSuccessStatusCode();
 
@@ -89,7 +84,6 @@ public class CompilationApi : ICompilationApi
                 throw new InvalidOperationException("Failed to deserialize compilation result from code-runner service");
             }
 
-            // Fallback: if execResult is in JSON but was not deserialized (e.g. nested type/polymorphism), parse it explicitly
             if (compilationResult.ExecResult == null && responseContent.Contains("\"execResult\"", StringComparison.OrdinalIgnoreCase))
             {
                 try
@@ -100,9 +94,10 @@ public class CompilationApi : ICompilationApi
                         compilationResult.ExecResult = JsonSerializer.Deserialize<CompilationResult>(execResultElement.GetRawText(), _jsonOptions);
                     }
                 }
-                catch (JsonException)
+                catch (JsonException ex)
                 {
-                    // Ignore; keep ExecResult null
+                    _logger.LogError(ex, "JSON deserialization error from code-runner compile API: CompilerId={CompilerId}", compilerId);
+                    throw;
                 }
             }
 

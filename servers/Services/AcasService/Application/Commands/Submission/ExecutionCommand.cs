@@ -26,7 +26,6 @@ public class ExecutionCommand : IExecutionCommand
         CompileRequest compileRequest,
         string lang)
     {
-        // Code-runner only returns execResult (run output) when filters.execute is true
         compileRequest.Options ??= new CompileOptions();
         compileRequest.Options.Filters ??= new CompileFilters();
         compileRequest.Options.Filters.Execute = true;

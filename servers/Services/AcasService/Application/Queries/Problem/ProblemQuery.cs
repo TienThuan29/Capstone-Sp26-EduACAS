@@ -62,7 +62,7 @@ public class ProblemQuery : IProblemQuery
                 FileName = problem.FileName,
                 FileUrl = fileUrl,
                 Difficulty = problem.Difficulty,
-                CodeTemplate = problem.CodeTemplate,
+                CodeTemplate = problem.CodeTemplates != null && problem.CodeTemplates.TryGetValue("default", out var ct) ? ct : (problem.CodeTemplates?.Values.FirstOrDefault() ?? string.Empty),
                 CreatedDate = problem.CreatedDate,
                 UpdatedDate = problem.UpdatedDate,
                 TestCases = testCases
@@ -70,11 +70,15 @@ public class ProblemQuery : IProblemQuery
                     .Select(tc => new TestCaseResponse
                     {
                         Id = tc.Id,
+                        ProblemId = tc.ProblemId,
                         InputData = tc.InputData,
                         ExpectedOutput = tc.ExpectedOutput,
                         IsPublic = tc.IsPublic,
                         IsCaseInsensitive = tc.IsCaseInsensitive,
-                        IsRemovedSpace = tc.IsRemovedSpace
+                        IsFloatingPoint = tc.IsFloatingPoint,
+                        FloatingPointTolerance = tc.FloatingPointTolerance,
+                        DecimalPlaces = tc.DecimalPlaces,
+                        IsTokenComparision = tc.IsTokenComparision
                     })
                     .ToList()
             };
@@ -165,11 +169,15 @@ public class ProblemQuery : IProblemQuery
                 .Select(tc => new TestCaseResponse
                 {
                     Id = tc.Id,
+                    ProblemId = tc.ProblemId,
                     InputData = tc.InputData,
                     ExpectedOutput = tc.ExpectedOutput,
                     IsPublic = tc.IsPublic,
                     IsCaseInsensitive = tc.IsCaseInsensitive,
-                    IsRemovedSpace = tc.IsRemovedSpace
+                    IsFloatingPoint = tc.IsFloatingPoint,
+                    FloatingPointTolerance = tc.FloatingPointTolerance,
+                    DecimalPlaces = tc.DecimalPlaces,
+                    IsTokenComparision = tc.IsTokenComparision
                 })
                 .ToList();
         }
@@ -191,11 +199,15 @@ public class ProblemQuery : IProblemQuery
             return new TestCaseResponse
             {
                 Id = testCase.Id,
+                ProblemId = testCase.ProblemId,
                 InputData = testCase.InputData,
                 ExpectedOutput = testCase.ExpectedOutput,
                 IsPublic = testCase.IsPublic,
                 IsCaseInsensitive = testCase.IsCaseInsensitive,
-                IsRemovedSpace = testCase.IsRemovedSpace
+                IsFloatingPoint = testCase.IsFloatingPoint,
+                FloatingPointTolerance = testCase.FloatingPointTolerance,
+                DecimalPlaces = testCase.DecimalPlaces,
+                IsTokenComparision = testCase.IsTokenComparision
             };
         }
         catch (Exception ex)

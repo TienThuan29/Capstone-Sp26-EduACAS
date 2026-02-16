@@ -75,8 +75,13 @@ public class CreateTestCaseRequest
     [Required(ErrorMessage = "IsCaseInsensitive is required")]
     public bool IsCaseInsensitive { get; set; } = false;
 
-    [Required(ErrorMessage = "IsRemovedSpace is required")]
-    public bool IsRemovedSpace { get; set; } = false;
+    public bool IsFloatingPoint { get; set; }
+
+    public double FloatingPointTolerance { get; set; }
+
+    public int DecimalPlaces { get; set; }
+
+    public bool IsTokenComparision { get; set; }
 }
 
 public class UpdateTestCaseRequest
@@ -93,8 +98,13 @@ public class UpdateTestCaseRequest
     [Required(ErrorMessage = "IsCaseInsensitive is required")]
     public bool IsCaseInsensitive { get; set; } = false;
 
-    [Required(ErrorMessage = "IsRemovedSpace is required")]
-    public bool IsRemovedSpace { get; set; } = false;
+    public bool IsFloatingPoint { get; set; }
+
+    public double FloatingPointTolerance { get; set; }
+
+    public int DecimalPlaces { get; set; }
+
+    public bool IsTokenComparision { get; set; }
 }
 
 public class ExtractOcrRequest

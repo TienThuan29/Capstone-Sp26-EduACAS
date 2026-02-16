@@ -16,7 +16,7 @@ public static class DynamoMapper
             ["content"] = new AttributeValue { S = problem.Content },
             ["fileName"] = new AttributeValue { S = problem.FileName },
             ["difficulty"] = new AttributeValue { S = problem.Difficulty.ToString() },
-            ["codeTemplate"] = new AttributeValue { S = problem.CodeTemplate },
+            ["codeTemplates"] = new AttributeValue { S = JsonSerializer.Serialize(problem.CodeTemplates ?? new Dictionary<string, string>()) },
             ["createdDate"] = new AttributeValue { S = problem.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["updatedDate"] = new AttributeValue { S = problem.UpdatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["isDeleted"] = new AttributeValue { BOOL = problem.IsDeleted },
@@ -34,6 +34,17 @@ public static class DynamoMapper
             testCases = JsonSerializer.Deserialize<List<TestCase>>(value.S) ?? [];
         }
 
+        Dictionary<string, string>? codeTemplates = null;
+        if (item.TryGetValue("codeTemplates", out var codeTemplatesVal) && !string.IsNullOrEmpty(codeTemplatesVal.S))
+        {
+            codeTemplates = JsonSerializer.Deserialize<Dictionary<string, string>>(codeTemplatesVal.S);
+        }
+        // Backward compatibility: legacy single codeTemplate stored as string
+        else if (item.TryGetValue("codeTemplate", out var legacyCodeTemplate) && !string.IsNullOrEmpty(legacyCodeTemplate.S))
+        {
+            codeTemplates = new Dictionary<string, string> { ["default"] = legacyCodeTemplate.S };
+        }
+
         var problem = new Models.Problem
         {
             Id = item["id"].S,
@@ -43,7 +54,7 @@ public static class DynamoMapper
             FileName = item["fileName"].S,
             // Mark = float.Parse(item["mark"].N),
             Difficulty = Enum.Parse<Difficulty>(item["difficulty"].S),
-            CodeTemplate = item["codeTemplate"].S,
+            CodeTemplates = codeTemplates,
             CreatedDate = DateTime.Parse(item["createdDate"].S),
             UpdatedDate = DateTime.Parse(item["updatedDate"].S),
             IsDeleted = item["isDeleted"].BOOL,
