@@ -39,6 +39,7 @@ export type TestCaseResponse = {
   floatingPointTolerance: number;
   decimalPlaces: number;
   isTokenComparision: boolean;
+  isNotOrderedComparision: boolean;
 };
 
 /** API may return difficulty as number (0=EASY, 1=MEDIUM, 2=HARD); use normalizeDifficulty() for display */
@@ -63,5 +64,8 @@ export type ProblemBasicResponse = {
   id: string;
   title: string;
   difficulty: number | Difficulty;
+  tags: string[];
+  testCasesCount: number;
   createdDate: string;
+  updatedDate: string;
 };

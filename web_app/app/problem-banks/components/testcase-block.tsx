@@ -16,9 +16,10 @@ const initialTestCase: CreateTestCasePayload = {
   isPublic: true,
   isCaseInsensitive: false,
   isFloatingPoint: false,
-  floatingPointTolerance: 0.0001,
-  decimalPlaces: 2,
+  floatingPointTolerance: null,
+  decimalPlaces: null,
   isTokenComparision: false,
+  isNotOrderedComparision: false,
 };
 
 export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
@@ -148,6 +149,24 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
                 Floating point comparison
               </Label>
             </div>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="tc-not-ordered-comparison"
+                checked={formData.isNotOrderedComparision !== null ? formData.isNotOrderedComparision : false}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    isNotOrderedComparision: e.target.checked,
+                  }))
+                }
+              />
+              <Label
+                htmlFor="tc-not-ordered-comparison"
+                className={`cursor-pointer ${isDark ? "text-gray-300" : "text-gray-700"}`}
+              >
+                Not ordered comparison (not care about order between tokens)
+              </Label>
+            </div>
             
           </div>
           {formData.isFloatingPoint && (
@@ -165,7 +184,7 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
                   step="0.0001"
                   value={formData.floatingPointTolerance !== null ? formData.floatingPointTolerance.toString() : "0.0001"}
                   onChange={(e) => {
-                    const val = parseFloat(e.target.value) || 0.0001;
+                    const val = parseFloat(e.target.value);
                     setFormData((prev) => ({
                       ...prev,
                       floatingPointTolerance: val,

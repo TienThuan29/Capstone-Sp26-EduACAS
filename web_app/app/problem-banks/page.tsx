@@ -160,7 +160,7 @@ export default function ProblemBanksPage() {
           content: formData.content,
           fileName: formData.fileName,
           difficulty: formData.difficulty,
-          codeTemplate: formData.codeTemplate,
+          codeTemplates: formData.codeTemplate ? { default: formData.codeTemplate } : undefined,
         };
         await updateProblem(editingProblem.id, payload);
         toast.showSuccess("Problem updated successfully");
@@ -171,7 +171,7 @@ export default function ProblemBanksPage() {
           content: formData.content,
           fileName: formData.fileName,
           difficulty: formData.difficulty,
-          codeTemplate: formData.codeTemplate,
+          codeTemplates: formData.codeTemplate ? { default: formData.codeTemplate } : undefined,
           mode: PROBLEM_MODE.MANUAL,
         };
         await createProblem(payload);
@@ -257,7 +257,10 @@ export default function ProblemBanksPage() {
               <TableRow>
                 <TableHeadCell>Title</TableHeadCell>
                 <TableHeadCell>Difficulty</TableHeadCell>
+                <TableHeadCell>Tags</TableHeadCell>
+                <TableHeadCell>Test cases</TableHeadCell>
                 <TableHeadCell>Created</TableHeadCell>
+                <TableHeadCell>Updated</TableHeadCell>
                 <TableHeadCell>Actions</TableHeadCell>
               </TableRow>
             </TableHead>
@@ -265,7 +268,7 @@ export default function ProblemBanksPage() {
               {filteredProblems.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={7}
                     className={`py-8 text-center ${isDark ? "text-gray-400" : "text-gray-500"}`}
                   >
                     No problems found. Create one to get started.
@@ -298,9 +301,31 @@ export default function ProblemBanksPage() {
                       </span>
                     </TableCell>
                     <TableCell
+                      className={`max-w-[180px] ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                    >
+                      {p.tags?.length ? (
+                        <span className="truncate" title={p.tags.join(", ")}>
+                          {p.tags.slice(0, 3).join(", ")}
+                          {p.tags.length > 3 ? ` +${p.tags.length - 3}` : ""}
+                        </span>
+                      ) : (
+                        <span className="italic text-gray-400">—</span>
+                      )}
+                    </TableCell>
+                    <TableCell
+                      className={isDark ? "text-gray-300" : "text-gray-700"}
+                    >
+                      {p.testCasesCount ?? 0}
+                    </TableCell>
+                    <TableCell
                       className={isDark ? "text-gray-300" : "text-gray-900"}
                     >
                       {formatDate(p.createdDate)}
+                    </TableCell>
+                    <TableCell
+                      className={isDark ? "text-gray-300" : "text-gray-900"}
+                    >
+                      {p.updatedDate ? formatDate(p.updatedDate) : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

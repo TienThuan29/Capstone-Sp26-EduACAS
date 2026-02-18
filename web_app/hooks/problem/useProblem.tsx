@@ -18,6 +18,7 @@ export type CreateTestCasePayload = {
   floatingPointTolerance: number | null;
   decimalPlaces: number | null;
   isTokenComparision: boolean | null;
+  isNotOrderedComparision: boolean | null;
 };
 
 export type CreateProblemPayload = {

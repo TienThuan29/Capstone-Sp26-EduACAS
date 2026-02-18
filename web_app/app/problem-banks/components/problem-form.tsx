@@ -22,6 +22,8 @@ import {
   CheckCircleIcon,
   AdjustmentsHorizontalIcon,
   DocumentTextIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "@/hooks/useToast";
 import { useProblem } from "@/hooks/problem/useProblem";
@@ -112,6 +114,7 @@ export function ProblemForm({
   const [uploading, setUploading] = useState(false);
   const [testCases, setTestCases] = useState<CreateTestCasePayload[]>([]);
   const [showTestcaseForm, setShowTestcaseForm] = useState(false);
+  const [expandedTcIndices, setExpandedTcIndices] = useState<Set<number>>(new Set());
   const [editorHtml, setEditorHtml] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [programmingLanguages, setProgrammingLanguages] = useState<
@@ -233,10 +236,11 @@ export function ProblemForm({
                 expectedOutput: tc.expectedOutput,
                 isPublic: tc.isPublic,
                 isCaseInsensitive: tc.isCaseInsensitive,
-                isFloatingPoint: tc.isFloatingPoint ?? false,
-                floatingPointTolerance: tc.floatingPointTolerance ?? 0.0001,
-                decimalPlaces: tc.decimalPlaces ?? 2,
-                isTokenComparision: tc.isTokenComparision ?? false,
+                isFloatingPoint: tc.isFloatingPoint,
+                floatingPointTolerance: tc.floatingPointTolerance,
+                decimalPlaces: tc.decimalPlaces,
+                isTokenComparision: tc.isTokenComparision,
+                isNotOrderedComparision: tc.isNotOrderedComparision,
               })),
             );
           }
@@ -913,41 +917,108 @@ export function ProblemForm({
                     </span>
                   </div>
                   <div className="max-h-[300px] space-y-2 overflow-y-auto pr-1">
-                    {testCases.map((tc, index) => (
-                      <div
-                        key={index}
-                        className={`group relative rounded-md border p-2 text-xs transition-colors hover:border-blue-400 ${isDark ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <div className="truncate font-mono font-semibold text-gray-700 dark:text-gray-300">
-                              In: {tc.inputData}
+                    {testCases.map((tc, index) => {
+                      const isExpanded = expandedTcIndices.has(index);
+                      const toggleExpanded = () => {
+                        setExpandedTcIndices((prev) => {
+                          const next = new Set(prev);
+                          if (next.has(index)) next.delete(index);
+                          else next.add(index);
+                          return next;
+                        });
+                      };
+                      const attrs: { label: string; value: string | number | boolean }[] = [
+                        { label: "Public", value: tc.isPublic },
+                        { label: "Case insensitive", value: tc.isCaseInsensitive },
+                        { label: "Floating point", value: tc.isFloatingPoint },
+                        {
+                          label: "Floating point tolerance",
+                          value: tc.floatingPointTolerance != null ? tc.floatingPointTolerance : "—",
+                        },
+                        {
+                          label: "Decimal places",
+                          value: tc.decimalPlaces != null ? tc.decimalPlaces : "—",
+                        },
+                        { label: "Token comparison", value: tc.isTokenComparision ?? false },
+                        { label: "Not ordered comparison", value: tc.isNotOrderedComparision ?? false },
+                      ];
+                      return (
+                        <div
+                          key={index}
+                          className={`group relative rounded-md border text-xs transition-colors hover:border-blue-400 ${isDark ? "border-gray-700 bg-gray-900" : "border-gray-200 bg-gray-50"}`}
+                        >
+                          <div className="flex items-center justify-between p-2">
+                            <div className="min-w-0 flex-1">
+                              <div className="truncate font-mono font-semibold text-gray-700 dark:text-gray-300">
+                                In: {tc.inputData}
+                              </div>
+                              <div className="truncate font-mono text-gray-500">
+                                Out: {tc.expectedOutput}
+                              </div>
                             </div>
-                            <div className="truncate font-mono text-gray-500">
-                              Out: {tc.expectedOutput}
+                            <div className="flex shrink-0 items-center gap-1">
+                              {tc.isPublic ? (
+                                <Badge color="blue" className="mt-1 w-fit">
+                                  Public
+                                </Badge>
+                              ) : (
+                                <Badge color="red" className="mt-1 w-fit">
+                                  Private
+                                </Badge>
+                              )}
+                              <Button
+                                type="button"
+                                size="xs"
+                                color="light"
+                                onClick={toggleExpanded}
+                                className="cursor-pointer"
+                                aria-expanded={isExpanded}
+                                title={isExpanded ? "Collapse attributes" : "Expand attributes"}
+                              >
+                                {isExpanded ? (
+                                  <ChevronUpIcon className="h-4 w-4" />
+                                ) : (
+                                  <ChevronDownIcon className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                type="button"
+                                size="xs"
+                                color="light"
+                                onClick={() =>
+                                  setTestCases((prev) =>
+                                    prev.filter((_, i) => i !== index),
+                                  )
+                                }
+                                className="text-red-500 hover:text-red-700 cursor-pointer"
+                              >
+                                <TrashIcon className="h-4 w-4" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center">
-                            {tc.isPublic ? <Badge color="blue" className="mt-1 w-fit">
-                                Public
-                              </Badge> : <Badge color="red" className="mt-1 w-fit">
-                                Private
-                              </Badge>}
-                            <Button
-                              type="button"
-                              onClick={() =>
-                                setTestCases((prev) =>
-                                  prev.filter((_, i) => i !== index),
-                                )
-                              }
-                              className="text-red-500 hover:text-red-700 cursor-pointer"
+                          {isExpanded && (
+                            <div
+                              className={`space-y-1.5 border-t px-3 py-2 ${isDark ? "border-gray-700 text-gray-400" : "border-gray-200 text-gray-600"}`}
                             >
-                              <TrashIcon className="h-4 w-4" />
-                            </Button>
-                          </div>
+                              {attrs.map(({ label, value }) => (
+                                <div key={label} className="flex flex-wrap gap-1">
+                                  <span className="font-medium text-gray-500">
+                                    {label}:
+                                  </span>
+                                  <span>
+                                    {typeof value === "boolean"
+                                      ? value
+                                        ? "Yes"
+                                        : "No"
+                                      : value}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                     {testCases.length === 0 && (
                       <div className="text-xs text-gray-500 italic">
                         No test cases added.
