@@ -37,16 +37,28 @@ public class Submission
 public class TestResult
 {
     public string Id { get; set; } = string.Empty;
+
+    public string TestcaseId { get; set; } = string.Empty;
     
     public string Input { get; set; } = string.Empty;
     
-    public string Output { get; set; } = string.Empty;
-    
-    public bool IsPassed { get; set; }
+    public string ActualOutput { get; set; } = string.Empty;
+
+    public string ExpectedOutput { get; set; } = string.Empty;
     
     public int ExecutionTimeMs { get; set; }
-    
-    public int Versioning { get; set; }
+
+    public TestcaseStatus Status { get; set; }
     
     public DateTime CreatedDate { get; set; }
+}
+
+public enum TestcaseStatus
+{
+    SUCCESS,
+    FAIL,
+    TIMEOUT,
+    COMPILE_ERROR,
+    RUNTIME_ERROR,
+    UNKNOWN_ERROR,
 }

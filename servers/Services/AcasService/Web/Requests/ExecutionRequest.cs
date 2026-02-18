@@ -109,6 +109,10 @@ public class RumBatchRequest : CompileRequest
     [MinLength(1, ErrorMessage = "stdinList must contain at least one input")]
     [JsonPropertyName("stdinList")]
     public List<string> StdinList { get; set; } = new();
+
+    [Required(ErrorMessage = "Test cases are required")]
+    [JsonPropertyName("testCases")]
+    public List<TestCase> TestCases { get; set; } = new List<TestCase>();
 }
 
 // custom testcase request
@@ -125,4 +129,57 @@ public class CustomTestcaseRequest
     [Required(ErrorMessage = "Language is required")]
     [JsonPropertyName("lang")]
     public string Lang { get; set; } = string.Empty;
+}
+
+// run all public testcases request
+public class PublicTestcasesRequest
+{
+    [Required(ErrorMessage = "Compiler ID is required")]
+    [JsonPropertyName("compilerId")]
+    public string CompilerId { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Language is required")]
+    [JsonPropertyName("lang")]
+    public string Lang { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Run batch request is required")]
+    [JsonPropertyName("runBatchRequest")]
+    public RumBatchRequest RunBatchRequest { get; set; } = new RumBatchRequest();
+}
+
+
+public class TestCase
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("problemId")]
+    public string ProblemId { get; set; } = string.Empty;
+
+    [JsonPropertyName("inputData")]
+    public string InputData { get; set; } = string.Empty;
+
+    [JsonPropertyName("expectedOutput")]
+    public string ExpectedOutput { get; set; } = string.Empty;
+
+    [JsonPropertyName("isPublic")]
+    public bool IsPublic { get; set; }
+
+    [JsonPropertyName("isCaseInsensitive")]
+    public bool IsCaseInsensitive { get; set; }
+
+    [JsonPropertyName("isFloatingPoint")]
+    public bool IsFloatingPoint { get; set; }
+
+    [JsonPropertyName("floatingPointTolerance")]
+    public double? FloatingPointTolerance { get; set; } = null;
+
+    [JsonPropertyName("decimalPlaces")]
+    public int? DecimalPlaces { get; set; }
+    
+    [JsonPropertyName("isTokenComparision")]
+    public bool IsTokenComparision { get; set; }
+    
+    [JsonPropertyName("isNotOrderedComparision")]
+    public bool? IsNotOrderedComparision { get; set; }
 }

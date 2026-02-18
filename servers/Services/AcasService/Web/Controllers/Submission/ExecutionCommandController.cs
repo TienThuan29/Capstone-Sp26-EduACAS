@@ -10,7 +10,7 @@ namespace AcasService.Web.Controllers.Submission;
 
 [ApiController]
 [Route("api/v1/submissions")]
-[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
+// [Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class ExecutionCommandController : ControllerBase
 {
     private readonly IExecutionCommand _executionCommand;
@@ -41,6 +41,34 @@ public class ExecutionCommandController : ControllerBase
         {
             _logger.LogError(ex, "Error executing custom testcase");
             return ResponseUtil.Error<CompilationResult>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPost("execute/public-testcases")]
+    public async Task<ActionResult<ApiResponse<List<TestResultResponse>>>> ExecutePublicTestcases(
+        [FromBody] PublicTestcasesRequest publicTestcasesRequest)
+    {
+        try
+        {
+            var results = await _executionCommand.ExecutePublicTestcasesAsync(
+                publicTestcasesRequest.CompilerId,
+                publicTestcasesRequest.RunBatchRequest,
+                publicTestcasesRequest.Lang
+            );
+            return ResponseUtil.Success(results, "Public testcases executed successfully", 200);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation while executing public testcases");
+            return ResponseUtil.Error<List<TestResultResponse>>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error executing public testcases");
+            return ResponseUtil.Error<List<TestResultResponse>>(
+                "Failed to execute public testcases",
+                error: ex.Message,
+                statusCode: 500);
         }
     }
 }

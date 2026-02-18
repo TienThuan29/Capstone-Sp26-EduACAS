@@ -17,6 +17,7 @@ using AcasService.Messaging;
 using AcasService.Messaging.User;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.ClassroomEnrollment;
+using AcasService.Repositories.DiscussionIssue;
 using AcasService.Repositories.DynamoDB;
 using AcasService.Repositories.Examination;
 using AcasService.Repositories.Problem;
@@ -102,6 +103,7 @@ builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRepository>();
 builder.Services.AddScoped<ISlotRepository,SlotRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
+builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -125,6 +127,7 @@ builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
 builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
+builder.Services.AddScoped<IResultComparator, ResultComparator>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -134,6 +137,7 @@ builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<MaterialMapper>();
+builder.Services.AddScoped<TestResultMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
