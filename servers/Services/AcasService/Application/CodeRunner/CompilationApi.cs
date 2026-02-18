@@ -124,6 +124,7 @@ public class CompilationApi : ICompilationApi
         }
     }
 
+
     public async Task<RunBatchResponse> RunBatchAsync(
         string compilerId,
         RumBatchRequest runBatchRequest,
