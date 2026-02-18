@@ -39,7 +39,8 @@ public class ProblemMapper
             IsFloatingPoint = testCase.IsFloatingPoint,
             FloatingPointTolerance = testCase.FloatingPointTolerance,
             DecimalPlaces = testCase.DecimalPlaces,
-            IsTokenComparision = testCase.IsTokenComparision
+            IsTokenComparision = testCase.IsTokenComparision,
+            IsNotOrderedComparision = testCase.IsNotOrderedComparision
         };
     }
 

@@ -79,7 +79,8 @@ public class ProblemQuery : IProblemQuery
                         IsFloatingPoint = tc.IsFloatingPoint,
                         FloatingPointTolerance = tc.FloatingPointTolerance,
                         DecimalPlaces = tc.DecimalPlaces,
-                        IsTokenComparision = tc.IsTokenComparision
+                        IsTokenComparision = tc.IsTokenComparision,
+                        IsNotOrderedComparision = tc.IsNotOrderedComparision
                     })
                     .ToList()
             };
@@ -103,7 +104,10 @@ public class ProblemQuery : IProblemQuery
                     Id = p.Id,
                     Title = p.Title,
                     Difficulty = p.Difficulty,
-                    CreatedDate = p.CreatedDate
+                    Tags = p.Tags?.ToList() ?? new List<string>(),
+                    TestCasesCount = p.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate
                 })
                 .ToList();
         }
@@ -126,7 +130,10 @@ public class ProblemQuery : IProblemQuery
                     Id = p.Id,
                     Title = p.Title,
                     Difficulty = p.Difficulty,
-                    CreatedDate = p.CreatedDate
+                    Tags = p.Tags?.ToList() ?? new List<string>(),
+                    TestCasesCount = p.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate
                 })
                 .ToList();
         }
@@ -149,7 +156,10 @@ public class ProblemQuery : IProblemQuery
                     Id = p.Id,
                     Title = p.Title,
                     Difficulty = p.Difficulty,
-                    CreatedDate = p.CreatedDate
+                    Tags = p.Tags?.ToList() ?? new List<string>(),
+                    TestCasesCount = p.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate
                 })
                 .ToList();
         }
@@ -178,7 +188,8 @@ public class ProblemQuery : IProblemQuery
                     IsFloatingPoint = tc.IsFloatingPoint,
                     FloatingPointTolerance = tc.FloatingPointTolerance,
                     DecimalPlaces = tc.DecimalPlaces,
-                    IsTokenComparision = tc.IsTokenComparision
+                    IsTokenComparision = tc.IsTokenComparision,
+                    IsNotOrderedComparision = tc.IsNotOrderedComparision
                 })
                 .ToList();
         }
@@ -208,7 +219,8 @@ public class ProblemQuery : IProblemQuery
                 IsFloatingPoint = testCase.IsFloatingPoint,
                 FloatingPointTolerance = testCase.FloatingPointTolerance,
                 DecimalPlaces = testCase.DecimalPlaces,
-                IsTokenComparision = testCase.IsTokenComparision
+                IsTokenComparision = testCase.IsTokenComparision,
+                IsNotOrderedComparision = testCase.IsNotOrderedComparision
             };
         }
         catch (Exception ex)

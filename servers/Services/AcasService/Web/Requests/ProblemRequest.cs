@@ -78,11 +78,13 @@ public class CreateTestCaseRequest
 
     public bool IsFloatingPoint { get; set; }
 
-    public double FloatingPointTolerance { get; set; }
+    public double? FloatingPointTolerance { get; set; }
 
-    public int DecimalPlaces { get; set; }
+    public int? DecimalPlaces { get; set; }
 
     public bool IsTokenComparision { get; set; }
+
+    public bool IsNotOrderedComparision { get; set; }
 }
 
 public class UpdateTestCaseRequest
@@ -101,11 +103,13 @@ public class UpdateTestCaseRequest
 
     public bool IsFloatingPoint { get; set; }
 
-    public double FloatingPointTolerance { get; set; }
+    public double? FloatingPointTolerance { get; set; }
 
-    public int DecimalPlaces { get; set; }
+    public int? DecimalPlaces { get; set; }
 
     public bool IsTokenComparision { get; set; }
+
+    public bool IsNotOrderedComparision { get; set; }
 }
 
 public class ExtractOcrRequest

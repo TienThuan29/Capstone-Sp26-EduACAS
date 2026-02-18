@@ -73,8 +73,12 @@ public class TestCaseResponse
 
     [JsonPropertyName("decimalPlaces")]
     public int? DecimalPlaces { get; set; }
+    
     [JsonPropertyName("isTokenComparision")]
     public bool IsTokenComparision { get; set; }
+    
+    [JsonPropertyName("isNotOrderedComparision")]
+    public bool? IsNotOrderedComparision { get; set; }
 }
 
 public class ProblemBasicResponse
@@ -87,7 +91,16 @@ public class ProblemBasicResponse
 
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }
-    
+
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new List<string>();
+
+    [JsonPropertyName("testCasesCount")]
+    public int TestCasesCount { get; set; }
+
     [JsonPropertyName("createdDate")]
     public DateTime CreatedDate { get; set; }
+
+    [JsonPropertyName("updatedDate")]
+    public DateTime UpdatedDate { get; set; }
 }

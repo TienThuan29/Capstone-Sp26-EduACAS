@@ -57,10 +57,12 @@ public class TestCase
     public bool IsFloatingPoint { get; set; } = false;
 
     public double? FloatingPointTolerance { get; set; } = null;
-
+    
     public int? DecimalPlaces { get; set; } = null; // default -1, not used
 
     public bool IsTokenComparision { get; set; } = false;
+
+    public bool IsNotOrderedComparision { get; set; } = false; // not care about order between tokens
 
     public bool IsDeleted { get; set; }
 }
