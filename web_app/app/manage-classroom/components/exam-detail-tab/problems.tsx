@@ -13,9 +13,11 @@ import { useProblem } from "@/hooks/problem/useProblem";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/useToast";
-import type { ProblemBasicResponse } from "@/types/problem";
+import type { ProblemBasicResponse, ProblemResponse } from "@/types/problem";
 import { normalizeDifficulty } from "@/types/problem";
+import { toExamProblem } from "@/utils/exam-problem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { formatDate } from "@/utils/datetime-utils";
 
 function DetailRow({
   label,
@@ -89,14 +91,14 @@ export function ProblemsTabContent({
       setLoadingExamProblems(true);
       try {
         const problemDetails = await Promise.all(
-          examProblems.map(async (ep) => {
-            const problem = await getProblemById(ep.problemId);
-            return problem;
-          })
+          examProblems.map(async (ep) => getProblemById(ep.problemId))
         );
-        // Filter out nulls and cast to Problem[]
+        const examId = examination.id;
+        const langId = examination.programmingLanguage?.id;
         setExamProblemDetails(
-          problemDetails.filter((p): p is Problem => p !== null) as Problem[]
+          problemDetails
+            .filter((p): p is ProblemResponse => p !== null)
+            .map((p) => toExamProblem(p, examId, langId))
         );
       } catch (error) {
         console.error("Failed to fetch problem details:", error);
@@ -542,11 +544,11 @@ export function ProblemsTabContent({
                 <DetailRow label="ID" value={p.id} />
                 <DetailRow
                   label="Created"
-                  value={new Date(p.createdDate).toLocaleString("vi-VN")}
+                  value={formatDate(p.createdDate)}
                 />
                 <DetailRow
                   label="Updated"
-                  value={new Date(p.updatedDate).toLocaleString("vi-VN")}
+                  value={formatDate(p.updatedDate)}
                 />
                 <DetailRow
                   label="Test Cases"

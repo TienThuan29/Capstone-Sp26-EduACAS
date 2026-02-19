@@ -21,6 +21,7 @@ import type { Material } from "@/types/material";
 import { useMaterial } from "@/hooks/material/useMaterial";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import { useToast } from "@/hooks/useToast";
+import { formatDate } from "@/utils/datetime-utils";
 
 type MaterialsTabProps = {
   classId: string;
@@ -73,16 +74,6 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
     } finally {
       setDownloadingId(null);
     }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
   };
 
   const getFileExtension = (filename: string) => {

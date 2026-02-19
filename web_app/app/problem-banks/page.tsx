@@ -42,6 +42,7 @@ import type {
   UpdateProblemPayload,
 } from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { formatDateOnly } from "@/utils/datetime-utils";
 
 type ProblemFormData = {
   lecturerId: string;
@@ -187,14 +188,6 @@ export default function ProblemBanksPage() {
     }
   };
 
-  const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString("vi-VN", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  };
-
   return (
     <div className="p-8">
       <div className="mb-8">
@@ -320,12 +313,12 @@ export default function ProblemBanksPage() {
                     <TableCell
                       className={isDark ? "text-gray-300" : "text-gray-900"}
                     >
-                      {formatDate(p.createdDate)}
+                      {formatDateOnly(p.createdDate)}
                     </TableCell>
                     <TableCell
                       className={isDark ? "text-gray-300" : "text-gray-900"}
                     >
-                      {p.updatedDate ? formatDate(p.updatedDate) : "—"}
+                      {p.updatedDate ? formatDateOnly(p.updatedDate) : "—"}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

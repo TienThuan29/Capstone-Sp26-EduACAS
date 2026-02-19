@@ -27,6 +27,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useSlot, SlotResponse } from "@/hooks/classroom/useSlot";
 import { useToast } from "@/hooks/useToast";
+import { formatDate } from "@/utils/datetime-utils";
 import { AddExamToSlotModal } from "@/app/manage-classroom/components/slot-tab/adding-exam-modal";
 
 const STATUS_LABELS: Record<number, string> = {
@@ -77,18 +78,6 @@ export function SlotsTab({ maxSlot }: SlotsTabProps) {
   };
 
   const isFull = slots.length >= maxSlot;
-
-  const formatDateTime = (dateStr: string) => {
-    try {
-      const d = new Date(dateStr);
-      return d.toLocaleString(undefined, {
-        dateStyle: "short",
-        timeStyle: "short",
-      });
-    } catch {
-      return dateStr;
-    }
-  };
 
   const fetchSlots = useCallback(async () => {
     try {
@@ -344,8 +333,8 @@ export function SlotsTab({ maxSlot }: SlotsTabProps) {
                                       {exam.examName}
                                     </span>
                                     <span className="text-gray-500 dark:text-gray-400">
-                                      {formatDateTime(exam.startDatetime)} –{" "}
-                                      {formatDateTime(exam.endDatetime)}
+                                      {formatDate(exam.startDatetime)} –{" "}
+                                      {formatDate(exam.endDatetime)}
                                     </span>
                                     <Badge
                                       color={

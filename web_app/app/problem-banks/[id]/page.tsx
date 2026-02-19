@@ -24,18 +24,8 @@ import type { ProblemResponse } from "@/types/problem";
 import { normalizeDifficulty } from "@/types/problem";
 import { markdownToHtml } from "@/utils/markdown-converter";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { formatDate } from "@/utils/datetime-utils";
 import { TestCaseCard } from "../components/testcase-card";
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("vi-VN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
 
 export default function ProblemViewPage() {
   const params = useParams();

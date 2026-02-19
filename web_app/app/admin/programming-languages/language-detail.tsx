@@ -25,6 +25,7 @@ import {
 } from '@heroicons/react/24/outline'
 import type { ProgrammingLanguage } from "@/types/language"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
+import { formatDate } from "@/utils/datetime-utils"
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage"
 
 interface LanguageDetailProps {
@@ -56,16 +57,6 @@ export default function LanguageDetail({ language, onBack, onUpdate }: LanguageD
       default:
         return 'gray'
     }
-  }
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   const handleEdit = () => {

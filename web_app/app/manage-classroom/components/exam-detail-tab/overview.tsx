@@ -3,7 +3,7 @@
 import { Badge } from "flowbite-react";
 import { ClockIcon } from "@heroicons/react/24/outline";
 import type { Examination } from "@/types/examination";
-import { formatDurationMs } from "@/utils/datetime-utils";
+import { formatDate, formatDateOnly, formatDurationMs, formatTime } from "@/utils/datetime-utils";
 
 function DetailRow({
   label,
@@ -33,20 +33,8 @@ function ExamTimeRange({
   const end = new Date(endDatetime);
   const durationMs = end.getTime() - start.getTime();
   const durationStr = formatDurationMs(durationMs);
-  const startStr = start.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-  const endStr = end.toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const startStr = formatDate(startDatetime);
+  const endStr = formatDate(endDatetime);
   return (
     <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
       <div className="flex items-center gap-2">
@@ -70,25 +58,15 @@ function ExamTimeRange({
 }
 
 function DateTimeDisplay({ datetime }: { datetime: string }) {
-  const d = new Date(datetime);
-  const dateStr = d.toLocaleDateString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-  const timeStr = d.toLocaleTimeString("vi-VN", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
   return (
     <div className="flex items-center gap-2">
       <div className="flex flex-col gap-0.5">
         <span className="text-sm font-medium text-gray-900 dark:text-white">
-          {dateStr}
+          {formatDateOnly(datetime)}
         </span>
         <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
           <ClockIcon className="h-3.5 w-3.5" />
-          {timeStr}
+          {formatTime(datetime)}
         </span>
       </div>
     </div>
