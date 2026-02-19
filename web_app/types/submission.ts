@@ -47,3 +47,42 @@ export interface CompileRequest {
   files?: { filename: string; contents: string }[];
   bypassCache?: boolean;
 }
+
+/** Test case payload for run-batch (public testcases) */
+export interface RunBatchTestCase {
+  id: string;
+  problemId?: string;
+  inputData: string;
+  expectedOutput: string;
+  isPublic: boolean;
+  isCaseInsensitive: boolean;
+  isFloatingPoint?: boolean;
+  floatingPointTolerance?: number | null;
+  decimalPlaces?: number | null;
+  isTokenComparision?: boolean;
+  isNotOrderedComparision?: boolean | null;
+}
+
+export interface RumBatchRequest extends CompileRequest {
+  stdinList: string[];
+  testCases: RunBatchTestCase[];
+}
+
+/** Request body for execute public testcases */
+export interface PublicTestcasesRequest {
+  compilerId: string;
+  lang: string;
+  runBatchRequest: RumBatchRequest;
+}
+
+/** Single test result from execute public testcases API */
+export interface TestResultResponse {
+  id: string;
+  testcaseId: string;
+  input: string;
+  actualOutput: string;
+  expectedOutput: string;
+  executionTimeMs: number;
+  status: string;
+  createdDate: string;
+}
