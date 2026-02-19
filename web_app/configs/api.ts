@@ -114,5 +114,6 @@ export const Api = {
 
   Submission: {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
+    EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
   },
 };

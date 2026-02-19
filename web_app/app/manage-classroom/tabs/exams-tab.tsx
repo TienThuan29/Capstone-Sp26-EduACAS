@@ -254,7 +254,7 @@ export function ExamsTab({
         </h2>
         <Button
           color="dark"
-          className="bg-[#1F4E79] hover:bg-[#2A6BA3]"
+          className="bg-[#1F4E79] hover:bg-[#2A6BA3] cursor-pointer"
           onClick={openCreate}
         >
           <PlusIcon className="mr-2 h-5 w-5" />
@@ -276,16 +276,18 @@ export function ExamsTab({
         <div className="overflow-x-auto border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
           <Table hoverable>
             <TableHead>
-              <TableHeadCell>Exam name</TableHeadCell>
-              <TableHeadCell>Language</TableHeadCell>
-              <TableHeadCell>Start</TableHeadCell>
-              <TableHeadCell>End</TableHeadCell>
-              <TableHeadCell>Total mark</TableHeadCell>
-              <TableHeadCell>Status</TableHeadCell>
-              <TableHeadCell>Mode</TableHeadCell>
-              <TableHeadCell>
-                <span className="sr-only">Actions</span>
-              </TableHeadCell>
+              <TableRow>
+                <TableHeadCell>Exam name</TableHeadCell>
+                <TableHeadCell>Language</TableHeadCell>
+                <TableHeadCell>Start</TableHeadCell>
+                <TableHeadCell>End</TableHeadCell>
+                <TableHeadCell>Total mark</TableHeadCell>
+                <TableHeadCell>Status</TableHeadCell>
+                <TableHeadCell>Mode</TableHeadCell>
+                <TableHeadCell>
+                  <span className="sr-only">Actions</span>
+                </TableHeadCell>
+              </TableRow>
             </TableHead>
             <TableBody>
               {examinations.map((exam) => {
