@@ -25,6 +25,14 @@ public static class DynamoMapper
             item["updatedDate"] = new AttributeValue { NULL = true };
         }
 
+        if (slot.ExaminationIds != null && slot.ExaminationIds.Count > 0)
+        {
+            item["examinationIds"] = new AttributeValue
+            {
+                L = slot.ExaminationIds.Select(id => new AttributeValue { S = id }).ToList()
+            };
+        }
+
         return item;
     }
 
@@ -40,7 +48,10 @@ public static class DynamoMapper
             CreatedDate = DateTime.Parse(item["createdDate"].S),
             UpdatedDate = item.ContainsKey("updatedDate") && !item["updatedDate"].NULL && !string.IsNullOrEmpty(item["updatedDate"].S)
                 ? DateTime.Parse(item["updatedDate"].S)
-                : null
+                : null,
+            ExaminationIds = item.ContainsKey("examinationIds") && item["examinationIds"].L != null
+                ? item["examinationIds"].L.Select(av => av.S).ToList()
+                : new List<string>()
         };
 
         return slot;

@@ -21,4 +21,6 @@ public class Slot
     public string Title { get; set; } = string.Empty;
     
     public string Description { get; set; } = string.Empty;
+
+    public List<string> ExaminationIds { get; set; } = new List<string>();
 }

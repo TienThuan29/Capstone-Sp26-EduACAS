@@ -47,6 +47,22 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
         }
     }
 
+    public async Task<List<Models.Examination>> GetByIdsAsync(IEnumerable<string> ids)
+    {
+        var idList = ids.Distinct().Where(id => !string.IsNullOrEmpty(id)).ToList();
+        if (idList.Count == 0)
+            return new List<Models.Examination>();
+
+        var result = new List<Models.Examination>();
+        foreach (var id in idList)
+        {
+            var exam = await GetByIdAsync(id);
+            if (exam != null)
+                result.Add(exam);
+        }
+        return result;
+    }
+
     public async Task<List<Models.Examination?>> GetAllAsync()
     {
         try
