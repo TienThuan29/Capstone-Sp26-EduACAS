@@ -69,7 +69,7 @@ public class ExecutionCommand : IExecutionCommand
 
         if (compilationFailed)
         {
-            // Return COMPILE_ERROR for all test cases
+            var compileErrorText = GetCompileErrorText(runBatchResponse);
             for (int i = 0; i < runBatchRequest.TestCases.Count; i++)
             {
                 var testCase = runBatchRequest.TestCases[i];
@@ -77,10 +77,10 @@ public class ExecutionCommand : IExecutionCommand
                 {
                     Id = Guid.NewGuid().ToString(),
                     TestcaseId = testCase.Id,
-                    Input = i < runBatchRequest.StdinList.Count 
-                        ? runBatchRequest.StdinList[i] 
+                    Input = i < runBatchRequest.StdinList.Count
+                        ? runBatchRequest.StdinList[i]
                         : testCase.InputData,
-                    ActualOutput = "",
+                    ActualOutput = compileErrorText,
                     ExpectedOutput = testCase.ExpectedOutput,
                     ExecutionTimeMs = runBatchResponse.ExecTime ?? 0,
                     Status = TestcaseStatus.COMPILE_ERROR.ToString(),
@@ -101,60 +101,40 @@ public class ExecutionCommand : IExecutionCommand
             return results;
         }
 
-        // Fallback: code-runner returned a different number of results (e.g. 1 per batch).
-        // Run once per test case, get one result per test case.
-        // for (int i = 0; i < runBatchRequest.TestCases.Count; i++)
-        // {
-        //     var testCase = runBatchRequest.TestCases[i];
-        //     var singleRequest = new RumBatchRequest
-        //     {
-        //         Source = runBatchRequest.Source,
-        //         Options = runBatchRequest.Options,
-        //         Lang = runBatchRequest.Lang,
-        //         StdinList = new List<string> { testCase.InputData },
-        //         TestCases = new List<Web.Requests.TestCase> { testCase }
-        //     };
-        //     var singleResponse = await _compilationApi.RunBatchAsync(compilerId, singleRequest, lang);
-
-        //     if (singleResponse.ExecResults == null || singleResponse.ExecResults.Count == 0)
-        //     {
-        //         // Compilation or run failed for this test case
-        //         results.Add(new TestResultResponse
-        //         {
-        //             Id = Guid.NewGuid().ToString(),
-        //             TestcaseId = testCase.Id,
-        //             Input = testCase.InputData,
-        //             ActualOutput = "",
-        //             ExpectedOutput = testCase.ExpectedOutput,
-        //             ExecutionTimeMs = singleResponse.ExecTime ?? 0,
-        //             Status = TestcaseStatus.COMPILE_ERROR.ToString(),
-        //             CreatedDate = DateTime.UtcNow
-        //         });
-        //         continue;
-        //     }
-
-        //     // For single-run batch, code-runner often puts stdout/code at response root, not in execResults[0].
-        //     var singleExec = singleResponse.ExecResults[0];
-        //     var effectiveResult = HasOutput(singleExec) ? singleExec : (CompilationResult)singleResponse;
-        //     results.Add(MapExecResultToTestResult(effectiveResult, testCase));
-        // }
-
         throw new Exception("Failed to execute public testcases");
     }
 
 
     private bool IsCompilationFailed(RunBatchResponse runBatchResponse)
     {
-        if (runBatchResponse.ExecResults != null && runBatchResponse.ExecResults.Count > 0)
-            return false;
+        // Build failed: treat as COMPILE_ERROR even if code-runner returned ExecResults (e.g. failed run entries)
+        if (runBatchResponse.BuildResult != null && runBatchResponse.BuildResult.Code != 0)
+            return true;
 
-        if (runBatchResponse.BuildResult != null)
+        // No exec results: treat as compile failure (build may have failed or no runs)
+        if (runBatchResponse.ExecResults == null || runBatchResponse.ExecResults.Count == 0)
         {
-            return runBatchResponse.BuildResult.Code != 0 ||
-                   (runBatchResponse.BuildResult.Stderr != null && runBatchResponse.BuildResult.Stderr.Count > 0);
+            if (runBatchResponse.BuildResult != null)
+                return runBatchResponse.BuildResult.Stderr != null && runBatchResponse.BuildResult.Stderr.Count > 0;
+            return true;
         }
 
-        return true;
+        // ExecResults present and build did not fail: use run results (RUNTIME_ERROR, FAIL, etc.), not COMPILE_ERROR
+        return false;
+    }
+
+    private static string GetCompileErrorText(RunBatchResponse runBatchResponse)
+    {
+        var stderr = runBatchResponse.BuildResult?.Stderr ?? runBatchResponse.Stderr;
+        if (stderr == null || stderr.Count == 0)
+        {
+            var first = runBatchResponse.ExecResults?.FirstOrDefault();
+            var run = first?.ExecResult ?? first;
+            stderr = run?.Stderr;
+        }
+        if (stderr == null || stderr.Count == 0)
+            return "Compilation failed.";
+        return string.Join("", stderr.Select(l => l?.Text ?? ""));
     }
 
     // private bool HasOutput(CompilationResult r)

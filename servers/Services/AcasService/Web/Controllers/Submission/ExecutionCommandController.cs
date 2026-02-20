@@ -1,3 +1,4 @@
+using System.Linq;
 using AcasService.Application.Commands.Submission;
 using AcasService.Application.ResponseDTOs;
 using Microsoft.AspNetCore.Mvc;
@@ -55,7 +56,8 @@ public class ExecutionCommandController : ControllerBase
                 publicTestcasesRequest.RunBatchRequest,
                 publicTestcasesRequest.Lang
             );
-            return ResponseUtil.Success(results, "Public testcases executed successfully", 200);
+            var message = GetMessageForPublicTestcasesResult(results);
+            return ResponseUtil.Success(results, message, 200);
         }
         catch (InvalidOperationException ex)
         {
@@ -70,5 +72,35 @@ public class ExecutionCommandController : ControllerBase
                 error: ex.Message,
                 statusCode: 500);
         }
+    }
+
+    private string GetMessageForPublicTestcasesResult(List<TestResultResponse> results)
+    {
+        if (results == null || results.Count == 0)
+            return "No test results.";
+
+        var hasCompileError = results.Any(r => r.Status == "COMPILE_ERROR");
+        var hasRuntimeError = results.Any(r => r.Status == "RUNTIME_ERROR");
+        var hasUnknownError = results.Any(r => r.Status == "UNKNOWN_ERROR");
+        var hasTimeout = results.Any(r => r.Status == "TIMEOUT");
+        var hasFail = results.Any(r => r.Status == "FAIL");
+        var successCount = results.Count(r => r.Status == "SUCCESS");
+        var total = results.Count;
+
+        if (hasCompileError)
+            return "Compilation failed.";
+        if (hasRuntimeError)
+            return "Runtime error occurred.";
+        if (hasUnknownError)
+            return "Unknown error occurred.";
+        if (hasTimeout)
+            return "Timeout occurred.";
+        if (hasFail)
+            return successCount == 0
+                ? "All test cases failed."
+                : $"{successCount} passed, {total - successCount} failed.";
+        return total == 1
+            ? "Test case passed."
+            : $"All {total} test cases passed.";
     }
 }
