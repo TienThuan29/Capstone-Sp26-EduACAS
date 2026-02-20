@@ -94,7 +94,7 @@ export function ConsolePanel() {
     editorState,
   } = useEditorContext();
   const { runCustomTest, isRunning } = useCustomTest();
-  const { runPublicTests, isRunning: isRunningTests, error: testsError, results: testResults } = usePublicTests();
+  const { runPublicTests, isRunning: isRunningTests, error: testsError, results: testResults, lastMessage: testsLastMessage } = usePublicTests();
   const activeTestCase =
     testCases.find((tc) => tc.id === activeTestCaseId) ?? testCases[0] ?? null;
 
@@ -207,6 +207,11 @@ export function ConsolePanel() {
             {testsError && (
               <div className="border-b border-gray-800 bg-red-900/20 px-3 py-2 text-sm text-red-300">
                 {testsError}
+              </div>
+            )}
+            {testsLastMessage && !testsError && (
+              <div className="border-b border-gray-800 bg-gray-800/50 px-3 py-2 text-sm text-gray-300">
+                {testsLastMessage}
               </div>
             )}
             {activeTestCase && (

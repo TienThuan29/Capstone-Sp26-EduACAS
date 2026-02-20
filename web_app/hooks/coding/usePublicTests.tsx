@@ -35,6 +35,7 @@ export function usePublicTests() {
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<TestResultResponse[] | null>(null);
+  const [lastMessage, setLastMessage] = useState<string | null>(null);
 
   const runPublicTests = useCallback(async () => {
     if (!selectedCompiler) {
@@ -59,6 +60,7 @@ export function usePublicTests() {
     setIsRunning(true);
     setError(null);
     setResults(null);
+    setLastMessage(null);
 
     const normalizedSource = (editorState.code ?? '')
       .replace(/\r\n/g, '\n')
@@ -116,18 +118,14 @@ export function usePublicTests() {
 
       setResults(data);
 
-      const passed = data.filter((r) => r.status === 'SUCCESS').length;
-      const failed = data.length - passed;
+      const apiMessage = res?.message ?? 'Public testcases executed successfully.';
+      setLastMessage(apiMessage);
       const hasCompileError = data.some((r) => r.status === 'COMPILE_ERROR');
-      if (hasCompileError && data[0]) {
-        setConsoleOutput(
-          `Compilation failed.\n\n${data[0].actualOutput?.trim() || 'Check your code for syntax errors.'}`
-        );
-      } else {
-        setConsoleOutput(
-          `Run completed: ${passed} passed, ${failed} failed (${data.length} test case(s) total).`
-        );
-      }
+      const compileDetail =
+        hasCompileError && data[0]?.actualOutput?.trim()
+          ? `\n\n${data[0].actualOutput.trim()}`
+          : '';
+      setConsoleOutput(`${apiMessage}${compileDetail}`);
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
@@ -153,5 +151,5 @@ export function usePublicTests() {
     setConsoleOutput,
   ]);
 
-  return { runPublicTests, isRunning, error, results };
+  return { runPublicTests, isRunning, error, results, lastMessage };
 }
