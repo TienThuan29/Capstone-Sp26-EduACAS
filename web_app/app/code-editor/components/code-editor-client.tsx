@@ -28,8 +28,7 @@ export function CodeEditorClient({
 
   useEffect(() => {
     if (!examination) return;
-
-    console.log('Examination:', examination);
+    // console.log('Examination:', examination);
 
     setProblem(examination.problem);
     setExamBackLink(examination.id, examination.classroom?.id ?? null);

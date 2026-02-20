@@ -30,7 +30,7 @@ function mapToRunBatchTestCase(tc: TestCase, problemId?: string): RunBatchTestCa
 
 export function usePublicTests() {
   const axiosInstance = useAxios();
-  const { editorState, selectedCompiler, testCases, problem } = useEditorContext();
+  const { editorState, selectedCompiler, testCases, problem, setConsoleOutput } = useEditorContext();
 
   const [isRunning, setIsRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,18 +96,38 @@ export function usePublicTests() {
         error?: string;
       }>(Api.Submission.EXECUTE_PUBLIC_TESTCASES, body);
 
-      const data = response.data?.dataResponse;
-      if (!response.data?.success || data === undefined) {
+      const res = response.data as {
+        success?: boolean;
+        dataResponse?: TestResultResponse[];
+        data?: TestResultResponse[];
+        message?: string;
+        error?: string;
+      };
+
+      const data = res?.dataResponse ?? res?.data;
+      if (!res?.success || !Array.isArray(data)) {
         const msg =
-          (response.data as { message?: string })?.message ??
-          (response.data as { error?: string })?.error ??
-          'No response data';
+          res?.message ?? res?.error ?? 'No response data';
         setError(msg);
         setResults(null);
+        setConsoleOutput(`Error: ${msg}`);
         return;
       }
 
       setResults(data);
+
+      const passed = data.filter((r) => r.status === 'SUCCESS').length;
+      const failed = data.length - passed;
+      const hasCompileError = data.some((r) => r.status === 'COMPILE_ERROR');
+      if (hasCompileError && data[0]) {
+        setConsoleOutput(
+          `Compilation failed.\n\n${data[0].actualOutput?.trim() || 'Check your code for syntax errors.'}`
+        );
+      } else {
+        setConsoleOutput(
+          `Run completed: ${passed} passed, ${failed} failed (${data.length} test case(s) total).`
+        );
+      }
     } catch (err: unknown) {
       const message =
         err && typeof err === 'object' && 'response' in err
@@ -119,6 +139,7 @@ export function usePublicTests() {
             : 'Request failed';
       setError(message ?? 'Request failed');
       setResults(null);
+      setConsoleOutput(`Error: ${message ?? 'Request failed'}`);
     } finally {
       setIsRunning(false);
     }
@@ -129,6 +150,7 @@ export function usePublicTests() {
     selectedCompiler,
     testCases,
     problem?.id,
+    setConsoleOutput,
   ]);
 
   return { runPublicTests, isRunning, error, results };
