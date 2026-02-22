@@ -19,7 +19,7 @@ public static class DynamoMapper
             ["version"] = new AttributeValue { N = submission.Version.ToString() },
             ["submittedDate"] = new AttributeValue { S = submission.SubmittedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["finalScore"] = new AttributeValue { N = submission.FinalScore.ToString(System.Globalization.CultureInfo.InvariantCulture) },
-            ["isGraded"] = new AttributeValue { BOOL = submission.IsGraded },
+            ["status"] = new AttributeValue { S = submission.Status.ToString() },
             ["gradedDate"] = new AttributeValue { S = submission.GradedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["regradingRequestId"] = new AttributeValue { S = submission.RegradingRequestId },
             ["lecturerFeedback"] = new AttributeValue { S = submission.LecturerFeedback },
@@ -55,7 +55,9 @@ public static class DynamoMapper
             Version = int.Parse(item["version"].N),
             SubmittedDate = DateTime.Parse(item["submittedDate"].S),
             FinalScore = float.Parse(item["finalScore"].N, System.Globalization.CultureInfo.InvariantCulture),
-            IsGraded = item["isGraded"].BOOL,
+            Status = item.ContainsKey("status") && !string.IsNullOrEmpty(item["status"].S)
+                ? Enum.Parse<Models.SubmissionStatus>(item["status"].S)
+                : (item.ContainsKey("isGraded") && item["isGraded"].BOOL ? Models.SubmissionStatus.GRADED : Models.SubmissionStatus.PENDING),
             GradedDate = item.ContainsKey("gradedDate") && !string.IsNullOrEmpty(item["gradedDate"].S)
                 ? DateTime.Parse(item["gradedDate"].S)
                 : DateTime.MinValue,

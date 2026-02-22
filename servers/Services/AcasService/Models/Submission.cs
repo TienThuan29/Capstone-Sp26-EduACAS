@@ -25,7 +25,7 @@ public class Submission
 
     public float FinalScore { get; set; }
 
-    public bool IsGraded { get; set; }
+    public SubmissionStatus Status { get; set; }
 
     public DateTime GradedDate { get; set; }
 
@@ -67,4 +67,12 @@ public enum TestcaseStatus
     COMPILE_ERROR,
     RUNTIME_ERROR,
     UNKNOWN_ERROR,
+}
+
+public enum SubmissionStatus
+{
+    PENDING,
+    GRADED,
+    REGRADING,
+    REGRADED
 }
