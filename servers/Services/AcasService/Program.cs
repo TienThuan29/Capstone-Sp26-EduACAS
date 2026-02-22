@@ -25,6 +25,7 @@ using AcasService.Repositories.ProgrammingLanguage;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using AcasService.Repositories.Subject;
+using AcasService.Repositories.Submission;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -104,6 +105,7 @@ builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRe
 builder.Services.AddScoped<ISlotRepository,SlotRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
