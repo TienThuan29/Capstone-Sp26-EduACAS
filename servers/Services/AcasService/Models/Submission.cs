@@ -9,29 +9,35 @@ public class Submission
 
     public string StudentId { get; set; } = string.Empty;
 
+    public string ExamId { get; set; } = string.Empty;
+
     public string ProblemId { get; set; } = string.Empty;
 
-    public string LanguageName { get; set; } = string.Empty;
+    public string LanguageId { get; set; } = string.Empty;
 
-    public string LanguageVersion { get; set; } = string.Empty;
+    public string CompilerId { get; set; } = string.Empty;
 
-    public string TextCode { get; set; } = string.Empty;
+    public string Source { get; set; } = string.Empty;
+
+    public int Version { get; set; }
 
     public DateTime SubmittedDate { get; set; }
 
     public float FinalScore { get; set; }
 
-    public string AiFeedback { get; set; } = string.Empty;
-    
-    public List<TestResult> TestResults { get; set; } = new List<TestResult>();
-
     public bool IsGraded { get; set; }
 
     public DateTime GradedDate { get; set; }
 
+    public List<TestResult> TestResults { get; set; } = new List<TestResult>();
+
     public string RegradingRequestId { get; set; } = string.Empty;
 
     public string LecturerFeedback { get; set; } = string.Empty;
+
+    public string AiFeedback { get; set; } = string.Empty;
+
+    public DateTime UpdatedDate { get; set; }
 }
 
 public class TestResult
