@@ -137,7 +137,7 @@ export const useClassroom = () => {
   const updateClassroom = useCallback(
     async (classroomId: string, payload: UpdateClassroomPayload) => {
       const response = await axiosInstance.put(
-        `${Api.Classroom.UPDATE_CLASSROOM}/${classroomId}`,
+        Api.Classroom.UPDATE_CLASSROOM(classroomId),
         payload,
       );
       return response.data;
@@ -148,7 +148,7 @@ export const useClassroom = () => {
   const softDeleteClassroom = useCallback(
     async (classroomId: string) => {
       const response = await axiosInstance.patch(
-        `${Api.Classroom.SOFT_DELETE_CLASSROOM}/${classroomId}/soft-delete`,
+        Api.Classroom.SOFT_DELETE_CLASSROOM(classroomId),
       );
       return response.data;
     },

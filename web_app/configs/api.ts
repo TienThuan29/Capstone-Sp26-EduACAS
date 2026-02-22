@@ -65,8 +65,8 @@ export const Api = {
     LEAVE: "/api/acas/v1/class-enrollments/leave",
     GET_LECTURER_CLASSROOMS: "/api/acas/v1/classrooms/lecturer",
     CREATE_CLASSROOM: "/api/acas/v1/classrooms",
-    UPDATE_CLASSROOM: "/api/acas/v1/classrooms", // + /:id
-    SOFT_DELETE_CLASSROOM: "/api/acas/v1/classrooms", // + /:id/soft-delete
+    UPDATE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}`,
+    SOFT_DELETE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}/soft-delete`,
   },
 
   Examination: {
@@ -96,10 +96,8 @@ export const Api = {
 
   Slot: {
     CREATE: "/api/v1/slots",
-    CREATE_ALL_SLOTS: (classroomId: string) =>
-      `/api/v1/slots/create-all-slots/${classroomId}`,
-    GET_BY_CLASSROOM: (classroomId: string) =>
-      `/api/v1/slots/classroom/${classroomId}`,
+    CREATE_ALL_SLOTS: (classroomId: string) => `/api/v1/slots/create-all-slots/${classroomId}`,
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/v1/slots/classroom/${classroomId}`,
     UPDATE: (id: string) => `/api/v1/slots/${id}`,
     DELETE: (id: string) => `/api/v1/slots/${id}`,
   },
