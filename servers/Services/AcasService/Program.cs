@@ -26,6 +26,7 @@ using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using AcasService.Repositories.Subject;
 using AcasService.Repositories.Submission;
+using AcasService.Repositories.Notification;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -106,6 +107,7 @@ builder.Services.AddScoped<ISlotRepository,SlotRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
