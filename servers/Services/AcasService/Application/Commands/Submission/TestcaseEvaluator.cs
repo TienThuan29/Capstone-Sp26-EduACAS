@@ -10,26 +10,26 @@ using AcasService.Web.Requests;
 
 namespace AcasService.Application.Commands.Submission;
 
-public interface IExecutionCommand
+public interface ITestcaseEvaluator
 {
     Task<CompilationResult> ExecuteCustomTestcaseAsync(
         string compilerId,
         CompileRequest compileRequest,
         string lang);
     
-    Task<List<TestResultResponse>> ExecutePublicTestcasesAsync(
+    Task<List<TestResultResponse>> ExecuteTestcasesAsync(
         string compilerId,
         RumBatchRequest runBatchRequest,
         string lang);
 }
 
-public class ExecutionCommand : IExecutionCommand
+public class TestcaseEvaluator : ITestcaseEvaluator
 {
     private readonly ICompilationApi _compilationApi;
     private readonly IResultComparator _resultComparator;
     private readonly TestResultMapper _testResultMapper;
 
-    public ExecutionCommand(ICompilationApi compilationApi, IResultComparator resultComparator, TestResultMapper testResultMapper)
+    public TestcaseEvaluator(ICompilationApi compilationApi, IResultComparator resultComparator, TestResultMapper testResultMapper)
     {
         _compilationApi = compilationApi;
         _resultComparator = resultComparator;
@@ -58,7 +58,7 @@ public class ExecutionCommand : IExecutionCommand
         return result;
     }
 
-    public async Task<List<TestResultResponse>> ExecutePublicTestcasesAsync(
+    public async Task<List<TestResultResponse>> ExecuteTestcasesAsync(
         string compilerId,
         RumBatchRequest runBatchRequest,
         string lang)

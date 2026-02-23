@@ -128,7 +128,7 @@ builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
 builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
-builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
+builder.Services.AddScoped<ITestcaseEvaluator, TestcaseEvaluator>();
 builder.Services.AddScoped<IResultComparator, ResultComparator>();
 
 // mapper
