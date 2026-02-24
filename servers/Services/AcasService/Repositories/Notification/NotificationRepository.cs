@@ -25,6 +25,7 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
     {
         try
         {
+            notification.SentDate = DateTime.UtcNow;
             var item = DynamoMapper.NotificationToDynamoItem(notification);
             await PutItemAsync(item, _notificationTableName);
             return notification;

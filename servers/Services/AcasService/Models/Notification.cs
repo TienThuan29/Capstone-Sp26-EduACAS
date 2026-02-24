@@ -20,8 +20,7 @@ public class Notification
       public NotificationType Type { get; set; }
 
       public Dictionary<string, object?> Payload { get; set; } = new();
-
-      [Required]
+      
       public DateTime SentDate { get; set; }
 }
 
