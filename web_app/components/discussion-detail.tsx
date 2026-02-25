@@ -1,8 +1,20 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, type ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useEditor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import TextAlign from "@tiptap/extension-text-align";
+import { TextStyle } from "@tiptap/extension-text-style";
+import Underline from "@tiptap/extension-underline";
+import TipTapLink from "@tiptap/extension-link";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
+import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
+import { createLowlight, all } from "lowlight";
 import {
   Button,
   Badge,
@@ -11,12 +23,15 @@ import {
   Label,
   HR,
 } from "flowbite-react";
+import { useThemeContext } from "@/components/theme-provider";
+import { TextEditor } from "@/app/problem-banks/components/text-editor";
 import type {
   DiscussionIssue,
   DiscussionIssueStatus,
   Comment,
 } from "@/types/discussion";
 import { formatDate } from "@/utils/datetime-utils";
+import { htmlToMarkdown } from "@/utils/markdown-converter";
 
 function totalCommentCount(comments: Comment[]): number {
   return comments.reduce((sum, c) => sum + 1 + totalCommentCount(c.replies), 0);
@@ -63,9 +78,6 @@ import {
   ChatBubbleLeftRightIcon,
   EyeIcon,
   ChevronLeftIcon,
-  CodeBracketIcon,
-  BoldIcon,
-  ItalicIcon,
 } from "@heroicons/react/24/outline";
 
 type DiscussionDetailProps = {
@@ -206,19 +218,7 @@ type CommentReplyBoxProps = {
   onSubmit: () => void;
 };
 
-function insertFormatting(
-  value: string,
-  start: number,
-  end: number,
-  before: string,
-  after: string,
-): { newValue: string; newCursor: number } {
-  const selected = value.slice(start, end);
-  const newValue =
-    value.slice(0, start) + before + selected + after + value.slice(end);
-  const newCursor = start + before.length + selected.length + after.length;
-  return { newValue, newCursor };
-}
+const lowlight = createLowlight(all);
 
 function CommentReplyBox({
   compact,
@@ -228,63 +228,55 @@ function CommentReplyBox({
   onCancel,
   onSubmit,
 }: CommentReplyBoxProps) {
-  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
-  const selectionRef = useRef({ start: 0, end: 0 });
+  const { isDark } = useThemeContext();
 
-  const saveSelection = useCallback(() => {
-    const el = textareaRef.current;
-    if (el) {
-      selectionRef.current = { start: el.selectionStart, end: el.selectionEnd };
-    }
-  }, []);
-
-  const applyFormat = useCallback(
-    (before: string, after: string) => {
-      saveSelection();
-      const { start, end } = selectionRef.current;
-      const { newValue, newCursor } = insertFormatting(
-        value,
-        start,
-        end,
-        before,
-        after,
-      );
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ codeBlock: false }),
+      CodeBlockLowlight.configure({
+        lowlight,
+        HTMLAttributes: { class: "hljs" },
+      }),
+      TextAlign.configure({
+        types: ["heading", "paragraph"],
+        alignments: ["left", "center", "right", "justify"],
+      }),
+      TextStyle,
+      Underline,
+      TipTapLink.configure({
+        openOnClick: false,
+        HTMLAttributes: { class: "text-blue-600 underline" },
+      }),
+      Table.configure({
+        resizable: true,
+        HTMLAttributes: { class: "border-collapse table-auto w-full" },
+      }),
+      TableRow,
+      TableHeader,
+      TableCell,
+    ],
+    content: value || "",
+    onUpdate: ({ editor }) => {
       onChange({
-        target: { value: newValue },
+        target: { value: editor.getHTML() },
       } as React.ChangeEvent<HTMLTextAreaElement>);
-      requestAnimationFrame(() => {
-        textareaRef.current?.focus();
-        textareaRef.current?.setSelectionRange(newCursor, newCursor);
-      });
     },
-    [value, onChange, saveSelection],
-  );
+    editable: true,
+    editorProps: { attributes: { spellcheck: "false" } },
+    immediatelyRender: false,
+  });
 
-  const handleBold = () => applyFormat("**", "**");
-  const handleItalic = () => applyFormat("_", "_");
-  const handleCode = () => {
-    saveSelection();
-    const { start, end } = selectionRef.current;
-    const selected = value.slice(start, end);
-    const hasNewline = selected.includes("\n");
-    if (hasNewline) {
-      const { newValue, newCursor } = insertFormatting(
-        value,
-        start,
-        end,
-        "```\n",
-        "\n```",
-      );
-      onChange({
-        target: { value: newValue },
-      } as React.ChangeEvent<HTMLTextAreaElement>);
-      requestAnimationFrame(() => {
-        textareaRef.current?.focus();
-        textareaRef.current?.setSelectionRange(newCursor, newCursor);
-      });
-    } else {
-      applyFormat("`", "`");
+  useEffect(() => {
+    if (value === "" && editor && !editor.isDestroyed) {
+      editor.commands.setContent("");
     }
+  }, [value, editor]);
+
+  const isEmptyHtml = (html: string) => {
+    const t = html.trim();
+    if (!t) return true;
+    if (t === "<p></p>" || t === "<p><br></p>") return true;
+    return false;
   };
 
   return (
@@ -304,51 +296,13 @@ function CommentReplyBox({
       >
         {isReplying ? "Reply to comment" : "Write a comment"}
       </h3>
-      <div
-        className={
-          compact
-            ? "mb-1.5 flex gap-0.5 rounded-t border border-b-0 border-gray-200 bg-gray-100 p-0.5 dark:border-gray-600 dark:bg-gray-700"
-            : "mb-2 flex gap-1 rounded-t-lg border border-b-0 border-gray-200 bg-gray-100 p-1 dark:border-gray-600 dark:bg-gray-700"
-        }
-      >
-        <button
-          type="button"
-          className="rounded p-1 text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600"
-          title="Bold"
-          aria-label="Bold"
-          onClick={handleBold}
-        >
-          <BoldIcon className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-        </button>
-        <button
-          type="button"
-          className="rounded p-1 text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600"
-          title="Italic"
-          aria-label="Italic"
-          onClick={handleItalic}
-        >
-          <ItalicIcon className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-        </button>
-        <button
-          type="button"
-          className="rounded p-1 text-gray-600 hover:bg-gray-200 dark:text-gray-300 dark:hover:bg-gray-600"
-          title="Code block"
-          aria-label="Code block"
-          onClick={handleCode}
-        >
-          <CodeBracketIcon className={compact ? "h-3.5 w-3.5" : "h-4 w-4"} />
-        </button>
+      <div className={compact ? "max-h-[280px] overflow-y-auto" : undefined}>
+        <TextEditor
+          editor={editor}
+          isDark={!!isDark}
+          helperText={compact ? undefined : "Use the toolbar to format your comment"}
+        />
       </div>
-      <textarea
-        ref={textareaRef}
-        placeholder="Add a comment... (Markdown supported)"
-        value={value}
-        onChange={onChange}
-        onSelect={saveSelection}
-        onBlur={saveSelection}
-        rows={compact ? 2 : 4}
-        className="w-full rounded-t-none border border-gray-200 bg-gray-50 text-sm text-gray-900 placeholder-gray-500 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500"
-      />
       <div
         className={
           compact
@@ -369,7 +323,7 @@ function CommentReplyBox({
           size={compact ? "xs" : "sm"}
           className="cursor-pointer bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90"
           onClick={onSubmit}
-          disabled={!value.trim()}
+          disabled={isEmptyHtml(value)}
         >
           {isReplying ? "Post reply" : "Post comment"}
         </Button>
@@ -515,8 +469,10 @@ export function DiscussionDetail({
 
   const handleSubmitComment = () => {
     const trimmed = commentDraft.trim();
-    if (!trimmed) return;
-    onSubmitComment?.(trimmed, replyingToCommentId ?? undefined);
+    if (!trimmed || trimmed === "<p></p>" || trimmed === "<p><br></p>") return;
+    const markdown = htmlToMarkdown(trimmed);
+    if (!markdown.trim()) return;
+    onSubmitComment?.(markdown, replyingToCommentId ?? undefined);
     setCommentDraft("");
     closeCommentBox();
   };
