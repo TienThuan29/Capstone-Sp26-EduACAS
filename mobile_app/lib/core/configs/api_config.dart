@@ -18,8 +18,8 @@ class ApiConfig {
   static String get refreshTokenEndpoint => '/api/auth/v1/refresh';
 
   // Classroom endpoints
-  static String get lecturerClassroomsEndpoint =>
-      '/api/acas/v1/classrooms/lecturer';
+  static String lecturerClassroomsEndpoint(String lecturerId) =>
+      '/api/acas/v1/classrooms/lecturer/$lecturerId';
   static String classroomByIdEndpoint(String id) =>
       '/api/acas/v1/classrooms/$id';
 
@@ -39,6 +39,30 @@ class ApiConfig {
   // S3 endpoints
   static String privateFileUrlEndpoint(String filename) =>
       '/api/acas/v1/private-s3/file/${Uri.encodeComponent(filename)}';
+
+  // Discussion Issue endpoints
+  static String discussionIssuesByClassroomEndpoint(String classroomId) =>
+      '/api/acas/v1/discussion-issues/classroom/$classroomId';
+  static String get createDiscussionIssueEndpoint =>
+      '/api/acas/v1/discussion-issues';
+  static String discussionIssueByIdEndpoint(String id) =>
+      '/api/acas/v1/discussion-issues/$id';
+  static String softDeleteDiscussionIssueEndpoint(String id) =>
+      '/api/acas/v1/discussion-issues/$id/soft-delete';
+
+  // Comment endpoints
+  static String commentsByDiscussionIssueEndpoint(String discussionIssueId) =>
+      '/api/acas/v1/comments/discussion-issue/$discussionIssueId';
+  static String get createCommentEndpoint => '/api/acas/v1/comments';
+  static String commentByIdEndpoint(String id) => '/api/acas/v1/comments/$id';
+  static String softDeleteCommentEndpoint(String id) =>
+      '/api/acas/v1/comments/$id/soft-delete';
+
+  // Problem endpoints
+  static String problemsByLecturerEndpoint(String lecturerId) =>
+      '/api/acas/v1/problems/lecturer/$lecturerId';
+  static String problemByIdEndpoint(String id) =>
+      '/api/acas/v1/problems/$id';
 
   static Duration get requestTimeout {
     try {

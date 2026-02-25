@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/features/presentation/lecturer/tabs/materials_tab.dart';
 import 'package:mobile/features/presentation/lecturer/tabs/assignments_tab.dart';
+import 'package:mobile/features/presentation/lecturer/tabs/discussions_tab.dart';
+import 'package:mobile/features/presentation/lecturer/tabs/problems_tab.dart';
 
 class ClassroomDetailPage extends StatefulWidget {
   final Classroom classroom;
@@ -81,37 +82,15 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
         children: [
           MaterialsTab(classroomId: widget.classroom.id),
           AssignmentsTab(classroomId: widget.classroom.id),
-          _buildComingSoonTab('Discussions'),
-          _buildComingSoonTab('Problems'),
+          DiscussionsTab(
+            classroomId: widget.classroom.id,
+            classroomName: widget.classroom.className,
+          ),
+          ProblemsTab(classroomId: widget.classroom.id),
         ],
       ),
     );
   }
 
-  Widget _buildComingSoonTab(String tabName) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.construction,
-            size: 64,
-            color: AppColors.textSecondary,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            '$tabName',
-            style: Theme.of(context).textTheme.titleLarge,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'This feature is coming soon',
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-        ],
-      ),
-    );
-  }
+
 }

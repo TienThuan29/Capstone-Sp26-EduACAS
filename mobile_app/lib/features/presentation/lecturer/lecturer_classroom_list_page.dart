@@ -226,18 +226,18 @@ class _LecturerClassroomListPageState
                   ],
                 ),
               ],
-              if (classroom.totalStudents != null) ...[
+              if (classroom.semesterName != null && classroom.semesterName!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
                     const Icon(
-                      Icons.people_outline,
+                      Icons.calendar_today_outlined,
                       size: 16,
                       color: AppColors.textSecondary,
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      '${classroom.totalStudents} students',
+                      classroom.semesterName!,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                             color: AppColors.textSecondary,
                           ),

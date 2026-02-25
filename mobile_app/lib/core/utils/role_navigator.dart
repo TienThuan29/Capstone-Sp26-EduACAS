@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:mobile/features/presentation/auth/login_page.dart';
+import 'package:mobile/features/presentation/lecturer/lecturer_classroom_list_page.dart';
 import 'package:mobile/features/presentation/student/student_page.dart';
 // import 'package:mobile/features/presentation/teacher/teacher_page.dart';
 // import 'package:mobile/features/presentation/admin/admin_page.dart';
 
 class RoleNavigator {
   static const String roleStudent = 'STUDENT';
-  static const String roleTeacher = 'TEACHER';
-  static const String roleAdmin = 'ADMIN';
+  static const String roleTeacher = 'LECTURER';
 
   /// Navigate to appropriate page based on user role
   static void navigateByRole(BuildContext context, String role) {
@@ -17,15 +18,10 @@ class RoleNavigator {
         targetPage = const StudentPage();
         break;
       case roleTeacher:
-        // targetPage = const TeacherPage();
-        targetPage = const StudentPage(); // TODO: Replace with TeacherPage
-        break;
-      case roleAdmin:
-        // targetPage = const AdminPage();
-        targetPage = const StudentPage(); // TODO: Replace with AdminPage
+        targetPage = const LecturerClassroomListPage();
         break;
       default:
-        targetPage = const StudentPage(); // Default fallback
+        targetPage = const LoginPage();
         break;
     }
 
@@ -41,11 +37,9 @@ class RoleNavigator {
       case roleStudent:
         return '/student';
       case roleTeacher:
-        return '/teacher';
-      case roleAdmin:
-        return '/admin';
+        return '/lecturer';
       default:
-        return '/student';
+        return '/login';
     }
   }
 }

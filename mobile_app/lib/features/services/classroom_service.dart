@@ -13,13 +13,26 @@ class ClassroomService {
         throw Exception('No access token found');
       }
 
+      final userId = await TokenStorage.getUserId();
+      if (userId == null || userId.isEmpty) {
+        throw Exception('No user ID found. Please log in again.');
+      }
+
       final response = await ApiNetwork.getWithAuth(
-        endpoint: ApiConfig.lecturerClassroomsEndpoint,
+        endpoint: ApiConfig.lecturerClassroomsEndpoint(userId),
         token: token,
+        queryParameters: {
+          'pageIndex': '1',
+          'pageSize': '100',
+        },
       );
 
+      debugPrint('Lecturer classrooms response: $response');
+
       if (response['success'] == true && response['dataResponse'] != null) {
-        final List<dynamic> classroomsData = response['dataResponse'];
+        final dataResponse = response['dataResponse'];
+        // Backend returns PagedResult with 'items' list
+        final List<dynamic> classroomsData = dataResponse['items'] ?? [];
         return classroomsData
             .map((json) => Classroom.fromJson(json as Map<String, dynamic>))
             .toList();
