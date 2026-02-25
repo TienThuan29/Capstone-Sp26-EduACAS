@@ -19,6 +19,7 @@ import {
   PractiseTab,
   OverviewTab,
   SlotTab,
+  DiscussionTab,
 } from "@/app/my-classroom/tabs";
 
 function ClassroomContent() {
@@ -145,6 +146,8 @@ function ClassroomContent() {
         return <PractiseTab />;
       case "slots":
         return <SlotTab />;
+      case "discussion":
+        return <DiscussionTab classId={classId} />;
       default:
         return (
           <OverviewTab
