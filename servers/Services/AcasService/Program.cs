@@ -49,6 +49,7 @@ using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
+using AcasService.Application.Thirdparty;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -153,6 +154,7 @@ builder.Services.AddScoped<TestResultMapper>();
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
+builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
 
 // Azure Form Recognizer configuration
 var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??

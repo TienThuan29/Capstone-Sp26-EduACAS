@@ -1,17 +1,16 @@
 using System.Linq;
 using AcasService.Application.Commands.Submission;
-using AcasService.Application.ResponseDTOs;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using AcasService.Application.ResponseDTOs.External;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
+using Microsoft.AspNetCore.Authorization;
 
 namespace AcasService.Web.Controllers.Submission;
 
 [ApiController]
 [Route("api/v1/submissions")]
-// [Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class ExecutionCommandController : ControllerBase
 {
     private readonly IExecutionCommand _executionCommand;
