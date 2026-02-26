@@ -21,6 +21,18 @@ public class CreateDiscussionIssueRequest
     public string RefProblemId { get; set; } = string.Empty;
 }
 
+public class UpdateDiscussionIssueRequest
+{
+    [Required]
+    [StringLength(500)]
+    public string Title { get; set; } = string.Empty;
+
+    [Required]
+    public string Content { get; set; } = string.Empty;
+
+    public string RefProblemId { get; set; } = string.Empty;
+}
+
 public class WriteCommentRequest
 {
     [Required]

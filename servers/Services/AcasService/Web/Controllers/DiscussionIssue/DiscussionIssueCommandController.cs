@@ -45,6 +45,29 @@ public class DiscussionIssueCommandController : ControllerBase
         }
     }
 
+    [HttpPut("{issueId}")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> UpdateIssue(
+        string issueId,
+        [FromBody] UpdateDiscussionIssueRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            var result = await _discussionIssueCommand.UpdateIssueAsync(issueId, request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Discussion issue not found", 404);
+
+            return ResponseUtil.Success(result, "Discussion issue updated successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating discussion issue {IssueId}", issueId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to update discussion issue", 500);
+        }
+    }
+
     [HttpPost("comments")]
     public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> WriteComment(
         [FromBody] WriteCommentRequest request)

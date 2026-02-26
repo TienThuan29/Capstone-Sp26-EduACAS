@@ -1,4 +1,5 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.DiscussionIssue;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Repositories.DiscussionIssue;
@@ -9,6 +10,8 @@ namespace AcasService.Application.Commands.DiscussionIssue;
 public interface IDiscussionIssueCommand
 {
       Task<DiscussionIssueDetailResponse?> CreateIssueAsync(CreateDiscussionIssueRequest request);
+
+      Task<DiscussionIssueDetailResponse?> UpdateIssueAsync(string issueId, UpdateDiscussionIssueRequest request);
 
       Task<DiscussionIssueDetailResponse?> WriteCommentAsync(WriteCommentRequest request);
 
@@ -26,15 +29,18 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
 {
       private readonly IDiscussionIssueRepository _repository;
       private readonly DiscussionIssueMapper _discussionIssueMapper;
+      private readonly IDiscussionIssueQuery _discussionIssueQuery;
       private readonly ILogger<DiscussionIssueCommand> _logger;
 
       public DiscussionIssueCommand(
           IDiscussionIssueRepository repository,
           DiscussionIssueMapper discussionIssueMapper,
+          IDiscussionIssueQuery discussionIssueQuery,
           ILogger<DiscussionIssueCommand> logger)
       {
             _repository = repository;
             _discussionIssueMapper = discussionIssueMapper;
+            _discussionIssueQuery = discussionIssueQuery;
             _logger = logger;
       }
 
@@ -54,7 +60,23 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   Comments = new List<Comment>()
             };
             var created = await _repository.CreateAsync(issue);
-            return created == null ? null : _discussionIssueMapper.ToDetailResponse(created);
+            return created == null ? null : await _discussionIssueQuery.GetByIdAsync(created.Id);
+      }
+
+      public async Task<DiscussionIssueDetailResponse?> UpdateIssueAsync(string issueId, UpdateDiscussionIssueRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(issueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", issueId);
+                  return null;
+            }
+            issue.Title = request.Title;
+            issue.Content = request.Content;
+            issue.RefProblemId = request.RefProblemId ?? string.Empty;
+            issue.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
       }
 
       public async Task<DiscussionIssueDetailResponse?> WriteCommentAsync(WriteCommentRequest request)
@@ -81,7 +103,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             issue.Comments.Add(comment);
             issue.UpdatedDate = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(issue);
-            return updated == null ? null : _discussionIssueMapper.ToDetailResponse(updated);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
       }
 
       public async Task<DiscussionIssueDetailResponse?> ReplyCommentAsync(ReplyCommentRequest request)
@@ -114,7 +136,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             parent.Replies.Add(reply);
             issue.UpdatedDate = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(issue);
-            return updated == null ? null : _discussionIssueMapper.ToDetailResponse(updated);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
       }
 
       public async Task<DiscussionIssueDetailResponse?> UpvoteCommentAsync(UpvoteCommentRequest request)
@@ -134,7 +156,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             comment.UpVoteCount++;
             comment.UpdatedDate = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(issue);
-            return updated == null ? null : _discussionIssueMapper.ToDetailResponse(updated);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
       }
 
       public async Task<DiscussionIssueDetailResponse?> ChangeStatusAsync(ChangeDiscussionStatusRequest request)
@@ -148,7 +170,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             issue.Status = request.Status;
             issue.UpdatedDate = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(issue);
-            return updated == null ? null : _discussionIssueMapper.ToDetailResponse(updated);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
       }
 
       public async Task<bool> SoftDeleteAsync(string issueId)
