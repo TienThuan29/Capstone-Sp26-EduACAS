@@ -12,6 +12,7 @@ using AcasService.Application.Queries.Problem;
 using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.S3;
 using AcasService.Application.Queries.Subject;
+using AcasService.Application.Queries.DiscussionIssue;
 using AcasService.Application.Utils;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
@@ -47,6 +48,7 @@ using AcasService.Application.Commands.Material;
 using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
+using AcasService.Application.Commands.DiscussionIssue;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -106,6 +108,7 @@ builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRe
 builder.Services.AddScoped<ISlotRepository,SlotRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
+builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
@@ -132,6 +135,8 @@ builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
 builder.Services.AddScoped<ITestcaseEvaluator, TestcaseEvaluator>();
 builder.Services.AddScoped<IResultComparator, ResultComparator>();
+builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
+builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -141,6 +146,8 @@ builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<MaterialMapper>();
+builder.Services.AddScoped<CommentMapper>();
+builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 
 // code runner service 

@@ -22,6 +22,8 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
     {
         try
         {
+            issue.CreatedDate = DateTime.UtcNow;
+            issue.IsDeleted = false;
             var item = DynamoMapper.DiscussionIssueToDynamoItem(issue);
             await PutItemAsync(item, _discussionIssueTableName);
             return issue;
@@ -86,6 +88,43 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error finding discussion issues for classroom {ClassroomId}", classroomId);
+            throw;
+        }
+    }
+
+    public async Task<int> CountByClassroomIdAsync(string classroomId)
+    {
+        try
+        {
+            int count = 0;
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _discussionIssueTableName,
+                    FilterExpression = "classroomId = :classroomId AND (attribute_not_exists(isDeleted) OR isDeleted = :false)",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":classroomId"] = new AttributeValue { S = classroomId },
+                        [":false"] = new AttributeValue { BOOL = false }
+                    },
+                    Select = Select.COUNT
+                };
+                if (lastKey != null && lastKey.Count > 0)
+                    scanRequest.ExclusiveStartKey = lastKey;
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+                count += response.Count;
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error counting discussion issues for classroom {ClassroomId}", classroomId);
             throw;
         }
     }

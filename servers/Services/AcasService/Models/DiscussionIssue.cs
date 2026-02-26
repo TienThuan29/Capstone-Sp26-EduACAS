@@ -38,8 +38,8 @@ public class DiscussionIssue
 
 public enum DiscussionIssueStatus
 {
-    Open,
-    Close
+    OPEN,
+    CLOSED
 }
 
 public class Comment
