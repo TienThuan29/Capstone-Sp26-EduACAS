@@ -18,12 +18,54 @@ class ApiConfig {
   static String get refreshTokenEndpoint => '/api/auth/v1/refresh';
   static String get examinationsEndpoint => '/api/acas/v1/examinations';
 
-  // // Blog endpoints
-  // static String get blogsEndpoint => '/api/patients/v1/blogs';
+  // Classroom endpoints
+  static String lecturerClassroomsEndpoint(String lecturerId) =>
+      '/api/acas/v1/classrooms/lecturer/$lecturerId';
+  static String studentClassroomsEndpoint(String studentId) =>
+      '/api/acas/v1/classrooms/student/$studentId';
+  static String classroomByIdEndpoint(String id) =>
+      '/api/acas/v1/classrooms/$id';
 
-  // // Patient Report endpoints
-  // static String get patientReportsEndpoint =>
-  //     '/api/patients/v1/patient-reports';
+  // Material endpoints
+  static String materialsByClassroomEndpoint(String classroomId) =>
+      '/api/acas/v1/materials/classroom/$classroomId';
+  static String get createMaterialEndpoint => '/api/acas/v1/materials';
+  static String deleteMaterialEndpoint(String id) =>
+      '/api/acas/v1/materials/$id';
+
+  // Examination endpoints
+  static String examinationsByClassEndpoint(String classId) =>
+      '/api/acas/v1/examinations/by-class/$classId';
+  static String examinationByIdEndpoint(String id) =>
+      '/api/acas/v1/examinations/$id';
+
+  // S3 endpoints
+  static String privateFileUrlEndpoint(String filename) =>
+      '/api/acas/v1/private-s3/file/${Uri.encodeComponent(filename)}';
+
+  // Discussion Issue endpoints
+  static String discussionIssuesByClassroomEndpoint(String classroomId) =>
+      '/api/acas/v1/discussion-issues/classroom/$classroomId';
+  static String get createDiscussionIssueEndpoint =>
+      '/api/acas/v1/discussion-issues';
+  static String discussionIssueByIdEndpoint(String id) =>
+      '/api/acas/v1/discussion-issues/$id';
+  static String softDeleteDiscussionIssueEndpoint(String id) =>
+      '/api/acas/v1/discussion-issues/$id/soft-delete';
+
+  // Comment endpoints
+  static String commentsByDiscussionIssueEndpoint(String discussionIssueId) =>
+      '/api/acas/v1/comments/discussion-issue/$discussionIssueId';
+  static String get createCommentEndpoint => '/api/acas/v1/comments';
+  static String commentByIdEndpoint(String id) => '/api/acas/v1/comments/$id';
+  static String softDeleteCommentEndpoint(String id) =>
+      '/api/acas/v1/comments/$id/soft-delete';
+
+  // Problem endpoints
+  static String problemsByLecturerEndpoint(String lecturerId) =>
+      '/api/acas/v1/problems/lecturer/$lecturerId';
+  static String problemByIdEndpoint(String id) =>
+      '/api/acas/v1/problems/$id';
 
   static Duration get requestTimeout {
     try {

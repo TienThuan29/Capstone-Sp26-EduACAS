@@ -15,12 +15,14 @@ class AuthService {
 
       final loginResponse = LoginResponse.fromJson(response);
 
-      // Save tokens to local storage if login successful
+      // Save tokens and user info to local storage if login successful
       if (loginResponse.success && loginResponse.dataResponse != null) {
         await TokenStorage.saveTokens(
           accessToken: loginResponse.dataResponse!.accessToken,
           refreshToken: loginResponse.dataResponse!.refreshToken,
         );
+        // Save user ID for later API calls
+        await TokenStorage.saveUserId(loginResponse.dataResponse!.userProfile.id);
       }
 
       return loginResponse;
