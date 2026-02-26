@@ -14,15 +14,15 @@ namespace AcasService.Web.Controllers.Submission;
 // [Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class ExecutionCommandController : ControllerBase
 {
-    private readonly ITestcaseEvaluator _testcaseEvaluator;
+    private readonly IExecutionCommand _executionCommand;
 
     private readonly ILogger<ExecutionCommandController> _logger;
 
     public ExecutionCommandController(
-        ITestcaseEvaluator testcaseEvaluator,
+        IExecutionCommand executionCommand,
         ILogger<ExecutionCommandController> logger)
     {
-        _testcaseEvaluator = testcaseEvaluator;
+        _executionCommand = executionCommand;
         _logger = logger;
     }
 
@@ -32,7 +32,7 @@ public class ExecutionCommandController : ControllerBase
     {
         try
         {
-            var result = await _testcaseEvaluator.ExecuteCustomTestcaseAsync(
+            var result = await _executionCommand.ExecuteCustomTestcaseAsync(
                 customTestcaseRequest.CompilerId,
                 customTestcaseRequest.CompileRequest,
                 customTestcaseRequest.Lang);
@@ -51,7 +51,7 @@ public class ExecutionCommandController : ControllerBase
     {
         try
         {
-            var results = await _testcaseEvaluator.ExecuteTestcasesAsync(
+            var results = await _executionCommand.ExecuteTestcasesAsync(
                 publicTestcasesRequest.CompilerId,
                 publicTestcasesRequest.RunBatchRequest,
                 publicTestcasesRequest.Lang
