@@ -24,54 +24,34 @@ class _StudentPageState extends State<StudentPage> {
   void initState() {
     super.initState();
     _loadUser();
-    _controller.addListener(_onSidebarChanged);
   }
 
   @override
   void dispose() {
-    _controller.removeListener(_onSidebarChanged);
     _controller.dispose();
     super.dispose();
   }
 
-  void _onSidebarChanged() {
-    if (!mounted) return;
-    
-    final newIndex = _controller.selectedIndex;
-    if (_currentIndex != newIndex) {
-      _updateIndexAndCloseDrawer(newIndex);
-    }
-  }
-
+  /// Called by AppSidebar when user taps an item.
   void _onSidebarItemSelected(int newIndex) {
     if (!mounted) return;
-    print("DEBUG: _onSidebarItemSelected fired with index: $newIndex");
-    
-    if (_controller.selectedIndex != newIndex) {
-      _controller.selectIndex(newIndex);
-    }
-    
-    if (_currentIndex != newIndex) {
-      _updateIndexAndCloseDrawer(newIndex);
+    // Always update — even if sidebar thinks index didn't change
+    if (_key.currentState?.isDrawerOpen ?? false) {
+      _key.currentState?.closeDrawer();
+      Future.delayed(const Duration(milliseconds: 250), () {
+        if (mounted) setState(() => _currentIndex = newIndex);
+      });
+    } else {
+      setState(() => _currentIndex = newIndex);
     }
   }
 
-  void _updateIndexAndCloseDrawer(int newIndex) {
-      if (_key.currentState?.isDrawerOpen ?? false) {
-        // Wait for drawer to close before rebuilding heavy body
-        _key.currentState?.closeDrawer();
-        Future.delayed(const Duration(milliseconds: 250), () {
-          if (mounted) {
-            setState(() {
-              _currentIndex = newIndex;
-            });
-          }
-        });
-      } else {
-        setState(() {
-          _currentIndex = newIndex;
-        });
-      }
+  /// Navigate programmatically (e.g. from Quick Action cards) and keep sidebar in sync.
+  void _navigateTo(int index) {
+    setState(() => _currentIndex = index);
+    if (_controller.selectedIndex != index) {
+      _controller.selectIndex(index);
+    }
   }
 
   Future<void> _loadUser() async {
@@ -214,7 +194,7 @@ class _StudentPageState extends State<StudentPage> {
               label: 'My Classrooms',
               subtitle: 'Browse and join your classrooms',
               gradientColors: const [Color(0xFF1F4E79), Color(0xFF2E86C1)],
-              onTap: () => setState(() => _currentIndex = 1),
+              onTap: () => _navigateTo(1),
             ),
             const SizedBox(height: 14),
             _QuickActionCard(
@@ -222,7 +202,7 @@ class _StudentPageState extends State<StudentPage> {
               label: 'Announcements',
               subtitle: 'Stay up to date with the latest news',
               gradientColors: const [Color(0xFF4A235A), Color(0xFF7D3C98)],
-              onTap: () => setState(() => _currentIndex = 2),
+              onTap: () => _navigateTo(2),
             ),
           ],
         ),
