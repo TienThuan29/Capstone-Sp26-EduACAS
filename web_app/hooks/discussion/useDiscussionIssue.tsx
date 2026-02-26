@@ -26,6 +26,13 @@ export interface CreateIssuePayload {
   refProblemId?: string;
 }
 
+/** Payload for updating an existing discussion issue. */
+export interface UpdateIssuePayload {
+  title: string;
+  content: string;
+  refProblemId?: string;
+}
+
 /** Payload for writing a top-level comment. */
 export interface WriteCommentPayload {
   issueId: string;
@@ -109,6 +116,21 @@ export const useDiscussionIssue = () => {
     [axiosInstance]
   );
 
+  /** PUT update issue */
+  const updateIssue = useCallback(
+    async (
+      issueId: string,
+      payload: UpdateIssuePayload
+    ): Promise<DiscussionIssue | null> => {
+      const response = await axiosInstance.put<ApiResponse<DiscussionIssue>>(
+        Api.DiscussionIssue.UPDATE(issueId),
+        payload
+      );
+      return response.data?.dataResponse ?? null;
+    },
+    [axiosInstance]
+  );
+
   /** PATCH change status (lecturer/admin) */
   const changeStatus = useCallback(
     async (
@@ -140,6 +162,7 @@ export const useDiscussionIssue = () => {
     getCountByClassroom,
     getById,
     createIssue,
+    updateIssue,
     changeStatus,
     softDeleteIssue,
   };

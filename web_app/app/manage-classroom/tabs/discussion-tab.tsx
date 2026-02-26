@@ -1,11 +1,13 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { DiscussionIssue } from "@/types/discussion";
 import { DiscussionDetail } from "@/components/discussion-detail";
 import { DiscussionList } from "@/components/discussion-list";
 import { useDiscussionIssue } from "@/hooks/discussion/useDiscussionIssue";
+import { useComment } from "@/hooks/discussion/useComment";
+import { useAuth } from "@/contexts/AuthContext";
 
 type DiscussionTabProps = {
   classId: string;
@@ -15,7 +17,9 @@ export function DiscussionTab({ classId }: DiscussionTabProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const issueIdFromUrl = searchParams.get("issue");
+  const { user } = useAuth();
   const { getById } = useDiscussionIssue();
+  const { writeComment, replyComment, upvoteComment } = useComment();
 
   const [selectedIssue, setSelectedIssue] = useState<DiscussionIssue | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -45,6 +49,49 @@ export function DiscussionTab({ classId }: DiscussionTabProps) {
     });
   };
 
+  const handleSubmitComment = useCallback(
+    async (content: string, parentCommentId?: string) => {
+      if (!selectedIssue || !user?.id) return;
+      try {
+        const updated =
+          parentCommentId
+            ? await replyComment({
+                issueId: selectedIssue.id,
+                parentCommentId,
+                authorId: user.id,
+                content,
+              })
+            : await writeComment({
+                issueId: selectedIssue.id,
+                authorId: user.id,
+                content,
+              });
+        if (updated) setSelectedIssue(updated);
+      } catch {
+        // Error could be shown via toast or inline message
+      }
+    },
+    [selectedIssue, user?.id, writeComment, replyComment]
+  );
+
+  const handleUpvote = useCallback(
+    async (target: "issue" | "comment", id: string) => {
+      if (!selectedIssue) return;
+      if (target === "comment") {
+        try {
+          const updated = await upvoteComment({
+            issueId: selectedIssue.id,
+            commentId: id,
+          });
+          if (updated) setSelectedIssue(updated);
+        } catch {
+          // Error could be shown via toast
+        }
+      }
+    },
+    [selectedIssue, upvoteComment]
+  );
+
   if (issueIdFromUrl && loadingDetail) {
     return (
       <div className="rounded-xl border border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800">
@@ -61,9 +108,9 @@ export function DiscussionTab({ classId }: DiscussionTabProps) {
         issue={selectedIssue}
         classId={classId}
         onBack={handleBack}
-        onUpvote={() => {}}
+        onUpvote={handleUpvote}
         onStatusChange={() => {}}
-        onSubmitComment={() => {}}
+        onSubmitComment={handleSubmitComment}
       />
     );
   }

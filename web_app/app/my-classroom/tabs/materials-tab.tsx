@@ -57,7 +57,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
     try {
       setDownloadingId(material.id);
       const url = await getFileUrl(material.filename);
-      
+
       // Create temporary anchor element to trigger download
       const link = document.createElement("a");
       link.href = url;
@@ -66,7 +66,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      
+
       showSuccess("Download started");
     } catch (error) {
       console.error("Download failed:", error);
@@ -93,7 +93,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="border-l-8 border-[#1F4E79] pl-4 text-3xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
             Learning Materials
           </h2>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -130,7 +130,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
                   key={material.id}
                   className="bg-white dark:border-gray-700 dark:bg-gray-800"
                 >
-                  <TableCell className="max-w-xs whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                  <TableCell className="max-w-xs font-medium whitespace-nowrap text-gray-900 dark:text-white">
                     <div className="flex items-center gap-2">
                       <DocumentIcon className="h-5 w-5 text-gray-400" />
                       <span className="truncate">{material.filename}</span>
@@ -146,7 +146,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
                       {getFileExtension(material.filename)}
                     </Badge>
                   </TableCell>
-                  <TableCell className="whitespace-nowrap text-sm text-gray-500">
+                  <TableCell className="text-sm whitespace-nowrap text-gray-500">
                     {formatDate(material.createdDate)}
                   </TableCell>
                   <TableCell>

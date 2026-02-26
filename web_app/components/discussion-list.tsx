@@ -7,6 +7,11 @@ import {
   Badge,
   Button,
   Label,
+  Modal,
+  ModalBody,
+  ModalFooter,
+  ModalHeader,
+  Pagination,
   TextInput,
   Timeline,
   TimelineBody,
@@ -41,8 +46,8 @@ import { useDiscussionIssue } from "@/hooks/discussion/useDiscussionIssue";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeContext } from "@/components/theme-provider";
 import { TextEditor } from "@/components/text-editor";
-import { htmlToMarkdown } from "@/utils/markdown-converter";
-import type { DiscussionIssueListItem } from "@/types/discussion";
+import { htmlToMarkdown, markdownToHtml } from "@/utils/markdown-converter";
+import type { DiscussionIssue, DiscussionIssueListItem } from "@/types/discussion";
 
 const PAGE_SIZE = 10;
 const lowlight = createLowlight(all);
@@ -66,14 +71,16 @@ export function DiscussionList({
 }: DiscussionListProps) {
   const router = useRouter();
   const { user } = useAuth();
-  const { getPagedByClassroom, softDeleteIssue } = useDiscussionIssue();
+  const { getPagedByClassroom, getById, softDeleteIssue } = useDiscussionIssue();
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [issueToDelete, setIssueToDelete] = useState<string | null>(null);
   const [items, setItems] = useState<DiscussionIssueListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [showNewForm, setShowNewForm] = useState(false);
+  const [editingIssue, setEditingIssue] = useState<DiscussionIssue | null>(null);
   const [activeTab, setActiveTab] = useState<"all" | "my-discussion">("all");
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
@@ -120,30 +127,53 @@ export function DiscussionList({
     };
   }, [classId, pageIndex, getPagedByClassroom]);
 
-  const handleNewIssueCreated = useCallback(
-    (issueId: string) => {
+  const handleFormSuccess = useCallback(
+    (issueId: string, options?: { isEdit?: boolean }) => {
       setShowNewForm(false);
+      setEditingIssue(null);
       refetch();
-      router.push(`/${classroomBasePath}/${classId}?tab=discussion&issue=${issueId}`, { scroll: false });
+      if (!options?.isEdit) {
+        router.push(`/${classroomBasePath}/${classId}?tab=discussion&issue=${issueId}`, {
+          scroll: false,
+        });
+      }
     },
     [classroomBasePath, classId, refetch, router]
   );
 
-  const handleDeleteIssue = useCallback(
+  const handleEditClick = useCallback(
     async (issueId: string, e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      if (!confirm("Delete this discussion? This cannot be undone.")) return;
-      setDeletingId(issueId);
-      try {
-        const ok = await softDeleteIssue(issueId);
-        if (ok) refetch();
-      } finally {
-        setDeletingId(null);
-      }
+      const issue = await getById(issueId);
+      if (issue) setEditingIssue(issue);
     },
-    [softDeleteIssue, refetch]
+    [getById]
   );
+
+  const openDeleteModal = useCallback((issueId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIssueToDelete(issueId);
+  }, []);
+
+  const closeDeleteModal = useCallback(() => {
+    if (!deletingId) setIssueToDelete(null);
+  }, [deletingId]);
+
+  const confirmDeleteIssue = useCallback(async () => {
+    if (!issueToDelete) return;
+    setDeletingId(issueToDelete);
+    try {
+      const ok = await softDeleteIssue(issueToDelete);
+      if (ok) {
+        setIssueToDelete(null);
+        refetch();
+      }
+    } finally {
+      setDeletingId(null);
+    }
+  }, [issueToDelete, softDeleteIssue, refetch]);
 
   return (
     <div className="space-y-4">
@@ -194,12 +224,25 @@ export function DiscussionList({
         </Button>
       </div>
 
-      {showNewForm && (
+      {(showNewForm || editingIssue) && (
         <NewDiscussionForm
           classId={classId}
           classroomBasePath={classroomBasePath}
-          onCancel={() => setShowNewForm(false)}
-          onSuccess={handleNewIssueCreated}
+          initialIssue={
+            editingIssue
+              ? {
+                  id: editingIssue.id,
+                  title: editingIssue.title,
+                  content: editingIssue.content,
+                  refProblemId: editingIssue.refProblemId || undefined,
+                }
+              : undefined
+          }
+          onCancel={() => {
+            setShowNewForm(false);
+            setEditingIssue(null);
+          }}
+          onSuccess={handleFormSuccess}
         />
       )}
 
@@ -265,20 +308,21 @@ export function DiscussionList({
                         </span>
                         {activeTab === "my-discussion" && (
                           <>
-                            <Link
-                              href={issueHref}
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                            <Button
+                              size="xs"
+                              color="gray"
+                              onClick={(e: React.MouseEvent) => handleEditClick(issue.id, e)}
+                              className="cursor-pointer"
                               title="Edit"
                             >
                               <PencilSquareIcon className="h-4 w-4" />
                               Edit
-                            </Link>
+                            </Button>
                             <Button
                               size="xs"
                               color="red"
                               onClick={(e: React.MouseEvent) =>
-                                handleDeleteIssue(issue.id, e)
+                                openDeleteModal(issue.id, e)
                               }
                               disabled={isDeleting}
                               className="cursor-pointer"
@@ -297,50 +341,95 @@ export function DiscussionList({
             })}
           </Timeline>
           {totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
-              <button
-                type="button"
-                onClick={() => setPageIndex((p) => Math.max(1, p - 1))}
-                disabled={pageIndex <= 1}
-                className="rounded border border-gray-300 px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-600"
-              >
-                Previous
-              </button>
-              <span className="text-sm text-gray-600 dark:text-gray-400">
-                Page {pageIndex} of {totalPages}
-              </span>
-              <button
-                type="button"
-                onClick={() => setPageIndex((p) => Math.min(totalPages, p + 1))}
-                disabled={pageIndex >= totalPages}
-                className="rounded border border-gray-300 px-3 py-1 text-sm disabled:opacity-50 dark:border-gray-600"
-              >
-                Next
-              </button>
+            <div className="flex overflow-x-auto justify-center pt-4">
+              <Pagination
+                currentPage={pageIndex}
+                totalPages={totalPages}
+                onPageChange={(page) => setPageIndex(page)}
+              />
             </div>
           )}
         </>
       )}
+
+      <DeleteDiscussionModal
+        show={issueToDelete !== null}
+        onClose={closeDeleteModal}
+        onConfirm={confirmDeleteIssue}
+        isDeleting={!!deletingId}
+      />
     </div>
   );
 }
 
+type DeleteDiscussionModalProps = {
+  show: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  isDeleting: boolean;
+};
+
+function DeleteDiscussionModal({
+  show,
+  onClose,
+  onConfirm,
+  isDeleting,
+}: DeleteDiscussionModalProps) {
+  return (
+    <Modal show={show} onClose={onClose} size="md">
+      <ModalHeader>Delete discussion</ModalHeader>
+      <ModalBody>
+        <p className="text-sm text-gray-600 dark:text-gray-300">
+          Delete this discussion? This cannot be undone.
+        </p>
+      </ModalBody>
+      <ModalFooter>
+        <Button
+          color="gray"
+          onClick={onClose}
+          disabled={isDeleting}
+          className="cursor-pointer"
+        >
+          Cancel
+        </Button>
+        <Button
+          color="red"
+          onClick={onConfirm}
+          disabled={isDeleting}
+          className="cursor-pointer"
+        >
+          {isDeleting ? "Deleting…" : "Delete"}
+        </Button>
+      </ModalFooter>
+    </Modal>
+  );
+}
+
+type DiscussionFormInitialIssue = {
+  id: string;
+  title: string;
+  content: string;
+  refProblemId?: string;
+};
 
 type NewDiscussionFormProps = {
   classId: string;
   classroomBasePath: string;
   onCancel: () => void;
-  onSuccess: (issueId: string) => void;
+  onSuccess: (issueId: string, options?: { isEdit?: boolean }) => void;
+  /** When set, form is in edit mode with pre-filled data. */
+  initialIssue?: DiscussionFormInitialIssue | null;
 };
 
 function NewDiscussionForm({
   classId,
   onCancel,
   onSuccess,
+  initialIssue,
 }: NewDiscussionFormProps) {
   const { user } = useAuth();
   const { isDark } = useThemeContext();
-  const { createIssue } = useDiscussionIssue();
+  const { createIssue, updateIssue } = useDiscussionIssue();
   const [title, setTitle] = useState("");
   const [contentHtml, setContentHtml] = useState("");
   const [refProblemId, setRefProblemId] = useState("");
@@ -382,10 +471,22 @@ function NewDiscussionForm({
   });
 
   useEffect(() => {
-    if (editor && !editor.isDestroyed) {
+    if (!editor || editor.isDestroyed) return;
+    if (initialIssue) {
+      setTitle(initialIssue.title);
+      const html = markdownToHtml(initialIssue.content);
+      setContentHtml(html);
+      setRefProblemId(initialIssue.refProblemId ?? "");
+      editor.commands.setContent(html);
+    } else {
+      setTitle("");
+      setContentHtml("");
+      setRefProblemId("");
       editor.commands.setContent("");
     }
-  }, [editor]);
+    // Only re-run when switching between create and edit (by issue id), not on every initialIssue reference change
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, initialIssue?.id]);
 
   const handleSubmit = async () => {
     const trimmedTitle = title.trim();
@@ -403,24 +504,37 @@ function NewDiscussionForm({
     }
     setSubmitError(null);
     setSubmitting(true);
+    const contentMarkdown = htmlToMarkdown(contentHtml);
     try {
-      const contentMarkdown = htmlToMarkdown(contentHtml);
-      const issue = await createIssue({
-        classroomId: classId,
-        authorId: user.id,
-        title: trimmedTitle,
-        content: contentMarkdown,
-        refProblemId: refProblemId.trim() || undefined,
-      });
-      if (issue?.id) {
-        onSuccess(issue.id);
+      if (initialIssue) {
+        const issue = await updateIssue(initialIssue.id, {
+          title: trimmedTitle,
+          content: contentMarkdown,
+          refProblemId: refProblemId.trim() || undefined,
+        });
+        if (issue?.id) {
+          onSuccess(issue.id, { isEdit: true });
+        } else {
+          setSubmitError("Failed to update discussion. Please try again.");
+        }
       } else {
-        setSubmitError("Failed to create discussion. Please try again.");
+        const issue = await createIssue({
+          classroomId: classId,
+          authorId: user.id,
+          title: trimmedTitle,
+          content: contentMarkdown,
+          refProblemId: refProblemId.trim() || undefined,
+        });
+        if (issue?.id) {
+          onSuccess(issue.id);
+        } else {
+          setSubmitError("Failed to create discussion. Please try again.");
+        }
       }
     } catch (err: unknown) {
       setSubmitError(
         (err as { response?: { data?: { message?: string } } })?.response?.data?.message ??
-          "Failed to create discussion. Please try again."
+          (initialIssue ? "Failed to update discussion. Please try again." : "Failed to create discussion. Please try again.")
       );
     } finally {
       setSubmitting(false);
@@ -430,7 +544,7 @@ function NewDiscussionForm({
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
       <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
-        New Discussion Issue
+        {initialIssue ? "Edit Discussion Issue" : "New Discussion Issue"}
       </h3>
       <div className="space-y-4">
         <div>
@@ -475,15 +589,22 @@ function NewDiscussionForm({
             outline
             onClick={onCancel}
             disabled={submitting}
+            className="cursor-pointer"
           >
             Cancel
           </Button>
           <Button
-            className="bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90"
+            className="bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90 cursor-pointer"
             onClick={handleSubmit}
             disabled={submitting || !title.trim() || isEmptyHtml(contentHtml)}
           >
-            {submitting ? "Creating…" : "Create discussion"}
+            {initialIssue
+              ? submitting
+                ? "Updating…"
+                : "Update discussion"
+              : submitting
+                ? "Creating…"
+                : "Create discussion"}
           </Button>
         </div>
       </div>

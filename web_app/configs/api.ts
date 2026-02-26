@@ -121,6 +121,7 @@ export const Api = {
     GET_COUNT: "/api/acas/v1/discussion-issues/count",
     GET_BY_ID: (id: string) => `/api/acas/v1/discussion-issues/${id}`,
     CREATE: "/api/acas/v1/discussion-issues",
+    UPDATE: (id: string) => `/api/acas/v1/discussion-issues/${id}`,
     WRITE_COMMENT: "/api/acas/v1/discussion-issues/comments",
     REPLY_COMMENT: "/api/acas/v1/discussion-issues/comments/reply",
     UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
