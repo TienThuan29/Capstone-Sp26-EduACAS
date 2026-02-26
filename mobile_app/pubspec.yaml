@@ -38,6 +38,7 @@ dependencies:
   flutter_dotenv: ^6.0.0
   http: ^1.6.0
   sidebarx: ^0.17.1
+  intl: ^0.19.0
   url_launcher: ^6.3.1
 
 dev_dependencies:

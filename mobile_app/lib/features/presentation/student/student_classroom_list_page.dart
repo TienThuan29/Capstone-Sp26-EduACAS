@@ -230,7 +230,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(Icons.school_outlined, size: 80, color: Colors.grey),
-          const SizedBox(height: 16),
+          SizedBox(height: 16),
           Text('No classrooms found', style: TextStyle(fontSize: 18, color: Colors.grey)),
         ],
       ),

@@ -129,19 +129,19 @@ class TokenStorage {
     await prefs.remove(_userRoleKey);
   }
 
-  /// Save user ID
-  static Future<void> saveUserId(String userId) async {
+  /// Save user id
+  static Future<void> saveUserId(String id) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userIdKey, userId);
+    await prefs.setString(_userIdKey, id);
   }
 
-  /// Get user ID
+  /// Get user id
   static Future<String?> getUserId() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString(_userIdKey);
   }
 
-  /// Clear user ID
+  /// Clear user id
   static Future<void> clearUserId() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userIdKey);

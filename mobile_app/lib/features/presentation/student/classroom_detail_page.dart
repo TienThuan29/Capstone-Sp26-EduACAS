@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom.dart';
+import 'package:mobile/features/presentation/student/tabs/student_materials_tab.dart';
 import 'package:mobile/features/presentation/student/tabs/student_examinations_tab.dart';
 import 'package:mobile/features/presentation/student/tabs/student_discussions_tab.dart';
 
@@ -23,7 +24,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -59,6 +60,10 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
           unselectedLabelColor: Colors.white70,
           tabs: const [
             Tab(
+              icon: Icon(Icons.file_present),
+              text: 'Materials',
+            ),
+            Tab(
               icon: Icon(Icons.assignment),
               text: 'Examinations',
             ),
@@ -72,6 +77,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
       body: TabBarView(
         controller: _tabController,
         children: [
+          StudentMaterialsTab(classroomId: widget.classroom.id),
           StudentExaminationsTab(classroomId: widget.classroom.id),
           StudentDiscussionsTab(
             classroomId: widget.classroom.id,

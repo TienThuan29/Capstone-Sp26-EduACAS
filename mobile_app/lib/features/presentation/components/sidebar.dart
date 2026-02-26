@@ -19,27 +19,27 @@ class Roles {
 }
 
 /// Get sidebar items based on user role
-List<SidebarXItem> getSidebarItemsForRole(String? role) {
+List<SidebarXItem> getSidebarItemsForRole(String? role, {Function(int)? onItemSelected}) {
   switch (role?.toUpperCase()) {
     case Roles.admin:
-      return const [
-        SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
-        SidebarXItem(icon: Icons.class_, label: 'Manage Classrooms'),
-        SidebarXItem(icon: Icons.book, label: 'Manage Subjects'),
-        SidebarXItem(icon: Icons.code, label: 'Manage Languages'),
-        SidebarXItem(icon: Icons.people, label: 'Manage Users'),
+      return [
+        SidebarXItem(icon: Icons.dashboard, label: 'Admin Dashboard', onTap: () => onItemSelected?.call(0)),
+        SidebarXItem(icon: Icons.class_, label: 'Manage Classrooms', onTap: () => onItemSelected?.call(1)),
+        SidebarXItem(icon: Icons.book, label: 'Manage Subjects', onTap: () => onItemSelected?.call(2)),
+        SidebarXItem(icon: Icons.code, label: 'Manage Languages', onTap: () => onItemSelected?.call(3)),
+        SidebarXItem(icon: Icons.people, label: 'Manage Users', onTap: () => onItemSelected?.call(4)),
       ];
     case Roles.lecturer:
-      return const [
-        SidebarXItem(icon: Icons.class_, label: 'My Classrooms'),
-        SidebarXItem(icon: Icons.quiz, label: 'Problem Banks'),
+      return [
+        SidebarXItem(icon: Icons.class_, label: 'My Classrooms', onTap: () => onItemSelected?.call(0)),
+        SidebarXItem(icon: Icons.quiz, label: 'Problem Banks', onTap: () => onItemSelected?.call(1)),
       ];
     case Roles.student:
     default:
-      return const [
-        SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
-        SidebarXItem(icon: Icons.class_, label: 'Classrooms'),
-        SidebarXItem(icon: Icons.campaign, label: 'Announcements'),
+      return [
+        SidebarXItem(icon: Icons.dashboard, label: 'Dashboard', onTap: () => onItemSelected?.call(0)),
+        SidebarXItem(icon: Icons.class_, label: 'Classrooms', onTap: () => onItemSelected?.call(1)),
+        SidebarXItem(icon: Icons.campaign, label: 'Announcements', onTap: () => onItemSelected?.call(2)),
       ];
   }
 }
@@ -50,11 +50,13 @@ class AppSidebar extends StatelessWidget {
     required this.controller,
     this.onLogout,
     this.userRole,
+    this.onItemSelected,
   });
 
   final SidebarXController controller;
   final VoidCallback? onLogout;
   final String? userRole;
+  final Function(int)? onItemSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +206,7 @@ class AppSidebar extends StatelessWidget {
           ),
         );
       },
-      items: getSidebarItemsForRole(userRole),
+      items: getSidebarItemsForRole(userRole, onItemSelected: onItemSelected),
     );
   }
 }
@@ -333,6 +335,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
       await TokenStorage.clearTokens();
       await TokenStorage.clearUserName();
       await TokenStorage.clearUserRole();
+      await TokenStorage.clearUserId();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
