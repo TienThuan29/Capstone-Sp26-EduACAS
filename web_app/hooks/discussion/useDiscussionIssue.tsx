@@ -124,11 +124,23 @@ export const useDiscussionIssue = () => {
     [axiosInstance]
   );
 
+  /** PATCH soft-delete issue */
+  const softDeleteIssue = useCallback(
+    async (issueId: string): Promise<boolean> => {
+      const response = await axiosInstance.patch<ApiResponse<boolean>>(
+        Api.DiscussionIssue.SOFT_DELETE(issueId)
+      );
+      return response.data?.success === true;
+    },
+    [axiosInstance]
+  );
+
   return {
     getPagedByClassroom,
     getCountByClassroom,
     getById,
     createIssue,
     changeStatus,
+    softDeleteIssue,
   };
 };

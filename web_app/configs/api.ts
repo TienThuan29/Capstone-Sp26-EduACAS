@@ -125,5 +125,6 @@ export const Api = {
     REPLY_COMMENT: "/api/acas/v1/discussion-issues/comments/reply",
     UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
+    SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
   },
 };

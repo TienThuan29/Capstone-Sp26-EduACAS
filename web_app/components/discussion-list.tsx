@@ -3,8 +3,27 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Card, Badge, Button, Label, TextInput } from "flowbite-react";
-import { EyeIcon, ChatBubbleLeftRightIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Badge,
+  Button,
+  Label,
+  TextInput,
+  Timeline,
+  TimelineBody,
+  TimelineContent,
+  TimelineItem,
+  TimelinePoint,
+  TimelineTime,
+  TimelineTitle,
+} from "flowbite-react";
+import {
+  EyeIcon,
+  ChatBubbleLeftRightIcon,
+  PlusIcon,
+  XMarkIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/outline";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
@@ -17,6 +36,7 @@ import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, all } from "lowlight";
+import { formatDate } from "@/utils/datetime-utils";
 import { useDiscussionIssue } from "@/hooks/discussion/useDiscussionIssue";
 import { useAuth } from "@/contexts/AuthContext";
 import { useThemeContext } from "@/components/theme-provider";
@@ -45,14 +65,22 @@ export function DiscussionList({
   classroomBasePath = "my-classroom",
 }: DiscussionListProps) {
   const router = useRouter();
-  const { getPagedByClassroom } = useDiscussionIssue();
+  const { user } = useAuth();
+  const { getPagedByClassroom, softDeleteIssue } = useDiscussionIssue();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [items, setItems] = useState<DiscussionIssueListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [pageIndex, setPageIndex] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [showNewForm, setShowNewForm] = useState(false);
+  const [activeTab, setActiveTab] = useState<"all" | "my-discussion">("all");
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+
+  const displayedItems =
+    activeTab === "my-discussion" && user?.id
+      ? items.filter((i) => i.authorId === user.id)
+      : items;
 
   const refetch = useCallback(() => {
     if (!classId) return;
@@ -101,6 +129,22 @@ export function DiscussionList({
     [classroomBasePath, classId, refetch, router]
   );
 
+  const handleDeleteIssue = useCallback(
+    async (issueId: string, e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (!confirm("Delete this discussion? This cannot be undone.")) return;
+      setDeletingId(issueId);
+      try {
+        const ok = await softDeleteIssue(issueId);
+        if (ok) refetch();
+      } finally {
+        setDeletingId(null);
+      }
+    },
+    [softDeleteIssue, refetch]
+  );
+
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -112,6 +156,7 @@ export function DiscussionList({
             Browse and participate in Q&A.
           </p>
         </div>
+        {/* Create new discussion issue button */}
         <Button
           color="gray"
           className={
@@ -123,6 +168,29 @@ export function DiscussionList({
         >
           {showNewForm ? <XMarkIcon className="h-4 w-4" /> : <PlusIcon className="h-4 w-4" />}
           {showNewForm ? "Cancel new issue" : "New Discussion Issue"}
+        </Button>
+      </div>
+
+      <div className="flex rounded-lg bg-gray-100 p-1 dark:bg-gray-800">
+        <Button
+          onClick={() => setActiveTab("all")}
+          className={`rounded-md border-0 bg-transparent px-4 py-2 text-sm font-bold transition-all ${
+            activeTab === "all"
+              ? "bg-white text-[#1F4E79] dark:bg-gray-700 dark:text-white"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          }`}
+        >
+          All
+        </Button>
+        <Button
+          onClick={() => setActiveTab("my-discussion")}
+          className={`rounded-md border-0 bg-transparent px-4 py-2 text-sm font-bold transition-all ${
+            activeTab === "my-discussion"
+              ? "bg-white text-[#1F4E79] dark:bg-gray-700 dark:text-white"
+              : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          }`}
+        >
+          My discussion
         </Button>
       </div>
 
@@ -147,27 +215,38 @@ export function DiscussionList({
             Loading discussions…
           </p>
         </div>
-      ) : items.length === 0 ? (
+      ) : displayedItems.length === 0 ? (
         <div className="rounded-xl border-2 border-dashed border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800">
           <p className="font-medium text-gray-500 dark:text-gray-400">
-            No discussions yet. Start one when you have a question.
+            {activeTab === "my-discussion"
+              ? "You haven't started any discussions yet. Use \"New Discussion Issue\" to create one."
+              : "No discussions yet. Start one when you have a question."}
           </p>
         </div>
       ) : (
         <>
-          <ul className="space-y-3">
-            {items.map((issue) => {
+          <Timeline className="relative z-10 border-gray-200 dark:border-gray-600">
+            {displayedItems.map((issue) => {
               const tags = issue.tags ?? [];
-              const content = (
-                <Card
-                  className="cursor-pointer border border-gray-200 transition-all hover:border-[#1F4E79] hover:shadow-xs dark:border-gray-700 dark:hover:border-[#C9A24D]"
-                  key={issue.id}
-                >
-                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-lg font-bold text-gray-900 dark:text-white">
+              const issueHref = `/${classroomBasePath}/${classId}?tab=discussion&issue=${issue.id}`;
+              const isDeleting = deletingId === issue.id;
+
+              return (
+                <TimelineItem key={issue.id}>
+                  <TimelinePoint className="border-0 bg-[#1F4E79] dark:bg-[#C9A24D]" />
+                  <TimelineContent>
+                    <TimelineTime className="text-gray-500 dark:text-gray-400">
+                      {formatDate(issue.createdDate)}
+                    </TimelineTime>
+                    <TimelineTitle className="text-gray-900 dark:text-gray-100">
+                      <Link
+                        href={issueHref}
+                        className="hover:text-[#1F4E79] dark:hover:text-[#C9A24D]"
+                      >
                         {issue.title}
-                      </h3>
+                      </Link>
+                    </TimelineTitle>
+                    <TimelineBody className="text-gray-600 dark:text-gray-300">
                       <div className="mt-2 flex flex-wrap gap-2">
                         {tags.map((tag) => (
                           <Badge key={tag} color="gray" className="font-medium">
@@ -175,31 +254,48 @@ export function DiscussionList({
                           </Badge>
                         ))}
                       </div>
-                    </div>
-                    <div className="flex shrink-0 items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
-                      <span className="flex items-center gap-1.5" title="Views">
-                        <EyeIcon className="h-4 w-4" />
-                        {issue.viewCount}
-                      </span>
-                      <span className="flex items-center gap-1.5" title="Comments">
-                        <ChatBubbleLeftRightIcon className="h-4 w-4" />
-                        {issue.commentCount}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              );
-
-              const issueHref = `/${classroomBasePath}/${classId}?tab=discussion&issue=${issue.id}`;
-              return (
-                <li key={issue.id}>
-                  <Link href={issueHref} className="block">
-                    {content}
-                  </Link>
-                </li>
+                      <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="flex items-center gap-1.5" title="Views">
+                          <EyeIcon className="h-4 w-4" />
+                          {issue.viewCount}
+                        </span>
+                        <span className="flex items-center gap-1.5" title="Comments">
+                          <ChatBubbleLeftRightIcon className="h-4 w-4" />
+                          {issue.commentCount}
+                        </span>
+                        {activeTab === "my-discussion" && (
+                          <>
+                            <Link
+                              href={issueHref}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1 rounded px-2 py-1 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+                              title="Edit"
+                            >
+                              <PencilSquareIcon className="h-4 w-4" />
+                              Edit
+                            </Link>
+                            <Button
+                              size="xs"
+                              color="red"
+                              onClick={(e: React.MouseEvent) =>
+                                handleDeleteIssue(issue.id, e)
+                              }
+                              disabled={isDeleting}
+                              className="cursor-pointer"
+                              title="Delete"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                              Delete
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </TimelineBody>
+                  </TimelineContent>
+                </TimelineItem>
               );
             })}
-          </ul>
+          </Timeline>
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-2 pt-4">
               <button
@@ -357,6 +453,7 @@ function NewDiscussionForm({
             helperText="Use the toolbar to format your question or description. You can use code blocks for snippets."
           />
         </div>
+        {/* Future feature: related problem,... */}
         {/* <div>
           <Label htmlFor="new-issue-ref" className="mb-1 block text-gray-900 dark:text-white">
             Related problem (optional)
