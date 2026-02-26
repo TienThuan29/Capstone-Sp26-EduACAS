@@ -163,7 +163,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             return true;
       }
 
-      private static Comment? FindCommentById(IList<Comment> comments, string commentId)
+      private Comment? FindCommentById(IList<Comment> comments, string commentId)
       {
             foreach (var c in comments)
             {
