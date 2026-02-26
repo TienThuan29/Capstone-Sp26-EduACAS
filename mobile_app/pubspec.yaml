@@ -39,6 +39,7 @@ dependencies:
   http: ^1.6.0
   sidebarx: ^0.17.1
   url_launcher: ^6.3.1
+  file_picker: ^10.3.2
 
 dev_dependencies:
   flutter_test:

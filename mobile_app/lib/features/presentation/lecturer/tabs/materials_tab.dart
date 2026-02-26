@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
+import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/material.dart' as model;
 import 'package:mobile/features/services/material_service.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,11 +24,20 @@ class _MaterialsTabState extends State<MaterialsTab> {
   List<model.Material> _materials = [];
   bool _isLoading = true;
   String? _errorMessage;
+  bool _isUploading = false;
+  File? _selectedFile;
+  final TextEditingController _descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     _loadMaterials();
+  }
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
   }
 
   Future<void> _loadMaterials() async {
@@ -90,6 +103,133 @@ class _MaterialsTabState extends State<MaterialsTab> {
         ),
       );
     }
+  }
+
+  Future<void> _showUploadDialog() async {
+    _selectedFile = null;
+    _descriptionController.clear();
+
+    await showDialog<void>(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: const Text('Upload Material'),
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _isUploading
+                          ? null
+                          : () async {
+                              final result = await FilePicker.platform.pickFiles(
+                                type: FileType.any,
+                              );
+
+                              if (result != null &&
+                                  result.files.isNotEmpty &&
+                                  result.files.single.path != null) {
+                                setDialogState(() {
+                                  _selectedFile = File(result.files.single.path!);
+                                });
+                              }
+                            },
+                      icon: const Icon(Icons.attach_file),
+                      label: const Text('Select file'),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      _selectedFile == null
+                          ? 'No file selected'
+                          : 'Selected: ${_selectedFile!.uri.pathSegments.last}',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppColors.textSecondary,
+                          ),
+                    ),
+                    const SizedBox(height: 16),
+                    TextField(
+                      controller: _descriptionController,
+                      enabled: !_isUploading,
+                      minLines: 2,
+                      maxLines: 4,
+                      decoration: const InputDecoration(
+                        labelText: 'Description (optional)',
+                        border: OutlineInputBorder(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: _isUploading ? null : () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: (_isUploading || _selectedFile == null)
+                      ? null
+                      : () async {
+                          final rootMessenger = ScaffoldMessenger.of(this.context);
+
+                          setDialogState(() {
+                            _isUploading = true;
+                          });
+
+                          try {
+                            final lecturerId = await TokenStorage.getUserId();
+                            if (lecturerId == null || lecturerId.isEmpty) {
+                              throw Exception('Cannot determine lecturer ID');
+                            }
+
+                            await MaterialService.createMaterial(
+                              classroomId: widget.classroomId,
+                              lecturerId: lecturerId,
+                              file: _selectedFile!,
+                              description: _descriptionController.text.trim(),
+                            );
+
+                            if (!context.mounted) return;
+                            Navigator.pop(context);
+                            rootMessenger.showSnackBar(
+                              const SnackBar(
+                                content: Text('Material uploaded successfully'),
+                                backgroundColor: AppColors.success,
+                              ),
+                            );
+                            await _loadMaterials();
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            rootMessenger.showSnackBar(
+                              SnackBar(
+                                content: Text('Error uploading material: $e'),
+                                backgroundColor: AppColors.error,
+                              ),
+                            );
+                          } finally {
+                            if (mounted) {
+                              setDialogState(() {
+                                _isUploading = false;
+                              });
+                            }
+                          }
+                        },
+                  child: _isUploading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Upload'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
   }
 
   Future<void> _confirmDelete(model.Material material) async {
@@ -205,21 +345,51 @@ class _MaterialsTabState extends State<MaterialsTab> {
                     color: AppColors.textSecondary,
                   ),
             ),
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _showUploadDialog,
+              icon: const Icon(Icons.upload_file),
+              label: const Text('Upload Material'),
+            ),
           ],
         ),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: _loadMaterials,
-      child: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: _materials.length,
-        itemBuilder: (context, index) {
-          final material = _materials[index];
-          return _buildMaterialCard(material);
-        },
-      ),
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'Course Materials',
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+              ),
+              ElevatedButton.icon(
+                onPressed: _showUploadDialog,
+                icon: const Icon(Icons.add),
+                label: const Text('Upload'),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadMaterials,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _materials.length,
+              itemBuilder: (context, index) {
+                final material = _materials[index];
+                return _buildMaterialCard(material);
+              },
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -240,7 +410,7 @@ class _MaterialsTabState extends State<MaterialsTab> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
