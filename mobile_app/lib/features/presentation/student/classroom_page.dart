@@ -4,6 +4,8 @@ import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom/classroom_model.dart';
 import 'package:mobile/features/services/classroom_service.dart';
+import 'package:mobile/features/models/classroom.dart';
+import 'package:mobile/features/presentation/student/classroom_detail_page.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Filter state
@@ -1035,7 +1037,31 @@ class _ClassroomCardState extends State<_ClassroomCard> {
                       width: double.infinity,
                       child: isJoined
                           ? ElevatedButton.icon(
-                              onPressed: null,
+                              onPressed: () {
+                                final mappedClassroom = Classroom(
+                                  id: c.id,
+                                  className: c.className,
+                                  classCode: c.classCode,
+                                  subjectId: c.subject.id,
+                                  subjectName: c.subject.subjectName,
+                                  lecturerId: c.lecturer.id,
+                                  lecturerName: c.lecturer.fullname,
+                                  lecturerEmail: c.lecturer.email,
+                                  semesterName: c.semesterName,
+                                  enrolKey: c.enrolKey,
+                                  maxSlot: c.maxSlot,
+                                  isDeleted: c.isDeleted,
+                                  createdDate: c.createdDate.toIso8601String(),
+                                  updatedDate: c.updatedDate?.toIso8601String(),
+                                  endDate: c.endDate.toIso8601String(),
+                                );
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => StudentClassroomDetailPage(classroom: mappedClassroom),
+                                  ),
+                                );
+                              },
                               icon: const Icon(Icons.open_in_new_rounded,
                                   size: 15),
                               label: const Text('Access Classroom'),
