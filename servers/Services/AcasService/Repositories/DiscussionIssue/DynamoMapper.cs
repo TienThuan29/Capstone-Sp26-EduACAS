@@ -19,18 +19,24 @@ public static class DynamoMapper
             ["classroomId"] = new AttributeValue { S = issue.ClassroomId },
             ["title"] = new AttributeValue { S = issue.Title },
             ["authorId"] = new AttributeValue { S = issue.AuthorId },
-            ["content"] = new AttributeValue { S = issue.Content },
-            ["attachments"] = new AttributeValue
-            {
-                L = issue.Attachments.Select(a => new AttributeValue { S = a }).ToList()
-            },
-            ["refProblemId"] = new AttributeValue { S = issue.RefProblemId },
+            ["content"] = new AttributeValue { S = issue.Content ?? "" },
             ["status"] = new AttributeValue { S = issue.Status.ToString() },
             ["viewCount"] = new AttributeValue { N = issue.ViewCount.ToString() },
             ["isDeleted"] = new AttributeValue { BOOL = issue.IsDeleted },
             ["createdDate"] = new AttributeValue { S = issue.CreatedDate.ToString("o") },
             ["updatedDate"] = new AttributeValue { S = issue.UpdatedDate.ToString("o") }
         };
+        if (issue.Attachments != null && issue.Attachments.Length > 0)
+        {
+            item["attachments"] = new AttributeValue
+            {
+                L = issue.Attachments.Select(a => new AttributeValue { S = a ?? "" }).ToList()
+            };
+        }
+        if (!string.IsNullOrEmpty(issue.RefProblemId))
+        {
+            item["refProblemId"] = new AttributeValue { S = issue.RefProblemId };
+        }
         if (issue.Comments != null && issue.Comments.Count > 0)
         {
             item["comments"] = new AttributeValue

@@ -3,6 +3,16 @@ using AcasService.Models;
 
 namespace AcasService.Application.ResponseDTOs;
 
+/// <summary>Author display info resolved via User service (e.g. RabbitMQ).</summary>
+public class AuthorDisplayResponse
+{
+    [JsonPropertyName("fullName")]
+    public string FullName { get; set; } = string.Empty;
+
+    [JsonPropertyName("avatarUrl")]
+    public string AvatarUrl { get; set; } = string.Empty;
+}
+
 /// <summary>
 /// Response for discussion issue list (e.g. discussion-list UI: title, tags, viewCount, commentCount).
 /// </summary>
@@ -13,6 +23,12 @@ public class DiscussionIssueListResponse
 
     [JsonPropertyName("title")]
     public string Title { get; set; } = string.Empty;
+
+    [JsonPropertyName("authorId")]
+    public string AuthorId { get; set; } = string.Empty;
+
+    [JsonPropertyName("authorDisplay")]
+    public AuthorDisplayResponse? AuthorDisplay { get; set; }
 
     [JsonPropertyName("viewCount")]
     public int ViewCount { get; set; }
@@ -46,6 +62,9 @@ public class DiscussionIssueDetailResponse
 
     [JsonPropertyName("authorId")]
     public string AuthorId { get; set; } = string.Empty;
+
+    [JsonPropertyName("authorDisplay")]
+    public AuthorDisplayResponse? AuthorDisplay { get; set; }
 
     [JsonPropertyName("content")]
     public string Content { get; set; } = string.Empty;
@@ -88,6 +107,9 @@ public class CommentResponse
 
     [JsonPropertyName("authorId")]
     public string AuthorId { get; set; } = string.Empty;
+
+    [JsonPropertyName("authorDisplay")]
+    public AuthorDisplayResponse? AuthorDisplay { get; set; }
 
     [JsonPropertyName("content")]
     public string Content { get; set; } = string.Empty;

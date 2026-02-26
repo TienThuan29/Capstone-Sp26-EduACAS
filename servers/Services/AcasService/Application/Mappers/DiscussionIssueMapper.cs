@@ -59,6 +59,7 @@ public class DiscussionIssueMapper
         {
             Id = issue.Id,
             Title = issue.Title,
+            AuthorId = issue.AuthorId ?? string.Empty,
             ViewCount = issue.ViewCount,
             CommentCount = CountComments(issue.Comments),
             CreatedDate = issue.CreatedDate,
