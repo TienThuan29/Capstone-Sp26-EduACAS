@@ -1,13 +1,39 @@
-/**
- * Frontend types aligned with backend AcasService.Models.DiscussionIssue and Comment.
- */
-
 export type DiscussionIssueStatus = "OPEN" | "CLOSED";
+
+/** Author display info from User service (e.g. RabbitMQ). */
+export interface AuthorDisplay {
+  fullName: string;
+  avatarUrl?: string;
+}
+
+/** List item from GET paged (DiscussionIssueListResponse). */
+export interface DiscussionIssueListItem {
+  id: string;
+  title: string;
+  authorId: string;
+  authorDisplay?: AuthorDisplay | null;
+  viewCount: number;
+  commentCount: number;
+  createdDate: string;
+  status: DiscussionIssueStatus;
+  tags: string[];
+}
+
+export interface PagedDiscussionIssues {
+  items: DiscussionIssueListItem[];
+  totalCount: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
 
 export interface Comment {
   id: string;
   issueId: string;
   authorId: string;
+  authorDisplay?: AuthorDisplay | null;
   content: string;
   attachments: string[];
   upVoteCount: number;
@@ -15,8 +41,6 @@ export interface Comment {
   isDeleted: boolean;
   createdDate: string;
   updatedDate: string;
-  /** Optional display info for UI (not in backend entity) */
-  authorDisplay?: { fullName: string; avatarUrl?: string };
 }
 
 export interface DiscussionIssue {
@@ -24,6 +48,7 @@ export interface DiscussionIssue {
   classroomId: string;
   title: string;
   authorId: string;
+  authorDisplay?: AuthorDisplay | null;
   content: string;
   attachments: string[];
   refProblemId: string;
@@ -33,8 +58,5 @@ export interface DiscussionIssue {
   isDeleted: boolean;
   createdDate: string;
   updatedDate: string;
-  /** Optional display info for UI (not in backend entity) */
-  authorDisplay?: { fullName: string; avatarUrl?: string };
-  /** Optional classification tags for list view (e.g. 'bug', 'question', 'C++') */
   tags?: string[];
 }

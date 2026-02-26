@@ -114,4 +114,16 @@ export const Api = {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
   },
+
+  DiscussionIssue: {
+    BASE: "/api/acas/v1/discussion-issues",
+    GET_PAGED: "/api/acas/v1/discussion-issues",
+    GET_COUNT: "/api/acas/v1/discussion-issues/count",
+    GET_BY_ID: (id: string) => `/api/acas/v1/discussion-issues/${id}`,
+    CREATE: "/api/acas/v1/discussion-issues",
+    WRITE_COMMENT: "/api/acas/v1/discussion-issues/comments",
+    REPLY_COMMENT: "/api/acas/v1/discussion-issues/comments/reply",
+    UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
+    CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
+  },
 };

@@ -15,16 +15,9 @@ import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, all } from "lowlight";
-import {
-  Button,
-  Badge,
-  Avatar,
-  Select,
-  Label,
-  HR,
-} from "flowbite-react";
+import { Button, Badge, Avatar, Select, Label, HR } from "flowbite-react";
 import { useThemeContext } from "@/components/theme-provider";
-import { TextEditor } from "@/app/problem-banks/components/text-editor";
+import { TextEditor } from "@/components/text-editor";
 import type {
   DiscussionIssue,
   DiscussionIssueStatus,
@@ -79,6 +72,8 @@ import {
   EyeIcon,
   ChevronLeftIcon,
 } from "@heroicons/react/24/outline";
+import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
+import { useAuth } from "@/contexts/AuthContext";
 
 type DiscussionDetailProps = {
   issue: DiscussionIssue;
@@ -105,8 +100,11 @@ function DiscussionDetailSidebar({
   onMarkAccepted,
   onStatusChange,
 }: DiscussionDetailSidebarProps) {
-  const [selectedStatus, setSelectedStatus] =
-    useState<DiscussionIssueStatus>(issue.status);
+  const { user } = useAuth();
+  const { isLecturer } = useRoleValidator(user);
+  const [selectedStatus, setSelectedStatus] = useState<DiscussionIssueStatus>(
+    issue.status,
+  );
 
   useEffect(() => {
     setSelectedStatus(issue.status);
@@ -139,32 +137,37 @@ function DiscussionDetailSidebar({
           </div>
 
           <div className="flex flex-col gap-2 border-t border-gray-200 pt-3 dark:border-gray-600">
-            <Label htmlFor="issue-status" className="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">
+            <Label
+              htmlFor="issue-status"
+              className="text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400"
+            >
               Status
             </Label>
-            <div className="flex items-center gap-2">
-              <Select
-                id="issue-status"
-                value={selectedStatus}
-                onChange={(e) =>
-                  setSelectedStatus(e.target.value as DiscussionIssueStatus)
-                }
-                className="min-w-0 flex-1"
-              >
-                <option value="Open">Open</option>
-                <option value="Close">Closed</option>
-              </Select>
-              {onStatusChange && (
-                <Button
-                  size="sm"
-                  className="shrink-0 cursor-pointer bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90"
-                  onClick={handleSaveStatus}
-                  disabled={!hasStatusChanged}
+            {isLecturer && (
+              <div className="flex items-center gap-2">
+                <Select
+                  id="issue-status"
+                  value={selectedStatus}
+                  onChange={(e) =>
+                    setSelectedStatus(e.target.value as DiscussionIssueStatus)
+                  }
+                  className="min-w-0 flex-1"
                 >
-                  Save
-                </Button>
-              )}
-            </div>
+                  <option value="Open">Open</option>
+                  <option value="Close">Closed</option>
+                </Select>
+                {onStatusChange && (
+                  <Button
+                    size="sm"
+                    className="shrink-0 cursor-pointer bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90"
+                    onClick={handleSaveStatus}
+                    disabled={!hasStatusChanged}
+                  >
+                    Save
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-wrap gap-2 border-t border-gray-200 pt-3 dark:border-gray-600">
@@ -202,7 +205,6 @@ function DiscussionDetailSidebar({
               </Button>
             )}
           </div>
-
         </div>
       </div>
     </div>
@@ -300,7 +302,9 @@ function CommentReplyBox({
         <TextEditor
           editor={editor}
           isDark={!!isDark}
-          helperText={compact ? undefined : "Use the toolbar to format your comment"}
+          helperText={
+            compact ? undefined : "Use the toolbar to format your comment"
+          }
         />
       </div>
       <div
@@ -366,8 +370,7 @@ function CommentTree({
                 img={comment.authorDisplay?.avatarUrl}
                 rounded
                 className="shrink-0"
-              >
-              </Avatar>
+              ></Avatar>
               <div className="min-w-0 flex-1">
                 <div className="mb-1 flex flex-wrap items-center gap-2">
                   <span className="text-sm font-semibold text-gray-900 dark:text-white">
@@ -383,7 +386,7 @@ function CommentTree({
                     </span>
                   )}
                 </div>
-                <div className="prose prose-sm max-w-none dark:prose-invert prose-p:text-sm prose-p:text-gray-700 prose-p:dark:text-gray-300 prose-headings:text-gray-900 prose-headings:dark:text-white">
+                <div className="prose prose-sm dark:prose-invert prose-p:text-sm prose-p:text-gray-700 prose-p:dark:text-gray-300 prose-headings:text-gray-900 prose-headings:dark:text-white max-w-none">
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={discussionMarkdownComponents}
@@ -514,7 +517,7 @@ export function DiscussionDetail({
                 </Badge>
               ))}
             </div>
-            <div className="prose prose-sm max-w-none dark:prose-invert prose-p:text-gray-700 prose-p:dark:text-gray-300 prose-headings:text-gray-900 prose-headings:dark:text-white bg-gray-50 p-4 dark:bg-gray-800/50">
+            <div className="prose prose-sm dark:prose-invert prose-p:text-gray-700 prose-p:dark:text-gray-300 prose-headings:text-gray-900 prose-headings:dark:text-white max-w-none bg-gray-50 p-4 dark:bg-gray-800/50">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 components={discussionMarkdownComponents}
@@ -524,7 +527,7 @@ export function DiscussionDetail({
             </div>
           </div>
 
-          <HR/>
+          <HR />
 
           <div className="mt-8">
             <div className="mb-4 flex items-center justify-between">

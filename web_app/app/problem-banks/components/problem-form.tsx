@@ -41,7 +41,7 @@ import type {
 } from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { TestcaseBlock } from "./testcase-block";
-import { TextEditor } from "./text-editor";
+import { TextEditor } from "../../../components/text-editor";
 import { useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import TextAlign from "@tiptap/extension-text-align";
