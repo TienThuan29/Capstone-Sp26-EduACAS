@@ -45,7 +45,9 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
       children: [
         const GradientBackground(),
         Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            _buildStickyHeader(),
             _buildSearchBar(),
             Expanded(
               child: _controller.isLoading
@@ -60,20 +62,56 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
     );
   }
 
+  Widget _buildStickyHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'Examinations',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 8),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
       child: TextField(
         controller: _searchController,
         onChanged: (value) => _controller.updateSearchQuery(value, () => setState(() {})),
         decoration: InputDecoration(
-          hintText: 'Search examinations...',
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+          hintText: 'Search by exam name...',
+          prefixIcon: const Icon(Icons.search, color: AppColors.textLight, size: 20),
           filled: true,
-          fillColor: Colors.white.withOpacity(0.8),
+          fillColor: Colors.white,
+          hoverColor: Colors.white,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
           contentPadding: const EdgeInsets.symmetric(vertical: 0),
         ),
@@ -92,7 +130,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
       onRefresh: _loadExaminations,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
         itemCount: _calculateTotalItems(groupedExams),
         itemBuilder: (context, index) {
           return _buildItemAt(index, groupedExams);
@@ -132,14 +170,14 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
 
   Widget _buildSectionHeader(String title) {
     return Padding(
-      padding: const EdgeInsets.only(top: 16, bottom: 8, left: 4),
+      padding: const EdgeInsets.fromLTRB(4, 20, 4, 12),
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
-          color: Colors.grey[700],
-          fontSize: 12,
-          fontWeight: FontWeight.bold,
-          letterSpacing: 1.2,
+          color: AppColors.textLight,
+          fontSize: 11,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1.5,
         ),
       ),
     );
@@ -175,13 +213,20 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.assignment_outlined, size: 80, color: Colors.grey[300]),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.5),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[300]),
+          ),
           const SizedBox(height: 16),
           Text(
             _controller.searchQuery.isEmpty 
-                ? 'No examinations for this class'
+                ? 'There are no examinations currently.'
                 : 'No results for "${_controller.searchQuery}"',
-            style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600], fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -208,92 +253,163 @@ class _ExaminationCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Expanded(
+                    child: Text(
+                      examination.examName,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                        height: 1.3,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   _buildStatusBadge(examination.status),
                 ],
               ),
-              const SizedBox(height: 12),
-              Text(
-                examination.examName,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              const SizedBox(height: 16),
+              
+              // Mode & Language Badges
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                   _buildTag(
+                    text: examination.mode == 1 ? 'EXAMINATION' : 'PRACTICAL',
+                    color: Colors.blue,
+                  ),
+                  if (examination.programmingLanguage.name.isNotEmpty)
+                    _buildTag(
+                      text: examination.programmingLanguage.name,
+                      color: Colors.purple,
+                    ),
+                  if (examination.isPublicResult)
+                    _buildTag(
+                      text: 'PUBLIC RESULT',
+                      color: Colors.green,
+                    ),
+                ],
+              ),
+              
+              const SizedBox(height: 16),
+              if (examination.description.isNotEmpty) ...[
+                Text(
+                  examination.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(color: Colors.grey[600], fontSize: 13, height: 1.4),
+                ),
+                const SizedBox(height: 16),
+              ],
+              
+              // Stats List (Web Style)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  children: [
+                    _buildStatRow('Start', _formatDateTime(examination.startDatetime)),
+                    const SizedBox(height: 6),
+                    _buildStatRow('End', _formatDateTime(examination.endDatetime)),
+                    const SizedBox(height: 6),
+                    _buildStatRow('Duration', '${_calculateDuration(examination)} mins'),
+                    const SizedBox(height: 6),
+                    _buildStatRow('Total Mark', examination.totalMark.toString()),
+                    const SizedBox(height: 6),
+                    _buildStatRow('Problems', examination.examProblems.length.toString()),
+                  ],
                 ),
               ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  const Icon(Icons.code, size: 14, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    'Language: ${examination.programmingLanguage.name}',
-                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+              
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: onTap,
+                  style: OutlinedButton.styleFrom(
+                    side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
-                ],
-              ),
-              const SizedBox(height: 4),
-              Row(
-                children: [
-                   const Icon(Icons.schedule, size: 14, color: Colors.grey),
-                   const SizedBox(width: 4),
-                   Text(
-                     'Starts: ${_formatDateTime(examination.startDatetime)}',
-                     style: const TextStyle(
-                       color: Colors.grey,
-                       fontSize: 12,
-                     ),
-                   ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              const Divider(height: 1),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.star_outline, size: 14, color: Colors.orange),
-                      const SizedBox(width: 4),
-                      Text(
-                        'Total Mark: ${examination.totalMark}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
+                  child: const Text(
+                    'Details',
+                    style: TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
                   ),
-                  const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
-                ],
+                ),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTag({required String text, required Color color}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
+        Text(
+          value,
+          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+        ),
+      ],
     );
   }
 
@@ -304,32 +420,32 @@ class _ExaminationCard extends StatelessWidget {
     switch (status) {
       case ExaminationStatus.ongoing:
         color = Colors.green;
-        label = 'Ongoing';
+        label = 'ONGOING';
         break;
       case ExaminationStatus.pending:
-        color = Colors.orange;
-        label = 'Pending';
+        color = Colors.amber;
+        label = 'UPCOMING';
         break;
       case ExaminationStatus.completed:
         color = Colors.grey;
-        label = 'Completed';
+        label = 'ENDED';
         break;
       default:
         color = Colors.grey;
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(4),
+        borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
         label,
         style: TextStyle(
           color: color,
-          fontSize: 10,
-          fontWeight: FontWeight.bold,
+          fontSize: 9,
+          fontWeight: FontWeight.w900,
         ),
       ),
     );
@@ -339,9 +455,19 @@ class _ExaminationCard extends StatelessWidget {
     if (dateTimeStr.isEmpty) return 'N/A';
     try {
       final dt = DateTime.parse(dateTimeStr);
-      return '${dt.day}/${dt.month} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+      return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
     } catch (e) {
       return dateTimeStr.split('T')[0];
+    }
+  }
+
+  int _calculateDuration(Examination exam) {
+    try {
+      final start = DateTime.parse(exam.startDatetime);
+      final end = DateTime.parse(exam.endDatetime);
+      return end.difference(start).inMinutes;
+    } catch (e) {
+      return 0;
     }
   }
 }
@@ -354,64 +480,79 @@ class _ExaminationDetailDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         constraints: const BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(24),
         child: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Examination Detail',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
-                  ),
-                  IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close)),
-                ],
-              ),
-              const Divider(),
-              const SizedBox(height: 16),
-              _buildDetailRow(Icons.assignment, 'Name', examination.examName),
-              _buildDetailRow(Icons.code, 'Language', examination.programmingLanguage.name),
-              _buildDetailRow(Icons.star, 'Total Mark', '${examination.totalMark} pts'),
-              _buildDetailRow(Icons.schedule, 'Start', _formatFullDateTime(examination.startDatetime)),
-              _buildDetailRow(Icons.timer_off, 'End', _formatFullDateTime(examination.endDatetime)),
-              _buildDetailRow(Icons.info_outline, 'Status', examination.getStatusText()),
-              const SizedBox(height: 24),
-              const Text('Points Breakdown', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              const SizedBox(height: 12),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: examination.examProblems.length,
-                itemBuilder: (context, index) {
-                  final problem = examination.examProblems[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Problem ${index + 1}', style: const TextStyle(color: Colors.black54)),
-                        Text('${problem.mark} pts', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary)),
-                      ],
+               Padding(
+                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'Examination Detail',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
                     ),
-                  );
-                },
+                    IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
+                  ],
+                ),
+               ),
+              const Divider(height: 1),
+              Padding(
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDetailItem('Name', examination.examName),
+                    const SizedBox(height: 16),
+                    _buildDetailItem('Language', examination.programmingLanguage.name),
+                    const SizedBox(height: 16),
+                    _buildDetailItem('Total Mark', '${examination.totalMark} pts'),
+                    const SizedBox(height: 16),
+                    _buildDetailItem('Timeline', '${_formatFullDateTime(examination.startDatetime)}\n— ${_formatFullDateTime(examination.endDatetime)}'),
+                    const SizedBox(height: 16),
+                    _buildDetailItem('Description', examination.description.isEmpty ? 'No description' : examination.description),
+                    
+                    const SizedBox(height: 24),
+                    const Text('Points Breakdown', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
+                    const SizedBox(height: 12),
+                    ...examination.examProblems.asMap().entries.map((entry) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text('Problem ${entry.key + 1}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.05), borderRadius: BorderRadius.circular(4)),
+                              child: Text('${entry.value.mark} pts', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                ),
               ),
-              const SizedBox(height: 24),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.primary,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(context),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      elevation: 0,
+                    ),
+                    child: const Text('Got it', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                   ),
-                  child: const Text('Got it', style: TextStyle(color: Colors.white)),
                 ),
               ),
             ],
@@ -421,17 +562,14 @@ class _ExaminationDetailDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildDetailRow(IconData icon, String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: Colors.grey),
-          const SizedBox(width: 12),
-          Text('$label: ', style: const TextStyle(color: Colors.grey, fontSize: 14)),
-          Expanded(child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14))),
-        ],
-      ),
+  Widget _buildDetailItem(String label, String value) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label.toUpperCase(), style: const TextStyle(color: AppColors.textLight, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.textPrimary)),
+      ],
     );
   }
 

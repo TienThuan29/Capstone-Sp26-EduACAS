@@ -44,23 +44,49 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.transparent,
-      body: Stack(
+    return Stack(
+      children: [
+        const GradientBackground(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStickyHeader(),
+            _buildSearchBar(),
+            _buildStatsBar(),
+            Expanded(
+              child: _controller.isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  : _controller.errorMessage != null
+                      ? _buildErrorState()
+                      : _buildDiscussionList(),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStickyHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      child: Row(
         children: [
-          const GradientBackground(),
-          Column(
-            children: [
-              _buildSearchBar(),
-              _buildStatsBar(),
-              Expanded(
-                child: _controller.isLoading
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                    : _controller.errorMessage != null
-                        ? _buildErrorState()
-                        : _buildDiscussionList(),
-              ),
-            ],
+          Container(
+            width: 8,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'Discussions',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+            ),
           ),
         ],
       ),
@@ -69,38 +95,29 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 16, 24, 12),
+      padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
       child: TextField(
         controller: _searchController,
         onChanged: (value) => _controller.updateSearchQuery(value, () => setState(() {})),
         decoration: InputDecoration(
           hintText: 'Search discussions...',
-          hintStyle: const TextStyle(color: AppColors.textLight),
-          prefixIcon: const Icon(Icons.search, color: AppColors.textSecondary),
-          suffixIcon: _controller.searchQuery.isNotEmpty
-              ? IconButton(
-                  icon: const Icon(Icons.clear, color: AppColors.textSecondary),
-                  onPressed: () {
-                    _searchController.clear();
-                    _controller.updateSearchQuery('', () => setState(() {}));
-                  },
-                )
-              : null,
+          hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 14),
+          prefixIcon: const Icon(Icons.search, color: AppColors.textLight, size: 20),
           filled: true,
-          fillColor: Colors.white.withOpacity(0.8),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          fillColor: Colors.white,
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
-            borderSide: BorderSide.none,
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
           ),
+          contentPadding: const EdgeInsets.symmetric(vertical: 0),
         ),
       ),
     );
@@ -109,18 +126,18 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
   Widget _buildStatsBar() {
     final filtered = _controller.getFilteredDiscussions();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
       child: Row(
         children: [
           _StatChip(
-            icon: Icons.forum,
-            label: '${filtered.length} issues',
+            icon: Icons.forum_outlined,
+            label: '${filtered.length} ISSUES',
             color: AppColors.primary,
           ),
           const SizedBox(width: 12),
           _StatChip(
-            icon: Icons.comment,
-            label: '${filtered.fold<int>(0, (sum, i) => sum + i.commentCount)} total comments',
+            icon: Icons.comment_outlined,
+            label: '${filtered.fold<int>(0, (sum, i) => sum + i.commentCount)} COMMENTS',
             color: Colors.orange,
           ),
         ],
@@ -139,7 +156,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
       onRefresh: _loadDiscussions,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
         itemCount: filtered.length,
         itemBuilder: (context, index) => _DiscussionCard(discussion: filtered[index]),
       ),
@@ -168,13 +185,20 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.forum_outlined, size: 80, color: Colors.grey),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.5),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.forum_outlined, size: 64, color: Colors.grey[300]),
+          ),
           const SizedBox(height: 16),
           Text(
             _controller.searchQuery.isEmpty 
-                ? 'No discussions for this class'
+                ? 'No discussions currently.'
                 : 'No results for "${_controller.searchQuery}"',
-            style: const TextStyle(fontSize: 18, color: Colors.grey),
+            style: const TextStyle(fontSize: 16, color: Colors.grey, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -189,11 +213,20 @@ class _DiscussionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 1,
-      shadowColor: Colors.black12,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
       child: InkWell(
         onTap: () {
           Navigator.push(
@@ -203,9 +236,9 @@ class _DiscussionCard extends StatelessWidget {
             ),
           );
         },
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(12),
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -213,35 +246,40 @@ class _DiscussionCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   CircleAvatar(
-                    radius: 18,
-                    backgroundColor: AppColors.primary.withOpacity(0.15),
+                    radius: 20,
+                    backgroundColor: AppColors.primary.withOpacity(0.1),
                     child: Text(
                       discussion.authorName.isNotEmpty ? discussion.authorName[0].toUpperCase() : '?',
-                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
+                      style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           discussion.title,
-                          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textPrimary, height: 1.3),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Row(
                           children: [
                             Text(
                               discussion.authorName,
-                              style: const TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.w500),
+                              style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              '•',
+                              style: TextStyle(color: Colors.grey[300], fontSize: 12),
                             ),
                             const SizedBox(width: 8),
                             Text(
                               _formatTimeAgo(discussion.createdDate),
-                              style: const TextStyle(fontSize: 11, color: AppColors.textLight),
+                              style: const TextStyle(fontSize: 12, color: AppColors.textLight),
                             ),
                           ],
                         ),
@@ -250,21 +288,47 @@ class _DiscussionCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              Text(
-                discussion.content,
-                style: const TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.4),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 16),
+              
+              if (discussion.content.isNotEmpty) ...[
+                Text(
+                  discussion.content,
+                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 16),
+              ],
+              
+              const Divider(height: 1),
+              const SizedBox(height: 16),
+              
               Row(
                 children: [
-                  const Icon(Icons.chat_bubble_outline, size: 14, color: AppColors.textLight),
-                  const SizedBox(width: 4),
-                  Text('${discussion.commentCount}', style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.withOpacity(0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(Icons.comment_outlined, size: 14, color: Colors.orange),
+                        const SizedBox(width: 6),
+                        Text(
+                          '${discussion.commentCount} comments',
+                          style: const TextStyle(fontSize: 12, color: Colors.orange, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
+                  ),
                   const Spacer(),
-                  const Icon(Icons.arrow_forward_ios, size: 12, color: Colors.grey),
+                  const Text(
+                    'Read more',
+                    style: TextStyle(fontSize: 13, color: AppColors.primary, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.arrow_forward, size: 14, color: AppColors.primary),
                 ],
               ),
             ],
@@ -294,14 +358,25 @@ class _StatChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.08),
+        borderRadius: BorderRadius.circular(100),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 12, color: color),
-          const SizedBox(width: 6),
-          Text(label, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color)),
+          const SizedBox(width: 8),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              color: color,
+              letterSpacing: 0.5,
+            ),
+          ),
         ],
       ),
     );

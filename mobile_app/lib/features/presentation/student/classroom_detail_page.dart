@@ -37,41 +37,55 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: Colors.white,
+        elevation: 0,
+        titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.primary, size: 20),
+          onPressed: () => Navigator.pop(context),
+        ),
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
               widget.classroom.className,
-              style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 18, 
+                color: AppColors.textPrimary, 
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
-              'Code: ${widget.classroom.classCode}',
-              style: const TextStyle(fontSize: 12, color: Colors.white70),
+              widget.classroom.classCode,
+              style: const TextStyle(
+                fontSize: 12, 
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+              ),
             ),
           ],
         ),
-        iconTheme: const IconThemeData(color: Colors.white),
-        elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(
-              icon: Icon(Icons.file_present),
-              text: 'Materials',
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(50),
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
             ),
-            Tab(
-              icon: Icon(Icons.assignment),
-              text: 'Examinations',
+            child: TabBar(
+              controller: _tabController,
+              indicatorColor: AppColors.primary,
+              indicatorWeight: 3,
+              labelColor: AppColors.primary,
+              unselectedLabelColor: AppColors.textLight,
+              labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+              unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+              tabs: const [
+                Tab(text: 'Materials'),
+                Tab(text: 'Exams'),
+                Tab(text: 'Discussions'),
+              ],
             ),
-            Tab(
-              icon: Icon(Icons.forum),
-              text: 'Discussions',
-            ),
-          ],
+          ),
         ),
       ),
       body: TabBarView(
