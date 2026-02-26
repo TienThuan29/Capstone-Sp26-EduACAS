@@ -3,6 +3,9 @@ import 'package:sidebarx/sidebarx.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/presentation/auth/login_page.dart';
+import 'package:mobile/features/presentation/profile/profile_screen.dart';
+import 'package:mobile/features/presentation/examination/examination_list_screen.dart';
+import 'package:mobile/features/presentation/student/student_page.dart';
 
 /// Role constants matching web_app
 class Roles {
@@ -16,7 +19,8 @@ List<SidebarXItem> getSidebarItemsForRole(String? role) {
   switch (role?.toUpperCase()) {
     case Roles.admin:
       return const [
-        SidebarXItem(icon: Icons.dashboard, label: 'Admin Dashboard'),
+        SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
+        SidebarXItem(icon: Icons.assignment, label: 'Examinations'),
         SidebarXItem(icon: Icons.class_, label: 'Manage Classrooms'),
         SidebarXItem(icon: Icons.book, label: 'Manage Subjects'),
         SidebarXItem(icon: Icons.code, label: 'Manage Languages'),
@@ -25,6 +29,7 @@ List<SidebarXItem> getSidebarItemsForRole(String? role) {
     case Roles.lecturer:
       return const [
         SidebarXItem(icon: Icons.class_, label: 'My Classrooms'),
+        SidebarXItem(icon: Icons.assignment, label: 'Examinations'),
         SidebarXItem(icon: Icons.quiz, label: 'Problem Banks'),
       ];
     case Roles.student:
@@ -32,6 +37,7 @@ List<SidebarXItem> getSidebarItemsForRole(String? role) {
       return const [
         SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
         SidebarXItem(icon: Icons.class_, label: 'Classrooms'),
+        SidebarXItem(icon: Icons.assignment, label: 'Examinations'),
         SidebarXItem(icon: Icons.campaign, label: 'Announcements'),
       ];
   }
@@ -104,32 +110,72 @@ class AppSidebar extends StatelessWidget {
       footerBuilder: (context, extended) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: InkWell(
-            onTap: onLogout,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Profile Button
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
+                },
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.red.withValues(alpha: 0.2),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person, color: Colors.white, size: 20),
+                      if (extended) ...[
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Profile',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.logout, color: Colors.white, size: 20),
-                  if (extended) ...[
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ],
+              const SizedBox(height: 12),
+              // Logout Button
+              InkWell(
+                onTap: onLogout,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.red.withValues(alpha: 0.2),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.logout, color: Colors.white, size: 20),
+                      if (extended) ...[
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
@@ -162,25 +208,49 @@ class AppSidebar extends StatelessWidget {
   }
 }
 
-/// Example usage of sidebar with a scaffold
 class SidebarScaffold extends StatefulWidget {
-  const SidebarScaffold({super.key, required this.child});
+  const SidebarScaffold({
+    super.key,
+    required this.child,
+    this.selectedIndex = 0,
+  });
 
   final Widget child;
+  final int selectedIndex;
 
   @override
   State<SidebarScaffold> createState() => _SidebarScaffoldState();
 }
 
 class _SidebarScaffoldState extends State<SidebarScaffold> {
-  final _controller = SidebarXController(selectedIndex: 0, extended: true);
+  late SidebarXController _controller;
   final _key = GlobalKey<ScaffoldState>();
   String? _userRole;
 
   @override
   void initState() {
     super.initState();
+    _controller = SidebarXController(
+      selectedIndex: widget.selectedIndex,
+      extended: true,
+    );
     _loadUserRole();
+    
+    // Add listener to handle navigation outside of build phase
+    _controller.addListener(_navigationListener);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_navigationListener);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _navigationListener() {
+    if (_controller.selectedIndex != widget.selectedIndex) {
+      _onItemSelected(_controller.selectedIndex);
+    }
   }
 
   Future<void> _loadUserRole() async {
@@ -188,6 +258,49 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
     if (mounted) {
       setState(() {
         _userRole = role;
+      });
+    }
+  }
+
+  void _onItemSelected(int index) {
+    Widget? nextScreen;
+    final role = _userRole?.toUpperCase();
+
+    if (role == Roles.student) {
+      switch (index) {
+        case 0: // Dashboard
+          nextScreen = const StudentPage();
+          break;
+        case 2: // Examinations
+          nextScreen = const ExaminationListScreen();
+          break;
+      }
+    } else if (role == Roles.lecturer) {
+      switch (index) {
+        case 1: // Examinations
+          nextScreen = const ExaminationListScreen();
+          break;
+      }
+    } else if (role == Roles.admin) {
+      switch (index) {
+        case 1: // Examinations
+          nextScreen = const ExaminationListScreen();
+          break;
+      }
+    }
+
+    if (nextScreen != null) {
+      // Use microtask to ensure we are outside of build/layout phase
+      Future.microtask(() {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => nextScreen!,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
       });
     }
   }
@@ -244,12 +357,23 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
             )
           : null,
       drawer: isSmallScreen
-          ? AppSidebar(controller: _controller, onLogout: _handleLogout, userRole: _userRole)
+          ? AppSidebar(
+              controller: _controller,
+              onLogout: _handleLogout,
+              userRole: _userRole,
+            )
           : null,
       body: Row(
         children: [
-          if (!isSmallScreen) AppSidebar(controller: _controller, onLogout: _handleLogout, userRole: _userRole),
-          Expanded(child: widget.child),
+          if (!isSmallScreen)
+            AppSidebar(
+              controller: _controller,
+              onLogout: _handleLogout,
+              userRole: _userRole,
+            ),
+          Expanded(
+            child: widget.child,
+          ),
         ],
       ),
     );

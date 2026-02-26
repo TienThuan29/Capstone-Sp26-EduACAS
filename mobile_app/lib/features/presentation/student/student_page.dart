@@ -30,6 +30,7 @@ class _StudentPageState extends State<StudentPage> {
   @override
   Widget build(BuildContext context) {
     return SidebarScaffold(
+      selectedIndex: 0,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
