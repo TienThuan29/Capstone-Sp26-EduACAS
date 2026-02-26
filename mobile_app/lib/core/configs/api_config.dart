@@ -21,6 +21,8 @@ class ApiConfig {
   // Classroom endpoints
   static String lecturerClassroomsEndpoint(String lecturerId) =>
       '/api/acas/v1/classrooms/lecturer/$lecturerId';
+  static String studentClassroomsEndpoint(String studentId) =>
+      '/api/acas/v1/classrooms/student/$studentId';
   static String classroomByIdEndpoint(String id) =>
       '/api/acas/v1/classrooms/$id';
 

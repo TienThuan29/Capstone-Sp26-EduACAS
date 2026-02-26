@@ -45,6 +45,49 @@ class ClassroomService {
     }
   }
 
+  // Get all classrooms for a student
+  static Future<List<Classroom>> getStudentClassrooms(String studentId) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) {
+        throw Exception('No access token found');
+      }
+
+      final response = await ApiNetwork.getWithAuth(
+        endpoint: ApiConfig.studentClassroomsEndpoint(studentId),
+        token: token,
+        queryParameters: {
+          'pageIndex': '1',
+          'pageSize': '100',
+        },
+      );
+
+      debugPrint('Student classrooms response: $response');
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final dataResponse = response['dataResponse'];
+        List<dynamic> classroomsData;
+        
+        if (dataResponse is Map<String, dynamic>) {
+          classroomsData = dataResponse['items'] ?? [];
+        } else if (dataResponse is List) {
+          classroomsData = dataResponse;
+        } else {
+          classroomsData = [];
+        }
+        
+        return classroomsData
+            .map((json) => Classroom.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      debugPrint('Failed to get student classrooms: $e');
+      throw Exception('Failed to load classrooms: $e');
+    }
+  }
+
   // Get classroom by ID
   static Future<Classroom?> getClassroomById(String classroomId) async {
     try {

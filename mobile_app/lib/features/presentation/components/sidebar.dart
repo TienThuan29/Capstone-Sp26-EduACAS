@@ -4,8 +4,12 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/presentation/auth/login_page.dart';
 import 'package:mobile/features/presentation/profile/profile_screen.dart';
-import 'package:mobile/features/presentation/examination/examination_list_screen.dart';
 import 'package:mobile/features/presentation/student/student_page.dart';
+import 'package:mobile/features/presentation/student/student_classroom_list_page.dart';
+import 'package:mobile/features/presentation/lecturer/lecturer_classroom_list_page.dart';
+import 'package:mobile/features/presentation/lecturer/problem_management_page.dart';
+import 'package:mobile/features/presentation/lecturer/discussion_issue_management.dart';
+import 'package:mobile/features/presentation/lecturer/lecturer_page.dart';
 
 /// Role constants matching web_app
 class Roles {
@@ -20,7 +24,6 @@ List<SidebarXItem> getSidebarItemsForRole(String? role) {
     case Roles.admin:
       return const [
         SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
-        SidebarXItem(icon: Icons.assignment, label: 'Examinations'),
         SidebarXItem(icon: Icons.class_, label: 'Manage Classrooms'),
         SidebarXItem(icon: Icons.book, label: 'Manage Subjects'),
         SidebarXItem(icon: Icons.code, label: 'Manage Languages'),
@@ -29,7 +32,6 @@ List<SidebarXItem> getSidebarItemsForRole(String? role) {
     case Roles.lecturer:
       return const [
         SidebarXItem(icon: Icons.class_, label: 'My Classrooms'),
-        SidebarXItem(icon: Icons.assignment, label: 'Examinations'),
         SidebarXItem(icon: Icons.quiz, label: 'Problem Banks'),
       ];
     case Roles.student:
@@ -37,7 +39,6 @@ List<SidebarXItem> getSidebarItemsForRole(String? role) {
       return const [
         SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
         SidebarXItem(icon: Icons.class_, label: 'Classrooms'),
-        SidebarXItem(icon: Icons.assignment, label: 'Examinations'),
         SidebarXItem(icon: Icons.campaign, label: 'Announcements'),
       ];
   }
@@ -271,20 +272,23 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
         case 0: // Dashboard
           nextScreen = const StudentPage();
           break;
-        case 2: // Examinations
-          nextScreen = const ExaminationListScreen();
+        case 1: // Classrooms
+          nextScreen = const StudentClassroomListPage();
           break;
       }
     } else if (role == Roles.lecturer) {
       switch (index) {
-        case 1: // Examinations
-          nextScreen = const ExaminationListScreen();
+        case 0: // Dashboard/Classrooms
+          nextScreen = const LecturerClassroomListPage();
+          break;
+        case 1: // Problem Banks
+          nextScreen = const ProblemManagementPage();
           break;
       }
     } else if (role == Roles.admin) {
       switch (index) {
-        case 1: // Examinations
-          nextScreen = const ExaminationListScreen();
+        case 2: // Manage Classrooms
+          // Admin classroom management logic
           break;
       }
     }

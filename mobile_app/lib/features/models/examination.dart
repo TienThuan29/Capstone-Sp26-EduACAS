@@ -3,15 +3,23 @@ import 'classroom.dart';
 class ProgrammingLanguage {
   final String id;
   final String name;
-  final String? version;
+  final String? monaco;
+  final List<String> extensions;
   final String? logoUrl;
+  final String? formatter;
+  final String? digitSeparator;
+  final List<Compiler> compilers;
   final bool isEnabled;
 
   ProgrammingLanguage({
     required this.id,
     required this.name,
-    this.version,
+    this.monaco,
+    required this.extensions,
     this.logoUrl,
+    this.formatter,
+    this.digitSeparator,
+    required this.compilers,
     required this.isEnabled,
   });
 
@@ -19,9 +27,15 @@ class ProgrammingLanguage {
     return ProgrammingLanguage(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
-      version: json['version'],
-      logoUrl: json['logoUrl'],
-      isEnabled: json['isEnabled'] ?? false,
+      monaco: json['monaco'] ?? json['monacoLanguage'],
+      extensions: List<String>.from(json['extensions'] ?? []),
+      logoUrl: json['logoUrl'] ?? json['logoFileUrl'],
+      formatter: json['formatter'],
+      digitSeparator: json['digitSeparator'],
+      compilers: (json['compilers'] as List? ?? [])
+          .map((i) => Compiler.fromJson(i))
+          .toList(),
+      isEnabled: json['isEnabled'] ?? (json['status'] == 'ACTIVE'),
     );
   }
 
@@ -29,9 +43,45 @@ class ProgrammingLanguage {
     return {
       'id': id,
       'name': name,
-      'version': version,
+      'monaco': monaco,
+      'extensions': extensions,
       'logoUrl': logoUrl,
+      'formatter': formatter,
+      'digitSeparator': digitSeparator,
+      'compilers': compilers.map((e) => e.toJson()).toList(),
       'isEnabled': isEnabled,
+    };
+  }
+}
+
+class Compiler {
+  final String id;
+  final String name;
+  final String group;
+  final List<String> stdVersions;
+
+  Compiler({
+    required this.id,
+    required this.name,
+    required this.group,
+    required this.stdVersions,
+  });
+
+  factory Compiler.fromJson(Map<String, dynamic> json) {
+    return Compiler(
+      id: json['id'] ?? '',
+      name: json['name'] ?? '',
+      group: json['group'] ?? '',
+      stdVersions: List<String>.from(json['stdVersions'] ?? []),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'group': group,
+      'stdVersions': stdVersions,
     };
   }
 }
@@ -282,7 +332,7 @@ class Examination {
   }
 
   String getModeText() {
-    return mode == ExaminationMode.practical ? 'Practice' : 'Examination';
+    return mode == ExaminationMode.practical ? 'Practical' : 'Examination';
   }
 
   String getStatusText() {

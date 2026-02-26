@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/presentation/components/sidebar.dart';
 
+import 'package:mobile/core/theme/app_colors.dart';
+import 'package:mobile/core/widgets/background.dart';
+
 class StudentPage extends StatefulWidget {
   const StudentPage({super.key});
 
@@ -31,25 +34,40 @@ class _StudentPageState extends State<StudentPage> {
   Widget build(BuildContext context) {
     return SidebarScaffold(
       selectedIndex: 0,
-      child: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.school, size: 64, color: Colors.grey),
-            const SizedBox(height: 16),
-            Text(
-              'Welcome, $_userName!',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Select an option from the sidebar',
-              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Colors.grey,
+      child: Stack(
+        children: [
+          const GradientBackground(),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    shape: BoxShape.circle,
                   ),
+                  child: const Icon(Icons.school, size: 64, color: AppColors.primary),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'Welcome, $_userName!',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'Select an option from the sidebar to get started',
+                  style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

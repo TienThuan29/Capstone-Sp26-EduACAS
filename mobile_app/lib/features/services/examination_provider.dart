@@ -1,30 +1,22 @@
-import 'package:mobile/core/storage/token_storage.dart';
-import 'package:mobile/features/models/examination/examination.dart';
+import 'package:mobile/features/models/examination.dart';
 import 'package:mobile/features/services/examination_service.dart';
 
-class ExaminationController {
+class ExaminationProvider {
   bool isLoading = false;
   String? errorMessage;
   List<Examination> examinations = [];
+  String searchQuery = '';
 
-  Future<void> fetchExaminations(Function() onUpdate) async {
+  Future<void> fetchExaminations(Function() onUpdate, {String? classId}) async {
     isLoading = true;
     errorMessage = null;
     onUpdate();
 
     try {
-      final token = await TokenStorage.getAccessToken();
-      if (token == null) {
-        throw Exception('No access token found');
-      }
-
-      final response = await ExaminationService.getAllExaminations(token);
-
-      if (response['success'] == true && response['dataResponse'] != null) {
-        final List<dynamic> data = response['dataResponse'];
-        examinations = data.map((json) => Examination.fromJson(json)).toList();
+      if (classId != null) {
+        examinations = await ExaminationService.getExaminationsByClassId(classId);
       } else {
-        errorMessage = response['message'] ?? 'Failed to load examinations';
+        examinations = await ExaminationService.getAllExaminations();
       }
     } catch (e) {
       errorMessage = e.toString();
@@ -33,8 +25,6 @@ class ExaminationController {
       onUpdate();
     }
   }
-
-  String searchQuery = '';
 
   void updateSearchQuery(String query, Function() onUpdate) {
     searchQuery = query;
@@ -49,9 +39,9 @@ class ExaminationController {
           e.classroom.className.toLowerCase().contains(query);
     }).toList();
 
-    final pending = filtered.where((e) => e.status == 0).toList();
-    final ongoing = filtered.where((e) => e.status == 1).toList();
-    final completed = filtered.where((e) => e.status == 2).toList();
+    final ongoing = filtered.where((e) => e.status == ExaminationStatus.ongoing).toList();
+    final pending = filtered.where((e) => e.status == ExaminationStatus.pending).toList();
+    final completed = filtered.where((e) => e.status == ExaminationStatus.completed).toList();
 
     final Map<String, List<Examination>> grouped = {};
     if (ongoing.isNotEmpty) grouped['Ongoing'] = ongoing;
