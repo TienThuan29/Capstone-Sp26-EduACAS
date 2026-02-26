@@ -80,15 +80,32 @@ class _MaterialsTabState extends State<MaterialsTab> {
       if (!mounted) return;
       Navigator.pop(context); // Close loading dialog
 
-      // Launch the URL
-      final uri = Uri.parse(fileUrl);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (!mounted) return;
+      final extension = material.filename.split('.').last.toLowerCase();
+      final officeExtensions = {
+        'doc',
+        'docx',
+        'xls',
+        'xlsx',
+        'ppt',
+        'pptx',
+      };
+
+      final uri = officeExtensions.contains(extension)
+          ? Uri.parse(
+              'https://docs.google.com/gview?embedded=1&url=${Uri.encodeComponent(fileUrl)}',
+            )
+          : Uri.parse(fileUrl);
+
+      // Prefer in-app browser for "View" behavior.
+      var opened = await launchUrl(uri, mode: LaunchMode.inAppBrowserView);
+      if (!opened) {
+        opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      }
+
+      if (!opened && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Could not open file'),
+            content: Text('Could not open file. Please install a browser or file viewer app.'),
             backgroundColor: AppColors.error,
           ),
         );
