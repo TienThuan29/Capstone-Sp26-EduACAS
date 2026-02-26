@@ -136,4 +136,20 @@ public class DiscussionIssueCommandController : ControllerBase
         }
     }
 
+    [HttpPatch("{issueId}/soft-delete")]
+    public async Task<ActionResult<ApiResponse<bool>>> SoftDelete(string issueId)
+    {
+        try
+        {
+            var result = await _discussionIssueCommand.SoftDeleteAsync(issueId);
+            if (!result)
+                return ResponseUtil.Error<bool>("Discussion issue not found", 404);
+            return ResponseUtil.Success(true, "Discussion issue deleted", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting issue {IssueId}", issueId);
+            return ResponseUtil.Error<bool>("Failed to delete discussion issue", 500);
+        }
+    }
 }

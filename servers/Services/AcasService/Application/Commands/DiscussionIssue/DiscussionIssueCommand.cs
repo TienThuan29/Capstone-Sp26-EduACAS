@@ -17,6 +17,8 @@ public interface IDiscussionIssueCommand
       Task<DiscussionIssueDetailResponse?> UpvoteCommentAsync(UpvoteCommentRequest request);
 
       Task<DiscussionIssueDetailResponse?> ChangeStatusAsync(ChangeDiscussionStatusRequest request);
+
+      Task<bool> SoftDeleteAsync(string issueId);
 }
 
 
@@ -147,6 +149,18 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             issue.UpdatedDate = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(issue);
             return updated == null ? null : _discussionIssueMapper.ToDetailResponse(updated);
+      }
+
+      public async Task<bool> SoftDeleteAsync(string issueId)
+      {
+            var issue = await _repository.FindByIdAsync(issueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", issueId);
+                  return false;
+            }
+            await _repository.SoftDeleteAsync(issueId);
+            return true;
       }
 
       private static Comment? FindCommentById(IList<Comment> comments, string commentId)
