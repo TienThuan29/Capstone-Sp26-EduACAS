@@ -1,8 +1,6 @@
-
-
 using System.Text.Json.Serialization;
 
-namespace AcasService.Application.ClassroomEnrollment.ResponseDTOs
+namespace AcasService.Application.ResponseDTOs
 {
     public class ClassEnrollmentsResponse
     {

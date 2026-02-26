@@ -1,15 +1,22 @@
 import Sidebar from "@/components/sidebar"
+import SidebarMain from "@/components/sidebar-main"
+import ProtectedPageWrapper from "@/components/protected-page-wrapper"
+import { SidebarProvider } from "@/contexts/SidebarContext"
 import type React from "react"
 
 export default function DefaultLayout({
   children,
 }: {
   children: React.ReactNode
-}) {    
+}) {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <main className="flex-1 ml-64 overflow-auto bg-gray-50 dark:bg-gray-900">{children}</main>
-    </div>
+    <ProtectedPageWrapper>
+      <SidebarProvider>
+        <div className="flex h-screen">
+          <Sidebar />
+          <SidebarMain>{children}</SidebarMain>
+        </div>
+      </SidebarProvider>
+    </ProtectedPageWrapper>
   )
 }

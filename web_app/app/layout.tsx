@@ -4,7 +4,8 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeInit } from "../.flowbite-react/init";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { UserProvider } from "@/contexts/AuthContext";
-import { ThemeProvider } from "@/components/ThemeProvider";
+import { SidebarProvider } from "@/contexts/SidebarContext";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -40,7 +41,9 @@ export default function RootLayout({
         <ThemeInit />
         <ToastProvider>
           <UserProvider>
-            <ThemeProvider>{children}</ThemeProvider>
+            <SidebarProvider>
+              <ThemeProvider>{children}</ThemeProvider>
+            </SidebarProvider>
           </UserProvider>
         </ToastProvider>
       </body>

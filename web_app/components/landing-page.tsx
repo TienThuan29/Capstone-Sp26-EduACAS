@@ -64,7 +64,7 @@ export default function LandingPage() {
             <div className="flex justify-center">
               <div className="relative w-full max-w-md">
                 <div
-                  className="p-8 rounded-2xl shadow-xl"
+                  className="p-8 rounded-2xl"
                   style={{ backgroundColor: "#FFFFFF", border: "3px solid #C9A24D" }}
                 >
                   <Image
@@ -114,13 +114,13 @@ export default function LandingPage() {
 
               <div className="flex items-center gap-4">
                 <button
-                  className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg"
+                  className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-transform"
                   style={{ backgroundColor: "#1F4E79" }}
                 >
                   Bắt đầu →
                 </button>
                 <span className="font-mono text-sm opacity-60" style={{ color: "#1F4E79" }}>
-                  // Miễn phí tham gia
+                  {"// Miễn phí tham gia"}
                 </span>
               </div>
 

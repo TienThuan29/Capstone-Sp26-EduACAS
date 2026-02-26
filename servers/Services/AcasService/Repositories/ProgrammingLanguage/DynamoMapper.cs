@@ -1,5 +1,6 @@
 using Amazon.DynamoDBv2.Model;
 using System.Globalization;
+using System.Text.Json;
 using AcasService.Models;
 
 namespace AcasService.Repositories.ProgrammingLanguage;
@@ -12,11 +13,20 @@ public static class DynamoMapper
         var item = new Dictionary<string, AttributeValue>
         {
             ["id"] = new AttributeValue { S = language.Id },
-            ["languageName"] = new AttributeValue { S = language.LanguageName },
-            ["key"] = new AttributeValue { S = language.Key },
-            ["languageVersion"] = new AttributeValue { S = language.LanguageVersion },
-            ["isEnable"] = new AttributeValue { BOOL = language.IsEnable }
+            ["name"] = new AttributeValue { S = language.Name },
+            ["monaco"] = new AttributeValue { S = language.Monaco },
+            ["extensions"] = new AttributeValue { L = language.Extensions.Select(e => new AttributeValue { S = e }).ToList() },
+            ["logoFileUrl"] = new AttributeValue { S = language.LogoFileUrl },
+            ["formatter"] = new AttributeValue { S = language.Formatter },
+            ["digitSeparator"] = new AttributeValue { S = language.DigitSeparator },
+            ["status"] = new AttributeValue { S = language.Status.ToString() }
         };
+
+        // Serialize Compilers as JSON string
+        if (language.Compilers != null && language.Compilers.Count > 0)
+        {
+            item["compilers"] = new AttributeValue { S = JsonSerializer.Serialize(language.Compilers) };
+        }
 
         if (language.CreatedDate != default)
         {
@@ -43,13 +53,21 @@ public static class DynamoMapper
         var language = new Models.ProgrammingLanguage
         {
             Id = item["id"].S,
-            LanguageName = item["languageName"].S,
-            Key = item["key"].S,
-            LanguageVersion = item.ContainsKey("languageVersion")
-                ? item["languageVersion"].S
-                : string.Empty,
-            IsEnable = item.ContainsKey("isEnable") && item["isEnable"].BOOL
+            Name = item.ContainsKey("name") ? item["name"].S : string.Empty,
+            Monaco = item.ContainsKey("monaco") ? item["monaco"].S : string.Empty,
+            Extensions = item.ContainsKey("extensions") 
+                ? item["extensions"].L.Select(e => e.S).ToList() 
+                : new List<string>(),
+            LogoFileUrl = item.ContainsKey("logoFileUrl") ? item["logoFileUrl"].S : string.Empty,
+            Formatter = item.ContainsKey("formatter") ? item["formatter"].S : string.Empty,
+            DigitSeparator = item.ContainsKey("digitSeparator") ? item["digitSeparator"].S : string.Empty,
+            Status = item.ContainsKey("status") ? Enum.Parse<PLStatus>(item["status"].S) : PLStatus.DISABLE
         };
+        
+        if (item.ContainsKey("compilers") && !string.IsNullOrEmpty(item["compilers"].S))
+        {
+            language.Compilers = JsonSerializer.Deserialize<List<Compiler>>(item["compilers"].S) ?? new List<Compiler>();
+        }
 
         if (item.ContainsKey("createdDate") && !string.IsNullOrEmpty(item["createdDate"].S))
         {

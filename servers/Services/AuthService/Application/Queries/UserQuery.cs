@@ -12,6 +12,7 @@ public interface IUserQuery
     public Task<AuthResponse> AuthenticateAsync(LoginCredentials credentials);
     public Task<AuthResponse> AuthenticateWithGoogleAsync(string idToken);
     public Task<UserProfileResponse> GetProfileAsync(string accessToken);
+    public Task<List<UserProfileResponse>> GetAllUsersAsync();
 }
 
 public class UserQuery : IUserQuery
@@ -76,7 +77,8 @@ public class UserQuery : IUserQuery
             {
                 UserProfile = _userMapper.ToUserResponse(user),
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                FirstLogin = user.FirstLogin ?? false
             };
         }
         catch (Exception ex)
@@ -90,10 +92,7 @@ public class UserQuery : IUserQuery
     {
         try
         {
-            // Verify Google ID token
             var googlePayload = await _googleTokenVerifier.VerifyTokenAsync(idToken);
-            
-            // Find user by email
             var user = await _userRepository.FindByEmailAsync(googlePayload.Email);
 
             if (user == null)
@@ -125,15 +124,14 @@ public class UserQuery : IUserQuery
 
             var accessToken = _jwtUtil.GenerateAccessToken(tokenPayload);
             var refreshToken = _jwtUtil.GenerateRefreshToken(tokenPayload);
-
-            // Update last login date
             user.LastLoginDate = DateTime.UtcNow;
 
             return new AuthResponse
             {
                 UserProfile = _userMapper.ToUserResponse(user),
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                FirstLogin = user.FirstLogin ?? false
             };
         }
         catch (Exception ex)
@@ -161,6 +159,20 @@ public class UserQuery : IUserQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting user profile");
+            throw;
+        }
+    }
+    
+    public async Task<List<UserProfileResponse>> GetAllUsersAsync()
+    {
+        try
+        {
+            var users = await _userRepository.FindAllAsync();
+            return users.Select(user => _userMapper.ToUserResponse(user)).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting all users");
             throw;
         }
     }

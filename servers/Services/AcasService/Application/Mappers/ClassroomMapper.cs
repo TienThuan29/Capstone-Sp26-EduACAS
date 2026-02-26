@@ -24,12 +24,16 @@ namespace AcasService.Application.Mappers
             if (lecturerProfile != null)
             {
                 lecturerLite.Id = lecturerProfile.Id;
-                lecturerLite.LecturerName = lecturerProfile.Fullname;
+                lecturerLite.Fullname = lecturerProfile.Fullname;
+                lecturerLite.Email = lecturerProfile.Email;
+                lecturerLite.AvatarUrl = lecturerProfile.AvatarUrl;
             }
             else
             {
                 lecturerLite.Id = "UNKNOWN LECTURER";
-                lecturerLite.LecturerName = "UNKNOWN LECTURER";
+                lecturerLite.Fullname = "UNKNOWN LECTURER";
+                lecturerLite.Email = "UNKNOWN LECTURER";
+                lecturerLite.AvatarUrl = "UNKNOWN LECTURER";
             }
 
             return new ClassroomResponse
@@ -43,22 +47,23 @@ namespace AcasService.Application.Mappers
                 EnrolKey = classroom.EnrolKey,
                 CreatedDate = classroom.CreatedDate,
                 UpdatedDate = classroom.UpdatedDate,
+                MaxSlot = classroom.MaxSlot,
                 EndDate = classroom.EndDate,
                 IsDeleted = classroom.IsDeleted
             };
         }
 
         public ClassroomResponse ToClassroomResponse(
-    Classroom classroom,
-    Subject subject,
-    UserProfileResponse? lecturerProfile,
-    ClassEnrollment? classEnrollment
-)
+            Classroom classroom,
+            Subject subject,
+            UserProfileResponse? lecturerProfile,
+            ClassEnrollment? classEnrollment
+        )
         {
-            
+
             var response = ToClassroomResponse(classroom, subject, lecturerProfile);
 
-            
+
             var enrollmentInfo = new EnrollmentInfoResponse();
 
             if (classEnrollment != null)

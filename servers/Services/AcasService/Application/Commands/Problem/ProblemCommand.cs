@@ -1,12 +1,16 @@
+using AcasService.Application.Mappers;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Web.Requests;
 using Microsoft.Extensions.FileSystemGlobbing.Internal.PathSegments;
+using System.ComponentModel.DataAnnotations;
+using System.Text.RegularExpressions;
 
 namespace AcasService.Application.Commands.Problem;
 
 public interface IProblemCommand
 {
-    Task<string> CreateProblemAsync(CreateProblemRequest request);
+    Task<ProblemResponse> CreateProblemAsync(CreateProblemRequest request);
     Task UpdateProblemAsync(string problemId, UpdateProblemRequest request);
     Task DeleteProblemAsync(string problemId);
     Task AddTestCaseAsync(string problemId, CreateTestCaseRequest request);
@@ -19,52 +23,86 @@ public class ProblemCommand : IProblemCommand
 {
     private readonly Repositories.Problem.IProblemRepository _problemRepository;
     private readonly ILogger<ProblemCommand> _logger;
+    private readonly ProblemMapper _problemMapper;
 
-    public ProblemCommand(Repositories.Problem.IProblemRepository problemRepository, ILogger<ProblemCommand> logger)
+    public ProblemCommand(
+        Repositories.Problem.IProblemRepository problemRepository,
+        ILogger<ProblemCommand> logger,
+        ProblemMapper problemMapper)
     {
         _problemRepository = problemRepository;
         _logger = logger;
+        _problemMapper = problemMapper;
     }
 
-    public async Task<string> CreateProblemAsync(CreateProblemRequest request)
+    public async Task<ProblemResponse> CreateProblemAsync(CreateProblemRequest request)
     {
         try
         {
             var problem = new Models.Problem
             {
-                ExamId = request.ExamId,
                 LecturerId = request.LecturerId,
                 Title = request.Title,
-                Content = request.Content,
-                FileName = request.FileName,
-                Mark = request.Mark,
+                //Content = request.Content,
+                //FileName = request.FileName,
                 Difficulty = Enum.Parse<Difficulty>(request.Difficulty),
                 CodeTemplate = request.CodeTemplate
             };
 
-            // Add test cases if provided
-            if (request.TestCases != null && request.TestCases.Any())
+            if (request.Mode == "MANUAL")
             {
-                foreach (var testCaseRequest in request.TestCases)
+                ValidateString(request.Content, 10, 50000, "Content");
+                problem.Content = request.Content;
+                problem.FileName = string.Empty;
+                _logger.LogInformation("Creating problem in MANUAL mode: {Title}, FileName: {FileName}", request.Title, request.FileName);
+            }
+            else if (request.Mode == "FROM_FILE")
+            {
+                if (request.WantsToEdit)
                 {
-                    var testCase = new TestCase
-                    {
-                        Id = Guid.NewGuid().ToString(),
-                        InputData = testCaseRequest.InputData,
-                        ExpectedOutput = testCaseRequest.ExpectedOutput,
-                        IsPublic = testCaseRequest.IsPublic,
-                        IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
-                        IsRemovedSpace = testCaseRequest.IsRemovedSpace,
-                        IsDeleted = false
-                    };
-                    problem.TestCases.Add(testCase);
+                    ValidateString(request.Content, 10, 50000, "Content");
+                    problem.Content = request.Content;
+                    problem.FileName = string.Empty;
+                    _logger.LogInformation("Creating problem in FROM_FILE mode with edits: {Title}", request.Title);
+
                 }
+                else
+                {
+                    ValidateString(request.FileName, 1, 255, "FileName");
+                    var regex = new Regex(@"^[a-zA-Z0-9_\-\.]+$");
+                    if (!regex.IsMatch(request.FileName))
+                        throw new ValidationException("FileName can only contain letters, numbers, underscores, hyphens, and dots");
+                    problem.Content = string.Empty;
+                    problem.FileName = request.FileName;
+                    _logger.LogInformation("Creating problem in FROM_FILE mode without edits: {Title}, FileName: {FileName}", request.Title, request.FileName);
+                }
+            } else
+            {
+                throw new ArgumentException($"Invalid mode: {request.Mode}. Must be MANUAL or FROM_FILE");
             }
 
-            var problemId = await _problemRepository.CreateAsync(problem);
+            if (request.TestCases != null && request.TestCases.Any())
+                {
+                    foreach (var testCaseRequest in request.TestCases)
+                    {
+                        var testCase = new TestCase
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            InputData = testCaseRequest.InputData,
+                            ExpectedOutput = testCaseRequest.ExpectedOutput,
+                            IsPublic = testCaseRequest.IsPublic,
+                            IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
+                            IsRemovedSpace = testCaseRequest.IsRemovedSpace,
+                            IsDeleted = false
+                        };
+                        problem.TestCases.Add(testCase);
+                    }
+                }
+
+            var createdProblem = await _problemRepository.CreateAsync(problem);
             _logger.LogInformation("Problem created with ID {ProblemId} and {TestCaseCount} test cases", 
-                problemId, problem.TestCases.Count);
-            return problemId;
+                createdProblem.Id, createdProblem.TestCases.Count);
+            return _problemMapper.ToProblemResponse(createdProblem);
         }
         catch (Exception ex)
         {
@@ -84,11 +122,53 @@ public class ProblemCommand : IProblemCommand
             }
 
             problem.Title = request.Title;
-            problem.Content = request.Content;
-            problem.FileName = request.FileName;
-            problem.Mark = request.Mark;
             problem.Difficulty = Enum.Parse<Difficulty>(request.Difficulty);
             problem.CodeTemplate = request.CodeTemplate;
+
+            
+            if (!string.IsNullOrWhiteSpace(request.FileName))
+            {
+                ValidateString(request.FileName, 1, 255, "FileName");
+                var regex = new Regex(@"^[a-zA-Z0-9_\-\.]+$");
+                if (!regex.IsMatch(request.FileName))
+                    throw new ValidationException("FileName can only contain letters, numbers, underscores, hyphens, and dots");
+                
+                problem.FileName = request.FileName;
+                problem.Content = string.Empty;
+                 _logger.LogInformation("Updating problem {ProblemId} with file: {FileName}", problemId, request.FileName);
+            }
+            else
+            {
+                ValidateString(request.Content, 10, 50000, "Content");
+                problem.Content = request.Content;
+                problem.FileName = string.Empty;
+                 _logger.LogInformation("Updating problem {ProblemId} with manual content", problemId);
+            }
+
+            // Update test cases if provided - replace all existing test cases with new ones
+            if (request.TestCases != null)
+            {
+                // Clear existing test cases and add new ones
+                problem.TestCases.Clear();
+                
+                foreach (var testCaseRequest in request.TestCases)
+                {
+                    var testCase = new TestCase
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        InputData = testCaseRequest.InputData,
+                        ExpectedOutput = testCaseRequest.ExpectedOutput,
+                        IsPublic = testCaseRequest.IsPublic,
+                        IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
+                        IsRemovedSpace = testCaseRequest.IsRemovedSpace,
+                        IsDeleted = false
+                    };
+                    problem.TestCases.Add(testCase);
+                }
+                
+                _logger.LogInformation("Problem {ProblemId} test cases replaced with {TestCaseCount} new test cases", 
+                    problemId, request.TestCases.Count);
+            }
 
             await _problemRepository.UpdateAsync(problem);
             _logger.LogInformation("Problem {ProblemId} updated successfully", problemId);
@@ -214,5 +294,13 @@ public class ProblemCommand : IProblemCommand
             _logger.LogError(ex, "Error deleting test case {TestCaseId} from problem {ProblemId}", testCaseId, problemId);
             throw;
         }
+    }
+
+    void ValidateString(string? value, int min, int max, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            throw new ValidationException($"{fieldName} is required");
+        if (value.Length < min || value.Length > max)
+            throw new ValidationException($"{fieldName} must be between {min} and {max} characters");
     }
 }

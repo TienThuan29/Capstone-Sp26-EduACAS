@@ -5,10 +5,6 @@ namespace AcasService.Web.Requests;
 
 public class CreateProblemRequest
 {
-    [Required(ErrorMessage = "ExamId is required")]
-    [StringLength(100, ErrorMessage = "ExamId cannot exceed 100 characters")]
-    public string ExamId { get; set; } = string.Empty;
-
     [Required(ErrorMessage = "LecturerId is required")]
     [StringLength(100, ErrorMessage = "LecturerId cannot exceed 100 characters")]
     public string LecturerId { get; set; } = string.Empty;
@@ -17,18 +13,14 @@ public class CreateProblemRequest
     [StringLength(500, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 500 characters")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Content is required")]
-    [StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
-    public string Content { get; set; } = string.Empty;
+    //[Required(ErrorMessage = "Content is required")]
+    //[StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
+    public string? Content { get; set; }
 
-    [Required(ErrorMessage = "FileName is required")]
-    [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
-    [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
-    public string FileName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Mark is required")]
-    [Range(0.1, 100, ErrorMessage = "Mark must be between 0.1 and 100")]
-    public float Mark { get; set; }
+    //[Required(ErrorMessage = "FileName is required")]
+    //[StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
+    //[RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
+    public string? FileName { get; set; } 
 
     [Required(ErrorMessage = "Difficulty is required")]
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
@@ -37,6 +29,11 @@ public class CreateProblemRequest
     [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
     public string CodeTemplate { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "Mode is required")]
+    [RegularExpression("^(MANUAL|FROM_FILE)$", ErrorMessage = "Mode must be MANUAL or FROM_FILE")]
+    public string Mode { get; set; } = "MANUAL";
+
+    public bool WantsToEdit { get; set; } = false;
     public List<CreateTestCaseRequest>? TestCases { get; set; }
 }
 
@@ -46,32 +43,26 @@ public class UpdateProblemRequest
     [StringLength(500, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 500 characters")]
     public string Title { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Content is required")]
-    [StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
-    public string Content { get; set; } = string.Empty;
+    //[Required(ErrorMessage = "Content is required")]
+    //[StringLength(50000, MinimumLength = 10, ErrorMessage = "Content must be between 10 and 50000 characters")]
+    public string? Content { get; set; }
 
-    [Required(ErrorMessage = "FileName is required")]
-    [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
-    [RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
-    public string FileName { get; set; } = string.Empty;
-
-    [Required(ErrorMessage = "Mark is required")]
-    [Range(0, 10, ErrorMessage = "Mark must be between 0 and 10")]
-    public float Mark { get; set; }
+    //[Required(ErrorMessage = "FileName is required")]
+    //[StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
+    //[RegularExpression(@"^[a-zA-Z0-9_\-\.]+$", ErrorMessage = "FileName can only contain letters, numbers, underscores, hyphens, and dots")]
+    public string? FileName { get; set; }
 
     [Required(ErrorMessage = "Difficulty is required")]
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
     public string Difficulty { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "CodeTemplate is required")]
-    [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
     public string CodeTemplate { get; set; } = string.Empty;
+
+    public List<CreateTestCaseRequest>? TestCases { get; set; }
 }
 
 public class CreateTestCaseRequest
 {
-    [Required(ErrorMessage = "InputData is required")]
-    [StringLength(10000, ErrorMessage = "InputData cannot exceed 10000 characters")]
     public string InputData { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "ExpectedOutput is required")]
@@ -90,8 +81,6 @@ public class CreateTestCaseRequest
 
 public class UpdateTestCaseRequest
 {
-    [Required(ErrorMessage = "InputData is required")]
-    [StringLength(10000, ErrorMessage = "InputData cannot exceed 10000 characters")]
     public string InputData { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "ExpectedOutput is required")]
@@ -106,4 +95,11 @@ public class UpdateTestCaseRequest
 
     [Required(ErrorMessage = "IsRemovedSpace is required")]
     public bool IsRemovedSpace { get; set; } = false;
+}
+
+public class ExtractOcrRequest
+{
+    [Required(ErrorMessage = "FileName is required")]
+    [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
+    public string FileName { get; set; } = string.Empty;
 }

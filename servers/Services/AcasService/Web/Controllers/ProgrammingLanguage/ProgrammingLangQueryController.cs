@@ -19,6 +19,21 @@ public class ProgrammingLanguageQueryController : ControllerBase
         _programmingLanguageQuery = programmingLanguageQuery;
     }
 
+    [HttpGet("enabled")]
+    public async Task<ActionResult<ApiResponse<List<ProgrammingLanguageResponse>>>> GetEnabledLanguages()
+    {
+        try
+        {
+            var languages = await _programmingLanguageQuery.GetEnabledAsync();
+            return ResponseUtil.Success(languages, "Enabled programming languages retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving enabled programming languages");
+            return ResponseUtil.Error<List<ProgrammingLanguageResponse>>("Internal Server Error", 500);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<ProgrammingLanguageResponse>>> GetById(string id)
     {
@@ -52,6 +67,26 @@ public class ProgrammingLanguageQueryController : ControllerBase
             _logger.LogError(ex,"Error retrieving all programming languages");
 
             return ResponseUtil.Error<List<ProgrammingLanguageResponse>>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpGet("paged")]
+    public async Task<ActionResult<ApiResponse<PagedProgrammingLanguageResponse>>> GetPaged(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? sortBy = null,
+        [FromQuery] bool ascending = true)
+    {
+        try
+        {
+            var result = await _programmingLanguageQuery.GetPagedAsync(page, pageSize, sortBy, ascending);
+            return ResponseUtil.Success(result,"Paged programming languages retrieved successfully",200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error retrieving paged programming languages");
+
+            return ResponseUtil.Error<PagedProgrammingLanguageResponse>("Internal Server Error", 500);
         }
     }
 }

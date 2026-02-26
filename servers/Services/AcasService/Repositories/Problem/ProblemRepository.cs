@@ -29,7 +29,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             awsRegion, _problemTableName);
     }
 
-    public async Task<string> CreateAsync(Models.Problem problem)
+    public async Task<Models.Problem> CreateAsync(Models.Problem problem)
     {
         try
         {
@@ -43,7 +43,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             if (response.HttpStatusCode == HttpStatusCode.OK)
             {
                 _logger.LogInformation("Problem {ProblemId} created successfully", problem.Id);
-                return problem.Id;
+                return await GetByIdAsync(problem.Id);
             }
 
             throw new Exception("Failed to create problem in DynamoDB");
@@ -105,29 +105,54 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         }
     }
 
+    // public async Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId)
+    // {
+    //     try
+    //     {
+    //         var request = new QueryRequest
+    //         {
+    //             TableName = _problemTableName,
+    //             IndexName = "lecturerId-index",
+    //             KeyConditionExpression = "lecturerId = :lecturerId",
+    //             ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+    //             {
+    //                 [":lecturerId"] = new AttributeValue { S = lecturerId }
+    //             }
+    //         };
+
+    //         var response = await _dynamoDBClient.QueryAsync(request);
+
+    //         var problems = response.Items
+    //             .Where(item => item.ContainsKey("isDeleted") && item["isDeleted"].BOOL == false)
+    //             .Select(DynamoMapper.DynamoItemToProblem)
+    //             .ToList();
+
+    //         return problems;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error retrieving problems for lecturer {LecturerId}", lecturerId);
+    //         throw;
+    //     }
+    // }
+
     public async Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId)
     {
         try
         {
-            var request = new QueryRequest
+            var request = new ScanRequest
             {
                 TableName = _problemTableName,
-                IndexName = "lecturerId-index",
-                KeyConditionExpression = "lecturerId = :lecturerId",
+                FilterExpression = "lecturerId = :lecturerId AND isDeleted = :false",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    [":lecturerId"] = new AttributeValue { S = lecturerId }
+                    [":lecturerId"] = new AttributeValue { S = lecturerId },
+                    [":false"] = new AttributeValue { BOOL = false }
                 }
             };
 
-            var response = await _dynamoDBClient.QueryAsync(request);
-
-            var problems = response.Items
-                .Where(item => item.ContainsKey("isDeleted") && item["isDeleted"].BOOL == false)
-                .Select(DynamoMapper.DynamoItemToProblem)
-                .ToList();
-
-            return problems;
+            var response = await _dynamoDBClient.ScanAsync(request);
+            return response.Items.Select(DynamoMapper.DynamoItemToProblem).ToList();
         }
         catch (Exception ex)
         {

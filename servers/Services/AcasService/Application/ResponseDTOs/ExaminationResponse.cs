@@ -12,13 +12,13 @@ public class ExaminationResponse
     public string ExamName { get; set; } = string.Empty;
 
     [JsonPropertyName("programmingLanguage")]
-    public ProgrammingLanguageLiteResponse ProgrammingLanguage { get; set; } = new ProgrammingLanguageLiteResponse();
+    public ProgrammingLanguageResponse ProgrammingLanguage { get; set; } = new ProgrammingLanguageResponse();
 
-    [JsonPropertyName("problemIds")]
-    public string[] ProblemIds { get; set; } = Array.Empty<string>();
+    // [JsonPropertyName("problemIds")]
+    // public string[] ProblemIds { get; set; } = Array.Empty<string>();
 
-    [JsonPropertyName("problems")]
-    public List<ProblemResponse> Problems { get; set; } = new();
+    [JsonPropertyName("examProblems")]
+    public List<ExaminationProblemResponse> ExamProblems { get; set; } = new();
 
   [JsonPropertyName("classroom")]
     public ClassroomLiteResponse Classroom { get; set; } = new ClassroomLiteResponse();
@@ -54,6 +54,15 @@ public class ExaminationResponse
 
 }
 
+public class ExaminationProblemResponse
+{
+    [JsonPropertyName("problemId")]
+    public string ProblemId { get; set; } = string.Empty;
+
+    [JsonPropertyName("mark")]
+    public float Mark { get; set; }
+}
+
 public class ClassroomLiteResponse
 {
     [JsonPropertyName("id")]
@@ -62,13 +71,36 @@ public class ClassroomLiteResponse
     [JsonPropertyName("className")]
     public string ClassName { get; set; } = string.Empty;
 }
-public class ProgrammingLanguageLiteResponse
+
+
+
+public class ExaminationSpecProblemResponse 
 {
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
-    [JsonPropertyName("languageName")]
-    public string Name { get; set; } = string.Empty;
+    [JsonPropertyName("examName")]
+    public string ExamName { get; set; } = string.Empty;
+
+    [JsonPropertyName("programmingLanguage")]
+    public ProgrammingLanguageResponse ProgrammingLanguage { get; set; } = new ProgrammingLanguageResponse();
+
+    [JsonPropertyName("problem")]
+    public ProblemResponse Problem { get; set; } = new();
+
+    [JsonPropertyName("classroom")]
+    public ClassroomLiteResponse Classroom { get; set; } = new ClassroomLiteResponse();
+
+    [JsonPropertyName("startDatetime")]
+    public DateTime StartDatetime { get; set; }
+
+    [JsonPropertyName("endDatetime")]
+    public DateTime EndDatetime { get; set; }
+
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
+
+    [JsonPropertyName("mode")]
+    public Mode Mode { get; set; }
+
 }
-
-

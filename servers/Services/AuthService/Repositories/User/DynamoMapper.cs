@@ -17,7 +17,8 @@ public static class DynamoMapper
             ["avatarUrl"] = new AttributeValue { S = user.AvatarUrl },
             ["googleId"] = new AttributeValue { S = user.GoogleId },
             ["role"] = new AttributeValue { S = user.Role.ToString() },
-            ["isEnable"] = new AttributeValue { BOOL = user.IsEnable }
+            ["isEnable"] = new AttributeValue { BOOL = user.IsEnable },
+            ["firstLogin"] = new AttributeValue { BOOL = user.FirstLogin ?? false }
         };
 
         if (user.Birthday.HasValue)
@@ -47,6 +48,15 @@ public static class DynamoMapper
             IsEnable = item["isEnable"].BOOL
         };
 
+        if (item.ContainsKey("roleNumber"))
+            user.RoleNumber = item["roleNumber"].S ?? string.Empty;
+
+        if (item.ContainsKey("avatarUrl"))
+            user.AvatarUrl = item["avatarUrl"].S ?? string.Empty;
+
+        if (item.ContainsKey("googleId"))
+            user.GoogleId = item["googleId"].S ?? string.Empty;
+
         if (item.ContainsKey("dateOfBirth") && !string.IsNullOrEmpty(item["dateOfBirth"].S))
             user.Birthday = DateTime.Parse(item["dateOfBirth"].S);
 
@@ -58,6 +68,9 @@ public static class DynamoMapper
 
         if (item.ContainsKey("updatedDate") && !string.IsNullOrEmpty(item["updatedDate"].S))
             user.UpdatedDate = DateTime.Parse(item["updatedDate"].S);
+
+        if (item.ContainsKey("firstLogin"))
+            user.FirstLogin = item["firstLogin"].BOOL;
 
         return user;
     }

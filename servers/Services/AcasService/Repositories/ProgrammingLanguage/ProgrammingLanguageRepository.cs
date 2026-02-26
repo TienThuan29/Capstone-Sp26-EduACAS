@@ -34,8 +34,11 @@ public class ProgrammingLanguageRepository : DynamoRepository, IProgrammingLangu
     {
         try
         {
-            language.Id = Guid.NewGuid().ToString();
-            language.IsEnable = true;
+            // Preserve ID if already set, otherwise generate new one
+            if (string.IsNullOrEmpty(language.Id))
+            {
+                language.Id = Guid.NewGuid().ToString();
+            }
             language.CreatedDate = DateTime.UtcNow;
             language.UpdatedDate = DateTime.UtcNow;
 
@@ -138,5 +141,105 @@ public class ProgrammingLanguageRepository : DynamoRepository, IProgrammingLangu
         }
     }
 
+    // public async Task<ProgrammingLanguage?> ToggleEnableAsync(string id)
+    // {
+    //     try
+    //     {
+    //         var language = await GetByIdAsync(id);
+    //         if (language == null)
+    //         {
+    //             throw new Exception("Programming language not found");
+    //         }
+
+    //         language.IsEnable = !language.IsEnable;
+    //         language.UpdatedDate = DateTime.UtcNow;
+
+    //         var dynamoItem = DynamoMapper.ProgrammingLanguageToDynamoItem(language);
+    //         var response = await PutItemAsync(dynamoItem, _tableName);
+
+    //         if (response.HttpStatusCode == HttpStatusCode.OK)
+    //         {
+    //             return await GetByIdAsync(id);
+    //         }
+
+    //         return null;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error toggling enable status for programming language: {Id}", id);
+    //         throw;
+    //     }
+    // }
+
+    // public async Task<IEnumerable<ProgrammingLanguage>> SearchAsync(string? searchTerm = null, bool? isEnable = null)
+    // {
+    //     try
+    //     {
+    //         var allLanguages = await GetAllAsync();
+            
+    //         var filtered = allLanguages.AsEnumerable();
+
+    //         if (!string.IsNullOrWhiteSpace(searchTerm))
+    //         {
+    //             filtered = filtered.Where(l => 
+    //                 l.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+    //                 l.Monaco.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+    //                 l.Extensions.Any(e => e.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+    //         }
+
+    //         if (isEnable.HasValue)
+    //         {
+    //             filtered = filtered.Where(l => l.IsEnable == isEnable.Value);
+    //         }
+
+    //         return filtered;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error searching programming languages");
+    //         throw;
+    //     }
+    // }
+
+    public async Task<(IEnumerable<ProgrammingLanguage> Items, int TotalCount)> GetPagedAsync(
+        int page, int pageSize, string? sortBy = null, bool ascending = true)
+    {
+        try
+        {
+            var allLanguages = (await GetAllAsync()).ToList();
+            var totalCount = allLanguages.Count;
+
+            // Sorting
+            IEnumerable<ProgrammingLanguage> sorted = sortBy?.ToLower() switch
+            {
+                "name" => ascending 
+                    ? allLanguages.OrderBy(l => l.Name)
+                    : allLanguages.OrderByDescending(l => l.Name),
+                "monaco" => ascending 
+                    ? allLanguages.OrderBy(l => l.Monaco)
+                    : allLanguages.OrderByDescending(l => l.Monaco),
+                "createdate" => ascending 
+                    ? allLanguages.OrderBy(l => l.CreatedDate)
+                    : allLanguages.OrderByDescending(l => l.CreatedDate),
+                "updatedate" => ascending 
+                    ? allLanguages.OrderBy(l => l.UpdatedDate)
+                    : allLanguages.OrderByDescending(l => l.UpdatedDate),
+                _ => allLanguages.OrderByDescending(l => l.CreatedDate)
+            };
+
+            // Pagination
+            var paged = sorted
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (paged, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged programming languages");
+            throw;
+        }
+    }
 
 }

@@ -224,4 +224,156 @@ public class UserRepository : DynamoRepository, IUserRepository
             throw;
         }
     }
+
+    public async Task<Models.User?> UpdatePasswordAndFirstLoginAsync(string userId, string newPassword, bool firstLogin)
+    {
+        try
+        {
+            var hashedPassword = HashingUtil.HashString(newPassword, _configuration);
+            var updatedDate = DateTime.UtcNow;
+            
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                ["password"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = hashedPassword }
+                },
+                ["firstLogin"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { BOOL = firstLogin }
+                },
+                ["updatedDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                }
+            };
+            
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user password and FirstLogin flag");
+            throw;
+        }
+    }
+
+    public async Task<Models.User?> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Models.Role? role, bool? isEnable)
+    {
+        try
+        {
+            var updatedDate = DateTime.UtcNow;
+            var updates = new Dictionary<string, AttributeValueUpdate>();
+            if (fullname != null)
+            {
+                updates["fullname"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = fullname }
+                };
+            }
+            if (roleNumber != null)
+            {
+                updates["roleNumber"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = roleNumber }
+                };
+            }
+            if (role.HasValue)
+            {
+                updates["role"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = role.Value.ToString() }
+                };
+            }
+            if (isEnable.HasValue)
+            {
+                updates["isEnable"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { BOOL = isEnable.Value }
+                };
+            }
+            updates["updatedDate"] = new AttributeValueUpdate
+            {
+                Action = AttributeAction.PUT,
+                Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+            };
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user information");
+            throw;
+        }
+    }
+
+    public async Task<Models.User?> UpdateProfileAsync(string userId, string? fullname, DateTime? birthday, string? avatarUrl)
+    {
+        try
+        {
+            var updatedDate = DateTime.UtcNow;
+            var updates = new Dictionary<string, AttributeValueUpdate>();
+
+            if (fullname != null)
+            {
+                updates["fullname"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = fullname }
+                };
+            }
+            if (birthday.HasValue)
+            {
+                updates["dateOfBirth"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = birthday.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                };
+            }
+            if (avatarUrl != null)
+            {
+                updates["avatarUrl"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = avatarUrl }
+                };
+            }
+
+            updates["updatedDate"] = new AttributeValueUpdate
+            {
+                Action = AttributeAction.PUT,
+                Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+            };
+
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user profile");
+            throw;
+        }
+    }
 }

@@ -1,26 +1,29 @@
+using System.Linq;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Web.Requests;
 using AcasService.Models;
+
 namespace AcasService.Application.Mappers;
 
 public class ExaminationMapper
 {
-    public ExaminationResponse ToExaminationResponse(Examination exam,Classroom classroom,ProgrammingLanguage programmingLanguage )
+    public ExaminationResponse ToExaminationResponse(Examination exam, Classroom classroom, ProgrammingLanguage programmingLanguage)
     {
-        var classroomLite = new ClassroomLiteResponse();
-        classroomLite.Id=classroom.Id;
-        classroomLite.ClassName=classroom.ClassName;
+        var classroomLite = new ClassroomLiteResponse
+        {
+            Id = classroom.Id,
+            ClassName = classroom.ClassName
+        };
 
-        var programmingLanguageLite = new ProgrammingLanguageLiteResponse();
-        programmingLanguageLite.Id=programmingLanguage.Id;
-        programmingLanguageLite.Name=programmingLanguage.LanguageName;
+        var programmingLanguageMapper = new ProgrammingLanguageMapper();
+        var programmingLanguageResponse = programmingLanguageMapper.ToProgrammingLanguageResponse(programmingLanguage);
 
         return new ExaminationResponse
         {
             Id = exam.Id,
             ExamName = exam.ExamName,
-           ProgrammingLanguage =programmingLanguageLite,
-            ProblemIds = exam.ProblemIds,
+            ProgrammingLanguage = programmingLanguageResponse,
+            ExamProblems = exam.Problems?.Select(p => new ExaminationProblemResponse { ProblemId = p.ProblemId, Mark = p.Mark }).ToList() ?? new List<ExaminationProblemResponse>(),
             Classroom = classroomLite,
             StartDatetime = exam.StartDatetime,
             EndDatetime = exam.EndDatetime,
@@ -35,7 +38,7 @@ public class ExaminationMapper
         };
     }
 
-    public Models.Examination ToExaminationModel(ExaminationRequestDTO examRequest)
+    public Examination ToExaminationModel(ExaminationRequestDTO examRequest)
     {
         if (!Enum.TryParse<Mode>(examRequest.Mode, true, out var mode))
             throw new InvalidOperationException($"Invalid Mode: {examRequest.Mode}");
@@ -45,7 +48,7 @@ public class ExaminationMapper
         {
             ExamName = examRequest.ExamName,
             ProgrammingLanguageId = examRequest.ProgrammingLanguageId,
-            ProblemIds = examRequest.ProblemIds,
+            Problems = examRequest.Problems?.Select(p => new ExaminationProblem { ProblemId = p.ProblemId, Mark = p.Mark }).ToList() ?? new List<ExaminationProblem>(),
             ClassroomId = examRequest.ClassroomId,
             StartDatetime = examRequest.StartDatetime,
             EndDatetime = examRequest.EndDatetime,
@@ -54,6 +57,33 @@ public class ExaminationMapper
             TotalMark = examRequest.TotalMark,
             Status = status,
             Mode = mode
+        };
+    }
+
+    public ExaminationSpecProblemResponse ToExaminationWithSpecProblem(Examination exam, ProblemResponse problemResponse, ProgrammingLanguage? programmingLanguage)
+    {
+        var classroomLite = new ClassroomLiteResponse
+        {
+            Id = exam.ClassroomId,
+            ClassName = string.Empty
+        };
+
+        var programmingLanguageMapper = new ProgrammingLanguageMapper();
+        var programmingLanguageResponse = programmingLanguage != null
+            ? programmingLanguageMapper.ToProgrammingLanguageResponse(programmingLanguage)
+            : new ProgrammingLanguageResponse();
+
+        return new ExaminationSpecProblemResponse
+        {
+            Id = exam.Id,
+            ExamName = exam.ExamName,
+            ProgrammingLanguage = programmingLanguageResponse,
+            Problem = problemResponse,
+            Classroom = classroomLite,
+            StartDatetime = exam.StartDatetime,
+            EndDatetime = exam.EndDatetime,
+            Description = exam.Description,
+            Mode = exam.Mode
         };
     }
 }

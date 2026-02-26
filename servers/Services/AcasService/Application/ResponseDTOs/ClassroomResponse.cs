@@ -17,7 +17,7 @@ namespace AcasService.Application.ResponseDTOs
         public LecturerLiteResponse Lecturer { get; set; } = new LecturerLiteResponse();
 
         [JsonPropertyName("subject")]
-        public SubjectLiteResponse Subject { get; set; } = new SubjectLiteResponse();   
+        public SubjectLiteResponse Subject { get; set; } = new SubjectLiteResponse();
 
         [JsonPropertyName("semesterName")]
         public string SemesterName { get; set; } = string.Empty;
@@ -36,10 +36,13 @@ namespace AcasService.Application.ResponseDTOs
 
         [JsonPropertyName("isDeleted")]
         public bool IsDeleted { get; set; }
+        
+        [JsonPropertyName("maxSlot")]
+        public int MaxSlot { get; set; }
 
-         [JsonPropertyName("enrollment")]
-    public EnrollmentInfoResponse Enrollment { get; set; }
-        = new EnrollmentInfoResponse();
+        [JsonPropertyName("enrollment")]
+        public EnrollmentInfoResponse Enrollment { get; set; }
+       = new EnrollmentInfoResponse();
 
     }
 
@@ -51,27 +54,36 @@ namespace AcasService.Application.ResponseDTOs
         public string SubjectName { get; set; } = string.Empty;
     }
 
+    /// <summary>
+    /// Lecturer profile response; structure aligned with AuthService UserProfileResponse.
+    /// </summary>
     public class LecturerLiteResponse
     {
-        [JsonPropertyName("lecturerId")]
+        [JsonPropertyName("id")]
         public string Id { get; set; } = string.Empty;
-        [JsonPropertyName("lecturerName")]
-        public string LecturerName { get; set; } = string.Empty;
+
+        [JsonPropertyName("email")]
+        public string Email { get; set; } = string.Empty;
+
+        [JsonPropertyName("fullname")]
+        public string Fullname { get; set; } = string.Empty;
+
+        [JsonPropertyName("avatarUrl")]
+        public string AvatarUrl { get; set; } = string.Empty;
+
     }
 
 
-public class EnrollmentInfoResponse
-{
-    [JsonPropertyName("isJoining")]
-    public bool IsJoining { get; set; }
+    public class EnrollmentInfoResponse
+    {
+        [JsonPropertyName("isJoining")]
+        public bool IsJoining { get; set; }
 
-    [JsonPropertyName("joinedDate")]
-    public DateTime? JoinedDate { get; set; }
+        [JsonPropertyName("joinedDate")]
+        public DateTime? JoinedDate { get; set; }
 
-    [JsonPropertyName("movedOutDate")]
-    public DateTime? MovedOutDate { get; set; }
-}
-
-
+        [JsonPropertyName("movedOutDate")]
+        public DateTime? MovedOutDate { get; set; }
+    }
 
 }

@@ -13,6 +13,13 @@ public interface IProgrammingLanguageQuery
 
     Task<List<ProgrammingLanguageResponse>> GetAllAsync();
 
+    Task<List<ProgrammingLanguageResponse>> GetEnabledAsync();
+    
+    // Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null);
+    
+    Task<PagedProgrammingLanguageResponse> GetPagedAsync(
+        int page = 1, int pageSize = 10, string? sortBy = null, bool ascending = true);
+
 }
 
 
@@ -56,6 +63,25 @@ public class ProgrammingLanguageQuery : IProgrammingLanguageQuery
         }
     }
 
+    public async Task<List<ProgrammingLanguageResponse>> GetEnabledAsync()
+    {
+        try
+        {
+            var entities = await _repository.GetAllAsync();
+            var enabledLanguages = entities
+                .Where(e => e.Status == PLStatus.ENABLE)
+                .Select(e => _mapper.ToProgrammingLanguageResponse(e))
+                .ToList();
+            
+            return enabledLanguages;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting enabled programming languages");
+            throw;
+        }
+    }
+
     public async Task<ProgrammingLanguageResponse?> GetByIdAsync(string id)
     {
         try
@@ -71,6 +97,56 @@ public class ProgrammingLanguageQuery : IProgrammingLanguageQuery
         {
             _logger.LogError(ex,
                 "Error getting programming language by Id: {Id}", id);
+            throw;
+        }
+    }
+
+    // public async Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null)
+    // {
+    //     try
+    //     {
+    //         var entities = await _repository.SearchAsync(searchTerm, isEnable);
+    //         var responseList = new List<ProgrammingLanguageResponse>();
+            
+    //         foreach (var entity in entities)
+    //         {
+    //             responseList.Add(_mapper.ToProgrammingLanguageResponse(entity));
+    //         }
+            
+    //         return responseList;
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         _logger.LogError(ex, "Error searching programming languages");
+    //         throw;
+    //     }
+    // }
+
+    public async Task<PagedProgrammingLanguageResponse> GetPagedAsync(
+        int page = 1, int pageSize = 10, string? sortBy = null, bool ascending = true)
+    {
+        try
+        {
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            var (items, totalCount) = await _repository.GetPagedAsync(page, pageSize, sortBy, ascending);
+            
+            var responseList = items.Select(entity => _mapper.ToProgrammingLanguageResponse(entity)).ToList();
+            
+            return new PagedProgrammingLanguageResponse
+            {
+                Items = responseList,
+                Page = page,
+                PageSize = pageSize,
+                TotalCount = totalCount,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged programming languages");
             throw;
         }
     }

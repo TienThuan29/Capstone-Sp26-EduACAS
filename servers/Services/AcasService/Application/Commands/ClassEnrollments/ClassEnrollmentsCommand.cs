@@ -1,12 +1,10 @@
-
 using AcasService.Repositories.ClassroomEnrollment;
-using AcasService.Application.ClassroomEnrollment;
-using AcasService.Application.ClassroomEnrollment.ResponseDTOs;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Web.Requests;
 
-namespace AcasService.Application.Commands.ClassroomEnrollment;
+namespace AcasService.Application.Commands.ClassEnrollments;
 
 public interface IClassEnrollmentsCommand
 {
@@ -30,7 +28,7 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
 
     public async Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request)
     {
-        var classroom = await _classroomRepository.FindByEnrollKeyAsync(request.EnrolKey);
+        var classroom = await _classroomRepository.FindByEnrollKeyAsync(request.EnrolKey); // ??????????
         if (classroom == null)
         {
             throw new InvalidOperationException("Invalid enrollment key");
