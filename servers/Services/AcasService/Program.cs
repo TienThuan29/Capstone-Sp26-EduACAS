@@ -127,6 +127,8 @@ builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageComma
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
+builder.Services.AddScoped<ITestcaseGenerator, TestcaseGenerator>();
+builder.Services.AddScoped<ITestcaseCommand, TestcaseCommand>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
 builder.Services.AddScoped<ISlotCommand, SlotCommand>();
 builder.Services.AddScoped<ISlotQuery, SlotQuery>();

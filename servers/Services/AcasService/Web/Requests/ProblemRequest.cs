@@ -118,3 +118,13 @@ public class ExtractOcrRequest
     [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
     public string FileName { get; set; } = string.Empty;
 }
+
+public class TestcaseGenerationPreviewRequest
+{
+    [Required(ErrorMessage = "Content is required")]
+    public string Content { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "NumberOfTestcases is required")]
+    [Range(1, 20, ErrorMessage = "NumberOfTestcases must be between 1 and 20")]
+    public int NumberOfTestcases { get; set; } = 1;
+}
