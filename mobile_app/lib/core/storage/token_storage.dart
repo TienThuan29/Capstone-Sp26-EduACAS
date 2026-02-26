@@ -7,6 +7,7 @@ class TokenStorage {
   static const String _savedEmailKey = 'saved_email';
   static const String _userNameKey = 'user_name';
   static const String _userRoleKey = 'user_role';
+  static const String _userIdKey = 'user_id';
 
   /// Save access token to local storage
   static Future<void> saveAccessToken(String token) async {
@@ -126,5 +127,23 @@ class TokenStorage {
   static Future<void> clearUserRole() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userRoleKey);
+  }
+
+  /// Save user id
+  static Future<void> saveUserId(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_userIdKey, id);
+  }
+
+  /// Get user id
+  static Future<String?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(_userIdKey);
+  }
+
+  /// Clear user id
+  static Future<void> clearUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_userIdKey);
   }
 }
