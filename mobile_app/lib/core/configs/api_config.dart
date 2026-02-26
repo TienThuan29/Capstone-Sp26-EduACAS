@@ -16,10 +16,13 @@ class ApiConfig {
   // static String get registerEndpoint => '/api/auth/v1/register';
   static String get userProfileEndpoint => '/api/auth/v1/profile';
   static String get refreshTokenEndpoint => '/api/auth/v1/refresh';
+  static String get examinationsEndpoint => '/api/acas/v1/examinations';
 
   // Classroom endpoints
   static String lecturerClassroomsEndpoint(String lecturerId) =>
       '/api/acas/v1/classrooms/lecturer/$lecturerId';
+  static String studentClassroomsEndpoint(String studentId) =>
+      '/api/acas/v1/classrooms/student/$studentId';
   static String classroomByIdEndpoint(String id) =>
       '/api/acas/v1/classrooms/$id';
 

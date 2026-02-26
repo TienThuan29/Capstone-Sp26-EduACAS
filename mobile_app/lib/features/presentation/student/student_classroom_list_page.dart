@@ -1,0 +1,297 @@
+import 'package:flutter/material.dart';
+import 'package:mobile/core/theme/app_colors.dart';
+import 'package:mobile/core/storage/token_storage.dart';
+import 'package:mobile/features/models/classroom.dart';
+import 'package:mobile/features/services/classroom_service.dart';
+import 'package:mobile/features/presentation/student/classroom_detail_page.dart';
+import 'package:mobile/core/widgets/background.dart';
+
+class StudentClassroomListPage extends StatefulWidget {
+  const StudentClassroomListPage({super.key});
+
+  @override
+  State<StudentClassroomListPage> createState() => _StudentClassroomListPageState();
+}
+
+class _StudentClassroomListPageState extends State<StudentClassroomListPage> with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List<Classroom> _allClassrooms = [];
+  bool _isLoading = true;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+    _loadClassrooms();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadClassrooms() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final studentId = await TokenStorage.getUserId();
+      if (studentId == null || studentId.isEmpty) {
+        throw Exception('Student ID not found. Please log in again.');
+      }
+
+      final classrooms = await ClassroomService.getStudentClassrooms(studentId);
+      setState(() {
+        _allClassrooms = classrooms;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  List<Classroom> get _joiningClassrooms => _allClassrooms.where((c) => (c.status ?? '').toUpperCase() == 'JOINED').toList();
+  List<Classroom> get _movedOutClassrooms => _allClassrooms.where((c) => (c.status ?? '').toUpperCase() == 'MOVED_OUT').toList();
+
+  @override
+  Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600;
+
+    return Stack(
+      children: [
+        const GradientBackground(),
+        Column(
+          children: [
+            if (!isSmallScreen) _buildHeader(),
+            _buildTabNavigation(),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildClassroomList(_allClassrooms),
+                  _buildClassroomList(_joiningClassrooms),
+                  _buildClassroomList(_movedOutClassrooms),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 40, 24, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.class_rounded, color: AppColors.primary, size: 28),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'My Classrooms',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'Access your enrolled courses and learning materials',
+            style: TextStyle(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabNavigation() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: TabBar(
+        controller: _tabController,
+        indicator: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: AppColors.primary,
+        ),
+        labelColor: Colors.white,
+        unselectedLabelColor: AppColors.textLight,
+        labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        padding: const EdgeInsets.all(4),
+        tabs: const [
+          Tab(text: 'All'),
+          Tab(text: 'Joined'),
+          Tab(text: 'Moved Out'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildClassroomList(List<Classroom> classrooms) {
+    if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_errorMessage != null) return _buildErrorState();
+    if (classrooms.isEmpty) return _buildEmptyState();
+
+    return RefreshIndicator(
+      onRefresh: _loadClassrooms,
+      child: ListView.builder(
+        padding: const EdgeInsets.all(24),
+        itemCount: classrooms.length,
+        itemBuilder: (context, index) => _buildClassroomCard(classrooms[index]),
+      ),
+    );
+  }
+
+  Widget _buildClassroomCard(Classroom classroom) {
+    final status = classroom.status ?? 'JOINED';
+    final isJoined = status.toUpperCase() == 'JOINED';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Stack(
+          children: [
+            Positioned(
+              top: 0,
+              right: 0,
+              child: Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: [AppColors.primary.withOpacity(0.05), AppColors.accent.withOpacity(0.1)],
+                  ),
+                ),
+              ),
+            ),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => StudentClassroomDetailPage(classroom: classroom)),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                            child: Text(classroom.classCode, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
+                          ),
+                          const Spacer(),
+                          Text(status, style: TextStyle(color: isJoined ? Colors.green : Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      Text(classroom.className, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                      const SizedBox(height: 16),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: AppColors.textLight),
+                          const SizedBox(width: 8),
+                          Text('Lecturer: ${classroom.lecturerName ?? 'Unknown'}', style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.book_outlined, size: 14, color: AppColors.textLight),
+                          const SizedBox(width: 8),
+                          Text('Subject: ${classroom.subjectName ?? 'Unknown'}', style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: const Center(
+                          child: Text('Access Classroom', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 13)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.school_outlined, size: 64, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          const Text('No classes found', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 8),
+          const Text('Enroll in a classroom to see your courses here', style: TextStyle(color: AppColors.textLight)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const Icon(Icons.error_outline, size: 48, color: Colors.red),
+          const SizedBox(height: 16),
+          Text(_errorMessage ?? 'Failed to load classrooms'),
+          const SizedBox(height: 16),
+          ElevatedButton(onPressed: _loadClassrooms, child: const Text('Retry')),
+        ],
+      ),
+    );
+  }
+}

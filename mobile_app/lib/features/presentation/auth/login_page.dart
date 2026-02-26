@@ -118,9 +118,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         if (loginResponse.success && loginResponse.dataResponse != null) {
           final userProfile = loginResponse.dataResponse!.userProfile;
 
-          // Save user name and role for later use
+          // Save user name, role and id for later use
           await TokenStorage.saveUserName(userProfile.fullname);
           await TokenStorage.saveUserRole(userProfile.role);
+          await TokenStorage.saveUserId(userProfile.id);
 
           // Handle remember me preference
           if (_rememberMe) {

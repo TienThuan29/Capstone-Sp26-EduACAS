@@ -3,6 +3,13 @@ import 'package:sidebarx/sidebarx.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/presentation/auth/login_page.dart';
+import 'package:mobile/features/presentation/profile/profile_screen.dart';
+import 'package:mobile/features/presentation/student/student_page.dart';
+import 'package:mobile/features/presentation/student/student_classroom_list_page.dart';
+import 'package:mobile/features/presentation/lecturer/lecturer_classroom_list_page.dart';
+import 'package:mobile/features/presentation/lecturer/problem_management_page.dart';
+import 'package:mobile/features/presentation/lecturer/discussion_issue_management.dart';
+import 'package:mobile/features/presentation/lecturer/lecturer_page.dart';
 
 /// Role constants matching web_app
 class Roles {
@@ -12,27 +19,27 @@ class Roles {
 }
 
 /// Get sidebar items based on user role
-List<SidebarXItem> getSidebarItemsForRole(String? role) {
+List<SidebarXItem> getSidebarItemsForRole(String? role, {Function(int)? onItemSelected}) {
   switch (role?.toUpperCase()) {
     case Roles.admin:
-      return const [
-        SidebarXItem(icon: Icons.dashboard, label: 'Admin Dashboard'),
-        SidebarXItem(icon: Icons.class_, label: 'Manage Classrooms'),
-        SidebarXItem(icon: Icons.book, label: 'Manage Subjects'),
-        SidebarXItem(icon: Icons.code, label: 'Manage Languages'),
-        SidebarXItem(icon: Icons.people, label: 'Manage Users'),
+      return [
+        SidebarXItem(icon: Icons.dashboard, label: 'Admin Dashboard', onTap: () => onItemSelected?.call(0)),
+        SidebarXItem(icon: Icons.class_, label: 'Manage Classrooms', onTap: () => onItemSelected?.call(1)),
+        SidebarXItem(icon: Icons.book, label: 'Manage Subjects', onTap: () => onItemSelected?.call(2)),
+        SidebarXItem(icon: Icons.code, label: 'Manage Languages', onTap: () => onItemSelected?.call(3)),
+        SidebarXItem(icon: Icons.people, label: 'Manage Users', onTap: () => onItemSelected?.call(4)),
       ];
     case Roles.lecturer:
-      return const [
-        SidebarXItem(icon: Icons.class_, label: 'My Classrooms'),
-        SidebarXItem(icon: Icons.quiz, label: 'Problem Banks'),
+      return [
+        SidebarXItem(icon: Icons.class_, label: 'My Classrooms', onTap: () => onItemSelected?.call(0)),
+        SidebarXItem(icon: Icons.quiz, label: 'Problem Banks', onTap: () => onItemSelected?.call(1)),
       ];
     case Roles.student:
     default:
-      return const [
-        SidebarXItem(icon: Icons.dashboard, label: 'Dashboard'),
-        SidebarXItem(icon: Icons.class_, label: 'Classrooms'),
-        SidebarXItem(icon: Icons.campaign, label: 'Announcements'),
+      return [
+        SidebarXItem(icon: Icons.dashboard, label: 'Dashboard', onTap: () => onItemSelected?.call(0)),
+        SidebarXItem(icon: Icons.class_, label: 'Classrooms', onTap: () => onItemSelected?.call(1)),
+        SidebarXItem(icon: Icons.campaign, label: 'Announcements', onTap: () => onItemSelected?.call(2)),
       ];
   }
 }
@@ -43,11 +50,13 @@ class AppSidebar extends StatelessWidget {
     required this.controller,
     this.onLogout,
     this.userRole,
+    this.onItemSelected,
   });
 
   final SidebarXController controller;
   final VoidCallback? onLogout;
   final String? userRole;
+  final Function(int)? onItemSelected;
 
   @override
   Widget build(BuildContext context) {
@@ -104,32 +113,72 @@ class AppSidebar extends StatelessWidget {
       footerBuilder: (context, extended) {
         return Padding(
           padding: const EdgeInsets.all(16.0),
-          child: InkWell(
-            onTap: onLogout,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              decoration: BoxDecoration(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Profile Button
+              InkWell(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfileScreen()),
+                  );
+                },
                 borderRadius: BorderRadius.circular(10),
-                color: Colors.red.withValues(alpha: 0.2),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.person, color: Colors.white, size: 20),
+                      if (extended) ...[
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Profile',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-              child: Row(
-                mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.logout, color: Colors.white, size: 20),
-                  if (extended) ...[
-                    const SizedBox(width: 12),
-                    const Text(
-                      'Logout',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ],
+              const SizedBox(height: 12),
+              // Logout Button
+              InkWell(
+                onTap: onLogout,
+                borderRadius: BorderRadius.circular(10),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.red.withValues(alpha: 0.2),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: extended ? MainAxisAlignment.start : MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.logout, color: Colors.white, size: 20),
+                      if (extended) ...[
+                        const SizedBox(width: 12),
+                        const Text(
+                          'Logout',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
         );
       },
@@ -157,30 +206,54 @@ class AppSidebar extends StatelessWidget {
           ),
         );
       },
-      items: getSidebarItemsForRole(userRole),
+      items: getSidebarItemsForRole(userRole, onItemSelected: onItemSelected),
     );
   }
 }
 
-/// Example usage of sidebar with a scaffold
 class SidebarScaffold extends StatefulWidget {
-  const SidebarScaffold({super.key, required this.child});
+  const SidebarScaffold({
+    super.key,
+    required this.child,
+    this.selectedIndex = 0,
+  });
 
   final Widget child;
+  final int selectedIndex;
 
   @override
   State<SidebarScaffold> createState() => _SidebarScaffoldState();
 }
 
 class _SidebarScaffoldState extends State<SidebarScaffold> {
-  final _controller = SidebarXController(selectedIndex: 0, extended: true);
+  late SidebarXController _controller;
   final _key = GlobalKey<ScaffoldState>();
   String? _userRole;
 
   @override
   void initState() {
     super.initState();
+    _controller = SidebarXController(
+      selectedIndex: widget.selectedIndex,
+      extended: true,
+    );
     _loadUserRole();
+    
+    // Add listener to handle navigation outside of build phase
+    _controller.addListener(_navigationListener);
+  }
+
+  @override
+  void dispose() {
+    _controller.removeListener(_navigationListener);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _navigationListener() {
+    if (_controller.selectedIndex != widget.selectedIndex) {
+      _onItemSelected(_controller.selectedIndex);
+    }
   }
 
   Future<void> _loadUserRole() async {
@@ -188,6 +261,52 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
     if (mounted) {
       setState(() {
         _userRole = role;
+      });
+    }
+  }
+
+  void _onItemSelected(int index) {
+    Widget? nextScreen;
+    final role = _userRole?.toUpperCase();
+
+    if (role == Roles.student) {
+      switch (index) {
+        case 0: // Dashboard
+          nextScreen = const StudentPage();
+          break;
+        case 1: // Classrooms
+          nextScreen = const StudentClassroomListPage();
+          break;
+      }
+    } else if (role == Roles.lecturer) {
+      switch (index) {
+        case 0: // Dashboard/Classrooms
+          nextScreen = const LecturerClassroomListPage();
+          break;
+        case 1: // Problem Banks
+          nextScreen = const ProblemManagementPage();
+          break;
+      }
+    } else if (role == Roles.admin) {
+      switch (index) {
+        case 2: // Manage Classrooms
+          // Admin classroom management logic
+          break;
+      }
+    }
+
+    if (nextScreen != null) {
+      // Use microtask to ensure we are outside of build/layout phase
+      Future.microtask(() {
+        if (!mounted) return;
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation1, animation2) => nextScreen!,
+            transitionDuration: Duration.zero,
+            reverseTransitionDuration: Duration.zero,
+          ),
+        );
       });
     }
   }
@@ -216,6 +335,7 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
       await TokenStorage.clearTokens();
       await TokenStorage.clearUserName();
       await TokenStorage.clearUserRole();
+      await TokenStorage.clearUserId();
       if (!mounted) return;
       Navigator.pushAndRemoveUntil(
         context,
@@ -244,12 +364,23 @@ class _SidebarScaffoldState extends State<SidebarScaffold> {
             )
           : null,
       drawer: isSmallScreen
-          ? AppSidebar(controller: _controller, onLogout: _handleLogout, userRole: _userRole)
+          ? AppSidebar(
+              controller: _controller,
+              onLogout: _handleLogout,
+              userRole: _userRole,
+            )
           : null,
       body: Row(
         children: [
-          if (!isSmallScreen) AppSidebar(controller: _controller, onLogout: _handleLogout, userRole: _userRole),
-          Expanded(child: widget.child),
+          if (!isSmallScreen)
+            AppSidebar(
+              controller: _controller,
+              onLogout: _handleLogout,
+              userRole: _userRole,
+            ),
+          Expanded(
+            child: widget.child,
+          ),
         ],
       ),
     );
