@@ -43,6 +43,12 @@ using AcasService.Application.Queries.Slot;
 using AcasService.Application.Commands.Material;
 using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
+using AcasService.Application.Commands.DiscussionIssue;
+using AcasService.Application.Queries.DiscussionIssue;
+using AcasService.Repositories.DiscussionIssue;
+using AcasService.Application.Commands.Comment;
+using AcasService.Application.Queries.Comment;
+using AcasService.Repositories.Comment;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -101,6 +107,8 @@ builder.Services.AddScoped<IProblemRepository, ProblemRepository>();
 builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRepository>();
 builder.Services.AddScoped<ISlotRepository,SlotRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
+builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
+builder.Services.AddScoped<ICommentRepository, CommentRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -121,6 +129,10 @@ builder.Services.AddScoped<ISlotCommand, SlotCommand>();
 builder.Services.AddScoped<ISlotQuery, SlotQuery>();
 builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
 builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
+builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
+builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
+builder.Services.AddScoped<ICommentCommand, CommentCommand>();
+builder.Services.AddScoped<ICommentQuery, CommentQuery>();
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
 
@@ -132,6 +144,8 @@ builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<MaterialMapper>();
+builder.Services.AddScoped<DiscussionIssueMapper>();
+builder.Services.AddScoped<CommentMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
