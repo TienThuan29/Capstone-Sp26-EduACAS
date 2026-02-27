@@ -184,21 +184,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
         borderRadius: BorderRadius.circular(16),
         child: Stack(
           children: [
-            Positioned(
-              top: 0,
-              right: 0,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    colors: [AppColors.primary.withOpacity(0.05), AppColors.accent.withOpacity(0.1)],
-                  ),
-                ),
-              ),
-            ),
+
             Material(
               color: Colors.transparent,
               child: InkWell(
@@ -221,7 +207,22 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
                             child: Text(classroom.classCode, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           const Spacer(),
-                          Text(status, style: TextStyle(color: isJoined ? Colors.green : Colors.orange, fontSize: 10, fontWeight: FontWeight.bold)),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: (isJoined ? Colors.green : Colors.orange).withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              status,
+                              style: TextStyle(
+                                color: isJoined ? Colors.green : Colors.orange,
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 12),
