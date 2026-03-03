@@ -5,100 +5,174 @@ using AcasService.Web.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AcasService.Web.Controllers.DiscussionIssue
+namespace AcasService.Web.Controllers.DiscussionIssue;
+
+[ApiController]
+[Route("api/v1/discussion-issues")]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
+public class DiscussionIssueCommandController : ControllerBase
 {
-    [ApiController]
-    [Route("api/v1/discussion-issues")]
-    [Authorize]
-    public class DiscussionIssueCommandController : ControllerBase
+    private readonly IDiscussionIssueCommand _discussionIssueCommand;
+    private readonly ILogger<DiscussionIssueCommandController> _logger;
+
+    public DiscussionIssueCommandController(
+        IDiscussionIssueCommand discussionIssueCommand,
+        ILogger<DiscussionIssueCommandController> logger)
     {
-        private readonly ILogger<DiscussionIssueCommandController> _logger;
-        private readonly IDiscussionIssueCommand _command;
+        _discussionIssueCommand = discussionIssueCommand;
+        _logger = logger;
+    }
 
-        public DiscussionIssueCommandController(
-            ILogger<DiscussionIssueCommandController> logger,
-            IDiscussionIssueCommand command)
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> CreateIssue(
+        [FromBody] CreateDiscussionIssueRequest request)
+    {
+        try
         {
-            _logger = logger;
-            _command = command;
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            var result = await _discussionIssueCommand.CreateIssueAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to create discussion issue", 500);
+
+            return ResponseUtil.Success(result, "Discussion issue created successfully", 201);
         }
-
-        [HttpPost]
-        public async Task<ActionResult<ApiResponse<DiscussionIssueResponse>>> Create(
-            [FromBody] CreateDiscussionIssueRequest request)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _command.CreateAsync(request);
-                return ResponseUtil.Success(result, "Discussion issue created successfully", 201);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error creating discussion issue");
-                return ResponseUtil.Error<DiscussionIssueResponse>("Failed to create discussion issue", 500);
-            }
+            _logger.LogError(ex, "Error creating discussion issue");
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to create discussion issue", 500);
         }
+    }
 
-        [HttpPut("{id}")]
-        public async Task<ActionResult<ApiResponse<DiscussionIssueResponse>>> Update(
-            string id,
-            [FromBody] UpdateDiscussionIssueRequest request)
+    [HttpPut("{issueId}")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> UpdateIssue(
+        string issueId,
+        [FromBody] UpdateDiscussionIssueRequest request)
+    {
+        try
         {
-            try
-            {
-                var result = await _command.UpdateAsync(id, request);
-                return ResponseUtil.Success(result, "Discussion issue updated successfully", 200);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Discussion issue not found for update");
-                return ResponseUtil.Error<DiscussionIssueResponse>("Discussion issue not found", 404);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error updating discussion issue");
-                return ResponseUtil.Error<DiscussionIssueResponse>("Failed to update discussion issue", 500);
-            }
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            var result = await _discussionIssueCommand.UpdateIssueAsync(issueId, request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Discussion issue not found", 404);
+
+            return ResponseUtil.Success(result, "Discussion issue updated successfully", 200);
         }
-
-        [HttpPatch("{id}/soft-delete")]
-        public async Task<ActionResult<ApiResponse<bool>>> SoftDelete(string id)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _command.SoftDeleteAsync(id);
-                return ResponseUtil.Success(result != null, "Discussion issue soft-deleted successfully", 200);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Discussion issue not found for soft deletion");
+            _logger.LogError(ex, "Error updating discussion issue {IssueId}", issueId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to update discussion issue", 500);
+        }
+    }
+
+    [HttpPost("comments")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> WriteComment(
+        [FromBody] WriteCommentRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            var result = await _discussionIssueCommand.WriteCommentAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Issue not found or failed to add comment", 404);
+
+            return ResponseUtil.Success(result, "Comment added successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error writing comment to issue {IssueId}", request?.IssueId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to add comment", 500);
+        }
+    }
+
+    [HttpPost("comments/reply")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> ReplyComment(
+        [FromBody] ReplyCommentRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            var result = await _discussionIssueCommand.ReplyCommentAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Issue or parent comment not found", 404);
+
+            return ResponseUtil.Success(result, "Reply added successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error replying to comment {ParentCommentId}", request?.ParentCommentId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to add reply", 500);
+        }
+    }
+
+    [HttpPost("comments/upvote")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> UpvoteComment(
+        [FromBody] UpvoteCommentRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            var result = await _discussionIssueCommand.UpvoteCommentAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Issue or comment not found", 404);
+
+            return ResponseUtil.Success(result, "Comment upvoted successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error upvoting comment {CommentId}", request?.CommentId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to upvote comment", 500);
+        }
+    }
+
+    [HttpPatch("{issueId}/status")]
+    [Authorize(Roles = "LECTURER, ADMIN")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> ChangeStatus(
+        string issueId,
+        [FromBody] ChangeDiscussionStatusRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            request.IssueId = issueId;
+            var result = await _discussionIssueCommand.ChangeStatusAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Discussion issue not found", 404);
+
+            return ResponseUtil.Success(result, "Status updated successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing status for issue {IssueId}", issueId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to update status", 500);
+        }
+    }
+
+    [HttpPatch("{issueId}/soft-delete")]
+    public async Task<ActionResult<ApiResponse<bool>>> SoftDelete(string issueId)
+    {
+        try
+        {
+            var result = await _discussionIssueCommand.SoftDeleteAsync(issueId);
+            if (!result)
                 return ResponseUtil.Error<bool>("Discussion issue not found", 404);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error soft deleting discussion issue");
-                return ResponseUtil.Error<bool>("Failed to soft delete discussion issue", 500);
-            }
+            return ResponseUtil.Success(true, "Discussion issue deleted", 200);
         }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult<ApiResponse<bool>>> Delete(string id)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _command.DeleteAsync(id);
-                return ResponseUtil.Success(result != null, "Discussion issue deleted successfully", 200);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Discussion issue not found for deletion");
-                return ResponseUtil.Error<bool>("Discussion issue not found", 404);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error deleting discussion issue");
-                return ResponseUtil.Error<bool>("Failed to delete discussion issue", 500);
-            }
+            _logger.LogError(ex, "Error soft deleting issue {IssueId}", issueId);
+            return ResponseUtil.Error<bool>("Failed to delete discussion issue", 500);
         }
     }
 }

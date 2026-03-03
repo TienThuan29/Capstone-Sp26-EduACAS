@@ -29,11 +29,14 @@ public class ProblemResponse
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }
 
-    [JsonPropertyName("codeTemplate")]
-    public string CodeTemplate { get; set; } = string.Empty;
+    [JsonPropertyName("codeTemplates")]
+    public Dictionary<string, string> CodeTemplates { get; set; } = new Dictionary<string, string>();
 
     [JsonPropertyName("testCases")]
     public List<TestCaseResponse> TestCases { get; set; } = new List<TestCaseResponse>();
+
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new List<string>();
 
     [JsonPropertyName("createdDate")]
     public DateTime CreatedDate { get; set; }
@@ -47,6 +50,9 @@ public class TestCaseResponse
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
 
+    [JsonPropertyName("problemId")]
+    public string ProblemId { get; set; } = string.Empty;
+
     [JsonPropertyName("inputData")]
     public string InputData { get; set; } = string.Empty;
 
@@ -59,8 +65,20 @@ public class TestCaseResponse
     [JsonPropertyName("isCaseInsensitive")]
     public bool IsCaseInsensitive { get; set; }
 
-    [JsonPropertyName("isRemovedSpace")]
-    public bool IsRemovedSpace { get; set; }
+    [JsonPropertyName("isFloatingPoint")]
+    public bool IsFloatingPoint { get; set; }
+
+    [JsonPropertyName("floatingPointTolerance")]
+    public double? FloatingPointTolerance { get; set; } = null;
+
+    [JsonPropertyName("decimalPlaces")]
+    public int? DecimalPlaces { get; set; }
+    
+    [JsonPropertyName("isTokenComparision")]
+    public bool IsTokenComparision { get; set; }
+    
+    [JsonPropertyName("isNotOrderedComparision")]
+    public bool? IsNotOrderedComparision { get; set; }
 }
 
 public class ProblemBasicResponse
@@ -73,7 +91,16 @@ public class ProblemBasicResponse
 
     [JsonPropertyName("difficulty")]
     public Difficulty Difficulty { get; set; }
-    
+
+    [JsonPropertyName("tags")]
+    public List<string> Tags { get; set; } = new List<string>();
+
+    [JsonPropertyName("testCasesCount")]
+    public int TestCasesCount { get; set; }
+
     [JsonPropertyName("createdDate")]
     public DateTime CreatedDate { get; set; }
+
+    [JsonPropertyName("updatedDate")]
+    public DateTime UpdatedDate { get; set; }
 }

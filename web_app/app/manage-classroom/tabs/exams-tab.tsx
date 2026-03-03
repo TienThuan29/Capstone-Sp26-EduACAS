@@ -34,6 +34,7 @@ import { useExamination } from "@/hooks/exam/useExamination";
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage";
 import type { ProgrammingLanguage } from "@/types/language";
 import { useToast } from "@/hooks/useToast";
+import { formatDate } from "@/utils/datetime-utils";
 import { ExaminationDetailView } from "./exam-detail-tab";
 
 const STATUS_LABELS: Record<number, string> = {
@@ -254,7 +255,7 @@ export function ExamsTab({
         </h2>
         <Button
           color="dark"
-          className="bg-[#1F4E79] hover:bg-[#2A6BA3]"
+          className="bg-[#1F4E79] hover:bg-[#2A6BA3] cursor-pointer"
           onClick={openCreate}
         >
           <PlusIcon className="mr-2 h-5 w-5" />
@@ -276,16 +277,18 @@ export function ExamsTab({
         <div className="overflow-x-auto border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
           <Table hoverable>
             <TableHead>
-              <TableHeadCell>Exam name</TableHeadCell>
-              <TableHeadCell>Language</TableHeadCell>
-              <TableHeadCell>Start</TableHeadCell>
-              <TableHeadCell>End</TableHeadCell>
-              <TableHeadCell>Total mark</TableHeadCell>
-              <TableHeadCell>Status</TableHeadCell>
-              <TableHeadCell>Mode</TableHeadCell>
-              <TableHeadCell>
-                <span className="sr-only">Actions</span>
-              </TableHeadCell>
+              <TableRow>
+                <TableHeadCell>Exam name</TableHeadCell>
+                <TableHeadCell>Language</TableHeadCell>
+                <TableHeadCell>Start</TableHeadCell>
+                <TableHeadCell>End</TableHeadCell>
+                <TableHeadCell>Total mark</TableHeadCell>
+                <TableHeadCell>Status</TableHeadCell>
+                <TableHeadCell>Mode</TableHeadCell>
+                <TableHeadCell>
+                  <span className="sr-only">Actions</span>
+                </TableHeadCell>
+              </TableRow>
             </TableHead>
             <TableBody>
               {examinations.map((exam) => {
@@ -293,8 +296,6 @@ export function ExamsTab({
                 const modeKey = exam.mode as 0 | 1;
                 const statusLabel = STATUS_LABELS[statusKey] ?? "PENDING";
                 const modeLabel = MODE_LABELS[modeKey] ?? "PRACTICAL";
-                const start = new Date(exam.startDatetime);
-                const end = new Date(exam.endDatetime);
                 return (
                   <TableRow key={exam.id}>
                     <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
@@ -302,10 +303,10 @@ export function ExamsTab({
                     </TableCell>
                     <TableCell>{exam.programmingLanguage?.name ?? "—"}</TableCell>
                     <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {start.toLocaleString("vi-VN")}
+                      {formatDate(exam.startDatetime)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {end.toLocaleString("vi-VN")}
+                      {formatDate(exam.endDatetime)}
                     </TableCell>
                     <TableCell>{exam.totalMark}</TableCell>
                     <TableCell>

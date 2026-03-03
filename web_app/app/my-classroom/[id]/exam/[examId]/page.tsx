@@ -15,7 +15,8 @@ import { useProblem } from "@/hooks/problem/useProblem";
 import type { Examination, Problem } from "@/types/examination";
 import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import { normalizeDifficulty } from "@/types/problem";
-import { formatDurationMs } from "@/utils/datetime-utils";
+import { formatDate, formatDurationMs } from "@/utils/datetime-utils";
+import { toExamProblem } from "@/utils/exam-problem";
 
 const MODE_LABELS: Record<number, string> = {
   0: "PRACTICAL",
@@ -32,7 +33,7 @@ function ExamDetailContent() {
   const examId = params.examId as string;
 
   const [examination, setExamination] = useState<Examination | null>(null);
-  const [problems, setProblems] = useState<Problem[]>([]);
+  const [problems, setProblems] = useState<(Problem & { mark: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [problemsLoading, setProblemsLoading] = useState(false);
 
@@ -67,7 +68,13 @@ function ExamDetailContent() {
       try {
         const problemDetails = await Promise.all(
           examination.examProblems.map(async (ep) => {
-            const problem = await getProblemById(ep.problemId);
+            const resp = await getProblemById(ep.problemId);
+            if (resp === null) return null;
+            const problem = toExamProblem(
+              resp,
+              examination.id,
+              examination.programmingLanguage?.id,
+            );
             return { ...problem, mark: ep.mark };
           }),
         );
@@ -195,7 +202,7 @@ function ExamDetailContent() {
                   Start
                 </div>
                 <div className="font-semibold text-gray-900 dark:text-white">
-                  {startDate.toLocaleString("vi-VN")}
+                  {formatDate(startDate)}
                 </div>
               </div>
             </div>
@@ -206,7 +213,7 @@ function ExamDetailContent() {
                   End
                 </div>
                 <div className="font-semibold text-gray-900 dark:text-white">
-                  {endDate.toLocaleString("vi-VN")}
+                  {formatDate(endDate)}
                 </div>
               </div>
             </div>
@@ -243,12 +250,12 @@ function ExamDetailContent() {
             </div>
           ) : (
             <div className="space-y-2">
-              {problems.map((problem, idx) => {
+              {problems.map((problem) => {
                 const normalized =
                   typeof problem.difficulty === "number"
                     ? normalizeDifficulty(problem.difficulty)
                     : (problem.difficulty as "EASY" | "MEDIUM" | "HARD");
-                const mark = (problem as Problem & { mark?: number }).mark ?? 0;
+                const mark = problem.mark;
 
                 return (
                   <div

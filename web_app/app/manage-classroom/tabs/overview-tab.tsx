@@ -22,6 +22,7 @@ import {
   KeyIcon,
 } from "@heroicons/react/24/outline";
 import type { Classroom } from "@/types/classroom";
+import { formatDateOnly } from "@/utils/datetime-utils";
 
 type OverviewTabProps = {
   classroom: Classroom;
@@ -189,11 +190,7 @@ export function OverviewTab({
               <TimelinePoint className="border-0 bg-[#1F4E79]" />
               <TimelineContent>
                 <TimelineTime className="text-gray-500 dark:text-gray-400">
-                  {new Date(classroom.createdDate).toLocaleDateString("vi-VN", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {formatDateOnly(classroom.createdDate)}
                 </TimelineTime>
                 <TimelineTitle className="text-gray-900 dark:text-gray-100">
                   Start Date
@@ -208,11 +205,7 @@ export function OverviewTab({
               <TimelineContent>
                 <TimelineTime className="text-gray-500 dark:text-gray-400">
                   {classroom.endDate
-                    ? new Date(classroom.endDate).toLocaleDateString("vi-VN", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })
+                    ? formatDateOnly(classroom.endDate)
                     : "N/A"}
                 </TimelineTime>
                 <TimelineTitle className="text-gray-900 dark:text-gray-100">

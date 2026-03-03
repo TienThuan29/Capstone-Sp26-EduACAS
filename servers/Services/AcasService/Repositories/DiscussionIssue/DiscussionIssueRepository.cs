@@ -14,16 +14,17 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         ILogger<DiscussionIssueRepository> logger
     ) : base(dynamoDbClient, logger)
     {
-        _discussionIssueTableName = configuration["DynamoDB:DiscussionIssueTableName"] ??
-                     throw new ArgumentNullException("DynamoDB:DiscussionIssueTableName is not configured");
-        base.TableName = _discussionIssueTableName;
+        _discussionIssueTableName = configuration["DynamoDB:DiscussionIssueTableName"]
+            ?? throw new ArgumentNullException("DynamoDB:DiscussionIssueTableName is not configured");
     }
 
     public async Task<Models.DiscussionIssue?> CreateAsync(Models.DiscussionIssue issue)
     {
         try
         {
-            var item = DynamoMapper.IssueToDynamoItem(issue);
+            issue.CreatedDate = DateTime.UtcNow;
+            issue.IsDeleted = false;
+            var item = DynamoMapper.DiscussionIssueToDynamoItem(issue);
             await PutItemAsync(item, _discussionIssueTableName);
             return issue;
         }
@@ -34,35 +35,18 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         }
     }
 
-    public async Task<Models.DiscussionIssue?> FindByIdAsync(string issueId)
+    public async Task<Models.DiscussionIssue?> FindByIdAsync(string id)
     {
         try
         {
-            var key = DynamoMapper.CreateKey(issueId);
+            var key = DynamoMapper.CreateKey(id);
             var response = await GetItemAsync(key, _discussionIssueTableName);
             if (response.Item.Count == 0) return null;
-            return DynamoMapper.DynamoItemToIssue(response.Item);
+            return DynamoMapper.DynamoItemToDiscussionIssue(response.Item);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error finding discussion issue {Id}", issueId);
-            throw;
-        }
-    }
-
-    public async Task<List<Models.DiscussionIssue>> FindAllAsync()
-    {
-        try
-        {
-            var request = new ScanRequest { TableName = _discussionIssueTableName };
-            var response = await _dynamoDBClient.ScanAsync(request);
-            return response.Items
-                .Select(item => DynamoMapper.DynamoItemToIssue(item))
-                .ToList();
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving all discussion issues");
+            _logger.LogError(ex, "Error finding discussion issue {Id}", id);
             throw;
         }
     }
@@ -71,21 +55,35 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
     {
         try
         {
-            var request = new ScanRequest
+            Dictionary<string, AttributeValue>? lastKey = null;
+            var issues = new List<Models.DiscussionIssue>();
+
+            do
             {
-                TableName = _discussionIssueTableName,
-                FilterExpression = "classroomId = :classroomId and isDeleted = :isDeleted",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                var scanRequest = new ScanRequest
                 {
-                    [":classroomId"] = new AttributeValue { S = classroomId },
-                    [":isDeleted"] = new AttributeValue { BOOL = false }
+                    TableName = _discussionIssueTableName,
+                    FilterExpression = "classroomId = :classroomId AND (attribute_not_exists(isDeleted) OR isDeleted = :false)",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":classroomId"] = new AttributeValue { S = classroomId },
+                        [":false"] = new AttributeValue { BOOL = false }
+                    }
+                };
+                if (lastKey != null && lastKey.Count > 0)
+                    scanRequest.ExclusiveStartKey = lastKey;
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+
+                foreach (var item in response.Items)
+                {
+                    issues.Add(DynamoMapper.DynamoItemToDiscussionIssue(item));
                 }
-            };
-            var response = await _dynamoDBClient.ScanAsync(request);
-            return response.Items
-                .Select(item => DynamoMapper.DynamoItemToIssue(item))
-                .OrderByDescending(i => i.CreatedDate)
-                .ToList();
+
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return issues;
         }
         catch (Exception ex)
         {
@@ -94,11 +92,48 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         }
     }
 
+    public async Task<int> CountByClassroomIdAsync(string classroomId)
+    {
+        try
+        {
+            int count = 0;
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _discussionIssueTableName,
+                    FilterExpression = "classroomId = :classroomId AND (attribute_not_exists(isDeleted) OR isDeleted = :false)",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":classroomId"] = new AttributeValue { S = classroomId },
+                        [":false"] = new AttributeValue { BOOL = false }
+                    },
+                    Select = Select.COUNT
+                };
+                if (lastKey != null && lastKey.Count > 0)
+                    scanRequest.ExclusiveStartKey = lastKey;
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+                count += response.Count;
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error counting discussion issues for classroom {ClassroomId}", classroomId);
+            throw;
+        }
+    }
+
     public async Task<Models.DiscussionIssue?> UpdateAsync(Models.DiscussionIssue issue)
     {
         try
         {
-            var item = DynamoMapper.IssueToDynamoItem(issue);
+            var item = DynamoMapper.DiscussionIssueToDynamoItem(issue);
             await PutItemAsync(item, _discussionIssueTableName);
             return issue;
         }
@@ -109,40 +144,43 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         }
     }
 
-    public async Task SoftDeleteAsync(string issueId)
+    public async Task SoftDeleteAsync(string id)
     {
         try
         {
-            var key = DynamoMapper.CreateKey(issueId);
+            var key = DynamoMapper.CreateKey(id);
             var updates = new Dictionary<string, AttributeValueUpdate>
             {
+                ["isDeleted"] = new AttributeValueUpdate
                 {
-                    "isDeleted", new AttributeValueUpdate
-                    {
-                        Action = AttributeAction.PUT,
-                        Value = new AttributeValue { BOOL = true }
-                    }
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { BOOL = true }
+                },
+                ["updatedDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = DateTime.UtcNow.ToString("o") }
                 }
             };
             await UpdateItemAsync(key, updates, _discussionIssueTableName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error soft deleting discussion issue {Id}", issueId);
+            _logger.LogError(ex, "Error soft deleting discussion issue {Id}", id);
             throw;
         }
     }
 
-    public async Task DeleteAsync(string issueId)
+    public async Task DeleteAsync(string id)
     {
         try
         {
-            var key = DynamoMapper.CreateKey(issueId);
+            var key = DynamoMapper.CreateKey(id);
             await DeleteItemAsync(key, _discussionIssueTableName);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting discussion issue {Id}", issueId);
+            _logger.LogError(ex, "Error deleting discussion issue {Id}", id);
             throw;
         }
     }

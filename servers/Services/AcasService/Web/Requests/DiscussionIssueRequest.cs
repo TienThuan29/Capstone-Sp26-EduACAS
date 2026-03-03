@@ -1,68 +1,78 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Models;
 
-namespace AcasService.Web.Requests
+namespace AcasService.Web.Requests;
+
+public class CreateDiscussionIssueRequest
 {
-    public class CreateDiscussionIssueRequest
-    {
-        [Required(ErrorMessage = "Classroom ID is required")]
-        public string ClassroomId { get; set; } = string.Empty;
+    [Required]
+    public string ClassroomId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Title is required")]
-        [StringLength(300, ErrorMessage = "Title cannot exceed 300 characters")]
-        public string Title { get; set; } = string.Empty;
+    [Required]
+    public string AuthorId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Author ID is required")]
-        public string AuthorId { get; set; } = string.Empty;
+    [Required]
+    [StringLength(500)]
+    public string Title { get; set; } = string.Empty;
 
-        public string AuthorName { get; set; } = string.Empty;
+    [Required]
+    public string Content { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Content is required")]
-        public string Content { get; set; } = string.Empty;
+    public string RefProblemId { get; set; } = string.Empty;
+}
 
-        public string[] ImagesName { get; set; } = Array.Empty<string>();
+public class UpdateDiscussionIssueRequest
+{
+    [Required]
+    [StringLength(500)]
+    public string Title { get; set; } = string.Empty;
 
-        public string[] FilesName { get; set; } = Array.Empty<string>();
-    }
+    [Required]
+    public string Content { get; set; } = string.Empty;
 
-    public class UpdateDiscussionIssueRequest
-    {
-        [Required(ErrorMessage = "Title is required")]
-        [StringLength(300, ErrorMessage = "Title cannot exceed 300 characters")]
-        public string Title { get; set; } = string.Empty;
+    public string RefProblemId { get; set; } = string.Empty;
+}
 
-        [Required(ErrorMessage = "Content is required")]
-        public string Content { get; set; } = string.Empty;
+public class WriteCommentRequest
+{
+    [Required]
+    public string IssueId { get; set; } = string.Empty;
 
-        public string[] ImagesName { get; set; } = Array.Empty<string>();
+    [Required]
+    public string AuthorId { get; set; } = string.Empty;
 
-        public string[] FilesName { get; set; } = Array.Empty<string>();
-    }
+    [Required]
+    public string Content { get; set; } = string.Empty;
+}
 
-    public class CreateCommentRequest
-    {
-        [Required(ErrorMessage = "Discussion Issue ID is required")]
-        public string DiscussionIssueId { get; set; } = string.Empty;
+public class ReplyCommentRequest
+{
+    [Required]
+    public string IssueId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Author ID is required")]
-        public string AuthorId { get; set; } = string.Empty;
+    [Required]
+    public string ParentCommentId { get; set; } = string.Empty;
 
-        public string AuthorName { get; set; } = string.Empty;
+    [Required]
+    public string AuthorId { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Content is required")]
-        public string Content { get; set; } = string.Empty;
+    [Required]
+    public string Content { get; set; } = string.Empty;
+}
 
-        public string[] ImagesName { get; set; } = Array.Empty<string>();
+public class UpvoteCommentRequest
+{
+    [Required]
+    public string IssueId { get; set; } = string.Empty;
 
-        public string[] FilesName { get; set; } = Array.Empty<string>();
-    }
+    [Required]
+    public string CommentId { get; set; } = string.Empty;
+}
 
-    public class UpdateCommentRequest
-    {
-        [Required(ErrorMessage = "Content is required")]
-        public string Content { get; set; } = string.Empty;
+public class ChangeDiscussionStatusRequest
+{
+    [Required]
+    public string IssueId { get; set; } = string.Empty;
 
-        public string[] ImagesName { get; set; } = Array.Empty<string>();
-
-        public string[] FilesName { get; set; } = Array.Empty<string>();
-    }
+    public DiscussionIssueStatus Status { get; set; }
 }

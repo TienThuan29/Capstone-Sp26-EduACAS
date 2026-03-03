@@ -12,11 +12,13 @@ using AcasService.Application.Queries.Problem;
 using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.S3;
 using AcasService.Application.Queries.Subject;
+using AcasService.Application.Queries.DiscussionIssue;
 using AcasService.Application.Utils;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.ClassroomEnrollment;
+using AcasService.Repositories.DiscussionIssue;
 using AcasService.Repositories.DynamoDB;
 using AcasService.Repositories.Examination;
 using AcasService.Repositories.Problem;
@@ -24,6 +26,8 @@ using AcasService.Repositories.ProgrammingLanguage;
 using AcasService.Repositories.Redis;
 using AcasService.Repositories.S3;
 using AcasService.Repositories.Subject;
+using AcasService.Repositories.Submission;
+using AcasService.Repositories.Notification;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -43,12 +47,9 @@ using AcasService.Application.Queries.Slot;
 using AcasService.Application.Commands.Material;
 using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
+using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
-using AcasService.Application.Queries.DiscussionIssue;
-using AcasService.Repositories.DiscussionIssue;
-using AcasService.Application.Commands.Comment;
-using AcasService.Application.Queries.Comment;
-using AcasService.Repositories.Comment;
+using AcasService.Application.Thirdparty;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -108,7 +109,9 @@ builder.Services.AddScoped<IClassroomEnrollmentRepository, ClassroomEnrollmentRe
 builder.Services.AddScoped<ISlotRepository,SlotRepository>();
 builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
-builder.Services.AddScoped<ICommentRepository, CommentRepository>();
+builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
+builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -124,17 +127,19 @@ builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageComma
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
+builder.Services.AddScoped<ITestcaseGenerator, TestcaseGenerator>();
+builder.Services.AddScoped<ITestcaseCommand, TestcaseCommand>();
 builder.Services.AddScoped<IClassEnrollmentsCommand, ClassEnrollmentsCommand>();
 builder.Services.AddScoped<ISlotCommand, SlotCommand>();
 builder.Services.AddScoped<ISlotQuery, SlotQuery>();
 builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
 builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
-builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
-builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
-builder.Services.AddScoped<ICommentCommand, CommentCommand>();
-builder.Services.AddScoped<ICommentQuery, CommentQuery>();
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
+builder.Services.AddScoped<ITestcaseEvaluator, TestcaseEvaluator>();
+builder.Services.AddScoped<IResultComparator, ResultComparator>();
+builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
+builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -144,11 +149,14 @@ builder.Services.AddScoped<ClassroomMapper>();
 builder.Services.AddScoped<ProgrammingLanguageMapper>();
 builder.Services.AddScoped<ExaminationMapper>();
 builder.Services.AddScoped<MaterialMapper>();
-builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<CommentMapper>();
+builder.Services.AddScoped<DiscussionIssueMapper>();
+builder.Services.AddScoped<TestResultMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
+builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
+builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
 
 // Azure Form Recognizer configuration
 var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??

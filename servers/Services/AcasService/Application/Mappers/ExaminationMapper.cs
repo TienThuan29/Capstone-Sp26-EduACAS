@@ -7,6 +7,19 @@ namespace AcasService.Application.Mappers;
 
 public class ExaminationMapper
 {
+    public ExaminationBasicResponse ToExaminationBasicResponse(Examination exam)
+    {
+        return new ExaminationBasicResponse
+        {
+            Id = exam.Id,
+            ExamName = exam.ExamName,
+            StartDatetime = exam.StartDatetime,
+            EndDatetime = exam.EndDatetime,
+            Status = exam.Status,
+            Mode = exam.Mode
+        };
+    }
+
     public ExaminationResponse ToExaminationResponse(Examination exam, Classroom classroom, ProgrammingLanguage programmingLanguage)
     {
         var classroomLite = new ClassroomLiteResponse

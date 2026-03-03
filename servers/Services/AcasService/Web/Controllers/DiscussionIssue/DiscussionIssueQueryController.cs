@@ -4,72 +4,78 @@ using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace AcasService.Web.Controllers.DiscussionIssue
+namespace AcasService.Web.Controllers.DiscussionIssue;
+
+[ApiController]
+[Route("api/v1/discussion-issues")]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
+public class DiscussionIssueQueryController : ControllerBase
 {
-    [ApiController]
-    [Route("api/v1/discussion-issues")]
-    [Authorize]
-    public class DiscussionIssueQueryController : ControllerBase
+    private readonly IDiscussionIssueQuery _discussionIssueQuery;
+    private readonly ILogger<DiscussionIssueQueryController> _logger;
+
+    public DiscussionIssueQueryController(
+        IDiscussionIssueQuery discussionIssueQuery,
+        ILogger<DiscussionIssueQueryController> logger)
     {
-        private readonly ILogger<DiscussionIssueQueryController> _logger;
-        private readonly IDiscussionIssueQuery _query;
+        _discussionIssueQuery = discussionIssueQuery;
+        _logger = logger;
+    }
 
-        public DiscussionIssueQueryController(
-            ILogger<DiscussionIssueQueryController> logger,
-            IDiscussionIssueQuery query)
+    [HttpGet]
+    public async Task<ActionResult<ApiResponse<PagedResult<DiscussionIssueListResponse>>>> GetPagedByClassroom(
+        [FromQuery] string classroomId,
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
         {
-            _logger = logger;
-            _query = query;
+            if (string.IsNullOrWhiteSpace(classroomId))
+                return ResponseUtil.Error<PagedResult<DiscussionIssueListResponse>>("classroomId is required", 400);
+
+            var result = await _discussionIssueQuery.GetPagedByClassroomIdAsync(classroomId, pageIndex, pageSize);
+            return ResponseUtil.Success(result, "Get discussion issues successfully", 200);
         }
-
-        [HttpGet]
-        public async Task<ActionResult<ApiResponse<List<DiscussionIssueResponse>>>> GetAll()
+        catch (Exception ex)
         {
-            try
-            {
-                var issues = await _query.GetAllAsync();
-                return ResponseUtil.Success(issues, "Get all discussion issues successfully", 200);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching all discussion issues");
-                return ResponseUtil.Error<List<DiscussionIssueResponse>>("Internal Server Error", 500);
-            }
+            _logger.LogError(ex, "Error fetching discussion issues for classroom {ClassroomId}", classroomId);
+            return ResponseUtil.Error<PagedResult<DiscussionIssueListResponse>>("Internal Server Error", 500);
         }
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<ApiResponse<DiscussionIssueResponse>>> GetById(string id)
+    [HttpGet("count")]
+    public async Task<ActionResult<ApiResponse<int>>> GetCountByClassroom([FromQuery] string classroomId)
+    {
+        try
         {
-            try
-            {
-                var issue = await _query.GetByIdAsync(id);
-                return ResponseUtil.Success(issue, "Get discussion issue successfully", 200);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Discussion issue not found with id: {Id}", id);
-                return ResponseUtil.Error<DiscussionIssueResponse>("Discussion issue not found", 404);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching discussion issue by id");
-                return ResponseUtil.Error<DiscussionIssueResponse>("Internal Server Error", 500);
-            }
+            if (string.IsNullOrWhiteSpace(classroomId))
+                return ResponseUtil.Error<int>("classroomId is required", 400);
+
+            var count = await _discussionIssueQuery.GetCountByClassroomIdAsync(classroomId);
+            return ResponseUtil.Success(count, "Get count successfully", 200);
         }
-
-        [HttpGet("classroom/{classroomId}")]
-        public async Task<ActionResult<ApiResponse<List<DiscussionIssueResponse>>>> GetByClassroomId(string classroomId)
+        catch (Exception ex)
         {
-            try
-            {
-                var issues = await _query.GetByClassroomIdAsync(classroomId);
-                return ResponseUtil.Success(issues, "Get discussion issues successfully", 200);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while fetching discussion issues for classroom");
-                return ResponseUtil.Error<List<DiscussionIssueResponse>>("Internal Server Error", 500);
-            }
+            _logger.LogError(ex, "Error counting discussion issues for classroom {ClassroomId}", classroomId);
+            return ResponseUtil.Error<int>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> GetById(string id)
+    {
+        try
+        {
+            var issue = await _discussionIssueQuery.GetByIdAsync(id);
+            if (issue == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Discussion issue not found", 404);
+
+            return ResponseUtil.Success(issue, "Get discussion issue successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching discussion issue {Id}", id);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Internal Server Error", 500);
         }
     }
 }

@@ -18,6 +18,7 @@ import {
 } from "flowbite-react";
 import { ArrowRightEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import type { Classroom } from "@/types/classroom";
+import { formatDateOnly } from "@/utils/datetime-utils";
 
 type LeaveClassConfirmModalProps = {
   show: boolean;
@@ -168,11 +169,7 @@ export function OverviewTab({
               <TimelinePoint className="border-0 bg-[#1F4E79]" />
               <TimelineContent>
                 <TimelineTime className="text-gray-500 dark:text-gray-400">
-                  {new Date(classroom.createdDate).toLocaleDateString("vi-VN", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {formatDateOnly(classroom.createdDate)}
                 </TimelineTime>
                 <TimelineTitle className="text-gray-900 dark:text-gray-100">
                   Start Date
@@ -186,11 +183,7 @@ export function OverviewTab({
               <TimelinePoint className="border-0 bg-[#C9A24D]" />
               <TimelineContent>
                 <TimelineTime className="text-gray-500 dark:text-gray-400">
-                  {new Date(classroom.endDate).toLocaleDateString("vi-VN", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })}
+                  {formatDateOnly(classroom.endDate)}
                 </TimelineTime>
                 <TimelineTitle className="text-gray-900 dark:text-gray-100">
                   End Date

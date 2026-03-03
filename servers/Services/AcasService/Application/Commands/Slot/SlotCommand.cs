@@ -132,6 +132,8 @@ public class SlotCommand : ISlotCommand
             slot.Title = slotRequest.Title;
             slot.Description = slotRequest.Description;
             slot.UpdatedDate = DateTime.UtcNow;
+            if (slotRequest.ExaminationIds != null)
+                slot.ExaminationIds = slotRequest.ExaminationIds;
 
             await _slotRepository.UpdateAsync(slot);
 

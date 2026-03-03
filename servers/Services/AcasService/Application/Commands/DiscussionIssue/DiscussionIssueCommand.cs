@@ -1,112 +1,198 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.DiscussionIssue;
 using AcasService.Application.ResponseDTOs;
+using AcasService.Models;
 using AcasService.Repositories.DiscussionIssue;
 using AcasService.Web.Requests;
 
-namespace AcasService.Application.Commands.DiscussionIssue
+namespace AcasService.Application.Commands.DiscussionIssue;
+
+public interface IDiscussionIssueCommand
 {
-    public interface IDiscussionIssueCommand
-    {
-        Task<DiscussionIssueResponse> CreateAsync(CreateDiscussionIssueRequest request);
-        Task<DiscussionIssueResponse> UpdateAsync(string issueId, UpdateDiscussionIssueRequest request);
-        Task<DiscussionIssueResponse> SoftDeleteAsync(string issueId);
-        Task<DiscussionIssueResponse> DeleteAsync(string issueId);
-    }
+      Task<DiscussionIssueDetailResponse?> CreateIssueAsync(CreateDiscussionIssueRequest request);
 
-    public class DiscussionIssueCommand : IDiscussionIssueCommand
-    {
-        private readonly IDiscussionIssueRepository _repository;
-        private readonly DiscussionIssueMapper _mapper;
-        private readonly ILogger<DiscussionIssueCommand> _logger;
+      Task<DiscussionIssueDetailResponse?> UpdateIssueAsync(string issueId, UpdateDiscussionIssueRequest request);
 
-        public DiscussionIssueCommand(
-            IDiscussionIssueRepository repository,
-            DiscussionIssueMapper mapper,
-            ILogger<DiscussionIssueCommand> logger)
-        {
+      Task<DiscussionIssueDetailResponse?> WriteCommentAsync(WriteCommentRequest request);
+
+      Task<DiscussionIssueDetailResponse?> ReplyCommentAsync(ReplyCommentRequest request);
+
+      Task<DiscussionIssueDetailResponse?> UpvoteCommentAsync(UpvoteCommentRequest request);
+
+      Task<DiscussionIssueDetailResponse?> ChangeStatusAsync(ChangeDiscussionStatusRequest request);
+
+      Task<bool> SoftDeleteAsync(string issueId);
+}
+
+
+public class DiscussionIssueCommand : IDiscussionIssueCommand
+{
+      private readonly IDiscussionIssueRepository _repository;
+      private readonly DiscussionIssueMapper _discussionIssueMapper;
+      private readonly IDiscussionIssueQuery _discussionIssueQuery;
+      private readonly ILogger<DiscussionIssueCommand> _logger;
+
+      public DiscussionIssueCommand(
+          IDiscussionIssueRepository repository,
+          DiscussionIssueMapper discussionIssueMapper,
+          IDiscussionIssueQuery discussionIssueQuery,
+          ILogger<DiscussionIssueCommand> logger)
+      {
             _repository = repository;
-            _mapper = mapper;
+            _discussionIssueMapper = discussionIssueMapper;
+            _discussionIssueQuery = discussionIssueQuery;
             _logger = logger;
-        }
+      }
 
-        public async Task<DiscussionIssueResponse> CreateAsync(CreateDiscussionIssueRequest request)
-        {
-            var now = DateTime.UtcNow;
+      public async Task<DiscussionIssueDetailResponse?> CreateIssueAsync(CreateDiscussionIssueRequest request)
+      {
             var issue = new Models.DiscussionIssue
             {
-                Id = Guid.NewGuid().ToString(),
-                ClassroomId = request.ClassroomId,
-                Title = request.Title,
-                AuthorId = request.AuthorId,
-                AuthorName = request.AuthorName,
-                Content = request.Content,
-                ImagesName = request.ImagesName,
-                FilesName = request.FilesName,
-                IsDeleted = false,
-                CreatedDate = now,
-                UpdatedDate = now
+                  Id = Guid.NewGuid().ToString(),
+                  ClassroomId = request.ClassroomId,
+                  Title = request.Title,
+                  AuthorId = request.AuthorId,
+                  Content = request.Content,
+                  RefProblemId = request.RefProblemId,
+                  Attachments = Array.Empty<string>(),
+                  Status = DiscussionIssueStatus.OPEN,
+                  ViewCount = 0,
+                  Comments = new List<Comment>()
             };
-
             var created = await _repository.CreateAsync(issue);
-            if (created == null)
+            return created == null ? null : await _discussionIssueQuery.GetByIdAsync(created.Id);
+      }
+
+      public async Task<DiscussionIssueDetailResponse?> UpdateIssueAsync(string issueId, UpdateDiscussionIssueRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(issueId);
+            if (issue == null)
             {
-                _logger.LogError("Failed to create discussion issue");
-                throw new Exception("Failed to create discussion issue");
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", issueId);
+                  return null;
             }
+            issue.Title = request.Title;
+            issue.Content = request.Content;
+            issue.RefProblemId = request.RefProblemId ?? string.Empty;
+            issue.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
 
-            return _mapper.ToResponse(created);
-        }
-
-        public async Task<DiscussionIssueResponse> UpdateAsync(string issueId, UpdateDiscussionIssueRequest request)
-        {
-            var existing = await _repository.FindByIdAsync(issueId);
-            if (existing == null)
+      public async Task<DiscussionIssueDetailResponse?> WriteCommentAsync(WriteCommentRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(request.IssueId);
+            if (issue == null)
             {
-                _logger.LogError("Discussion issue not found with ID: {IssueId}", issueId);
-                throw new KeyNotFoundException("Discussion issue not found");
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
+                  return null;
             }
-
-            existing.Title = request.Title;
-            existing.Content = request.Content;
-            existing.ImagesName = request.ImagesName;
-            existing.FilesName = request.FilesName;
-            existing.UpdatedDate = DateTime.UtcNow;
-
-            var updated = await _repository.UpdateAsync(existing);
-            if (updated == null)
+            var comment = new Comment
             {
-                _logger.LogError("Failed to update discussion issue");
-                throw new Exception("Failed to update discussion issue");
-            }
+                  Id = Guid.NewGuid().ToString(),
+                  IssueId = request.IssueId,
+                  AuthorId = request.AuthorId,
+                  Content = request.Content,
+                  Attachments = Array.Empty<string>(),
+                  UpVoteCount = 0,
+                  Replies = new List<Comment>(),
+                  IsDeleted = false,
+                  CreatedDate = DateTime.UtcNow,
+                  UpdatedDate = DateTime.UtcNow
+            };
+            issue.Comments.Add(comment);
+            issue.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
 
-            return _mapper.ToResponse(updated);
-        }
-
-        public async Task<DiscussionIssueResponse> SoftDeleteAsync(string issueId)
-        {
-            var existing = await _repository.FindByIdAsync(issueId);
-            if (existing == null)
+      public async Task<DiscussionIssueDetailResponse?> ReplyCommentAsync(ReplyCommentRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(request.IssueId);
+            if (issue == null)
             {
-                _logger.LogError("Discussion issue not found with ID: {IssueId}", issueId);
-                throw new KeyNotFoundException("Discussion issue not found");
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
+                  return null;
             }
+            var parent = FindCommentById(issue.Comments, request.ParentCommentId);
+            if (parent == null)
+            {
+                  _logger.LogWarning("Parent comment not found: {CommentId}", request.ParentCommentId);
+                  return null;
+            }
+            var reply = new Comment
+            {
+                  Id = Guid.NewGuid().ToString(),
+                  IssueId = request.IssueId,
+                  AuthorId = request.AuthorId,
+                  Content = request.Content,
+                  Attachments = Array.Empty<string>(),
+                  UpVoteCount = 0,
+                  Replies = new List<Comment>(),
+                  IsDeleted = false,
+                  CreatedDate = DateTime.UtcNow,
+                  UpdatedDate = DateTime.UtcNow
+            };
+            parent.Replies.Add(reply);
+            issue.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
 
+      public async Task<DiscussionIssueDetailResponse?> UpvoteCommentAsync(UpvoteCommentRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(request.IssueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
+                  return null;
+            }
+            var comment = FindCommentById(issue.Comments, request.CommentId);
+            if (comment == null)
+            {
+                  _logger.LogWarning("Comment not found: {CommentId}", request.CommentId);
+                  return null;
+            }
+            comment.UpVoteCount++;
+            comment.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
+
+      public async Task<DiscussionIssueDetailResponse?> ChangeStatusAsync(ChangeDiscussionStatusRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(request.IssueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
+                  return null;
+            }
+            issue.Status = request.Status;
+            issue.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
+
+      public async Task<bool> SoftDeleteAsync(string issueId)
+      {
+            var issue = await _repository.FindByIdAsync(issueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", issueId);
+                  return false;
+            }
             await _repository.SoftDeleteAsync(issueId);
-            existing.IsDeleted = true;
-            return _mapper.ToResponse(existing);
-        }
+            return true;
+      }
 
-        public async Task<DiscussionIssueResponse> DeleteAsync(string issueId)
-        {
-            var existing = await _repository.FindByIdAsync(issueId);
-            if (existing == null)
+      private Comment? FindCommentById(IList<Comment> comments, string commentId)
+      {
+            foreach (var c in comments)
             {
-                _logger.LogError("Discussion issue not found with ID: {IssueId}", issueId);
-                throw new KeyNotFoundException("Discussion issue not found");
+                  if (c.Id == commentId) return c;
+                  var found = FindCommentById(c.Replies, commentId);
+                  if (found != null) return found;
             }
-
-            await _repository.DeleteAsync(issueId);
-            return _mapper.ToResponse(existing);
-        }
-    }
+            return null;
+      }
 }

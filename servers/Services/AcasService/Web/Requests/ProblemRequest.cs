@@ -26,8 +26,7 @@ public class CreateProblemRequest
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
     public string Difficulty { get; set; } = string.Empty;
 
-    [StringLength(10000, ErrorMessage = "CodeTemplate cannot exceed 10000 characters")]
-    public string CodeTemplate { get; set; } = string.Empty;
+    public Dictionary<string, string>? CodeTemplates { get; set; }
 
     [Required(ErrorMessage = "Mode is required")]
     [RegularExpression("^(MANUAL|FROM_FILE)$", ErrorMessage = "Mode must be MANUAL or FROM_FILE")]
@@ -35,6 +34,7 @@ public class CreateProblemRequest
 
     public bool WantsToEdit { get; set; } = false;
     public List<CreateTestCaseRequest>? TestCases { get; set; }
+    public List<string>? Tags { get; set; }
 }
 
 public class UpdateProblemRequest
@@ -56,9 +56,10 @@ public class UpdateProblemRequest
     [RegularExpression("^(EASY|MEDIUM|HARD)$", ErrorMessage = "Difficulty must be EASY, MEDIUM, or HARD")]
     public string Difficulty { get; set; } = string.Empty;
 
-    public string CodeTemplate { get; set; } = string.Empty;
+    public Dictionary<string, string>? CodeTemplates { get; set; }
 
     public List<CreateTestCaseRequest>? TestCases { get; set; }
+    public List<string>? Tags { get; set; }
 }
 
 public class CreateTestCaseRequest
@@ -75,8 +76,15 @@ public class CreateTestCaseRequest
     [Required(ErrorMessage = "IsCaseInsensitive is required")]
     public bool IsCaseInsensitive { get; set; } = false;
 
-    [Required(ErrorMessage = "IsRemovedSpace is required")]
-    public bool IsRemovedSpace { get; set; } = false;
+    public bool IsFloatingPoint { get; set; }
+
+    public double? FloatingPointTolerance { get; set; }
+
+    public int? DecimalPlaces { get; set; }
+
+    public bool IsTokenComparision { get; set; }
+
+    public bool IsNotOrderedComparision { get; set; }
 }
 
 public class UpdateTestCaseRequest
@@ -93,8 +101,15 @@ public class UpdateTestCaseRequest
     [Required(ErrorMessage = "IsCaseInsensitive is required")]
     public bool IsCaseInsensitive { get; set; } = false;
 
-    [Required(ErrorMessage = "IsRemovedSpace is required")]
-    public bool IsRemovedSpace { get; set; } = false;
+    public bool IsFloatingPoint { get; set; }
+
+    public double? FloatingPointTolerance { get; set; }
+
+    public int? DecimalPlaces { get; set; }
+
+    public bool IsTokenComparision { get; set; }
+
+    public bool IsNotOrderedComparision { get; set; }
 }
 
 public class ExtractOcrRequest
@@ -102,4 +117,14 @@ public class ExtractOcrRequest
     [Required(ErrorMessage = "FileName is required")]
     [StringLength(255, MinimumLength = 1, ErrorMessage = "FileName must be between 1 and 255 characters")]
     public string FileName { get; set; } = string.Empty;
+}
+
+public class TestcaseGenerationPreviewRequest
+{
+    [Required(ErrorMessage = "Content is required")]
+    public string Content { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "NumberOfTestcases is required")]
+    [Range(1, 20, ErrorMessage = "NumberOfTestcases must be between 1 and 20")]
+    public int NumberOfTestcases { get; set; } = 1;
 }
