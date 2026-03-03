@@ -27,7 +27,7 @@ public class ExaminationRequestDTO
     public string ProgrammingLanguageId { get; set; } = string.Empty;
 
     [JsonPropertyName("problems")]
-    public List<ExaminationProblemDTO> Problems { get; set; } = new();
+    public List<ExaminationProblemDTO>? Problems { get; set; }
 
     [Required]
     [JsonPropertyName("classroomId")]

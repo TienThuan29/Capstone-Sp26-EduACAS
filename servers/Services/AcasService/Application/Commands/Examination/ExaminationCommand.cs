@@ -70,12 +70,15 @@ public class ExaminationCommand : IExaminationCommand
 
             existingExam.ExamName = examDto.ExamName;
             existingExam.ProgrammingLanguageId = examDto.ProgrammingLanguageId;
-            existingExam.Problems = examDto.Problems?.Select(
-                p => new ExaminationProblem { 
-                    ProblemId = p.ProblemId, 
-                    Mark = p.Mark 
-                    }).ToList() 
-                    ?? new List<ExaminationProblem>();
+            // Only update problems when the client sends them; otherwise keep existing
+            if (examDto.Problems != null)
+            {
+                existingExam.Problems = examDto.Problems.Select(
+                    p => new ExaminationProblem {
+                        ProblemId = p.ProblemId,
+                        Mark = p.Mark
+                    }).ToList();
+            }
             existingExam.ClassroomId = examDto.ClassroomId;
             existingExam.StartDatetime = examDto.StartDatetime;
             existingExam.EndDatetime = examDto.EndDatetime;
