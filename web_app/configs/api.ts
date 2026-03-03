@@ -113,6 +113,10 @@ export const Api = {
   Submission: {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
+    SAVE: '/api/v1/submissions',
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
+    GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) =>
+      `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
   },
 
   TestcaseGeneration: {

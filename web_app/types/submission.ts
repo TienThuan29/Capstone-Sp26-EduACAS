@@ -86,3 +86,25 @@ export interface TestResultResponse {
   status: string;
   createdDate: string;
 }
+
+/** Request body for saving a problem submission (code-editor submit) */
+export interface SubmitProblemRequest {
+  examId: string;
+  problemId: string;
+  studentId: string;
+  source: string;
+  languageId: string;
+  compilerId: string;
+}
+
+/** Submission response from save / get submission APIs */
+export interface SubmissionResponse {
+  id: string;
+  studentId: string;
+  examId: string;
+  problemId: string;
+  version: number;
+  status: string;
+  submittedDate: string;
+  finalScore: number;
+}
