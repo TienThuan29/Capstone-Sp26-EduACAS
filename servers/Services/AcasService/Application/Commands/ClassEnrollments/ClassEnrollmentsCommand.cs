@@ -28,14 +28,14 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
 
     public async Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request)
     {
-        var classroom = await _classroomRepository.FindByEnrollKeyAsync(request.EnrolKey); // ??????????
+        var classroom = await _classroomRepository.FindByIdAsync(request.ClassId);
         if (classroom == null)
         {
-            throw new InvalidOperationException("Invalid enrollment key");
+            throw new InvalidOperationException("Class not found");
         }
-        if (classroom.Id != request.ClassId)
+        if (classroom.EnrolKey != request.EnrolKey)
         {
-            throw new InvalidOperationException("Enrollment key does not belong to this class");
+            throw new InvalidOperationException("Invalid enrollment key");
         }
 
         var existingEnrollment = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(request.ClassId, request.StudentId);
