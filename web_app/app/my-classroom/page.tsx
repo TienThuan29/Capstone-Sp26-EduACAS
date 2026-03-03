@@ -24,6 +24,7 @@ import HomeNavbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { useClassroom } from "@/hooks/classroom/useClassroom";
 import type { Classroom } from "@/types/classroom";
+import { formatDateOnly } from "@/utils/datetime-utils";
 import Link from "next/link";
 
 export default function ListClassroomPage() {
@@ -354,8 +355,8 @@ export default function ListClassroomPage() {
                     <div className="flex items-center gap-3 border-t border-gray-200 pt-3 dark:border-gray-600">
                       <CalendarIcon className="h-5 w-5 shrink-0 text-[#1F4E79] dark:text-[#C9A24D]" />
                       <p className="text-sm text-gray-600 dark:text-gray-400">
-                        {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
-                        {new Date(c.endDate).toLocaleDateString("vi-VN")}
+                        {formatDateOnly(c.createdDate)} –{" "}
+                        {formatDateOnly(c.endDate)}
                       </p>
                     </div>
                   </div>

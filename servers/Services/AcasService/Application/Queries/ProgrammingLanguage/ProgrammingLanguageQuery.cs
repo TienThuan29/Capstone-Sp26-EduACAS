@@ -17,8 +17,7 @@ public interface IProgrammingLanguageQuery
     
     // Task<List<ProgrammingLanguageResponse>> SearchAsync(string? searchTerm = null, bool? isEnable = null);
     
-    Task<PagedProgrammingLanguageResponse> GetPagedAsync(
-        int page = 1, int pageSize = 10, string? sortBy = null, bool ascending = true);
+    Task<PagedProgrammingLanguageResponse> GetPagedAsync(int page = 1, int pageSize = 10, string? sortBy = null, bool ascending = true);
 
 }
 

@@ -45,10 +45,19 @@ export const useProgrammingLanguage = () => {
     throw new Error('Failed to update programming language');
   }, [axiosInstance]);
 
+  const updateCompilerName = useCallback(async (languageId: string, compilerId: string, name: string): Promise<ProgrammingLanguage> => {
+    const response = await axiosInstance.put(Api.ProgrammingLanguage.UPDATE_COMPILER_NAME(languageId, compilerId), { name });
+    if (response.data?.dataResponse) {
+      return response.data.dataResponse;
+    }
+    throw new Error('Failed to update compiler name');
+  }, [axiosInstance]);
+
   return {
     getAllProgrammingLanguages,
     getEnabledProgrammingLanguages,
     syncProgrammingLanguages,
     updateProgrammingLanguage,
+    updateCompilerName,
   };
 };

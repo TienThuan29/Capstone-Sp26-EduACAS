@@ -36,6 +36,7 @@ import {
 } from "@/app/manage-classroom/tabs";
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
+import { DiscussionTab } from "../tabs/discussion-tab";
 
 type UpdateClassroomFormData = {
   classCode: string;
@@ -267,6 +268,8 @@ function ClassroomContent() {
         return <DashboardTab />;
       case "slots":
         return <SlotsTab maxSlot={classroom.maxSlot} />;
+      case "discussion":
+        return <DiscussionTab classId={classId} />;
       default:
         return (
           <OverviewTab

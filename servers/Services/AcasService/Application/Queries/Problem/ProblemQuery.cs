@@ -62,7 +62,8 @@ public class ProblemQuery : IProblemQuery
                 FileName = problem.FileName,
                 FileUrl = fileUrl,
                 Difficulty = problem.Difficulty,
-                CodeTemplate = problem.CodeTemplate,
+                CodeTemplates = problem.CodeTemplates ?? new Dictionary<string, string>(),
+                Tags = problem.Tags?.ToList() ?? new List<string>(),
                 CreatedDate = problem.CreatedDate,
                 UpdatedDate = problem.UpdatedDate,
                 TestCases = testCases
@@ -70,11 +71,16 @@ public class ProblemQuery : IProblemQuery
                     .Select(tc => new TestCaseResponse
                     {
                         Id = tc.Id,
+                        ProblemId = tc.ProblemId,
                         InputData = tc.InputData,
                         ExpectedOutput = tc.ExpectedOutput,
                         IsPublic = tc.IsPublic,
                         IsCaseInsensitive = tc.IsCaseInsensitive,
-                        IsRemovedSpace = tc.IsRemovedSpace
+                        IsFloatingPoint = tc.IsFloatingPoint,
+                        FloatingPointTolerance = tc.FloatingPointTolerance,
+                        DecimalPlaces = tc.DecimalPlaces,
+                        IsTokenComparision = tc.IsTokenComparision,
+                        IsNotOrderedComparision = tc.IsNotOrderedComparision
                     })
                     .ToList()
             };
@@ -98,7 +104,10 @@ public class ProblemQuery : IProblemQuery
                     Id = p.Id,
                     Title = p.Title,
                     Difficulty = p.Difficulty,
-                    CreatedDate = p.CreatedDate
+                    Tags = p.Tags?.ToList() ?? new List<string>(),
+                    TestCasesCount = p.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate
                 })
                 .ToList();
         }
@@ -121,7 +130,10 @@ public class ProblemQuery : IProblemQuery
                     Id = p.Id,
                     Title = p.Title,
                     Difficulty = p.Difficulty,
-                    CreatedDate = p.CreatedDate
+                    Tags = p.Tags?.ToList() ?? new List<string>(),
+                    TestCasesCount = p.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate
                 })
                 .ToList();
         }
@@ -144,7 +156,10 @@ public class ProblemQuery : IProblemQuery
                     Id = p.Id,
                     Title = p.Title,
                     Difficulty = p.Difficulty,
-                    CreatedDate = p.CreatedDate
+                    Tags = p.Tags?.ToList() ?? new List<string>(),
+                    TestCasesCount = p.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+                    CreatedDate = p.CreatedDate,
+                    UpdatedDate = p.UpdatedDate
                 })
                 .ToList();
         }
@@ -165,11 +180,16 @@ public class ProblemQuery : IProblemQuery
                 .Select(tc => new TestCaseResponse
                 {
                     Id = tc.Id,
+                    ProblemId = tc.ProblemId,
                     InputData = tc.InputData,
                     ExpectedOutput = tc.ExpectedOutput,
                     IsPublic = tc.IsPublic,
                     IsCaseInsensitive = tc.IsCaseInsensitive,
-                    IsRemovedSpace = tc.IsRemovedSpace
+                    IsFloatingPoint = tc.IsFloatingPoint,
+                    FloatingPointTolerance = tc.FloatingPointTolerance,
+                    DecimalPlaces = tc.DecimalPlaces,
+                    IsTokenComparision = tc.IsTokenComparision,
+                    IsNotOrderedComparision = tc.IsNotOrderedComparision
                 })
                 .ToList();
         }
@@ -191,11 +211,16 @@ public class ProblemQuery : IProblemQuery
             return new TestCaseResponse
             {
                 Id = testCase.Id,
+                ProblemId = testCase.ProblemId,
                 InputData = testCase.InputData,
                 ExpectedOutput = testCase.ExpectedOutput,
                 IsPublic = testCase.IsPublic,
                 IsCaseInsensitive = testCase.IsCaseInsensitive,
-                IsRemovedSpace = testCase.IsRemovedSpace
+                IsFloatingPoint = testCase.IsFloatingPoint,
+                FloatingPointTolerance = testCase.FloatingPointTolerance,
+                DecimalPlaces = testCase.DecimalPlaces,
+                IsTokenComparision = testCase.IsTokenComparision,
+                IsNotOrderedComparision = testCase.IsNotOrderedComparision
             };
         }
         catch (Exception ex)

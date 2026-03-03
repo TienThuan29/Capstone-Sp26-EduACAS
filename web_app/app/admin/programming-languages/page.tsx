@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
 import { 
@@ -21,6 +21,7 @@ import {
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'
 import { DefaultCustomButton } from "@/components/ui/custom-button"
+import { formatDate } from "@/utils/datetime-utils"
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage"
 import type { ProgrammingLanguage } from "@/types/language"
 import { useToast } from "@/hooks/useToast"
@@ -91,13 +92,15 @@ export default function ProgrammingLanguagesManagement() {
 
   const handleUpdateLanguage = async (updatedLanguage: ProgrammingLanguage) => {
     try {
-      await updateProgrammingLanguage(updatedLanguage.id, { status: updatedLanguage.status })
-      toast.showSuccess('Updated programming language successfully')
-      // Update local state
-      setLanguages(prev => prev.map(lang => 
-        lang.id === updatedLanguage.id ? { ...lang, status: updatedLanguage.status } : lang
+      const statusChanged = selectedLanguage?.status !== updatedLanguage.status
+      if (statusChanged) {
+        await updateProgrammingLanguage(updatedLanguage.id, { status: updatedLanguage.status })
+      }
+      toast.showSuccess(statusChanged ? 'Updated programming language successfully' : 'Updated successfully')
+      setLanguages(prev => prev.map(lang =>
+        lang.id === updatedLanguage.id ? updatedLanguage : lang
       ))
-      setSelectedLanguage({ ...updatedLanguage })
+      setSelectedLanguage(updatedLanguage)
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       toast.showError(err.response?.data?.message || 'Cannot update programming language')
@@ -116,16 +119,6 @@ export default function ProgrammingLanguagesManagement() {
       default:
         return 'gray'
     }
-  }
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   return (
@@ -237,7 +230,7 @@ export default function ProgrammingLanguagesManagement() {
                           {formatDate(lang.updatedDate)}
                         </TableCell>
                         <TableCell>
-                          <Button className="cursor-pointer" size="xs" color="info" onClick={(e) => { e.stopPropagation(); handleViewDetail(lang); }}>
+                          <Button className="cursor-pointer" size="xs" color="info" onClick={(e: React.MouseEvent) => { e.stopPropagation(); handleViewDetail(lang); }}>
                             View Detail
                           </Button>
                         </TableCell>

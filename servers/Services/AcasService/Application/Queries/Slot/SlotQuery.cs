@@ -1,5 +1,7 @@
 using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
+using AcasService.Models;
+using AcasService.Repositories.Examination;
 using AcasService.Repositories.Slot;
 
 namespace AcasService.Application.Queries.Slot;
@@ -15,17 +17,23 @@ public interface ISlotQuery
 public class SlotQuery : ISlotQuery
 {
     private readonly ISlotRepository _slotRepository;
+    private readonly IExaminationRepository _examinationRepository;
     private readonly SlotMapper _slotMapper;
+    private readonly ExaminationMapper _examinationMapper;
     private readonly ILogger<SlotQuery> _logger;
 
     public SlotQuery(
         ISlotRepository slotRepository,
+        IExaminationRepository examinationRepository,
         SlotMapper slotMapper,
+        ExaminationMapper examinationMapper,
         ILogger<SlotQuery> logger
     )
     {
         _slotRepository = slotRepository;
+        _examinationRepository = examinationRepository;
         _slotMapper = slotMapper;
+        _examinationMapper = examinationMapper;
         _logger = logger;
     }
 
@@ -41,7 +49,9 @@ public class SlotQuery : ISlotQuery
                 throw new KeyNotFoundException($"Slot with id {slotId} not found.");
             }
 
-            return _slotMapper.ToSlotResponse(slot);
+            var examinations = await _examinationRepository.GetByIdsAsync(slot.ExaminationIds);
+            var examinationResponses = examinations.Select(_examinationMapper.ToExaminationBasicResponse).ToList();
+            return _slotMapper.ToSlotResponse(slot, examinationResponses);
         }
         catch (Exception ex)
         {
@@ -55,7 +65,7 @@ public class SlotQuery : ISlotQuery
         try
         {
             var slots = await _slotRepository.FindAllAsync();
-            return slots.Select(s => _slotMapper.ToSlotResponse(s)).ToList();
+            return await MapSlotsWithExaminationsAsync(slots.ToList());
         }
         catch (Exception ex)
         {
@@ -69,7 +79,7 @@ public class SlotQuery : ISlotQuery
         try
         {
             var slots = await _slotRepository.GetSlotsByClassroomIdAsync(classroomId);
-            return slots.Select(s => _slotMapper.ToSlotResponse(s)).ToList();
+            return await MapSlotsWithExaminationsAsync(slots.ToList());
         }
         catch (Exception ex)
         {
@@ -83,12 +93,24 @@ public class SlotQuery : ISlotQuery
         try
         {
             var slots = await _slotRepository.GetSlotsByKeywordAsync(keyword);
-            return slots.Select(s => _slotMapper.ToSlotResponse(s)).ToList();
+            return await MapSlotsWithExaminationsAsync(slots.ToList());
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error searching slots by keyword: {Keyword}", keyword);
             throw;
         }
+    }
+
+    private async Task<List<SlotResponse>> MapSlotsWithExaminationsAsync(List<Models.Slot> slots)
+    {
+        var result = new List<SlotResponse>();
+        foreach (var slot in slots)
+        {
+            var examinations = await _examinationRepository.GetByIdsAsync(slot.ExaminationIds ?? new List<string>());
+            var examinationResponses = examinations.Select(_examinationMapper.ToExaminationBasicResponse).ToList();
+            result.Add(_slotMapper.ToSlotResponse(slot, examinationResponses));
+        }
+        return result;
     }
 }

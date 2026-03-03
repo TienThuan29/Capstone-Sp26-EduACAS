@@ -9,4 +9,6 @@ public class SlotResponse
     public string Description { get; set; } = string.Empty;
     public DateTime CreatedDate { get; set; }
     public DateTime? UpdatedDate { get; set; }
+    public List<string> ExaminationIds { get; set; } = new List<string>();
+    public List<ExaminationBasicResponse> Examinations { get; set; } = new List<ExaminationBasicResponse>();
 }

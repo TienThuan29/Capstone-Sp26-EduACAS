@@ -37,6 +37,9 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             problem.CreatedDate = DateTime.UtcNow;
             problem.UpdatedDate = DateTime.UtcNow;
 
+            foreach (var tc in problem.TestCases)
+                tc.ProblemId = problem.Id;
+
             var dynamoItem = DynamoMapper.ProblemToDynamoItem(problem);
             var response = await PutItemAsync(dynamoItem, _problemTableName);
             

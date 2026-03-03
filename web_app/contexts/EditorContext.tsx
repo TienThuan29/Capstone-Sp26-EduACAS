@@ -14,7 +14,7 @@ import React, {
 //   Problem,
 //   Submission,
 // } from '@/types/language';
-import { ProgrammingLanguage } from '@/types/language';
+import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
 
 
@@ -52,6 +52,8 @@ interface EditorContextType {
   editorState: EditorState;
   setCode: (code: string) => void;
   setLanguage: (language: ProgrammingLanguage) => void;
+  selectedCompiler: Compiler | null;
+  setSelectedCompiler: (compiler: Compiler | null) => void;
   setFontSize: (size: number) => void;
   setTheme: (theme: 'vs-dark' | 'vs-light') => void;
   setTabSize: (size: number) => void;
@@ -66,6 +68,11 @@ interface EditorContextType {
   // Problem State
   problem: Problem | null;
   setProblem: (problem: Problem) => void;
+
+  // Exam back link (when opened from my-classroom exam)
+  examId: string | null;
+  examClassroomId: string | null;
+  setExamBackLink: (examId: string | null, classroomId: string | null) => void;
 
   // Test Cases
   testCases: TestCase[];
@@ -165,6 +172,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   // Problem State
   const [problem, setProblem] = useState<Problem | null>(null);
+  const [selectedCompiler, setSelectedCompiler] = useState<Compiler | null>(null);
+  const [examId, setExamIdState] = useState<string | null>(null);
+  const [examClassroomId, setExamClassroomIdState] = useState<string | null>(null);
 
   // Test Cases
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -240,6 +250,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       language,
       code: boilerplate,
     }));
+    setSelectedCompiler(language?.compilers?.[0] ?? null);
   }, [problem]);
 
   const setFontSize = useCallback((fontSize: number) => {
@@ -272,6 +283,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   const setCursorSmoothCaretAnimation = useCallback((cursorSmoothCaretAnimation: boolean) => {
     setEditorState((prev) => ({ ...prev, cursorSmoothCaretAnimation }));
+  }, []);
+
+  const setExamBackLink = useCallback((eid: string | null, cid: string | null) => {
+    setExamIdState(eid);
+    setExamClassroomIdState(cid);
   }, []);
 
   const toggleTheme = useCallback(() => {
@@ -408,6 +424,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     editorState,
     setCode,
     setLanguage,
+    selectedCompiler,
+    setSelectedCompiler,
     setFontSize,
     setTheme,
     setTabSize,
@@ -420,6 +438,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     resetCode,
     problem,
     setProblem,
+    examId,
+    examClassroomId,
+    setExamBackLink,
     testCases,
     setTestCases,
     updateTestCase,

@@ -92,6 +92,29 @@ public class ProgrammingLanguageCommandController : ControllerBase
         }
     }
 
+    [HttpPut("{id}/compilers/{compilerId}/name")]
+    public async Task<ActionResult<ApiResponse<ProgrammingLanguageResponse>>> UpdateCompilerName(
+        string id,
+        string compilerId,
+        [FromBody] UpdateCompilerNameRequest request)
+    {
+        try
+        {
+            var result = await _programmingLanguageCommand.UpdateCompilerNameAsync(id, compilerId, request.Name);
+            return ResponseUtil.Success(result, "Compiler name updated successfully", 200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, "Programming language or compiler not found: {Id}, {CompilerId}", id, compilerId);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>(ex.Message, 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating compiler name for programming language: {Id}, compiler: {CompilerId}", id, compilerId);
+            return ResponseUtil.Error<ProgrammingLanguageResponse>("Internal Server Error", 500);
+        }
+    }
+
     // [HttpPost]
     // public async Task<ActionResult<ApiResponse<ProgrammingLanguageResponse>>> Create(
     //     [FromBody] ProgrammingLanguageRequest request)
