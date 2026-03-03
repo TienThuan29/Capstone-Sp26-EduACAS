@@ -48,7 +48,7 @@ public class TestcaseGenerator : ITestcaseGenerator
             var generationConfig = new GeminiGenerationConfig
             {
                   Temperature = 0.4,
-                  MaxOutputTokens = 2048
+                  MaxOutputTokens = 16384
             };
 
             var raw = await _geminiClient.GenerateContentAsync(prompt, generationConfig);
@@ -173,28 +173,55 @@ public class TestcaseGenerator : ITestcaseGenerator
                   return null;
             }
 
-            // We frequently see truncation right after a trailing comma on the last
-            // valid property (e.g. \"FloatingPointTolerance\": null, \" ). To fix,
-            // trim everything after the LAST comma-newline sequence and then close
-            // the object/array.
-            var commaNewlineIndex = json.LastIndexOf(",\n", StringComparison.Ordinal);
+            var trimmed = json.Trim();
+
+            // If response was cut mid-property (e.g. "FloatingPoint), complete the key/value and add remaining fields.
+            string? completion = null;
+            if (trimmed.EndsWith("\"FloatingPoint", StringComparison.OrdinalIgnoreCase))
+                  completion = "Tolerance\": null, \"DecimalPlaces\": null, \"IsTokenComparision\": false, \"IsNotOrderedComparision\": false }";
+            else if (trimmed.EndsWith("\"FloatingPointTolerance", StringComparison.OrdinalIgnoreCase))
+                  completion = "\": null, \"DecimalPlaces\": null, \"IsTokenComparision\": false, \"IsNotOrderedComparision\": false }";
+            else if (trimmed.EndsWith("\"DecimalPlaces", StringComparison.OrdinalIgnoreCase))
+                  completion = "\": null, \"IsTokenComparision\": false, \"IsNotOrderedComparision\": false }";
+            else if (trimmed.EndsWith("\"IsTokenComparision", StringComparison.OrdinalIgnoreCase))
+                  completion = "\": false, \"IsNotOrderedComparision\": false }";
+            else if (trimmed.EndsWith("\"IsNotOrderedComparision", StringComparison.OrdinalIgnoreCase))
+                  completion = "\": false }";
+
+            if (completion != null)
+            {
+                  var fix = trimmed + completion;
+                  if (!fix.TrimEnd().EndsWith("]"))
+                        fix += "\n]";
+                  return fix;
+            }
+
+            // Truncation after a trailing comma: trim to last complete object and close with remaining fields + ].
+            var commaNewlineIndex = trimmed.LastIndexOf(",\n", StringComparison.Ordinal);
+            if (commaNewlineIndex < 0)
+                  commaNewlineIndex = trimmed.LastIndexOf(", ", StringComparison.Ordinal);
             if (commaNewlineIndex < 0)
             {
                   return null;
             }
 
-            var prefix = json[..commaNewlineIndex].TrimEnd();
+            var prefix = trimmed[..commaNewlineIndex].TrimEnd();
 
-            // Ensure we still have the opening array bracket
             if (!prefix.StartsWith("[", StringComparison.Ordinal))
             {
                   prefix = "[" + prefix;
             }
 
             var sb = new System.Text.StringBuilder();
-            sb.AppendLine(prefix);
-            sb.AppendLine();
-            sb.AppendLine("  }");
+            sb.Append(prefix);
+            // Complete the truncated object with required trailing fields so deserializer gets all properties
+            if (!prefix.EndsWith("}", StringComparison.Ordinal))
+            {
+                  if (!prefix.TrimEnd().EndsWith(","))
+                        sb.Append(',');
+                  sb.Append(" \"FloatingPointTolerance\": null, \"DecimalPlaces\": null, \"IsTokenComparision\": false, \"IsNotOrderedComparision\": false }");
+            }
+            sb.Append('\n');
             sb.Append(']');
 
             return sb.ToString();
@@ -322,28 +349,26 @@ TEST CASE DESIGN REQUIREMENTS
 
 OUTPUT FORMAT (CRITICAL)
 
-- Respond with ONLY a valid JSON array (list) of test case objects.
-- Do NOT include any surrounding text, explanation, or markdown.
-- Do NOT wrap the JSON in ``` fences.
-- Generate EXACTLY {{NUMBER_OF_TESTCASES}} objects.
+- Respond with ONLY a valid JSON array. No surrounding text, no explanation, no markdown, no code fences.
+- Generate EXACTLY {{NUMBER_OF_TESTCASES}} test case objects. Each object MUST have all 9 fields below.
+- Do not truncate: the response must be one complete JSON array from [ to ].
+- Use minimal whitespace to avoid token limits (e.g. single space after commas and colons).
 
-Example of the required JSON shape (values are just illustrative):
+Required fields per object (exact names):
+- "InputData": string
+- "ExpectedOutput": string
+- "IsPublic": bool
+- "IsCaseInsensitive": bool
+- "IsFloatingPoint": bool
+- "FloatingPointTolerance": number or null
+- "DecimalPlaces": integer or null
+- "IsTokenComparision": bool
+- "IsNotOrderedComparision": bool
 
-[
-  {
-    "InputData": "3\n1 2 3\n",
-    "ExpectedOutput": "6\n",
-    "IsPublic": true,
-    "IsCaseInsensitive": false,
-    "IsFloatingPoint": false,
-    "FloatingPointTolerance": null,
-    "DecimalPlaces": null,
-    "IsTokenComparision": false,
-    "IsNotOrderedComparision": false
-  }
-]
+Example (one object; generate {{NUMBER_OF_TESTCASES}} like this):
+[{"InputData":"3\n1 2 3\n","ExpectedOutput":"6\n","IsPublic":true,"IsCaseInsensitive":false,"IsFloatingPoint":false,"FloatingPointTolerance":null,"DecimalPlaces":null,"IsTokenComparision":false,"IsNotOrderedComparision":false}]
 
-Now generate the JSON array of {{NUMBER_OF_TESTCASES}} test cases using the problem above.
+Generate the full JSON array of {{NUMBER_OF_TESTCASES}} test cases now. Do not stop early; include every object.
 """;
 
       
