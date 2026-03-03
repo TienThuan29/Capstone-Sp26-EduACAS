@@ -13,7 +13,6 @@ import {
   TextInput,
   Textarea,
   Select,
-  Badge,
   Spinner,
   Table,
   TableBody,
@@ -26,11 +25,9 @@ import {
 } from "flowbite-react";
 import {
   PlusIcon,
-  PencilIcon,
   TrashIcon,
   MagnifyingGlassIcon,
   DocumentTextIcon,
-  CodeBracketSquareIcon,
 } from "@heroicons/react/24/outline";
 import { useToast } from "@/hooks/useToast";
 import { useProblem } from "@/hooks/problem/useProblem";
@@ -60,15 +57,6 @@ const initialFormData: ProblemFormData = {
   fileName: "",
   difficulty: "EASY",
   codeTemplate: "",
-};
-
-const difficultyBadgeColor: Record<
-  Difficulty,
-  "success" | "warning" | "failure"
-> = {
-  EASY: "success",
-  MEDIUM: "warning",
-  HARD: "failure",
 };
 
 export default function ProblemBanksPage() {

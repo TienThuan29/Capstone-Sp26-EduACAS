@@ -115,6 +115,10 @@ export const Api = {
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
   },
 
+  TestcaseGeneration: {
+    PREVIEW: '/api/acas/v1/testcase-generation/preview',
+  },
+
   DiscussionIssue: {
     BASE: "/api/acas/v1/discussion-issues",
     GET_PAGED: "/api/acas/v1/discussion-issues",
