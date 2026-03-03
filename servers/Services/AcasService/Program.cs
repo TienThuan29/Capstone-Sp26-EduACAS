@@ -50,6 +50,8 @@ using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
+using AcasService.Application.Queries.Submission;
+using AcasService.Repositories.Caching.Redis.Submission;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,6 +85,10 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     return ConnectionMultiplexer.Connect(redisConnectionString);
 });
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    options.Configuration = redisConnectionString;
+});
 builder.Services.AddHostedService<RedisHostedService>();
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
@@ -113,6 +119,9 @@ builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 
+// cahing
+builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
+
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
 builder.Services.AddScoped<IPublicS3Command, PublicS3Command>();
@@ -140,6 +149,9 @@ builder.Services.AddScoped<ITestcaseEvaluator, TestcaseEvaluator>();
 builder.Services.AddScoped<IResultComparator, ResultComparator>();
 builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
 builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
+builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
+builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
+builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -152,6 +164,7 @@ builder.Services.AddScoped<MaterialMapper>();
 builder.Services.AddScoped<CommentMapper>();
 builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
+builder.Services.AddScoped<SubmissionMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
