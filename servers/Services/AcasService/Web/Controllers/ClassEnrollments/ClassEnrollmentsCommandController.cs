@@ -32,6 +32,10 @@ public class ClassEnrollmentsCommandController : ControllerBase
             var response = await _classEnrollmentsCommand.EnrollClass(request);
             return ResponseUtil.Success(response, "Enrolled in class successfully", 201);
         }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Class not found"))
+        {
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Class not found", 404);
+        }
         catch (InvalidOperationException ex) when (ex.Message.Contains("Invalid enrollment key"))
         {
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Invalid enrollment key", 400);
@@ -39,10 +43,6 @@ public class ClassEnrollmentsCommandController : ControllerBase
         catch (Exception ex) when (ex.Message.Contains("Student is already enrolled in this class"))
         {
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is already enrolled in this class", 409);
-        }
-        catch (InvalidOperationException ex) when (ex.Message.Contains("Enrollment key does not belong to this class"))
-        {
-            return ResponseUtil.Error<ClassEnrollmentsResponse>("Enrollment key does not belong to this class", 400);
         }
         catch (Exception ex)
         {
