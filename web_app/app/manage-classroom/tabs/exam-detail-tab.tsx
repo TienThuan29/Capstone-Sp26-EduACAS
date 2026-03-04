@@ -1,6 +1,7 @@
 "use client";
 
-import { Tabs, TabItem } from "flowbite-react";
+import { Button, Tabs, TabItem } from "flowbite-react";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { Examination } from "@/types/examination";
 import { OverviewTabContent } from "../components/exam-detail-tab/overview";
 import { ProblemsTabContent } from "../components/exam-detail-tab/problems";
@@ -24,11 +25,15 @@ export type ExaminationDetailViewProps = {
   examination: Examination;
   onBack: () => void;
   onExaminationUpdate?: (updated: Examination) => void;
+  /** When false, back button is shown in page header instead of card (default true for backward compatibility) */
+  showBackInHeader?: boolean;
 };
 
 export function ExaminationDetailView({
   examination,
+  onBack,
   onExaminationUpdate,
+  showBackInHeader = true,
 }: ExaminationDetailViewProps) {
   const statusLabel =
     STATUS_LABELS[examination.status as 0 | 1 | 2] ?? "PENDING";
@@ -37,7 +42,18 @@ export function ExaminationDetailView({
 
   return (
     <div className="bg-white shadow dark:bg-gray-800">
-      <div className="border-b border-gray-200 p-4 dark:border-gray-600">
+      <div className="flex flex-wrap items-center gap-3 border-b border-gray-200 p-4 dark:border-gray-600">
+        {showBackInHeader && (
+          <Button
+            color="gray"
+            outline
+            onClick={onBack}
+            className="inline-flex cursor-pointer items-center gap-2"
+          >
+            <ArrowLeftIcon className="h-5 w-5" />
+            Back to list
+          </Button>
+        )}
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
           {examination.examName}
         </h3>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState, Suspense, useMemo } from "react";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Spinner,
   Button,
@@ -50,6 +50,7 @@ type UpdateClassroomFormData = {
 
 function ClassroomContent() {
   const params = useParams();
+  const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
   const {
@@ -63,6 +64,7 @@ function ClassroomContent() {
   const { showSuccess, showError } = useToast();
 
   const activeTab = searchParams.get("tab") || "overview";
+  const initialExamId = searchParams.get("examId");
 
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
@@ -75,6 +77,9 @@ function ClassroomContent() {
   const [actionLoading, setActionLoading] = useState(false);
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [showEnrolKey, setShowEnrolKey] = useState(false);
+  const [examDetailBack, setExamDetailBack] = useState<(() => void) | null>(
+    null
+  );
 
   const classId = params.id as string;
 
@@ -147,6 +152,16 @@ function ClassroomContent() {
       setExamsLoading(false);
     }
   }, [getExaminationsByClassId, classId]);
+
+  const updateExamIdInUrl = useCallback(
+    (examId: string | null) => {
+      const p = new URLSearchParams(searchParams?.toString() ?? "");
+      if (examId) p.set("examId", examId);
+      else p.delete("examId");
+      router.replace(`${pathname}?${p.toString()}`);
+    },
+    [router, searchParams, pathname]
+  );
 
   useEffect(() => {
     if ((activeTab === "exams" || activeTab === "practise-ex") && classId) {
@@ -260,6 +275,9 @@ function ClassroomContent() {
             examinations={examinations}
             loading={examsLoading}
             onRefetch={fetchExaminations}
+            setExamDetailBack={setExamDetailBack}
+            initialExamId={initialExamId}
+            onExamIdInUrlChange={updateExamIdInUrl}
           />
         );
       case "students":
@@ -286,12 +304,19 @@ function ClassroomContent() {
       <Sidebar />
 
       <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
-        <div className="mb-5">
+        <div className="mb-5 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="Manage classrooms"
             icon={<ArrowLeftIcon className="h-4 w-4" />}
             onClick={() => router.push(PageUrl.MANAGE_CLASSROOM_PAGE)}
           />
+          {activeTab === "exams" && examDetailBack && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={examDetailBack}
+            />
+          )}
         </div>
 
         {renderTabContent()}
