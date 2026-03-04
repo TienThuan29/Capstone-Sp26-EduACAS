@@ -167,6 +167,7 @@ builder.Services.AddScoped<CommentMapper>();
 builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
+builder.Services.AddScoped<ClassEnrollmentMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();

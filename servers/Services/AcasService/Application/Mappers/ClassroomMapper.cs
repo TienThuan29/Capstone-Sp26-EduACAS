@@ -89,9 +89,9 @@ public class ClassroomMapper
 }
 
 
-public class ClassroomStudentMapper
+public class ClassEnrollmentMapper
 {
-    public static ClassroomStudentResponse ToClassroomStudentResponse(ClassEnrollment enrollment, UserProfileResponse? userProfile)
+    public ClassroomStudentResponse ToClassroomStudentResponse(ClassEnrollment enrollment, UserProfileResponse? userProfile)
     {
         return new ClassroomStudentResponse
         {
@@ -106,6 +106,19 @@ public class ClassroomStudentMapper
             Birthday = userProfile?.Birthday,
             Role = userProfile?.Role ?? string.Empty,
             IsEnable = userProfile?.IsEnable ?? false
+        };
+    }
+
+    public ClassEnrollmentsResponse ToClassEnrollmentsResponse(ClassEnrollment enrollment)
+    {
+        return new ClassEnrollmentsResponse
+        {
+            EnrollmentId = enrollment.Id,
+            ClassId = enrollment.ClassId,
+            StudentId = enrollment.StudentId,
+            JoinedDate = enrollment.JoinedDate,
+            IsJoining = enrollment.IsJoining,
+            MovedOutDate = enrollment.MovedOutDate
         };
     }
 }
