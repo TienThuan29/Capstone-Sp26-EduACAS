@@ -3,7 +3,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/features/services/classroom_service.dart';
-import 'package:mobile/features/presentation/student/classroom_detail_page.dart';
+import 'package:mobile/features/presentation/classroom/student_classroom_detail_page.dart';
 import 'package:mobile/core/widgets/background.dart';
 
 class StudentClassroomListPage extends StatefulWidget {
@@ -96,7 +96,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
             ),
             child: const Icon(Icons.class_rounded, color: AppColors.primary, size: 28),
@@ -125,9 +125,9 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
+        color: Colors.white.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: TabBar(
         controller: _tabController,
@@ -176,9 +176,9 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
@@ -203,14 +203,14 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
                         children: [
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(6)),
+                            decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(6)),
                             child: Text(classroom.classCode, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           const Spacer(),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: (isJoined ? Colors.green : Colors.orange).withOpacity(0.1),
+                              color: (isJoined ? Colors.green : Colors.orange).withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
@@ -248,7 +248,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primary.withOpacity(0.5)),
+                          border: Border.all(color: AppColors.primary.withValues(alpha: 0.5)),
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Center(

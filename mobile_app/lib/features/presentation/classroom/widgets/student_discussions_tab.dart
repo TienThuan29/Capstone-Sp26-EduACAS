@@ -3,7 +3,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/discussion_issue.dart';
 import 'package:mobile/features/services/discussion_provider.dart';
-import 'package:mobile/features/presentation/student/discussion_detail_screen.dart';
+import 'package:mobile/features/presentation/discussion/discussion_detail_page.dart';
 
 class StudentDiscussionsTab extends StatefulWidget {
   final String classroomId;
@@ -107,11 +107,11 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
           fillColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -188,7 +188,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.forum_outlined, size: 64, color: Colors.grey[300]),
@@ -218,10 +218,10 @@ class _DiscussionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -247,7 +247,7 @@ class _DiscussionCard extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: AppColors.primary.withOpacity(0.1),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Text(
                       discussion.authorName.isNotEmpty ? discussion.authorName[0].toUpperCase() : '?',
                       style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
@@ -308,7 +308,7 @@ class _DiscussionCard extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Colors.orange.withOpacity(0.08),
+                      color: Colors.orange.withValues(alpha: 0.08),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Row(
@@ -360,7 +360,7 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(100),
       ),
       child: Row(

@@ -5,7 +5,9 @@ import 'package:mobile/core/widgets/enhanced_button.dart';
 import 'profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onLogout;
+
+  const ProfileScreen({super.key, this.onLogout});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -117,6 +119,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           isLoading: _controller.isLoading,
                           onPressed: _handleUpdate,
                         ),
+                        if (widget.onLogout != null) ...[
+                          const SizedBox(height: 24),
+                          SizedBox(
+                            width: double.infinity,
+                            child: OutlinedButton.icon(
+                              onPressed: widget.onLogout,
+                              icon: const Icon(Icons.logout, size: 20),
+                              label: const Text('Logout'),
+                              style: OutlinedButton.styleFrom(
+                                foregroundColor: AppColors.error,
+                                side: const BorderSide(color: AppColors.error),
+                                padding: const EdgeInsets.symmetric(vertical: 14),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

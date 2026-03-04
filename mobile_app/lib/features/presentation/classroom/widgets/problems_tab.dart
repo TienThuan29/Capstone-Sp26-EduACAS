@@ -3,7 +3,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/problem.dart';
 import 'package:mobile/features/services/problem_service.dart';
-import 'package:mobile/features/presentation/lecturer/problem_detail_page.dart';
+import 'package:mobile/features/presentation/problem/problem_detail_page.dart';
 
 class ProblemsTab extends StatefulWidget {
   final String classroomId;

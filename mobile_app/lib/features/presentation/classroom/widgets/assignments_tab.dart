@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/examination.dart';
 import 'package:mobile/features/services/examination_service.dart';
-import 'package:mobile/features/presentation/lecturer/examination_detail_page.dart';
+import 'package:mobile/features/presentation/examination/examination_detail_page.dart';
 
 class AssignmentsTab extends StatefulWidget {
   final String classroomId;
@@ -181,7 +181,7 @@ class _AssignmentsTabState extends State<AssignmentsTab> {
                   Container(
                     padding: const EdgeInsets.all(10),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -215,7 +215,7 @@ class _AssignmentsTabState extends State<AssignmentsTab> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: statusColor.withOpacity(0.2),
+                                color: statusColor.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Row(
@@ -245,7 +245,7 @@ class _AssignmentsTabState extends State<AssignmentsTab> {
                                 vertical: 2,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.accent.withOpacity(0.2),
+                                color: AppColors.accent.withValues(alpha: 0.2),
                                 borderRadius: BorderRadius.circular(4),
                               ),
                               child: Text(

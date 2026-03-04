@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/models/classroom.dart';
-import 'package:mobile/features/presentation/lecturer/tabs/materials_tab.dart';
-import 'package:mobile/features/presentation/lecturer/tabs/assignments_tab.dart';
-import 'package:mobile/features/presentation/lecturer/tabs/discussions_tab.dart';
-import 'package:mobile/features/presentation/lecturer/tabs/problems_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/materials_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/assignments_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/discussions_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/problems_tab.dart';
 
 class ClassroomDetailPage extends StatefulWidget {
   final Classroom classroom;

@@ -432,7 +432,7 @@ class _StatChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -495,7 +495,7 @@ class _IssueCard extends StatelessWidget {
                   // Author avatar
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: AppColors.primary.withOpacity(0.15),
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.15),
                     child: Text(
                       issue.authorName.isNotEmpty
                           ? issue.authorName[0].toUpperCase()
@@ -915,7 +915,7 @@ class _IssueDetailPageState extends State<IssueDetailPage> {
               children: [
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: AppColors.primary.withOpacity(0.15),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.15),
                   child: Text(
                     widget.issue.authorName.isNotEmpty
                         ? widget.issue.authorName[0].toUpperCase()
@@ -1028,7 +1028,7 @@ class _IssueDetailPageState extends State<IssueDetailPage> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, -2),
           ),
@@ -1513,7 +1513,7 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 8, vertical: 3),
                           decoration: BoxDecoration(
-                            color: AppColors.info.withOpacity(0.1),
+                            color: AppColors.info.withValues(alpha: 0.1),
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
@@ -1578,7 +1578,7 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
             // Formatting tips
             Card(
               elevation: 0,
-              color: AppColors.info.withOpacity(0.05),
+              color: AppColors.info.withValues(alpha: 0.05),
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(14)),
               child: Padding(

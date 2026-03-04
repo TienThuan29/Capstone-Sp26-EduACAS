@@ -5,7 +5,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom/classroom_model.dart';
 import 'package:mobile/features/services/classroom_service.dart';
 import 'package:mobile/features/models/classroom.dart';
-import 'package:mobile/features/presentation/student/classroom_detail_page.dart';
+import 'package:mobile/features/presentation/classroom/student_classroom_detail_page.dart';
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  Filter state

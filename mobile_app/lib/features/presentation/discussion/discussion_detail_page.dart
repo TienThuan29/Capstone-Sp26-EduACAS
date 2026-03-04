@@ -163,7 +163,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
             ),
           ],
         ),
-        shape: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
+        shape: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
       ),
       body: Stack(
         children: [
@@ -209,12 +209,12 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(24),
@@ -225,7 +225,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     widget.issue.authorName.isNotEmpty ? widget.issue.authorName[0].toUpperCase() : '?',
                     style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
@@ -251,7 +251,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
@@ -276,7 +276,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
               widget.issue.content,
               style: TextStyle(
                 fontSize: 15,
-                color: AppColors.textPrimary.withOpacity(0.8),
+                color: AppColors.textPrimary.withValues(alpha: 0.8),
                 height: 1.6,
                 fontWeight: FontWeight.w500,
               ),
@@ -295,7 +295,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: AppColors.textSecondary.withOpacity(0.05),
+              color: AppColors.textSecondary.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(Icons.forum_outlined, size: 18, color: AppColors.textSecondary),
@@ -320,9 +320,9 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 60),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.5),
+        color: Colors.white.withValues(alpha: 0.5),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withOpacity(0.1), style: BorderStyle.solid),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), style: BorderStyle.solid),
       ),
       child: Center(
         child: Column(
@@ -352,7 +352,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
         borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 20,
             offset: const Offset(0, -4),
           ),
@@ -366,7 +366,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
               decoration: BoxDecoration(
                 color: AppColors.background,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withOpacity(0.1)),
+                border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
               ),
               child: TextField(
                 controller: _commentController,
@@ -395,7 +395,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
               borderRadius: BorderRadius.circular(14),
               boxShadow: [
                 BoxShadow(
-                  color: AppColors.primary.withOpacity(0.3),
+                  color: AppColors.primary.withValues(alpha: 0.3),
                   blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
@@ -451,7 +451,7 @@ class _CommentCard extends StatelessWidget {
               if (!isOwn) ...[
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: AppColors.primary.withOpacity(0.1),
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     comment.authorName.isNotEmpty ? comment.authorName[0].toUpperCase() : '?',
                     style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 10),
@@ -472,12 +472,12 @@ class _CommentCard extends StatelessWidget {
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
+                        color: Colors.black.withValues(alpha: 0.04),
                         blurRadius: 8,
                         offset: const Offset(0, 2),
                       ),
                     ],
-                    border: isOwn ? null : Border.all(color: Colors.grey.withOpacity(0.1)),
+                    border: isOwn ? null : Border.all(color: Colors.grey.withValues(alpha: 0.1)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -506,7 +506,7 @@ class _CommentCard extends StatelessWidget {
                 const SizedBox(width: 12),
                 CircleAvatar(
                   radius: 16,
-                  backgroundColor: AppColors.accent.withOpacity(0.1),
+                  backgroundColor: AppColors.accent.withValues(alpha: 0.1),
                   child: const Icon(Icons.person, color: AppColors.accent, size: 16),
                 ),
               ],

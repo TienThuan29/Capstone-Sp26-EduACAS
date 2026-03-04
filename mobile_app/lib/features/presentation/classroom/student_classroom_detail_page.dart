@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom.dart';
-import 'package:mobile/features/presentation/student/tabs/student_materials_tab.dart';
-import 'package:mobile/features/presentation/student/tabs/student_examinations_tab.dart';
-import 'package:mobile/features/presentation/student/tabs/student_discussions_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/student_materials_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/student_examinations_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/student_discussions_tab.dart';
 
 class StudentClassroomDetailPage extends StatefulWidget {
   final Classroom classroom;
@@ -69,7 +69,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
           preferredSize: const Size.fromHeight(50),
           child: Container(
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.withOpacity(0.1))),
+              border: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
             ),
             child: TabBar(
               controller: _tabController,

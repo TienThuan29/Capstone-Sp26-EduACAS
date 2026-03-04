@@ -22,17 +22,13 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
     final startDate = DateTime.parse(examination.startDatetime);
     final endDate = DateTime.parse(examination.endDatetime);
 
-    Color statusColor;
     String statusText;
 
     if (now.isBefore(startDate)) {
-      statusColor = AppColors.warning;
       statusText = 'Pending';
     } else if (now.isAfter(endDate)) {
-      statusColor = AppColors.textSecondary;
       statusText = 'Completed';
     } else {
-      statusColor = AppColors.success;
       statusText = 'Ongoing';
     }
 
@@ -74,7 +70,7 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
@@ -312,7 +308,7 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
         side: BorderSide(
-          color: AppColors.primary.withOpacity(0.2),
+          color: AppColors.primary.withValues(alpha: 0.2),
         ),
       ),
       child: Padding(
@@ -325,7 +321,7 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
                 Container(
                   padding: const EdgeInsets.all(6),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
+                    color: AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Text(
@@ -354,7 +350,7 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
                     vertical: 4,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withOpacity(0.2),
+                    color: AppColors.accent.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                   ),
                   child: Text(

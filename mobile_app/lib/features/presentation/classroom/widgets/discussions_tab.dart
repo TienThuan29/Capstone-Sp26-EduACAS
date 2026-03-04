@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/features/presentation/lecturer/discussion_issue_management.dart';
+import 'package:mobile/features/presentation/discussion/discussion_management_page.dart';
 
 class DiscussionsTab extends StatelessWidget {
   final String classroomId;

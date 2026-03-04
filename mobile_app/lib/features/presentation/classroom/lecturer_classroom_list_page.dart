@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/features/services/classroom_service.dart';
-import 'package:mobile/features/presentation/lecturer/classroom_detail_page.dart';
+import 'package:mobile/features/presentation/classroom/lecturer_classroom_detail_page.dart';
 
 class LecturerClassroomListPage extends StatefulWidget {
   const LecturerClassroomListPage({super.key});
@@ -165,7 +165,7 @@ class _LecturerClassroomListPageState
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
+                      color: AppColors.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(

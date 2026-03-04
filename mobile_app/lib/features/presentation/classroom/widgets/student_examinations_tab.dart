@@ -103,11 +103,11 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
           hoverColor: Colors.white,
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide(color: Colors.grey.withOpacity(0.2)),
+            borderSide: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -216,7 +216,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.5),
+              color: Colors.white.withValues(alpha: 0.5),
               shape: BoxShape.circle,
             ),
             child: Icon(Icons.assignment_outlined, size: 64, color: Colors.grey[300]),
@@ -257,10 +257,10 @@ class _ExaminationCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withOpacity(0.1)),
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -303,7 +303,7 @@ class _ExaminationCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                    _buildTag(
-                    text: examination.mode == 1 ? 'EXAMINATION' : 'PRACTICAL',
+                    text: examination.mode == ExaminationMode.examination ? 'EXAMINATION' : 'PRACTICAL',
                     color: Colors.blue,
                   ),
                   if (examination.programmingLanguage.name.isNotEmpty)
@@ -358,7 +358,7 @@ class _ExaminationCard extends StatelessWidget {
                 child: OutlinedButton(
                   onPressed: onTap,
                   style: OutlinedButton.styleFrom(
-                    side: BorderSide(color: Colors.grey.withOpacity(0.3)),
+                    side: BorderSide(color: Colors.grey.withValues(alpha: 0.3)),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(vertical: 10),
                   ),
@@ -383,7 +383,7 @@ class _ExaminationCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
@@ -430,14 +430,12 @@ class _ExaminationCard extends StatelessWidget {
         color = Colors.grey;
         label = 'ENDED';
         break;
-      default:
-        color = Colors.grey;
     }
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
@@ -529,13 +527,13 @@ class _ExaminationDetailDialog extends StatelessWidget {
                             Text('Problem ${entry.key + 1}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: AppColors.primary.withOpacity(0.05), borderRadius: BorderRadius.circular(4)),
+                              decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4)),
                               child: Text('${entry.value.mark} pts', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
                             ),
                           ],
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               ),
