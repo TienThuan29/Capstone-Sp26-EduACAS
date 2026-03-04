@@ -63,4 +63,14 @@ public class SubmissionMapper
             FinalScore = submission.FinalScore
         };
     }
+
+    /// <summary>
+    /// Maps submission to response with optional problem info for UI display.
+    /// </summary>
+    public SubmissionResponse ToResponse(Submission submission, ProblemLiteResponse? problem)
+    {
+        var response = ToResponse(submission);
+        response.Problem = problem;
+        return response;
+    }
 }

@@ -1,6 +1,19 @@
 using System.Text.Json.Serialization;
 
 namespace AcasService.Application.ResponseDTOs;
+
+/// <summary>
+/// Minimal problem info for display in submission responses (e.g. in grading UI).
+/// </summary>
+public class ProblemLiteResponse
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("title")]
+    public string Title { get; set; } = string.Empty;
+}
+
 public class SubmissionResponse
 {
     [JsonPropertyName("id")]
@@ -26,6 +39,12 @@ public class SubmissionResponse
 
     [JsonPropertyName("finalScore")]
     public float FinalScore { get; set; }
+
+    /// <summary>
+    /// Optional problem info (e.g. title) for UI display. Populated when querying by exam/problem.
+    /// </summary>
+    [JsonPropertyName("problem")]
+    public ProblemLiteResponse? Problem { get; set; }
 }
 
 public class TestResultResponse

@@ -1,4 +1,5 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.Problem;
 using AcasService.Application.Queries.Submission;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
@@ -13,15 +14,18 @@ namespace AcasService.Web.Controllers.Submission;
 public class SubmissionQueryController : ControllerBase
 {
       private readonly ISubmissionQuery _submissionQuery;
+      private readonly IProblemQuery _problemQuery;
       private readonly SubmissionMapper _submissionMapper;
       private readonly ILogger<SubmissionQueryController> _logger;
 
       public SubmissionQueryController(
             ISubmissionQuery submissionQuery,
+            IProblemQuery problemQuery,
             SubmissionMapper submissionMapper,
             ILogger<SubmissionQueryController> logger)
       {
             _submissionQuery = submissionQuery;
+            _problemQuery = problemQuery;
             _submissionMapper = submissionMapper;
             _logger = logger;
       }
@@ -50,7 +54,19 @@ public class SubmissionQueryController : ControllerBase
             try
             {
                   var submissions = await _submissionQuery.GetTheLatestVersionSubmissionsByExamAndProblemAsync(examId, problemId);
-                  var response = submissions.Select(_submissionMapper.ToResponse).ToList();
+                  ProblemLiteResponse? problemLite = null;
+                  var problem = await _problemQuery.GetProblemByIdAsync(problemId);
+                  if (problem != null)
+                  {
+                        problemLite = new ProblemLiteResponse
+                        {
+                              Id = problem.Id,
+                              Title = problem.Title
+                        };
+                  }
+                  var response = submissions
+                        .Select(s => _submissionMapper.ToResponse(s, problemLite))
+                        .ToList();
                   return ResponseUtil.Success(response, "Latest submissions retrieved successfully", 200);
             }
             catch (Exception ex)
