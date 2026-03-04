@@ -5,6 +5,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { Examination } from "@/types/examination";
 import { OverviewTabContent } from "../components/exam-detail-tab/overview";
 import { ProblemsTabContent } from "../components/exam-detail-tab/problems";
+import { SubmissionsTabContent } from "../components/exam-detail-tab/submissions";
 
 const STATUS_LABELS: Record<number, string> = {
   0: "PENDING",
@@ -73,6 +74,9 @@ export function ExaminationDetailView({
               problems={problems}
               onExaminationUpdate={onExaminationUpdate}
             />
+          </TabItem>
+          <TabItem title="Submissions">
+            <SubmissionsTabContent examination={examination} />
           </TabItem>
         </Tabs>
       </div>

@@ -97,7 +97,11 @@ export interface SubmitProblemRequest {
   compilerId: string;
 }
 
-/** Submission response from save / get submission APIs */
+export interface ProblemLiteResponse {
+  id: string;
+  title: string;
+}
+
 export interface SubmissionResponse {
   id: string;
   studentId: string;
@@ -107,4 +111,5 @@ export interface SubmissionResponse {
   status: string;
   submittedDate: string;
   finalScore: number;
+  problem?: ProblemLiteResponse;
 }
