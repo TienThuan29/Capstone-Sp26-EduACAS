@@ -18,7 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
 import type { SubmissionResponse } from '@/types/submission';
-import { useSubmission } from '@/hooks/submission/useSubmission';
+import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
 
 
 /**
@@ -161,7 +161,7 @@ const FALLBACK_BOILERPLATE: Record<string, string> = {
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { saveSubmission } = useSubmission();
+  const { saveSubmission } = useSubmissionStudent();
 
   // Editor State – language is overwritten by examination.programmingLanguage when exam loads
   const [editorState, setEditorState] = useState<EditorState>({

@@ -12,7 +12,7 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-export const useSubmission = () => {
+export const useSubmissionStudent = () => {
   const axiosInstance = useAxios();
 
   const saveSubmission = useCallback(

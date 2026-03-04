@@ -20,7 +20,7 @@ import { Spinner } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useEditorContext } from "@/contexts/EditorContext";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
-import { useSubmission } from "@/hooks/submission/useSubmission";
+import { useSubmissionStudent } from "@/hooks/submission/useSubmissionStudent";
 import { DIFFICULTY } from "@/types/problem";
 import type { SubmissionResponse } from "@/types/submission";
 
@@ -284,7 +284,7 @@ function SubmissionsTab() {
     submissionsCache,
     setSubmissionsCache,
   } = useEditorContext();
-  const { getSubmissionsByStudentId } = useSubmission();
+  const { getSubmissionsByStudentId } = useSubmissionStudent();
   const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(false);
@@ -410,7 +410,7 @@ function SubmissionsTab() {
       {submissions.map((submission) => (
         <div
           key={submission.id}
-          className="rounded-lg border border-gray-700 bg-gray-800 p-4 transition-colors hover:border-gray-600"
+          className="rounded-lg border border-gray-700 bg-gray-800 p-4 transition-colors hover:border-gray-600 cursor-pointer"
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">

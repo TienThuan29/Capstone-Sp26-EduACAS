@@ -263,7 +263,7 @@ function ClassroomContent() {
           />
         );
       case "students":
-        return <StudentTab />;
+        return <StudentTab classId={classId} />;
       case "dashboard":
         return <DashboardTab />;
       case "slots":
