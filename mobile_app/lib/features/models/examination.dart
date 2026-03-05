@@ -192,16 +192,19 @@ class Problem {
 class ExamProblem {
   final String problemId;
   final double mark;
+  final String title;
 
   ExamProblem({
     required this.problemId,
     required this.mark,
+    required this.title,
   });
 
   factory ExamProblem.fromJson(Map<String, dynamic> json) {
     return ExamProblem(
       problemId: json['problemId'] ?? '',
       mark: (json['mark'] ?? 0).toDouble(),
+      title: json['title'] ?? '',
     );
   }
 
@@ -209,6 +212,7 @@ class ExamProblem {
     return {
       'problemId': problemId,
       'mark': mark,
+      'title': title,
     };
   }
 }

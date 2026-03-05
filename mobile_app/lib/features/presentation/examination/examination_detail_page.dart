@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/examination.dart';
+import 'package:mobile/features/services/problem_service.dart';
+import 'package:mobile/features/models/problem.dart' as detail_model;
 
 class ExaminationDetailPage extends StatefulWidget {
   final Examination examination;
@@ -16,6 +18,77 @@ class ExaminationDetailPage extends StatefulWidget {
 }
 
 class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
+  List<Problem> _problems = [];
+  bool _isLoadingProblems = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _problems = List.from(widget.examination.problems);
+    if (_problems.isEmpty && widget.examination.examProblems.isNotEmpty) {
+      _fetchProblemDetails();
+    }
+  }
+
+  Future<void> _fetchProblemDetails() async {
+    setState(() {
+      _isLoadingProblems = true;
+    });
+
+    try {
+      final fetchedProblems = await Future.wait(
+        widget.examination.examProblems.map((ep) => ProblemService.getById(ep.problemId)),
+      );
+
+      if (mounted) {
+        setState(() {
+          _problems = fetchedProblems
+              .where((p) => p != null)
+              .map((p) => Problem(
+                    id: p!.id,
+                    examId: widget.examination.id,
+                    lecturerId: p.lecturerId,
+                    title: p.title,
+                    content: p.content,
+                    difficulty: _mapDifficulty(p.difficulty),
+                    testCases: p.testCases
+                        .map((tc) => TestCase(
+                              id: tc.id,
+                              inputData: tc.inputData,
+                              expectedOutput: tc.expectedOutput,
+                              isPublic: tc.isPublic,
+                              isCaseInsensitive: tc.isCaseInsensitive,
+                              isRemovedSpace: tc.isRemovedSpace,
+                            ))
+                        .toList(),
+                    createdDate: p.createdDate,
+                    updatedDate: p.updatedDate,
+                  ))
+              .toList();
+          _isLoadingProblems = false;
+        });
+      }
+    } catch (e) {
+      debugPrint('Error fetching problem details: $e');
+      if (mounted) {
+        setState(() {
+          _isLoadingProblems = false;
+        });
+      }
+    }
+  }
+
+  int _mapDifficulty(detail_model.Difficulty d) {
+    switch (d) {
+      case detail_model.Difficulty.easy:
+        return 0;
+      case detail_model.Difficulty.medium:
+        return 1;
+      case detail_model.Difficulty.hard:
+        return 2;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final examination = widget.examination;
@@ -75,53 +148,68 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
           ),
         ],
       ),
-      child: Column(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildStatusBadge(examination.status),
-          const SizedBox(height: 20),
-          Text(
-            examination.examName,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 26,
-              fontWeight: FontWeight.w900,
-              height: 1.2,
-              letterSpacing: -0.5,
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  examination.examName,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 26,
+                    fontWeight: FontWeight.w900,
+                    height: 1.2,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.code_rounded,
+                          color: Colors.white, size: 16),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      examination.programmingLanguage.name,
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(width: 20),
+                    Container(
+                      padding: const EdgeInsets.all(6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: const Icon(Icons.workspace_premium_rounded,
+                          color: Colors.white, size: 16),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${examination.totalMark} pts',
+                      style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.code_rounded, color: Colors.white, size: 16),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                examination.programmingLanguage.name,
-                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(width: 20),
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 16),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                '${examination.totalMark} pts',
-                style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w800),
-              ),
-            ],
-          ),
+          const SizedBox(width: 16),
+          _buildStatusBadge(examination.status),
         ],
       ),
     );
@@ -150,19 +238,22 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
         break;
     }
 
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(100),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 10,
-          fontWeight: FontWeight.w900,
-          letterSpacing: 1,
+    return RotatedBox(
+      quarterTurns: 1, // Vertical text
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        decoration: BoxDecoration(
+          color: color,
+          borderRadius: BorderRadius.circular(100),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: textColor,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1,
+          ),
         ),
       ),
     );
@@ -205,25 +296,51 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
           padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
           child: Row(
             children: [
-              const Icon(Icons.quiz_outlined, color: AppColors.textPrimary, size: 20),
+              const Icon(Icons.quiz_outlined,
+                  color: AppColors.textPrimary, size: 20),
               const SizedBox(width: 8),
               Text(
-                'Problems (${examination.problems.length})',
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                'Problems (${examination.examProblems.length})',
+                style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary),
               ),
+              if (_isLoadingProblems) ...[
+                const SizedBox(width: 12),
+                const SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ],
             ],
           ),
         ),
         const SizedBox(height: 8),
-        ...examination.problems.asMap().entries.map((entry) {
+        ...examination.examProblems.asMap().entries.map((entry) {
           final index = entry.key;
-          final problem = entry.value;
-          final examProblem = examination.examProblems.firstWhere(
-            (ep) => ep.problemId == problem.id,
-            orElse: () => ExamProblem(problemId: problem.id, mark: 0),
+          final examProblem = entry.value;
+
+          // Try to find full problem detail if it exists in _problems
+          final problemDetail = _problems.firstWhere(
+            (p) => p.id == examProblem.problemId,
+            orElse: () => Problem(
+              id: examProblem.problemId,
+              examId: examination.id,
+              lecturerId: '',
+              title: examProblem.title.isNotEmpty
+                  ? examProblem.title
+                  : 'Problem ${index + 1}',
+              content: '',
+              difficulty: 0,
+              testCases: [],
+              createdDate: '',
+              updatedDate: '',
+            ),
           );
 
-          return _buildProblemCard(index + 1, problem, examProblem.mark);
+          return _buildProblemCard(index + 1, problemDetail, examProblem.mark);
         }),
       ],
     );
