@@ -20,7 +20,7 @@ public class ExaminationResponse
     [JsonPropertyName("examProblems")]
     public List<ExaminationProblemResponse> ExamProblems { get; set; } = new();
 
-  [JsonPropertyName("classroom")]
+    [JsonPropertyName("classroom")]
     public ClassroomLiteResponse Classroom { get; set; } = new ClassroomLiteResponse();
     [JsonPropertyName("startDatetime")]
     public DateTime StartDatetime { get; set; }
@@ -61,6 +61,10 @@ public class ExaminationProblemResponse
 
     [JsonPropertyName("mark")]
     public float Mark { get; set; }
+
+    [JsonPropertyName("title")]
+    public String Title { get; set; }
+
 }
 
 public class ClassroomLiteResponse
@@ -74,7 +78,7 @@ public class ClassroomLiteResponse
 
 
 
-public class ExaminationSpecProblemResponse 
+public class ExaminationSpecProblemResponse
 {
     [JsonPropertyName("id")]
     public string Id { get; set; } = string.Empty;
