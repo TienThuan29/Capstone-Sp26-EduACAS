@@ -4,6 +4,7 @@ import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/problem.dart';
 import 'package:mobile/features/services/problem_service.dart';
 import 'package:mobile/features/presentation/problem/problem_detail_page.dart';
+import 'package:mobile/core/widgets/background.dart';
 
 class ProblemManagementPage extends StatefulWidget {
   const ProblemManagementPage({super.key});
@@ -84,14 +85,61 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Problem Banks'),
-        elevation: 0,
-      ),
-      body: Column(
+      body: Stack(
         children: [
-          _buildSearchAndFilter(),
-          Expanded(child: _buildBody()),
+          const GradientBackground(),
+          Column(
+            children: [
+              _buildHeader(),
+              _buildSearchAndFilter(),
+              Expanded(child: _buildBody()),
+            ],
+          ),
+        ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          // TODO: Implement Create Problem
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Create problem coming soon')),
+          );
+        },
+        backgroundColor: AppColors.accent,
+        icon: const Icon(Icons.add_rounded, color: Colors.white),
+        label: const Text('New Problem', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 60, 24, 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.accent.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: const Icon(Icons.quiz_rounded, color: AppColors.accent, size: 28),
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            'Problem Banks',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'Create and organize your coding problems',
+            style: TextStyle(fontSize: 14, color: AppColors.textLight, fontWeight: FontWeight.w500),
+          ),
         ],
       ),
     );
@@ -99,39 +147,38 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
 
   Widget _buildSearchAndFilter() {
     return Container(
-      color: AppColors.backgroundWhite,
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
       child: Column(
         children: [
           // Search bar
-          TextField(
-            controller: _searchController,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: 'Search by title...',
-              prefixIcon:
-                  const Icon(Icons.search, color: AppColors.textSecondary),
-              suffixIcon: _searchController.text.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear,
-                          color: AppColors.textSecondary),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() {});
-                      },
-                    )
-                  : null,
-              filled: true,
-              fillColor: AppColors.background,
-              contentPadding:
-                  const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+            ),
+            child: TextField(
+              controller: _searchController,
+              onChanged: (_) => setState(() {}),
+              decoration: InputDecoration(
+                hintText: 'Search by title...',
+                hintStyle: const TextStyle(fontSize: 14, color: AppColors.textLight),
+                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textLight, size: 20),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, color: AppColors.textLight, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() {});
+                        },
+                      )
+                    : null,
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               ),
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           // Difficulty filter chips
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
@@ -154,31 +201,36 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
 
   Widget _buildFilterChip({required String label, Difficulty? value}) {
     final isSelected = _selectedDifficulty == value;
-    final Color chipColor;
-    if (value == null) {
-      chipColor = AppColors.primary;
-    } else {
-      chipColor = _difficultyColor(value);
-    }
+    final chipColor = value == null ? AppColors.primary : _difficultyColor(value);
 
-    return FilterChip(
-      label: Text(label),
-      selected: isSelected,
-      onSelected: (_) {
-        setState(() {
-          _selectedDifficulty = value;
-        });
-      },
-      selectedColor: chipColor.withValues(alpha: 0.2),
-      checkmarkColor: chipColor,
-      labelStyle: TextStyle(
-        color: isSelected ? chipColor : AppColors.textSecondary,
-        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+    return GestureDetector(
+      onTap: () => setState(() => _selectedDifficulty = value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? chipColor : Colors.white.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected ? chipColor : Colors.grey.withValues(alpha: 0.1),
+          ),
+          boxShadow: isSelected ? [
+            BoxShadow(
+              color: chipColor.withValues(alpha: 0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            )
+          ] : null,
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : AppColors.textLight,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            fontSize: 12,
+          ),
+        ),
       ),
-      side: BorderSide(
-        color: isSelected ? chipColor : Colors.grey.shade300,
-      ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
     );
   }
 
@@ -194,26 +246,23 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
           children: [
             const Icon(Icons.error_outline, size: 64, color: AppColors.error),
             const SizedBox(height: 16),
-            Text(
+            const Text(
               'Error loading problems',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 32),
               child: Text(
                 _errorMessage!,
-                style: Theme.of(context)
-                    .textTheme
-                    .bodyMedium
-                    ?.copyWith(color: AppColors.textSecondary),
+                style: const TextStyle(color: AppColors.textLight),
                 textAlign: TextAlign.center,
               ),
             ),
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _loadProblems,
-              icon: const Icon(Icons.refresh),
+              icon: const Icon(Icons.refresh_rounded),
               label: const Text('Retry'),
             ),
           ],
@@ -228,22 +277,18 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.quiz_outlined,
-                size: 64, color: AppColors.textSecondary),
+            Icon(Icons.quiz_outlined, size: 64, color: Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
               _problems.isEmpty ? 'No problems found' : 'No matching problems',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
             ),
             const SizedBox(height: 8),
             Text(
               _problems.isEmpty
                   ? 'You have not created any problems yet'
                   : 'Try a different search or filter',
-              style: Theme.of(context)
-                  .textTheme
-                  .bodyMedium
-                  ?.copyWith(color: AppColors.textSecondary),
+              style: const TextStyle(color: AppColors.textLight),
             ),
           ],
         ),
@@ -253,10 +298,9 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
     return RefreshIndicator(
       onRefresh: _loadProblems,
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
         itemCount: filtered.length,
-        itemBuilder: (context, index) =>
-            _buildProblemCard(filtered[index]),
+        itemBuilder: (context, index) => _buildProblemCard(filtered[index]),
       ),
     );
   }
@@ -264,82 +308,99 @@ class _ProblemManagementPageState extends State<ProblemManagementPage> {
   Widget _buildProblemCard(ProblemBasic problem) {
     final diffColor = _difficultyColor(problem.difficulty);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: InkWell(
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => ProblemDetailPage(problemId: problem.id),
-            ),
-          );
-        },
-        borderRadius: BorderRadius.circular(12),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              // Icon
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(8),
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(16),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => ProblemDetailPage(problemId: problem.id),
                 ),
-                child: const Icon(Icons.code, color: AppColors.primary),
-              ),
-              const SizedBox(width: 12),
-              // Title + date
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      problem.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
                     ),
-                    const SizedBox(height: 6),
-                    Row(
+                    child: const Icon(Icons.code_rounded, color: AppColors.primary, size: 24),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 10, vertical: 3),
-                          decoration: BoxDecoration(
-                            color: diffColor.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
+                        Text(
+                          problem.title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
                           ),
-                          child: Text(
-                            difficultyLabel(problem.difficulty),
-                            style: TextStyle(
-                              color: diffColor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        const SizedBox(width: 10),
-                        if (problem.createdDate.isNotEmpty)
-                          Text(
-                            _formatDate(problem.createdDate),
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(color: AppColors.textSecondary),
-                          ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: diffColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                difficultyLabel(problem.difficulty).toUpperCase(),
+                                style: TextStyle(
+                                  color: diffColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            if (problem.createdDate.isNotEmpty)
+                              Row(
+                                children: [
+                                  const Icon(Icons.access_time_rounded, size: 12, color: AppColors.textLight),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _formatDate(problem.createdDate),
+                                    style: const TextStyle(fontSize: 11, color: AppColors.textLight),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                  const Icon(Icons.chevron_right_rounded, color: AppColors.textLight),
+                ],
               ),
-              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-            ],
+            ),
           ),
         ),
       ),

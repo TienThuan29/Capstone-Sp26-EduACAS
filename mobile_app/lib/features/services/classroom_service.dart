@@ -179,4 +179,30 @@ class ClassroomService {
       throw Exception('Failed to load classroom details: $e');
     }
   }
+
+  // Search classrooms by keyword
+  static Future<List<Classroom>> searchClassroomsByKeyword(String keyword) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) {
+        throw Exception('No access token found');
+      }
+
+      final response = await ApiNetwork.postWithAuth(
+        endpoint: '$_classroomsEndpoint/search',
+        token: token,
+        body: {'classCode': keyword},
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final List<dynamic> classroomsData = response['dataResponse'] is List ? response['dataResponse'] : [];
+        return classroomsData.map((json) => Classroom.fromJson(json as Map<String, dynamic>)).toList();
+      }
+
+      return [];
+    } catch (e) {
+      debugPrint('Failed to search classrooms: $e');
+      throw Exception('Failed to search classrooms: $e');
+    }
+  }
 }

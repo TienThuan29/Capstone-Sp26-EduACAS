@@ -68,7 +68,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
 
   Widget _buildStickyHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Row(
         children: [
           Container(
@@ -95,7 +95,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 12),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
       child: TextField(
         controller: _searchController,
         onChanged: (value) => _controller.updateSearchQuery(value, () => setState(() {})),
@@ -126,7 +126,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
   Widget _buildStatsBar() {
     final filtered = _controller.getFilteredDiscussions();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
       child: Row(
         children: [
           _StatChip(
@@ -156,7 +156,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
       onRefresh: _loadDiscussions,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         itemCount: filtered.length,
         itemBuilder: (context, index) => _DiscussionCard(discussion: filtered[index]),
       ),
@@ -232,7 +232,7 @@ class _DiscussionCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => StudentDiscussionDetailScreen(issue: discussion),
+              builder: (context) => DiscussionDetailPage(issue: discussion),
             ),
           );
         },

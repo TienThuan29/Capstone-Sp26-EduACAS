@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/examination.dart';
+import 'package:mobile/features/presentation/examination/examination_detail_page.dart';
 import 'package:mobile/features/services/examination_provider.dart';
 
 class StudentExaminationsTab extends StatefulWidget {
@@ -64,7 +65,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
 
   Widget _buildStickyHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Row(
         children: [
           Container(
@@ -91,7 +92,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
 
   Widget _buildSearchBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: TextField(
         controller: _searchController,
         onChanged: (value) => _controller.updateSearchQuery(value, () => setState(() {})),
@@ -130,7 +131,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
       onRefresh: _loadExaminations,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         itemCount: _calculateTotalItems(groupedExams),
         itemBuilder: (context, index) {
           return _buildItemAt(index, groupedExams);
@@ -160,7 +161,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
         final exam = entry.value[index - currentIndex];
         return _ExaminationCard(
           examination: exam,
-          onTap: () => _showExaminationDetailModal(exam),
+          onTap: () => _navigateToExaminationDetail(exam),
         );
       }
       currentIndex += entry.value.length;
@@ -233,10 +234,14 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
     );
   }
 
-  void _showExaminationDetailModal(Examination exam) {
-    showDialog(
-      context: context,
-      builder: (context) => _ExaminationDetailDialog(examination: exam),
+  void _navigateToExaminationDetail(Examination exam) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ExaminationDetailPage(
+          examination: exam,
+        ),
+      ),
     );
   }
 }
@@ -347,7 +352,7 @@ class _ExaminationCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     _buildStatRow('Total Mark', examination.totalMark.toString()),
                     const SizedBox(height: 6),
-                    _buildStatRow('Problems', examination.examProblems.length.toString()),
+                    _buildStatRow('Problems', examination.problems.length.toString()),
                   ],
                 ),
               ),
@@ -470,114 +475,3 @@ class _ExaminationCard extends StatelessWidget {
   }
 }
 
-class _ExaminationDetailDialog extends StatelessWidget {
-  final Examination examination;
-
-  const _ExaminationDetailDialog({required this.examination});
-
-  @override
-  Widget build(BuildContext context) {
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        constraints: const BoxConstraints(maxWidth: 500),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-               Padding(
-                 padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
-                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Examination Detail',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.primary),
-                    ),
-                    IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(Icons.close), padding: EdgeInsets.zero, constraints: const BoxConstraints()),
-                  ],
-                ),
-               ),
-              const Divider(height: 1),
-              Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildDetailItem('Name', examination.examName),
-                    const SizedBox(height: 16),
-                    _buildDetailItem('Language', examination.programmingLanguage.name),
-                    const SizedBox(height: 16),
-                    _buildDetailItem('Total Mark', '${examination.totalMark} pts'),
-                    const SizedBox(height: 16),
-                    _buildDetailItem('Timeline', '${_formatFullDateTime(examination.startDatetime)}\n— ${_formatFullDateTime(examination.endDatetime)}'),
-                    const SizedBox(height: 16),
-                    _buildDetailItem('Description', examination.description.isEmpty ? 'No description' : examination.description),
-                    
-                    const SizedBox(height: 24),
-                    const Text('Points Breakdown', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppColors.textPrimary)),
-                    const SizedBox(height: 12),
-                    ...examination.examProblems.asMap().entries.map((entry) {
-                      return Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 6),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('Problem ${entry.key + 1}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                              decoration: BoxDecoration(color: AppColors.primary.withValues(alpha: 0.05), borderRadius: BorderRadius.circular(4)),
-                              child: Text('${entry.value.mark} pts', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 14)),
-                            ),
-                          ],
-                        ),
-                      );
-                    }),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () => Navigator.pop(context),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      elevation: 0,
-                    ),
-                    child: const Text('Got it', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDetailItem(String label, String value) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(label.toUpperCase(), style: const TextStyle(color: AppColors.textLight, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.textPrimary)),
-      ],
-    );
-  }
-
-  String _formatFullDateTime(String dateTimeStr) {
-    if (dateTimeStr.isEmpty) return 'N/A';
-    try {
-      final dt = DateTime.parse(dateTimeStr);
-      return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
-    } catch (e) {
-      return dateTimeStr;
-    }
-  }
-}

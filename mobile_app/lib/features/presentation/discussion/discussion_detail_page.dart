@@ -6,19 +6,19 @@ import 'package:mobile/features/models/comment.dart';
 import 'package:mobile/features/services/discussion_service.dart';
 import 'package:mobile/core/widgets/background.dart';
 
-class StudentDiscussionDetailScreen extends StatefulWidget {
+class DiscussionDetailPage extends StatefulWidget {
   final DiscussionIssue issue;
 
-  const StudentDiscussionDetailScreen({
+  const DiscussionDetailPage({
     super.key,
     required this.issue,
   });
 
   @override
-  State<StudentDiscussionDetailScreen> createState() => _StudentDiscussionDetailScreenState();
+  State<DiscussionDetailPage> createState() => _DiscussionDetailPageState();
 }
 
-class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailScreen> {
+class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   List<Comment> _comments = [];
   bool _isLoading = true;
   bool _isSendingComment = false;
@@ -70,7 +70,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
 
     setState(() => _isSendingComment = true);
     try {
-      final userName = await TokenStorage.getUserName() ?? 'Student';
+      final userName = await TokenStorage.getUserName() ?? 'User';
       final result = await CommentService.create(
         discussionIssueId: widget.issue.id,
         authorId: _currentUserId!,
@@ -105,6 +105,75 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
         setState(() => _isSendingComment = false);
       }
     }
+  }
+
+  void _showCommentOptions(Comment comment) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Message Options',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 16),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 22),
+              ),
+              title: const Text(
+                'Delete Message',
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
+              ),
+              subtitle: const Text('This action cannot be undone'),
+              onTap: () {
+                Navigator.pop(context);
+                _deleteComment(comment);
+              },
+            ),
+            const SizedBox(height: 8),
+            ListTile(
+              leading: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.textSecondary.withValues(alpha: 0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 22),
+              ),
+              title: const Text(
+                'Cancel',
+                style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+              ),
+              onTap: () => Navigator.pop(context),
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
+      ),
+    );
   }
 
   Future<void> _deleteComment(Comment comment) async {
@@ -178,7 +247,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
                         color: AppColors.primary,
                         child: ListView(
                           controller: _scrollController,
-                          padding: const EdgeInsets.all(24),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
                           children: [
                             _buildIssueContent(),
                             const SizedBox(height: 32),
@@ -186,7 +255,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
                             ..._comments.map((comment) => _CommentCard(
                                   comment: comment,
                                   currentUserId: _currentUserId ?? '',
-                                  onDelete: () => _deleteComment(comment),
+                                  onShowOptions: () => _showCommentOptions(comment),
                                 )),
                             if (_comments.isEmpty) _buildEmptyComments(),
                             const SizedBox(height: 20),
@@ -206,18 +275,18 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
           ),
         ],
         border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -242,7 +311,7 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _formatDateTime(widget.issue.createdDate),
+                        _formatDate(widget.issue.createdDate),
                         style: const TextStyle(fontSize: 11, color: AppColors.textLight),
                       ),
                     ],
@@ -261,22 +330,23 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
                 ),
               ],
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             Text(
               widget.issue.title,
               style: const TextStyle(
-                fontSize: 22,
+                fontSize: 20,
                 fontWeight: FontWeight.w900,
                 color: AppColors.textPrimary,
                 letterSpacing: -0.5,
+                height: 1.2,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Text(
               widget.issue.content,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 15,
-                color: AppColors.textPrimary.withValues(alpha: 0.8),
+                color: AppColors.textPrimary,
                 height: 1.6,
                 fontWeight: FontWeight.w500,
               ),
@@ -292,25 +362,14 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
       padding: const EdgeInsets.only(bottom: 20, left: 4),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.textSecondary.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.forum_outlined, size: 18, color: AppColors.textSecondary),
-          ),
+          const Icon(Icons.forum_outlined, size: 18, color: AppColors.textSecondary),
           const SizedBox(width: 12),
           Text(
             '${_comments.length} Comments',
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(width: 16),
-          const Expanded(child: Divider(color: Colors.grey, thickness: 0.1)),
+          const Expanded(child: Divider(color: Colors.black12)),
         ],
       ),
     );
@@ -318,25 +377,15 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
 
   Widget _buildEmptyComments() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 60),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.5),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1), style: BorderStyle.solid),
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 48),
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.chat_bubble_outline_rounded, size: 64, color: Colors.grey[300]),
+            Icon(Icons.chat_bubble_outline_rounded, size: 48, color: Colors.grey[300]),
             const SizedBox(height: 16),
             const Text(
               'No comments yet',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textSecondary),
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Be the first to share your thoughts!',
-              style: TextStyle(color: AppColors.textLight, fontSize: 13),
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
             ),
           ],
         ),
@@ -346,15 +395,14 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
 
   Widget _buildCommentInput() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 20,
-            offset: const Offset(0, -4),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -5),
           ),
         ],
       ),
@@ -363,63 +411,36 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
         children: [
           Expanded(
             child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
                 color: AppColors.background,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: TextField(
                 controller: _commentController,
-                style: const TextStyle(fontSize: 14),
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Share your thoughts...',
-                  hintStyle: const TextStyle(color: AppColors.textLight, fontSize: 14),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   border: InputBorder.none,
+                  contentPadding: EdgeInsets.symmetric(vertical: 12),
                 ),
-                maxLines: 4,
+                maxLines: 5,
                 minLines: 1,
               ),
             ),
           ),
           const SizedBox(width: 12),
-          Container(
-            height: 48,
-            width: 48,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [AppColors.primary, Color(0xFF154360)],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-              ),
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: _isSendingComment ? null : _submitComment,
-                borderRadius: BorderRadius.circular(14),
-                child: Center(
-                  child: _isSendingComment
-                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                      : const Icon(Icons.send_rounded, color: Colors.white, size: 20),
-                ),
-              ),
-            ),
+          IconButton(
+            onPressed: _isSendingComment ? null : _submitComment,
+            icon: _isSendingComment
+                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                : const Icon(Icons.send_rounded, color: AppColors.primary),
           ),
         ],
       ),
     );
   }
 
-  String _formatDateTime(DateTime dt) {
+  String _formatDate(DateTime dt) {
     return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }
@@ -427,12 +448,12 @@ class _StudentDiscussionDetailScreenState extends State<StudentDiscussionDetailS
 class _CommentCard extends StatelessWidget {
   final Comment comment;
   final String currentUserId;
-  final VoidCallback onDelete;
+  final VoidCallback onShowOptions;
 
   const _CommentCard({
     required this.comment,
     required this.currentUserId,
-    required this.onDelete,
+    required this.onShowOptions,
   });
 
   @override
@@ -440,7 +461,7 @@ class _CommentCard extends StatelessWidget {
     final isOwn = comment.authorId == currentUserId;
     
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.only(bottom: 20),
       child: Column(
         crossAxisAlignment: isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
@@ -450,64 +471,69 @@ class _CommentCard extends StatelessWidget {
             children: [
               if (!isOwn) ...[
                 CircleAvatar(
-                  radius: 16,
+                  radius: 18,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
                     comment.authorName.isNotEmpty ? comment.authorName[0].toUpperCase() : '?',
-                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 10),
+                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 12),
               ],
               Flexible(
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: isOwn ? AppColors.primary : Colors.white,
-                    borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(16),
-                      topRight: const Radius.circular(16),
-                      bottomLeft: Radius.circular(isOwn ? 16 : 4),
-                      bottomRight: Radius.circular(isOwn ? 4 : 16),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+                child: GestureDetector(
+                  onLongPress: isOwn ? onShowOptions : null,
+                  onTap: isOwn ? onShowOptions : null,
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: isOwn ? AppColors.primary : Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: const Radius.circular(16),
+                        topRight: const Radius.circular(16),
+                        bottomLeft: Radius.circular(isOwn ? 16 : 4),
+                        bottomRight: Radius.circular(isOwn ? 4 : 16),
                       ),
-                    ],
-                    border: isOwn ? null : Border.all(color: Colors.grey.withValues(alpha: 0.1)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (!isOwn)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 6),
-                          child: Text(
-                            comment.authorName,
-                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (!isOwn)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 6),
+                            child: Text(
+                              comment.authorName,
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary),
+                            ),
+                          ),
+                        Text(
+                          comment.content,
+                          style: TextStyle(
+                            fontSize: 14, 
+                            color: isOwn ? Colors.white : AppColors.textPrimary,
+                            height: 1.4,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                      Text(
-                        comment.content,
-                        style: TextStyle(
-                          fontSize: 14, 
-                          color: isOwn ? Colors.white : AppColors.textPrimary,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
               if (isOwn) ...[
-                const SizedBox(width: 12),
-                CircleAvatar(
-                  radius: 16,
-                  backgroundColor: AppColors.accent.withValues(alpha: 0.1),
-                  child: const Icon(Icons.person, color: AppColors.accent, size: 16),
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.more_vert_rounded, size: 20, color: AppColors.textSecondary),
+                  onPressed: onShowOptions,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
                 ),
               ],
             ],
@@ -515,27 +541,12 @@ class _CommentCard extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(
               top: 6,
-              left: !isOwn ? 44 : 0,
-              right: isOwn ? 44 : 0,
+              left: !isOwn ? 48 : 0,
+              right: isOwn ? 32 : 0,
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  _formatTimeAgo(comment.createdDate),
-                  style: const TextStyle(fontSize: 10, color: AppColors.textLight, fontWeight: FontWeight.w500),
-                ),
-                if (isOwn) ...[
-                  const SizedBox(width: 12),
-                  GestureDetector(
-                    onTap: onDelete,
-                    child: Text(
-                      'Delete',
-                      style: TextStyle(fontSize: 10, color: Colors.red[300], fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ],
-              ],
+            child: Text(
+              _formatTimeAgo(comment.createdDate),
+              style: const TextStyle(fontSize: 10, color: AppColors.textLight, fontWeight: FontWeight.w600),
             ),
           ),
         ],

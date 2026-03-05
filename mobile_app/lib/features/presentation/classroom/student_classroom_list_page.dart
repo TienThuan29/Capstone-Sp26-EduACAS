@@ -15,8 +15,11 @@ class StudentClassroomListPage extends StatefulWidget {
 
 class _StudentClassroomListPageState extends State<StudentClassroomListPage> with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  List<Classroom> _allClassrooms = [];
+  final TextEditingController _searchController = TextEditingController();
+  List<Classroom> _allClassrooms = []; // This will now represent "Joined" classrooms mostly
+  List<Classroom> _searchResults = [];
   bool _isLoading = true;
+  bool _isSearching = false;
   String? _errorMessage;
 
   @override
@@ -29,6 +32,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
   @override
   void dispose() {
     _tabController.dispose();
+    _searchController.dispose();
     super.dispose();
   }
 
@@ -57,39 +61,69 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
     }
   }
 
+  Future<void> _handleSearch(String query) async {
+    if (query.trim().isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _isSearching = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isSearching = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final results = await ClassroomService.searchClassroomsByKeyword(query.trim());
+      setState(() {
+        _searchResults = results;
+        _isSearching = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = e.toString();
+        _isSearching = false;
+      });
+    }
+  }
+
   List<Classroom> get _joiningClassrooms => _allClassrooms.where((c) => (c.status ?? '').toUpperCase() == 'JOINED').toList();
   List<Classroom> get _movedOutClassrooms => _allClassrooms.where((c) => (c.status ?? '').toUpperCase() == 'MOVED_OUT').toList();
 
   @override
   Widget build(BuildContext context) {
-    final isSmallScreen = MediaQuery.of(context).size.width < 600;
 
-    return Stack(
-      children: [
-        const GradientBackground(),
-        Column(
-          children: [
-            if (!isSmallScreen) _buildHeader(),
-            _buildTabNavigation(),
-            Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _buildClassroomList(_allClassrooms),
-                  _buildClassroomList(_joiningClassrooms),
-                  _buildClassroomList(_movedOutClassrooms),
-                ],
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      body: Stack(
+        children: [
+          const GradientBackground(),
+          Column(
+            children: [
+              _buildHeader(),
+              _buildTabNavigation(),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    _buildExploreTab(),
+                    _buildClassroomList(_joiningClassrooms),
+                    _buildClassroomList(_movedOutClassrooms),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 40, 24, 20),
+      padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -143,10 +177,101 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
         dividerColor: Colors.transparent,
         padding: const EdgeInsets.all(4),
         tabs: const [
-          Tab(text: 'All'),
+          Tab(text: 'Explore'),
           Tab(text: 'Joined'),
           Tab(text: 'Moved Out'),
         ],
+      ),
+    );
+  }
+
+  Widget _buildExploreTab() {
+    return Column(
+      children: [
+        _buildSearchBar(),
+        Expanded(
+          child: _isSearching
+              ? const Center(child: CircularProgressIndicator())
+              : _searchResults.isEmpty
+                  ? _buildExploreEmptyState()
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                        itemCount: _searchResults.length,
+                        itemBuilder: (context, index) => _buildClassroomCard(_searchResults[index], showStatus: false),
+                      ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(24, 12, 24, 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 15,
+            offset: const Offset(0, 5),
+          ),
+        ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+      ),
+      child: TextField(
+        controller: _searchController,
+        onSubmitted: _handleSearch,
+        decoration: InputDecoration(
+          hintText: 'Search by class code (e.g. SE1802)...',
+          hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+          border: InputBorder.none,
+          icon: const Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
+          suffixIcon: _searchController.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear_rounded, size: 18),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() => _searchResults = []);
+                  },
+                )
+              : null,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExploreEmptyState() {
+    return Center(
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.travel_explore_rounded, size: 64, color: AppColors.primary.withValues(alpha: 0.3)),
+            ),
+            const SizedBox(height: 24),
+            const Text(
+              'Explore Classrooms',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+            ),
+            const SizedBox(height: 8),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 48),
+              child: Text(
+                'Enter a class code to find and join new classrooms',
+                style: TextStyle(color: AppColors.textLight),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -166,9 +291,21 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
     );
   }
 
-  Widget _buildClassroomCard(Classroom classroom) {
-    final status = classroom.status ?? 'JOINED';
+  Widget _buildClassroomCard(Classroom classroom, {bool showStatus = true}) {
+    final status = classroom.status ?? 'NOT_JOINED';
     final isJoined = status.toUpperCase() == 'JOINED';
+    final isMovedOut = status.toUpperCase() == 'MOVED_OUT';
+
+    String displayStatus = 'Available';
+    Color statusColor = Colors.blue;
+
+    if (isJoined) {
+      displayStatus = 'Joined';
+      statusColor = Colors.green;
+    } else if (isMovedOut) {
+      displayStatus = 'Moved Out';
+      statusColor = Colors.orange;
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -207,22 +344,23 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
                             child: Text(classroom.classCode, style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold)),
                           ),
                           const Spacer(),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: (isJoined ? Colors.green : Colors.orange).withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              status,
-                              style: TextStyle(
-                                color: isJoined ? Colors.green : Colors.orange,
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 0.5,
+                          if (showStatus)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                displayStatus,
+                                style: TextStyle(
+                                  color: statusColor,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 0.5,
+                                ),
                               ),
                             ),
-                          ),
                         ],
                       ),
                       const SizedBox(height: 12),

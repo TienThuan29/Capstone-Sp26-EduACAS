@@ -118,7 +118,7 @@ class _StudentMaterialsTabState extends State<StudentMaterialsTab> {
 
   Widget _buildStickyHeader() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
       child: Row(
         children: [
           Container(
@@ -152,7 +152,7 @@ class _StudentMaterialsTabState extends State<StudentMaterialsTab> {
       onRefresh: _loadMaterials,
       color: AppColors.primary,
       child: ListView.builder(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
         itemCount: _materials.length,
         itemBuilder: (context, index) {
           return _buildMaterialCard(_materials[index]);
