@@ -26,7 +26,17 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(_handleTabSelection);
     _loadClassrooms();
+  }
+
+  void _handleTabSelection() {
+    if (_tabController.indexIsChanging) return;
+    
+    // When switching to 'Joined' (0) or 'Moved Out' (2), refetch data
+    if (_tabController.index == 0 || _tabController.index == 2) {
+      _loadClassrooms();
+    }
   }
 
   @override
@@ -108,8 +118,8 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
                 child: TabBarView(
                   controller: _tabController,
                   children: [
-                    _buildExploreTab(),
                     _buildClassroomList(_joiningClassrooms),
+                    _buildExploreTab(),
                     _buildClassroomList(_movedOutClassrooms),
                   ],
                 ),
@@ -177,8 +187,8 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
         dividerColor: Colors.transparent,
         padding: const EdgeInsets.all(4),
         tabs: const [
-          Tab(text: 'Explore'),
           Tab(text: 'Joined'),
+          Tab(text: 'Explore'),
           Tab(text: 'Moved Out'),
         ],
       ),

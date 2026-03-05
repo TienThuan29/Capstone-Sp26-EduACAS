@@ -5,6 +5,8 @@ import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/presentation/classroom/widgets/student_materials_tab.dart';
 import 'package:mobile/features/presentation/classroom/widgets/student_examinations_tab.dart';
 import 'package:mobile/features/presentation/classroom/widgets/student_discussions_tab.dart';
+import 'package:mobile/core/storage/token_storage.dart';
+import 'package:mobile/features/services/classroom_service.dart';
 
 class StudentClassroomDetailPage extends StatefulWidget {
   final Classroom classroom;
@@ -21,16 +23,33 @@ class StudentClassroomDetailPage extends StatefulWidget {
 class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late TextEditingController _enrollController;
+  bool _isJoined = false;
+  bool _isEnrolling = false;
+  String _userId = '';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
+    _enrollController = TextEditingController();
+    _isJoined = (widget.classroom.status?.toUpperCase() == 'JOINED');
+    _getUserId();
+  }
+
+  Future<void> _getUserId() async {
+    final id = await TokenStorage.getUserId();
+    if (mounted) {
+      setState(() {
+        _userId = id ?? '';
+      });
+    }
   }
 
   @override
   void dispose() {
     _tabController.dispose();
+    _enrollController.dispose();
     super.dispose();
   }
 
@@ -39,27 +58,163 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
     return Scaffold(
       body: Stack(
         children: [
-          GradientBackground(),
+          const GradientBackground(),
           Column(
             children: [
               _buildHeader(context),
-              _buildTabNavigation(),
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: [
-                    StudentMaterialsTab(classroomId: widget.classroom.id),
-                    StudentExaminationsTab(classroomId: widget.classroom.id),
-                    StudentDiscussionsTab(
-                      classroomId: widget.classroom.id,
-                      classroomName: widget.classroom.className,
-                    ),
-                  ],
+              if (_isJoined) ...[
+                _buildTabNavigation(),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    children: [
+                      StudentMaterialsTab(classroomId: widget.classroom.id),
+                      StudentExaminationsTab(classroomId: widget.classroom.id),
+                      StudentDiscussionsTab(
+                        classroomId: widget.classroom.id,
+                        classroomName: widget.classroom.className,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ] else
+                Expanded(child: _buildEnrollView()),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildEnrollView() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          const SizedBox(height: 40),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.8),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.lock_person_rounded, size: 80, color: AppColors.primary.withValues(alpha: 0.5)),
+          ),
+          const SizedBox(height: 32),
+          const Text(
+            'Enrollment Required',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'You need to join this classroom to access materials, examinations, and discussions.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
+          ),
+          const SizedBox(height: 40),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 20, offset: const Offset(0, 10)),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Enter Enrollment Key',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _enrollController,
+                  decoration: InputDecoration(
+                    hintText: 'Ask your lecturer for the key',
+                    prefixIcon: const Icon(Icons.key_rounded, color: AppColors.primary, size: 20),
+                    filled: true,
+                    fillColor: Colors.grey.withValues(alpha: 0.05),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isEnrolling ? null : _handleEnroll,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: _isEnrolling
+                        ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                        : const Text('Join Classroom', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _handleEnroll() async {
+    final key = _enrollController.text.trim();
+    if (key.isEmpty) {
+      _showSnack('Please enter enrollment key', isError: true);
+      return;
+    }
+
+    setState(() => _isEnrolling = true);
+
+    try {
+      final response = await ClassroomService.enrollClassroom(
+        classId: widget.classroom.id,
+        studentId: _userId,
+        enrolKey: key,
+      );
+
+      if (response['success'] == true) {
+        _showSnack('Successfully joined the classroom!');
+        if (mounted) {
+          setState(() {
+            _isJoined = true;
+            _isEnrolling = false;
+          });
+        }
+      } else {
+        _showSnack(response['message'] ?? 'Failed to join classroom', isError: true);
+        setState(() => _isEnrolling = false);
+      }
+    } catch (e) {
+      String msg = e.toString().replaceFirst('Exception: ', '');
+      if (msg.contains('400')) {
+        msg = 'Invalid enrollment key. Please try again.';
+      } else if (msg.contains('409')) {
+        msg = 'You are already enrolled in this classroom.';
+      } else if (msg.contains('500')) {
+        msg = 'Server error. Please try again later.';
+      }
+      _showSnack(msg, isError: true);
+      setState(() => _isEnrolling = false);
+    }
+  }
+
+  void _showSnack(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.error : AppColors.success,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
