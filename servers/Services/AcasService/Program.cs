@@ -53,6 +53,7 @@ using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
 using AcasService.Repositories.Caching.Redis.Submission;
+using AcasService.Dev;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -119,6 +120,7 @@ builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
