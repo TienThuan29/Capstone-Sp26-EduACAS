@@ -102,14 +102,68 @@ export interface ProblemLiteResponse {
   title: string;
 }
 
+/** Minimal student info in submission detail. */
+export interface StudentLiteResponse {
+  studentId: string;
+  fullname: string;
+  email: string;
+  roleNumber?: string;
+}
+
 export interface SubmissionResponse {
   id: string;
   studentId: string;
   examId: string;
   problemId: string;
+  languageId?: string;
+  compilerId?: string;
+  source?: string;
   version: number;
   status: string;
   submittedDate: string;
   finalScore: number;
+  gradedDate?: string;
+  testResults?: TestResultResponse[];
   problem?: ProblemLiteResponse;
+  student?: StudentLiteResponse;
+}
+
+/** Request payload for one submission when calling auto-grade API */
+export interface SubmissionGradingRequest {
+  id: string;
+  studentId: string;
+  languageId: string;
+  compilerId: string;
+  examId: string;
+  problemId: string;
+  source: string;
+}
+
+/** Request body for run auto-grading (all submissions of a problem in an exam) */
+export interface BulkSubmissionGradingRequest {
+  problemId: string;
+  examId: string;
+  submissions: SubmissionGradingRequest[];
+}
+
+/** Per-submission result in auto-grade API response */
+export interface AutoGradeSubmissionResult {
+  submissionId: string;
+  studentId: string;
+  finalScore: number;
+  status: string;
+  gradedDate: string;
+  passedTestCases: number;
+  totalTestCases: number;
+  errorMessage?: string | null;
+}
+
+/** Response from run auto-grading API */
+export interface AutoGradeProblemResponse {
+  problemId: string;
+  examId: string;
+  totalSubmissions: number;
+  gradedCount: number;
+  failedCount: number;
+  results: AutoGradeSubmissionResult[];
 }
