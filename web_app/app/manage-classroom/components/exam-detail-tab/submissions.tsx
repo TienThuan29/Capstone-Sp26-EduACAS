@@ -15,6 +15,9 @@ import {
   Label,
   Select,
   HR,
+  Modal,
+  ModalHeader,
+  ModalBody,
 } from "flowbite-react";
 import {
   CommandLineIcon,
@@ -22,13 +25,18 @@ import {
   EyeIcon,
 } from "@heroicons/react/24/outline";
 import type { Examination } from "@/types/examination";
-import type { SubmissionResponse } from "@/types/submission";
+import type {
+  SubmissionResponse,
+  SubmissionGradingRequest,
+  AutoGradeProblemResponse,
+} from "@/types/submission";
 import type { ClassroomStudentResponse } from "@/types/classroom";
 import { useStudentClassroom } from "@/hooks/classroom/useStudentClassroom";
 import { useSubmissionLecturer } from "@/hooks/submission/useSubmissionLecturer";
 import { formatDate } from "@/utils/datetime-utils";
 import { CustomPagination } from "@/components/custom-pagination";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { SubmissionDetail } from "./submission-detail";
 
 export type SubmissionsTabContentProps = {
   examination: Examination;
@@ -36,7 +44,6 @@ export type SubmissionsTabContentProps = {
 
 const SUBMISSIONS_PAGE_SIZE = 10;
 
-/** Per-problem submissions; uses examProblems (problemId + mark) since list API does not return full Problem[]. */
 type ProblemSubmissions = {
   problemId: string;
   mark: number;
@@ -47,7 +54,10 @@ export function SubmissionsTabContent({
   examination,
 }: SubmissionsTabContentProps) {
   const { getStudentsByClassId } = useStudentClassroom();
-  const { getLatestSubmissionsByExamAndProblem } = useSubmissionLecturer();
+  const {
+    getLatestSubmissionsByExamAndProblem,
+    runAutoGrading,
+  } = useSubmissionLecturer();
 
   const [students, setStudents] = useState<ClassroomStudentResponse[]>([]);
   const [problemSubmissions, setProblemSubmissions] = useState<
@@ -55,15 +65,28 @@ export function SubmissionsTabContent({
   >([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  /** Selected problem id; empty string means "All problems". */
   const [selectedProblemId, setSelectedProblemId] = useState<string>("");
-  /** Current page (1-based) per problemId for table pagination. */
   const [currentPageByProblem, setCurrentPageByProblem] = useState<
     Record<string, number>
   >({});
 
+  /** Whether the confirm-run-auto-grading modal is open. */
+  const [showGradingConfirmModal, setShowGradingConfirmModal] = useState(false);
+  const [gradingConfirmLoading, setGradingConfirmLoading] = useState(false);
+  const [loadingDots, setLoadingDots] = useState(0);
+  /** Submission id to show in detail (in-page); null = show list. */
+  const [detailSubmissionId, setDetailSubmissionId] = useState<string | null>(null);
+  const [detailStudentName, setDetailStudentName] = useState<string | undefined>(undefined);
+  /** Message to show after auto-grading completes (success or error). */
+  const [gradingResult, setGradingResult] = useState<{
+    success: boolean;
+    message: string;
+    detail?: AutoGradeProblemResponse;
+  } | null>(null);
+
   const classId = examination.classroom?.id;
   const examId = examination.id;
+
   /** Backend list API returns examProblems (problemId + mark), not full problems[]. Use this for submission queries. */
   const examProblems = useMemo(
     () => examination.examProblems ?? [],
@@ -83,6 +106,9 @@ export function SubmissionsTabContent({
     return problemSubmissions.filter((p) => p.problemId === selectedProblemId);
   }, [problemSubmissions, selectedProblemId]);
 
+  /**
+   * Fetch data for the submissions tab.
+   */
   const fetchData = useCallback(async () => {
     if (!classId || !examId) return;
     setLoading(true);
@@ -120,6 +146,84 @@ export function SubmissionsTabContent({
     fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    if (!gradingConfirmLoading) {
+      setLoadingDots(0);
+      return;
+    }
+    const id = setInterval(() => {
+      setLoadingDots((d) => (d + 1) % 3);
+    }, 400);
+    return () => clearInterval(id);
+  }, [gradingConfirmLoading]);
+
+  /**
+   * Build request payload for one submission for auto-grade API.
+   */
+  const toGradingRequest = useCallback(
+    (sub: SubmissionResponse): SubmissionGradingRequest => ({
+      id: sub.id,
+      studentId: sub.studentId,
+      languageId: sub.languageId ?? "",
+      compilerId: sub.compilerId ?? "",
+      examId: sub.examId,
+      problemId: sub.problemId,
+      source: sub.source ?? "",
+    }),
+    []
+  );
+
+  /**
+   * Handle run auto-grading for the selected problem.
+   */
+  const handleRunAutoGrading = useCallback(async () => {
+    if (!selectedProblemId || !examId) return;
+    setShowGradingConfirmModal(false);
+    setGradingConfirmLoading(true);
+    setGradingResult(null);
+    try {
+      const selected = problemSubmissions.find(
+        (p) => p.problemId === selectedProblemId
+      );
+      const submissions = selected?.submissions ?? [];
+      if (submissions.length === 0) {
+        setGradingResult({
+          success: false,
+          message: "No submissions to grade for this problem.",
+        });
+        return;
+      }
+      const request = {
+        examId,
+        problemId: selectedProblemId,
+        submissions: submissions.map(toGradingRequest),
+      };
+      const result = await runAutoGrading(request);
+      setGradingResult({
+        success: result.failedCount === 0,
+        message:
+          result.failedCount === 0
+            ? `Auto-grading completed. Graded ${result.gradedCount} submission(s).`
+            : `Auto-grading completed. Graded ${result.gradedCount} submission(s), ${result.failedCount} failed.`,
+        detail: result,
+      });
+      await fetchData();
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Auto-grading failed.";
+      setGradingResult({ success: false, message });
+    } finally {
+      setGradingConfirmLoading(false);
+    }
+  }, [
+    selectedProblemId,
+    examId,
+    problemSubmissions,
+    toGradingRequest,
+    runAutoGrading,
+    fetchData,
+  ]);
+
   if (loading) {
     return (
       <div className="flex justify-center py-12">
@@ -156,6 +260,20 @@ export function SubmissionsTabContent({
     );
   }
 
+  // In-page submission detail view (replaces list when a submission is selected)
+  if (detailSubmissionId) {
+    return (
+      <SubmissionDetail
+        submissionId={detailSubmissionId}
+        studentName={detailStudentName}
+        onBack={() => {
+          setDetailSubmissionId(null);
+          setDetailStudentName(undefined);
+        }}
+      />
+    );
+  }
+
   return (
     <div className="">
       <div className="flex flex-wrap items-end gap-4">
@@ -180,8 +298,43 @@ export function SubmissionsTabContent({
             })}
           </Select>
         </div>
+        <Tooltip content="Select a problem to run auto grading">
+          <DefaultCustomButton
+            label="Run Auto Grading"
+            size="sm"
+            className="cursor-pointer"
+            onClick={() => setShowGradingConfirmModal(true)}
+            disabled={!selectedProblemId}
+          />
+        </Tooltip>
       </div>
       <HR />
+
+      {gradingResult && (
+        <div
+          className={`mb-4 rounded-lg border p-4 ${
+            gradingResult.success
+              ? "border-green-200 bg-green-50 text-green-800 dark:border-green-800 dark:bg-green-900/20 dark:text-green-200"
+              : "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200"
+          }`}
+        >
+          <p className="font-medium">{gradingResult.message}</p>
+          {gradingResult.detail && gradingResult.detail.results.length > 0 && (
+            <p className="mt-1 text-sm opacity-90">
+              {gradingResult.detail.results.filter((r) => !r.errorMessage).length} passed,{" "}
+              {gradingResult.detail.results.filter((r) => r.errorMessage).length} failed
+            </p>
+          )}
+          <Button
+            color={gradingResult.success ? "green" : "red"}
+            size="xs"
+            className="mt-2 cursor-pointer"
+            onClick={() => setGradingResult(null)}
+          >
+            Dismiss
+          </Button>
+        </div>
+      )}
 
       {displayedProblems.map(({ problemId, mark, submissions }, index) => {
         const problemTitle = submissions[0]?.problem?.title ?? problemId;
@@ -223,6 +376,7 @@ export function SubmissionsTabContent({
                           <TableHeadCell>Version</TableHeadCell>
                           <TableHeadCell>Submitted</TableHeadCell>
                           <TableHeadCell>Score</TableHeadCell>
+                          <TableHeadCell>Status</TableHeadCell>
                           <TableHeadCell>Action</TableHeadCell>
                           <TableHeadCell>
                             <span className="sr-only">Actions</span>
@@ -248,6 +402,20 @@ export function SubmissionsTabContent({
                                 {sub.finalScore}
                               </span>
                             </TableCell>
+                            <TableCell>
+                              <Badge
+                                color={
+                                  sub.status === "GRADED"
+                                    ? "success"
+                                    : sub.status === "PENDING"
+                                      ? "warning"
+                                      : "gray"
+                                }
+                                size="sm"
+                              >
+                                {sub.status}
+                              </Badge>
+                            </TableCell>
                             <TableCell className="flex items-center gap-2">
                               {/* for manual grading */}
                               <Tooltip content="View in editor">
@@ -266,6 +434,10 @@ export function SubmissionsTabContent({
                                   icon={<EyeIcon className="h-4 w-4" />}
                                   size="xs"
                                   className="cursor-pointer"
+                                  onClick={() => {
+                                    setDetailSubmissionId(sub.id);
+                                    setDetailStudentName(studentIdToName[sub.studentId]);
+                                  }}
                                 />
                               </Tooltip>
                             </TableCell>
@@ -289,6 +461,84 @@ export function SubmissionsTabContent({
           </div>
         );
       })}
+
+      {gradingConfirmLoading && (
+        <div
+          className="fixed inset-0 z-[100] flex cursor-wait flex-col items-center justify-center gap-4 bg-gray-500/60 dark:bg-gray-900/70"
+          aria-hidden="true"
+        >
+          <Spinner size="xl" color="info" />
+          <p className="text-lg font-medium text-white text-center">
+            Running auto grading
+            <span className="inline-block w-[1.2em] text-left" aria-hidden="true">
+              {".".repeat(loadingDots + 1)}
+            </span>
+          </p>
+        </div>
+      )}
+
+      <ConfirmRunningGradingForProblemModal
+        show={showGradingConfirmModal}
+        onClose={() => setShowGradingConfirmModal(false)}
+        problemId={selectedProblemId}
+        problemTitle={
+          problemSubmissions.find((p) => p.problemId === selectedProblemId)
+            ?.submissions[0]?.problem?.title ?? selectedProblemId
+        }
+        onConfirm={handleRunAutoGrading}
+      />
     </div>
+  );
+}
+
+// -- confirm run auto grading for problem modal
+
+type ConfirmRunningGradingForProblemModalProps = {
+  show: boolean;
+  onClose: () => void;
+  problemId: string;
+  problemTitle: string;
+  onConfirm: () => void | Promise<void>;
+};
+
+function ConfirmRunningGradingForProblemModal({
+  show,
+  onClose,
+  problemId,
+  problemTitle,
+  onConfirm,
+}: ConfirmRunningGradingForProblemModalProps) {
+  const handleConfirm = () => {
+    void Promise.resolve(onConfirm());
+  };
+
+  return (
+    <Modal show={show} onClose={onClose} size="md" popup>
+      <ModalHeader />
+      <ModalBody>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          Run auto grading
+        </h3>
+        <p className="mb-6 text-gray-500 dark:text-gray-400">
+          Run auto grading for problem{" "}
+          <span className="font-medium text-gray-900 dark:text-white">
+            {problemTitle || problemId}
+          </span>
+          ? Pending submissions for this problem will be graded automatically.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button color="gray" onClick={onClose} className="cursor-pointer">
+            Cancel
+          </Button>
+          <Button
+            color="green"
+            onClick={handleConfirm}
+            className="cursor-pointer"
+          >
+            Run auto grading
+          </Button>
+        </div>
+      </ModalBody>
+    </Modal>
   );
 }
