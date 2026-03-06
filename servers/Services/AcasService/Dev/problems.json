@@ -232,7 +232,7 @@
     "codeTemplate": "import math\n\n# Read N numbers and compute population standard deviation\n",
     "content": "## Description\nGiven **N** numbers, compute the **population standard deviation**.\n\nσ = √( (1/N) × Σ(xi - μ)² )\n\nwhere μ is the mean.\n\n## Input Format\n- Line 1: integer **N** (2 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the population standard deviation rounded to **4 decimal places**.\n\n## Examples\n**Input:**\n```\n5\n2 4 4 4 5\n```\n**Output:**\n```\n0.8944\n```",
     "testCases": [
-      { "input": "5\n2 4 4 4 5", "expectedOutput": "0.8944", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 4 },
+      { "input": "5\n2 4 4 4 5", "expectedOutput": "0.9798", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 4 },
       { "input": "4\n10 10 10 10", "expectedOutput": "0.0000", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 4 },
       { "input": "3\n1 5 9", "expectedOutput": "3.2660", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 4 },
       { "input": "6\n1 2 3 4 5 6", "expectedOutput": "1.7078", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 4 },
