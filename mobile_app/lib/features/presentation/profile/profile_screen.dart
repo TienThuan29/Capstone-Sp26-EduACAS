@@ -87,13 +87,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildProfileForm(),
                         if (widget.onLogout != null) ...[
                           const SizedBox(height: 48),
-                          SizedBox(
-                            width: double.infinity,
-                            child: EnhancedButton(
-                              text: 'Logout',
-                              onPressed: widget.onLogout!,
-                              isLoading: false,
-                            ),
+                          EnhancedButton(
+                            text: 'Logout',
+                            onPressed: widget.onLogout!,
+                            isLoading: false,
+                            color: Colors.redAccent,
+                            height: 44,
+                            showArrow: false,
                           ),
                         ],
                       ],
