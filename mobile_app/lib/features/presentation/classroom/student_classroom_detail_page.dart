@@ -59,9 +59,10 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
       body: Stack(
         children: [
           const GradientBackground(),
-          Column(
-            children: [
-              _buildHeader(context),
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context),
               if (_isJoined) ...[
                 _buildTabNavigation(),
                 Expanded(
@@ -79,7 +80,8 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
                 ),
               ] else
                 Expanded(child: _buildEnrollView()),
-            ],
+              ],
+            ),
           ),
         ],
       ),
@@ -221,7 +223,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
 
   Widget _buildHeader(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 50, 16, 20),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -229,18 +231,22 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
             children: [
               IconButton(
                 onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.primary, size: 20),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: AppColors.primary, size: 20),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
               const SizedBox(width: 16),
               Container(
+                width: 40,
+                height: 40,
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.school_rounded, color: AppColors.primary, size: 20),
+                child: const Icon(Icons.school_rounded,
+                    color: AppColors.primary, size: 20),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -255,7 +261,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
                         color: AppColors.textPrimary,
                         letterSpacing: -0.5,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(

@@ -212,42 +212,25 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.primary, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Discussion Detail',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-            ),
-            Text(
-              'Started by ${widget.issue.authorName}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
-            ),
-          ],
-        ),
-        shape: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.1))),
-      ),
       body: Stack(
         children: [
           const GradientBackground(),
-          Column(
-            children: [
+          SafeArea(
+            child: Column(
+              children: [
+                _buildHeader(context),
               Expanded(
                 child: _isLoading
-                    ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                    ? const Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.primary))
                     : RefreshIndicator(
                         onRefresh: _loadComments,
                         color: AppColors.primary,
                         child: ListView(
                           controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
                           children: [
                             _buildIssueContent(),
                             const SizedBox(height: 32),
@@ -255,7 +238,8 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                             ..._comments.map((comment) => _CommentCard(
                                   comment: comment,
                                   currentUserId: _currentUserId ?? '',
-                                  onShowOptions: () => _showCommentOptions(comment),
+                                  onShowOptions: () =>
+                                      _showCommentOptions(comment),
                                 )),
                             if (_comments.isEmpty) _buildEmptyComments(),
                             const SizedBox(height: 20),
@@ -264,6 +248,68 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                       ),
               ),
               _buildCommentInput(),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+  Widget _buildHeader(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: AppColors.primary, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.forum_rounded,
+                    color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Discussion Detail',
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      'Started by ${widget.issue.authorName}',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
         ],

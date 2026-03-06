@@ -94,166 +94,226 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
     final examination = widget.examination;
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text(
-          'Examination Detail',
-          style: TextStyle(fontWeight: FontWeight.w900, color: AppColors.primary),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: AppColors.primary),
-      ),
       body: Stack(
         children: [
           const GradientBackground(),
           SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 10), // Small spacer for AppBar
-                  _buildHeaderCard(examination),
-                  const SizedBox(height: 20),
-                  _buildInfoSection(examination),
-                  const SizedBox(height: 20),
-                  if (examination.description.isNotEmpty) ...[
-                    _buildDescriptionSection(examination),
-                    const SizedBox(height: 20),
-                  ],
-                  _buildProblemsSection(examination),
-                  const SizedBox(height: 32),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeaderCard(Examination examination) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  examination.examName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                    height: 1.2,
-                    letterSpacing: -0.5,
+                _buildHeader(context, examination),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 8),
+                        _buildHighlightsSection(examination),
+                        const SizedBox(height: 20),
+                        _buildInfoSection(examination),
+                        const SizedBox(height: 20),
+                        if (examination.description.isNotEmpty) ...[
+                          _buildDescriptionSection(examination),
+                          const SizedBox(height: 20),
+                        ],
+                        _buildProblemsSection(examination),
+                        const SizedBox(height: 32),
+                      ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.code_rounded,
-                          color: Colors.white, size: 16),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      examination.programmingLanguage.name,
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(width: 20),
-                    Container(
-                      padding: const EdgeInsets.all(6),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.2),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: const Icon(Icons.workspace_premium_rounded,
-                          color: Colors.white, size: 16),
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${examination.totalMark} pts',
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w800),
-                    ),
-                  ],
                 ),
               ],
             ),
           ),
-          const SizedBox(width: 16),
-          _buildStatusBadge(examination.status),
         ],
       ),
     );
   }
 
-  Widget _buildStatusBadge(ExaminationStatus status) {
+  Widget _buildHeader(BuildContext context, Examination examination) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.arrow_back_ios_new_rounded,
+                    color: AppColors.primary, size: 20),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+              const SizedBox(width: 16),
+              Container(
+                width: 40,
+                height: 40,
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.assignment_rounded,
+                    color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      examination.examName,
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.5,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const Text(
+                      'Examination Detail',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHighlightsSection(Examination examination) {
+    return Row(
+      children: [
+        _buildHighlightCard(
+          icon: Icons.code_rounded,
+          label: 'Language',
+          value: examination.programmingLanguage.name,
+          color: Colors.blue,
+        ),
+        const SizedBox(width: 12),
+        _buildHighlightCard(
+          icon: Icons.workspace_premium_rounded,
+          label: 'Total Mark',
+          value: '${examination.totalMark} pts',
+          color: Colors.amber,
+        ),
+        const SizedBox(width: 12),
+        _buildStatusHighlight(examination.status),
+      ],
+    );
+  }
+
+  Widget _buildHighlightCard({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: color.withValues(alpha: 0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(
+                  fontSize: 10,
+                  color: AppColors.textLight,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(
+                  fontSize: 13,
+                  color: AppColors.textPrimary,
+                  fontWeight: FontWeight.w900),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatusHighlight(ExaminationStatus status) {
     Color color;
     Color textColor = Colors.white;
     String label = status.name.toUpperCase();
-    
+    IconData icon = Icons.timer_outlined;
+
     switch (status) {
       case ExaminationStatus.ongoing:
-        color = Colors.greenAccent;
-        textColor = const Color(0xFF065F46); // Dark green for readability
+        color = Colors.green;
         label = 'ONGOING';
+        icon = Icons.play_circle_outline_rounded;
         break;
       case ExaminationStatus.pending:
-        color = Colors.orangeAccent;
-        textColor = const Color(0xFF92400E); // Dark orange
+        color = Colors.orange;
         label = 'UPCOMING';
+        icon = Icons.schedule_rounded;
         break;
       case ExaminationStatus.completed:
-        color = Colors.white.withValues(alpha: 0.3);
-        textColor = Colors.white;
+        color = Colors.grey;
         label = 'ENDED';
+        icon = Icons.event_available_rounded;
         break;
     }
 
-    return RotatedBox(
-      quarterTurns: 1, // Vertical text
+    return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+        padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(100),
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: textColor,
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(height: 8),
+            const Text(
+              'Status',
+              style: TextStyle(
+                  fontSize: 10,
+                  color: AppColors.textLight,
+                  fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: TextStyle(
+                  fontSize: 12, color: color, fontWeight: FontWeight.w900),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
       ),
     );
@@ -348,49 +408,81 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
 
   Widget _buildProblemCard(int index, Problem problem, double mark) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
       ),
       child: Theme(
-        data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          splashColor: AppColors.primary.withValues(alpha: 0.05),
+          highlightColor: Colors.transparent,
+        ),
         child: ExpansionTile(
-          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
-          collapsedShape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
-          backgroundColor: AppColors.background,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20)),
+          collapsedShape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20)),
+          backgroundColor: AppColors.background.withValues(alpha: 0.3),
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: Container(
-            padding: const EdgeInsets.all(10),
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              shape: BoxShape.circle,
+              gradient: LinearGradient(
+                colors: [
+                  AppColors.primary,
+                  AppColors.primary.withValues(alpha: 0.8)
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.primary.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Text(
               '$index',
-              style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w900),
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16),
             ),
           ),
           title: Text(
             problem.title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            style: const TextStyle(
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+                color: AppColors.textPrimary),
           ),
           trailing: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
               color: AppColors.accent.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
               '${mark.toStringAsFixed(1)} pts',
-              style: const TextStyle(color: AppColors.accent, fontWeight: FontWeight.w900, fontSize: 12),
+              style: const TextStyle(
+                  color: AppColors.accent,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 11),
             ),
           ),
           children: [
@@ -399,11 +491,17 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Divider(),
-                  const SizedBox(height: 8),
+                  const Divider(height: 1),
+                  const SizedBox(height: 16),
                   Text(
-                    problem.content.isNotEmpty ? problem.content : 'No content available.',
-                    style: const TextStyle(color: AppColors.textSecondary, height: 1.5),
+                    problem.content.isNotEmpty
+                        ? problem.content
+                        : 'No content available.',
+                    style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        height: 1.6,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500),
                   ),
                 ],
               ),
@@ -414,35 +512,48 @@ class _ExaminationDetailPageState extends State<ExaminationDetailPage> {
     );
   }
 
-  Widget _buildSectionCard({required String title, required IconData icon, required Widget child}) {
+  Widget _buildSectionCard(
+      {required String title, required IconData icon, required Widget child}) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              Icon(icon, size: 20, color: AppColors.primary),
-              const SizedBox(width: 8),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(icon, size: 18, color: AppColors.primary),
+              ),
+              const SizedBox(width: 12),
               Text(
                 title,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.3),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           child,
         ],
       ),
