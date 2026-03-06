@@ -41,4 +41,20 @@ public class SubmissionCommandController : ControllerBase
             return ResponseUtil.Error<SubmissionResponse>("Failed to save submission", 500);
         }
     }
+
+    [HttpPost("auto-grade")]
+    public async Task<ActionResult<ApiResponse<AutoGradeProblemResponse>>> AutoGradeSubmissions(
+        [FromBody] BulkSubmissionGradingRequest request)
+    {
+        try
+        {
+            var result = await _submissionCommand.AutoGradeAllSubmissionsOfProblemAysnc(request);
+            return ResponseUtil.Success(result, "Auto-grading completed", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error running auto-grading");
+            return ResponseUtil.Error<AutoGradeProblemResponse>("Auto-grading failed", 500);
+        }
+    }
 }

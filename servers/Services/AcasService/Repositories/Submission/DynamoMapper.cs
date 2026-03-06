@@ -20,17 +20,17 @@ public static class DynamoMapper
             ["submittedDate"] = new AttributeValue { S = submission.SubmittedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
             ["finalScore"] = new AttributeValue { N = submission.FinalScore.ToString(System.Globalization.CultureInfo.InvariantCulture) },
             ["status"] = new AttributeValue { S = submission.Status.ToString() },
-            ["gradedDate"] = new AttributeValue { S = submission.GradedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
+            ["gradedDate"] = new AttributeValue { S = submission.GradedDate?.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") ?? string.Empty },
             ["regradingRequestId"] = new AttributeValue { S = submission.RegradingRequestId },
             ["lecturerFeedback"] = new AttributeValue { S = submission.LecturerFeedback },
             ["aiFeedback"] = new AttributeValue { S = submission.AiFeedback },
             ["updatedDate"] = new AttributeValue { S = submission.UpdatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
         };
 
-        if (submission.TestResults != null && submission.TestResults.Count > 0)
-        {
-            item["testResults"] = new AttributeValue { S = JsonSerializer.Serialize(submission.TestResults) };
-        }
+        var testResultsJson = submission.TestResults != null && submission.TestResults.Count > 0
+            ? JsonSerializer.Serialize(submission.TestResults)
+            : "[]";
+        item["testResults"] = new AttributeValue { S = testResultsJson };
 
         return item;
     }
