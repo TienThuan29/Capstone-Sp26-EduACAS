@@ -1,4 +1,4 @@
-﻿using Amazon.DynamoDBv2.Model;
+using Amazon.DynamoDBv2.Model;
 
 namespace AcasService.Repositories.Subject;
 
@@ -11,7 +11,7 @@ public static class DynamoMapper
             ["id"] = new AttributeValue { S = subject.Id },
             ["subjectCode"] = new AttributeValue { S = subject.SubjectCode },
             ["subjectName"] = new AttributeValue { S = subject.SubjectName },
-            ["description"] = new AttributeValue { S = subject.Description },
+            ["description"] = new AttributeValue { S = subject.Description ?? string.Empty },
             ["createdBy"] = new AttributeValue { S = subject.CreatedBy },
             ["isDeleted"] = new AttributeValue { BOOL = subject.IsDeleted },
             ["createdDate"] = new AttributeValue { S = subject.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }

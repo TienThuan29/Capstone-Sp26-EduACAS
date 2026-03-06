@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("SubmissionTableName")]
 public class Submission
 {
     [Key]
@@ -27,7 +29,7 @@ public class Submission
 
     public SubmissionStatus Status { get; set; }
 
-    public DateTime GradedDate { get; set; }
+    public DateTime? GradedDate { get; set; }
 
     public List<TestResult> TestResults { get; set; } = new List<TestResult>();
 
