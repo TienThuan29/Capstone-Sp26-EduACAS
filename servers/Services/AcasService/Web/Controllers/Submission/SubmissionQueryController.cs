@@ -30,6 +30,30 @@ public class SubmissionQueryController : ControllerBase
             _logger = logger;
       }
 
+      [HttpGet("{id}")]
+      public async Task<ActionResult<ApiResponse<SubmissionResponse>>> GetById([FromRoute] string id)
+      {
+            try
+            {
+                  var (submission, problem, studentProfile) = await _submissionQuery.GetSubmissionDetailByIdAsync(id);
+                  if (submission == null)
+                        return ResponseUtil.Error<SubmissionResponse>("Submission not found", 404);
+
+                  ProblemLiteResponse? problemLite = null;
+                  if (problem != null)
+                        problemLite = new ProblemLiteResponse { Id = problem.Id, Title = problem.Title };
+
+                  var studentLite = _submissionMapper.ToStudentLiteResponse(studentProfile);
+                  var response = _submissionMapper.ToResponse(submission, problemLite, studentLite);
+                  return ResponseUtil.Success(response, "Submission retrieved successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                  _logger.LogError(ex, "Error getting submission {Id}", id);
+                  return ResponseUtil.Error<SubmissionResponse>("Failed to get submission", 500);
+            }
+      }
+
       [HttpGet("student/{studentId}")]
       public async Task<ActionResult<ApiResponse<List<SubmissionResponse>>>> GetByStudentId([FromRoute] string studentId)
       {
