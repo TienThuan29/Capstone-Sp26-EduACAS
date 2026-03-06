@@ -118,22 +118,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         const Text(
-          'Profile Settings',
+          'Your Information',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Manage your personal information',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
+        ],
     );
   }
 
