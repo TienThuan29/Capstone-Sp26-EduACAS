@@ -19,8 +19,8 @@ type UserContextType = {
     loginWithGoogle: (idToken: string) => void,
     logout: () => void,
     isLoggedIn: () => boolean,
-    setUser: (user: UserProfile) => void,
-    setAuthTokens: (authTokens: AuthTokens) => void,
+    setUser: (user: UserProfile | null) => void,
+    setAuthTokens: (authTokens: AuthTokens | null) => void,
     sessionExpired: boolean,
     handleSessionExpired: () => void,
     isLoggingOut: boolean

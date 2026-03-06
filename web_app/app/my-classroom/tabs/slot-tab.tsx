@@ -182,14 +182,16 @@ export function SlotTab() {
                                     <span className="text-gray-500 dark:text-gray-400">
                                       {modeLabel}
                                     </span>
-                                    <Link
-                                      href={`/my-classroom/${classroomId}/exam/${exam.id}`}
-                                      className="ml-auto"
-                                    >
-                                      <Button color="info" size="xs" className="cursor-pointer bg-[#1F4E79] text-white">
-                                        Take
-                                      </Button>
-                                    </Link>
+                                    {statusLabel === "ONGOING" && (
+                                      <Link
+                                        href={`/my-classroom/${classroomId}/exam/${exam.id}`}
+                                        className="ml-auto"
+                                      >
+                                        <Button color="info" size="xs" className="cursor-pointer bg-[#1F4E79] text-white">
+                                          Take
+                                        </Button>
+                                      </Link>
+                                    )}
                                   </li>
                                 );
                               })}

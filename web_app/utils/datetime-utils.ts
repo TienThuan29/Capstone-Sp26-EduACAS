@@ -54,6 +54,26 @@ export function formatTime(value: string | Date | null | undefined): string {
   }
 }
 
+/**
+ * Format a nullable/optional date for display (e.g. graded date).
+ * Returns placeholder "—" when value is null, empty, invalid, or a sentinel/min date (year < 1900).
+ * Backend may send default/min date (e.g. 0001-01-01) instead of null for unset dates.
+ */
+export function formatGradedDate(
+  value: string | Date | null | undefined,
+  placeholder = "—"
+): string {
+  if (value == null || (typeof value === "string" && value === ""))
+    return placeholder;
+  try {
+    const d = typeof value === "string" ? new Date(value) : value;
+    if (Number.isNaN(d.getTime()) || d.getFullYear() < 1900) return placeholder;
+    return formatDate(value);
+  } catch {
+    return placeholder;
+  }
+}
+
 export function formatDurationMs(ms: number): string {
   const totalMinutes = Math.round(ms / (1000 * 60));
   if (totalMinutes < 60) return `${totalMinutes} minutes`;

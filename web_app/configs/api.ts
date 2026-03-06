@@ -63,6 +63,8 @@ export const Api = {
     GET_BY_ID: "/api/acas/v1/classrooms",
     ENROLL: "/api/acas/v1/class-enrollments/enroll",
     LEAVE: "/api/acas/v1/class-enrollments/leave",
+    GET_CLASSROOM_STUDENTS: (classId: string) => `/api/acas/v1/class-enrollments/classroom/${classId}/students`,
+    FORCE_LEAVE: (classId: string, studentId: string) => `/api/acas/v1/class-enrollments/force-leave?classId=${encodeURIComponent(classId)}&studentId=${encodeURIComponent(studentId)}`,
     GET_LECTURER_CLASSROOMS: "/api/acas/v1/classrooms/lecturer",
     CREATE_CLASSROOM: "/api/acas/v1/classrooms",
     UPDATE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}`,
@@ -113,6 +115,11 @@ export const Api = {
   Submission: {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
+    SAVE: '/api/v1/submissions',
+    GET_BY_ID: (id: string) => `/api/v1/submissions/${id}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
+    GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
+    AUTO_GRADE: '/api/v1/submissions/auto-grade',
   },
 
   TestcaseGeneration: {

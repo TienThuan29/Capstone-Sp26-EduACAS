@@ -13,7 +13,7 @@ public static class DynamoMapper
             ["classroomId"] = new AttributeValue { S = material.ClassroomId },
             ["filename"] = new AttributeValue { S = material.Filename },
             ["fileUrl"] = new AttributeValue { S = material.FileUrl },
-            ["description"] = new AttributeValue { S = material.Description },
+            ["description"] = new AttributeValue { S = material.Description ?? string.Empty },
             ["isDeleted"] = new AttributeValue { BOOL = material.IsDeleted },
             ["createdDate"] = new AttributeValue { S = material.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
         };
