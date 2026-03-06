@@ -3,7 +3,11 @@
 import { useCallback } from 'react';
 import useAxios from '@/hooks/useAxios';
 import { Api } from '@/configs/api';
-import type { SubmissionResponse } from '@/types/submission';
+import type {
+  SubmissionResponse,
+  BulkSubmissionGradingRequest,
+  AutoGradeProblemResponse,
+} from '@/types/submission';
 
 interface ApiResponse<T> {
   success?: boolean;
@@ -28,7 +32,24 @@ export const useSubmissionLecturer = () => {
     [axiosInstance]
   );
 
+  const runAutoGrading = useCallback(
+    async (
+      request: BulkSubmissionGradingRequest
+    ): Promise<AutoGradeProblemResponse> => {
+      const response = await axiosInstance.post<
+        ApiResponse<AutoGradeProblemResponse>
+      >(Api.Submission.AUTO_GRADE, request);
+      const data = response.data?.dataResponse;
+      if (!data) {
+        throw new Error(response.data?.error ?? 'Auto-grading failed');
+      }
+      return data;
+    },
+    [axiosInstance]
+  );
+
   return {
     getLatestSubmissionsByExamAndProblem,
+    runAutoGrading,
   };
 };
