@@ -11,7 +11,7 @@ public class RegradingRequest
     
     private string ExaminationId { get; set; } = string.Empty;
     
-    private string ProblemId { get; set; } = string.Empty;
+    // private string ProblemId { get; set; } = string.Empty;
     
     private string SubmissionId { get; set; } = string.Empty;
     
