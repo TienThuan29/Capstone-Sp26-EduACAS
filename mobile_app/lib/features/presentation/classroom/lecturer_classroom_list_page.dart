@@ -65,8 +65,8 @@ class _LecturerClassroomListPageState
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -76,20 +76,30 @@ class _LecturerClassroomListPageState
             ),
             child: const Icon(Icons.class_rounded, color: AppColors.primary, size: 28),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'Manage Classrooms',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-              letterSpacing: -0.5,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Manage Classrooms',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'View and organize your assigned classes',
+                  style: TextStyle(fontSize: 12, color: AppColors.textLight, fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'View and organize your assigned teaching classes',
-            style: TextStyle(fontSize: 14, color: AppColors.textLight, fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -183,8 +193,8 @@ class _LecturerClassroomListPageState
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8,
             offset: const Offset(0, 4),
           ),
         ],

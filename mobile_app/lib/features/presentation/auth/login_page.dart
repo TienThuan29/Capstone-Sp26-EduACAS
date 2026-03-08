@@ -305,29 +305,28 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               child: Hero(
                 tag: 'app_logo',
                 child: Container(
-                  width: 85,
-                  height: 85,
+                  width: 100,
+                  height: 100,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                    ),
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: Colors.black.withValues(alpha: 0.08),
                         spreadRadius: 0,
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.school_rounded,
-                      color: Colors.white,
-                      size: 46,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(24),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12.0),
+                      child: Image.asset(
+                        'assets/logo.png',
+                        fit: BoxFit.contain,
+                      ),
                     ),
                   ),
                 ),

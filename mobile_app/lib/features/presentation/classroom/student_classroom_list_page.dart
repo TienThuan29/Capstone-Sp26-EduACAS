@@ -134,8 +134,8 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
   Widget _buildHeader() {
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 60, 24, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
             padding: const EdgeInsets.all(12),
@@ -145,20 +145,30 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
             ),
             child: const Icon(Icons.class_rounded, color: AppColors.primary, size: 28),
           ),
-          const SizedBox(height: 16),
-          const Text(
-            'My Classrooms',
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.w900,
-              color: AppColors.textPrimary,
-              letterSpacing: -0.5,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'My Classrooms',
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Access your enrolled courses and materials',
+                  style: TextStyle(fontSize: 12, color: Colors.grey[600], fontWeight: FontWeight.w500),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Access your enrolled courses and learning materials',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600], fontWeight: FontWeight.w500),
           ),
         ],
       ),
@@ -223,8 +233,8 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 15,
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
             offset: const Offset(0, 5),
           ),
         ],
@@ -323,7 +333,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 8, offset: const Offset(0, 4)),
         ],
         border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
