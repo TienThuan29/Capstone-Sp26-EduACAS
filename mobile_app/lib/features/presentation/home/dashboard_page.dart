@@ -35,7 +35,7 @@ class DashboardPage extends StatelessWidget {
               _HeroCard(
                 userName: userName,
                 subtitle: _isLecturer
-                    ? 'Manage your classrooms and problems'
+                    ? 'Manage your classrooms'
                     : 'Ready to learn something today?',
                 icon: _isLecturer ? Icons.school_rounded : Icons.school_rounded,
               ),
@@ -72,15 +72,6 @@ class DashboardPage extends StatelessWidget {
           color: AppColors.primary,
           onTap: () => onNavigate(1),
         ),
-        const SizedBox(height: 16),
-        _QuickButton(
-          icon: Icons.quiz_rounded,
-          label: 'Problem Banks',
-          description: 'Create and organize coding problems',
-          color: AppColors.accent,
-          onTap: () => onNavigate(2),
-        ),
-        const SizedBox(height: 16),
         _QuickButton(
           icon: Icons.person_outline_rounded,
           label: 'My Profile',
@@ -159,12 +150,17 @@ class _HeroCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: Icon(icon, color: Colors.white, size: 28),
+                child: Image.asset(
+                  'assets/logo.png',
+                  width: 32,
+                  height: 32,
+                  fit: BoxFit.contain,
+                ),
               ),
               const SizedBox(width: 16),
               const Expanded(

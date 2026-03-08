@@ -6,7 +6,6 @@ import 'package:mobile/features/presentation/auth/login_page.dart';
 import 'package:mobile/features/presentation/home/dashboard_page.dart';
 import 'package:mobile/features/presentation/classroom/student_classroom_list_page.dart';
 import 'package:mobile/features/presentation/classroom/lecturer_classroom_list_page.dart';
-import 'package:mobile/features/presentation/problem/problem_management_page.dart';
 import 'package:mobile/features/presentation/profile/profile_screen.dart';
 
 /// Unified shell with BottomNavigationBar for quick-access navigation.
@@ -90,7 +89,6 @@ class _MainShellState extends State<MainShell> {
       return [
         _NavItem('Home', Icons.home_rounded, Icons.home_outlined),
         _NavItem('Classrooms', Icons.class_rounded, Icons.class_outlined),
-        _NavItem('Problems', Icons.quiz_rounded, Icons.quiz_outlined),
         _NavItem('Profile', Icons.person_rounded, Icons.person_outline_rounded),
       ];
     }
@@ -114,7 +112,6 @@ class _MainShellState extends State<MainShell> {
           onNavigate: _selectTab,
         ),
         const LecturerClassroomListPage(),
-        const ProblemManagementPage(),
         ProfileScreen(onLogout: _handleLogout),
       ];
     }
