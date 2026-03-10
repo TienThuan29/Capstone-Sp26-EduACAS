@@ -15,11 +15,12 @@ public class ProblemMapper
             Content = problem.Content,
             FileName = problem.FileName,
             Difficulty = problem.Difficulty,
-            CodeTemplate = problem.CodeTemplate,
+            CodeTemplates = problem.CodeTemplates ?? new Dictionary<string, string>(),
             TestCases = problem.TestCases
                 .Where(tc => !tc.IsDeleted)
                 .Select(ToTestCaseResponse)
                 .ToList(),
+            Tags = problem.Tags?.ToList() ?? new List<string>(),
             CreatedDate = problem.CreatedDate,
             UpdatedDate = problem.UpdatedDate
         };
@@ -30,11 +31,16 @@ public class ProblemMapper
         return new TestCaseResponse
         {
             Id = testCase.Id,
+            ProblemId = testCase.ProblemId,
             InputData = testCase.InputData,
             ExpectedOutput = testCase.ExpectedOutput,
             IsPublic = testCase.IsPublic,
             IsCaseInsensitive = testCase.IsCaseInsensitive,
-            IsRemovedSpace = testCase.IsRemovedSpace
+            IsFloatingPoint = testCase.IsFloatingPoint,
+            FloatingPointTolerance = testCase.FloatingPointTolerance,
+            DecimalPlaces = testCase.DecimalPlaces,
+            IsTokenComparision = testCase.IsTokenComparision,
+            IsNotOrderedComparision = testCase.IsNotOrderedComparision
         };
     }
 

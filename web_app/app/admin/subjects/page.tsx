@@ -27,6 +27,7 @@ import {
   ArrowPathIcon,
 } from '@heroicons/react/24/outline'
 import { DefaultCustomButton } from "@/components/ui/custom-button"
+import { formatDateOnly } from "@/utils/datetime-utils"
 import { useToast } from "@/hooks/useToast"
 import { useSubject } from "@/hooks/subject/useSubject"
 import type { Subject } from "@/types/subject"
@@ -174,14 +175,6 @@ export default function SubjectsManagement() {
     }
   }
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    })
-  }
-
   return (
     <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <Sidebar />
@@ -270,10 +263,10 @@ export default function SubjectsManagement() {
                       </Badge>
                     </TableCell>
                     <TableCell className={isDark ? 'text-gray-300' : 'text-gray-900'}>
-                      {subject.createdDate ? formatDate(new Date(subject.createdDate)) : 'N/A'}
+                      {subject.createdDate ? formatDateOnly(subject.createdDate) : 'N/A'}
                     </TableCell>
                     <TableCell className={isDark ? 'text-gray-300' : 'text-gray-900'}>
-                      {subject.updatedDate ? formatDate(new Date(subject.updatedDate)) : 'N/A'}
+                      {subject.updatedDate ? formatDateOnly(subject.updatedDate) : 'N/A'}
                     </TableCell>
                     <TableCell>
                       <div className="flex gap-2">

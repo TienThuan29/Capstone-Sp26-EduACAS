@@ -31,3 +31,18 @@ export interface Classroom {
   enrollment?: Enrollment;
   maxSlot: number;
 }
+
+// student classroom response
+export interface ClassroomStudentResponse {
+  enrollmentId: string;
+  studentId: string;
+  joinedDate: string;
+  isJoining: boolean;
+  roleNumber: string;
+  email: string;
+  fullname: string;
+  avatarUrl: string;
+  birthday: string | null;
+  role: string;
+  isEnable: boolean;
+}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Button, Card, Spinner, Badge } from "flowbite-react";
 import type { Examination } from "@/types/examination";
+import { formatDate } from "@/utils/datetime-utils";
 
 const MODE_LABELS: Record<number, string> = {
   0: "PRACTICAL",
@@ -110,13 +111,13 @@ export function ExamsTab({
                     <div className="flex justify-between">
                       <span>Start:</span>
                       <span className="font-bold">
-                        {startDate.toLocaleString("vi-VN")}
+                        {formatDate(exam.startDatetime)}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span>End:</span>
                       <span className="font-bold">
-                        {endDate.toLocaleString("vi-VN")}
+                        {formatDate(exam.endDatetime)}
                       </span>
                     </div>
                     <div className="flex justify-between">

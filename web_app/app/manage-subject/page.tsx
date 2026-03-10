@@ -9,6 +9,7 @@ import { Api } from "@/configs/api"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/useToast"
 import { PencilIcon as HiPencil, TrashIcon as HiTrash, PlusIcon as HiPlus, EyeIcon as HiEye } from "@heroicons/react/24/solid"
+import { formatDateOnly } from "@/utils/datetime-utils"
 
 interface Subject {
     id: string
@@ -309,7 +310,7 @@ export default function ManageSubjectPage() {
                                             )}
                                         </TableCell>
                                         <TableCell className="text-center">
-                                            {new Date(subject.createdDate).toLocaleDateString("vi-VN")}
+                                            {formatDateOnly(subject.createdDate)}
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex gap-2 justify-center">

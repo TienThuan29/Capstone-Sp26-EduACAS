@@ -27,13 +27,13 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
-  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import type { Examination, ExaminationRequest } from "@/types/examination";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage";
 import type { ProgrammingLanguage } from "@/types/language";
 import { useToast } from "@/hooks/useToast";
+import { formatDate } from "@/utils/datetime-utils";
 import { ExaminationDetailView } from "./exam-detail-tab";
 
 const STATUS_LABELS: Record<number, string> = {
@@ -77,6 +77,11 @@ type PractiseTabProps = {
   examinations: Examination[];
   loading: boolean;
   onRefetch: () => Promise<void>;
+  setExamDetailBack?: (callback: (() => void) | null) => void;
+  /** Exam ID from URL to restore detail view on refresh */
+  initialExamId?: string | null;
+  /** Called when user opens an exam or goes back to list (to sync URL) */
+  onExamIdInUrlChange?: (examId: string | null) => void;
 };
 
 export function ExamsTab({
@@ -84,12 +89,16 @@ export function ExamsTab({
   examinations,
   loading,
   onRefetch,
+  setExamDetailBack,
+  initialExamId,
+  onExamIdInUrlChange,
 }: PractiseTabProps) {
   const { showSuccess, showError } = useToast();
   const {
     createExamination,
     updateExamination,
     deleteExamination,
+    getExaminationById,
   } = useExamination();
 
   const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
@@ -156,11 +165,38 @@ export function ExamsTab({
 
   const openViewDetail = (exam: Examination) => {
     setExamToView(exam);
+    onExamIdInUrlChange?.(exam.id);
   };
 
-  const backToList = () => {
+  const backToList = useCallback(() => {
     setExamToView(null);
-  };
+    onExamIdInUrlChange?.(null);
+  }, [onExamIdInUrlChange]);
+
+  useEffect(() => {
+    setExamDetailBack?.(() => (examToView ? backToList : null));
+    return () => setExamDetailBack?.(() => null);
+  }, [examToView, backToList, setExamDetailBack]);
+
+  // Restore exam detail from URL (e.g. after F5 refresh)
+  useEffect(() => {
+    if (!initialExamId) {
+      setExamToView(null);
+      return;
+    }
+    const fromList = examinations.find((e) => e.id === initialExamId);
+    if (fromList) {
+      setExamToView(fromList);
+      return;
+    }
+    let cancelled = false;
+    getExaminationById(initialExamId).then((exam) => {
+      if (!cancelled && exam) setExamToView(exam);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialExamId, examinations, getExaminationById]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -224,24 +260,14 @@ export function ExamsTab({
     }
   };
 
-  // Detail tab: show full examination when one is selected
+  // Detail tab: show full examination when one is selected (back button is in page header)
   if (examToView) {
     return (
-      <div className="space-y-6">
-        <Button
-          color="gray"
-          outline
-          onClick={backToList}
-          className="inline-flex cursor-pointer items-center gap-2"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          Back to list
-        </Button>
-        <ExaminationDetailView
-          examination={examToView}
-          onBack={backToList}
-        />
-      </div>
+      <ExaminationDetailView
+        examination={examToView}
+        onBack={backToList}
+        showBackInHeader={false}
+      />
     );
   }
 
@@ -254,7 +280,7 @@ export function ExamsTab({
         </h2>
         <Button
           color="dark"
-          className="bg-[#1F4E79] hover:bg-[#2A6BA3]"
+          className="bg-[#1F4E79] hover:bg-[#2A6BA3] cursor-pointer"
           onClick={openCreate}
         >
           <PlusIcon className="mr-2 h-5 w-5" />
@@ -276,16 +302,18 @@ export function ExamsTab({
         <div className="overflow-x-auto border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
           <Table hoverable>
             <TableHead>
-              <TableHeadCell>Exam name</TableHeadCell>
-              <TableHeadCell>Language</TableHeadCell>
-              <TableHeadCell>Start</TableHeadCell>
-              <TableHeadCell>End</TableHeadCell>
-              <TableHeadCell>Total mark</TableHeadCell>
-              <TableHeadCell>Status</TableHeadCell>
-              <TableHeadCell>Mode</TableHeadCell>
-              <TableHeadCell>
-                <span className="sr-only">Actions</span>
-              </TableHeadCell>
+              <TableRow>
+                <TableHeadCell>Exam name</TableHeadCell>
+                <TableHeadCell>Language</TableHeadCell>
+                <TableHeadCell>Start</TableHeadCell>
+                <TableHeadCell>End</TableHeadCell>
+                <TableHeadCell>Total mark</TableHeadCell>
+                <TableHeadCell>Status</TableHeadCell>
+                <TableHeadCell>Mode</TableHeadCell>
+                <TableHeadCell>
+                  <span className="sr-only">Actions</span>
+                </TableHeadCell>
+              </TableRow>
             </TableHead>
             <TableBody>
               {examinations.map((exam) => {
@@ -293,8 +321,6 @@ export function ExamsTab({
                 const modeKey = exam.mode as 0 | 1;
                 const statusLabel = STATUS_LABELS[statusKey] ?? "PENDING";
                 const modeLabel = MODE_LABELS[modeKey] ?? "PRACTICAL";
-                const start = new Date(exam.startDatetime);
-                const end = new Date(exam.endDatetime);
                 return (
                   <TableRow key={exam.id}>
                     <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
@@ -302,10 +328,10 @@ export function ExamsTab({
                     </TableCell>
                     <TableCell>{exam.programmingLanguage?.name ?? "—"}</TableCell>
                     <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {start.toLocaleString("vi-VN")}
+                      {formatDate(exam.startDatetime)}
                     </TableCell>
                     <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {end.toLocaleString("vi-VN")}
+                      {formatDate(exam.endDatetime)}
                     </TableCell>
                     <TableCell>{exam.totalMark}</TableCell>
                     <TableCell>

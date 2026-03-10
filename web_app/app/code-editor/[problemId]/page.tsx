@@ -7,12 +7,8 @@ import { ExaminationSpecificProblemResponse } from '@/types/examination';
 import { FullPageLoader } from '@/components/loading-effect';
 
 interface PageProps {
-  params: Promise<{
-    problemId: string;
-  }>;
-  searchParams: Promise<{
-    examId?: string;
-  }>;
+  params: Promise<{problemId: string;}>;
+  searchParams: Promise<{examId?: string;}>;
 }
 
 export default function CodeEditorPage({ params, searchParams }: PageProps) {

@@ -23,6 +23,7 @@ import { Api } from "@/configs/api";
 import { CustomPagination } from "@/components/custom-pagination";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { formatDateOnly } from "@/utils/datetime-utils";
 
 interface LecturerLite {
   lecturerId: string;
@@ -419,8 +420,8 @@ export default function ManageClassroomPage() {
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400">
                     <span className="md:hidden">Time: </span>
-                    {new Date(c.createdDate).toLocaleDateString("vi-VN")} –{" "}
-                    {new Date(c.endDate).toLocaleDateString("vi-VN")}
+                    {formatDateOnly(c.createdDate)} –{" "}
+                    {formatDateOnly(c.endDate)}
                   </div>
                   <div className="flex justify-end pt-2 md:pt-0">
                     <Link href={`/manage-classroom/${c.id}`}>

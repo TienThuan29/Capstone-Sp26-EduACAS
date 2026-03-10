@@ -17,6 +17,7 @@ import { useUserManagement } from "@/hooks/user/useUserManagement"
 import { useToast } from "@/hooks/useToast"
 import { UserProfile } from "@/types/user"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
+import { formatDateOnly, formatTime } from "@/utils/datetime-utils"
 
 const userStatsAccentStyles: Record<string, { border: string; iconBg: string; iconColor: string }> = {
   purple: { border: 'border-l-purple-500', iconBg: 'bg-purple-50 dark:bg-purple-500/10', iconColor: 'text-purple-600 dark:text-purple-400' },
@@ -176,23 +177,6 @@ export default function UsersManagement() {
                          (filterStatus === 'disabled' && !user.isEnable)
     return matchesSearch && matchesRole && matchesStatus
   })
-
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'No data'
-    return new Date(dateString).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
-    })
-  }
-
-  const formatTime = (dateString: string | null) => {
-    if (!dateString) return ''
-    return new Date(dateString).toLocaleTimeString('vi-VN', {
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -373,7 +357,7 @@ export default function UsersManagement() {
                           </div>
                           {user.birthday && (
                             <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                              {new Date(user.birthday).toLocaleDateString('vi-VN')}
+                              {formatDateOnly(user.birthday)}
                             </div>
                           )}
                         </div>
@@ -404,7 +388,7 @@ export default function UsersManagement() {
                     <TableCell>
                       <div className="flex flex-col">
                         <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {formatDate(user.createdDate)}
+                          {formatDateOnly(user.createdDate)}
                         </span>
                         <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
                           {formatTime(user.createdDate)}

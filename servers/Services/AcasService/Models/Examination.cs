@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("ExaminationTableName")]
 public class Examination
 {
     [Key]
@@ -18,8 +20,8 @@ public class Examination
     [Required]
     public string ClassroomId { get; set; } = string.Empty;
     
-    [Required]
-    public string SlotId { get; set; } = string.Empty;
+    // [Required]
+    // public string SlotId { get; set; } = string.Empty;
     
     [Required]
     public DateTime StartDatetime { get; set; }

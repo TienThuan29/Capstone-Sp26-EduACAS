@@ -31,6 +31,7 @@ import {
   ClockIcon,
   BanknotesIcon,
   QuestionMarkCircleIcon,
+  ChatBubbleLeftRightIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -121,6 +122,11 @@ const Sidebar = () => {
       label: "Manage Students",
       href: `${pathname}?tab=students`,
     },
+    {
+      icon: ChatBubbleLeftRightIcon ,
+      label: "Discussion Channel",
+      href: `${pathname}?tab=discussion`,
+    },
     // {icon: QuestionMarkCircleIcon, label: "Question Banks", href: `${pathname}?tab=question-banks` },
   ];
 
@@ -171,9 +177,9 @@ const Sidebar = () => {
       href: `${pathname}?tab=materials`,
     },
     {
-      icon: PencilSquareIcon,
-      label: "Assignments",
-      href: `${pathname}?tab=assignments`,
+      icon: ChatBubbleLeftRightIcon ,
+      label: "Discussion Channel",
+      href: `${pathname}?tab=discussion`,
     },
   ];
 

@@ -12,12 +12,15 @@ import {
   FileOutput,
   Copy,
   Check,
-  X,
+  Clock,
+  AlertCircle,
 } from 'lucide-react';
 import { Spinner } from 'flowbite-react';
 import clsx from 'clsx';
 import { useEditorContext } from '@/contexts/EditorContext';
-import { TestCase } from '@/types/examination';
+import { useCustomTest } from '@/hooks/coding/useCustomTest';
+import { usePublicTests } from '@/hooks/coding/usePublicTests';
+import type { TestResultResponse } from '@/types/submission';
 
 // Dynamic import for Monaco Diff Editor
 const MonacoDiffEditor = dynamic(
@@ -34,18 +37,23 @@ const MonacoDiffEditor = dynamic(
 
 type ConsoleTab = 'testcases' | 'custom' | 'output';
 
-// function getStatusIcon(status: TestCaseStatus) {
-//   switch (status) {
-//     case 'pass':
-//       return <CheckCircle className="h-4 w-4 text-green-500" />;
-//     case 'fail':
-//       return <XCircle className="h-4 w-4 text-red-500" />;
-//     case 'error':
-//       return <XCircle className="h-4 w-4 text-orange-500" />;
-//     default:
-//       return <Circle className="h-4 w-4 text-gray-500" />;
-//   }
-// }
+/** Status from backend TestcaseStatus: SUCCESS, FAIL, TIMEOUT, COMPILE_ERROR, RUNTIME_ERROR, UNKNOWN_ERROR */
+function getStatusIcon(status: string | undefined) {
+  switch (status) {
+    case 'SUCCESS':
+      return <CheckCircle className="h-4 w-4 text-green-500" />;
+    case 'FAIL':
+      return <XCircle className="h-4 w-4 text-red-500" />;
+    case 'TIMEOUT':
+      return <Clock className="h-4 w-4 text-amber-500" />;
+    case 'COMPILE_ERROR':
+    case 'RUNTIME_ERROR':
+    case 'UNKNOWN_ERROR':
+      return <AlertCircle className="h-4 w-4 text-orange-500" />;
+    default:
+      return <Circle className="h-4 w-4 text-gray-500" />;
+  }
+}
 
 function CopyButton({ text }: { text: string }) {
   const [copied, setCopied] = useState(false);
@@ -85,8 +93,25 @@ export function ConsolePanel() {
     diffContent,
     editorState,
   } = useEditorContext();
+  const { runCustomTest, isRunning } = useCustomTest();
+  const { runPublicTests, isRunning: isRunningTests, error: testsError, results: testResults, lastMessage: testsLastMessage } = usePublicTests();
+  const activeTestCase =
+    testCases.find((tc) => tc.id === activeTestCaseId) ?? testCases[0] ?? null;
 
-  const activeTestCase = testCases.find((tc) => tc.id === activeTestCaseId);
+  const resultByTestcaseId = React.useMemo(() => {
+    const map: Record<string, TestResultResponse> = {};
+    if (testResults) for (const r of testResults) map[r.testcaseId] = r;
+    return map;
+  }, [testResults]);
+
+  const handleRunCustomTest = () => {
+    runCustomTest();
+    setActiveTab('output');
+  };
+
+  const handleRunPublicTests = () => {
+    runPublicTests();
+  };
 
   const tabs = [
     { id: 'testcases' as const, label: 'Test Cases', icon: Play },
@@ -104,7 +129,7 @@ export function ConsolePanel() {
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={clsx(
-                'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors',
+                'flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors cursor-pointer ',
                 activeTab === tab.id
                   ? 'border-b-2 border-blue-500 text-blue-500'
                   : 'text-gray-400 hover:text-gray-200'
@@ -137,155 +162,153 @@ export function ConsolePanel() {
       <div className="flex-1 overflow-hidden">
         {activeTab === 'testcases' && (
           <div className="flex h-full flex-col">
-            {/* Test Case Tabs */}
-            {/* <div className="flex items-center gap-1 border-b border-gray-800 px-3 py-2">
-              {testCases.map((tc) => (
-                <button
-                  key={tc.id}
-                  onClick={() => setActiveTestCaseId(tc.id)}
-                  className={clsx(
-                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
-                    activeTestCaseId === tc.id
-                      ? 'bg-gray-700 text-white'
-                      : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
-                  )}
-                >
-                  {getStatusIcon(tc.status)}
-                  <span>Case {tc.id}</span>
-                </button>
-              ))}
-            </div> */}
-
-            {/* Test Case Details */}
+            <div className="flex items-center justify-between gap-2 border-b border-gray-800 px-3 py-2">
+              <div className="flex items-center gap-1 overflow-x-auto">
+                {testCases.map((tc, index) => {
+                  const result = resultByTestcaseId[tc.id];
+                  const caseNumber = index + 1;
+                  return (
+                    <button
+                      key={tc.id}
+                      onClick={() => setActiveTestCaseId(tc.id)}
+                      title={tc.id}
+                      className={clsx(
+                        'flex shrink-0 items-center gap-1.5 rounded-md px-3 py-1.5 text-sm transition-colors',
+                        activeTestCaseId === tc.id
+                          ? 'bg-gray-700 text-white'
+                          : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200'
+                      )}
+                    >
+                      {getStatusIcon(result?.status)}
+                      <span>Case {caseNumber}</span>
+                    </button>
+                  );
+                })}
+              </div>
+              <button
+                type="button"
+                onClick={handleRunPublicTests}
+                disabled={isRunningTests || !testCases?.length}
+                className="flex shrink-0 items-center gap-2 rounded-md bg-blue-600 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              >
+                {isRunningTests ? (
+                  <>
+                    <Spinner size="sm" color="info" aria-label="Running..." />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Run all
+                  </>
+                )}
+              </button>
+            </div>
+            {testsError && (
+              <div className="border-b border-gray-800 bg-red-900/20 px-3 py-2 text-sm text-red-300">
+                {testsError}
+              </div>
+            )}
+            {testsLastMessage && !testsError && (
+              <div className="border-b border-gray-800 bg-gray-800/50 px-3 py-2 text-sm text-gray-300">
+                {testsLastMessage}
+              </div>
+            )}
             {activeTestCase && (
               <div className="flex-1 overflow-y-auto p-4">
-                {/* Show Diff View if available and test failed */}
-                {/* {showDiffView && diffContent && activeTestCase.status === 'fail' ? (
-                  <div className="h-full">
-                    <div className="mb-2 flex items-center justify-between">
-                      <h4 className="text-sm font-medium text-white">
-                        Output Comparison
-                      </h4>
-                      <button
-                        onClick={() => setShowDiffView(false)}
-                        className="rounded p-1 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
-                      >
-                        <X className="h-4 w-4" />
-                      </button>
+                <div className="space-y-4">
+                  <p className="text-xs font-medium text-gray-500">
+                    Test case {testCases.findIndex((tc) => tc.id === activeTestCase.id) + 1} of {testCases.length}
+                  </p>
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <label className="text-xs font-medium text-gray-400">
+                        Input
+                      </label>
+                      <CopyButton text={activeTestCase.inputData ?? ''} />
                     </div>
-                    <div className="h-[200px] overflow-hidden rounded-md border border-gray-700">
-                      <MonacoDiffEditor
-                        height="100%"
-                        original={diffContent.expected}
-                        modified={diffContent.actual}
-                        theme={editorState.theme}
-                        options={{
-                          readOnly: true,
-                          renderSideBySide: true,
-                          minimap: { enabled: false },
-                          fontSize: 12,
-                          lineNumbers: 'off',
-                          scrollBeyondLastLine: false,
-                          wordWrap: 'on',
-                          diffWordWrap: 'on',
-                        }}
-                        originalLanguage="text"
-                        modifiedLanguage="text"
-                      />
-                    </div>
-                    <div className="mt-2 flex justify-between text-xs text-gray-500">
-                      <span>Expected Output</span>
-                      <span>Your Output</span>
+                    <div className="rounded-md bg-gray-800 p-3">
+                      <pre className="font-mono text-sm text-gray-200 whitespace-pre-wrap">
+                        {activeTestCase.inputData ?? '(none)'}
+                      </pre>
                     </div>
                   </div>
-                ) : ( */}
-                  <div className="space-y-4">
-                    {/* Input */}
-                    {/* <div>
-                      <div className="mb-1.5 flex items-center justify-between">
-                        <label className="text-xs font-medium text-gray-400">
-                          Input
-                        </label>
-                        <CopyButton text={activeTestCase.input} />
-                      </div>
-                      <div className="rounded-md bg-gray-800 p-3">
-                        <pre className="font-mono text-sm text-gray-200 whitespace-pre-wrap">
-                          {activeTestCase.input}
-                        </pre>
-                      </div>
-                    </div> */}
 
-                    {/* Expected Output */}
-                    <div>
-                      <div className="mb-1.5 flex items-center justify-between">
-                        <label className="text-xs font-medium text-gray-400">
-                          Expected Output
-                        </label>
-                        <CopyButton text={activeTestCase.expectedOutput} />
-                      </div>
-                      <div className="rounded-md bg-gray-800 p-3">
-                        <pre className="font-mono text-sm text-gray-200 whitespace-pre-wrap">
-                          {activeTestCase.expectedOutput}
-                        </pre>
-                      </div>
+                  <div>
+                    <div className="mb-1.5 flex items-center justify-between">
+                      <label className="text-xs font-medium text-gray-400">
+                        Expected Output
+                      </label>
+                      <CopyButton text={activeTestCase.expectedOutput} />
                     </div>
+                    <div className="rounded-md bg-gray-800 p-3">
+                      <pre className="font-mono text-sm text-gray-200 whitespace-pre-wrap">
+                        {activeTestCase.expectedOutput}
+                      </pre>
+                    </div>
+                  </div>
 
-                    {/* Actual Output (if tested) */}
-                    {/* {activeTestCase.actualOutput !== undefined && (
-                      <div>
-                        <div className="mb-1.5 flex items-center justify-between">
-                          <label className="text-xs font-medium text-gray-400">
-                            Your Output
-                          </label>
-                          <div className="flex items-center gap-2">
-                            {activeTestCase.status === 'fail' && diffContent && (
-                              <button
-                                onClick={() => setShowDiffView(true)}
-                                className="text-xs text-blue-400 hover:text-blue-300"
-                              >
-                                View Diff
-                              </button>
-                            )}
-                            <CopyButton text={activeTestCase.actualOutput} />
+                  {(() => {
+                    const result = resultByTestcaseId[activeTestCase.id];
+                    if (!result) return null;
+                    const isErrorStatus =
+                      result.status === 'COMPILE_ERROR' ||
+                      result.status === 'RUNTIME_ERROR' ||
+                      result.status === 'UNKNOWN_ERROR' ||
+                      result.status === 'TIMEOUT';
+                    const displayOutput =
+                      result.actualOutput?.trim() ||
+                      (result.status === 'COMPILE_ERROR'
+                        ? 'Compilation failed. Check your code for syntax errors.'
+                        : '(no output)');
+                    return (
+                      <>
+                        <div>
+                          <div className="mb-1.5 flex items-center justify-between">
+                            <label className="text-xs font-medium text-gray-400">
+                              Your Output
+                            </label>
+                            <CopyButton text={result.actualOutput} />
                           </div>
-                        </div> */}
-                        {/* <div
-                          className={clsx(
-                            'rounded-md p-3',
-                            activeTestCase.status === 'pass'
-                              ? 'bg-green-900/20 border border-green-700/50'
-                              : 'bg-red-900/20 border border-red-700/50'
-                          )}
-                        >
-                          <pre
+                          <div
                             className={clsx(
-                              'font-mono text-sm whitespace-pre-wrap',
-                              activeTestCase.status === 'pass'
-                                ? 'text-green-300'
-                                : 'text-red-300'
+                              'rounded-md p-3',
+                              result.status === 'SUCCESS' &&
+                                'bg-green-900/20 border border-green-700/50',
+                              result.status === 'FAIL' &&
+                                'bg-red-900/20 border border-red-700/50',
+                              isErrorStatus &&
+                                'bg-amber-900/20 border border-amber-700/50'
                             )}
                           >
-                            {activeTestCase.actualOutput}
-                          </pre>
-                        </div> */}
-                      </div>
-                    {/* )} */}
-
-                    {/* Execution Stats */}
-                    {/* {activeTestCase.executionTime !== undefined && (
-                      <div className="flex gap-4 text-xs text-gray-500">
-                        <span>
-                          Runtime: {activeTestCase.executionTime.toFixed(2)}ms
-                        </span>
-                        {activeTestCase.memoryUsed !== undefined && (
-                          <span>
-                            Memory: {activeTestCase.memoryUsed.toFixed(2)}MB
+                            <pre
+                              className={clsx(
+                                'font-mono text-sm whitespace-pre-wrap',
+                                result.status === 'SUCCESS' && 'text-green-300',
+                                result.status === 'FAIL' && 'text-red-300',
+                                isErrorStatus && 'text-amber-300'
+                              )}
+                            >
+                              {displayOutput}
+                            </pre>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-3 text-xs">
+                          <span className="flex items-center gap-1.5 font-medium text-gray-400">
+                            {getStatusIcon(result.status)}
+                            {result.status.replace(/_/g, ' ')}
                           </span>
-                        )}
-                      </div>
-                    )} */}
-                  </div>
-              // </div>
+                          {result.executionTimeMs >= 0 && (
+                            <span className="text-gray-500">
+                              Runtime: {result.executionTimeMs}ms
+                            </span>
+                          )}
+                        </div>
+                      </>
+                    );
+                  })()}
+                </div>
+              </div>
             )}
           </div>
         )}
@@ -299,11 +322,31 @@ export function ConsolePanel() {
               value={customInput}
               onChange={(e) => setCustomInput(e.target.value)}
               placeholder="Enter your custom test input here..."
-              className="flex-1 resize-none rounded-md border border-gray-700 bg-gray-800 p-3 font-mono text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              className="min-h-[120px] flex-1 resize-none rounded-md border border-gray-700 bg-gray-800 p-3 font-mono text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
             />
-            <p className="mt-2 text-xs text-gray-500">
-              Enter custom input to test your code against specific scenarios.
-            </p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <p className="text-xs text-gray-500">
+                Enter custom input to test your code. Stdout and stderr will appear in the Output tab.
+              </p>
+              <button
+                type="button"
+                onClick={handleRunCustomTest}
+                disabled={isRunning}
+                className="flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isRunning ? (
+                  <>
+                    <Spinner size="sm" color="info" aria-label="Running..." />
+                    Running...
+                  </>
+                ) : (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Run
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         )}
 

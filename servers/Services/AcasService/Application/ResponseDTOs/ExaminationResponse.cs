@@ -72,7 +72,26 @@ public class ClassroomLiteResponse
     public string ClassName { get; set; } = string.Empty;
 }
 
+public class ExaminationBasicResponse
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
 
+    [JsonPropertyName("examName")]
+    public string ExamName { get; set; } = string.Empty;
+
+    [JsonPropertyName("startDatetime")]
+    public DateTime StartDatetime { get; set; }
+
+    [JsonPropertyName("endDatetime")]
+    public DateTime EndDatetime { get; set; }
+
+    [JsonPropertyName("status")]
+    public Status Status { get; set; }
+
+    [JsonPropertyName("mode")]
+    public Mode Mode { get; set; }
+}
 
 public class ExaminationSpecProblemResponse 
 {

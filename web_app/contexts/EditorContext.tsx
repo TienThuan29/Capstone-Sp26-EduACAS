@@ -14,8 +14,11 @@ import React, {
 //   Problem,
 //   Submission,
 // } from '@/types/language';
-import { ProgrammingLanguage } from '@/types/language';
+import { useAuth } from '@/contexts/AuthContext';
+import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
+import type { SubmissionResponse } from '@/types/submission';
+import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
 
 
 /**
@@ -52,6 +55,8 @@ interface EditorContextType {
   editorState: EditorState;
   setCode: (code: string) => void;
   setLanguage: (language: ProgrammingLanguage) => void;
+  selectedCompiler: Compiler | null;
+  setSelectedCompiler: (compiler: Compiler | null) => void;
   setFontSize: (size: number) => void;
   setTheme: (theme: 'vs-dark' | 'vs-light') => void;
   setTabSize: (size: number) => void;
@@ -66,6 +71,11 @@ interface EditorContextType {
   // Problem State
   problem: Problem | null;
   setProblem: (problem: Problem) => void;
+
+  // Exam back link (when opened from my-classroom exam)
+  examId: string | null;
+  examClassroomId: string | null;
+  setExamBackLink: (examId: string | null, classroomId: string | null) => void;
 
   // Test Cases
   testCases: TestCase[];
@@ -82,11 +92,12 @@ interface EditorContextType {
   consoleOutput: string;
   setConsoleOutput: (output: string) => void;
 
-  // Submission State
-  // submissionStatus: SubmissionStatus;
-  // setSubmissionStatus: (status: SubmissionStatus) => void;
-  // submissions: Submission[];
-  // addSubmission: (submission: Submission) => void;
+  // Submission State (for refetching submission list after submit)
+  submissionsRefreshKey: number;
+  incrementSubmissionsRefresh: () => void;
+  /** Cache of submission history list for current workspace; invalidated when submissionsRefreshKey changes. */
+  submissionsCache: { key: string; list: SubmissionResponse[]; refreshKeyWhenFetched: number } | null;
+  setSubmissionsCache: (key: string, list: SubmissionResponse[], refreshKey: number) => void;
 
   // Timer
   timerSeconds: number;
@@ -149,6 +160,9 @@ const FALLBACK_BOILERPLATE: Record<string, string> = {
 };
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth();
+  const { saveSubmission } = useSubmissionStudent();
+
   // Editor State – language is overwritten by examination.programmingLanguage when exam loads
   const [editorState, setEditorState] = useState<EditorState>({
     code: '',
@@ -165,6 +179,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   // Problem State
   const [problem, setProblem] = useState<Problem | null>(null);
+  const [selectedCompiler, setSelectedCompiler] = useState<Compiler | null>(null);
+  const [examId, setExamIdState] = useState<string | null>(null);
+  const [examClassroomId, setExamClassroomIdState] = useState<string | null>(null);
 
   // Test Cases
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -174,9 +191,24 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [customInput, setCustomInput] = useState('');
   const [consoleOutput, setConsoleOutput] = useState('');
 
-  // Submission State (commented out)
-  // const [submissionStatus, setSubmissionStatus] = useState<SubmissionStatus>('idle');
-  // const [submissions, setSubmissions] = useState<Submission[]>([]);
+  // Submission list refresh trigger (increment after submit so SubmissionsTab refetches)
+  const [submissionsRefreshKey, setSubmissionsRefreshKey] = useState(0);
+  const incrementSubmissionsRefresh = useCallback(() => {
+    setSubmissionsRefreshKey((k) => k + 1);
+  }, []);
+
+  // Cache submission history per (studentId_examId_problemId) to avoid repeated API calls in workspace
+  const [submissionsCache, setSubmissionsCacheState] = useState<{
+    key: string;
+    list: SubmissionResponse[];
+    refreshKeyWhenFetched: number;
+  } | null>(null);
+  const setSubmissionsCache = useCallback(
+    (key: string, list: SubmissionResponse[], refreshKey: number) => {
+      setSubmissionsCacheState({ key, list, refreshKeyWhenFetched: refreshKey });
+    },
+    []
+  );
 
   // Timer
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -240,6 +272,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       language,
       code: boilerplate,
     }));
+    setSelectedCompiler(language?.compilers?.[0] ?? null);
   }, [problem]);
 
   const setFontSize = useCallback((fontSize: number) => {
@@ -272,6 +305,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   const setCursorSmoothCaretAnimation = useCallback((cursorSmoothCaretAnimation: boolean) => {
     setEditorState((prev) => ({ ...prev, cursorSmoothCaretAnimation }));
+  }, []);
+
+  const setExamBackLink = useCallback((eid: string | null, cid: string | null) => {
+    setExamIdState(eid);
+    setExamClassroomIdState(cid);
   }, []);
 
   const toggleTheme = useCallback(() => {
@@ -360,54 +398,48 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setIsRunning(false);
   }, []);
 
-  // Mock submit code function
   const submitCode = useCallback(async () => {
-    setIsSubmitting(true);
-    setConsoleOutput('Submitting code...\n');
-    // setSubmissionStatus('queued');
-
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    // setSubmissionStatus('processing');
-
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-
-    // Mock submission result
-    const passed = Math.random() > 0.3;
-    // setSubmissionStatus(passed ? 'accepted' : 'wrong_answer');
-
-    if (!passed) {
-      setDiffContent({
-        expected: '10',
-        actual: '9',
-      });
-      setShowDiffView(true);
+    const studentId = user?.id;
+    if (!examId || !problem?.id || !studentId || !selectedCompiler) {
+      console.warn('submitCode: missing examId, problemId, studentId, or selectedCompiler');
+      return;
     }
-
-    // const newSubmission: Submission = {
-    //   id: Date.now().toString(),
-    //   language: editorState.language,
-    //   code: editorState.code,
-    //   status: passed ? 'accepted' : 'wrong_answer',
-    //   timestamp: new Date(),
-    //   executionTime: Math.random() * 100,
-    //   memoryUsed: Math.random() * 50,
-    //   passedTestCases: passed ? 10 : 8,
-    //   totalTestCases: 10,
-    // };
-    // addSubmission(newSubmission);
-
-    setConsoleOutput(
-      passed
-        ? 'All test cases passed!\n'
-        : 'Wrong Answer on test case 3.\n'
-    );
-    setIsSubmitting(false);
-  }, [editorState.language, editorState.code]);
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        examId,
+        problemId: problem.id,
+        studentId,
+        source: editorState.code,
+        languageId: editorState.language?.id ?? '',
+        compilerId: selectedCompiler.id,
+      };
+      const result = await saveSubmission(payload);
+      if (result != null) {
+        incrementSubmissionsRefresh();
+      }
+    } catch (err) {
+      console.error('submitCode failed:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [
+    examId,
+    problem?.id,
+    user?.id,
+    selectedCompiler,
+    editorState.code,
+    editorState.language?.id,
+    saveSubmission,
+    incrementSubmissionsRefresh,
+  ]);
 
   const value: EditorContextType = {
     editorState,
     setCode,
     setLanguage,
+    selectedCompiler,
+    setSelectedCompiler,
     setFontSize,
     setTheme,
     setTabSize,
@@ -420,6 +452,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     resetCode,
     problem,
     setProblem,
+    examId,
+    examClassroomId,
+    setExamBackLink,
     testCases,
     setTestCases,
     updateTestCase,
@@ -429,10 +464,10 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setCustomInput,
     consoleOutput,
     setConsoleOutput,
-    // submissionStatus,
-    // setSubmissionStatus,
-    // submissions,
-    // addSubmission,
+    submissionsRefreshKey,
+    incrementSubmissionsRefresh,
+    submissionsCache,
+    setSubmissionsCache,
     timerSeconds,
     isTimerRunning,
     startTimer,

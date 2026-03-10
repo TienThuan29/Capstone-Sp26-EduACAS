@@ -12,4 +12,9 @@ public class SlotRequest
     public string Title { get; set; } = string.Empty;
 
     public string Description { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Optional. When provided, replaces the slot's examination IDs.
+    /// </summary>
+    public List<string>? ExaminationIds { get; set; }
 }

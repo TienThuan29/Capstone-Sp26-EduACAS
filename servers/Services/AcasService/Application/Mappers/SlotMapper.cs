@@ -5,9 +5,9 @@ namespace AcasService.Application.Mappers;
 
 public class SlotMapper
 {
-    public SlotResponse ToSlotResponse(Slot slot)
+    public SlotResponse ToSlotResponse(Slot slot, List<ExaminationBasicResponse>? examinations = null)
     {
-        return new SlotResponse
+        var response = new SlotResponse
         {
             Id = slot.Id,
             ClassroomId = slot.ClassroomId,
@@ -15,9 +15,11 @@ public class SlotMapper
             Title = slot.Title,
             Description = slot.Description,
             CreatedDate = slot.CreatedDate,
-            UpdatedDate = slot.UpdatedDate
+            UpdatedDate = slot.UpdatedDate,
+            ExaminationIds = slot.ExaminationIds ?? new List<string>()
         };
+        if (examinations != null)
+            response.Examinations = examinations;
+        return response;
     }
-
-    
 }

@@ -1,0 +1,354 @@
+[
+  {
+    "title": "Sum of Two Numbers",
+    "difficulty": "EASY",
+    "tags": ["math", "basic", "input-output"],
+    "codeTemplate": "# Read two integers and print their sum\n",
+    "content": "## Description\nGiven two integers **a** and **b**, compute and print their sum.\n\n## Input Format\nTwo lines, each containing a single integer.\n- Line 1: integer **a** (-10^9 ≤ a ≤ 10^9)\n- Line 2: integer **b** (-10^9 ≤ b ≤ 10^9)\n\n## Output Format\nPrint a single integer — the sum of a and b.\n\n## Constraints\n- -10^9 ≤ a, b ≤ 10^9\n\n## Examples\n**Input:**\n```\n3\n5\n```\n**Output:**\n```\n8\n```",
+    "testCases": [
+      { "input": "3\n5", "expectedOutput": "8", "isPublic": true },
+      { "input": "0\n0", "expectedOutput": "0", "isPublic": true },
+      { "input": "-10\n25", "expectedOutput": "15", "isPublic": false },
+      { "input": "1000000\n999999", "expectedOutput": "1999999", "isPublic": false },
+      { "input": "-500\n-300", "expectedOutput": "-800", "isPublic": false }
+    ]
+  },
+  {
+    "title": "FizzBuzz Single Number",
+    "difficulty": "EASY",
+    "tags": ["conditional", "basic", "modular-arithmetic"],
+    "codeTemplate": "# Read an integer N and print FizzBuzz result\n",
+    "content": "## Description\nGiven a positive integer **N**, print:\n- `FizzBuzz` if N is divisible by both 3 and 5\n- `Fizz` if N is divisible by 3 only\n- `Buzz` if N is divisible by 5 only\n- The number itself otherwise\n\n## Input Format\nA single integer **N** (1 ≤ N ≤ 10^6).\n\n## Output Format\nPrint the result as described above.\n\n## Examples\n**Input:**\n```\n15\n```\n**Output:**\n```\nFizzBuzz\n```",
+    "testCases": [
+      { "input": "15", "expectedOutput": "FizzBuzz", "isPublic": true },
+      { "input": "9", "expectedOutput": "Fizz", "isPublic": true },
+      { "input": "10", "expectedOutput": "Buzz", "isPublic": false },
+      { "input": "7", "expectedOutput": "7", "isPublic": false },
+      { "input": "30", "expectedOutput": "FizzBuzz", "isPublic": false },
+      { "input": "1", "expectedOutput": "1", "isPublic": false }
+    ]
+  },
+  {
+    "title": "Reverse String",
+    "difficulty": "EASY",
+    "tags": ["string", "basic", "manipulation"],
+    "codeTemplate": "# Read a string and print it reversed\n",
+    "content": "## Description\nGiven a string **s**, print the reverse of s.\n\n## Input Format\nA single line containing a string **s** (1 ≤ |s| ≤ 10^5). The string consists of printable ASCII characters.\n\n## Output Format\nPrint the reversed string.\n\n## Examples\n**Input:**\n```\nhello\n```\n**Output:**\n```\nolleh\n```",
+    "testCases": [
+      { "input": "hello", "expectedOutput": "olleh", "isPublic": true },
+      { "input": "a", "expectedOutput": "a", "isPublic": true },
+      { "input": "abcdef", "expectedOutput": "fedcba", "isPublic": false },
+      { "input": "racecar", "expectedOutput": "racecar", "isPublic": false },
+      { "input": "12345", "expectedOutput": "54321", "isPublic": false }
+    ]
+  },
+  {
+    "title": "Palindrome Check",
+    "difficulty": "EASY",
+    "tags": ["string", "basic", "palindrome"],
+    "codeTemplate": "# Read a string and check if it's a palindrome\n",
+    "content": "## Description\nGiven a string **s**, determine if it is a palindrome. A palindrome reads the same forwards and backwards.\n\n## Input Format\nA single line containing a string **s** (1 ≤ |s| ≤ 10^5), consisting of lowercase English letters.\n\n## Output Format\nPrint `YES` if the string is a palindrome, `NO` otherwise.\n\n## Examples\n**Input:**\n```\nracecar\n```\n**Output:**\n```\nYES\n```",
+    "testCases": [
+      { "input": "racecar", "expectedOutput": "YES", "isPublic": true },
+      { "input": "hello", "expectedOutput": "NO", "isPublic": true },
+      { "input": "a", "expectedOutput": "YES", "isPublic": false },
+      { "input": "abba", "expectedOutput": "YES", "isPublic": false },
+      { "input": "abcd", "expectedOutput": "NO", "isPublic": false }
+    ]
+  },
+  {
+    "title": "Count Digits",
+    "difficulty": "EASY",
+    "tags": ["math", "basic", "counting"],
+    "codeTemplate": "# Read an integer and count its digits\n",
+    "content": "## Description\nGiven a non-negative integer **N**, count and print the number of digits in N.\n\n## Input Format\nA single non-negative integer **N** (0 ≤ N ≤ 10^18).\n\n## Output Format\nPrint the number of digits in N.\n\n## Examples\n**Input:**\n```\n12345\n```\n**Output:**\n```\n5\n```",
+    "testCases": [
+      { "input": "12345", "expectedOutput": "5", "isPublic": true },
+      { "input": "0", "expectedOutput": "1", "isPublic": true },
+      { "input": "100", "expectedOutput": "3", "isPublic": false },
+      { "input": "9", "expectedOutput": "1", "isPublic": false },
+      { "input": "999999999", "expectedOutput": "9", "isPublic": false }
+    ]
+  },
+  {
+    "title": "Grade Classifier",
+    "difficulty": "EASY",
+    "tags": ["conditional", "string", "case-insensitive"],
+    "codeTemplate": "# Read a score and print the grade\n",
+    "content": "## Description\nGiven a student's score (0-100), classify and print the letter grade:\n- **A** if score ≥ 90\n- **B** if 80 ≤ score < 90\n- **C** if 70 ≤ score < 80\n- **D** if 60 ≤ score < 70\n- **F** if score < 60\n\n## Input Format\nA single integer **score** (0 ≤ score ≤ 100).\n\n## Output Format\nPrint the letter grade. Output comparison is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n85\n```\n**Output:**\n```\nB\n```",
+    "testCases": [
+      { "input": "85", "expectedOutput": "B", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "95", "expectedOutput": "A", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "72", "expectedOutput": "C", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "65", "expectedOutput": "D", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "45", "expectedOutput": "F", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "0", "expectedOutput": "F", "isPublic": false, "isCaseInsensitive": true }
+    ]
+  },
+  {
+    "title": "Even or Odd",
+    "difficulty": "EASY",
+    "tags": ["conditional", "basic", "case-insensitive"],
+    "codeTemplate": "# Read a number and print Even or Odd\n",
+    "content": "## Description\nGiven an integer **N**, determine if it is even or odd.\n\n## Input Format\nA single integer **N** (-10^9 ≤ N ≤ 10^9).\n\n## Output Format\nPrint `Even` if the number is even, `Odd` otherwise. Output is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n4\n```\n**Output:**\n```\nEven\n```",
+    "testCases": [
+      { "input": "4", "expectedOutput": "Even", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "7", "expectedOutput": "Odd", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "0", "expectedOutput": "Even", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "-3", "expectedOutput": "Odd", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "1000000", "expectedOutput": "Even", "isPublic": false, "isCaseInsensitive": true }
+    ]
+  },
+  {
+    "title": "Leap Year Checker",
+    "difficulty": "EASY",
+    "tags": ["conditional", "date", "case-insensitive"],
+    "codeTemplate": "# Read a year and check if it's a leap year\n",
+    "content": "## Description\nGiven a year, determine if it is a leap year.\n\nA year is a leap year if:\n- It is divisible by 4 **AND**\n- It is NOT divisible by 100, **UNLESS** it is also divisible by 400.\n\n## Input Format\nA single integer **year** (1 ≤ year ≤ 10^4).\n\n## Output Format\nPrint `YES` if leap year, `NO` otherwise. Output is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n2024\n```\n**Output:**\n```\nYES\n```",
+    "testCases": [
+      { "input": "2024", "expectedOutput": "YES", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "1900", "expectedOutput": "NO", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "2000", "expectedOutput": "YES", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "2023", "expectedOutput": "NO", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "400", "expectedOutput": "YES", "isPublic": false, "isCaseInsensitive": true }
+    ]
+  },
+  {
+    "title": "Triangle Type Classifier",
+    "difficulty": "MEDIUM",
+    "tags": ["geometry", "conditional", "case-insensitive"],
+    "codeTemplate": "# Read 3 sides and classify the triangle\n",
+    "content": "## Description\nGiven three sides of a triangle, classify it as:\n- `Equilateral` — all three sides are equal\n- `Isosceles` — exactly two sides are equal\n- `Scalene` — all three sides are different\n- `Not a triangle` — if the sides cannot form a valid triangle (sum of any two sides must be greater than the third)\n\n## Input Format\nThree space-separated integers **a**, **b**, **c** (1 ≤ a, b, c ≤ 10^6).\n\n## Output Format\nPrint the type of triangle. Output is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n3 3 3\n```\n**Output:**\n```\nEquilateral\n```",
+    "testCases": [
+      { "input": "3 3 3", "expectedOutput": "Equilateral", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "3 3 5", "expectedOutput": "Isosceles", "isPublic": true, "isCaseInsensitive": true },
+      { "input": "3 4 5", "expectedOutput": "Scalene", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "1 2 10", "expectedOutput": "Not a triangle", "isPublic": false, "isCaseInsensitive": true },
+      { "input": "5 5 5", "expectedOutput": "Equilateral", "isPublic": false, "isCaseInsensitive": true }
+    ]
+  },
+  {
+    "title": "Circle Area Calculator",
+    "difficulty": "EASY",
+    "tags": ["math", "floating-point", "geometry"],
+    "codeTemplate": "import math\n\n# Read radius and print area of circle\n",
+    "content": "## Description\nGiven the radius of a circle, compute its area using the formula **A = π × r²**.\n\n## Input Format\nA single floating-point number **r** (0 ≤ r ≤ 10^6).\n\n## Output Format\nPrint the area of the circle. Your answer will be accepted if the absolute error is within **0.001**.\n\n## Constraints\n- 0 ≤ r ≤ 10^6\n\n## Examples\n**Input:**\n```\n5\n```\n**Output:**\n```\n78.53981633974483\n```",
+    "testCases": [
+      { "input": "5", "expectedOutput": "78.53981633974483", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "1", "expectedOutput": "3.141592653589793", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "0", "expectedOutput": "0.0", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "2.5", "expectedOutput": "19.634954084936208", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "100", "expectedOutput": "31415.926535897932", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.001 }
+    ]
+  },
+  {
+    "title": "Hypotenuse Calculator",
+    "difficulty": "EASY",
+    "tags": ["math", "floating-point", "geometry"],
+    "codeTemplate": "import math\n\n# Read two sides of a right triangle and compute the hypotenuse\n",
+    "content": "## Description\nGiven the lengths of two legs of a right triangle **a** and **b**, compute the hypotenuse **c = √(a² + b²)**.\n\n## Input Format\nTwo space-separated floating-point numbers **a** and **b** (0 < a, b ≤ 10^4).\n\n## Output Format\nPrint the hypotenuse. Accepted if absolute error ≤ **0.0001**.\n\n## Examples\n**Input:**\n```\n3 4\n```\n**Output:**\n```\n5.0\n```",
+    "testCases": [
+      { "input": "3 4", "expectedOutput": "5.0", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.0001 },
+      { "input": "5 12", "expectedOutput": "13.0", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.0001 },
+      { "input": "1 1", "expectedOutput": "1.4142135623730951", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.0001 },
+      { "input": "8 15", "expectedOutput": "17.0", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.0001 },
+      { "input": "6.5 3.2", "expectedOutput": "7.244998274671292", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.0001 }
+    ]
+  },
+  {
+    "title": "Compound Interest",
+    "difficulty": "MEDIUM",
+    "tags": ["math", "floating-point", "finance"],
+    "codeTemplate": "# Read principal, rate, and time, compute compound interest\n",
+    "content": "## Description\nGiven a principal amount **P**, annual interest rate **r** (as a percentage), and number of years **t**, compute the final amount using compound interest formula:\n\n**A = P × (1 + r/100)^t**\n\n## Input Format\nThree space-separated values:\n- **P** (principal, 1 ≤ P ≤ 10^6)\n- **r** (annual rate %, 0 < r ≤ 100)\n- **t** (years, 1 ≤ t ≤ 50)\n\n## Output Format\nPrint the final amount. Accepted if absolute error ≤ **0.01**.\n\n## Examples\n**Input:**\n```\n1000 5 10\n```\n**Output:**\n```\n1628.894626777442\n```",
+    "testCases": [
+      { "input": "1000 5 10", "expectedOutput": "1628.894626777442", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.01 },
+      { "input": "5000 8 3", "expectedOutput": "6298.56", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.01 },
+      { "input": "100 10 1", "expectedOutput": "110.0", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.01 },
+      { "input": "2500 3.5 20", "expectedOutput": "4974.468602835913", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.01 },
+      { "input": "10000 12 5", "expectedOutput": "17623.416832", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.01 }
+    ]
+  },
+  {
+    "title": "Distance Between Two Points",
+    "difficulty": "EASY",
+    "tags": ["math", "floating-point", "geometry"],
+    "codeTemplate": "import math\n\n# Read two points and compute Euclidean distance\n",
+    "content": "## Description\nGiven two points **(x1, y1)** and **(x2, y2)** in a 2D plane, compute the Euclidean distance:\n\n**d = √((x2-x1)² + (y2-y1)²)**\n\n## Input Format\nTwo lines:\n- Line 1: two space-separated floats **x1 y1**\n- Line 2: two space-separated floats **x2 y2**\n\n## Output Format\nPrint the distance. Accepted if absolute error ≤ **0.001**.\n\n## Examples\n**Input:**\n```\n0 0\n3 4\n```\n**Output:**\n```\n5.0\n```",
+    "testCases": [
+      { "input": "0 0\n3 4", "expectedOutput": "5.0", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "1 1\n4 5", "expectedOutput": "5.0", "isPublic": true, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "0 0\n0 0", "expectedOutput": "0.0", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "-3 -4\n3 4", "expectedOutput": "10.0", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.001 },
+      { "input": "1.5 2.5\n4.5 6.5", "expectedOutput": "5.0", "isPublic": false, "isFloatingPoint": true, "floatingPointTolerance": 0.001 }
+    ]
+  },
+  {
+    "title": "Average Calculator",
+    "difficulty": "EASY",
+    "tags": ["math", "floating-point", "decimal-places"],
+    "codeTemplate": "# Read N numbers and print their average to 2 decimal places\n",
+    "content": "## Description\nGiven **N** integers, compute and print their average rounded to exactly **2 decimal places**.\n\n## Input Format\n- Line 1: integer **N** (1 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers (each between -10^6 and 10^6)\n\n## Output Format\nPrint the average as a floating-point number with exactly 2 decimal places.\n\n## Examples\n**Input:**\n```\n3\n10 20 30\n```\n**Output:**\n```\n20.00\n```",
+    "testCases": [
+      { "input": "3\n10 20 30", "expectedOutput": "20.00", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "4\n1 2 3 4", "expectedOutput": "2.50", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "1\n7", "expectedOutput": "7.00", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "5\n10 10 10 10 11", "expectedOutput": "10.20", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "3\n-5 0 5", "expectedOutput": "0.00", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 2 }
+    ]
+  },
+  {
+    "title": "Temperature Converter (Celsius to Fahrenheit)",
+    "difficulty": "EASY",
+    "tags": ["math", "floating-point", "conversion", "decimal-places"],
+    "codeTemplate": "# Read temperature in Celsius and convert to Fahrenheit\n",
+    "content": "## Description\nConvert a temperature from Celsius to Fahrenheit using the formula:\n\n**F = C × 9/5 + 32**\n\n## Input Format\nA single floating-point number **C** (-273.15 ≤ C ≤ 10^6).\n\n## Output Format\nPrint the temperature in Fahrenheit, rounded to **2 decimal places**.\n\n## Examples\n**Input:**\n```\n100\n```\n**Output:**\n```\n212.00\n```",
+    "testCases": [
+      { "input": "100", "expectedOutput": "212.00", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "0", "expectedOutput": "32.00", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "-40", "expectedOutput": "-40.00", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "37.5", "expectedOutput": "99.50", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 2 },
+      { "input": "-273.15", "expectedOutput": "-459.67", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 2 }
+    ]
+  },
+  {
+    "title": "BMI Calculator",
+    "difficulty": "EASY",
+    "tags": ["math", "floating-point", "health", "decimal-places"],
+    "codeTemplate": "# Read weight (kg) and height (m) then compute BMI\n",
+    "content": "## Description\nCompute the Body Mass Index (BMI) given weight in kilograms and height in meters:\n\n**BMI = weight / height²**\n\n## Input Format\nTwo space-separated floating-point numbers:\n- **weight** in kg (1 ≤ weight ≤ 500)\n- **height** in meters (0.5 ≤ height ≤ 2.5)\n\n## Output Format\nPrint the BMI rounded to **1 decimal place**.\n\n## Examples\n**Input:**\n```\n70 1.75\n```\n**Output:**\n```\n22.9\n```",
+    "testCases": [
+      { "input": "70 1.75", "expectedOutput": "22.9", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 1 },
+      { "input": "80 1.80", "expectedOutput": "24.7", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 1 },
+      { "input": "50 1.60", "expectedOutput": "19.5", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 1 },
+      { "input": "120 1.70", "expectedOutput": "41.5", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 1 },
+      { "input": "55 1.65", "expectedOutput": "20.2", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 1 }
+    ]
+  },
+  {
+    "title": "Standard Deviation",
+    "difficulty": "MEDIUM",
+    "tags": ["math", "statistics", "floating-point", "decimal-places"],
+    "codeTemplate": "import math\n\n# Read N numbers and compute population standard deviation\n",
+    "content": "## Description\nGiven **N** numbers, compute the **population standard deviation**.\n\nσ = √( (1/N) × Σ(xi - μ)² )\n\nwhere μ is the mean.\n\n## Input Format\n- Line 1: integer **N** (2 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the population standard deviation rounded to **4 decimal places**.\n\n## Examples\n**Input:**\n```\n5\n2 4 4 4 5\n```\n**Output:**\n```\n0.8944\n```",
+    "testCases": [
+      { "input": "5\n2 4 4 4 5", "expectedOutput": "0.9798", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 4 },
+      { "input": "4\n10 10 10 10", "expectedOutput": "0.0000", "isPublic": true, "isFloatingPoint": true, "decimalPlaces": 4 },
+      { "input": "3\n1 5 9", "expectedOutput": "3.2660", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 4 },
+      { "input": "6\n1 2 3 4 5 6", "expectedOutput": "1.7078", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 4 },
+      { "input": "2\n0 100", "expectedOutput": "50.0000", "isPublic": false, "isFloatingPoint": true, "decimalPlaces": 4 }
+    ]
+  },
+  {
+    "title": "Prefix Sum Array",
+    "difficulty": "MEDIUM",
+    "tags": ["array", "prefix-sum", "token-comparison"],
+    "codeTemplate": "# Read N, then N integers. Print space-separated prefix sums.\n",
+    "content": "## Description\nGiven an array of **N** integers, compute and print the **prefix sum** array.\nThe prefix sum at index **i** is the sum of all elements from index 0 to i.\n\n## Input Format\n- Line 1: integer **N** (1 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the prefix sum array as space-separated values on a single line.\nOutput is compared **token-by-token** (whitespace is normalized).\n\n## Examples\n**Input:**\n```\n5\n1 2 3 4 5\n```\n**Output:**\n```\n1 3 6 10 15\n```",
+    "testCases": [
+      { "input": "5\n1 2 3 4 5", "expectedOutput": "1 3 6 10 15", "isPublic": true, "isTokenComparision": true },
+      { "input": "3\n10 -5 3", "expectedOutput": "10 5 8", "isPublic": true, "isTokenComparision": true },
+      { "input": "1\n42", "expectedOutput": "42", "isPublic": false, "isTokenComparision": true },
+      { "input": "4\n0 0 0 0", "expectedOutput": "0 0 0 0", "isPublic": false, "isTokenComparision": true },
+      { "input": "6\n5 -3 2 -1 4 -2", "expectedOutput": "5 2 4 3 7 5", "isPublic": false, "isTokenComparision": true }
+    ]
+  },
+  {
+    "title": "Fibonacci Sequence",
+    "difficulty": "EASY",
+    "tags": ["dynamic-programming", "sequence", "token-comparison"],
+    "codeTemplate": "# Read N and print the first N Fibonacci numbers\n",
+    "content": "## Description\nPrint the first **N** Fibonacci numbers. The Fibonacci sequence starts with F(1)=0, F(2)=1, and each subsequent number is the sum of the two preceding ones.\n\n## Input Format\nA single integer **N** (1 ≤ N ≤ 40).\n\n## Output Format\nPrint the first N Fibonacci numbers, separated by spaces.\n\n## Examples\n**Input:**\n```\n7\n```\n**Output:**\n```\n0 1 1 2 3 5 8\n```",
+    "testCases": [
+      { "input": "7", "expectedOutput": "0 1 1 2 3 5 8", "isPublic": true, "isTokenComparision": true },
+      { "input": "1", "expectedOutput": "0", "isPublic": true, "isTokenComparision": true },
+      { "input": "2", "expectedOutput": "0 1", "isPublic": false, "isTokenComparision": true },
+      { "input": "10", "expectedOutput": "0 1 1 2 3 5 8 13 21 34", "isPublic": false, "isTokenComparision": true },
+      { "input": "5", "expectedOutput": "0 1 1 2 3", "isPublic": false, "isTokenComparision": true }
+    ]
+  },
+  {
+    "title": "Left Rotate Array",
+    "difficulty": "MEDIUM",
+    "tags": ["array", "rotation", "token-comparison"],
+    "codeTemplate": "# Read N, K, and array. Print array after K left rotations.\n",
+    "content": "## Description\nGiven an array of **N** integers and a number **K**, perform **K left rotations** on the array and print the result.\n\nA left rotation shifts each element one position to the left, and the first element wraps around to the end.\n\n## Input Format\n- Line 1: two integers **N** and **K** (1 ≤ N ≤ 10^5, 0 ≤ K ≤ 10^6)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the rotated array as space-separated values.\n\n## Examples\n**Input:**\n```\n5 2\n1 2 3 4 5\n```\n**Output:**\n```\n3 4 5 1 2\n```",
+    "testCases": [
+      { "input": "5 2\n1 2 3 4 5", "expectedOutput": "3 4 5 1 2", "isPublic": true, "isTokenComparision": true },
+      { "input": "4 0\n10 20 30 40", "expectedOutput": "10 20 30 40", "isPublic": true, "isTokenComparision": true },
+      { "input": "3 3\n1 2 3", "expectedOutput": "1 2 3", "isPublic": false, "isTokenComparision": true },
+      { "input": "5 7\n1 2 3 4 5", "expectedOutput": "3 4 5 1 2", "isPublic": false, "isTokenComparision": true },
+      { "input": "1 100\n42", "expectedOutput": "42", "isPublic": false, "isTokenComparision": true }
+    ]
+  },
+  {
+    "title": "Matrix Row Sums",
+    "difficulty": "MEDIUM",
+    "tags": ["matrix", "2d-array", "token-comparison"],
+    "codeTemplate": "# Read an NxM matrix and print the sum of each row\n",
+    "content": "## Description\nGiven an **N × M** matrix of integers, compute and print the sum of each row.\n\n## Input Format\n- Line 1: two integers **N** and **M** (1 ≤ N, M ≤ 100)\n- Next N lines: M space-separated integers each\n\n## Output Format\nPrint N space-separated integers — the sum of each row.\n\n## Examples\n**Input:**\n```\n2 3\n1 2 3\n4 5 6\n```\n**Output:**\n```\n6 15\n```",
+    "testCases": [
+      { "input": "2 3\n1 2 3\n4 5 6", "expectedOutput": "6 15", "isPublic": true, "isTokenComparision": true },
+      { "input": "1 1\n42", "expectedOutput": "42", "isPublic": true, "isTokenComparision": true },
+      { "input": "3 2\n1 -1\n2 -2\n3 -3", "expectedOutput": "0 0 0", "isPublic": false, "isTokenComparision": true },
+      { "input": "2 4\n10 20 30 40\n5 5 5 5", "expectedOutput": "100 20", "isPublic": false, "isTokenComparision": true },
+      { "input": "3 3\n1 0 0\n0 1 0\n0 0 1", "expectedOutput": "1 1 1", "isPublic": false, "isTokenComparision": true }
+    ]
+  },
+  {
+    "title": "Prime Factorization",
+    "difficulty": "MEDIUM",
+    "tags": ["math", "prime", "factorization", "unordered"],
+    "codeTemplate": "# Read an integer N and print all distinct prime factors\n",
+    "content": "## Description\nGiven a positive integer **N**, find all its **distinct prime factors**.\n\n## Input Format\nA single integer **N** (2 ≤ N ≤ 10^9).\n\n## Output Format\nPrint all distinct prime factors of N, separated by spaces.\nThe **order does not matter** — `2 3` and `3 2` are both accepted.\n\n## Examples\n**Input:**\n```\n12\n```\n**Output:**\n```\n2 3\n```",
+    "testCases": [
+      { "input": "12", "expectedOutput": "2 3", "isPublic": true, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "30", "expectedOutput": "2 3 5", "isPublic": true, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "7", "expectedOutput": "7", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "100", "expectedOutput": "2 5", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "2310", "expectedOutput": "2 3 5 7 11", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true }
+    ]
+  },
+  {
+    "title": "Find Duplicate Elements",
+    "difficulty": "MEDIUM",
+    "tags": ["array", "hashing", "unordered"],
+    "codeTemplate": "# Read N integers and print all duplicates\n",
+    "content": "## Description\nGiven an array of **N** integers, find and print all elements that appear **more than once**. Each duplicate should be printed only once.\n\n## Input Format\n- Line 1: integer **N** (1 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint all duplicate values, separated by spaces. If no duplicates, print `NONE`.\nThe **order does not matter**.\n\n## Examples\n**Input:**\n```\n7\n1 2 3 2 4 3 5\n```\n**Output:**\n```\n2 3\n```",
+    "testCases": [
+      { "input": "7\n1 2 3 2 4 3 5", "expectedOutput": "2 3", "isPublic": true, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "5\n1 2 3 4 5", "expectedOutput": "NONE", "isPublic": true },
+      { "input": "6\n5 5 5 5 5 5", "expectedOutput": "5", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "8\n10 20 30 10 20 30 40 50", "expectedOutput": "10 20 30", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "1\n1", "expectedOutput": "NONE", "isPublic": false }
+    ]
+  },
+  {
+    "title": "Set Intersection",
+    "difficulty": "MEDIUM",
+    "tags": ["set", "hashing", "unordered"],
+    "codeTemplate": "# Read two arrays and print their intersection\n",
+    "content": "## Description\nGiven two arrays of integers, find and print all **common elements** (intersection). Each common element should be printed only once.\n\n## Input Format\n- Line 1: integer **N** (size of first array)\n- Line 2: N space-separated integers\n- Line 3: integer **M** (size of second array)\n- Line 4: M space-separated integers\n\n## Output Format\nPrint all common elements, separated by spaces. If no common elements, print `EMPTY`.\nThe **order does not matter**.\n\n## Examples\n**Input:**\n```\n5\n1 2 3 4 5\n4\n3 4 5 6\n```\n**Output:**\n```\n3 4 5\n```",
+    "testCases": [
+      { "input": "5\n1 2 3 4 5\n4\n3 4 5 6", "expectedOutput": "3 4 5", "isPublic": true, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "3\n1 2 3\n3\n4 5 6", "expectedOutput": "EMPTY", "isPublic": true },
+      { "input": "4\n10 20 30 40\n4\n40 30 20 10", "expectedOutput": "10 20 30 40", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "3\n1 1 2\n2\n1 2", "expectedOutput": "1 2", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "1\n5\n1\n5", "expectedOutput": "5", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true }
+    ]
+  },
+  {
+    "title": "Unique Characters in String",
+    "difficulty": "EASY",
+    "tags": ["string", "hashing", "unordered"],
+    "codeTemplate": "# Read a string and print all unique characters\n",
+    "content": "## Description\nGiven a string of lowercase English letters, print all **distinct characters** that appear in it.\n\n## Input Format\nA single string **s** (1 ≤ |s| ≤ 10^5), consisting of lowercase English letters.\n\n## Output Format\nPrint the distinct characters separated by spaces.\nThe **order does not matter**.\n\n## Examples\n**Input:**\n```\nhello\n```\n**Output:**\n```\nh e l o\n```",
+    "testCases": [
+      { "input": "hello", "expectedOutput": "h e l o", "isPublic": true, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "a", "expectedOutput": "a", "isPublic": true, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "aabbcc", "expectedOutput": "a b c", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "abcdefg", "expectedOutput": "a b c d e f g", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true },
+      { "input": "zzz", "expectedOutput": "z", "isPublic": false, "isTokenComparision": true, "isNotOrderedComparision": true }
+    ]
+  }
+]

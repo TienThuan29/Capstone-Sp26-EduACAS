@@ -30,11 +30,16 @@ export function normalizeDifficulty(value: number | Difficulty): Difficulty {
 
 export type TestCaseResponse = {
   id: string;
+  problemId: string;
   inputData: string;
   expectedOutput: string;
   isPublic: boolean;
   isCaseInsensitive: boolean;
-  isRemovedSpace: boolean;
+  isFloatingPoint: boolean;
+  floatingPointTolerance: number;
+  decimalPlaces: number;
+  isTokenComparision: boolean;
+  isNotOrderedComparision: boolean;
 };
 
 /** API may return difficulty as number (0=EASY, 1=MEDIUM, 2=HARD); use normalizeDifficulty() for display */
@@ -47,8 +52,9 @@ export type ProblemResponse = {
   /** Presigned URL for the file (private S3). Use for download/display. */
   fileUrl?: string;
   difficulty: number | Difficulty;
-  codeTemplate: string;
+  codeTemplates: Record<string, string>;
   testCases: TestCaseResponse[];
+  tags: string[];
   createdDate: string;
   updatedDate: string;
 };
@@ -58,5 +64,8 @@ export type ProblemBasicResponse = {
   id: string;
   title: string;
   difficulty: number | Difficulty;
+  tags: string[];
+  testCasesCount: number;
   createdDate: string;
+  updatedDate: string;
 };
