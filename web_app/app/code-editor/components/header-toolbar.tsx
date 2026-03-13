@@ -1,45 +1,96 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import { Sun, Moon, Plus, Minus, RefreshCw } from 'lucide-react';
-import { Cog6ToothIcon } from '@heroicons/react/24/outline';
-import { useEditorContext } from '@/contexts/EditorContext';
-import { ConfirmModal } from './confirm-modal';
-import { EditorSettingsModal } from './editor-settings-modal';
-import { Button, Dropdown, DropdownItem } from 'flowbite-react';
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Sun, Moon, Plus, Minus, RefreshCw } from "lucide-react";
+import {
+  Cog6ToothIcon,
+  ArrowLeftIcon,
+  PaperAirplaneIcon,
+} from "@heroicons/react/24/outline";
+import { useEditorContext } from "@/contexts/EditorContext";
+import { ConfirmModal } from "./confirm-modal";
+import { EditorSettingsModal } from "./editor-settings-modal";
+import { Button, Dropdown, DropdownItem } from "flowbite-react";
 
 export function HeaderToolbar() {
-  const { editorState, setFontSize, toggleTheme, resetCode } =
-    useEditorContext();
+  const router = useRouter();
+  const {
+    editorState,
+    setFontSize,
+    toggleTheme,
+    resetCode,
+    submitCode,
+    isSubmitting,
+    examId,
+    examClassroomId,
+    selectedCompiler,
+    setSelectedCompiler,
+  } = useEditorContext();
+
+  const lang = editorState.language;
+  const compilers = lang?.compilers ?? [];
+  const activeCompiler = selectedCompiler ?? compilers[0] ?? null;
+  const dropdownLabel =
+    compilers.length > 0 && activeCompiler
+      ? `${lang?.name ?? "Language"} - ${activeCompiler.name}`
+      : (lang?.name ?? "Language");
 
   const [showResetModal, setShowResetModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [showLeaveModal, setShowLeaveModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
 
   return (
     <>
       <div className="flex items-center justify-between border-b border-gray-700 bg-gray-900 px-4 py-2">
-        {/* Left Section - Language Selector */}
+        {/* Left Section - Back + Language Selector */}
         <div className="flex items-center gap-4">
-          {/* Language (from examination; single language) */}
+          {/* Submit code for problem button */}
+          <Button
+            size="sm"
+            color="green"
+            onClick={() => setShowSubmitModal(true)}
+            disabled={isSubmitting}
+            className="flex cursor-pointer items-center gap-1.5"
+          >
+            <PaperAirplaneIcon className="h-4 w-4" />
+            <span>{isSubmitting ? "Submitting…" : "Submit"}</span>
+          </Button>
+
+          {/* Language - Compiler (from examination) */}
           <Dropdown
-            size='sm'
-            className='border border-gray-400 cursor-pointer'
-            label={editorState.language?.name ?? 'Language'}
+            size="sm"
+            className="cursor-pointer border border-gray-400"
+            label={dropdownLabel}
             dismissOnClick={true}
           >
-            <DropdownItem
-              key={editorState.language?.id}
-              className='bg-[#1F4E79] text-white cursor-default'
-            >
-              {editorState.language?.name ?? 'Language'}
-            </DropdownItem>
+            {compilers.length > 0 ? (
+              compilers.map((compiler) => (
+                <DropdownItem
+                  key={compiler.id}
+                  onClick={() => setSelectedCompiler(compiler)}
+                  className={
+                    activeCompiler?.id === compiler.id
+                      ? "cursor-default bg-[#1F4E79] text-white"
+                      : "cursor-pointer"
+                  }
+                >
+                  {lang?.name ?? "Language"} - {compiler.name}
+                </DropdownItem>
+              ))
+            ) : (
+              <DropdownItem className="cursor-default bg-[#1F4E79] text-white">
+                {lang?.name ?? "Language"}
+              </DropdownItem>
+            )}
           </Dropdown>
 
           {/* Font Size Controls - not change this button style */}
           <div className="flex items-center gap-1 rounded-md border border-gray-600 bg-gray-800">
             <button
               onClick={() => setFontSize(Math.max(1, editorState.fontSize - 2))}
-              className="p-1.5 text-gray-400 transition-colors hover:text-white cursor-pointer"
+              className="cursor-pointer p-1.5 text-gray-400 transition-colors hover:text-white"
               title="Decrease font size"
             >
               <Minus className="h-4 w-4" />
@@ -48,8 +99,10 @@ export function HeaderToolbar() {
               {editorState.fontSize}px
             </span>
             <button
-              onClick={() => setFontSize(Math.min(32, editorState.fontSize + 2))}
-              className="p-1.5 text-gray-400 transition-colors hover:text-white cursor-pointer"
+              onClick={() =>
+                setFontSize(Math.min(32, editorState.fontSize + 2))
+              }
+              className="cursor-pointer p-1.5 text-gray-400 transition-colors hover:text-white"
               title="Increase font size"
             >
               <Plus className="h-4 w-4" />
@@ -58,9 +111,9 @@ export function HeaderToolbar() {
 
           {/* Reset Code Button */}
           <Button
-            size='sm'
+            size="sm"
             onClick={() => setShowResetModal(true)}
-            className="flex items-center gap-1.5 rounded-md border border-gray-600 bg-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer"
+            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-gray-600 bg-gray-800 px-3 py-1.5 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
             title="Reset to boilerplate code"
           >
             <RefreshCw className="h-4 w-4" />
@@ -73,22 +126,22 @@ export function HeaderToolbar() {
           <button
             type="button"
             onClick={() => setShowSettingsModal(true)}
-            className="rounded-md border border-gray-600 bg-gray-800 p-2 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white cursor-pointer"
+            className="cursor-pointer rounded-md border border-gray-600 bg-gray-800 p-2 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
             title="Editor settings"
           >
             <Cog6ToothIcon className="h-5 w-5" />
           </button>
           <Button
-            size='sm'
+            size="sm"
             onClick={toggleTheme}
-            className="flex items-center gap-1.5 rounded-md border border-gray-600 bg-gray-800 px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
+            className="flex cursor-pointer items-center gap-1.5 rounded-md border border-gray-600 bg-gray-800 px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-gray-700 hover:text-white"
             title={
-              editorState.theme === 'vs-dark'
-                ? 'Switch to light mode'
-                : 'Switch to dark mode'
+              editorState.theme === "vs-dark"
+                ? "Switch to light mode"
+                : "Switch to dark mode"
             }
           >
-            {editorState.theme === 'vs-dark' ? (
+            {editorState.theme === "vs-dark" ? (
               <>
                 <Sun className="h-4 w-4" />
                 <span>Light</span>
@@ -100,6 +153,19 @@ export function HeaderToolbar() {
               </>
             )}
           </Button>
+
+          {examId && examClassroomId && (
+            <Button
+              size="sm"
+              color="red"
+              onClick={() => setShowLeaveModal(true)}
+              className="cursor-pointer"
+              title="Back to exam problems"
+            >
+              <ArrowLeftIcon className="h-4 w-4" />
+              <span>Leave</span>
+            </Button>
+          )}
         </div>
       </div>
 
@@ -116,10 +182,41 @@ export function HeaderToolbar() {
         confirmText="Reset Code"
       />
 
+      {/* Leave / Back to exam – confirm before navigating away */}
+      <ConfirmModal
+        isOpen={showLeaveModal}
+        onClose={() => setShowLeaveModal(false)}
+        onConfirm={() => {
+          setShowLeaveModal(false);
+          if (examId && examClassroomId) {
+            router.push(`/my-classroom/${examClassroomId}/exam/${examId}`);
+          }
+        }}
+        title="Leave editor?"
+        message="Your code may not be saved. Are you sure you want to go back to the exam problems?"
+        confirmText="Leave"
+        cancelText="Stay"
+      />
+
       {/* Editor Settings Modal */}
       <EditorSettingsModal
         isOpen={showSettingsModal}
         onClose={() => setShowSettingsModal(false)}
+      />
+
+      {/* Submit code confirmation modal */}
+      <ConfirmModal
+        isOpen={showSubmitModal}
+        onClose={() => !isSubmitting && setShowSubmitModal(false)}
+        onConfirm={async () => {
+          await submitCode();
+          setShowSubmitModal(false);
+        }}
+        title="Submit code"
+        message="Are you sure you want to submit your code for this problem? You may not be able to resubmit depending on exam settings."
+        confirmText={isSubmitting ? "Submitting…" : "Submit"}
+        cancelText="Cancel"
+        confirmVariant="green"
       />
     </>
   );

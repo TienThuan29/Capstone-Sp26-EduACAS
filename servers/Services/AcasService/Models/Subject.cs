@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("SubjectTableName")]
 public class Subject
 {
     [Key]

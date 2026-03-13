@@ -1,3 +1,79 @@
+const VI_LOCALE = "vi-VN";
+
+/**
+ * Format date with time (dd/mm/yyyy, hh:mm) in vi-VN locale.
+ * Use for timestamps (e.g. created date, exam start/end).
+ */
+export function formatDate(value: string | Date | null | undefined): string {
+  if (value == null) return "";
+  try {
+    const d = typeof value === "string" ? new Date(value) : value;
+    return d.toLocaleDateString(VI_LOCALE, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * Format date only (dd/mm/yyyy) in vi-VN locale.
+ * Use when time is not needed (e.g. birthday, range labels).
+ */
+export function formatDateOnly(value: string | Date | null | undefined): string {
+  if (value == null) return "";
+  try {
+    const d = typeof value === "string" ? new Date(value) : value;
+    return d.toLocaleDateString(VI_LOCALE, {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * Format time only (hh:mm) in vi-VN locale.
+ */
+export function formatTime(value: string | Date | null | undefined): string {
+  if (value == null) return "";
+  try {
+    const d = typeof value === "string" ? new Date(value) : value;
+    return d.toLocaleTimeString(VI_LOCALE, {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return String(value);
+  }
+}
+
+/**
+ * Format a nullable/optional date for display (e.g. graded date).
+ * Returns placeholder "—" when value is null, empty, invalid, or a sentinel/min date (year < 1900).
+ * Backend may send default/min date (e.g. 0001-01-01) instead of null for unset dates.
+ */
+export function formatGradedDate(
+  value: string | Date | null | undefined,
+  placeholder = "—"
+): string {
+  if (value == null || (typeof value === "string" && value === ""))
+    return placeholder;
+  try {
+    const d = typeof value === "string" ? new Date(value) : value;
+    if (Number.isNaN(d.getTime()) || d.getFullYear() < 1900) return placeholder;
+    return formatDate(value);
+  } catch {
+    return placeholder;
+  }
+}
+
 export function formatDurationMs(ms: number): string {
   const totalMinutes = Math.round(ms / (1000 * 60));
   if (totalMinutes < 60) return `${totalMinutes} minutes`;

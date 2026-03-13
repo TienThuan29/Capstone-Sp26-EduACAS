@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import { X, AlertTriangle, CheckCircle } from 'lucide-react';
 import clsx from 'clsx';
 import { Button } from 'flowbite-react';
 
@@ -13,7 +13,8 @@ interface ConfirmModalProps {
   message: string;
   confirmText?: string;
   cancelText?: string;
-  confirmVariant?: 'red' | 'yellow';
+  /** Affects icon and confirm button color. Default 'red' for destructive/leave actions. */
+  confirmVariant?: 'red' | 'green' | 'yellow';
 }
 
 export function ConfirmModal({
@@ -24,15 +25,38 @@ export function ConfirmModal({
   message,
   confirmText = 'Confirm',
   cancelText = 'Cancel',
-  // confirmVariant = 'red',
+  confirmVariant = 'red',
 }: ConfirmModalProps) {
   if (!isOpen) return null;
+
+  const variantStyles = {
+    red: {
+      iconBg: 'bg-red-500/20',
+      iconColor: 'text-red-500',
+      buttonColor: 'red' as const,
+      Icon: AlertTriangle,
+    },
+    green: {
+      iconBg: 'bg-green-500/20',
+      iconColor: 'text-green-500',
+      buttonColor: 'green' as const,
+      Icon: CheckCircle,
+    },
+    yellow: {
+      iconBg: 'bg-yellow-500/20',
+      iconColor: 'text-yellow-500',
+      buttonColor: 'yellow' as const,
+      Icon: AlertTriangle,
+    },
+  };
+  const style = variantStyles[confirmVariant];
+  const IconComponent = style.Icon;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/60 backdrop-blur-xs"
         onClick={onClose}
       />
 
@@ -51,12 +75,14 @@ export function ConfirmModal({
         <div className="mb-4 flex justify-center">
           <div
             className={clsx(
-              'rounded-full p-3 bg-red-500/20',
+              'rounded-full p-3',
+              style.iconBg,
             )}
           >
-            <AlertTriangle
+            <IconComponent
               className={clsx(
-                'h-8 w-8 text-red-500',
+                'h-8 w-8',
+                style.iconColor,
               )}
             />
           </div>
@@ -81,7 +107,7 @@ export function ConfirmModal({
           </Button>
           <Button
             onClick={onConfirm}
-            color='red'
+            color={style.buttonColor}
             className="flex-1 cursor-pointer"
           >
             {confirmText}

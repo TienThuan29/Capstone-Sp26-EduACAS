@@ -60,7 +60,7 @@ export function ActionFooter() {
       {/* Right - Action Buttons */}
       <div className="flex items-center gap-3">
         {/* Run Code Button */}
-        <button
+        {/* <button
           onClick={runCode}
           disabled={isRunning}
           className={clsx(
@@ -81,7 +81,7 @@ export function ActionFooter() {
               <span>Run Code</span>
             </>
           )}
-        </button>
+        </button> */}
 
         {/* Submit Button (submission-related - commented out) */}
         {/* <button

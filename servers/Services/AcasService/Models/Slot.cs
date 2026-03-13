@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("SlotTableName")]
 public class Slot
 {
     [Key]
@@ -21,4 +23,6 @@ public class Slot
     public string Title { get; set; } = string.Empty;
     
     public string Description { get; set; } = string.Empty;
+
+    public List<string> ExaminationIds { get; set; } = new List<string>();
 }

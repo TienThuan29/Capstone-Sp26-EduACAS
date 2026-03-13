@@ -48,9 +48,9 @@ export function CodingWorkspace() {
           {!isLeftPanelCollapsed && (
             <>
               <Panel
-                defaultSize={450}
+                defaultSize={300}
                 minSize={100}
-                maxSize={800}
+                maxSize={600}
                 id="problem-panel"
               >
                 <div className="relative h-full">

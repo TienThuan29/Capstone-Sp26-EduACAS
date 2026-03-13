@@ -73,7 +73,8 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:ProgrammingLanguageTableName"] ?? "acas-programming-languages",
             configuration["DynamoDB:RegradingRequestTableName"] ?? "acas-regrading-requests",
             configuration["DynamoDB:SubjectTableName"] ?? "acas-subjects",
-            configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions"
+            configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions",
+            configuration["DynamoDB:NotificationTableName"] ?? "acas-notifications"
         };
 
         return tables

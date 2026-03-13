@@ -46,7 +46,8 @@ public class ProblemCommand : IProblemCommand
                 //Content = request.Content,
                 //FileName = request.FileName,
                 Difficulty = Enum.Parse<Difficulty>(request.Difficulty),
-                CodeTemplate = request.CodeTemplate
+                CodeTemplates = request.CodeTemplates ?? new Dictionary<string, string>(),
+                Tags = request.Tags?.ToArray() ?? Array.Empty<string>()
             };
 
             if (request.Mode == "MANUAL")
@@ -85,14 +86,18 @@ public class ProblemCommand : IProblemCommand
                 {
                     foreach (var testCaseRequest in request.TestCases)
                     {
-                        var testCase = new TestCase
+                        var testCase = new Models.TestCase
                         {
                             Id = Guid.NewGuid().ToString(),
                             InputData = testCaseRequest.InputData,
                             ExpectedOutput = testCaseRequest.ExpectedOutput,
                             IsPublic = testCaseRequest.IsPublic,
                             IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
-                            IsRemovedSpace = testCaseRequest.IsRemovedSpace,
+                            IsFloatingPoint = testCaseRequest.IsFloatingPoint,
+                            FloatingPointTolerance = testCaseRequest.FloatingPointTolerance,
+                            DecimalPlaces = testCaseRequest.DecimalPlaces,
+                            IsTokenComparision = testCaseRequest.IsTokenComparision,
+                            IsNotOrderedComparision = testCaseRequest.IsNotOrderedComparision,
                             IsDeleted = false
                         };
                         problem.TestCases.Add(testCase);
@@ -123,7 +128,8 @@ public class ProblemCommand : IProblemCommand
 
             problem.Title = request.Title;
             problem.Difficulty = Enum.Parse<Difficulty>(request.Difficulty);
-            problem.CodeTemplate = request.CodeTemplate;
+            problem.CodeTemplates = request.CodeTemplates ?? new Dictionary<string, string>();
+            problem.Tags = request.Tags?.ToArray() ?? Array.Empty<string>();
 
             
             if (!string.IsNullOrWhiteSpace(request.FileName))
@@ -153,14 +159,19 @@ public class ProblemCommand : IProblemCommand
                 
                 foreach (var testCaseRequest in request.TestCases)
                 {
-                    var testCase = new TestCase
+                    var testCase = new Models.TestCase
                     {
                         Id = Guid.NewGuid().ToString(),
+                        ProblemId = problemId,
                         InputData = testCaseRequest.InputData,
                         ExpectedOutput = testCaseRequest.ExpectedOutput,
                         IsPublic = testCaseRequest.IsPublic,
                         IsCaseInsensitive = testCaseRequest.IsCaseInsensitive,
-                        IsRemovedSpace = testCaseRequest.IsRemovedSpace,
+                        IsFloatingPoint = testCaseRequest.IsFloatingPoint,
+                        FloatingPointTolerance = testCaseRequest.FloatingPointTolerance,
+                        DecimalPlaces = testCaseRequest.DecimalPlaces,
+                        IsTokenComparision = testCaseRequest.IsTokenComparision,
+                        IsNotOrderedComparision = testCaseRequest.IsNotOrderedComparision,
                         IsDeleted = false
                     };
                     problem.TestCases.Add(testCase);
@@ -204,13 +215,17 @@ public class ProblemCommand : IProblemCommand
                 throw new KeyNotFoundException($"Problem {problemId} not found");
             }
 
-            var testCase = new TestCase
+            var testCase = new Models.TestCase
             {
+                ProblemId = problemId,
                 InputData = request.InputData,
                 ExpectedOutput = request.ExpectedOutput,
                 IsPublic = request.IsPublic,
                 IsCaseInsensitive = request.IsCaseInsensitive,
-                IsRemovedSpace = request.IsRemovedSpace
+                IsFloatingPoint = request.IsFloatingPoint,
+                FloatingPointTolerance = request.FloatingPointTolerance,
+                DecimalPlaces = request.DecimalPlaces,
+                IsTokenComparision = request.IsTokenComparision
             };
 
             await _problemRepository.AddTestCaseAsync(problemId, testCase);
@@ -235,13 +250,18 @@ public class ProblemCommand : IProblemCommand
 
             foreach (var request in requests)
             {
-                var testCase = new TestCase
+                var testCase = new Models.TestCase
                 {
+                    ProblemId = problemId,
                     InputData = request.InputData,
                     ExpectedOutput = request.ExpectedOutput,
                     IsPublic = request.IsPublic,
                     IsCaseInsensitive = request.IsCaseInsensitive,
-                    IsRemovedSpace = request.IsRemovedSpace
+                    IsFloatingPoint = request.IsFloatingPoint,
+                    FloatingPointTolerance = request.FloatingPointTolerance,
+                    DecimalPlaces = request.DecimalPlaces,
+                    IsTokenComparision = request.IsTokenComparision,
+                    IsNotOrderedComparision = request.IsNotOrderedComparision
                 };
 
                 await _problemRepository.AddTestCaseAsync(problemId, testCase);
@@ -270,7 +290,11 @@ public class ProblemCommand : IProblemCommand
             testCase.ExpectedOutput = request.ExpectedOutput;
             testCase.IsPublic = request.IsPublic;
             testCase.IsCaseInsensitive = request.IsCaseInsensitive;
-            testCase.IsRemovedSpace = request.IsRemovedSpace;
+            testCase.IsFloatingPoint = request.IsFloatingPoint;
+            testCase.FloatingPointTolerance = request.FloatingPointTolerance;
+            testCase.DecimalPlaces = request.DecimalPlaces;
+            testCase.IsTokenComparision = request.IsTokenComparision;
+            testCase.IsNotOrderedComparision = request.IsNotOrderedComparision;
 
             await _problemRepository.UpdateTestCaseAsync(problemId, testCase);
             _logger.LogInformation("Test case {TestCaseId} updated for problem {ProblemId}", testCaseId, problemId);

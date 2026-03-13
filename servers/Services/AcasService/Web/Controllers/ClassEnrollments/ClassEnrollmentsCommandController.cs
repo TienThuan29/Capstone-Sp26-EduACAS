@@ -11,7 +11,7 @@ namespace AcasService.Web.Controllers.ClassEnrollments;
 
 [ApiController]
 [Route("api/v1/class-enrollments")]
-[Authorize(Roles = "STUDENT")]
+[Authorize]
 public class ClassEnrollmentsCommandController : ControllerBase
 {
     private readonly IClassEnrollmentsCommand _classEnrollmentsCommand;
@@ -25,6 +25,7 @@ public class ClassEnrollmentsCommandController : ControllerBase
     }
 
     [HttpPost("enroll")]
+    [Authorize(Roles = "STUDENT")]
     public async Task<ActionResult<ApiResponse<ClassEnrollmentsResponse>>> EnrollClass([FromBody] ClassEnrollmentsRequest request)
     {
         try
@@ -53,6 +54,7 @@ public class ClassEnrollmentsCommandController : ControllerBase
 
 
     [HttpPut("leave")]
+    [Authorize(Roles = "STUDENT")]
     public async Task<ActionResult<ApiResponse<ClassEnrollmentsResponse>>> LeaveClass([FromBody] ClassEnrollmentsRequest request)
     {
         try
@@ -67,6 +69,33 @@ public class ClassEnrollmentsCommandController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error leaving class");
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpPut("force-leave")]
+    [Authorize(Roles = "LECTURER, ADMIN")]
+    public async Task<ActionResult<ApiResponse<ClassEnrollmentsResponse>>> ForceLeaveClass(
+        [FromQuery] string classId,
+        [FromQuery] string studentId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(classId) || string.IsNullOrWhiteSpace(studentId))
+            {
+                return ResponseUtil.Error<ClassEnrollmentsResponse>("Class ID and Student ID are required", 400);
+            }
+
+            var response = await _classEnrollmentsCommand.ForceLeaveClass(classId, studentId);
+            return ResponseUtil.Success(response, "Student removed from class successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Student is not enrolled in this class"))
+        {
+            return ResponseUtil.Error<ClassEnrollmentsResponse>("Student is not enrolled in this class", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error removing student from class: ClassId={ClassId}, StudentId={StudentId}", classId, studentId);
             return ResponseUtil.Error<ClassEnrollmentsResponse>("Internal Server Error", 500);
         }
     }

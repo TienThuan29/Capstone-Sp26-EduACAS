@@ -4,6 +4,15 @@ import { useCallback } from "react";
 import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
 
+export interface ExaminationBasicResponse {
+  id: string;
+  examName: string;
+  startDatetime: string;
+  endDatetime: string;
+  status: string;
+  mode: string;
+}
+
 export interface SlotResponse {
   id: string;
   classroomId: string;
@@ -11,12 +20,18 @@ export interface SlotResponse {
   title: string;
   description: string;
   createdDate: string;
+  examinationIds: string[];
+  examinations: ExaminationBasicResponse[];
 }
 
 export type CreateSlotPayload = {
   classroomId: string;
   title: string;
   description: string;
+};
+
+export type UpdateSlotPayload = Partial<CreateSlotPayload> & {
+  examinationIds?: string[];
 };
 
 export const useSlot = () => {
@@ -51,7 +66,7 @@ export const useSlot = () => {
   );
 
   const updateSlot = useCallback(
-    async (slotId: string, payload: Partial<CreateSlotPayload>) => {
+    async (slotId: string, payload: UpdateSlotPayload) => {
       const response = await axiosInstance.put(
         Api.Slot.UPDATE(slotId),
         payload

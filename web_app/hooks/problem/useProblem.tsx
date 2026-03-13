@@ -14,7 +14,11 @@ export type CreateTestCasePayload = {
   expectedOutput: string;
   isPublic: boolean;
   isCaseInsensitive: boolean;
-  isRemovedSpace: boolean;
+  isFloatingPoint: boolean;
+  floatingPointTolerance: number | null;
+  decimalPlaces: number | null;
+  isTokenComparision: boolean | null;
+  isNotOrderedComparision: boolean | null;
 };
 
 export type CreateProblemPayload = {
@@ -23,10 +27,11 @@ export type CreateProblemPayload = {
   content: string;
   fileName: string;
   difficulty: Difficulty;
-  codeTemplate: string;
+  codeTemplates?: Record<string, string>;
   testCases?: CreateTestCasePayload[];
   mode: string;
   wantsToEdit?: boolean;
+  tags?: string[];
 };
 
 export type UpdateProblemPayload = {
@@ -34,8 +39,9 @@ export type UpdateProblemPayload = {
   content: string;
   fileName: string;
   difficulty: Difficulty;
-  codeTemplate: string;
+  codeTemplates?: Record<string, string>;
   testCases?: CreateTestCasePayload[];
+  tags?: string[];
 };
 
 
@@ -103,6 +109,7 @@ export const useProblem = () => {
         }
 
         return content;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         console.error('OCR extraction failed:', error);
         throw new Error(error.response?.data?.message || 'Failed to extract content from file');

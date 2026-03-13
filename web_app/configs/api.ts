@@ -52,6 +52,7 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
     UPDATE_STATUS: (id: string) => `/api/acas/v1/programming-languages/${id}/status`,
     UPDATE_LOGO: (id: string) => `/api/acas/v1/programming-languages/${id}/logo`,
+    UPDATE_COMPILER_NAME: (id: string, compilerId: string) => `/api/acas/v1/programming-languages/${id}/compilers/${compilerId}/name`,
     DELETE: (id: string) => `/api/acas/v1/programming-languages/${id}`,
     TOGGLE_ENABLE: (id: string) => `/api/acas/v1/programming-languages/${id}/toggle-enable`,
   },
@@ -62,10 +63,12 @@ export const Api = {
     GET_BY_ID: "/api/acas/v1/classrooms",
     ENROLL: "/api/acas/v1/class-enrollments/enroll",
     LEAVE: "/api/acas/v1/class-enrollments/leave",
+    GET_CLASSROOM_STUDENTS: (classId: string) => `/api/acas/v1/class-enrollments/classroom/${classId}/students`,
+    FORCE_LEAVE: (classId: string, studentId: string) => `/api/acas/v1/class-enrollments/force-leave?classId=${encodeURIComponent(classId)}&studentId=${encodeURIComponent(studentId)}`,
     GET_LECTURER_CLASSROOMS: "/api/acas/v1/classrooms/lecturer",
     CREATE_CLASSROOM: "/api/acas/v1/classrooms",
-    UPDATE_CLASSROOM: "/api/acas/v1/classrooms", // + /:id
-    SOFT_DELETE_CLASSROOM: "/api/acas/v1/classrooms", // + /:id/soft-delete
+    UPDATE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}`,
+    SOFT_DELETE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}/soft-delete`,
   },
 
   Examination: {
@@ -95,10 +98,8 @@ export const Api = {
 
   Slot: {
     CREATE: "/api/v1/slots",
-    CREATE_ALL_SLOTS: (classroomId: string) =>
-      `/api/v1/slots/create-all-slots/${classroomId}`,
-    GET_BY_CLASSROOM: (classroomId: string) =>
-      `/api/v1/slots/classroom/${classroomId}`,
+    CREATE_ALL_SLOTS: (classroomId: string) => `/api/v1/slots/create-all-slots/${classroomId}`,
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/v1/slots/classroom/${classroomId}`,
     UPDATE: (id: string) => `/api/v1/slots/${id}`,
     DELETE: (id: string) => `/api/v1/slots/${id}`,
   },
@@ -110,5 +111,32 @@ export const Api = {
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
   },
-  
+
+  Submission: {
+    EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
+    EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
+    SAVE: '/api/v1/submissions',
+    GET_BY_ID: (id: string) => `/api/v1/submissions/${id}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
+    GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
+    AUTO_GRADE: '/api/v1/submissions/auto-grade',
+  },
+
+  TestcaseGeneration: {
+    PREVIEW: '/api/acas/v1/testcase-generation/preview',
+  },
+
+  DiscussionIssue: {
+    BASE: "/api/acas/v1/discussion-issues",
+    GET_PAGED: "/api/acas/v1/discussion-issues",
+    GET_COUNT: "/api/acas/v1/discussion-issues/count",
+    GET_BY_ID: (id: string) => `/api/acas/v1/discussion-issues/${id}`,
+    CREATE: "/api/acas/v1/discussion-issues",
+    UPDATE: (id: string) => `/api/acas/v1/discussion-issues/${id}`,
+    WRITE_COMMENT: "/api/acas/v1/discussion-issues/comments",
+    REPLY_COMMENT: "/api/acas/v1/discussion-issues/comments/reply",
+    UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
+    CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
+    SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
+  },
 };

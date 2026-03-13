@@ -13,7 +13,8 @@ import {
   TableCell,
   TableHead,
   TableHeadCell,
-  TableRow
+  TableRow,
+  TextInput,
 } from "flowbite-react"
 import {
   CodeBracketIcon,
@@ -24,6 +25,8 @@ import {
 } from '@heroicons/react/24/outline'
 import type { ProgrammingLanguage } from "@/types/language"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
+import { formatDate } from "@/utils/datetime-utils"
+import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage"
 
 interface LanguageDetailProps {
   language: ProgrammingLanguage
@@ -33,11 +36,15 @@ interface LanguageDetailProps {
 
 export default function LanguageDetail({ language, onBack, onUpdate }: LanguageDetailProps) {
   const { isDark } = useThemeContext()
+  const { updateCompilerName } = useProgrammingLanguage()
   const [isEditing, setIsEditing] = useState(false)
   const [editData, setEditData] = useState({
     status: language.status,
   })
   const [saving, setSaving] = useState(false)
+  const [editingCompilerId, setEditingCompilerId] = useState<string | null>(null)
+  const [editingCompilerName, setEditingCompilerName] = useState("")
+  const [savingCompilerId, setSavingCompilerId] = useState<string | null>(null)
 
   const getStatusColor = (status: string) => {
     switch (status.toUpperCase()) {
@@ -50,16 +57,6 @@ export default function LanguageDetail({ language, onBack, onUpdate }: LanguageD
       default:
         return 'gray'
     }
-  }
-
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
   }
 
   const handleEdit = () => {
@@ -88,12 +85,39 @@ export default function LanguageDetail({ language, onBack, onUpdate }: LanguageD
     }
   }
 
+  const handleStartEditCompilerName = (compiler: { id: string; name: string }) => {
+    setEditingCompilerId(compiler.id)
+    setEditingCompilerName(compiler.name || "")
+  }
+
+  const handleCancelEditCompilerName = () => {
+    setEditingCompilerId(null)
+    setEditingCompilerName("")
+  }
+
+  const handleSaveCompilerName = async () => {
+    if (editingCompilerId == null || editingCompilerName.trim() === "") {
+      handleCancelEditCompilerName()
+      return
+    }
+    try {
+      setSavingCompilerId(editingCompilerId)
+      const updated = await updateCompilerName(language.id, editingCompilerId, editingCompilerName.trim())
+      await onUpdate(updated)
+      handleCancelEditCompilerName()
+    } catch (error) {
+      console.error('Error updating compiler name:', error)
+    } finally {
+      setSavingCompilerId(null)
+    }
+  }
+
   return (
     <div className={`rounded-lg p-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-4 cursor-pointer">
-          <Button color="gray" size="sm" onClick={onBack}>
+          <Button color="gray" size="sm" onClick={onBack} className="cursor-pointer">
             <ArrowLeftIcon className="w-4 h-4 mr-2" />
             Back
           </Button>
@@ -116,7 +140,7 @@ export default function LanguageDetail({ language, onBack, onUpdate }: LanguageD
         <div className="flex gap-2">
           {isEditing ? (
             <>
-              <Button color="gray" size="sm" onClick={handleCancel} disabled={saving}>
+              <Button color="gray" size="sm" onClick={handleCancel} disabled={saving} className="cursor-pointer"  >
                 <XMarkIcon className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
@@ -237,7 +261,39 @@ export default function LanguageDetail({ language, onBack, onUpdate }: LanguageD
                         </code>
                       </TableCell>
                       <TableCell className={isDark ? 'text-gray-300' : 'text-gray-700'}>
-                        {compiler.name || 'N/A'}
+                        {editingCompilerId === compiler.id ? (
+                          <div className="flex items-center gap-2">
+                            <TextInput
+                              value={editingCompilerName}
+                              onChange={(e) => setEditingCompilerName(e.target.value)}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') handleSaveCompilerName()
+                                if (e.key === 'Escape') handleCancelEditCompilerName()
+                              }}
+                              disabled={savingCompilerId === compiler.id}
+                              className="min-w-[120px]"
+                              autoFocus
+                            />
+                            <Button size="xs" color="gray" onClick={handleCancelEditCompilerName} disabled={savingCompilerId === compiler.id}>
+                              <XMarkIcon className="w-4 h-4" />
+                            </Button>
+                            <Button size="xs" color="success" onClick={() => handleSaveCompilerName()} disabled={savingCompilerId === compiler.id || !editingCompilerName.trim()}>
+                              {savingCompilerId === compiler.id ? '...' : <CheckIcon className="w-4 h-4" />}
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2 group">
+                            <span>{compiler.name || 'N/A'}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditCompilerName(compiler)}
+                              className="opacity-0 group-hover:opacity-100 p-0.5 rounded text-gray-400 hover:text-blue-500 cursor-pointer"
+                              title="Edit compiler name"
+                            >
+                              <PencilIcon className="w-4 h-4" />
+                            </button>
+                          </div>
+                        )}
                       </TableCell>
                       <TableCell>
                         <Badge color="purple">{compiler.group}</Badge>

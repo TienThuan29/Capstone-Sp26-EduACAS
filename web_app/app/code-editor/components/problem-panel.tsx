@@ -17,9 +17,12 @@ import {
 } from "lucide-react";
 import clsx from "clsx";
 import { Spinner } from "flowbite-react";
+import { useAuth } from "@/contexts/AuthContext";
 import { useEditorContext } from "@/contexts/EditorContext";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
+import { useSubmissionStudent } from "@/hooks/submission/useSubmissionStudent";
 import { DIFFICULTY } from "@/types/problem";
+import type { SubmissionResponse } from "@/types/submission";
 
 type ProblemTab = "problem" | "submissions" ;
 
@@ -64,38 +67,24 @@ function CodeBlock({
   );
 }
 
-// function getStatusIcon(status: SubmissionStatus) {
-//   switch (status) {
-//     case "accepted":
-//       return <CheckCircle className="h-4 w-4 text-green-500" />;
-//     case "wrong_answer":
-//       return <XCircle className="h-4 w-4 text-red-500" />;
-//     case "tle":
-//       return <Clock className="h-4 w-4 text-yellow-500" />;
-//     case "runtime_error":
-//     case "compilation_error":
-//       return <AlertCircle className="h-4 w-4 text-orange-500" />;
-//     default:
-//       return <Clock className="h-4 w-4 text-gray-400" />;
-//   }
-// }
+function getStatusIcon(status: string) {
+  const s = (status || "").toLowerCase();
+  if (s === "accepted" || s === "passed") return <CheckCircle className="h-4 w-4 text-green-500" />;
+  if (s === "wrong_answer" || s === "failed") return <XCircle className="h-4 w-4 text-red-500" />;
+  if (s === "tle" || s === "time_limit_exceeded") return <Clock className="h-4 w-4 text-yellow-500" />;
+  if (s === "runtime_error" || s === "compilation_error") return <AlertCircle className="h-4 w-4 text-orange-500" />;
+  return <Clock className="h-4 w-4 text-gray-400" />;
+}
 
-// function getStatusLabel(status: SubmissionStatus) {
-//   switch (status) {
-//     case "accepted":
-//       return "Accepted";
-//     case "wrong_answer":
-//       return "Wrong Answer";
-//     case "tle":
-//       return "Time Limit Exceeded";
-//     case "runtime_error":
-//       return "Runtime Error";
-//     case "compilation_error":
-//       return "Compilation Error";
-//     default:
-//       return status;
-//   }
-// }
+function getStatusLabel(status: string) {
+  const s = (status || "").toLowerCase();
+  if (s === "accepted" || s === "passed") return "Accepted";
+  if (s === "wrong_answer" || s === "failed") return "Wrong Answer";
+  if (s === "tle" || s === "time_limit_exceeded") return "Time Limit Exceeded";
+  if (s === "runtime_error") return "Runtime Error";
+  if (s === "compilation_error") return "Compilation Error";
+  return status || "Unknown";
+}
 
 const TABS = [
   { id: "problem" as const, label: "Problem", icon: FileText },
@@ -287,61 +276,170 @@ function DescriptionTab() {
 }
 
 function SubmissionsTab() {
-  // const { submissions } = useEditorContext();
+  const { authTokens, user } = useAuth();
+  const {
+    examId,
+    problem,
+    submissionsRefreshKey,
+    submissionsCache,
+    setSubmissionsCache,
+  } = useEditorContext();
+  const { getSubmissionsByStudentId } = useSubmissionStudent();
+  const [submissions, setSubmissions] = useState<SubmissionResponse[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
-  // if (submissions.length === 0) {
+  const problemId = problem?.id ?? null;
+  const studentId = user?.id ?? null;
+  const isAuthenticated = Boolean(authTokens?.accessToken);
+  const cacheKey =
+    studentId && examId && problemId
+      ? `${studentId}_${examId}_${problemId}`
+      : null;
+
+  useEffect(() => {
+    if (!isAuthenticated || !studentId || !examId || !problemId || !cacheKey) {
+      setSubmissions([]);
+      setLoadError(false);
+      setLoading(false);
+      return;
+    }
+
+    // Use cache when key matches and data was fetched for current refreshKey (no new submit since)
+    const cacheHit =
+      submissionsCache?.key === cacheKey &&
+      submissionsCache.refreshKeyWhenFetched === submissionsRefreshKey;
+
+    if (cacheHit) {
+      setSubmissions(submissionsCache.list);
+      setLoadError(false);
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+    setLoadError(false);
+    getSubmissionsByStudentId(studentId)
+      .then((data) => {
+        if (!cancelled) {
+          const list = Array.isArray(data) ? data : [];
+          const forThisExamProblem = list
+            .filter((s) => s.examId === examId && s.problemId === problemId)
+            .sort((a, b) => (b.version ?? 0) - (a.version ?? 0));
+          setSubmissions(forThisExamProblem);
+          setSubmissionsCache(cacheKey, forThisExamProblem, submissionsRefreshKey);
+          setLoadError(false);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSubmissions([]);
+          setLoadError(true);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    isAuthenticated,
+    studentId,
+    examId,
+    problemId,
+    cacheKey,
+    submissionsRefreshKey,
+    submissionsCache?.key,
+    submissionsCache?.refreshKeyWhenFetched,
+    submissionsCache?.list,
+    setSubmissionsCache,
+    getSubmissionsByStudentId,
+  ]);
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+        <History className="mb-3 h-12 w-12 opacity-50" />
+        <p className="text-sm">Please log in to see submission history.</p>
+      </div>
+    );
+  }
+
+  if (!examId || !problemId) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+        <History className="mb-3 h-12 w-12 opacity-50" />
+        <p className="text-sm">No submissions yet</p>
+        <p className="mt-1 text-xs">Open a problem from an exam to see submission history.</p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+        <Spinner size="lg" />
+        <p className="mt-3 text-sm">Loading submissions...</p>
+      </div>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+        <History className="mb-3 h-12 w-12 opacity-50" />
+        <p className="text-sm">Unable to load submissions</p>
+        <p className="mt-1 text-xs">You may not have permission or the service is unavailable.</p>
+      </div>
+    );
+  }
+
+  if (submissions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-gray-400">
         <History className="mb-3 h-12 w-12 opacity-50" />
         <p className="text-sm">No submissions yet</p>
       </div>
     );
-  // }
+  }
 
-  // return (
-  //   <div className="space-y-3">
-  //     {submissions.map((submission) => (
-  //       <div
-  //         key={submission.id}
-  //         className="rounded-lg border border-gray-700 bg-gray-800 p-4 transition-colors hover:border-gray-600"
-  //       >
-  //         <div className="flex items-center justify-between">
-  //           <div className="flex items-center gap-2">
-  //             {getStatusIcon(submission.status)}
-  //             <span
-  //               className={clsx(
-  //                 "font-medium",
-  //                 submission.status === "accepted"
-  //                   ? "text-green-500"
-  //                   : "text-red-500",
-  //               )}
-  //             >
-  //               {getStatusLabel(submission.status)}
-  //             </span>
-  //           </div>
-  //           <span className="text-xs text-gray-500">
-  //             {submission.timestamp.toLocaleString()}
-  //           </span>
-  //         </div>
-  //         <div className="mt-2 flex gap-4 text-xs text-gray-400">
-  //           <span>Language: {submission.language}</span>
-  //           {submission.executionTime && (
-  //             <span>Runtime: {submission.executionTime.toFixed(0)}ms</span>
-  //           )}
-  //           {submission.memoryUsed && (
-  //             <span>Memory: {submission.memoryUsed.toFixed(1)}MB</span>
-  //           )}
-  //           {submission.passedTestCases !== undefined && (
-  //             <span>
-  //               Test Cases: {submission.passedTestCases}/
-  //               {submission.totalTestCases}
-  //             </span>
-  //           )}
-  //         </div>
-  //       </div>
-  //     ))}
-  //   </div>
-  // );
+  return (
+    <div className="space-y-3">
+      {submissions.map((submission) => (
+        <div
+          key={submission.id}
+          className="rounded-lg border border-gray-700 bg-gray-800 p-4 transition-colors hover:border-gray-600 cursor-pointer"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {getStatusIcon(submission.status)}
+              <span
+                className={clsx(
+                  "font-medium",
+                  (submission.status || "").toLowerCase() === "accepted" || (submission.status || "").toLowerCase() === "passed"
+                    ? "text-green-500"
+                    : "text-red-500",
+                )}
+              >
+                {getStatusLabel(submission.status)}
+              </span>
+            </div>
+            <span className="text-xs text-gray-500">
+              {submission.submittedDate
+                ? new Date(submission.submittedDate).toLocaleString()
+                : "—"}
+            </span>
+          </div>
+          <div className="mt-2 flex flex-wrap gap-4 text-xs text-gray-400">
+            <span>Version: {submission.version}</span>
+            <span>Score: {submission.finalScore}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // function HintsTab() {
