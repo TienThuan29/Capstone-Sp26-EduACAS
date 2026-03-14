@@ -21,14 +21,14 @@ export default function AboutUsPage() {
           <div
             className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D]"
           >
-            <GraduateIcon /> VỀ CHÚNG TÔI
+            <GraduateIcon /> ABOUT US
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="text-[#1F4E79] dark:text-white">Về </span>
+            <span className="text-[#1F4E79] dark:text-white">About </span>
             <span className="text-[#C9A24D]">Edu-ACAS</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Nền tảng học lập trình hiện đại, kết nối giảng viên và sinh viên trong việc giảng dạy, học tập và thực hành các ngôn ngữ lập trình
+            A modern programming learning platform connecting instructors and students in teaching, learning, and practicing programming languages
           </p>
         </div>
       </section>
@@ -75,30 +75,30 @@ export default function AboutUsPage() {
             <div className="space-y-8">
               <div>
                 <h2 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-                  Sứ mệnh của chúng tôi
+                  Our Mission
                 </h2>
                 <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-                  Edu-ACAS được xây dựng với sứ mệnh mang đến trải nghiệm học lập trình tốt nhất cho sinh viên và công cụ giảng dạy hiệu quả cho giảng viên. Chúng tôi tin rằng việc học lập trình cần được thực hành trong môi trường chuyên nghiệp với công cụ phù hợp.
+                  Edu-ACAS is built with the mission to deliver the best programming learning experience for students and effective teaching tools for instructors. We believe that learning to code should be practiced in a professional environment with the right tools.
                 </p>
               </div>
 
               <div>
                 <h2 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-                  Tầm nhìn
+                  Vision
                 </h2>
                 <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-                  Trở thành nền tảng E-Learning hàng đầu cho việc giảng dạy và học tập lập trình tại Việt Nam, giúp sinh viên phát triển kỹ năng coding và chuẩn bị tốt cho sự nghiệp.
+                  To become the leading E-Learning platform for programming teaching and learning in Vietnam, helping students develop coding skills and prepare well for their careers.
                 </p>
               </div>
 
               <div className="grid grid-cols-2 gap-4 pt-4">
                 <Card className="p-6 text-center border-2 hover:shadow-lg transition-all" style={{ borderColor: "#C9A24D" }}>
                   <div className="text-4xl font-bold text-[#C9A24D] mb-2">100+</div>
-                  <div className="text-sm text-gray-700 dark:text-gray-300">Bài tập lập trình</div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300">Programming exercises</div>
                 </Card>
                 <Card className="p-6 text-center border-2 hover:shadow-lg transition-all" style={{ borderColor: "#1F4E79" }}>
                   <div className="text-4xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">24/7</div>
-                  <div className="text-sm text-gray-700 dark:text-gray-300">Hỗ trợ học tập</div>
+                  <div className="text-sm text-gray-700 dark:text-gray-300">Learning support</div>
                 </Card>
               </div>
             </div>
@@ -111,10 +111,10 @@ export default function AboutUsPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-              Giá trị cốt lõi
+              Core Values
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Những giá trị định hướng mọi hoạt động của chúng tôi
+              The values that guide everything we do
             </p>
           </div>
 
@@ -126,10 +126,10 @@ export default function AboutUsPage() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-3">
-                Thực hành trực tiếp
+                Hands-on practice
               </h3>
               <p className="text-gray-700 dark:text-gray-300">
-                Viết code và nhận phản hồi ngay lập tức từ hệ thống chấm điểm tự động, giúp sinh viên học nhanh hơn
+                Write code and get instant feedback from the automated grading system, helping students learn faster
               </p>
             </Card>
 
@@ -140,10 +140,10 @@ export default function AboutUsPage() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-3">
-                Giảng viên chuyên nghiệp
+                Professional instructors
               </h3>
               <p className="text-gray-700 dark:text-gray-300">
-                Được hướng dẫn bởi các giảng viên giàu kinh nghiệm trong ngành, đảm bảo chất lượng giảng dạy
+                Guided by experienced industry instructors, ensuring teaching quality
               </p>
             </Card>
 
@@ -154,10 +154,10 @@ export default function AboutUsPage() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-3">
-                Công nghệ hiện đại
+                Modern technology
               </h3>
               <p className="text-gray-700 dark:text-gray-300">
-                Nền tảng được xây dựng với công nghệ mới nhất, đảm bảo trải nghiệm tốt nhất cho người dùng
+                The platform is built with the latest technology, ensuring the best experience for users
               </p>
             </Card>
           </div>
@@ -169,30 +169,30 @@ export default function AboutUsPage() {
         <div className="container mx-auto max-w-6xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-              Cộng đồng của chúng tôi
+              Our Community
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Tham gia nền tảng đang phát triển
+              Join our growing platform
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="p-8 text-center border-2 hover:shadow-lg transition-all bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
               <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">1000+</div>
-              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Sinh viên</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Đang học tập trên nền tảng</p>
+              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Students</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Learning on the platform</p>
             </Card>
 
             <Card className="p-8 text-center border-2 hover:shadow-lg transition-all bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
               <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">50+</div>
-              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Giảng viên</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Đang giảng dạy trên hệ thống</p>
+              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Instructors</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Teaching on the system</p>
             </Card>
 
             <Card className="p-8 text-center border-2 hover:shadow-lg transition-all bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
               <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">5+</div>
-              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Ngôn ngữ</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Lập trình được hỗ trợ</p>
+              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Languages</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Programming languages supported</p>
             </Card>
           </div>
         </div>

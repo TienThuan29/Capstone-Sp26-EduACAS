@@ -1,0 +1,30 @@
+[
+  { "id": "admin-eduacas", "roleNumber": "AD000001", "email": "admin@edu-acas.com", "password": "123456", "fullname": "EduAcas Admin", "role": "ADMIN" },
+
+  { "id": "usr-lec-001", "roleNumber": "LE000001", "email": "lecturer1@edu-acas.com", "password": "123456", "fullname": "Dr. Nguyen Van An", "role": "LECTURER" },
+  { "id": "usr-lec-002", "roleNumber": "LE000002", "email": "lecturer2@edu-acas.com", "password": "123456", "fullname": "Dr. Tran Thi Binh", "role": "LECTURER" },
+  { "id": "usr-lec-003", "roleNumber": "LE000003", "email": "lecturer3@edu-acas.com", "password": "123456", "fullname": "Dr. Le Van Cuong", "role": "LECTURER" },
+  { "id": "usr-lec-004", "roleNumber": "LE000004", "email": "lecturer4@edu-acas.com", "password": "123456", "fullname": "Dr. Pham Thi Dung", "role": "LECTURER" },
+  { "id": "usr-lec-005", "roleNumber": "LE000005", "email": "lecturer5@edu-acas.com", "password": "123456", "fullname": "Dr. Hoang Van Em", "role": "LECTURER" },
+
+  { "id": "usr-stu-001", "roleNumber": "SE000001", "email": "student1@edu-acas.com", "password": "123456", "fullname": "Vo Minh Khoi", "role": "STUDENT" },
+  { "id": "usr-stu-002", "roleNumber": "SE000002", "email": "student2@edu-acas.com", "password": "123456", "fullname": "Nguyen Thi Lan", "role": "STUDENT" },
+  { "id": "usr-stu-003", "roleNumber": "SE000003", "email": "student3@edu-acas.com", "password": "123456", "fullname": "Tran Van Minh", "role": "STUDENT" },
+  { "id": "usr-stu-004", "roleNumber": "SE000004", "email": "student4@edu-acas.com", "password": "123456", "fullname": "Le Thi Ngoc", "role": "STUDENT" },
+  { "id": "usr-stu-005", "roleNumber": "SE000005", "email": "student5@edu-acas.com", "password": "123456", "fullname": "Pham Van Phuc", "role": "STUDENT" },
+  { "id": "usr-stu-006", "roleNumber": "SE000006", "email": "student6@edu-acas.com", "password": "123456", "fullname": "Hoang Thi Quyen", "role": "STUDENT" },
+  { "id": "usr-stu-007", "roleNumber": "SE000007", "email": "student7@edu-acas.com", "password": "123456", "fullname": "Bui Van Sang", "role": "STUDENT" },
+  { "id": "usr-stu-008", "roleNumber": "SE000008", "email": "student8@edu-acas.com", "password": "123456", "fullname": "Do Thi Thao", "role": "STUDENT" },
+  { "id": "usr-stu-009", "roleNumber": "SE000009", "email": "student9@edu-acas.com", "password": "123456", "fullname": "Ngo Van Uy", "role": "STUDENT" },
+  { "id": "usr-stu-010", "roleNumber": "SE000010", "email": "student10@edu-acas.com", "password": "123456", "fullname": "Dang Thi Vy", "role": "STUDENT" },
+  { "id": "usr-stu-011", "roleNumber": "SE000011", "email": "student11@edu-acas.com", "password": "123456", "fullname": "Luong Van Hao", "role": "STUDENT" },
+  { "id": "usr-stu-012", "roleNumber": "SE000012", "email": "student12@edu-acas.com", "password": "123456", "fullname": "Mai Thi Huong", "role": "STUDENT" },
+  { "id": "usr-stu-013", "roleNumber": "SE000013", "email": "student13@edu-acas.com", "password": "123456", "fullname": "Cao Van Khanh", "role": "STUDENT" },
+  { "id": "usr-stu-014", "roleNumber": "SE000014", "email": "student14@edu-acas.com", "password": "123456", "fullname": "Dinh Thi Linh", "role": "STUDENT" },
+  { "id": "usr-stu-015", "roleNumber": "SE000015", "email": "student15@edu-acas.com", "password": "123456", "fullname": "Vu Van Nam", "role": "STUDENT" },
+  { "id": "usr-stu-016", "roleNumber": "SE000016", "email": "student16@edu-acas.com", "password": "123456", "fullname": "Ly Thi Oanh", "role": "STUDENT" },
+  { "id": "usr-stu-017", "roleNumber": "SE000017", "email": "student17@edu-acas.com", "password": "123456", "fullname": "Ta Van Phong", "role": "STUDENT" },
+  { "id": "usr-stu-018", "roleNumber": "SE000018", "email": "student18@edu-acas.com", "password": "123456", "fullname": "Trinh Thi Quanh", "role": "STUDENT" },
+  { "id": "usr-stu-019", "roleNumber": "SE000019", "email": "student19@edu-acas.com", "password": "123456", "fullname": "Duong Van Ren", "role": "STUDENT" },
+  { "id": "usr-stu-020", "roleNumber": "SE000020", "email": "student20@edu-acas.com", "password": "123456", "fullname": "Ha Thi Son", "role": "STUDENT" }
+]

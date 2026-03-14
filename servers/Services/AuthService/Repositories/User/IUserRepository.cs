@@ -4,6 +4,7 @@ public interface IUserRepository
 {
     Task<Models.User?> CreateAsync(Models.User user);
     Task<Models.User?> FindByIdAsync(string userId);
+    Task<List<Models.User>> FindByIdsAsync(IEnumerable<string> userIds);
     Task<Models.User?> FindByEmailAsync(string email);
     Task<Models.User?> FindByGoogleIdAsync(string googleId);
     Task<List<Models.User>> FindAllAsync();

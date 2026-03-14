@@ -34,11 +34,11 @@ export default function Footer() {
               />
             </div>
             <p className="text-white opacity-80 text-sm">
-              Nền tảng học lập trình qua các bài tập tương tác và thử thách code.
+              A platform for learning programming through interactive exercises and code challenges.
             </p>
           </div>
           <div>
-            <h4 className="text-base font-bold mb-4 text-white">Ngôn ngữ</h4>
+            <h4 className="text-base font-bold mb-4 text-white">Languages</h4>
             <ul className="space-y-2 text-white opacity-80 text-sm">
               <li>
                 <a href="#" className="hover:opacity-100 transition-opacity">
@@ -63,16 +63,16 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-            <h4 className="text-base font-bold mb-4 text-white">Hỗ trợ</h4>
+            <h4 className="text-base font-bold mb-4 text-white">Support</h4>
             <ul className="space-y-2 text-white opacity-80 text-sm">
               <li>
                 <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Tài liệu
+                  → Documentation
                 </a>
               </li>
               <li>
                 <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Hướng dẫn
+                  → Guides
                 </a>
               </li>
               <li>
@@ -82,17 +82,17 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Liên hệ
+                  → Contact
                 </a>
               </li>
             </ul>
           </div>
           <div>
-            <h4 className="text-base font-bold mb-4 text-white">Giới thiệu</h4>
+            <h4 className="text-base font-bold mb-4 text-white">About</h4>
             <ul className="space-y-2 text-white opacity-80 text-sm">
               <li>
                 <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Về chúng tôi
+                  → About us
                 </a>
               </li>
               <li>
@@ -102,7 +102,7 @@ export default function Footer() {
               </li>
               <li>
                 <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Cộng đồng
+                  → Community
                 </a>
               </li>
             </ul>
@@ -110,7 +110,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(201, 162, 77, 0.3)" }}>
-          <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Nền tảng học lập trình chuyên nghiệp.</p>
+          <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Professional programming learning platform.</p>
         </div>
       </div>
     </footer>

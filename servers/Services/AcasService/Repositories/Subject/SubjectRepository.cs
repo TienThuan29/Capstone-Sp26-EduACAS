@@ -58,6 +58,36 @@ public class SubjectRepository : DynamoRepository, ISubjectRepository
         }
     }
 
+    public async Task<List<Models.Subject>> FindByIdsAsync(IEnumerable<string> subjectIds)
+    {
+        var idList = subjectIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        if (idList.Count == 0)
+            return new List<Models.Subject>();
+
+        const int batchSize = 100;
+        var batches = idList
+            .Chunk(batchSize)
+            .Select(batchIds =>
+            {
+                var keys = batchIds.Select(id => DynamoMapper.CreateKey(id)).ToList();
+                var request = new BatchGetItemRequest
+                {
+                    RequestItems = new Dictionary<string, KeysAndAttributes>
+                    {
+                        [_subjectTableName] = new KeysAndAttributes { Keys = keys }
+                    }
+                };
+                return _dynamoDBClient.BatchGetItemAsync(request);
+            })
+            .ToList();
+
+        var responses = await Task.WhenAll(batches);
+        return responses
+            .SelectMany(r => r.Responses.TryGetValue(_subjectTableName, out var items) ? items : [])
+            .Select(item => DynamoMapper.DynamoItemToSubject(item))
+            .ToList();
+    }
+
 
     public async Task<List<Models.Subject>> FindAllAsync()
     {

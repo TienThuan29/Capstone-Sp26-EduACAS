@@ -104,13 +104,32 @@ public class SlotQuery : ISlotQuery
 
     private async Task<List<SlotResponse>> MapSlotsWithExaminationsAsync(List<Models.Slot> slots)
     {
-        var result = new List<SlotResponse>();
-        foreach (var slot in slots)
-        {
-            var examinations = await _examinationRepository.GetByIdsAsync(slot.ExaminationIds ?? new List<string>());
-            var examinationResponses = examinations.Select(_examinationMapper.ToExaminationBasicResponse).ToList();
-            result.Add(_slotMapper.ToSlotResponse(slot, examinationResponses));
-        }
-        return result;
+        if (slots.Count == 0)
+            return new List<SlotResponse>();
+
+        var allExaminationIds = slots
+            .SelectMany(s => s.ExaminationIds ?? Enumerable.Empty<string>())
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct()
+            .ToList();
+
+        var examinations = allExaminationIds.Count == 0
+            ? new List<Models.Examination>()
+            : await _examinationRepository.GetByIdsAsync(allExaminationIds);
+        var examinationById = examinations.ToDictionary(e => e.Id);
+
+        return slots
+            .Select(slot =>
+            {
+                var slotExamIds = slot.ExaminationIds ?? new List<string>();
+                var slotExaminations = slotExamIds
+                    .Select(id => examinationById.GetValueOrDefault(id))
+                    .Where(e => e != null)
+                    .Cast<Models.Examination>()
+                    .ToList();
+                var examinationResponses = slotExaminations.Select(_examinationMapper.ToExaminationBasicResponse).ToList();
+                return _slotMapper.ToSlotResponse(slot, examinationResponses);
+            })
+            .ToList();
     }
 }

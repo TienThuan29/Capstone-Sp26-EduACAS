@@ -19,18 +19,18 @@ public interface IDiscussionIssueQuery
 
 public class DiscussionIssueQuery : IDiscussionIssueQuery
 {
-    private readonly IDiscussionIssueRepository _repository;
+    private readonly IDiscussionIssueRepository _discussionIssueRepository;
     private readonly DiscussionIssueMapper _discussionIssueMapper;
     private readonly UserRequestProducer _userRequestProducer;
     private readonly ILogger<DiscussionIssueQuery> _logger;
 
     public DiscussionIssueQuery(
-        IDiscussionIssueRepository repository,
+        IDiscussionIssueRepository discussionIssueRepository,
         DiscussionIssueMapper discussionIssueMapper,
         UserRequestProducer userRequestProducer,
         ILogger<DiscussionIssueQuery> logger)
     {
-        _repository = repository;
+        _discussionIssueRepository = discussionIssueRepository;
         _discussionIssueMapper = discussionIssueMapper;
         _userRequestProducer = userRequestProducer;
         _logger = logger;
@@ -45,7 +45,7 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        var all = await _repository.FindByClassroomIdAsync(classroomId);
+        var all = await _discussionIssueRepository.FindByClassroomIdAsync(classroomId);
         var ordered = all.OrderByDescending(x => x.CreatedDate).ToList();
         var totalCount = ordered.Count;
         var items = ordered
@@ -61,12 +61,12 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
 
     public async Task<int> GetCountByClassroomIdAsync(string classroomId)
     {
-        return await _repository.CountByClassroomIdAsync(classroomId);
+        return await _discussionIssueRepository.CountByClassroomIdAsync(classroomId);
     }
 
     public async Task<DiscussionIssueDetailResponse?> GetByIdAsync(string discussionId)
     {
-        var issue = await _repository.FindByIdAsync(discussionId);
+        var issue = await _discussionIssueRepository.FindByIdAsync(discussionId);
         if (issue == null) return null;
 
         var detail = _discussionIssueMapper.ToDetailResponse(issue);
@@ -120,16 +120,14 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
     private async Task<Dictionary<string, AuthorDisplayResponse>> FetchAuthorDisplayMapAsync(List<string> authorIds)
     {
         var result = new Dictionary<string, AuthorDisplayResponse>(StringComparer.OrdinalIgnoreCase);
-        var tasks = authorIds.Distinct().Select(async id =>
+        var distinctIds = authorIds.Distinct().Where(id => !string.IsNullOrEmpty(id)).ToList();
+        if (distinctIds.Count == 0) return result;
+
+        var users = await _userRequestProducer.GetUsersByIdsAsync(distinctIds);
+        foreach (var user in users)
         {
-            var user = await _userRequestProducer.GetUserByIdAsync(id);
-            return (Id: id, User: user);
-        });
-        var pairs = await Task.WhenAll(tasks);
-        foreach (var (id, user) in pairs)
-        {
-            if (user != null)
-                result[id] = new AuthorDisplayResponse
+            if (user != null && !string.IsNullOrEmpty(user.Id))
+                result[user.Id] = new AuthorDisplayResponse
                 {
                     FullName = user.Fullname ?? string.Empty,
                     AvatarUrl = user.AvatarUrl ?? string.Empty

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "cls-001",
+    "classCode": "CS101-SP26-G1",
+    "className": "Intro to Programming - Group 1",
+    "lecturerId": "usr-lec-001",
+    "subjectId": "sub-001",
+    "semesterName": "Spring 2026",
+    "enrolKey": "cs101g1",
+    "maxSlot": 3
+  },
+  {
+    "id": "cls-002",
+    "classCode": "CS201-SP26-G1",
+    "className": "Data Structures and Algorithms - Group 1",
+    "lecturerId": "usr-lec-001",
+    "subjectId": "sub-002",
+    "semesterName": "Spring 2026",
+    "enrolKey": "cs201g1",
+    "maxSlot": 3
+  },
+  {
+    "id": "cls-003",
+    "classCode": "CS301-SP26-G1",
+    "className": "Object-Oriented Programming - Group 1",
+    "lecturerId": "usr-lec-001",
+    "subjectId": "sub-003",
+    "semesterName": "Spring 2026",
+    "enrolKey": "cs301g1",
+    "maxSlot": 3
+  },
+  {
+    "id": "cls-004",
+    "classCode": "CS401-SP26-G1",
+    "className": "Database Systems - Group 1",
+    "lecturerId": "usr-lec-002",
+    "subjectId": "sub-004",
+    "semesterName": "Spring 2026",
+    "enrolKey": "cs401g1",
+    "maxSlot": 3
+  },
+  {
+    "id": "cls-005",
+    "classCode": "CS501-SP26-G1",
+    "className": "Software Engineering - Group 1",
+    "lecturerId": "usr-lec-003",
+    "subjectId": "sub-005",
+    "semesterName": "Spring 2026",
+    "enrolKey": "cs501g1",
+    "maxSlot": 3
+  },
+  {
+    "id": "cls-006",
+    "classCode": "CS101-SP26-G2",
+    "className": "Introduction to Programming - Group 2",
+    "lecturerId": "usr-lec-001",
+    "subjectId": "sub-001",
+    "semesterName": "Spring 2026",
+    "enrolKey": "cs101g2",
+    "maxSlot": 3
+  },
+  {
+    "id": "cls-007",
+    "classCode": "TEST-SP26",
+    "className": "Test Classroom",
+    "lecturerId": "usr-lec-001",
+    "subjectId": "sub-001",
+    "semesterName": "Spring 2026",
+    "enrolKey": "testclass",
+    "maxSlot": 5
+  }
+]

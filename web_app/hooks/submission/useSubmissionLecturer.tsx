@@ -5,6 +5,7 @@ import useAxios from '@/hooks/useAxios';
 import { Api } from '@/configs/api';
 import type {
   SubmissionResponse,
+  ProblemSubmissionsResponse,
   BulkSubmissionGradingRequest,
   AutoGradeProblemResponse,
 } from '@/types/submission';
@@ -32,6 +33,17 @@ export const useSubmissionLecturer = () => {
     [axiosInstance]
   );
 
+  /** Fetches latest submissions for all problems of an exam in one request (avoids N parallel requests). */
+  const getLatestSubmissionsByExam = useCallback(
+    async (examId: string): Promise<ProblemSubmissionsResponse[]> => {
+      const response = await axiosInstance.get<
+        ApiResponse<ProblemSubmissionsResponse[]>
+      >(Api.Submission.GET_LATEST_BY_EXAM(examId));
+      return response.data?.dataResponse ?? [];
+    },
+    [axiosInstance]
+  );
+
   const runAutoGrading = useCallback(
     async (
       request: BulkSubmissionGradingRequest
@@ -50,6 +62,7 @@ export const useSubmissionLecturer = () => {
 
   return {
     getLatestSubmissionsByExamAndProblem,
+    getLatestSubmissionsByExam,
     runAutoGrading,
   };
 };

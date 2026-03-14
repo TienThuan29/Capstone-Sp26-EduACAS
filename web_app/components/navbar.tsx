@@ -56,16 +56,16 @@ export default function HomeNavbar() {
       <div className="relative mx-auto max-w-7xl overflow-visible rounded-full border border-white/30 bg-white/70 shadow-black/10 backdrop-blur-2xl backdrop-saturate-150 dark:border-gray-600/40 dark:bg-gray-800/70 dark:shadow-black/40">
         {/* Glass overlay gradient */}
         <div className="pointer-events-none absolute inset-0 rounded-full bg-linear-to-b from-white/20 to-transparent dark:from-gray-700/30 dark:to-transparent"></div>
-        <Navbar fluid className="relative rounded-full bg-transparent px-6 py-3">
+        <Navbar fluid className="relative rounded-full bg-transparent px-6 py-2">
           <NavbarBrand as={Link} href="/" className="mr-4">
             <div className="flex items-center space-x-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-[#1F4E79] to-[#C9A24D] p-2">
+              <div className="flex items-center justify-center rounded-full p-1">
                 <Image
                   src="/logo-single.png"
                   alt="Edu-ACAS Logo"
-                  width={24}
+                  width={28}
                   height={24}
-                  className="h-6 w-6"
+                  className="h-full w-full"
                   priority
                 />
               </div>

@@ -29,14 +29,16 @@ public class ClassEnrollmentsQuery : IClassEnrollmentsQuery
     public async Task<List<ClassroomStudentResponse>> GetStudentsByClassIdAsync(string classId, CancellationToken cancellationToken = default)
     {
         var enrollments = await _enrollmentRepository.FindByClassIdAsync(classId);
-        var result = new List<ClassroomStudentResponse>();
+        var studentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
 
-        foreach (var enrollment in enrollments)
-        {
-            var userProfile = await _userRequestProducer.GetUserByIdAsync(enrollment.StudentId, cancellationToken);
-            result.Add(_classEnrollmentMapper.ToClassroomStudentResponse(enrollment, userProfile));
-        }
+        var userProfileTasks = studentIds.Select(id => _userRequestProducer.GetUserByIdAsync(id, cancellationToken));
+        var userProfiles = await Task.WhenAll(userProfileTasks);
+        var userById = studentIds
+            .Zip(userProfiles, (id, profile) => (id, profile))
+            .ToDictionary(x => x.id, x => x.profile);
 
-        return result;
+        return enrollments
+            .Select(e => _classEnrollmentMapper.ToClassroomStudentResponse(e, userById.GetValueOrDefault(e.StudentId)))
+            .ToList();
     }
 }

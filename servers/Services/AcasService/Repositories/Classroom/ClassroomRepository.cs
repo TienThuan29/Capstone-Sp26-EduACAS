@@ -51,6 +51,36 @@ public class ClassroomRepository : DynamoRepository, IClassroomRepository
         }
     }
 
+    public async Task<List<Models.Classroom>> FindByIdsAsync(IEnumerable<string> classroomIds)
+    {
+        var idList = classroomIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        if (idList.Count == 0)
+            return new List<Models.Classroom>();
+
+        const int batchSize = 100;
+        var batches = idList
+            .Chunk(batchSize)
+            .Select(batchIds =>
+            {
+                var keys = batchIds.Select(id => DynamoMapper.CreateKey(id)).ToList();
+                var request = new BatchGetItemRequest
+                {
+                    RequestItems = new Dictionary<string, KeysAndAttributes>
+                    {
+                        [_classroomTableName] = new KeysAndAttributes { Keys = keys }
+                    }
+                };
+                return _dynamoDBClient.BatchGetItemAsync(request);
+            })
+            .ToList();
+
+        var responses = await Task.WhenAll(batches);
+        return responses
+            .SelectMany(r => r.Responses.TryGetValue(_classroomTableName, out var items) ? items : [])
+            .Select(DynamoMapper.DynamoItemToClassroom)
+            .ToList();
+    }
+
     public async Task<List<Models.Classroom>> FindAllAsync()
         {
         try
