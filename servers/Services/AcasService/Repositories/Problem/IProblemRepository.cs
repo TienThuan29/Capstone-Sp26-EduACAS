@@ -5,6 +5,7 @@ namespace AcasService.Repositories.Problem;
 public interface IProblemRepository
 {
     Task<Models.Problem?> GetByIdAsync(string problemId);
+    Task<List<Models.Problem>> GetByIdsAsync(IEnumerable<string> problemIds);
     Task<List<Models.Problem>> GetByExamIdAsync(string examId);
     Task<List<Models.Problem>> GetByLecturerIdAsync(string lecturerId);
     Task<List<Models.Problem>> GetAllAsync();

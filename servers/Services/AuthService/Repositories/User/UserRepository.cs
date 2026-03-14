@@ -74,6 +74,36 @@ public class UserRepository : DynamoRepository, IUserRepository
         }
     }
 
+    public async Task<List<Models.User>> FindByIdsAsync(IEnumerable<string> userIds)
+    {
+        var idList = userIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        if (idList.Count == 0)
+            return new List<Models.User>();
+
+        const int batchSize = 100; // DynamoDB BatchGetItem limit
+        var batches = idList
+            .Chunk(batchSize)
+            .Select(batchIds =>
+            {
+                var keys = batchIds.Select(id => DynamoMapper.CreateKey(id)).ToList();
+                var request = new BatchGetItemRequest
+                {
+                    RequestItems = new Dictionary<string, KeysAndAttributes>
+                    {
+                        [_userTableName] = new KeysAndAttributes { Keys = keys }
+                    }
+                };
+                return _dynamoDBClient.BatchGetItemAsync(request);
+            })
+            .ToList();
+
+        var responses = await Task.WhenAll(batches);
+        return responses
+            .SelectMany(r => r.Responses.TryGetValue(_userTableName, out var items) ? items : [])
+            .Select(DynamoMapper.DynamoItemToUser)
+            .ToList();
+    }
+
     public async Task<Models.User?> FindByEmailAsync(string email)
     {
         try

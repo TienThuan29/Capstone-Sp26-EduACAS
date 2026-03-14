@@ -1,3 +1,4 @@
+using AcasService.Application.Mappers;
 using AcasService.Application.Queries.Problem;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Messaging.User;
@@ -15,6 +16,8 @@ public interface ISubmissionQuery
       Task<List<Models.Submission>> GetSubmissionsByStudentIdAsync(string studentId);
 
       Task<List<Models.Submission>> GetTheLatestVersionSubmissionsByExamAndProblemAsync(string examId, string problemId);
+
+      Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId);
 }
 
 public class SubmissionQuery : ISubmissionQuery
@@ -23,17 +26,20 @@ public class SubmissionQuery : ISubmissionQuery
       private readonly ISubmissionRepository _submissionRepository;
       private readonly IProblemQuery _problemQuery;
       private readonly UserRequestProducer _userRequestProducer;
+      private readonly SubmissionMapper _submissionMapper;
 
       public SubmissionQuery(
             ISubmissionRepository submissionRepository,
             ISubmissionCache submissionCache,
             IProblemQuery problemQuery,
-            UserRequestProducer userRequestProducer)
+            UserRequestProducer userRequestProducer,
+            SubmissionMapper submissionMapper)
       {
             _submissionRepository = submissionRepository;
             _submissionCache = submissionCache;
             _problemQuery = problemQuery;
             _userRequestProducer = userRequestProducer;
+            _submissionMapper = submissionMapper;
       }
 
       public Task<Models.Submission?> GetSubmissionByIdAsync(string id) =>
@@ -55,4 +61,25 @@ public class SubmissionQuery : ISubmissionQuery
 
       public Task<List<Models.Submission>> GetTheLatestVersionSubmissionsByExamAndProblemAsync(string examId, string problemId) =>
             _submissionRepository.GetLatestVersionSubmissionsOfProblemInExam(examId, problemId);
+
+      public async Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId)
+      {
+            var byProblem = await _submissionRepository.GetLatestVersionSubmissionsByExamAsync(examId).ConfigureAwait(false);
+            var problemIds = byProblem.Keys.ToList();
+            if (problemIds.Count == 0)
+                  return new List<ProblemSubmissionsResponse>();
+
+            var problems = await _problemQuery.GetProblemsByIdsAsync(problemIds).ConfigureAwait(false);
+            var problemLiteById = problems.ToDictionary(p => p.Id, p => new ProblemLiteResponse { Id = p.Id, Title = p.Title });
+
+            return byProblem
+                .Select(kv => new ProblemSubmissionsResponse
+                {
+                    ProblemId = kv.Key,
+                    Submissions = kv.Value
+                        .Select(s => _submissionMapper.ToResponse(s, problemLiteById.GetValueOrDefault(kv.Key)))
+                        .ToList()
+                })
+                .ToList();
+      }
 }

@@ -25,7 +25,7 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
         
         base.TableName = _problemTableName;
         var awsRegion = configuration["AWS:Region"] ?? "Not configured";
-        logger.LogInformation("ProblemRepository initialized - Region: {Region}, ProblemTable: {ProblemTable}", 
+        logger.LogDebug("ProblemRepository initialized - Region: {Region}, ProblemTable: {ProblemTable}",
             awsRegion, _problemTableName);
     }
 
@@ -75,6 +75,38 @@ public class ProblemRepository : DynamoRepository, IProblemRepository
             _logger.LogError(ex, "Error retrieving problem {ProblemId}", problemId);
             throw;
         }
+    }
+
+    public async Task<List<Models.Problem>> GetByIdsAsync(IEnumerable<string> problemIds)
+    {
+        var idList = problemIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        if (idList.Count == 0)
+            return new List<Models.Problem>();
+
+        const int batchSize = 100; // DynamoDB BatchGetItem limit
+        var batches = idList
+            .Chunk(batchSize)
+            .Select(batchIds =>
+            {
+                var keys = batchIds.Select(id => DynamoMapper.CreateKey(id)).ToList();
+                var request = new BatchGetItemRequest
+                {
+                    RequestItems = new Dictionary<string, KeysAndAttributes>
+                    {
+                        [_problemTableName] = new KeysAndAttributes { Keys = keys }
+                    }
+                };
+                return _dynamoDBClient.BatchGetItemAsync(request);
+            })
+            .ToList();
+
+        var responses = await Task.WhenAll(batches);
+
+        return responses
+            .SelectMany(r => r.Responses.TryGetValue(_problemTableName, out var items) ? items : [])
+            .Where(item => !item.ContainsKey("isDeleted") || !item["isDeleted"].BOOL)
+            .Select(DynamoMapper.DynamoItemToProblem)
+            .ToList();
     }
 
     public async Task<List<Models.Problem>> GetByExamIdAsync(string examId)

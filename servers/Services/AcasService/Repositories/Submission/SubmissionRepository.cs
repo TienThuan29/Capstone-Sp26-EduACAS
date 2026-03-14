@@ -207,4 +207,34 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
             throw;
         }
     }
+
+    public async Task<Dictionary<string, List<Models.Submission>>> GetLatestVersionSubmissionsByExamAsync(string examId)
+    {
+        try
+        {
+            var request = new ScanRequest
+            {
+                TableName = _submissionTableName,
+                FilterExpression = "examId = :examId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":examId"] = new AttributeValue { S = examId }
+                }
+            };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var submissions = response.Items.Select(DynamoMapper.DynamoItemToSubmission).ToList();
+            var byProblem = submissions
+                .GroupBy(s => s.ProblemId)
+                .ToDictionary(g => g.Key, g => g
+                    .GroupBy(s => s.StudentId)
+                    .Select(studentGroup => studentGroup.OrderByDescending(s => s.Version).First())
+                    .ToList());
+            return byProblem;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving latest submissions for exam {ExamId}", examId);
+            throw;
+        }
+    }
 }

@@ -18,14 +18,14 @@ export default function FeaturesPage() {
           <div
             className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#C9A24D]"
           >
-            <SparklesIcon /> TÍNH NĂNG NỔI BẬT
+            <SparklesIcon /> FEATURED
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="text-[#1F4E79] dark:text-white">Tính năng </span>
-            <span className="text-[#C9A24D]">nổi bật</span>
+            <span className="text-[#1F4E79] dark:text-white">Featured </span>
+            <span className="text-[#C9A24D]">Features</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Mọi thứ bạn cần cho việc giảng dạy và học tập lập trình một cách hiệu quả và chuyên nghiệp
+            Everything you need for effective and professional programming teaching and learning
           </p>
         </div>
       </section>
@@ -68,10 +68,10 @@ export default function FeaturesPage() {
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-              Tính năng chi tiết
+              Detailed Features
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Khám phá các tính năng mạnh mẽ của Edu-ACAS
+              Explore the powerful features of Edu-ACAS
             </p>
           </div>
 
@@ -81,27 +81,27 @@ export default function FeaturesPage() {
               <Card className="p-8 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
                 <div className="space-y-4">
                   <div className="inline-block px-4 py-2 rounded-full bg-[#C9A24D] text-white text-sm font-semibold">
-                    CHO SINH VIÊN
+                    FOR STUDENTS
                   </div>
                   <h3 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D]">
-                    Học tập linh hoạt
+                    Flexible learning
                   </h3>
                   <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                     <li className="flex items-start gap-3">
                       <span className="text-[#C9A24D] text-xl">✓</span>
-                      <span>Truy cập bài giảng và tài liệu mọi lúc, mọi nơi</span>
+                      <span>Access lessons and materials anytime, anywhere</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#C9A24D] text-xl">✓</span>
-                      <span>Thực hành code trực tiếp trên trình duyệt</span>
+                      <span>Practice code directly in the browser</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#C9A24D] text-xl">✓</span>
-                      <span>Nhận phản hồi tự động và chi tiết</span>
+                      <span>Get automatic and detailed feedback</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#C9A24D] text-xl">✓</span>
-                      <span>Theo dõi tiến độ học tập của bản thân</span>
+                      <span>Track your own learning progress</span>
                     </li>
                   </ul>
                 </div>
@@ -110,27 +110,27 @@ export default function FeaturesPage() {
               <Card className="p-8 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#1F4E79" }}>
                 <div className="space-y-4">
                   <div className="inline-block px-4 py-2 rounded-full bg-[#1F4E79] text-white text-sm font-semibold">
-                    CHO GIẢNG VIÊN
+                    FOR INSTRUCTORS
                   </div>
                   <h3 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D]">
-                    Quản lý hiệu quả
+                    Effective management
                   </h3>
                   <ul className="space-y-3 text-gray-700 dark:text-gray-300">
                     <li className="flex items-start gap-3">
                       <span className="text-[#1F4E79] dark:text-[#C9A24D] text-xl">✓</span>
-                      <span>Tạo và quản lý bài tập, đề thi dễ dàng</span>
+                      <span>Create and manage assignments and exams easily</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#1F4E79] dark:text-[#C9A24D] text-xl">✓</span>
-                      <span>Chấm điểm tự động tiết kiệm thời gian</span>
+                      <span>Automatic grading saves time</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#1F4E79] dark:text-[#C9A24D] text-xl">✓</span>
-                      <span>Theo dõi tiến độ của từng sinh viên</span>
+                      <span>Track each student&apos;s progress</span>
                     </li>
                     <li className="flex items-start gap-3">
                       <span className="text-[#1F4E79] dark:text-[#C9A24D] text-xl">✓</span>
-                      <span>Báo cáo và thống kê chi tiết</span>
+                      <span>Detailed reports and statistics</span>
                     </li>
                   </ul>
                 </div>
@@ -141,27 +141,27 @@ export default function FeaturesPage() {
             <Card className="p-12 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <div className="text-center space-y-6">
                 <h3 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D]">
-                  Hệ thống chấm điểm tự động
+                  Automatic grading system
                 </h3>
                 <p className="text-lg text-gray-700 dark:text-gray-300 max-w-3xl mx-auto">
-                  Sử dụng công nghệ AI và thuật toán tiên tiến để chấm điểm code tự động, cung cấp phản hồi chi tiết về cú pháp, logic, hiệu suất và độ tối ưu của code
+                  Uses AI technology and advanced algorithms to grade code automatically, providing detailed feedback on syntax, logic, performance, and code optimization
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6">
                   <div>
                     <div className="text-4xl font-bold text-[#C9A24D] mb-2">100%</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Tự động</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Automatic</div>
                   </div>
                   <div>
                     <div className="text-4xl font-bold text-[#C9A24D] mb-2">&lt;1s</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Thời gian chấm</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Grading time</div>
                   </div>
                   <div>
                     <div className="text-4xl font-bold text-[#C9A24D] mb-2">24/7</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Sẵn sàng</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Available</div>
                   </div>
                   <div>
                     <div className="text-4xl font-bold text-[#C9A24D] mb-2">∞</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Số lần thử</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Attempts</div>
                   </div>
                 </div>
               </div>
@@ -174,23 +174,23 @@ export default function FeaturesPage() {
       <section className="py-20 px-4 bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]">
         <div className="container mx-auto max-w-4xl text-center">
           <h2 className="text-4xl font-bold text-white mb-6">
-            Sẵn sàng trải nghiệm?
+            Ready to try it?
           </h2>
           <p className="text-xl text-white/90 mb-8">
-            Bắt đầu học lập trình ngay hôm nay với Edu-ACAS
+            Start learning programming today with Edu-ACAS
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/register"
               className="px-8 py-4 bg-white text-[#1F4E79] rounded-lg font-bold text-lg hover:scale-105 transition-all"
             >
-              Đăng ký ngay
+              Sign up now
             </Link>
             <Link
               href="/"
               className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold text-lg hover:scale-105 transition-all"
             >
-              Tìm hiểu thêm
+              Learn more
             </Link>
           </div>
         </div>

@@ -69,3 +69,12 @@ export type ProblemBasicResponse = {
   createdDate: string;
   updatedDate: string;
 };
+
+/** Paged result from GET lecturer/{lecturerId}/paged */
+export type PagedProblemResult = {
+  items: ProblemBasicResponse[];
+  totalCount: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+};

@@ -6,6 +6,7 @@ import { Api } from "@/configs/api";
 import type {
   ProblemResponse,
   ProblemBasicResponse,
+  PagedProblemResult,
   Difficulty,
 } from "@/types/problem";
 
@@ -55,8 +56,42 @@ export const useProblem = () => {
 
   const getProblemsByLecturerId = useCallback(
     async (lecturerId: string): Promise<ProblemBasicResponse[]> => {
-      const response = await axiosInstance.get(Api.Problem.GET_BY_LECTURER(lecturerId));
-      return response.data?.dataResponse ?? [];
+      const response = await axiosInstance.get(Api.Problem.GET_BY_LECTURER(lecturerId), {
+        params: { pageIndex: 1, pageSize: 1000 },
+      });
+      const data = response.data?.dataResponse;
+      return Array.isArray(data?.items) ? data.items : [];
+    },
+    [axiosInstance],
+  );
+
+  const getProblemsByLecturerIdPaged = useCallback(
+    async (
+      lecturerId: string,
+      pageIndex: number = 1,
+      pageSize: number = 10,
+      searchTerm?: string,
+      difficulty?: string,
+    ): Promise<PagedProblemResult> => {
+      const params: Record<string, string | number> = {
+        pageIndex,
+        pageSize,
+      };
+      if (searchTerm != null && searchTerm.trim() !== "") params.searchTerm = searchTerm.trim();
+      if (difficulty != null && difficulty !== "all") params.difficulty = difficulty;
+      const response = await axiosInstance.get(Api.Problem.GET_BY_LECTURER(lecturerId), {
+        params,
+      });
+      const data = response.data?.dataResponse;
+      if (!data || typeof data !== "object")
+        return { items: [], totalCount: 0, pageIndex: 1, pageSize: 10, totalPages: 0 };
+      return {
+        items: Array.isArray(data.items) ? data.items : [],
+        totalCount: Number(data.totalCount) ?? 0,
+        pageIndex: Number(data.pageIndex) ?? 1,
+        pageSize: Number(data.pageSize) ?? 10,
+        totalPages: Number(data.totalPages) ?? 0,
+      };
     },
     [axiosInstance],
   );
@@ -66,6 +101,18 @@ export const useProblem = () => {
       const response = await axiosInstance.get(Api.Problem.GET_BY_ID(id));
       const data = response.data?.dataResponse;
       return data ?? null;
+    },
+    [axiosInstance],
+  );
+
+  const getProblemsByIds = useCallback(
+    async (ids: string[]): Promise<ProblemResponse[]> => {
+      if (ids.length === 0) return [];
+      const response = await axiosInstance.get(Api.Problem.GET_BY_IDS, {
+        params: { ids: ids.join(",") },
+      });
+      const data = response.data?.dataResponse;
+      return Array.isArray(data) ? data : [];
     },
     [axiosInstance],
   );
@@ -121,7 +168,9 @@ export const useProblem = () => {
   return {
     // getAllProblems,
     getProblemsByLecturerId,
+    getProblemsByLecturerIdPaged,
     getProblemById,
+    getProblemsByIds,
     createProblem,
     updateProblem,
     deleteProblem,

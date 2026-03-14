@@ -54,10 +54,7 @@ export function SubmissionsTabContent({
   examination,
 }: SubmissionsTabContentProps) {
   const { getStudentsByClassId } = useStudentClassroom();
-  const {
-    getLatestSubmissionsByExamAndProblem,
-    runAutoGrading,
-  } = useSubmissionLecturer();
+  const { getLatestSubmissionsByExam, runAutoGrading } = useSubmissionLecturer();
 
   const [students, setStudents] = useState<ClassroomStudentResponse[]>([]);
   const [problemSubmissions, setProblemSubmissions] = useState<
@@ -107,26 +104,27 @@ export function SubmissionsTabContent({
   }, [problemSubmissions, selectedProblemId]);
 
   /**
-   * Fetch data for the submissions tab.
+   * Fetch data for the submissions tab (single batch request for all problems).
    */
   const fetchData = useCallback(async () => {
     if (!classId || !examId) return;
     setLoading(true);
     setError(null);
     try {
-      const [studentsRes, ...submissionResults] = await Promise.all([
+      const [studentsRes, submissionsByProblem] = await Promise.all([
         getStudentsByClassId(classId),
-        ...examProblems.map((ep) =>
-          getLatestSubmissionsByExamAndProblem(examId, ep.problemId),
-        ),
+        getLatestSubmissionsByExam(examId),
       ]);
       setStudents(studentsRes);
+      const byProblemId = new Map(
+        submissionsByProblem.map((p) => [p.problemId, p.submissions])
+      );
       setProblemSubmissions(
-        examProblems.map((ep, i) => ({
+        examProblems.map((ep) => ({
           problemId: ep.problemId,
           mark: ep.mark,
-          submissions: submissionResults[i] ?? [],
-        })),
+          submissions: byProblemId.get(ep.problemId) ?? [],
+        }))
       );
     } catch (err) {
       console.error("Failed to load submissions", err);
@@ -134,13 +132,7 @@ export function SubmissionsTabContent({
     } finally {
       setLoading(false);
     }
-  }, [
-    classId,
-    examId,
-    examProblems,
-    getStudentsByClassId,
-    getLatestSubmissionsByExamAndProblem,
-  ]);
+  }, [classId, examId, examProblems, getStudentsByClassId, getLatestSubmissionsByExam]);
 
   useEffect(() => {
     fetchData();

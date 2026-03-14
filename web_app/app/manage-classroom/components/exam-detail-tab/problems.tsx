@@ -13,7 +13,7 @@ import { useProblem } from "@/hooks/problem/useProblem";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/useToast";
-import type { ProblemBasicResponse, ProblemResponse } from "@/types/problem";
+import type { ProblemBasicResponse } from "@/types/problem";
 import { normalizeDifficulty } from "@/types/problem";
 import { toExamProblem } from "@/utils/exam-problem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
@@ -57,7 +57,7 @@ export function ProblemsTabContent({
 }: ProblemsTabContentProps) {
   const { user } = useAuth();
   const toast = useToast();
-  const { getProblemsByLecturerId, getProblemById } = useProblem();
+  const { getProblemsByLecturerId, getProblemsByIds } = useProblem();
   const { updateExamination } = useExamination();
 
   const [lecturerProblems, setLecturerProblems] = useState<
@@ -79,8 +79,9 @@ export function ProblemsTabContent({
     new Set(),
   );
 
-  // Fetch problem details for examProblems
+  // Fetch all exam problem details in a single batch request
   useEffect(() => {
+    let cancelled = false;
     const fetchExamProblemDetails = async () => {
       const examProblems = examination.examProblems ?? [];
       if (examProblems.length === 0) {
@@ -90,26 +91,31 @@ export function ProblemsTabContent({
 
       setLoadingExamProblems(true);
       try {
-        const problemDetails = await Promise.all(
-          examProblems.map(async (ep) => getProblemById(ep.problemId))
-        );
+        const problemIds = examProblems.map((ep) => ep.problemId);
+        const problemDetails = await getProblemsByIds(problemIds);
+        if (cancelled) return;
         const examId = examination.id;
         const langId = examination.programmingLanguage?.id;
-        setExamProblemDetails(
-          problemDetails
-            .filter((p): p is ProblemResponse => p !== null)
-            .map((p) => toExamProblem(p, examId, langId))
+        const orderMap = new Map(examProblems.map((ep, i) => [ep.problemId, i]));
+        const sorted = [...problemDetails].sort(
+          (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0)
         );
+        setExamProblemDetails(sorted.map((p) => toExamProblem(p, examId, langId)));
       } catch (error) {
-        console.error("Failed to fetch problem details:", error);
-        toast.showError("Failed to load problem details");
+        if (!cancelled) {
+          console.error("Failed to fetch problem details:", error);
+          toast.showError("Failed to load problem details");
+        }
       } finally {
-        setLoadingExamProblems(false);
+        if (!cancelled) setLoadingExamProblems(false);
       }
     };
 
     fetchExamProblemDetails();
-  }, [examination.examProblems, getProblemById, toast]);
+    return () => {
+      cancelled = true;
+    };
+  }, [examination.examProblems, examination.id, examination.programmingLanguage?.id, getProblemsByIds, toast]);
 
   // Use fetched problem details or initial problems
   const problems = examProblemDetails.length > 0 ? examProblemDetails : initialProblems;

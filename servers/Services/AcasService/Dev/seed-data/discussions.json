@@ -1,0 +1,394 @@
+[
+  {
+    "id": "disc-001",
+    "classroomId": "cls-001",
+    "title": "How to read multiple lines of input in Python?",
+    "authorId": "usr-stu-001",
+    "content": "I'm having trouble reading two integers from separate lines. Can someone help?",
+    "refProblemId": "prob-001",
+    "status": "OPEN",
+    "viewCount": 12,
+    "comments": [
+      {
+        "id": "cmt-001-01",
+        "issueId": "disc-001",
+        "authorId": "usr-stu-002",
+        "content": "I had the same issue! Try using `input()` on separate lines for each integer.",
+        "upVoteCount": 3,
+        "replies": [
+          {
+            "id": "cmt-001-01-r1",
+            "issueId": "disc-001",
+            "authorId": "usr-lec-001",
+            "content": "That's correct. Use `a = int(input())` on one line, then `b = int(input())` on the next. Each call to `input()` reads one line from stdin.",
+            "upVoteCount": 5,
+            "replies": []
+          },
+          {
+            "id": "cmt-001-01-r2",
+            "issueId": "disc-001",
+            "authorId": "usr-stu-001",
+            "content": "Thanks! That worked perfectly. I was trying to read both on the same line with `split()`.",
+            "upVoteCount": 1,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-001-02",
+        "issueId": "disc-001",
+        "authorId": "usr-stu-004",
+        "content": "For competitive programming, you can also use `sys.stdin` for faster input reading, but `input()` is fine for most problems here.",
+        "upVoteCount": 2,
+        "replies": []
+      }
+    ]
+  },
+  {
+    "id": "disc-002",
+    "classroomId": "cls-001",
+    "title": "FizzBuzz edge cases discussion",
+    "authorId": "usr-lec-001",
+    "content": "Let's discuss the edge cases for the FizzBuzz problem. What happens when N=1?",
+    "refProblemId": "prob-002",
+    "status": "CLOSED",
+    "viewCount": 25,
+    "comments": [
+      {
+        "id": "cmt-002-01",
+        "issueId": "disc-002",
+        "authorId": "usr-stu-003",
+        "content": "When N=1, it should just print `1` since 1 is not divisible by 3 or 5.",
+        "upVoteCount": 4,
+        "replies": []
+      },
+      {
+        "id": "cmt-002-02",
+        "issueId": "disc-002",
+        "authorId": "usr-stu-005",
+        "content": "What about N=15? That should print `FizzBuzz` right?",
+        "upVoteCount": 2,
+        "replies": [
+          {
+            "id": "cmt-002-02-r1",
+            "issueId": "disc-002",
+            "authorId": "usr-lec-001",
+            "content": "Exactly! The key is checking divisibility by 15 first (or equivalently both 3 and 5), then 3, then 5. If you check 3 first you'll print `Fizz` and miss the `FizzBuzz` case.",
+            "upVoteCount": 7,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-002-03",
+        "issueId": "disc-002",
+        "authorId": "usr-stu-002",
+        "content": "I got confused about the order of checks. Thanks for clarifying professor!",
+        "upVoteCount": 1,
+        "replies": []
+      }
+    ]
+  },
+  {
+    "id": "disc-003",
+    "classroomId": "cls-002",
+    "title": "Floating point precision issues",
+    "authorId": "usr-stu-005",
+    "content": "My circle area calculation is off by a tiny amount. Is that expected with floating point?",
+    "refProblemId": "prob-010",
+    "status": "OPEN",
+    "viewCount": 18,
+    "comments": [
+      {
+        "id": "cmt-003-01",
+        "issueId": "disc-003",
+        "authorId": "usr-lec-001",
+        "content": "Floating point arithmetic in computers is inherently imprecise due to IEEE 754 representation. Numbers like 0.1 cannot be represented exactly in binary.",
+        "upVoteCount": 6,
+        "replies": [
+          {
+            "id": "cmt-003-01-r1",
+            "issueId": "disc-003",
+            "authorId": "usr-stu-005",
+            "content": "So how does the grading system handle this?",
+            "upVoteCount": 3,
+            "replies": []
+          },
+          {
+            "id": "cmt-003-01-r2",
+            "issueId": "disc-003",
+            "authorId": "usr-lec-001",
+            "content": "We use a tolerance-based comparison. Your answer just needs to be within a small epsilon (e.g., 0.0001) of the expected value. So don't worry about the last few decimal places.",
+            "upVoteCount": 8,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-003-02",
+        "issueId": "disc-003",
+        "authorId": "usr-stu-007",
+        "content": "I recommend using `math.pi` instead of hardcoding `3.14159`. It gives you the best precision available in your language.",
+        "upVoteCount": 4,
+        "replies": [
+          {
+            "id": "cmt-003-02-r1",
+            "issueId": "disc-003",
+            "authorId": "usr-stu-005",
+            "content": "Good tip! I was indeed hardcoding it. Switched to `math.pi` and now the output matches.",
+            "upVoteCount": 2,
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-004",
+    "classroomId": "cls-002",
+    "title": "How to format output to 2 decimal places?",
+    "authorId": "usr-stu-006",
+    "content": "What's the correct way to format a float to exactly 2 decimal places in Python?",
+    "refProblemId": "prob-014",
+    "status": "OPEN",
+    "viewCount": 30,
+    "comments": [
+      {
+        "id": "cmt-004-01",
+        "issueId": "disc-004",
+        "authorId": "usr-stu-008",
+        "content": "In Python, use f-strings: `print(f'{value:.2f}')`. This will always print exactly 2 decimal places, even for whole numbers.",
+        "upVoteCount": 9,
+        "replies": [
+          {
+            "id": "cmt-004-01-r1",
+            "issueId": "disc-004",
+            "authorId": "usr-stu-006",
+            "content": "That works great! Thanks! I was using `round()` but it doesn't pad trailing zeros.",
+            "upVoteCount": 2,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-004-02",
+        "issueId": "disc-004",
+        "authorId": "usr-lec-001",
+        "content": "You can also use `format(value, '.2f')` or the old-style `'%.2f' % value`. All three approaches produce the same result.",
+        "upVoteCount": 5,
+        "replies": []
+      },
+      {
+        "id": "cmt-004-03",
+        "issueId": "disc-004",
+        "authorId": "usr-stu-009",
+        "content": "What about in Java? I'm using `System.out.printf(\"%.2f\", value)` — is that correct?",
+        "upVoteCount": 3,
+        "replies": [
+          {
+            "id": "cmt-004-03-r1",
+            "issueId": "disc-004",
+            "authorId": "usr-lec-001",
+            "content": "Yes, `printf` or `String.format(\"%.2f\", value)` are both correct in Java. In C++ you'd use `cout << fixed << setprecision(2) << value`.",
+            "upVoteCount": 6,
+            "replies": []
+          },
+          {
+            "id": "cmt-004-03-r2",
+            "issueId": "disc-004",
+            "authorId": "usr-stu-009",
+            "content": "Perfect, thanks for the cross-language comparison!",
+            "upVoteCount": 1,
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-005",
+    "classroomId": "cls-003",
+    "title": "Prefix sum algorithm explanation",
+    "authorId": "usr-stu-009",
+    "content": "Can someone explain the prefix sum approach step by step?",
+    "refProblemId": "prob-018",
+    "status": "OPEN",
+    "viewCount": 22,
+    "comments": [
+      {
+        "id": "cmt-005-01",
+        "issueId": "disc-005",
+        "authorId": "usr-stu-010",
+        "content": "The idea is to precompute cumulative sums so you can get any range sum in O(1) time instead of O(n).",
+        "upVoteCount": 5,
+        "replies": [
+          {
+            "id": "cmt-005-01-r1",
+            "issueId": "disc-005",
+            "authorId": "usr-stu-009",
+            "content": "Can you give a concrete example with `[1, 2, 3, 4]`?",
+            "upVoteCount": 2,
+            "replies": []
+          },
+          {
+            "id": "cmt-005-01-r2",
+            "issueId": "disc-005",
+            "authorId": "usr-stu-010",
+            "content": "Sure! For `[1, 2, 3, 4]`, prefix sums are `[1, 3, 6, 10]`. Each element is the running total. To get the sum from index 1 to 3: `prefix[3] - prefix[0] = 10 - 1 = 9`.",
+            "upVoteCount": 7,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-005-02",
+        "issueId": "disc-005",
+        "authorId": "usr-lec-001",
+        "content": "Great explanation! This technique is fundamental in competitive programming. You'll see it used in problems involving subarray sums, 2D matrix queries, and difference arrays.",
+        "upVoteCount": 4,
+        "replies": []
+      },
+      {
+        "id": "cmt-005-03",
+        "issueId": "disc-005",
+        "authorId": "usr-stu-012",
+        "content": "For this specific problem, you just need to output the running sum at each step. You don't even need an array — just accumulate and print.",
+        "upVoteCount": 3,
+        "replies": [
+          {
+            "id": "cmt-005-03-r1",
+            "issueId": "disc-005",
+            "authorId": "usr-stu-009",
+            "content": "Oh that simplifies things a lot. Thanks everyone!",
+            "upVoteCount": 1,
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-006",
+    "classroomId": "cls-003",
+    "title": "Does output order matter for prime factorization?",
+    "authorId": "usr-stu-011",
+    "content": "The problem says order doesn't matter. Does the grading system handle that?",
+    "refProblemId": "prob-022",
+    "status": "CLOSED",
+    "viewCount": 15,
+    "comments": [
+      {
+        "id": "cmt-006-01",
+        "issueId": "disc-006",
+        "authorId": "usr-lec-001",
+        "content": "Yes, the system uses **token-unordered comparison** for this problem. It splits both your output and the expected output into tokens and checks if they form the same set.",
+        "upVoteCount": 8,
+        "replies": [
+          {
+            "id": "cmt-006-01-r1",
+            "issueId": "disc-006",
+            "authorId": "usr-stu-011",
+            "content": "That makes sense. So `2 3 5` and `5 3 2` would both be accepted?",
+            "upVoteCount": 3,
+            "replies": []
+          },
+          {
+            "id": "cmt-006-01-r2",
+            "issueId": "disc-006",
+            "authorId": "usr-lec-001",
+            "content": "Correct! As long as all the prime factors are present, the order doesn't matter.",
+            "upVoteCount": 5,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-006-02",
+        "issueId": "disc-006",
+        "authorId": "usr-stu-012",
+        "content": "Just make sure to separate factors with spaces and don't include duplicate factors. For example, `12 = 2 * 2 * 3` should output `2 3`, not `2 2 3`.",
+        "upVoteCount": 4,
+        "replies": [
+          {
+            "id": "cmt-006-02-r1",
+            "issueId": "disc-006",
+            "authorId": "usr-stu-013",
+            "content": "Wait, is it distinct prime factors or all prime factors? The problem says distinct right?",
+            "upVoteCount": 2,
+            "replies": []
+          },
+          {
+            "id": "cmt-006-02-r2",
+            "issueId": "disc-006",
+            "authorId": "usr-lec-001",
+            "content": "Yes, the problem asks for **distinct** prime factors only. So for 12, output `2 3`.",
+            "upVoteCount": 6,
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-007",
+    "classroomId": "cls-006",
+    "title": "String reversal approaches",
+    "authorId": "usr-stu-017",
+    "content": "What are the different ways to reverse a string in Python?",
+    "refProblemId": "prob-003",
+    "status": "OPEN",
+    "viewCount": 8,
+    "comments": [
+      {
+        "id": "cmt-007-01",
+        "issueId": "disc-007",
+        "authorId": "usr-stu-001",
+        "content": "The easiest and most Pythonic way is slicing: `s[::-1]`. It creates a reversed copy in one expression.",
+        "upVoteCount": 6,
+        "replies": []
+      },
+      {
+        "id": "cmt-007-02",
+        "issueId": "disc-007",
+        "authorId": "usr-stu-013",
+        "content": "You can also use `''.join(reversed(s))`. The `reversed()` function returns an iterator, so you need to join it back into a string.",
+        "upVoteCount": 4,
+        "replies": [
+          {
+            "id": "cmt-007-02-r1",
+            "issueId": "disc-007",
+            "authorId": "usr-stu-017",
+            "content": "Nice! I didn't know about the `reversed()` function. Which one is faster?",
+            "upVoteCount": 2,
+            "replies": []
+          },
+          {
+            "id": "cmt-007-02-r2",
+            "issueId": "disc-007",
+            "authorId": "usr-lec-001",
+            "content": "Slicing `[::-1]` is generally faster because it's implemented in C under the hood. `reversed()` + `join()` has more Python overhead. For this problem either works fine though.",
+            "upVoteCount": 5,
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-007-03",
+        "issueId": "disc-007",
+        "authorId": "usr-stu-005",
+        "content": "In Java or C++, you'd typically use a `StringBuilder.reverse()` or `std::reverse()`. For a manual approach, you can swap characters from both ends moving inward.",
+        "upVoteCount": 3,
+        "replies": [
+          {
+            "id": "cmt-007-03-r1",
+            "issueId": "disc-007",
+            "authorId": "usr-stu-017",
+            "content": "Good to know for when we switch languages. Thanks for all the tips!",
+            "upVoteCount": 1,
+            "replies": []
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -150,6 +150,18 @@ public class AutoGradeProblemResponse
 }
 
 /// <summary>
+/// Submissions for one problem when fetching latest by exam 
+/// </summary>
+public class ProblemSubmissionsResponse
+{
+    [JsonPropertyName("problemId")]
+    public string ProblemId { get; set; } = string.Empty;
+
+    [JsonPropertyName("submissions")]
+    public List<SubmissionResponse> Submissions { get; set; } = new();
+}
+
+/// <summary>
 /// Per-submission result for auto-grading (one row in the grading table / refresh list).
 /// </summary>
 public class AutoGradeSubmissionResult

@@ -70,6 +70,23 @@ public class SubmissionQueryController : ControllerBase
             }
       }
 
+      [HttpGet("exam/{examId}/latest-all")]
+      public async Task<ActionResult<ApiResponse<List<ProblemSubmissionsResponse>>>> GetLatestSubmissionsByExam([FromRoute] string examId)
+      {
+            try
+            {
+                  if (string.IsNullOrWhiteSpace(examId))
+                        return ResponseUtil.Error<List<ProblemSubmissionsResponse>>("Exam ID is required.", 400);
+                  var result = await _submissionQuery.GetLatestSubmissionsByExamAsync(examId);
+                  return ResponseUtil.Success(result, $"Retrieved latest submissions for {result.Count} problem(s).");
+            }
+            catch (Exception ex)
+            {
+                  _logger.LogError(ex, "Error getting latest submissions for exam {ExamId}", examId);
+                  return ResponseUtil.Error<List<ProblemSubmissionsResponse>>("Failed to get latest submissions", 500);
+            }
+      }
+
       [HttpGet("exam/{examId}/problem/{problemId}/latest")]
       public async Task<ActionResult<ApiResponse<List<SubmissionResponse>>>> GetLatestByExamAndProblem(
             [FromRoute] string examId,

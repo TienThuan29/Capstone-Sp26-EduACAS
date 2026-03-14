@@ -145,7 +145,10 @@ export function ExamsTab({
     setFormData({
       examName: exam.examName,
       programmingLanguageId: exam.programmingLanguage.id,
-      problems: [],
+      problems: (exam.examProblems ?? []).map((ep) => ({
+        problemId: ep.problemId,
+        mark: ep.mark,
+      })),
       classroomId: exam.classroom.id,
       startDatetime: exam.startDatetime.slice(0, 16),
       endDatetime: exam.endDatetime.slice(0, 16),
