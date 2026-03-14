@@ -4,29 +4,37 @@ import 'package:mobile/core/theme/app_colors.dart';
 class EnhancedButton extends StatelessWidget {
   final bool isLoading;
   final VoidCallback? onPressed;
-  final String text; // thêm text
+  final String text;
+  final Color? color;
+  final double height;
+  final bool showArrow;
 
   const EnhancedButton({
     super.key,
     required this.isLoading,
     required this.onPressed,
-    required this.text, // bắt buộc truyền vào
+    required this.text,
+    this.color,
+    this.height = 52,
+    this.showArrow = true,
   });
 
   @override
   Widget build(BuildContext context) {
+    final themeColor = color ?? AppColors.primary;
     return Container(
-      height: 52,
+      height: height,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [AppColors.primary, AppColors.primaryLight],
+        color: color != null ? null : null, // Fallback logic
+        gradient: LinearGradient(
+          colors: [themeColor, color ?? AppColors.primaryLight],
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
         ),
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(height / 3.25), // Maintain proportions
         boxShadow: [
           BoxShadow(
-            color: AppColors.primary.withOpacity(0.3),
+            color: themeColor.withValues(alpha: 0.3),
             spreadRadius: 0,
             blurRadius: 12,
             offset: const Offset(0, 4),
@@ -39,7 +47,7 @@ class EnhancedButton extends StatelessWidget {
           backgroundColor: Colors.transparent,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(height / 3.25),
           ),
         ),
         child: isLoading
@@ -68,19 +76,21 @@ class EnhancedButton extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  Container(
-                    padding: const EdgeInsets.all(5),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
-                      shape: BoxShape.circle,
+                  if (showArrow) ...[
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.all(5),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 16,
+                      ),
                     ),
-                    child: const Icon(
-                      Icons.arrow_forward_rounded,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
+                  ],
                 ],
               ),
       ),

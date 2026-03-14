@@ -10,7 +10,7 @@ void main() async {
     // Load environment variables (optional)
     await dotenv.load(fileName: ".env");
     debugPrint('Environment loaded successfully');
-    debugPrint('Base URL: ${dotenv.env['BASE_URL']}');
+    debugPrint('API Base URL: ${dotenv.env['API_BASE_URL']}');
     debugPrint('Dotenv initialized: ${dotenv.isInitialized}');
   } catch (e) {
     debugPrint('Error loading .env file: $e');

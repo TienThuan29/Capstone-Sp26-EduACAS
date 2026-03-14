@@ -50,39 +50,52 @@ class EnhancedTextField extends StatelessWidget {
             ),
           ),
         ),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          validator: validator,
-          onChanged: onChanged,
-          onFieldSubmitted: onFieldSubmitted,
-          style: TextStyle(fontSize: 15, color: Colors.grey[800]),
-          cursorColor: AppColors.primary,
-          enableInteractiveSelection: true,
-          autofocus: false,
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
-            prefixIcon: Padding(
-              padding: const EdgeInsets.only(left: 12, right: 8),
-              child: Icon(icon, color: AppColors.primaryLight, size: 20),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: TextFormField(
+            controller: controller,
+            keyboardType: keyboardType,
+            obscureText: obscureText,
+            validator: validator,
+            onChanged: onChanged,
+            onFieldSubmitted: onFieldSubmitted,
+            style: TextStyle(fontSize: 15, color: Colors.grey[800]),
+            cursorColor: AppColors.primary,
+            enableInteractiveSelection: true,
+            autofocus: false,
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+              prefixIcon: Padding(
+                padding: const EdgeInsets.only(left: 12, right: 8),
+                child: Icon(icon, color: AppColors.primaryLight, size: 20),
+              ),
+              prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+              suffixIcon: suffixIcon != null
+                  ? Padding(
+                      padding: const EdgeInsets.only(right: 12, left: 8),
+                      child: suffixIcon,
+                    )
+                  : null,
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              border: _buildBorder(Colors.grey[200]!, width: 1.0),
+              enabledBorder: _buildBorder(Colors.grey[200]!, width: 1.0),
+              focusedBorder: _buildBorder(AppColors.primary, width: 2.0),
+              errorBorder: _buildBorder(AppColors.error),
+              focusedErrorBorder: _buildBorder(AppColors.error),
             ),
-            prefixIconConstraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-            suffixIcon: suffixIcon != null
-                ? Padding(
-                    padding: const EdgeInsets.only(right: 12, left: 8),
-                    child: suffixIcon,
-                  )
-                : null,
-            filled: true,
-            fillColor: Colors.grey[50],
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            border: _buildBorder(Colors.transparent, width: 0),
-            enabledBorder: _buildBorder(Colors.transparent, width: 0),
-            focusedBorder: _buildBorder(AppColors.primary),
-            errorBorder: _buildBorder(AppColors.error),
-            focusedErrorBorder: _buildBorder(AppColors.error),
           ),
         ),
       ],
