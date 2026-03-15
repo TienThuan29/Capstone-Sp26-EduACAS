@@ -27,6 +27,7 @@ import {
   QuestionMarkCircleIcon,
   AcademicCapIcon,
 } from "@heroicons/react/24/outline"
+import { NotificationSection } from "@/components/notification-section"
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation"
 
 export default function HomeNavbar() {
@@ -100,16 +101,18 @@ export default function HomeNavbar() {
             <DarkThemeToggle className="hidden lg:flex" />
             <NavbarToggle className="lg:hidden" />
             {isLoggedIn() && user ? (
-              <Dropdown
-                inline
-                placement="bottom-end"
-                theme={{
-                  floating: {
-                    base: "z-[100] w-fit divide-y divide-gray-100 rounded-lg shadow focus:outline-none border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700",
-                  },
-                }}
-                label={
-                  <div className="flex items-center gap-2 cursor-pointer">
+              <>
+                <NotificationSection />
+                <Dropdown
+                  inline
+                  placement="bottom-end"
+                  theme={{
+                    floating: {
+                      base: "z-[100] w-fit divide-y divide-gray-100 rounded-lg shadow focus:outline-none border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700",
+                    },
+                  }}
+                  label={
+                    <div className="flex items-center gap-2 cursor-pointer">
                     {user.avatarUrl ? (
                       <Avatar
                         rounded
@@ -207,6 +210,7 @@ export default function HomeNavbar() {
                   </span>
                 </DropdownItem>
               </Dropdown>
+              </>
             ) : (
               <>
                 <Button

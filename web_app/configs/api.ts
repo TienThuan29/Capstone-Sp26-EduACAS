@@ -128,6 +128,11 @@ export const Api = {
     PREVIEW: '/api/acas/v1/testcase-generation/preview',
   },
 
+  Notification: {
+    /** SignalR hub for real-time notifications */
+    HUB: "/api/acas/v1/hubs/notification",
+  },
+
   DiscussionIssue: {
     BASE: "/api/acas/v1/discussion-issues",
     GET_PAGED: "/api/acas/v1/discussion-issues",

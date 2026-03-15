@@ -33,6 +33,7 @@ using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 // using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi;
@@ -50,10 +51,12 @@ using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
+using AcasService.Application.Commands.Notification;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Dev;
+using AcasService.Web.Controllers.Notification;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -214,6 +217,17 @@ builder.Services.AddAuthentication(options =>
     // Add event handlers for debugging
     options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            // SignalR sends token via query string when using WebSockets (no Authorization header)
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api/acas/v1/hubs") || path.StartsWithSegments("/api/v1/hubs")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
         OnAuthenticationFailed = context =>
         {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
@@ -245,11 +259,16 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8080")
+        policy.WithOrigins("http://localhost:8080", "http://localhost:3000")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
+
+builder.Services.AddSingleton<IUserIdProvider, SubClaimUserIdProvider>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ClassroomNotification>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -394,6 +413,8 @@ if (app.Environment.IsProduction())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+// Map at /api/v1/hubs/notification so gateway forwards /api/acas/v1/hubs/* -> /api/v1/hubs/*
+app.MapHub<NotificationHub>("/api/v1/hubs/notification");
 app.MapHealthChecks("/health");
 
 app.Run();
