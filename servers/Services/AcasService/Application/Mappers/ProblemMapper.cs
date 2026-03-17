@@ -5,6 +5,28 @@ namespace AcasService.Application.Mappers;
 
 public class ProblemMapper
 {
+    public ProblemResponse ToProblemResponse(Problem problem, string fileUrl, IEnumerable<TestCase> testCases)
+    {
+        return new ProblemResponse
+        {
+            Id = problem.Id,
+            LecturerId = problem.LecturerId,
+            Title = problem.Title,
+            Content = problem.Content,
+            FileName = problem.FileName,
+            FileUrl = fileUrl,
+            Difficulty = problem.Difficulty,
+            CodeTemplates = problem.CodeTemplates ?? new Dictionary<string, string>(),
+            TestCases = testCases
+                .Where(tc => !tc.IsDeleted)
+                .Select(ToTestCaseResponse)
+                .ToList(),
+            Tags = problem.Tags?.ToList() ?? new List<string>(),
+            CreatedDate = problem.CreatedDate,
+            UpdatedDate = problem.UpdatedDate
+        };
+    }
+
     public ProblemResponse ToProblemResponse(Problem problem)
     {
         return new ProblemResponse

@@ -55,6 +55,8 @@ public class Comment
     [Required]
     public string AuthorId { get; set; } = string.Empty;
     
+    public string AuthorName { get; set; } = string.Empty;
+    
     [Required]
     public string Content { get; set; } = string.Empty; // markdown content
     
@@ -62,7 +64,7 @@ public class Comment
 
     public int UpVoteCount { get; set; }
 
-    public List<Comment> Replies { get; set; } = new List<Comment>();
+    public List<Models.Comment> Replies { get; set; } = new List<Models.Comment>();
     
     public bool IsDeleted { get; set; }
     

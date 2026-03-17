@@ -1,0 +1,30 @@
+[
+  { "id": "subm-001", "studentId": "usr-stu-001", "examId": "exam-001", "problemId": "prob-001", "source": "a=int(input())\nb=int(input())\nprint(a+b)" },
+  { "id": "subm-002", "studentId": "usr-stu-001", "examId": "exam-001", "problemId": "prob-002", "source": "n=int(input())\nif n%15==0: print('FizzBuzz')\nelif n%3==0: print('Fizz')\nelif n%5==0: print('Buzz')\nelse: print(n)" },
+  { "id": "subm-003", "studentId": "usr-stu-002", "examId": "exam-001", "problemId": "prob-001", "source": "a=int(input())\nb=int(input())\nprint(a+b)" },
+  { "id": "subm-004", "studentId": "usr-stu-003", "examId": "exam-001", "problemId": "prob-002", "source": "n=int(input())\nif n%15==0: print('FizzBuzz')\nelif n%3==0: print('Fizz')\nelif n%5==0: print('Buzz')\nelse: print(n)" },
+
+  { "id": "subm-005", "studentId": "usr-stu-004", "examId": "exam-002", "problemId": "prob-006", "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')" },
+  { "id": "subm-006", "studentId": "usr-stu-005", "examId": "exam-002", "problemId": "prob-007", "source": "n=int(input())\nprint('Even' if n%2==0 else 'Odd')" },
+
+  { "id": "subm-007", "studentId": "usr-stu-003", "examId": "exam-003", "problemId": "prob-010", "source": "import math\nr=float(input())\nprint(math.pi*r**2)" },
+  { "id": "subm-008", "studentId": "usr-stu-004", "examId": "exam-003", "problemId": "prob-011", "source": "import math\na,b=map(float,input().split())\nprint(math.sqrt(a**2+b**2))" },
+  { "id": "subm-009", "studentId": "usr-stu-005", "examId": "exam-003", "problemId": "prob-010", "source": "import math\nr=float(input())\nprint(math.pi*r**2)" },
+
+  { "id": "subm-010", "studentId": "usr-stu-006", "examId": "exam-004", "problemId": "prob-014", "source": "n=int(input())\nnums=list(map(int,input().split()))\nprint(f'{sum(nums)/n:.2f}')" },
+  { "id": "subm-011", "studentId": "usr-stu-007", "examId": "exam-004", "problemId": "prob-015", "source": "c=float(input())\nprint(f'{c*9/5+32:.2f}')" },
+
+  { "id": "subm-012", "studentId": "usr-stu-006", "examId": "exam-005", "problemId": "prob-018", "source": "n=int(input())\narr=list(map(int,input().split()))\ns=0\nresult=[]\nfor x in arr:\n    s+=x\n    result.append(str(s))\nprint(' '.join(result))" },
+  { "id": "subm-013", "studentId": "usr-stu-008", "examId": "exam-005", "problemId": "prob-019", "source": "n=int(input())\nfib=[0,1]\nfor i in range(2,n):\n    fib.append(fib[-1]+fib[-2])\nprint(' '.join(map(str,fib[:n])))" },
+  { "id": "subm-014", "studentId": "usr-stu-009", "examId": "exam-005", "problemId": "prob-018", "source": "n=int(input())\narr=list(map(int,input().split()))\nfrom itertools import accumulate\nprint(' '.join(map(str,accumulate(arr))))" },
+
+  { "id": "subm-015", "studentId": "usr-stu-010", "examId": "exam-006", "problemId": "prob-022", "source": "n=int(input())\ni=2\nfactors=[]\nwhile i*i<=n:\n    if n%i==0:\n        factors.append(str(i))\n        while n%i==0: n//=i\n    i+=1\nif n>1: factors.append(str(n))\nprint(' '.join(factors))" },
+  { "id": "subm-016", "studentId": "usr-stu-011", "examId": "exam-006", "problemId": "prob-023", "source": "n=int(input())\nnums=list(map(int,input().split()))\nfrom collections import Counter\nc=Counter(nums)\ndups=[str(k) for k,v in c.items() if v>1]\nprint(' '.join(dups) if dups else 'NONE')" },
+
+  { "id": "subm-017", "studentId": "usr-stu-001", "examId": "exam-007", "problemId": "prob-003", "source": "print(input()[::-1])" },
+  { "id": "subm-018", "studentId": "usr-stu-005", "examId": "exam-007", "problemId": "prob-009", "source": "a,b,c=map(int,input().split())\nif a+b<=c or a+c<=b or b+c<=a: print('Not a triangle')\nelif a==b==c: print('Equilateral')\nelif a==b or b==c or a==c: print('Isosceles')\nelse: print('Scalene')" },
+  { "id": "subm-019", "studentId": "usr-stu-009", "examId": "exam-007", "problemId": "prob-013", "source": "import math\nx1,y1=map(float,input().split())\nx2,y2=map(float,input().split())\nprint(math.sqrt((x2-x1)**2+(y2-y1)**2))" },
+
+  { "id": "subm-020", "studentId": "usr-stu-013", "examId": "exam-008", "problemId": "prob-020", "source": "n,k=map(int,input().split())\narr=list(map(int,input().split()))\nk%=n\nprint(' '.join(map(str,arr[k:]+arr[:k])))" },
+  { "id": "subm-021", "studentId": "usr-stu-017", "examId": "exam-008", "problemId": "prob-025", "source": "s=input()\nprint(' '.join(sorted(set(s))))" }
+]

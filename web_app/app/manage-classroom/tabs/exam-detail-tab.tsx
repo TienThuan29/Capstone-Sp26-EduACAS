@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button, Tabs, TabItem } from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type { Examination } from "@/types/examination";
@@ -30,12 +31,17 @@ export type ExaminationDetailViewProps = {
   showBackInHeader?: boolean;
 };
 
+const TAB_OVERVIEW = 0;
+const TAB_PROBLEMS = 1;
+const TAB_SUBMISSIONS = 2;
+
 export function ExaminationDetailView({
   examination,
   onBack,
   onExaminationUpdate,
   showBackInHeader = true,
 }: ExaminationDetailViewProps) {
+  const [activeTab, setActiveTab] = useState(TAB_OVERVIEW);
   const statusLabel =
     STATUS_LABELS[examination.status as 0 | 1 | 2] ?? "PENDING";
   const modeLabel = MODE_LABELS[examination.mode as 0 | 1] ?? "PRACTICAL";
@@ -60,23 +66,29 @@ export function ExaminationDetailView({
         </h3>
       </div>
       <div className="p-4 [&_button[role=tab]]:cursor-pointer">
-        <Tabs>
-          <TabItem title="Overview" active>
-            <OverviewTabContent
-              examination={examination}
-              statusLabel={statusLabel}
-              modeLabel={modeLabel}
-            />
+        <Tabs onActiveTabChange={setActiveTab}>
+          <TabItem title="Overview" active={activeTab === TAB_OVERVIEW}>
+            {activeTab === TAB_OVERVIEW && (
+              <OverviewTabContent
+                examination={examination}
+                statusLabel={statusLabel}
+                modeLabel={modeLabel}
+              />
+            )}
           </TabItem>
-          <TabItem title="Problems">
-            <ProblemsTabContent
-              examination={examination}
-              problems={problems}
-              onExaminationUpdate={onExaminationUpdate}
-            />
+          <TabItem title="Problems" active={activeTab === TAB_PROBLEMS}>
+            {activeTab === TAB_PROBLEMS && (
+              <ProblemsTabContent
+                examination={examination}
+                problems={problems}
+                onExaminationUpdate={onExaminationUpdate}
+              />
+            )}
           </TabItem>
-          <TabItem title="Submissions">
-            <SubmissionsTabContent examination={examination} />
+          <TabItem title="Submissions" active={activeTab === TAB_SUBMISSIONS}>
+            {activeTab === TAB_SUBMISSIONS && (
+              <SubmissionsTabContent examination={examination} />
+            )}
           </TabItem>
         </Tabs>
       </div>

@@ -7,10 +7,14 @@ class Classroom {
   final String lecturerId;
   final String? lecturerName;
   final String? lecturerEmail;
-  final int? totalStudents;
+  final String? semesterName;
+  final String? enrolKey;
+  final int? maxSlot;
   final bool? isDeleted;
   final String? createdDate;
   final String? updatedDate;
+  final String? endDate;
+  final String? status;
 
   Classroom({
     required this.id,
@@ -21,26 +25,46 @@ class Classroom {
     required this.lecturerId,
     this.lecturerName,
     this.lecturerEmail,
-    this.totalStudents,
+    this.semesterName,
+    this.enrolKey,
+    this.maxSlot,
     this.isDeleted,
     this.createdDate,
     this.updatedDate,
+    this.endDate,
+    this.status,
   });
 
   factory Classroom.fromJson(Map<String, dynamic> json) {
+    // Backend returns nested 'lecturer' and 'subject' objects
+    final lecturer = json['lecturer'] as Map<String, dynamic>?;
+    final subject = json['subject'] as Map<String, dynamic>?;
+
+    // For student classroom list, status might be in enrollment.isJoining
+    final enrollment = json['enrollment'] as Map<String, dynamic>?;
+    String? currentStatus = json['status'];
+    if (currentStatus == null && enrollment != null) {
+      final bool isJoining = enrollment['isJoining'] ?? false;
+      currentStatus = isJoining ? 'JOINED' : 'MOVED_OUT';
+    }
+
     return Classroom(
       id: json['id'] ?? '',
       className: json['className'] ?? '',
       classCode: json['classCode'] ?? '',
-      subjectId: json['subjectId'],
-      subjectName: json['subjectName'],
-      lecturerId: json['lecturerId'] ?? '',
-      lecturerName: json['lecturerName'],
-      lecturerEmail: json['lecturerEmail'],
-      totalStudents: json['totalStudents'],
+      subjectId: subject?['subjectId'] ?? json['subjectId'],
+      subjectName: subject?['subjectName'] ?? json['subjectName'],
+      lecturerId: lecturer?['id'] ?? json['lecturerId'] ?? '',
+      lecturerName: lecturer?['fullname'] ?? json['lecturerName'],
+      lecturerEmail: lecturer?['email'] ?? json['lecturerEmail'],
+      semesterName: json['semesterName'],
+      enrolKey: json['enrolKey'],
+      maxSlot: json['maxSlot'],
       isDeleted: json['isDeleted'],
       createdDate: json['createdDate'],
       updatedDate: json['updatedDate'],
+      endDate: json['endDate'],
+      status: currentStatus,
     );
   }
 
@@ -54,10 +78,14 @@ class Classroom {
       'lecturerId': lecturerId,
       'lecturerName': lecturerName,
       'lecturerEmail': lecturerEmail,
-      'totalStudents': totalStudents,
+      'semesterName': semesterName,
+      'enrolKey': enrolKey,
+      'maxSlot': maxSlot,
       'isDeleted': isDeleted,
       'createdDate': createdDate,
       'updatedDate': updatedDate,
+      'endDate': endDate,
+      'status': status,
     };
   }
 }

@@ -287,7 +287,12 @@ function ClassroomContent() {
       case "slots":
         return <SlotsTab maxSlot={classroom.maxSlot} />;
       case "discussion":
-        return <DiscussionTab classId={classId} />;
+        return (
+          <DiscussionTab
+            classId={classId}
+            hideBackButton={!!searchParams.get("issue")}
+          />
+        );
       default:
         return (
           <OverviewTab
@@ -315,6 +320,18 @@ function ClassroomContent() {
               label="Back to list"
               icon={<ArrowLeftIcon className="h-4 w-4" />}
               onClick={examDetailBack}
+            />
+          )}
+          {activeTab === "discussion" && searchParams.get("issue") && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={() => {
+                const p = new URLSearchParams(searchParams?.toString() ?? "");
+                p.set("tab", "discussion");
+                p.delete("issue");
+                router.replace(`${pathname}?${p.toString()}`, { scroll: false });
+              }}
             />
           )}
         </div>

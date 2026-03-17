@@ -1,1 +1,0 @@
-<!-- Write component use together for all project -->

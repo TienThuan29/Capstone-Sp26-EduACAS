@@ -272,14 +272,8 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
         setIsLoggingOut(true);
         
         try {
-            // Add a small delay to show the loading state
             await new Promise(resolve => setTimeout(resolve, 500));
-            
-            // Clear all authentication related data from localStorage
-            localStorage.removeItem(AUTH_TOKENS_KEY);
-            localStorage.removeItem(USER_PROFILE_KEY);
-            
-            // Clear state
+            localStorage.clear();
             setUser(null);
             setAuthTokens(null);
             setSessionExpired(false);
@@ -287,9 +281,7 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
             permanentRedirect(PageUrl.LOGIN_PAGE);
         } catch (error) {
             console.error('Error during logout:', error);
-            // Even if there's an error, still clear the session
-            localStorage.removeItem(AUTH_TOKENS_KEY);
-            localStorage.removeItem(USER_PROFILE_KEY);
+            localStorage.clear();
             setUser(null);
             setAuthTokens(null);
             setSessionExpired(false);

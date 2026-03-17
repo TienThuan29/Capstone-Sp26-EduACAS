@@ -1,0 +1,37 @@
+[
+  {
+    "id": "sub-001",
+    "subjectCode": "CS101",
+    "subjectName": "Introduction to Programming",
+    "description": "Fundamentals of programming using Python. Topics include variables, control flow, functions, data structures, and basic algorithms.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-002",
+    "subjectCode": "CS201",
+    "subjectName": "Data Structures & Algorithms",
+    "description": "Study of fundamental data structures (arrays, linked lists, trees, graphs) and algorithm design techniques (sorting, searching, dynamic programming).",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-003",
+    "subjectCode": "CS301",
+    "subjectName": "Object-Oriented Programming",
+    "description": "Principles of OOP including encapsulation, inheritance, polymorphism, and design patterns using Java and C++.",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "sub-004",
+    "subjectCode": "CS401",
+    "subjectName": "Database Systems",
+    "description": "Relational database design, SQL, normalization, indexing, transactions, and introduction to NoSQL databases.",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "sub-005",
+    "subjectCode": "CS501",
+    "subjectName": "Software Engineering",
+    "description": "Software development lifecycle, agile methodologies, requirements engineering, testing strategies, and project management.",
+    "createdBy": "usr-lec-004"
+  }
+]

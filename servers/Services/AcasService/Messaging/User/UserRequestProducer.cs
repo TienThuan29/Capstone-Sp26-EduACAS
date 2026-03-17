@@ -10,6 +10,7 @@ public class UserRequestProducer
     private readonly RabbitMqHostedService _rabbitMqService;
     private readonly ILogger<UserRequestProducer> _logger;
     private const string RequestQueueName = "user.get.request";
+    private const string BatchRequestQueueName = "user.getbatch.request";
     private const string ResponseQueueName = "user.get.response";
 
     public UserRequestProducer(
@@ -43,8 +44,16 @@ public class UserRequestProducer
             arguments: null
         );
 
-        _logger.LogInformation("RabbitMQ queues initialized: {RequestQueue}, {ResponseQueue}", 
-            RequestQueueName, ResponseQueueName);
+        channel.QueueDeclare(
+            queue: BatchRequestQueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null
+        );
+
+        _logger.LogInformation("RabbitMQ queues initialized: {RequestQueue}, {ResponseQueue}, {BatchRequestQueue}", 
+            RequestQueueName, ResponseQueueName, BatchRequestQueueName);
     }
 
     public async Task<UserProfileResponse?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
@@ -146,6 +155,93 @@ public class UserRequestProducer
         {
             _logger.LogError(ex, "Error sending user request: UserId={UserId}", userId);
             return null;
+        }
+    }
+
+    public async Task<List<UserProfileResponse>> GetUsersByIdsAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
+    {
+        var idList = userIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        if (idList.Count == 0)
+            return new List<UserProfileResponse>();
+
+        var channel = _rabbitMqService.Channel;
+        var correlationId = Guid.NewGuid().ToString();
+        var responseQueueName = $"{ResponseQueueName}.{correlationId}";
+
+        try
+        {
+            channel.QueueDeclare(
+                queue: responseQueueName,
+                durable: false,
+                exclusive: true,
+                autoDelete: true,
+                arguments: null
+            );
+
+            var responseReceived = new TaskCompletionSource<List<UserProfileResponse>>();
+            var consumer = new EventingBasicConsumer(channel);
+
+            consumer.Received += (model, ea) =>
+            {
+                try
+                {
+                    if (ea.BasicProperties.CorrelationId == correlationId)
+                    {
+                        var body = ea.Body.ToArray();
+                        var message = Encoding.UTF8.GetString(body);
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var list = JsonSerializer.Deserialize<List<UserProfileResponse>>(message, options)
+                            ?? new List<UserProfileResponse>();
+                        responseReceived.SetResult(list);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing user batch response");
+                    responseReceived.SetResult(new List<UserProfileResponse>());
+                }
+            };
+
+            var consumerTag = channel.BasicConsume(
+                queue: responseQueueName,
+                autoAck: true,
+                consumer: consumer
+            );
+
+            var requestMessage = JsonSerializer.Serialize(new { UserIds = idList });
+            var requestBody = Encoding.UTF8.GetBytes(requestMessage);
+
+            var properties = channel.CreateBasicProperties();
+            properties.CorrelationId = correlationId;
+            properties.ReplyTo = responseQueueName;
+            properties.Persistent = true;
+
+            channel.BasicPublish(
+                exchange: "",
+                routingKey: BatchRequestQueueName,
+                basicProperties: properties,
+                body: requestBody
+            );
+
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+            try
+            {
+                var response = await responseReceived.Task.WaitAsync(linkedCts.Token);
+                channel.BasicCancel(consumerTag);
+                return response;
+            }
+            catch (OperationCanceledException)
+            {
+                channel.BasicCancel(consumerTag);
+                _logger.LogWarning("User batch request timed out: CorrelationId={CorrelationId}", correlationId);
+                return new List<UserProfileResponse>();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending user batch request");
+            return new List<UserProfileResponse>();
         }
     }
 }

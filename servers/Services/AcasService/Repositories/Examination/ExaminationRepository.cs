@@ -53,14 +53,28 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
         if (idList.Count == 0)
             return new List<Models.Examination>();
 
-        var result = new List<Models.Examination>();
-        foreach (var id in idList)
-        {
-            var exam = await GetByIdAsync(id);
-            if (exam != null)
-                result.Add(exam);
-        }
-        return result;
+        const int batchSize = 100;
+        var batches = idList
+            .Chunk(batchSize)
+            .Select(batchIds =>
+            {
+                var keys = batchIds.Select(id => DynamoMapper.CreateKey(id)).ToList();
+                var request = new BatchGetItemRequest
+                {
+                    RequestItems = new Dictionary<string, KeysAndAttributes>
+                    {
+                        [_examinationTableName] = new KeysAndAttributes { Keys = keys }
+                    }
+                };
+                return _dynamoDBClient.BatchGetItemAsync(request);
+            })
+            .ToList();
+
+        var responses = await Task.WhenAll(batches);
+        return responses
+            .SelectMany(r => r.Responses.TryGetValue(_examinationTableName, out var items) ? items : [])
+            .Select(DynamoMapper.DynamoItemToExamination)
+            .ToList();
     }
 
     public async Task<List<Models.Examination?>> GetAllAsync()
@@ -68,15 +82,9 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
         try
         {
             var response = await ScanAsync(_examinationTableName);
-            var list = new List<Models.Examination?>();
-
-            foreach (var item in response.Items)
-            {
-                var exam = DynamoMapper.DynamoItemToExamination(item);
-                list.Add(exam);
-            }
-
-            return list;
+            return response.Items
+                .Select(item => (Models.Examination?)DynamoMapper.DynamoItemToExamination(item))
+                .ToList();
         }
         catch (Exception ex)
         {

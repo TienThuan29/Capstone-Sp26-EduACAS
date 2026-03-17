@@ -36,7 +36,7 @@ public class ExaminationMapper
             Id = exam.Id,
             ExamName = exam.ExamName,
             ProgrammingLanguage = programmingLanguageResponse,
-            ExamProblems = exam.Problems?.Select(p => new ExaminationProblemResponse { ProblemId = p.ProblemId, Mark = p.Mark }).ToList() ?? new List<ExaminationProblemResponse>(),
+            ExamProblems = exam.Problems?.Select(p => new ExaminationProblemResponse { ProblemId = p.ProblemId, Mark = p.Mark}).ToList() ?? new List<ExaminationProblemResponse>(),
             Classroom = classroomLite,
             StartDatetime = exam.StartDatetime,
             EndDatetime = exam.EndDatetime,

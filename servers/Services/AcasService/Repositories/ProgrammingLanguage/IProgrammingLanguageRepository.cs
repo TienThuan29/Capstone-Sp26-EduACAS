@@ -6,6 +6,7 @@ public interface IProgrammingLanguageRepository
     Task<Models.ProgrammingLanguage?> CreateAsync(Models.ProgrammingLanguage language);
 
     Task<Models.ProgrammingLanguage?> GetByIdAsync(string id);
+    Task<List<Models.ProgrammingLanguage>> GetByIdsAsync(IEnumerable<string> ids);
 
     Task<IEnumerable<Models.ProgrammingLanguage>> GetAllAsync();
 

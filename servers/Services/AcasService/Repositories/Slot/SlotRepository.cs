@@ -159,12 +159,31 @@ public class SlotRepository : DynamoRepository, ISlotRepository
 
     public async Task AddRangeAsync(List<Models.Slot> slots)
     {
+        if (slots == null || slots.Count == 0)
+            return;
+
         try
         {
-            foreach (var slot in slots)
+            const int batchSize = 25; 
+            var batches = slots
+                .Chunk(batchSize)
+                .Select(chunk => new BatchWriteItemRequest
+                {
+                    RequestItems = new Dictionary<string, List<WriteRequest>>
+                    {
+                        [_slotTableName] = chunk
+                            .Select(slot => new WriteRequest
+                            {
+                                PutRequest = new PutRequest { Item = DynamoMapper.SlotToDynamoItem(slot) }
+                            })
+                            .ToList()
+                    }
+                })
+                .ToList();
+
+            foreach (var batch in batches)
             {
-                var item = DynamoMapper.SlotToDynamoItem(slot);
-                await PutItemAsync(item, _slotTableName);
+                await _dynamoDBClient.BatchWriteItemAsync(batch);
             }
         }
         catch (Exception ex)

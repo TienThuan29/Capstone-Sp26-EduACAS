@@ -1,0 +1,29 @@
+[
+  { "id": "slot-001", "classroomId": "cls-001", "slotNumber": "1", "title": "Week 1 - Basics", "description": "Introduction to variables and I/O", "examinationIds": ["exam-001"] },
+  { "id": "slot-002", "classroomId": "cls-001", "slotNumber": "2", "title": "Week 2 - Conditionals", "description": "If/else, switch statements", "examinationIds": ["exam-002"] },
+  { "id": "slot-003", "classroomId": "cls-001", "slotNumber": "3", "title": "Week 3 - Loops", "description": "For and while loops", "examinationIds": [] },
+
+  { "id": "slot-004", "classroomId": "cls-002", "slotNumber": "1", "title": "Week 1 - Arrays", "description": "Array operations and searching", "examinationIds": ["exam-003"] },
+  { "id": "slot-005", "classroomId": "cls-002", "slotNumber": "2", "title": "Week 2 - Sorting", "description": "Bubble sort, merge sort, quicksort", "examinationIds": ["exam-004"] },
+  { "id": "slot-006", "classroomId": "cls-002", "slotNumber": "3", "title": "Week 3 - Trees", "description": "Binary trees and traversals", "examinationIds": [] },
+
+  { "id": "slot-007", "classroomId": "cls-003", "slotNumber": "1", "title": "Week 1 - Classes", "description": "Classes, objects, constructors", "examinationIds": ["exam-005"] },
+  { "id": "slot-008", "classroomId": "cls-003", "slotNumber": "2", "title": "Week 2 - Inheritance", "description": "Inheritance and polymorphism", "examinationIds": ["exam-006"] },
+  { "id": "slot-009", "classroomId": "cls-003", "slotNumber": "3", "title": "Week 3 - Patterns", "description": "Design patterns introduction", "examinationIds": [] },
+
+  { "id": "slot-010", "classroomId": "cls-004", "slotNumber": "1", "title": "Week 1 - SQL Basics", "description": "SELECT, INSERT, UPDATE, DELETE", "examinationIds": [] },
+  { "id": "slot-011", "classroomId": "cls-004", "slotNumber": "2", "title": "Week 2 - Joins", "description": "INNER JOIN, LEFT JOIN, subqueries", "examinationIds": [] },
+  { "id": "slot-012", "classroomId": "cls-004", "slotNumber": "3", "title": "Week 3 - Normalization", "description": "1NF, 2NF, 3NF, BCNF", "examinationIds": [] },
+
+  { "id": "slot-013", "classroomId": "cls-005", "slotNumber": "1", "title": "Week 1 - SDLC", "description": "Software development lifecycle overview", "examinationIds": [] },
+  { "id": "slot-014", "classroomId": "cls-005", "slotNumber": "2", "title": "Week 2 - Agile", "description": "Scrum and Kanban methodologies", "examinationIds": [] },
+  { "id": "slot-015", "classroomId": "cls-005", "slotNumber": "3", "title": "Week 3 - Testing", "description": "Unit testing, integration testing", "examinationIds": [] },
+
+  { "id": "slot-016", "classroomId": "cls-006", "slotNumber": "1", "title": "Week 1 - Basics", "description": "Variables, types, and I/O", "examinationIds": ["exam-007"] },
+  { "id": "slot-017", "classroomId": "cls-006", "slotNumber": "2", "title": "Week 2 - Functions", "description": "Function definitions and scope", "examinationIds": ["exam-008"] },
+  { "id": "slot-018", "classroomId": "cls-006", "slotNumber": "3", "title": "Week 3 - Collections", "description": "Lists, dictionaries, sets", "examinationIds": [] },
+
+  { "id": "slot-019", "classroomId": "cls-007", "slotNumber": "1", "title": "Python & Java Exams", "description": "Exams for Python and Java", "examinationIds": ["exam-test-python", "exam-test-java"] },
+  { "id": "slot-020", "classroomId": "cls-007", "slotNumber": "2", "title": "C++ & C Exams", "description": "Exams for C++ and C", "examinationIds": ["exam-test-cpp", "exam-test-c"] },
+  { "id": "slot-021", "classroomId": "cls-007", "slotNumber": "3", "title": "JavaScript Exam", "description": "Exam for JavaScript", "examinationIds": ["exam-test-javascript"] }
+]

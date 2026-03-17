@@ -77,22 +77,26 @@ public class ExaminationQuery : IExaminationQuery
         try
         {
             var exams = await _examinationRepository.GetAllAsync();
-            var responseList = new List<ExaminationResponse?>();
-
             if (exams == null || exams.Count == 0)
             {
                 throw new Exception("No examinations found.");
             }
 
-            foreach (var exam in exams)
-            {
-                var programmingLanguagere = await _programmingLanguageRepository.GetByIdAsync(exam.ProgrammingLanguageId);
-                var classroomre = await _classroomRepository.FindByIdAsync(exam.ClassroomId);
-                var response = _examinationMapper.ToExaminationResponse(exam, classroomre, programmingLanguagere);
-                responseList.Add(response);
-            }
+            var programmingLanguageIds = exams.Select(e => e.ProgrammingLanguageId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var classroomIds = exams.Select(e => e.ClassroomId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
 
-            return responseList;
+            var languages = await _programmingLanguageRepository.GetByIdsAsync(programmingLanguageIds);
+            var classrooms = await _classroomRepository.FindByIdsAsync(classroomIds);
+
+            var programmingLanguageById = languages.ToDictionary(l => l.Id, l => (Models.ProgrammingLanguage?)l);
+            var classroomById = classrooms.ToDictionary(c => c.Id, c => (Models.Classroom?)c);
+
+            return exams
+                .Select(exam => (ExaminationResponse?)_examinationMapper.ToExaminationResponse(
+                    exam,
+                    classroomById.GetValueOrDefault(exam.ClassroomId),
+                    programmingLanguageById.GetValueOrDefault(exam.ProgrammingLanguageId)))
+                .ToList();
         }
         catch (Exception ex)
         {
@@ -105,9 +109,8 @@ public class ExaminationQuery : IExaminationQuery
     {
         try
         {
-            var exams = await _examinationRepository.GetByClassIdAsync(classId);
-
-            if (exams == null || !exams.Any())
+            var exams = (await _examinationRepository.GetByClassIdAsync(classId)).ToList();
+            if (exams == null || exams.Count == 0)
             {
                 _logger.LogInformation(
                     "No examinations found for classId {ClassId}",
@@ -115,16 +118,22 @@ public class ExaminationQuery : IExaminationQuery
                 );
                 return new List<ExaminationResponse?>();
             }
-            var responseList = new List<ExaminationResponse?>();
-            foreach (var exam in exams)
-            {
-                var programmingLanguagere = await _programmingLanguageRepository.GetByIdAsync(exam.ProgrammingLanguageId);
-                var classroomre = await _classroomRepository.FindByIdAsync(exam.ClassroomId);
-                var response = _examinationMapper.ToExaminationResponse(exam, classroomre, programmingLanguagere);
-                responseList.Add(response);
-            }
-            return responseList;
 
+            var programmingLanguageIds = exams.Select(e => e.ProgrammingLanguageId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var classroomIds = exams.Select(e => e.ClassroomId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+
+            var languages = await _programmingLanguageRepository.GetByIdsAsync(programmingLanguageIds);
+            var classrooms = await _classroomRepository.FindByIdsAsync(classroomIds);
+
+            var programmingLanguageById = languages.ToDictionary(l => l.Id, l => (Models.ProgrammingLanguage?)l);
+            var classroomById = classrooms.ToDictionary(c => c.Id, c => (Models.Classroom?)c);
+
+            return exams
+                .Select(exam => (ExaminationResponse?)_examinationMapper.ToExaminationResponse(
+                    exam,
+                    classroomById.GetValueOrDefault(exam.ClassroomId),
+                    programmingLanguageById.GetValueOrDefault(exam.ProgrammingLanguageId)))
+                .ToList();
         }
         catch (Exception ex)
         {

@@ -1,0 +1,243 @@
+[
+  {
+    "id": "exam-001",
+    "examName": "Midterm Exam - Intro to Programming G1",
+    "programmingLanguageId": "",
+    "classroomId": "cls-001",
+    "description": "Midterm covering basic I/O and string operations. Exact string comparison.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 5.0 },
+      { "problemId": "prob-002", "mark": 5.0 }
+    ]
+  },
+  {
+    "id": "exam-002",
+    "examName": "Practice Quiz - Intro to Programming G1",
+    "programmingLanguageId": "",
+    "classroomId": "cls-001",
+    "description": "Practice session on conditional logic. Case-insensitive output.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "PRACTICAL",
+    "problems": [
+      { "problemId": "prob-006", "mark": 3.0 },
+      { "problemId": "prob-007", "mark": 3.0 },
+      { "problemId": "prob-008", "mark": 4.0 }
+    ]
+  },
+  {
+    "id": "exam-003",
+    "examName": "Midterm Exam - DSA G1",
+    "programmingLanguageId": "",
+    "classroomId": "cls-002",
+    "description": "Midterm covering floating-point math computations. Tolerance-based comparison.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-010", "mark": 5.0 },
+      { "problemId": "prob-011", "mark": 5.0 }
+    ]
+  },
+  {
+    "id": "exam-004",
+    "examName": "Lab Test - DSA G1",
+    "programmingLanguageId": "",
+    "classroomId": "cls-002",
+    "description": "Lab test on formatted output. Decimal-places comparison.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "PRACTICAL",
+    "problems": [
+      { "problemId": "prob-014", "mark": 3.0 },
+      { "problemId": "prob-015", "mark": 3.0 },
+      { "problemId": "prob-016", "mark": 4.0 }
+    ]
+  },
+  {
+    "id": "exam-005",
+    "examName": "Midterm Exam - OOP G1",
+    "programmingLanguageId": "",
+    "classroomId": "cls-003",
+    "description": "Midterm covering array operations. Token-ordered comparison.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-018", "mark": 5.0 },
+      { "problemId": "prob-019", "mark": 5.0 }
+    ]
+  },
+  {
+    "id": "exam-006",
+    "examName": "Final Exam - OOP G1",
+    "programmingLanguageId": "",
+    "classroomId": "cls-003",
+    "description": "Final exam on set operations. Token-unordered comparison.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-022", "mark": 3.0 },
+      { "problemId": "prob-023", "mark": 3.0 },
+      { "problemId": "prob-024", "mark": 4.0 }
+    ]
+  },
+  {
+    "id": "exam-007",
+    "examName": "Midterm Exam - Intro to Programming G2",
+    "programmingLanguageId": "",
+    "classroomId": "cls-006",
+    "description": "Mixed-type midterm covering exact, case-insensitive, and float problems.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-003", "mark": 3.0 },
+      { "problemId": "prob-009", "mark": 3.0 },
+      { "problemId": "prob-013", "mark": 4.0 }
+    ]
+  },
+  {
+    "id": "exam-008",
+    "examName": "Final Exam - Intro to Programming G2",
+    "programmingLanguageId": "",
+    "classroomId": "cls-006",
+    "description": "Mixed-type final covering token-ordered and token-unordered problems.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-020", "mark": 5.0 },
+      { "problemId": "prob-025", "mark": 5.0 }
+    ]
+  },
+  {
+    "id": "exam-test-python",
+    "examName": "Full Test - Python",
+    "programmingLanguageId": "__python__",
+    "classroomId": "cls-007",
+    "description": "Complete test covering all 25 problems in Python.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 0.5 }, { "problemId": "prob-002", "mark": 0.5 },
+      { "problemId": "prob-003", "mark": 0.5 }, { "problemId": "prob-004", "mark": 0.5 },
+      { "problemId": "prob-005", "mark": 0.5 }, { "problemId": "prob-006", "mark": 0.375 },
+      { "problemId": "prob-007", "mark": 0.375 }, { "problemId": "prob-008", "mark": 0.375 },
+      { "problemId": "prob-009", "mark": 0.375 }, { "problemId": "prob-010", "mark": 0.375 },
+      { "problemId": "prob-011", "mark": 0.375 }, { "problemId": "prob-012", "mark": 0.375 },
+      { "problemId": "prob-013", "mark": 0.375 }, { "problemId": "prob-014", "mark": 0.375 },
+      { "problemId": "prob-015", "mark": 0.375 }, { "problemId": "prob-016", "mark": 0.375 },
+      { "problemId": "prob-017", "mark": 0.375 }, { "problemId": "prob-018", "mark": 0.375 },
+      { "problemId": "prob-019", "mark": 0.375 }, { "problemId": "prob-020", "mark": 0.375 },
+      { "problemId": "prob-021", "mark": 0.375 }, { "problemId": "prob-022", "mark": 0.375 },
+      { "problemId": "prob-023", "mark": 0.375 }, { "problemId": "prob-024", "mark": 0.375 },
+      { "problemId": "prob-025", "mark": 0.375 }
+    ]
+  },
+  {
+    "id": "exam-test-java",
+    "examName": "Full Test - Java",
+    "programmingLanguageId": "__java__",
+    "classroomId": "cls-007",
+    "description": "Complete test covering all 25 problems in Java.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 0.5 }, { "problemId": "prob-002", "mark": 0.5 },
+      { "problemId": "prob-003", "mark": 0.5 }, { "problemId": "prob-004", "mark": 0.5 },
+      { "problemId": "prob-005", "mark": 0.5 }, { "problemId": "prob-006", "mark": 0.375 },
+      { "problemId": "prob-007", "mark": 0.375 }, { "problemId": "prob-008", "mark": 0.375 },
+      { "problemId": "prob-009", "mark": 0.375 }, { "problemId": "prob-010", "mark": 0.375 },
+      { "problemId": "prob-011", "mark": 0.375 }, { "problemId": "prob-012", "mark": 0.375 },
+      { "problemId": "prob-013", "mark": 0.375 }, { "problemId": "prob-014", "mark": 0.375 },
+      { "problemId": "prob-015", "mark": 0.375 }, { "problemId": "prob-016", "mark": 0.375 },
+      { "problemId": "prob-017", "mark": 0.375 }, { "problemId": "prob-018", "mark": 0.375 },
+      { "problemId": "prob-019", "mark": 0.375 }, { "problemId": "prob-020", "mark": 0.375 },
+      { "problemId": "prob-021", "mark": 0.375 }, { "problemId": "prob-022", "mark": 0.375 },
+      { "problemId": "prob-023", "mark": 0.375 }, { "problemId": "prob-024", "mark": 0.375 },
+      { "problemId": "prob-025", "mark": 0.375 }
+    ]
+  },
+  {
+    "id": "exam-test-cpp",
+    "examName": "Full Test - C++",
+    "programmingLanguageId": "__c++__",
+    "classroomId": "cls-007",
+    "description": "Complete test covering all 25 problems in C++.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 0.5 }, { "problemId": "prob-002", "mark": 0.5 },
+      { "problemId": "prob-003", "mark": 0.5 }, { "problemId": "prob-004", "mark": 0.5 },
+      { "problemId": "prob-005", "mark": 0.5 }, { "problemId": "prob-006", "mark": 0.375 },
+      { "problemId": "prob-007", "mark": 0.375 }, { "problemId": "prob-008", "mark": 0.375 },
+      { "problemId": "prob-009", "mark": 0.375 }, { "problemId": "prob-010", "mark": 0.375 },
+      { "problemId": "prob-011", "mark": 0.375 }, { "problemId": "prob-012", "mark": 0.375 },
+      { "problemId": "prob-013", "mark": 0.375 }, { "problemId": "prob-014", "mark": 0.375 },
+      { "problemId": "prob-015", "mark": 0.375 }, { "problemId": "prob-016", "mark": 0.375 },
+      { "problemId": "prob-017", "mark": 0.375 }, { "problemId": "prob-018", "mark": 0.375 },
+      { "problemId": "prob-019", "mark": 0.375 }, { "problemId": "prob-020", "mark": 0.375 },
+      { "problemId": "prob-021", "mark": 0.375 }, { "problemId": "prob-022", "mark": 0.375 },
+      { "problemId": "prob-023", "mark": 0.375 }, { "problemId": "prob-024", "mark": 0.375 },
+      { "problemId": "prob-025", "mark": 0.375 }
+    ]
+  },
+  {
+    "id": "exam-test-c",
+    "examName": "Full Test - C",
+    "programmingLanguageId": "__c__",
+    "classroomId": "cls-007",
+    "description": "Complete test covering all 25 problems in C.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 0.5 }, { "problemId": "prob-002", "mark": 0.5 },
+      { "problemId": "prob-003", "mark": 0.5 }, { "problemId": "prob-004", "mark": 0.5 },
+      { "problemId": "prob-005", "mark": 0.5 }, { "problemId": "prob-006", "mark": 0.375 },
+      { "problemId": "prob-007", "mark": 0.375 }, { "problemId": "prob-008", "mark": 0.375 },
+      { "problemId": "prob-009", "mark": 0.375 }, { "problemId": "prob-010", "mark": 0.375 },
+      { "problemId": "prob-011", "mark": 0.375 }, { "problemId": "prob-012", "mark": 0.375 },
+      { "problemId": "prob-013", "mark": 0.375 }, { "problemId": "prob-014", "mark": 0.375 },
+      { "problemId": "prob-015", "mark": 0.375 }, { "problemId": "prob-016", "mark": 0.375 },
+      { "problemId": "prob-017", "mark": 0.375 }, { "problemId": "prob-018", "mark": 0.375 },
+      { "problemId": "prob-019", "mark": 0.375 }, { "problemId": "prob-020", "mark": 0.375 },
+      { "problemId": "prob-021", "mark": 0.375 }, { "problemId": "prob-022", "mark": 0.375 },
+      { "problemId": "prob-023", "mark": 0.375 }, { "problemId": "prob-024", "mark": 0.375 },
+      { "problemId": "prob-025", "mark": 0.375 }
+    ]
+  },
+  {
+    "id": "exam-test-javascript",
+    "examName": "Full Test - JavaScript",
+    "programmingLanguageId": "__javascript__",
+    "classroomId": "cls-007",
+    "description": "Complete test covering all 25 problems in JavaScript.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 0.5 }, { "problemId": "prob-002", "mark": 0.5 },
+      { "problemId": "prob-003", "mark": 0.5 }, { "problemId": "prob-004", "mark": 0.5 },
+      { "problemId": "prob-005", "mark": 0.5 }, { "problemId": "prob-006", "mark": 0.375 },
+      { "problemId": "prob-007", "mark": 0.375 }, { "problemId": "prob-008", "mark": 0.375 },
+      { "problemId": "prob-009", "mark": 0.375 }, { "problemId": "prob-010", "mark": 0.375 },
+      { "problemId": "prob-011", "mark": 0.375 }, { "problemId": "prob-012", "mark": 0.375 },
+      { "problemId": "prob-013", "mark": 0.375 }, { "problemId": "prob-014", "mark": 0.375 },
+      { "problemId": "prob-015", "mark": 0.375 }, { "problemId": "prob-016", "mark": 0.375 },
+      { "problemId": "prob-017", "mark": 0.375 }, { "problemId": "prob-018", "mark": 0.375 },
+      { "problemId": "prob-019", "mark": 0.375 }, { "problemId": "prob-020", "mark": 0.375 },
+      { "problemId": "prob-021", "mark": 0.375 }, { "problemId": "prob-022", "mark": 0.375 },
+      { "problemId": "prob-023", "mark": 0.375 }, { "problemId": "prob-024", "mark": 0.375 },
+      { "problemId": "prob-025", "mark": 0.375 }
+    ]
+  }
+]
