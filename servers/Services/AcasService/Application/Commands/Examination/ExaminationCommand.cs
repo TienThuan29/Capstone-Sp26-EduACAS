@@ -1,5 +1,6 @@
 
 using AcasService.Application.ResponseDTOs;
+using AcasService.Application.Commands.Notification;
 using AcasService.Web.Requests;
 using AcasService.Application.Mappers;
 using AcasService.Repositories.Examination;
@@ -23,13 +24,20 @@ public class ExaminationCommand : IExaminationCommand
     private readonly IProgrammingLanguageRepository _programmingLanguageRepository;
 
     private readonly IClassroomRepository _classroomRepository;
+    private readonly IBusinessNotificationService _businessNotificationService;
     private readonly ILogger<ExaminationCommand> _logger;
 
-    public ExaminationCommand(IExaminationRepository examinationRepository, ILogger<ExaminationCommand> logger, IClassroomRepository classroomRepository, IProgrammingLanguageRepository programmingLanguageRepository )
+    public ExaminationCommand(
+        IExaminationRepository examinationRepository,
+        ILogger<ExaminationCommand> logger,
+        IClassroomRepository classroomRepository,
+        IProgrammingLanguageRepository programmingLanguageRepository,
+        IBusinessNotificationService businessNotificationService)
     {
         _examinationRepository = examinationRepository;
         _programmingLanguageRepository =programmingLanguageRepository;
         _classroomRepository =classroomRepository;
+        _businessNotificationService = businessNotificationService;
         _examinationMapper = new ExaminationMapper();
         _logger = logger;
     }
@@ -42,6 +50,21 @@ public class ExaminationCommand : IExaminationCommand
             var classroom =await _classroomRepository.FindByIdAsync(examDto.ClassroomId);
             var programmingLanguage = await _programmingLanguageRepository.GetByIdAsync(examDto.ProgrammingLanguageId);
             var createdExam = await _examinationRepository.CreateAsync(examModel);
+
+            await _businessNotificationService.NotifyClassroomAsync(
+                createdExam.ClassroomId,
+                NotificationType.NEW_EXAMINATION,
+                "New examination published",
+                $"A new examination '{createdExam.ExamName}' is now available.",
+                payload: new Dictionary<string, object?>
+                {
+                    ["examId"] = createdExam.Id,
+                    ["classroomId"] = createdExam.ClassroomId,
+                    ["status"] = createdExam.Status.ToString(),
+                    ["mode"] = createdExam.Mode.ToString()
+                }
+            );
+
             return _examinationMapper.ToExaminationResponse(createdExam,classroom,programmingLanguage);
         }
         catch (Exception ex)

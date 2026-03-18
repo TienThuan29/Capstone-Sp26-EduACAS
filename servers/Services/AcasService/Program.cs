@@ -28,6 +28,7 @@ using AcasService.Repositories.S3;
 using AcasService.Repositories.Subject;
 using AcasService.Repositories.Submission;
 using AcasService.Repositories.Notification;
+using AcasService.Repositories.UserDevice;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -46,7 +47,11 @@ using AcasService.Repositories.Slot;
 using AcasService.Application.Queries.ClassEnrollments;
 using AcasService.Application.Queries.Slot;
 using AcasService.Application.Commands.Material;
+using AcasService.Application.Commands.Notification;
+using AcasService.Application.Commands.UserDevice;
 using AcasService.Application.Queries.Material;
+using AcasService.Application.Queries.Notification;
+using AcasService.Application.Queries.UserDevice;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
@@ -120,6 +125,7 @@ builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
 
 // cahing
@@ -158,6 +164,12 @@ builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
+builder.Services.AddScoped<IFirebaseCloudMessageService, FirebaseCloudMessageService>();
+builder.Services.AddScoped<INotificationCommand, NotificationCommand>();
+builder.Services.AddScoped<IBusinessNotificationService, BusinessNotificationService>();
+builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<IUserDeviceCommand, UserDeviceCommand>();
+builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();

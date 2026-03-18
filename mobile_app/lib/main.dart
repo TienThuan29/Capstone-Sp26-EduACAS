@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
+import 'package:mobile/features/services/fcm_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mobile/features/presentation/auth/login_page.dart';
 
@@ -17,6 +18,14 @@ void main() async {
     debugPrint('Continuing with dart-define or fallback values');
     // Continue with default values
   }
+
+  try {
+    await FcmService.initialize();
+    debugPrint('FCM initialized successfully');
+  } catch (e) {
+    debugPrint('FCM initialization failed: $e');
+  }
+
   runApp(const MyApp());
 }
 

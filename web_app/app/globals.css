@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "flowbite-react/plugin/tailwindcss";
 
 /* Flowbite: use @source so Tailwind includes Flowbite classes. The plugin import
    is omitted because flowbite-react/plugin/tailwindcss is not resolved by Tailwind v4's
