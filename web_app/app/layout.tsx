@@ -22,6 +22,9 @@ export const metadata: Metadata = {
   title: "Edu ACAS",
   description:
     "Automated Console-based Programming Assessment System for University Education",
+  icons: {
+    icon: "/images/EduACAS-single.png",
+  },
 };
 
 export default function RootLayout({

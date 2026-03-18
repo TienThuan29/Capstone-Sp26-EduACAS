@@ -14,6 +14,7 @@ class Classroom {
   final String? createdDate;
   final String? updatedDate;
   final String? endDate;
+  final String? status;
 
   Classroom({
     required this.id,
@@ -31,12 +32,21 @@ class Classroom {
     this.createdDate,
     this.updatedDate,
     this.endDate,
+    this.status,
   });
 
   factory Classroom.fromJson(Map<String, dynamic> json) {
     // Backend returns nested 'lecturer' and 'subject' objects
     final lecturer = json['lecturer'] as Map<String, dynamic>?;
     final subject = json['subject'] as Map<String, dynamic>?;
+
+    // For student classroom list, status might be in enrollment.isJoining
+    final enrollment = json['enrollment'] as Map<String, dynamic>?;
+    String? currentStatus = json['status'];
+    if (currentStatus == null && enrollment != null) {
+      final bool isJoining = enrollment['isJoining'] ?? false;
+      currentStatus = isJoining ? 'JOINED' : 'MOVED_OUT';
+    }
 
     return Classroom(
       id: json['id'] ?? '',
@@ -54,6 +64,7 @@ class Classroom {
       createdDate: json['createdDate'],
       updatedDate: json['updatedDate'],
       endDate: json['endDate'],
+      status: currentStatus,
     );
   }
 
@@ -74,6 +85,7 @@ class Classroom {
       'createdDate': createdDate,
       'updatedDate': updatedDate,
       'endDate': endDate,
+      'status': status,
     };
   }
 }

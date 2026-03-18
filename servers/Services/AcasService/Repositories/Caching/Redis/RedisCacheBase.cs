@@ -19,7 +19,7 @@ public interface IRedisCacheBaseRepository<T> where T : class
 
 
 
-public class RedisCacheBaseRepository<T> : IRedisCacheBaseRepository<T> where T : class
+public abstract class RedisCacheBaseRepository<T> : IRedisCacheBaseRepository<T> where T : class
 {
       private readonly IDistributedCache _cache;
       private readonly ILogger<RedisCacheBaseRepository<T>> _logger;

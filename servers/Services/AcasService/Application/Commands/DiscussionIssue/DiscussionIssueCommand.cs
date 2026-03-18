@@ -57,7 +57,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   Attachments = Array.Empty<string>(),
                   Status = DiscussionIssueStatus.OPEN,
                   ViewCount = 0,
-                  Comments = new List<Comment>()
+                  Comments = new List<Models.Comment>()
             };
             var created = await _repository.CreateAsync(issue);
             return created == null ? null : await _discussionIssueQuery.GetByIdAsync(created.Id);
@@ -87,7 +87,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
                   return null;
             }
-            var comment = new Comment
+            var comment = new Models.Comment
             {
                   Id = Guid.NewGuid().ToString(),
                   IssueId = request.IssueId,
@@ -95,7 +95,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   Content = request.Content,
                   Attachments = Array.Empty<string>(),
                   UpVoteCount = 0,
-                  Replies = new List<Comment>(),
+                  Replies = new List<Models.Comment>(),
                   IsDeleted = false,
                   CreatedDate = DateTime.UtcNow,
                   UpdatedDate = DateTime.UtcNow
@@ -120,7 +120,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   _logger.LogWarning("Parent comment not found: {CommentId}", request.ParentCommentId);
                   return null;
             }
-            var reply = new Comment
+            var reply = new Models.Comment
             {
                   Id = Guid.NewGuid().ToString(),
                   IssueId = request.IssueId,
@@ -128,7 +128,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   Content = request.Content,
                   Attachments = Array.Empty<string>(),
                   UpVoteCount = 0,
-                  Replies = new List<Comment>(),
+                  Replies = new List<Models.Comment>(),
                   IsDeleted = false,
                   CreatedDate = DateTime.UtcNow,
                   UpdatedDate = DateTime.UtcNow
@@ -185,7 +185,7 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             return true;
       }
 
-      private Comment? FindCommentById(IList<Comment> comments, string commentId)
+      private Models.Comment? FindCommentById(IList<Models.Comment> comments, string commentId)
       {
             foreach (var c in comments)
             {

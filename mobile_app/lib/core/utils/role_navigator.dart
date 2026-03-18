@@ -1,34 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/presentation/auth/login_page.dart';
-import 'package:mobile/features/presentation/lecturer/lecturer_classroom_list_page.dart';
-import 'package:mobile/features/presentation/student/student_page.dart';
-// import 'package:mobile/features/presentation/teacher/teacher_page.dart';
-// import 'package:mobile/features/presentation/admin/admin_page.dart';
+import 'package:mobile/features/presentation/home/main_shell.dart';
 
 class RoleNavigator {
   static const String roleStudent = 'STUDENT';
   static const String roleTeacher = 'LECTURER';
 
-  /// Navigate to appropriate page based on user role
+  /// Navigate to the unified MainShell after login.
+  /// MainShell reads the role from TokenStorage and adapts automatically.
   static void navigateByRole(BuildContext context, String role) {
-    Widget targetPage;
-
-    switch (role.toUpperCase()) {
-      case roleStudent:
-        targetPage = const StudentPage();
-        break;
-      case roleTeacher:
-        targetPage = const LecturerClassroomListPage();
-        break;
-      default:
-        targetPage = const LoginPage();
-        break;
+    final upperRole = role.toUpperCase();
+    if (upperRole == roleStudent || upperRole == roleTeacher) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const MainShell()),
+      );
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+      );
     }
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => targetPage),
-    );
   }
 
   /// Get home route name based on role

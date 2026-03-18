@@ -27,7 +27,6 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
-  ArrowLeftIcon,
 } from "@heroicons/react/24/outline";
 import type { Examination, ExaminationRequest } from "@/types/examination";
 import { useExamination } from "@/hooks/exam/useExamination";
@@ -78,6 +77,11 @@ type PractiseTabProps = {
   examinations: Examination[];
   loading: boolean;
   onRefetch: () => Promise<void>;
+  setExamDetailBack?: (callback: (() => void) | null) => void;
+  /** Exam ID from URL to restore detail view on refresh */
+  initialExamId?: string | null;
+  /** Called when user opens an exam or goes back to list (to sync URL) */
+  onExamIdInUrlChange?: (examId: string | null) => void;
 };
 
 export function ExamsTab({
@@ -85,12 +89,16 @@ export function ExamsTab({
   examinations,
   loading,
   onRefetch,
+  setExamDetailBack,
+  initialExamId,
+  onExamIdInUrlChange,
 }: PractiseTabProps) {
   const { showSuccess, showError } = useToast();
   const {
     createExamination,
     updateExamination,
     deleteExamination,
+    getExaminationById,
   } = useExamination();
 
   const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
@@ -137,7 +145,10 @@ export function ExamsTab({
     setFormData({
       examName: exam.examName,
       programmingLanguageId: exam.programmingLanguage.id,
-      problems: [],
+      problems: (exam.examProblems ?? []).map((ep) => ({
+        problemId: ep.problemId,
+        mark: ep.mark,
+      })),
       classroomId: exam.classroom.id,
       startDatetime: exam.startDatetime.slice(0, 16),
       endDatetime: exam.endDatetime.slice(0, 16),
@@ -157,11 +168,38 @@ export function ExamsTab({
 
   const openViewDetail = (exam: Examination) => {
     setExamToView(exam);
+    onExamIdInUrlChange?.(exam.id);
   };
 
-  const backToList = () => {
+  const backToList = useCallback(() => {
     setExamToView(null);
-  };
+    onExamIdInUrlChange?.(null);
+  }, [onExamIdInUrlChange]);
+
+  useEffect(() => {
+    setExamDetailBack?.(() => (examToView ? backToList : null));
+    return () => setExamDetailBack?.(() => null);
+  }, [examToView, backToList, setExamDetailBack]);
+
+  // Restore exam detail from URL (e.g. after F5 refresh)
+  useEffect(() => {
+    if (!initialExamId) {
+      setExamToView(null);
+      return;
+    }
+    const fromList = examinations.find((e) => e.id === initialExamId);
+    if (fromList) {
+      setExamToView(fromList);
+      return;
+    }
+    let cancelled = false;
+    getExaminationById(initialExamId).then((exam) => {
+      if (!cancelled && exam) setExamToView(exam);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [initialExamId, examinations, getExaminationById]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,24 +263,14 @@ export function ExamsTab({
     }
   };
 
-  // Detail tab: show full examination when one is selected
+  // Detail tab: show full examination when one is selected (back button is in page header)
   if (examToView) {
     return (
-      <div className="space-y-6">
-        <Button
-          color="gray"
-          outline
-          onClick={backToList}
-          className="inline-flex cursor-pointer items-center gap-2"
-        >
-          <ArrowLeftIcon className="h-5 w-5" />
-          Back to list
-        </Button>
-        <ExaminationDetailView
-          examination={examToView}
-          onBack={backToList}
-        />
-      </div>
+      <ExaminationDetailView
+        examination={examToView}
+        onBack={backToList}
+        showBackInHeader={false}
+      />
     );
   }
 

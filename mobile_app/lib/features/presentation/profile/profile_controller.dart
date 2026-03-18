@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import '../../models/auth/user_profile.dart';
 import '../../services/auth_service.dart';
 import '../../../core/storage/token_storage.dart';
@@ -49,12 +48,12 @@ class ProfileController {
         userData: data,
       );
 
-      if (response != null && response['success'] == true) {
+      if (response['success'] == true) {
         // Refresh local profile
         await fetchProfile(onUpdate);
         return true;
       } else {
-        errorMessage = response?['message'] ?? 'Update failed';
+        errorMessage = response['message'] ?? 'Update failed';
         return false;
       }
     } catch (e) {

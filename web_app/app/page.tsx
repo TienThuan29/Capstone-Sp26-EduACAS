@@ -89,12 +89,12 @@ export default function Home() {
 
               <div className="space-y-3">
                 <h2 className="text-3xl font-semibold" style={{ color: "#1F4E79" }}>
-                  Nền tảng E-Learning
+                  E-Learning platform
                   <br />
-                  <span style={{ color: "#C9A24D" }}>Lập trình chuyên nghiệp</span>
+                  <span style={{ color: "#C9A24D" }}>Professional programming</span>
                 </h2>
                 <p className="text-lg opacity-80 text-[#1E1E1E] dark:text-gray-300">
-                  Kết nối giảng viên và sinh viên trong việc giảng dạy, học tập và thực hành các ngôn ngữ lập trình
+                  Connecting instructors and students in teaching, learning, and practicing programming languages
                 </p>
               </div>
 
@@ -106,7 +106,7 @@ export default function Home() {
                   >
                     {/* Button shine effect */}
                     <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 group-hover:translate-x-full transition-all duration-700" />
-                    <span className="relative">Bắt đầu</span>
+                    <span className="relative">Get started</span>
                   </button>
                 </Link>
               </div>
@@ -142,13 +142,13 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2 mb-3 px-5 py-2 rounded-full text-sm font-semibold bg-[#F5F7FA] dark:bg-gray-700 text-[#C9A24D]"
             >
-              <SparklesIcon /> TÍNH NĂNG NỔI BẬT
+              <SparklesIcon /> FEATURED
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#1F4E79] dark:text-[#C9A24D]">
-              Tính năng nổi bật
+              Featured features
             </h2>
             <p className="text-lg max-w-2xl mx-auto text-[#1E1E1E] dark:text-gray-300">
-              Mọi thứ bạn cần cho việc giảng dạy và học tập lập trình
+              Everything you need for programming teaching and learning
             </p>
           </div>
 
@@ -189,13 +189,13 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2 mb-3 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D]"
             >
-              <ChartStatsIcon /> THỐNG KÊ
+              <ChartStatsIcon /> STATISTICS
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#1F4E79] dark:text-[#C9A24D]">
-              Cộng đồng của chúng tôi
+              Our community
             </h2>
             <p className="text-lg text-[#1E1E1E] dark:text-gray-300">
-              Tham gia nền tảng đang phát triển
+              Join our growing platform
             </p>
           </div>
 
@@ -228,13 +228,13 @@ export default function Home() {
             <div
               className="inline-flex items-center gap-2 mb-3 px-5 py-2 rounded-full text-sm font-semibold bg-[#F5F7FA] dark:bg-gray-700 text-[#C9A24D]"
             >
-              <LaptopIcon /> NGÔN NGỮ LẬP TRÌNH
+              <LaptopIcon /> PROGRAMMING LANGUAGES
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4 text-[#1F4E79] dark:text-[#C9A24D]">
-              Các ngôn ngữ lập trình
+              Programming languages
             </h2>
             <p className="text-lg max-w-2xl mx-auto text-[#1E1E1E] dark:text-gray-300">
-              Khám phá các bài tập lập trình và thử thách code
+              Explore programming exercises and code challenges
             </p>
           </div>
 

@@ -79,6 +79,8 @@ type DiscussionDetailProps = {
   issue: DiscussionIssue;
   classId: string;
   onBack: () => void;
+  /** When true, the "Back to list" button is not rendered */
+  hideBackButton?: boolean;
   onMarkAccepted?: (commentId: string) => void;
   onUpvote?: (target: "issue" | "comment", id: string) => void;
   onStatusChange?: (status: DiscussionIssueStatus) => void;
@@ -443,6 +445,7 @@ export function DiscussionDetail({
   issue,
   classId,
   onBack,
+  hideBackButton,
   onMarkAccepted,
   onUpvote,
   onStatusChange,
@@ -493,15 +496,17 @@ export function DiscussionDetail({
 
   return (
     <div className="space-y-3">
-      <Button
-        color="light"
-        size="sm"
-        onClick={onBack}
-        className="inline-flex cursor-pointer items-center gap-2"
-      >
-        <ChevronLeftIcon className="h-4 w-4" />
-        Back to list
-      </Button>
+      {!hideBackButton && (
+        <Button
+          color="light"
+          size="sm"
+          onClick={onBack}
+          className="inline-flex cursor-pointer items-center gap-2"
+        >
+          <ChevronLeftIcon className="h-4 w-4" />
+          Back to list
+        </Button>
+      )}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
         {/* Left column: main content & thread */}

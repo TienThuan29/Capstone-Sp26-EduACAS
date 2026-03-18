@@ -1,7 +1,8 @@
-using AcasService.Repositories.ClassroomEnrollment;
+using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Repositories.Classroom;
+using AcasService.Repositories.ClassroomEnrollment;
 using AcasService.Web.Requests;
 
 namespace AcasService.Application.Commands.ClassEnrollments;
@@ -11,6 +12,8 @@ public interface IClassEnrollmentsCommand
     Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request);
 
     Task<ClassEnrollmentsResponse> LeaveClass(ClassEnrollmentsRequest request);
+
+    Task<ClassEnrollmentsResponse> ForceLeaveClass(string classId, string studentId);
 }
 
 
@@ -18,11 +21,16 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
 {
     private readonly IClassroomEnrollmentRepository _classroomEnrollmentRepository;
     private readonly IClassroomRepository _classroomRepository;
+    private readonly ClassEnrollmentMapper _classEnrollmentMapper;
 
-    public ClassEnrollmentsCommand(IClassroomEnrollmentRepository classroomEnrollmentRepository, IClassroomRepository classroomRepository)
+    public ClassEnrollmentsCommand(
+        IClassroomEnrollmentRepository classroomEnrollmentRepository, 
+        IClassroomRepository classroomRepository,
+        ClassEnrollmentMapper classEnrollmentMapper)
     {
         _classroomEnrollmentRepository = classroomEnrollmentRepository;
         _classroomRepository = classroomRepository;
+        _classEnrollmentMapper = classEnrollmentMapper;
     }
 
 
@@ -60,17 +68,7 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
             throw new Exception("Failed to enroll in class");
         }
 
-
-        var response = new ClassEnrollmentsResponse
-        {
-            EnrollmentId = createdEnrollment.Id,
-            ClassId = createdEnrollment.ClassId,
-            StudentId = createdEnrollment.StudentId,
-            JoinedDate = createdEnrollment.JoinedDate,
-            IsJoining = createdEnrollment.IsJoining,
-            MovedOutDate = createdEnrollment.MovedOutDate
-        };
-        return response;
+        return _classEnrollmentMapper.ToClassEnrollmentsResponse(createdEnrollment);
 
     }
 
@@ -89,16 +87,27 @@ public class ClassEnrollmentsCommand : IClassEnrollmentsCommand
         {
             throw new Exception("Failed to leave class");
         }
-        var response = new ClassEnrollmentsResponse
-        {
-            EnrollmentId = updatedEnrollment.Id,
-            ClassId = updatedEnrollment.ClassId,
-            StudentId = updatedEnrollment.StudentId,
-            JoinedDate = updatedEnrollment.JoinedDate,
-            IsJoining = updatedEnrollment.IsJoining,
-            MovedOutDate = updatedEnrollment.MovedOutDate
-        };
 
-        return response;
+        return _classEnrollmentMapper.ToClassEnrollmentsResponse(updatedEnrollment);
+    }
+
+    public async Task<ClassEnrollmentsResponse> ForceLeaveClass(string classId, string studentId)
+    {
+        var classEnrollment = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classId, studentId);
+        if (classEnrollment == null)
+        {
+            throw new InvalidOperationException("Student is not enrolled in this class");
+        }
+
+        classEnrollment.MovedOutDate = DateTime.UtcNow;
+        classEnrollment.IsJoining = false;
+
+        var updatedEnrollment = await _classroomEnrollmentRepository.UpdateAsync(classEnrollment);
+        if (updatedEnrollment == null)
+        {
+            throw new Exception("Failed to remove student from class");
+        }
+
+        return _classEnrollmentMapper.ToClassEnrollmentsResponse(updatedEnrollment);
     }
 }

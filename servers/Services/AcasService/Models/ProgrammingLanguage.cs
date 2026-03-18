@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("ProgrammingLanguageTableName")]
 public class ProgrammingLanguage
 {
     [Key]

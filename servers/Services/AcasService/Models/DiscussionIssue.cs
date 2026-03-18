@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("DiscussionIssueTableName")]
 public class DiscussionIssue
 {
     [Key]
@@ -62,7 +64,7 @@ public class Comment
 
     public int UpVoteCount { get; set; }
 
-    public List<Comment> Replies { get; set; } = new List<Comment>();
+    public List<Models.Comment> Replies { get; set; } = new List<Models.Comment>();
     
     public bool IsDeleted { get; set; }
     

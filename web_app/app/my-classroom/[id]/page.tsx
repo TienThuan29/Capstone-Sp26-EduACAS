@@ -147,7 +147,12 @@ function ClassroomContent() {
       case "slots":
         return <SlotTab />;
       case "discussion":
-        return <DiscussionTab classId={classId} />;
+        return (
+          <DiscussionTab
+            classId={classId}
+            hideBackButton={!!searchParams.get("issue")}
+          />
+        );
       default:
         return (
           <OverviewTab
@@ -162,18 +167,33 @@ function ClassroomContent() {
     }
   };
 
+  const isDiscussionDetail =
+    activeTab === "discussion" && searchParams.get("issue");
+
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
       <div className="ml-20 flex-grow p-4 lg:ml-64 lg:p-8">
-        <div className="mb-10">
+        <div className="mb-10 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="All classes"
             icon={<ArrowLeftIcon className="h-4 w-4" />}
             onClick={() => router.push(PageUrl.MY_CLASSROOM_PAGE)}
             className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
           />
+          {isDiscussionDetail && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={() =>
+                router.replace(`/my-classroom/${classId}?tab=discussion`, {
+                  scroll: false,
+                })
+              }
+              className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
+            />
+          )}
         </div>
 
         {renderTabContent()}

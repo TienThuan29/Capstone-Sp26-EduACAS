@@ -5,7 +5,9 @@ import 'package:mobile/core/widgets/enhanced_button.dart';
 import 'profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final VoidCallback? onLogout;
+
+  const ProfileScreen({super.key, this.onLogout});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -63,34 +65,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
-  Future<void> _handleUpdate() async {
-    if (_formKey.currentState!.validate()) {
-      final success = await _controller.updateProfile({
-        'fullname': _nameController.text,
-        'birthday': _birthdayController.text,
-      }, () {
-        if (mounted) setState(() {});
-      });
-
-      if (mounted) {
-        if (success) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Profile updated successfully!'),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(_controller.errorMessage ?? 'Update failed'),
-              backgroundColor: AppColors.error,
-            ),
-          );
-        }
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,12 +85,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildAvatarSection(),
                         const SizedBox(height: 32),
                         _buildProfileForm(),
-                        const SizedBox(height: 32),
-                        EnhancedButton(
-                          text: 'Save Changes',
-                          isLoading: _controller.isLoading,
-                          onPressed: _handleUpdate,
-                        ),
+                        if (widget.onLogout != null) ...[
+                          const SizedBox(height: 48),
+                          EnhancedButton(
+                            text: 'Logout',
+                            onPressed: widget.onLogout!,
+                            isLoading: false,
+                            color: Colors.redAccent,
+                            height: 44,
+                            showArrow: false,
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -139,22 +118,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Column(
       children: [
         const Text(
-          'Profile Settings',
+          'Your Information',
           style: TextStyle(
             fontSize: 28,
             fontWeight: FontWeight.bold,
             color: AppColors.primary,
           ),
         ),
-        const SizedBox(height: 8),
-        Text(
-          'Manage your personal information',
-          style: TextStyle(
-            fontSize: 16,
-            color: Colors.grey[600],
-          ),
-        ),
-      ],
+        ],
     );
   }
 
@@ -178,22 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 : null,
           ),
         ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: AppColors.accent,
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(
-              Icons.camera_alt,
-              color: Colors.white,
-              size: 20,
-            ),
-          ),
-        ),
+
       ],
     );
   }
@@ -206,10 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _ProfileTextField(
             controller: _nameController,
             label: 'Full Name',
-            hint: 'Enter your full name',
+            hint: 'Your full name',
             icon: Icons.person_outline,
-            validator: (value) =>
-                value == null || value.isEmpty ? 'Please enter your name' : null,
+            readOnly: true,
           ),
           const SizedBox(height: 20),
           _ProfileTextField(
@@ -223,20 +178,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _ProfileTextField(
             controller: _birthdayController,
             label: 'Birthday',
-            hint: 'YYYY-MM-DD',
+            hint: 'Not provided',
             icon: Icons.cake_outlined,
             readOnly: true,
-            onTap: () async {
-              DateTime? picked = await showDatePicker(
-                context: context,
-                initialDate: DateTime.now(),
-                firstDate: DateTime(1900),
-                lastDate: DateTime.now(),
-              );
-              if (picked != null) {
-                _birthdayController.text = picked.toString().split(' ')[0];
-              }
-            },
           ),
           const SizedBox(height: 20),
           _ProfileTextField(

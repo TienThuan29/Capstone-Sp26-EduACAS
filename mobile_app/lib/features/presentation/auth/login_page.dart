@@ -118,9 +118,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         if (loginResponse.success && loginResponse.dataResponse != null) {
           final userProfile = loginResponse.dataResponse!.userProfile;
 
-          // Save user name and role for later use
+          // Save user name, role and id for later use
           await TokenStorage.saveUserName(userProfile.fullname);
           await TokenStorage.saveUserRole(userProfile.role);
+          await TokenStorage.saveUserId(userProfile.id);
 
           // Handle remember me preference
           if (_rememberMe) {
@@ -303,31 +304,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
               scale: value,
               child: Hero(
                 tag: 'app_logo',
-                child: Container(
-                  width: 85,
-                  height: 85,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [AppColors.primary, AppColors.primaryLight],
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                    boxShadow: [
-                      BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
-                        spreadRadius: 0,
-                        blurRadius: 16,
-                        offset: const Offset(0, 8),
-                      ),
-                    ],
-                  ),
-                  child: const Center(
-                    child: Icon(
-                      Icons.school_rounded,
-                      color: Colors.white,
-                      size: 46,
-                    ),
+                child: SizedBox(
+                  width: 120,
+                  height: 120,
+                  child: Image.asset(
+                    'assets/logo.png',
+                    fit: BoxFit.contain,
                   ),
                 ),
               ),

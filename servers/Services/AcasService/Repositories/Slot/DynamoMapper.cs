@@ -12,7 +12,7 @@ public static class DynamoMapper
             ["classroomId"] = new AttributeValue { S = slot.ClassroomId },
             ["slotNumber"] = new AttributeValue { S = slot.SlotNumber },
             ["title"] = new AttributeValue { S = slot.Title },
-            ["description"] = new AttributeValue { S = slot.Description },
+            ["description"] = new AttributeValue { S = slot.Description ?? string.Empty },
             ["createdDate"] = new AttributeValue { S = slot.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
         };
 

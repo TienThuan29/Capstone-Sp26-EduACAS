@@ -74,7 +74,8 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:RegradingRequestTableName"] ?? "acas-regrading-requests",
             configuration["DynamoDB:SubjectTableName"] ?? "acas-subjects",
             configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions",
-            configuration["DynamoDB:NotificationTableName"] ?? "acas-notifications"
+            configuration["DynamoDB:NotificationTableName"] ?? "acas-notifications",
+            configuration["DynamoDB:SlotTableName"] ?? "acas-slots",
         };
 
         return tables

@@ -59,16 +59,12 @@ namespace AcasService.Application.Queries.Material
             try
             {
                 var materials = await _materialRepository.FindByClassroomIdAsync(classroomId);
-                
-                // Regenerate signed URLs for all materials
-                var materialResponses = new List<MaterialResponse>();
+                var fileUrls = await _privateS3Query.GetFileUrlsAsync(materials.Select(m => m.Filename));
                 foreach (var material in materials)
                 {
-                    material.FileUrl = await _privateS3Query.GetFileUrlAsync(material.Filename);
-                    materialResponses.Add(_materialMapper.ToMaterialResponse(material));
+                    material.FileUrl = fileUrls.GetValueOrDefault(material.Filename) ?? string.Empty;
                 }
-
-                return materialResponses;
+                return materials.Select(_materialMapper.ToMaterialResponse).ToList();
             }
             catch (Exception ex)
             {
@@ -82,16 +78,12 @@ namespace AcasService.Application.Queries.Material
             try
             {
                 var materials = await _materialRepository.FindAllAsync();
-                
-                // Regenerate signed URLs for all materials
-                var materialResponses = new List<MaterialResponse>();
+                var fileUrls = await _privateS3Query.GetFileUrlsAsync(materials.Select(m => m.Filename));
                 foreach (var material in materials)
                 {
-                    material.FileUrl = await _privateS3Query.GetFileUrlAsync(material.Filename);
-                    materialResponses.Add(_materialMapper.ToMaterialResponse(material));
+                    material.FileUrl = fileUrls.GetValueOrDefault(material.Filename) ?? string.Empty;
                 }
-
-                return materialResponses;
+                return materials.Select(_materialMapper.ToMaterialResponse).ToList();
             }
             catch (Exception ex)
             {

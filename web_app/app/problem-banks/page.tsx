@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useThemeContext } from "@/components/theme-provider";
 import { PageUrl } from "@/configs/page.url";
@@ -39,6 +39,7 @@ import type {
   UpdateProblemPayload,
 } from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { CustomPagination } from "@/components/custom-pagination";
 import { formatDateOnly } from "@/utils/datetime-utils";
 
 type ProblemFormData = {
@@ -65,7 +66,7 @@ export default function ProblemBanksPage() {
   const { isDark } = useThemeContext();
   const toast = useToast();
   const {
-    getProblemsByLecturerId,
+    getProblemsByLecturerIdPaged,
     createProblem,
     updateProblem,
     deleteProblem,
@@ -73,6 +74,10 @@ export default function ProblemBanksPage() {
 
   const [mounted, setMounted] = useState(false);
   const [problems, setProblems] = useState<ProblemBasicResponse[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [pageIndex, setPageIndex] = useState(1);
+  const pageSize = 10;
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
@@ -84,35 +89,47 @@ export default function ProblemBanksPage() {
   const [formData, setFormData] = useState<ProblemFormData>(initialFormData);
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-    fetchProblems();
-  }, [])
-
-  const fetchProblems = async () => {
+  const fetchProblems = useCallback(async () => {
+    const lecturerId = user?.id ?? "";
+    if (!lecturerId) {
+      setProblems([]);
+      setTotalCount(0);
+      setTotalPages(0);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
-      const data = await getProblemsByLecturerId(user?.id ?? "");
-      setProblems(data);
+      const result = await getProblemsByLecturerIdPaged(
+        lecturerId,
+        pageIndex,
+        pageSize,
+        searchTerm || undefined,
+        difficultyFilter === "all" ? undefined : difficultyFilter,
+      );
+      setProblems(result.items);
+      setTotalCount(result.totalCount);
+      setTotalPages(result.totalPages);
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       toast.showError(err.response?.data?.message ?? "Failed to load problems");
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.id, pageIndex, pageSize, searchTerm, difficultyFilter, getProblemsByLecturerIdPaged, toast]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || !user?.id) return;
+    fetchProblems();
+  }, [mounted, user?.id, fetchProblems]);
 
   if (!mounted) return null;
 
-  const filteredProblems = problems.filter((p) => {
-    const matchesSearch = p.title
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const normalized = normalizeDifficulty(p.difficulty);
-    const matchesDifficulty =
-      difficultyFilter === "all" || normalized === difficultyFilter;
-    return matchesSearch && matchesDifficulty;
-  });
+  const displayedProblems = problems;
 
   const handleViewDetail = (row: ProblemBasicResponse) => {
     router.push(PageUrl.PROBLEM_BANKS_VIEW_PAGE(row.id));
@@ -186,6 +203,11 @@ export default function ProblemBanksPage() {
         </h1>
         <p className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}>
           Create and manage coding problems
+          {!loading && totalCount >= 0 && (
+            <span className="ml-2 font-medium">
+              ({totalCount} problem{totalCount !== 1 ? "s" : ""})
+            </span>
+          )}
         </p>
       </div>
 
@@ -197,13 +219,19 @@ export default function ProblemBanksPage() {
               icon={MagnifyingGlassIcon}
               placeholder="Search by title..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPageIndex(1);
+              }}
               className="w-full"
             />
           </div>
           <Select
             value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
+            onChange={(e) => {
+              setDifficultyFilter(e.target.value);
+              setPageIndex(1);
+            }}
             className="min-w-[140px]"
           >
             <option value="all">All difficulty</option>
@@ -246,7 +274,7 @@ export default function ProblemBanksPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredProblems.length === 0 ? (
+              {displayedProblems.length === 0 ? (
                 <TableRow>
                   <TableCell
                     colSpan={7}
@@ -256,7 +284,7 @@ export default function ProblemBanksPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredProblems.map((p) => (
+                displayedProblems.map((p) => (
                   <TableRow key={p.id}>
                     <TableCell
                       className={`max-w-xs truncate font-medium ${isDark ? "text-white" : "text-gray-900"}`}
@@ -340,6 +368,14 @@ export default function ProblemBanksPage() {
           </Table>
         )}
       </div>
+
+      {!loading && totalPages > 1 && (
+        <CustomPagination
+          currentPage={pageIndex}
+          totalPages={totalPages}
+          onPageChange={setPageIndex}
+        />
+      )}
 
       <ProblemFormModal
         show={isModalOpen}

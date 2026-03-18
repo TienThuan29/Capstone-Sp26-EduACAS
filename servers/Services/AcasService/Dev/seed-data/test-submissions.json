@@ -1,0 +1,1752 @@
+[
+  {
+    "id": "subm-test-python-001-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-001",
+    "source": "a = int(input())\nb = int(input())\nprint(a + b)"
+  },
+  {
+    "id": "subm-test-python-001-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-001",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-001-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-001",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt();\n        int b = sc.nextInt();\n        System.out.println(a + b);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-001-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-001",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-002-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-002",
+    "source": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)"
+  },
+  {
+    "id": "subm-test-python-002-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-002",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-002-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-002",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        if (n % 15 == 0) System.out.println(\"FizzBuzz\");\n        else if (n % 3 == 0) System.out.println(\"Fizz\");\n        else if (n % 5 == 0) System.out.println(\"Buzz\");\n        else System.out.println(n);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-002-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-002",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-003-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-003",
+    "source": "s = input()\nprint(s[::-1])"
+  },
+  {
+    "id": "subm-test-python-003-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-003",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-003-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-003",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine();\n        System.out.println(new StringBuilder(s).reverse().toString());\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-003-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-003",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-004-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-004",
+    "source": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")"
+  },
+  {
+    "id": "subm-test-python-004-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-004",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-004-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-004",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine();\n        String r = new StringBuilder(s).reverse().toString();\n        System.out.println(s.equals(r) ? \"YES\" : \"NO\");\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-004-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-004",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-005-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-005",
+    "source": "n = int(input())\nprint(len(str(n)))"
+  },
+  {
+    "id": "subm-test-python-005-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-005",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-005-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-005",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(String.valueOf(n).length());\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-005-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-005",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-006-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-006",
+    "source": "s = int(input())\nif s >= 90:\n    print(\"A\")\nelif s >= 80:\n    print(\"B\")\nelif s >= 70:\n    print(\"C\")\nelif s >= 60:\n    print(\"D\")\nelse:\n    print(\"F\")"
+  },
+  {
+    "id": "subm-test-python-006-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-006",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-006-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-006",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int s = sc.nextInt();\n        if (s >= 90) System.out.println(\"A\");\n        else if (s >= 80) System.out.println(\"B\");\n        else if (s >= 70) System.out.println(\"C\");\n        else if (s >= 60) System.out.println(\"D\");\n        else System.out.println(\"F\");\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-006-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-006",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-007-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-007",
+    "source": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")"
+  },
+  {
+    "id": "subm-test-python-007-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-007",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-007-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-007",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        System.out.println(n % 2 == 0 ? \"Even\" : \"Odd\");\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-007-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-007",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-008-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-008",
+    "source": "y = int(input())\nif y % 400 == 0:\n    print(\"Leap\")\nelif y % 100 == 0:\n    print(\"Not Leap\")\nelif y % 4 == 0:\n    print(\"Leap\")\nelse:\n    print(\"Not Leap\")"
+  },
+  {
+    "id": "subm-test-python-008-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-008",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-008-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-008",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int y = sc.nextInt();\n        if (y % 400 == 0) System.out.println(\"Leap\");\n        else if (y % 100 == 0) System.out.println(\"Not Leap\");\n        else if (y % 4 == 0) System.out.println(\"Leap\");\n        else System.out.println(\"Not Leap\");\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-008-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-008",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-009-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-009",
+    "source": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or b == c or a == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")"
+  },
+  {
+    "id": "subm-test-python-009-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-009",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-009-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-009",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int a = sc.nextInt(), b = sc.nextInt(), c = sc.nextInt();\n        if (a + b <= c || a + c <= b || b + c <= a) System.out.println(\"Not a triangle\");\n        else if (a == b && b == c) System.out.println(\"Equilateral\");\n        else if (a == b || b == c || a == c) System.out.println(\"Isosceles\");\n        else System.out.println(\"Scalene\");\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-009-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-009",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-010-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-010",
+    "source": "import math\nr = float(input())\nprint(math.pi * r * r)"
+  },
+  {
+    "id": "subm-test-python-010-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-010",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-010-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-010",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double r = sc.nextDouble();\n        System.out.println(Math.PI * r * r);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-010-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-010",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-011-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-011",
+    "source": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))"
+  },
+  {
+    "id": "subm-test-python-011-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-011",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-011-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-011",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double a = sc.nextDouble(), b = sc.nextDouble();\n        System.out.println(Math.sqrt(a * a + b * b));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-011-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-011",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-012-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-012",
+    "source": "P, r, n, t = map(float, input().split())\nprint(P * (1 + r / n) ** (n * t))"
+  },
+  {
+    "id": "subm-test-python-012-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-012",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-012-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-012",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double P = sc.nextDouble(), r = sc.nextDouble(), n = sc.nextDouble(), t = sc.nextDouble();\n        System.out.println(P * Math.pow(1 + r / n, n * t));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-012-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-012",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-013-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-013",
+    "source": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().split())\nprint(math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2))"
+  },
+  {
+    "id": "subm-test-python-013-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-013",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-013-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-013",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double x1 = sc.nextDouble(), y1 = sc.nextDouble();\n        double x2 = sc.nextDouble(), y2 = sc.nextDouble();\n        System.out.println(Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2)));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-013-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-013",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-014-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-014",
+    "source": "n = int(input())\nnums = list(map(int, input().split()))\nprint(f\"{sum(nums) / n:.2f}\")"
+  },
+  {
+    "id": "subm-test-python-014-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-014",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-014-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-014",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int sum = 0;\n        for (int i = 0; i < n; i++) sum += sc.nextInt();\n        System.out.println(String.format(\"%.2f\", (double) sum / n));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-014-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-014",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-015-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-015",
+    "source": "c = float(input())\nprint(f\"{c * 9 / 5 + 32:.2f}\")"
+  },
+  {
+    "id": "subm-test-python-015-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-015",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-015-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-015",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double c = sc.nextDouble();\n        System.out.println(String.format(\"%.2f\", c * 9 / 5 + 32));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-015-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-015",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-016-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-016",
+    "source": "w, h = map(float, input().split())\nprint(f\"{w / (h * h):.2f}\")"
+  },
+  {
+    "id": "subm-test-python-016-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-016",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-016-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-016",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double w = sc.nextDouble(), h = sc.nextDouble();\n        System.out.println(String.format(\"%.2f\", w / (h * h)));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-016-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-016",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-017-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-017",
+    "source": "import math\nn = int(input())\nnums = list(map(float, input().split()))\nmean = sum(nums) / n\nvar = sum((x - mean) ** 2 for x in nums) / n\nprint(f\"{math.sqrt(var):.4f}\")"
+  },
+  {
+    "id": "subm-test-python-017-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-017",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-017-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-017",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        double[] nums = new double[n];\n        double sum = 0;\n        for (int i = 0; i < n; i++) { nums[i] = sc.nextDouble(); sum += nums[i]; }\n        double mean = sum / n;\n        double var = 0;\n        for (double x : nums) var += (x - mean) * (x - mean);\n        System.out.println(String.format(\"%.4f\", Math.sqrt(var / n)));\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-017-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-017",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-018-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-018",
+    "source": "n = int(input())\nnums = list(map(int, input().split()))\nresult = []\ns = 0\nfor x in nums:\n    s += x\n    result.append(str(s))\nprint(\" \".join(result))"
+  },
+  {
+    "id": "subm-test-python-018-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-018",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-018-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-018",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int s = 0;\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            s += sc.nextInt();\n            if (i > 0) sb.append(\" \");\n            sb.append(s);\n        }\n        System.out.println(sb);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-018-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-018",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-019-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-019",
+    "source": "n = int(input())\nfib = []\na, b = 0, 1\nfor _ in range(n):\n    fib.append(str(a))\n    a, b = b, a + b\nprint(\" \".join(fib))"
+  },
+  {
+    "id": "subm-test-python-019-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-019",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-019-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-019",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        long a = 0, b = 1;\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            if (i > 0) sb.append(\" \");\n            sb.append(a);\n            long t = a + b;\n            a = b;\n            b = t;\n        }\n        System.out.println(sb);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-019-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-019",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-020-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-020",
+    "source": "n, k = map(int, input().split())\narr = list(map(int, input().split()))\nk = k % n\nrotated = arr[k:] + arr[:k]\nprint(\" \".join(map(str, rotated)))"
+  },
+  {
+    "id": "subm-test-python-020-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-020",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-020-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-020",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt(), k = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        k = k % n;\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            if (i > 0) sb.append(\" \");\n            sb.append(arr[(i + k) % n]);\n        }\n        System.out.println(sb);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-020-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-020",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-021-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-021",
+    "source": "rows, cols = map(int, input().split())\nsums = []\nfor _ in range(rows):\n    row = list(map(int, input().split()))\n    sums.append(str(sum(row)))\nprint(\" \".join(sums))"
+  },
+  {
+    "id": "subm-test-python-021-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-021",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-021-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-021",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int rows = sc.nextInt(), cols = sc.nextInt();\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < rows; i++) {\n            int sum = 0;\n            for (int j = 0; j < cols; j++) sum += sc.nextInt();\n            if (i > 0) sb.append(\" \");\n            sb.append(sum);\n        }\n        System.out.println(sb);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-021-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-021",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-022-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-022",
+    "source": "n = int(input())\nfactors = []\nd = 2\nwhile d * d <= n:\n    if n % d == 0:\n        factors.append(str(d))\n        while n % d == 0:\n            n //= d\n    d += 1\nif n > 1:\n    factors.append(str(n))\nprint(\" \".join(factors))"
+  },
+  {
+    "id": "subm-test-python-022-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-022",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-022-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-022",
+    "source": "import java.util.Scanner;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        StringBuilder sb = new StringBuilder();\n        for (int d = 2; d * d <= n; d++) {\n            if (n % d == 0) {\n                if (sb.length() > 0) sb.append(\" \");\n                sb.append(d);\n                while (n % d == 0) n /= d;\n            }\n        }\n        if (n > 1) {\n            if (sb.length() > 0) sb.append(\" \");\n            sb.append(n);\n        }\n        System.out.println(sb);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-022-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-022",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-023-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-023",
+    "source": "n = int(input())\nnums = list(map(int, input().split()))\nseen = set()\ndupes = set()\nfor x in nums:\n    if x in seen:\n        dupes.add(x)\n    seen.add(x)\nif dupes:\n    print(\" \".join(map(str, sorted(dupes))))\nelse:\n    print(\"NONE\")"
+  },
+  {
+    "id": "subm-test-python-023-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-023",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-023-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-023",
+    "source": "import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Set<Integer> seen = new HashSet<>(), dupes = new TreeSet<>();\n        for (int i = 0; i < n; i++) {\n            int x = sc.nextInt();\n            if (!seen.add(x)) dupes.add(x);\n        }\n        if (dupes.isEmpty()) System.out.println(\"NONE\");\n        else {\n            StringBuilder sb = new StringBuilder();\n            for (int d : dupes) {\n                if (sb.length() > 0) sb.append(\" \");\n                sb.append(d);\n            }\n            System.out.println(sb);\n        }\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-023-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-023",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-024-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-024",
+    "source": "n1 = int(input())\ns1 = set(map(int, input().split()))\nn2 = int(input())\ns2 = set(map(int, input().split()))\ninter = s1 & s2\nif inter:\n    print(\" \".join(map(str, sorted(inter))))\nelse:\n    print(\"EMPTY\")"
+  },
+  {
+    "id": "subm-test-python-024-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-024",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-024-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-024",
+    "source": "import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n1 = sc.nextInt();\n        Set<Integer> s1 = new TreeSet<>();\n        for (int i = 0; i < n1; i++) s1.add(sc.nextInt());\n        int n2 = sc.nextInt();\n        Set<Integer> s2 = new HashSet<>();\n        for (int i = 0; i < n2; i++) s2.add(sc.nextInt());\n        s1.retainAll(s2);\n        if (s1.isEmpty()) System.out.println(\"EMPTY\");\n        else {\n            StringBuilder sb = new StringBuilder();\n            for (int x : s1) {\n                if (sb.length() > 0) sb.append(\" \");\n                sb.append(x);\n            }\n            System.out.println(sb);\n        }\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-024-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-024",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-python-025-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-python",
+    "problemId": "prob-025",
+    "source": "s = input()\nseen = set()\nresult = []\nfor c in s:\n    if c not in seen:\n        seen.add(c)\n        result.append(c)\nprint(\" \".join(result))"
+  },
+  {
+    "id": "subm-test-python-025-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-python",
+    "problemId": "prob-025",
+    "source": "print(0)"
+  },
+  {
+    "id": "subm-test-java-025-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-java",
+    "problemId": "prob-025",
+    "source": "import java.util.*;\nclass Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine();\n        Set<Character> seen = new LinkedHashSet<>();\n        for (char c : s.toCharArray()) seen.add(c);\n        StringBuilder sb = new StringBuilder();\n        for (char c : seen) {\n            if (sb.length() > 0) sb.append(\" \");\n            sb.append(c);\n        }\n        System.out.println(sb);\n    }\n}"
+  },
+  {
+    "id": "subm-test-java-025-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-java",
+    "problemId": "prob-025",
+    "source": "class Main{public static void main(String[] a){System.out.println(0);}}"
+  },
+  {
+    "id": "subm-test-cpp-001-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-001",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int a,b;cin>>a>>b;cout<<a+b;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-001-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-001",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-002-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-002",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int n;cin>>n;if(n%15==0)cout<<\"FizzBuzz\";else if(n%3==0)cout<<\"Fizz\";else if(n%5==0)cout<<\"Buzz\";else cout<<n;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-002-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-002",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-003-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-003",
+    "source": "#include<iostream>\n#include<string>\n#include<algorithm>\nusing namespace std;\nint main(){string s;cin>>s;reverse(s.begin(),s.end());cout<<s;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-003-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-003",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-004-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-004",
+    "source": "#include<iostream>\n#include<string>\n#include<algorithm>\nusing namespace std;\nint main(){string s;cin>>s;string r=s;reverse(r.begin(),r.end());cout<<(s==r?\"YES\":\"NO\");return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-004-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-004",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-005-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-005",
+    "source": "#include<iostream>\n#include<string>\nusing namespace std;\nint main(){string s;cin>>s;cout<<s.length();return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-005-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-005",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-006-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-006",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int s;cin>>s;if(s>=90)cout<<\"A\";else if(s>=80)cout<<\"B\";else if(s>=70)cout<<\"C\";else if(s>=60)cout<<\"D\";else cout<<\"F\";return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-006-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-006",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-007-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-007",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int n;cin>>n;cout<<(n%2==0?\"Even\":\"Odd\");return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-007-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-007",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-008-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-008",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int y;cin>>y;cout<<((y%4==0&&y%100!=0)||y%400==0?\"Leap\":\"Not Leap\");return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-008-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-008",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-009-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-009",
+    "source": "#include<iostream>\n#include<algorithm>\nusing namespace std;\nint main(){int a,b,c;cin>>a>>b>>c;int mx=max({a,b,c});if(a+b+c-mx<=mx)cout<<\"Not a triangle\";else if(a==b&&b==c)cout<<\"Equilateral\";else if(a==b||b==c||a==c)cout<<\"Isosceles\";else cout<<\"Scalene\";return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-009-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-009",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-010-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-010",
+    "source": "#include<iostream>\n#include<cmath>\n#include<iomanip>\nusing namespace std;\nint main(){double r;cin>>r;cout<<fixed<<setprecision(4)<<acos(-1.0)*r*r;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-010-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-010",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-011-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-011",
+    "source": "#include<iostream>\n#include<cmath>\n#include<iomanip>\nusing namespace std;\nint main(){double a,b;cin>>a>>b;cout<<fixed<<setprecision(4)<<sqrt(a*a+b*b);return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-011-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-011",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-012-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-012",
+    "source": "#include<iostream>\n#include<cmath>\n#include<iomanip>\nusing namespace std;\nint main(){double P,r,n,t;cin>>P>>r>>n>>t;cout<<fixed<<setprecision(2)<<P*pow(1+r/n,n*t);return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-012-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-012",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-013-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-013",
+    "source": "#include<iostream>\n#include<cmath>\n#include<iomanip>\nusing namespace std;\nint main(){double x1,y1,x2,y2;cin>>x1>>y1>>x2>>y2;cout<<fixed<<setprecision(4)<<sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-013-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-013",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-014-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-014",
+    "source": "#include<iostream>\n#include<iomanip>\nusing namespace std;\nint main(){int n;cin>>n;double s=0;for(int i=0;i<n;i++){int x;cin>>x;s+=x;}cout<<fixed<<setprecision(2)<<s/n;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-014-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-014",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-015-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-015",
+    "source": "#include<iostream>\n#include<iomanip>\nusing namespace std;\nint main(){double c;cin>>c;cout<<fixed<<setprecision(2)<<c*9.0/5.0+32.0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-015-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-015",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-016-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-016",
+    "source": "#include<iostream>\n#include<iomanip>\nusing namespace std;\nint main(){double w,h;cin>>w>>h;cout<<fixed<<setprecision(2)<<w/(h*h);return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-016-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-016",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-017-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-017",
+    "source": "#include<iostream>\n#include<cmath>\n#include<iomanip>\n#include<vector>\nusing namespace std;\nint main(){int n;cin>>n;vector<double>a(n);double s=0;for(int i=0;i<n;i++){cin>>a[i];s+=a[i];}double m=s/n,v=0;for(int i=0;i<n;i++)v+=(a[i]-m)*(a[i]-m);cout<<fixed<<setprecision(4)<<sqrt(v/n);return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-017-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-017",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-018-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-018",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int n;cin>>n;int s=0;for(int i=0;i<n;i++){int x;cin>>x;s+=x;if(i)cout<<\" \";cout<<s;}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-018-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-018",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-019-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-019",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int n;cin>>n;long long a=0,b=1;for(int i=0;i<n;i++){if(i)cout<<\" \";cout<<a;long long c=a+b;a=b;b=c;}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-019-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-019",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-020-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-020",
+    "source": "#include<iostream>\n#include<vector>\nusing namespace std;\nint main(){int n,k;cin>>n>>k;vector<int>a(n);for(int i=0;i<n;i++)cin>>a[i];k%=n;for(int i=0;i<n;i++){if(i)cout<<\" \";cout<<a[(i+k)%n];}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-020-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-020",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-021-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-021",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int r,c;cin>>r>>c;for(int i=0;i<r;i++){int s=0;for(int j=0;j<c;j++){int x;cin>>x;s+=x;}if(i)cout<<\" \";cout<<s;}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-021-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-021",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-022-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-022",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){int n;cin>>n;int f=0;for(int i=2;i*i<=n;i++){if(n%i==0){if(f)cout<<\" \";cout<<i;f=1;while(n%i==0)n/=i;}}if(n>1){if(f)cout<<\" \";cout<<n;}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-022-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-022",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-023-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-023",
+    "source": "#include<iostream>\n#include<map>\nusing namespace std;\nint main(){int n;cin>>n;map<int,int>m;int a[10000];for(int i=0;i<n;i++){cin>>a[i];m[a[i]]++;}int f=0;for(auto&p:m){if(p.second>1){if(f)cout<<\" \";cout<<p.first;f=1;}}if(!f)cout<<\"NONE\";return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-023-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-023",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-024-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-024",
+    "source": "#include<iostream>\n#include<set>\nusing namespace std;\nint main(){int n1;cin>>n1;set<int>s1;for(int i=0;i<n1;i++){int x;cin>>x;s1.insert(x);}int n2;cin>>n2;set<int>res;for(int i=0;i<n2;i++){int x;cin>>x;if(s1.count(x))res.insert(x);}if(res.empty())cout<<\"EMPTY\";else{int f=0;for(int x:res){if(f)cout<<\" \";cout<<x;f=1;}}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-024-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-024",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-025-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-025",
+    "source": "#include<iostream>\n#include<string>\n#include<set>\nusing namespace std;\nint main(){string s;cin>>s;set<char>seen;int f=0;for(char c:s){if(!seen.count(c)){if(f)cout<<\" \";cout<<c;f=1;seen.insert(c);}}return 0;}"
+  },
+  {
+    "id": "subm-test-cpp-025-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-cpp",
+    "problemId": "prob-025",
+    "source": "#include<iostream>\nusing namespace std;\nint main(){cout<<0;return 0;}"
+  },
+  {
+    "id": "subm-test-c-001-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-001",
+    "source": "#include<stdio.h>\nint main(){int a,b;scanf(\"%d%d\",&a,&b);printf(\"%d\",a+b);return 0;}"
+  },
+  {
+    "id": "subm-test-c-001-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-001",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-002-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-002",
+    "source": "#include<stdio.h>\nint main(){int n;scanf(\"%d\",&n);if(n%15==0)printf(\"FizzBuzz\");else if(n%3==0)printf(\"Fizz\");else if(n%5==0)printf(\"Buzz\");else printf(\"%d\",n);return 0;}"
+  },
+  {
+    "id": "subm-test-c-002-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-002",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-003-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-003",
+    "source": "#include<stdio.h>\n#include<string.h>\nint main(){char s[1001];scanf(\"%s\",s);int n=strlen(s);for(int i=n-1;i>=0;i--)printf(\"%c\",s[i]);return 0;}"
+  },
+  {
+    "id": "subm-test-c-003-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-003",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-004-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-004",
+    "source": "#include<stdio.h>\n#include<string.h>\nint main(){char s[1001];scanf(\"%s\",s);int n=strlen(s),p=1;for(int i=0;i<n/2;i++)if(s[i]!=s[n-1-i])p=0;printf(p?\"YES\":\"NO\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-004-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-004",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-005-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-005",
+    "source": "#include<stdio.h>\n#include<string.h>\nint main(){char s[100];scanf(\"%s\",s);printf(\"%d\",(int)strlen(s));return 0;}"
+  },
+  {
+    "id": "subm-test-c-005-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-005",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-006-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-006",
+    "source": "#include<stdio.h>\nint main(){int s;scanf(\"%d\",&s);if(s>=90)printf(\"A\");else if(s>=80)printf(\"B\");else if(s>=70)printf(\"C\");else if(s>=60)printf(\"D\");else printf(\"F\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-006-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-006",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-007-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-007",
+    "source": "#include<stdio.h>\nint main(){int n;scanf(\"%d\",&n);printf(n%2==0?\"Even\":\"Odd\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-007-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-007",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-008-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-008",
+    "source": "#include<stdio.h>\nint main(){int y;scanf(\"%d\",&y);printf((y%4==0&&y%100!=0)||y%400==0?\"Leap\":\"Not Leap\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-008-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-008",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-009-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-009",
+    "source": "#include<stdio.h>\nint main(){int a,b,c;scanf(\"%d%d%d\",&a,&b,&c);int mx=a;if(b>mx)mx=b;if(c>mx)mx=c;if(a+b+c-mx<=mx)printf(\"Not a triangle\");else if(a==b&&b==c)printf(\"Equilateral\");else if(a==b||b==c||a==c)printf(\"Isosceles\");else printf(\"Scalene\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-009-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-009",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-010-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-010",
+    "source": "#include<stdio.h>\n#include<math.h>\nint main(){double r;scanf(\"%lf\",&r);printf(\"%.4f\",acos(-1.0)*r*r);return 0;}"
+  },
+  {
+    "id": "subm-test-c-010-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-010",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-011-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-011",
+    "source": "#include<stdio.h>\n#include<math.h>\nint main(){double a,b;scanf(\"%lf%lf\",&a,&b);printf(\"%.4f\",sqrt(a*a+b*b));return 0;}"
+  },
+  {
+    "id": "subm-test-c-011-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-011",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-012-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-012",
+    "source": "#include<stdio.h>\n#include<math.h>\nint main(){double P,r,n,t;scanf(\"%lf%lf%lf%lf\",&P,&r,&n,&t);printf(\"%.2f\",P*pow(1+r/n,n*t));return 0;}"
+  },
+  {
+    "id": "subm-test-c-012-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-012",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-013-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-013",
+    "source": "#include<stdio.h>\n#include<math.h>\nint main(){double x1,y1,x2,y2;scanf(\"%lf%lf%lf%lf\",&x1,&y1,&x2,&y2);printf(\"%.4f\",sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)));return 0;}"
+  },
+  {
+    "id": "subm-test-c-013-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-013",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-014-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-014",
+    "source": "#include<stdio.h>\nint main(){int n;scanf(\"%d\",&n);double s=0;for(int i=0;i<n;i++){int x;scanf(\"%d\",&x);s+=x;}printf(\"%.2f\",s/n);return 0;}"
+  },
+  {
+    "id": "subm-test-c-014-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-014",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-015-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-015",
+    "source": "#include<stdio.h>\nint main(){double c;scanf(\"%lf\",&c);printf(\"%.2f\",c*9.0/5.0+32.0);return 0;}"
+  },
+  {
+    "id": "subm-test-c-015-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-015",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-016-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-016",
+    "source": "#include<stdio.h>\nint main(){double w,h;scanf(\"%lf%lf\",&w,&h);printf(\"%.2f\",w/(h*h));return 0;}"
+  },
+  {
+    "id": "subm-test-c-016-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-016",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-017-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-017",
+    "source": "#include<stdio.h>\n#include<math.h>\nint main(){int n;scanf(\"%d\",&n);double a[10000],s=0;for(int i=0;i<n;i++){scanf(\"%lf\",&a[i]);s+=a[i];}double m=s/n,v=0;for(int i=0;i<n;i++)v+=(a[i]-m)*(a[i]-m);printf(\"%.4f\",sqrt(v/n));return 0;}"
+  },
+  {
+    "id": "subm-test-c-017-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-017",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-018-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-018",
+    "source": "#include<stdio.h>\nint main(){int n;scanf(\"%d\",&n);int s=0;for(int i=0;i<n;i++){int x;scanf(\"%d\",&x);s+=x;if(i)printf(\" \");printf(\"%d\",s);}return 0;}"
+  },
+  {
+    "id": "subm-test-c-018-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-018",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-019-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-019",
+    "source": "#include<stdio.h>\nint main(){int n;scanf(\"%d\",&n);long long a=0,b=1;for(int i=0;i<n;i++){if(i)printf(\" \");printf(\"%lld\",a);long long c=a+b;a=b;b=c;}return 0;}"
+  },
+  {
+    "id": "subm-test-c-019-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-019",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-020-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-020",
+    "source": "#include<stdio.h>\nint main(){int n,k;scanf(\"%d%d\",&n,&k);int a[10000];for(int i=0;i<n;i++)scanf(\"%d\",&a[i]);k%=n;for(int i=0;i<n;i++){if(i)printf(\" \");printf(\"%d\",a[(i+k)%n]);}return 0;}"
+  },
+  {
+    "id": "subm-test-c-020-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-020",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-021-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-021",
+    "source": "#include<stdio.h>\nint main(){int r,c;scanf(\"%d%d\",&r,&c);for(int i=0;i<r;i++){int s=0;for(int j=0;j<c;j++){int x;scanf(\"%d\",&x);s+=x;}if(i)printf(\" \");printf(\"%d\",s);}return 0;}"
+  },
+  {
+    "id": "subm-test-c-021-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-021",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-022-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-022",
+    "source": "#include<stdio.h>\nint main(){int n;scanf(\"%d\",&n);int f=0;for(int i=2;i*i<=n;i++){if(n%i==0){if(f)printf(\" \");printf(\"%d\",i);f=1;while(n%i==0)n/=i;}}if(n>1){if(f)printf(\" \");printf(\"%d\",n);}return 0;}"
+  },
+  {
+    "id": "subm-test-c-022-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-022",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-023-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-023",
+    "source": "#include<stdio.h>\n#include<stdlib.h>\nint cmp(const void*a,const void*b){return *(int*)a-*(int*)b;}\nint main(){int n;scanf(\"%d\",&n);int a[10000];for(int i=0;i<n;i++)scanf(\"%d\",&a[i]);qsort(a,n,sizeof(int),cmp);int f=0;for(int i=1;i<n;i++){if(a[i]==a[i-1]){if(i>1&&a[i]==a[i-2])continue;if(f)printf(\" \");printf(\"%d\",a[i]);f=1;}}if(!f)printf(\"NONE\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-023-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-023",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-024-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-024",
+    "source": "#include<stdio.h>\nint main(){int n1;scanf(\"%d\",&n1);int a[10000];for(int i=0;i<n1;i++)scanf(\"%d\",&a[i]);int n2;scanf(\"%d\",&n2);int b[10000];for(int i=0;i<n2;i++)scanf(\"%d\",&b[i]);int res[10000],rc=0;for(int i=0;i<n2;i++){for(int j=0;j<n1;j++){if(b[i]==a[j]){int dup=0;for(int k=0;k<rc;k++)if(res[k]==b[i])dup=1;if(!dup)res[rc++]=b[i];break;}}}if(rc==0)printf(\"EMPTY\");else{for(int i=0;i<rc;i++){if(i)printf(\" \");printf(\"%d\",res[i]);}}return 0;}"
+  },
+  {
+    "id": "subm-test-c-024-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-024",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-c-025-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-c",
+    "problemId": "prob-025",
+    "source": "#include<stdio.h>\n#include<string.h>\nint main(){char s[1001];scanf(\"%s\",s);int seen[256]={0};int f=0;for(int i=0;i<(int)strlen(s);i++){if(!seen[(unsigned char)s[i]]){if(f)printf(\" \");printf(\"%c\",s[i]);f=1;seen[(unsigned char)s[i]]=1;}}return 0;}"
+  },
+  {
+    "id": "subm-test-c-025-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-c",
+    "problemId": "prob-025",
+    "source": "#include<stdio.h>\nint main(){printf(\"0\");return 0;}"
+  },
+  {
+    "id": "subm-test-javascript-001-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-001",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst a = parseInt(lines[0]);\nconst b = parseInt(lines[1]);\nconsole.log(a + b);\n"
+  },
+  {
+    "id": "subm-test-javascript-001-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-001",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-002-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-002",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nif (n % 15 === 0) console.log('FizzBuzz');\nelse if (n % 3 === 0) console.log('Fizz');\nelse if (n % 5 === 0) console.log('Buzz');\nelse console.log(n);\n"
+  },
+  {
+    "id": "subm-test-javascript-002-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-002",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-003-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-003",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconsole.log(lines[0].split('').reverse().join(''));\n"
+  },
+  {
+    "id": "subm-test-javascript-003-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-003",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-004-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-004",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst s = lines[0];\nconsole.log(s === s.split('').reverse().join('') ? 'YES' : 'NO');\n"
+  },
+  {
+    "id": "subm-test-javascript-004-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-004",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-005-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-005",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconsole.log(lines[0].length);\n"
+  },
+  {
+    "id": "subm-test-javascript-005-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-005",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-006-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-006",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst score = parseInt(lines[0]);\nif (score >= 90) console.log('A');\nelse if (score >= 80) console.log('B');\nelse if (score >= 70) console.log('C');\nelse if (score >= 60) console.log('D');\nelse console.log('F');\n"
+  },
+  {
+    "id": "subm-test-javascript-006-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-006",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-007-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-007",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconsole.log(n % 2 === 0 ? 'Even' : 'Odd');\n"
+  },
+  {
+    "id": "subm-test-javascript-007-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-007",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-008-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-008",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst y = parseInt(lines[0]);\nif ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) console.log('Leap');\nelse console.log('Not Leap');\n"
+  },
+  {
+    "id": "subm-test-javascript-008-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-008",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-009-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-009",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [a, b, c] = lines[0].split(' ').map(Number);\nif (a + b <= c || a + c <= b || b + c <= a) console.log('Not a triangle');\nelse if (a === b && b === c) console.log('Equilateral');\nelse if (a === b || b === c || a === c) console.log('Isosceles');\nelse console.log('Scalene');\n"
+  },
+  {
+    "id": "subm-test-javascript-009-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-009",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-010-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-010",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst r = parseFloat(lines[0]);\nconsole.log((Math.PI * r * r).toFixed(4));\n"
+  },
+  {
+    "id": "subm-test-javascript-010-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-010",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-011-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-011",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [a, b] = lines[0].split(' ').map(Number);\nconsole.log(Math.sqrt(a * a + b * b).toFixed(4));\n"
+  },
+  {
+    "id": "subm-test-javascript-011-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-011",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-012-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-012",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [P, r, n, t] = lines[0].split(' ').map(Number);\nconst A = P * Math.pow(1 + r / n, n * t);\nconsole.log(A.toFixed(2));\n"
+  },
+  {
+    "id": "subm-test-javascript-012-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-012",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-013-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-013",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [x1, y1] = lines[0].split(' ').map(Number);\nconst [x2, y2] = lines[1].split(' ').map(Number);\nconsole.log(Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2).toFixed(4));\n"
+  },
+  {
+    "id": "subm-test-javascript-013-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-013",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-014-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-014",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nconst avg = nums.reduce((s, v) => s + v, 0) / n;\nconsole.log(avg.toFixed(2));\n"
+  },
+  {
+    "id": "subm-test-javascript-014-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-014",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-015-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-015",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst c = parseFloat(lines[0]);\nconsole.log((c * 9 / 5 + 32).toFixed(2));\n"
+  },
+  {
+    "id": "subm-test-javascript-015-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-015",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-016-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-016",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [w, h] = lines[0].split(' ').map(Number);\nconsole.log((w / (h * h)).toFixed(2));\n"
+  },
+  {
+    "id": "subm-test-javascript-016-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-016",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-017-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-017",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nconst mean = nums.reduce((s, v) => s + v, 0) / n;\nconst variance = nums.reduce((s, v) => s + (v - mean) ** 2, 0) / n;\nconsole.log(Math.sqrt(variance).toFixed(4));\n"
+  },
+  {
+    "id": "subm-test-javascript-017-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-017",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-018-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-018",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nconst prefix = [];\nlet sum = 0;\nfor (let i = 0; i < n; i++) { sum += nums[i]; prefix.push(sum); }\nconsole.log(prefix.join(' '));\n"
+  },
+  {
+    "id": "subm-test-javascript-018-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-018",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-019-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-019",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst fib = [];\nfor (let i = 0; i < n; i++) { if (i === 0) fib.push(0); else if (i === 1) fib.push(1); else fib.push(fib[i-1] + fib[i-2]); }\nconsole.log(fib.join(' '));\n"
+  },
+  {
+    "id": "subm-test-javascript-019-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-019",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-020-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-020",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [n, k] = lines[0].split(' ').map(Number);\nconst arr = lines[1].split(' ').map(Number);\nconst rot = k % n;\nconst result = arr.slice(rot).concat(arr.slice(0, rot));\nconsole.log(result.join(' '));\n"
+  },
+  {
+    "id": "subm-test-javascript-020-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-020",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-021-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-021",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst [rows, cols] = lines[0].split(' ').map(Number);\nconst sums = [];\nfor (let i = 0; i < rows; i++) { const row = lines[i + 1].split(' ').map(Number); sums.push(row.reduce((a, b) => a + b, 0)); }\nconsole.log(sums.join(' '));\n"
+  },
+  {
+    "id": "subm-test-javascript-021-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-021",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-022-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-022",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nlet n = parseInt(lines[0]);\nconst factors = [];\nfor (let i = 2; i * i <= n; i++) { if (n % i === 0) { factors.push(i); while (n % i === 0) n /= i; } }\nif (n > 1) factors.push(n);\nconsole.log(factors.join(' '));\n"
+  },
+  {
+    "id": "subm-test-javascript-022-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-022",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-023-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-023",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n = parseInt(lines[0]);\nconst nums = lines[1].split(' ').map(Number);\nconst count = {};\nnums.forEach(v => { count[v] = (count[v] || 0) + 1; });\nconst dups = Object.keys(count).filter(k => count[k] > 1).map(Number);\nconsole.log(dups.length > 0 ? dups.join(' ') : 'NONE');\n"
+  },
+  {
+    "id": "subm-test-javascript-023-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-023",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-024-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-024",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst n1 = parseInt(lines[0]);\nconst set1 = new Set(lines[1].split(' ').map(Number));\nconst n2 = parseInt(lines[2]);\nconst arr2 = lines[3].split(' ').map(Number);\nconst inter = arr2.filter(v => set1.has(v));\nconst unique = [...new Set(inter)];\nconsole.log(unique.length > 0 ? unique.join(' ') : 'EMPTY');\n"
+  },
+  {
+    "id": "subm-test-javascript-024-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-024",
+    "source": "console.log(0);\n"
+  },
+  {
+    "id": "subm-test-javascript-025-ok",
+    "studentId": "usr-stu-001",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-025",
+    "source": "const lines = require('fs').readFileSync('/dev/stdin', 'utf8').trim().split('\\n');\nconst s = lines[0];\nconst seen = new Set();\nconst unique = [];\nfor (const ch of s) { if (!seen.has(ch)) { seen.add(ch); unique.push(ch); } }\nconsole.log(unique.join(' '));\n"
+  },
+  {
+    "id": "subm-test-javascript-025-bad",
+    "studentId": "usr-stu-002",
+    "examId": "exam-test-javascript",
+    "problemId": "prob-025",
+    "source": "console.log(0);\n"
+  }
+]

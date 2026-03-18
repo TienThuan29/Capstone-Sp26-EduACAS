@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations;
+using AcasService.Dev;
 
 namespace AcasService.Models;
 
+[DynamoDBEntity("RegradingRequestTableName")]
 public class RegradingRequest
 {
     [Key]
@@ -9,7 +11,7 @@ public class RegradingRequest
     
     private string ExaminationId { get; set; } = string.Empty;
     
-    private string ProblemId { get; set; } = string.Empty;
+    // private string ProblemId { get; set; } = string.Empty;
     
     private string SubmissionId { get; set; } = string.Empty;
     
