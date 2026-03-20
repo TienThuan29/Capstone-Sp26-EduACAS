@@ -1,4 +1,5 @@
 using AcasService.Application.Queries.Problem;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -17,6 +18,37 @@ public class ProblemQueryController : ControllerBase
     {
         _problemQuery = problemQuery;
         _logger = logger;
+    }
+
+    [HttpGet("by-ids")]
+    public async Task<ActionResult<ApiResponse<object>>> GetProblemsByIds([FromQuery] string? ids)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(ids))
+            {
+                return ResponseUtil.Error<object>("Query parameter 'ids' is required (comma-separated problem IDs).", statusCode: 400);
+            }
+            var problemIds = ids!.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            if (problemIds.Count == 0)
+            {
+                return ResponseUtil.Success(new List<object>(), "No problem IDs provided.");
+            }
+            var problems = await _problemQuery.GetProblemsByIdsAsync(problemIds);
+            return ResponseUtil.Success(
+                problems,
+                $"Retrieved {problems.Count} problems."
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving problems by ids");
+            return ResponseUtil.Error<object>(
+                "Failed to retrieve problems.",
+                error: ex.Message,
+                stack: ex.StackTrace
+            );
+        }
     }
 
     [HttpGet("{problemId}")]
@@ -79,25 +111,30 @@ public class ProblemQueryController : ControllerBase
     }
 
     [HttpGet("lecturer/{lecturerId}")]
-    public async Task<ActionResult<ApiResponse<object>>> GetProblemsByLecturerId([FromRoute] string lecturerId)
+    public async Task<ActionResult<ApiResponse<PagedResult<ProblemBasicResponse>>>> GetProblemsByLecturerId(
+        [FromRoute] string lecturerId,
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? difficulty = null)
     {
         try
         {
             if (string.IsNullOrWhiteSpace(lecturerId))
             {
-                return ResponseUtil.Error<object>("Lecturer ID is required.", statusCode: 400);
+                return ResponseUtil.Error<PagedResult<ProblemBasicResponse>>("Lecturer ID is required.", statusCode: 400);
             }
 
-            var problems = await _problemQuery.GetProblemsByLecturerIdAsync(lecturerId);
+            var result = await _problemQuery.GetProblemsByLecturerIdPagedAsync(
+                lecturerId, pageIndex, pageSize, searchTerm, difficulty);
             return ResponseUtil.Success(
-                problems,
-                $"Retrieved {problems.Count} problems for lecturer."
-            );
+                result,
+                $"Retrieved page {result.PageIndex} of {result.TotalPages} ({result.TotalCount} total).");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving problems for lecturer {LecturerId}", lecturerId);
-            return ResponseUtil.Error<object>(
+            return ResponseUtil.Error<PagedResult<ProblemBasicResponse>>(
                 "Failed to retrieve problems.",
                 error: ex.Message,
                 stack: ex.StackTrace

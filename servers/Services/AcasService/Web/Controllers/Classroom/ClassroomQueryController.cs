@@ -1,4 +1,4 @@
-using AcasService.Application.Queries.Classroom;
+﻿using AcasService.Application.Queries.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
@@ -57,7 +57,7 @@ namespace AcasService.Web.Controllers.Classroom
             }
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("search")]
         public async Task<ActionResult<ApiResponse<ClassroomResponse>>> SearchClassrooms([FromBody] SearchClassroomRequest request)
         {

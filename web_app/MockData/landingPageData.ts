@@ -8,79 +8,79 @@ import {
 } from "@/components/svg-icons"
 
 export const heroStats = [
-  { number: "4+", label: "Ngôn ngữ" },
-  { number: "∞", label: "Bài tập" },
-  { number: "24/7", label: "Hỗ trợ" },
+  { number: "4+", label: "Languages" },
+  { number: "∞", label: "Exercises" },
+  { number: "24/7", label: "Support" },
 ]
 
 export const features = [
   {
     icon: UsersIcon,
-    title: "Quản lý lớp học",
+    title: "Classroom management",
     description:
-      "Giảng viên dễ dàng tạo và quản lý các lớp học, thêm sinh viên vào lớp. Nội dung chi tiết sẽ được bổ sung sau.",
+      "Instructors can easily create and manage classrooms and add students to classes. Detailed content will be added later.",
   },
   {
     icon: BookOpenIcon,
-    title: "Tài liệu học tập",
+    title: "Learning materials",
     description:
-      "Chia sẻ tài liệu, slide bài giảng và tài nguyên học tập cho sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+      "Share documents, lecture slides, and learning resources with students. Detailed content will be added later.",
   },
   {
     icon: ClipboardIcon,
-    title: "Giao bài tập",
+    title: "Assignments",
     description:
-      "Giảng viên tạo và phân công bài tập lập trình cho sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+      "Instructors create and assign programming exercises to students. Detailed content will be added later.",
   },
   {
     icon: FileCodeIcon,
-    title: "Nộp bài trực tuyến",
+    title: "Online submission",
     description:
-      "Sinh viên nộp bài tập code trực tiếp trên hệ thống. Nội dung chi tiết sẽ được bổ sung sau.",
+      "Students submit code assignments directly on the system. Detailed content will be added later.",
   },
   {
     icon: CheckCircleIcon,
-    title: "Chấm điểm tự động",
+    title: "Automatic grading",
     description:
-      "Hệ thống tự động kiểm tra và chấm điểm bài tập của sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+      "The system automatically checks and grades student assignments. Detailed content will be added later.",
   },
   {
     icon: BarChartIcon,
-    title: "Theo dõi tiến độ",
+    title: "Progress tracking",
     description:
-      "Giảng viên theo dõi tiến độ học tập của từng sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+      "Instructors track each student's learning progress. Detailed content will be added later.",
   },
 ]
 
 export const communityStats = [
-  { number: "0", label: "Sinh viên hoạt động", sublabel: "Chưa có người dùng" },
-  { number: "0", label: "Giảng viên", sublabel: "Chưa có người dùng" },
-  { number: "0", label: "Lớp học", sublabel: "Chưa có người dùng" },
+  { number: "0", label: "Active students", sublabel: "No users yet" },
+  { number: "0", label: "Instructors", sublabel: "No users yet" },
+  { number: "0", label: "Classrooms", sublabel: "No users yet" },
 ]
 
 export const programmingLanguages = [
   {
     img: "/python-code-editor-with-syntax-highlighting-showin.png",
-    title: "Lập trình Python",
-    desc: "Học Python qua các bài tập thực hành về cấu trúc dữ liệu, thuật toán và ứng dụng thực tế. Nội dung chi tiết sẽ được bổ sung sau.",
+    title: "Python programming",
+    desc: "Learn Python through hands-on exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
     badge: "Python",
   },
   {
     img: "/javascript-code-with-colorful-syntax-highlighting-.png",
     title: "JavaScript",
-    desc: "Thành thạo JavaScript với các bài tập tương tác về ES6+, lập trình bất đồng bộ và thao tác DOM. Nội dung chi tiết sẽ được bổ sung sau.",
+    desc: "Master JavaScript with interactive exercises on ES6+, asynchronous programming, and DOM manipulation. Detailed content will be added later.",
     badge: "JavaScript",
   },
   {
     img: "/java-code-showing-class-structure-and-object-orien.png",
-    title: "Phát triển Java",
-    desc: "Tìm hiểu Java với các bài tập về OOP, cấu trúc dữ liệu và phát triển ứng dụng doanh nghiệp. Nội dung chi tiết sẽ được bổ sung sau.",
+    title: "Java development",
+    desc: "Learn Java with exercises on OOP, data structures, and enterprise application development. Detailed content will be added later.",
     badge: "Java",
   },
   {
     img: "/sql-query-editor-showing-database-tables-and-selec.png",
-    title: "SQL & Cơ sở dữ liệu",
-    desc: "Thực hành các câu truy vấn SQL, thiết kế cơ sở dữ liệu và làm việc hiệu quả với cơ sở dữ liệu quan hệ. Nội dung chi tiết sẽ được bổ sung sau.",
+    title: "SQL & Databases",
+    desc: "Practice SQL queries, database design, and work effectively with relational databases. Detailed content will be added later.",
     badge: "SQL",
   },
 ]

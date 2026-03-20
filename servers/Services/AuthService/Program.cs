@@ -57,6 +57,7 @@ builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredSer
 
 // RabbitMQ Consumer
 builder.Services.AddHostedService<UserRequestConsumer>();
+builder.Services.AddHostedService<UserBatchRequestConsumer>();
 
 // repo
 builder.Services.AddHostedService<DynamoDbHostedService>();

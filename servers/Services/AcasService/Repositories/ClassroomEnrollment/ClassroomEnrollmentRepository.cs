@@ -149,41 +149,55 @@ public class ClassroomEnrollmentRepository : DynamoRepository, IClassroomEnrollm
 
     public async Task<Models.ClassEnrollment?> FindByClassAndStudentIdAsync(string classId, string studentId)
     {
-        try
+        var result = await FindByClassIdsAndStudentIdAsync(new[] { classId }, studentId);
+        return result.GetValueOrDefault(classId);
+    }
+
+    public async Task<Dictionary<string, Models.ClassEnrollment?>> FindByClassIdsAndStudentIdAsync(IEnumerable<string> classIds, string studentId)
+    {
+        var idList = classIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        var result = new Dictionary<string, Models.ClassEnrollment?>(StringComparer.OrdinalIgnoreCase);
+        if (idList.Count == 0)
+            return result;
+        foreach (var id in idList)
+            result[id] = null;
+
+        const int inLimit = 100; 
+        var chunks = idList.Chunk(inLimit).ToList();
+
+        var chunkTasks = chunks.Select(async chunk =>
         {
+            var enrollments = new List<Models.ClassEnrollment>();
+            var inValues = new Dictionary<string, AttributeValue>();
+            inValues[":studentId"] = new AttributeValue { S = studentId };
+            for (var i = 0; i < chunk.Length; i++)
+                inValues[":c" + i] = new AttributeValue { S = chunk[i] };
+
+            var inExpr = string.Join(", ", chunk.Select((_, i) => ":c" + i));
             Dictionary<string, AttributeValue>? lastKey = null;
             do
             {
                 var scanRequest = new ScanRequest
                 {
                     TableName = _classroomEnrollmentTableName,
-                    FilterExpression = "classId = :classId AND studentId = :studentId",
-                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                    {
-                        [":classId"] = new AttributeValue { S = classId },
-                        [":studentId"] = new AttributeValue { S = studentId }
-                    },
+                    FilterExpression = "studentId = :studentId AND classId IN (" + inExpr + ")",
+                    ExpressionAttributeValues = inValues,
                     ExclusiveStartKey = lastKey
                 };
-
                 var response = await _dynamoDBClient.ScanAsync(scanRequest);
-
                 foreach (var item in response.Items)
-                {
-                    return DynamoMapper.DynamoItemToClassEnrollment(item);
-                }
-
+                    enrollments.Add(DynamoMapper.DynamoItemToClassEnrollment(item));
                 lastKey = response.LastEvaluatedKey;
-
             } while (lastKey != null && lastKey.Count > 0);
 
-            return null;
-        }
-        catch (Exception exception)
-        {
-            throw new Exception($"Error finding classroom enrollment for class {classId} and student {studentId}",
-                exception);
-        }
+            return enrollments;
+        });
+
+        var chunkResults = await Task.WhenAll(chunkTasks);
+        foreach (var enrollment in chunkResults.SelectMany(e => e))
+            result[enrollment.ClassId] = enrollment;
+
+        return result;
     }
 
     public async Task<List<Models.ClassEnrollment>> FindByClassIdAsync(string classId)

@@ -11,9 +11,11 @@ import { useAuth } from "@/contexts/AuthContext";
 
 type DiscussionTabProps = {
   classId: string;
+  /** When true, "Back to list" is shown in the page header instead of inside the detail view. */
+  hideBackButton?: boolean;
 };
 
-export function DiscussionTab({ classId }: DiscussionTabProps) {
+export function DiscussionTab({ classId, hideBackButton }: DiscussionTabProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const issueIdFromUrl = searchParams.get("issue");
@@ -109,6 +111,7 @@ export function DiscussionTab({ classId }: DiscussionTabProps) {
         issue={selectedIssue}
         classId={classId}
         onBack={handleBack}
+        hideBackButton={hideBackButton}
         onUpvote={handleUpvote}
         onStatusChange={() => {}}
         onSubmitComment={handleSubmitComment}

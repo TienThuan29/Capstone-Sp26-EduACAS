@@ -14,9 +14,12 @@ import { useExamination } from "@/hooks/exam/useExamination";
 import { useProblem } from "@/hooks/problem/useProblem";
 import type { Examination, Problem } from "@/types/examination";
 import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
+import { CustomPagination } from "@/components/custom-pagination";
 import { normalizeDifficulty } from "@/types/problem";
 import { formatDate, formatDurationMs } from "@/utils/datetime-utils";
 import { toExamProblem } from "@/utils/exam-problem";
+
+const PROBLEMS_PER_PAGE = 5;
 
 const MODE_LABELS: Record<number, string> = {
   0: "PRACTICAL",
@@ -27,7 +30,7 @@ function ExamDetailContent() {
   const params = useParams();
   const router = useRouter();
   const { getExaminationById } = useExamination();
-  const { getProblemById } = useProblem();
+  const { getProblemsByIds } = useProblem();
 
   const classId = params.id as string;
   const examId = params.examId as string;
@@ -36,6 +39,14 @@ function ExamDetailContent() {
   const [problems, setProblems] = useState<(Problem & { mark: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [problemsLoading, setProblemsLoading] = useState(false);
+  const [problemsPage, setProblemsPage] = useState(1);
+
+  const problemsTotalPages = Math.max(1, Math.ceil(problems.length / PROBLEMS_PER_PAGE));
+  const currentProblemsPage = Math.min(Math.max(1, problemsPage), problemsTotalPages);
+  const paginatedProblems = problems.slice(
+    (currentProblemsPage - 1) * PROBLEMS_PER_PAGE,
+    currentProblemsPage * PROBLEMS_PER_PAGE,
+  );
 
   useEffect(() => {
     const fetchExamination = async () => {
@@ -66,23 +77,30 @@ function ExamDetailContent() {
 
       setProblemsLoading(true);
       try {
-        const problemDetails = await Promise.all(
-          examination.examProblems.map(async (ep) => {
-            const resp = await getProblemById(ep.problemId);
-            if (resp === null) return null;
+        const problemIds = examination.examProblems.map((ep) => ep.problemId);
+        const problemDetails = await getProblemsByIds(problemIds);
+        const orderMap = new Map(
+          examination.examProblems.map((ep, i) => [ep.problemId, i]),
+        );
+        const markByProblemId = new Map(
+          examination.examProblems.map((ep) => [ep.problemId, ep.mark]),
+        );
+        const sorted = [...problemDetails].sort(
+          (a, b) => (orderMap.get(a.id) ?? 0) - (orderMap.get(b.id) ?? 0),
+        );
+        const ordered = sorted
+          .map((resp) => {
             const problem = toExamProblem(
               resp,
               examination.id,
               examination.programmingLanguage?.id,
             );
-            return { ...problem, mark: ep.mark };
-          }),
-        );
-        setProblems(
-          problemDetails.filter(
-            (p): p is Problem & { mark: number } => p !== null,
-          ),
-        );
+            const mark = markByProblemId.get(resp.id) ?? 0;
+            return { ...problem, mark };
+          })
+          .filter((p): p is Problem & { mark: number } => p != null);
+        setProblems(ordered);
+        setProblemsPage(1);
       } catch (error) {
         console.error("Failed to fetch problems:", error);
       } finally {
@@ -91,7 +109,7 @@ function ExamDetailContent() {
     };
 
     fetchProblems();
-  }, [examination?.examProblems, getProblemById]);
+  }, [examination?.id, examination?.examProblems, examination?.programmingLanguage?.id, getProblemsByIds]);
 
   if (loading) {
     return (
@@ -233,9 +251,15 @@ function ExamDetailContent() {
         <HR className="" />
         {/* Problems Section */}
         <div>
-          <h2 className="mb-6 border-l-8 border-[#1F4E79] pl-4 text-2xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
+          <h2 className="mb-4 border-l-8 border-[#1F4E79] pl-4 text-2xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
             Problems ({problems.length})
           </h2>
+          {problems.length > 0 && problemsTotalPages > 1 && (
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              Showing {(currentProblemsPage - 1) * PROBLEMS_PER_PAGE + 1}–
+              {Math.min(currentProblemsPage * PROBLEMS_PER_PAGE, problems.length)} of {problems.length}
+            </p>
+          )}
 
           {problemsLoading ? (
             <div className="flex justify-center py-12">
@@ -249,45 +273,52 @@ function ExamDetailContent() {
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
-              {problems.map((problem) => {
-                const normalized =
-                  typeof problem.difficulty === "number"
-                    ? normalizeDifficulty(problem.difficulty)
-                    : (problem.difficulty as "EASY" | "MEDIUM" | "HARD");
-                const mark = problem.mark;
+            <>
+              <div className="space-y-2">
+                {paginatedProblems.map((problem) => {
+                  const normalized =
+                    typeof problem.difficulty === "number"
+                      ? normalizeDifficulty(problem.difficulty)
+                      : (problem.difficulty as "EASY" | "MEDIUM" | "HARD");
+                  const mark = problem.mark;
 
-                return (
-                  <div
-                    key={problem.id}
-                    className="flex items-center justify-between rounded-lg bg-gray-50 px-6 py-4 dark:bg-gray-800 border border-gray-200 dark:border-gray-700"
-                  >
-                    {/* Left side - Problem info */}
-                    <div>
-                      <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                        {problem.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-green-600 dark:text-green-400">
-                        {normalized}, {examination.programmingLanguage?.name ?? "Unknown"}, Max Score: {mark}
-                      </p>
-                    </div>
+                  return (
+                    <div
+                      key={problem.id}
+                      className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800"
+                    >
+                      {/* Left side - Problem info */}
+                      <div>
+                        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                          {problem.title}
+                        </h3>
+                        <p className="mt-1 text-sm text-green-600 dark:text-green-400">
+                          {normalized}, {examination.programmingLanguage?.name ?? "Unknown"}, Max Score: {mark}
+                        </p>
+                      </div>
 
-                    {/* Right side - Star and Solve button */}
-                    <div className="flex items-center gap-4">
-                      <Button
-                        className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                        onClick={() => {
-                          router.push(`/code-editor/${problem.id}?examId=${examId}`);
-                        }}
-                      >
-                        Solve
-                        <CheckIcon className="h-4 w-4" />
-                      </Button>
+                      {/* Right side - Solve button */}
+                      <div className="flex items-center gap-4">
+                        <Button
+                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                          onClick={() => {
+                            router.push(`/code-editor/${problem.id}?examId=${examId}`);
+                          }}
+                        >
+                          Solve
+                          <CheckIcon className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+              <CustomPagination
+                currentPage={currentProblemsPage}
+                totalPages={problemsTotalPages}
+                onPageChange={setProblemsPage}
+              />
+            </>
           )}
         </div>
       </div>

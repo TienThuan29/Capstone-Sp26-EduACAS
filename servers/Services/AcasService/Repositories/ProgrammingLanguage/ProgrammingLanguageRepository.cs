@@ -3,6 +3,7 @@ namespace AcasService.Repositories.ProgrammingLanguage;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 using AcasService.Models;
 using AcasService.Repositories.DynamoDb;
 using System.Net;
@@ -80,6 +81,35 @@ public class ProgrammingLanguageRepository : DynamoRepository, IProgrammingLangu
         }
     }
 
+    public async Task<List<Models.ProgrammingLanguage>> GetByIdsAsync(IEnumerable<string> ids)
+    {
+        var idList = ids.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        if (idList.Count == 0)
+            return new List<Models.ProgrammingLanguage>();
+
+        const int batchSize = 100;
+        var batches = idList
+            .Chunk(batchSize)
+            .Select(batchIds =>
+            {
+                var keys = batchIds.Select(id => DynamoMapper.CreateKey(id)).ToList();
+                var request = new BatchGetItemRequest
+                {
+                    RequestItems = new Dictionary<string, KeysAndAttributes>
+                    {
+                        [_programmingLanguageTableName] = new KeysAndAttributes { Keys = keys }
+                    }
+                };
+                return _dynamoDBClient.BatchGetItemAsync(request);
+            })
+            .ToList();
+
+        var responses = await Task.WhenAll(batches);
+        return responses
+            .SelectMany(r => r.Responses.TryGetValue(_programmingLanguageTableName, out var items) ? items : [])
+            .Select(DynamoMapper.DynamoItemToProgrammingLanguage)
+            .ToList();
+    }
 
     public async Task<IEnumerable<Models.ProgrammingLanguage>> GetAllAsync()
     {

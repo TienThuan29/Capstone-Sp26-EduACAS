@@ -92,20 +92,30 @@ namespace AcasService.Application.Queries.Classroom
                     .Take(pageSize)
                     .ToList();
 
-                var responses = new List<ClassroomResponse>();
+                // DynamoDB has no JOIN; load related data via batch reads (BatchGetItem) and parallel calls.
+                var subjectIds = itemsOnPage.Select(c => c.SubjectId).Distinct().ToList();
+                var lecturerIds = itemsOnPage.Select(c => c.LecturerId).Distinct().ToList();
 
-                foreach (var classroom in itemsOnPage)
+                var subjects = await _subjectRepository.FindByIdsAsync(subjectIds);
+                var subjectById = subjects.ToDictionary(s => s.Id);
+
+                var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
+                var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
+
+                Dictionary<string, ClassEnrollment?> enrollmentByClassId = new();
+                if (!string.IsNullOrEmpty(userId))
                 {
-                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
-                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    ClassEnrollment? enrollclass = null;
-                    if (!string.IsNullOrEmpty(userId))
-                    {
-                        enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(classroom.Id, userId);
-                    }
-                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile, enrollclass);
-                    responses.Add(response);
+                    var classIds = itemsOnPage.Select(c => c.Id).ToList();
+                    enrollmentByClassId = await _classroomEnrollmentRepository.FindByClassIdsAndStudentIdAsync(classIds, userId);
                 }
+
+                var responses = itemsOnPage
+                    .Select(classroom => _classroomMapper.ToClassroomResponse(
+                        classroom,
+                        subjectById.GetValueOrDefault(classroom.SubjectId),
+                        userById.GetValueOrDefault(classroom.LecturerId),
+                        enrollmentByClassId.GetValueOrDefault(classroom.Id)))
+                    .ToList();
 
                 return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);
 
@@ -121,18 +131,24 @@ namespace AcasService.Application.Queries.Classroom
         {
             try
             {
-                var classrooms = await _classroomRepository.GetClassroomsByKeywordAsync(request.ClassCode);
-                var responses = new List<ClassroomResponse>();
+                var classrooms = (await _classroomRepository.GetClassroomsByKeywordAsync(request.ClassCode)).ToList();
+                if (classrooms.Count == 0)
+                    return Array.Empty<ClassroomResponse>();
 
-                foreach (var classroom in classrooms)
-                {
-                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
-                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
-                    responses.Add(response);
-                }
+                var subjectIds = classrooms.Select(c => c.SubjectId).Distinct().ToList();
+                var lecturerIds = classrooms.Select(c => c.LecturerId).Distinct().ToList();
 
-                return responses;
+                var subjects = await _subjectRepository.FindByIdsAsync(subjectIds);
+                var subjectById = subjects.ToDictionary(s => s.Id);
+
+                var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
+                var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
+
+                return classrooms
+                    .Select(classroom => _classroomMapper.ToClassroomResponse(
+                        classroom,
+                        subjectById.GetValueOrDefault(classroom.SubjectId),
+                        userById.GetValueOrDefault(classroom.LecturerId)));
             }
             catch (Exception ex)
             {
@@ -144,26 +160,31 @@ namespace AcasService.Application.Queries.Classroom
         public async Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId)
         {
             var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
-            if (!enrollments.Any())
-            {
-               return new List<ClassroomResponse>();
-            }
+            if (enrollments.Count == 0)
+                return new List<ClassroomResponse>();
 
-            var classroomResponses = new List<ClassroomResponse>();
-            foreach (var enrollment in enrollments)
-            {
-                var classroom = await _classroomRepository.FindByIdAsync(enrollment.ClassId);
-                if (classroom != null)
-                {
-                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
-                    var lecturer = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    var enrollclass = await _classroomEnrollmentRepository.FindByClassAndStudentIdAsync(enrollment.ClassId,studentId);
-                    var classroomResponse = _classroomMapper.ToClassroomResponse(classroom,subject,lecturer,enrollclass);
-                    classroomResponses.Add(classroomResponse);
-                }
-            }
+            var classIds = enrollments.Select(e => e.ClassId).Distinct().ToList();
+            var classrooms = await _classroomRepository.FindByIdsAsync(classIds);
+            var classroomById = classrooms.ToDictionary(c => c.Id);
 
-            return classroomResponses;
+            var subjectIds = classrooms.Select(c => c.SubjectId).Distinct().ToList();
+            var lecturerIds = classrooms.Select(c => c.LecturerId).Distinct().ToList();
+
+            var subjects = await _subjectRepository.FindByIdsAsync(subjectIds);
+            var subjectById = subjects.ToDictionary(s => s.Id);
+
+            var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
+            var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
+
+            return enrollments
+                .Select(e => (Enrollment: e, Classroom: classroomById.GetValueOrDefault(e.ClassId)))
+                .Where(x => x.Classroom != null)
+                .Select(x => _classroomMapper.ToClassroomResponse(
+                    x.Classroom!,
+                    subjectById.GetValueOrDefault(x.Classroom!.SubjectId),
+                    userById.GetValueOrDefault(x.Classroom!.LecturerId),
+                    x.Enrollment))
+                .ToList();
         }
 
         // public async Task<ClassroomResponse> FindByStudentIdAndClassIdAsync(string studentId, string classId)
@@ -206,15 +227,22 @@ namespace AcasService.Application.Queries.Classroom
                     .Take(pageSize)
                     .ToList();
 
-                var responses = new List<ClassroomResponse>();
-                foreach (var classroom in itemsOnPage)
-                {
-                    var subject = await _subjectRepository.FindByIdAsync(classroom.SubjectId);
-                    var userProfile = await _userRequestProducer.GetUserByIdAsync(classroom.LecturerId);
-                    var response = _classroomMapper.ToClassroomResponse(classroom, subject, userProfile);
-                    responses.Add(response);
-                }
-                
+                var subjectIds = itemsOnPage.Select(c => c.SubjectId).Distinct().ToList();
+                var lecturerIds = itemsOnPage.Select(c => c.LecturerId).Distinct().ToList();
+
+                var subjects = await _subjectRepository.FindByIdsAsync(subjectIds);
+                var subjectById = subjects.ToDictionary(s => s.Id);
+
+                var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
+                var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
+
+                var responses = itemsOnPage
+                    .Select(classroom => _classroomMapper.ToClassroomResponse(
+                        classroom,
+                        subjectById.GetValueOrDefault(classroom.SubjectId),
+                        userById.GetValueOrDefault(classroom.LecturerId)))
+                    .ToList();
+
                 return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);
             }
             catch (Exception ex)

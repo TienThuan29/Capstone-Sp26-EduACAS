@@ -147,6 +147,8 @@ builder.Services.AddScoped<ISlotCommand, SlotCommand>();
 builder.Services.AddScoped<ISlotQuery, SlotQuery>();
 builder.Services.AddScoped<IMaterialCommand, MaterialCommand>();
 builder.Services.AddScoped<IMaterialQuery, MaterialQuery>();
+builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
+builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<IAzureOcrCommand, AzureOcrCommand>();
 builder.Services.AddScoped<IProblemOcrCommand, ProblemOcrCommand>();
 builder.Services.AddScoped<ITestcaseEvaluator, TestcaseEvaluator>();

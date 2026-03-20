@@ -128,6 +128,12 @@ export interface SubmissionResponse {
   student?: StudentLiteResponse;
 }
 
+/** One problem's submissions from GET exam/{examId}/latest-all */
+export interface ProblemSubmissionsResponse {
+  problemId: string;
+  submissions: SubmissionResponse[];
+}
+
 /** Request payload for one submission when calling auto-grade API */
 export interface SubmissionGradingRequest {
   id: string;
