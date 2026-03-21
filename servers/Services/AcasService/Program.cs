@@ -28,6 +28,11 @@ using AcasService.Repositories.S3;
 using AcasService.Repositories.Subject;
 using AcasService.Repositories.Submission;
 using AcasService.Repositories.Notification;
+using AcasService.Repositories.Quiz;
+using AcasService.Repositories.Question;
+using AcasService.Repositories.ClassroomQuiz;
+using AcasService.Repositories.QuizAttempt;
+using AcasService.Repositories.StudentAnswer;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -54,6 +59,16 @@ using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Dev;
+using AcasService.Application.Commands.Quiz;
+using AcasService.Application.Commands.Question;
+using AcasService.Application.Commands.ClassroomQuiz;
+using AcasService.Application.Commands.QuizAttempt;
+using AcasService.Application.Commands.StudentAnswer;
+using AcasService.Application.Queries.Quiz;
+using AcasService.Application.Queries.Question;
+using AcasService.Application.Queries.ClassroomQuiz;
+using AcasService.Application.Queries.QuizAttempt;
+using AcasService.Application.Queries.StudentAnswer;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -121,6 +136,11 @@ builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IClassroomQuizRepository, ClassroomQuizRepository>();
+builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
@@ -158,6 +178,16 @@ builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
+builder.Services.AddScoped<IQuizCommand, QuizCommand>();
+builder.Services.AddScoped<IQuizQuery, QuizQuery>();
+builder.Services.AddScoped<IQuestionCommand, QuestionCommand>();
+builder.Services.AddScoped<IQuestionQuery, QuestionQuery>();
+builder.Services.AddScoped<IClassroomQuizCommand, ClassroomQuizCommand>();
+builder.Services.AddScoped<IClassroomQuizQuery, ClassroomQuizQuery>();
+builder.Services.AddScoped<IQuizAttemptCommand, QuizAttemptCommand>();
+builder.Services.AddScoped<IQuizAttemptQuery, QuizAttemptQuery>();
+builder.Services.AddScoped<IStudentAnswerCommand, StudentAnswerCommand>();
+builder.Services.AddScoped<IStudentAnswerQuery, StudentAnswerQuery>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -172,6 +202,11 @@ builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
+builder.Services.AddScoped<QuizMapper>();
+builder.Services.AddScoped<QuestionMapper>();
+builder.Services.AddScoped<ClassroomQuizMapper>();
+builder.Services.AddScoped<QuizAttemptMapper>();
+builder.Services.AddScoped<StudentAnswerMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
