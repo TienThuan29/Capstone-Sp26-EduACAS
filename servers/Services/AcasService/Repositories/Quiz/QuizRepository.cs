@@ -1,5 +1,6 @@
 using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
+using Amazon.DynamoDBv2.Model;
 
 namespace AcasService.Repositories.Quiz;
 
@@ -22,31 +23,110 @@ public class QuizRepository : DynamoRepository, IQuizRepository
 
     public Task<Models.Quiz?> CreateAsync(Models.Quiz quiz)
     {
-        throw new NotImplementedException();
+        return CreateInternalAsync(quiz);
     }
 
-    public Task<Models.Quiz?> FindByIdAsync(string quizId)
+    private async Task<Models.Quiz?> CreateInternalAsync(Models.Quiz quiz)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var item = DynamoMapper.QuizToDynamoItem(quiz);
+            await PutItemAsync(item, _quizTableName);
+            return quiz;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating quiz");
+            throw;
+        }
     }
 
-    public Task<List<Models.Quiz>> FindAllAsync()
+    public async Task<Models.Quiz?> FindByIdAsync(string quizId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var key = DynamoMapper.CreateKey(quizId);
+            var response = await GetItemAsync(key, _quizTableName);
+
+            if (response.Item.Count == 0)
+            {
+                return null;
+            }
+
+            return DynamoMapper.DynamoItemToQuiz(response.Item);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding quiz {Id}", quizId);
+            throw;
+        }
     }
 
-    public Task<Models.Quiz?> UpdateAsync(Models.Quiz quiz)
+    public async Task<List<Models.Quiz>> FindAllAsync()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var request = new ScanRequest { TableName = _quizTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+
+            return response.Items.Select(DynamoMapper.DynamoItemToQuiz).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding all quizzes");
+            throw;
+        }
     }
 
-    public Task SoftDeleteAsync(string quizId)
+    public async Task<Models.Quiz?> UpdateAsync(Models.Quiz quiz)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var item = DynamoMapper.QuizToDynamoItem(quiz);
+            await PutItemAsync(item, _quizTableName);
+            return quiz;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating quiz {Id}", quiz.Id);
+            throw;
+        }
     }
 
-    public Task DeleteAsync(string quizId)
+    public async Task SoftDeleteAsync(string quizId)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var quiz = await FindByIdAsync(quizId);
+            if (quiz == null)
+            {
+                throw new KeyNotFoundException($"Quiz with id {quizId} not found");
+            }
+
+            quiz.IsDeleted = true;
+            quiz.UpdatedAt = DateTime.UtcNow;
+
+            var item = DynamoMapper.QuizToDynamoItem(quiz);
+            await PutItemAsync(item, _quizTableName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting quiz {Id}", quizId);
+            throw;
+        }
+    }
+
+    public async Task DeleteAsync(string quizId)
+    {
+        try
+        {
+            var key = DynamoMapper.CreateKey(quizId);
+            await DeleteItemAsync(key, _quizTableName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting quiz {Id}", quizId);
+            throw;
+        }
     }
 }
