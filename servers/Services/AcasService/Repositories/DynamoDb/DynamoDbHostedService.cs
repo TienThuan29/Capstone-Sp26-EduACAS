@@ -76,6 +76,11 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions",
             configuration["DynamoDB:NotificationTableName"] ?? "acas-notifications",
             configuration["DynamoDB:SlotTableName"] ?? "acas-slots",
+            configuration["DynamoDB:QuizTableName"] ?? "acas-quizzes",
+            configuration["DynamoDB:QuestionTableName"] ?? "acas-questions",
+            configuration["DynamoDB:ClassroomQuizTableName"] ?? "acas-classroom-quizzes",
+            configuration["DynamoDB:QuizAttemptTableName"] ?? "acas-quiz-attempts",
+            configuration["DynamoDB:StudentAnswerTableName"] ?? "acas-student-answers"
         };
 
         return tables
