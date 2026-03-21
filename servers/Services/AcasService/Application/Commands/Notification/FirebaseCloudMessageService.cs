@@ -2,6 +2,7 @@ using System.Text.Json;
 using FirebaseAdmin;
 using FirebaseAdmin.Messaging;
 using Google.Apis.Auth.OAuth2;
+using Microsoft.Extensions.Configuration;
 
 namespace AcasService.Application.Commands.Notification;
 
@@ -28,9 +29,26 @@ public class FirebaseCloudMessageService : IFirebaseCloudMessageService
         if (FirebaseApp.DefaultInstance != null)
             return;
 
+        var serviceAccountSection = configuration.GetSection("Firebase:ServiceAccount");
+        var serviceAccountData = serviceAccountSection.GetChildren()
+            .ToDictionary(x => x.Key, x => x.Value);
+
+        if (serviceAccountData.Count > 0 && serviceAccountData.Values.Any(v => !string.IsNullOrWhiteSpace(v)))
+        {
+            var serviceAccountJson = JsonSerializer.Serialize(serviceAccountData);
+
+            FirebaseApp.Create(new AppOptions
+            {
+                Credential = GoogleCredential.FromJson(serviceAccountJson)
+            });
+
+            _logger.LogInformation("Firebase Admin SDK initialized from Firebase:ServiceAccount settings");
+            return;
+        }
+
         var configuredPath = configuration["Firebase:ServiceAccountFile"];
         if (string.IsNullOrWhiteSpace(configuredPath))
-            throw new InvalidOperationException("Firebase:ServiceAccountFile is not configured");
+            throw new InvalidOperationException("Firebase:ServiceAccount or Firebase:ServiceAccountFile is not configured");
 
         var credentialPath = Path.IsPathRooted(configuredPath)
             ? configuredPath

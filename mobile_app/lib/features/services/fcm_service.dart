@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +5,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:mobile/core/configs/api_config.dart';
 import 'package:mobile/core/network/api_network.dart';
 import 'package:mobile/core/storage/token_storage.dart';
+import 'package:mobile/features/models/announcement.dart';
+import 'package:mobile/features/services/announcement_service.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -56,7 +56,12 @@ class FcmService {
         ?.createNotificationChannel(channel);
 
     FirebaseMessaging.onMessage.listen((message) {
-      _showForegroundNotification(message);
+      final inAppAnnouncement = Announcement.fromRemoteMessage(message);
+      AnnouncementFeed.addInApp(
+        inAppAnnouncement,
+        autoOpenAnnouncements: true,
+      );
+      debugPrint('Foreground notification added to announcements page');
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((message) {
@@ -127,26 +132,4 @@ class FcmService {
     }
   }
 
-  static Future<void> _showForegroundNotification(RemoteMessage message) async {
-    final title = message.notification?.title ?? message.data['title']?.toString() ?? 'Notification';
-    final body = message.notification?.body ?? message.data['body']?.toString() ?? '';
-
-    const details = NotificationDetails(
-      android: AndroidNotificationDetails(
-        _channelId,
-        _channelName,
-        channelDescription: _channelDescription,
-        importance: Importance.high,
-        priority: Priority.high,
-      ),
-    );
-
-    await _localNotifications.show(
-      DateTime.now().millisecondsSinceEpoch ~/ 1000,
-      title,
-      body,
-      details,
-      payload: jsonEncode(message.data),
-    );
-  }
 }

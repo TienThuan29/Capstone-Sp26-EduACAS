@@ -56,12 +56,28 @@ public class UserDeviceRepository : DynamoRepository, IUserDeviceRepository
         try
         {
             var now = DateTime.UtcNow;
-            var existing = await FindByUserAndTokenAsync(userId, deviceToken);
+            var sameTokenRecords = await FindByTokenAsync(deviceToken);
 
-            if (existing != null)
+            var recordToRebind = sameTokenRecords.FirstOrDefault(x =>
+                    string.Equals(x.UserId, userId, StringComparison.Ordinal) && x.IsActive)
+                ?? sameTokenRecords.FirstOrDefault(x =>
+                    string.Equals(x.UserId, userId, StringComparison.Ordinal))
+                ?? sameTokenRecords.FirstOrDefault();
+
+            if (recordToRebind != null)
             {
                 var updates = new Dictionary<string, AttributeValueUpdate>
                 {
+                    ["userId"] = new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { S = userId }
+                    },
+                    ["deviceToken"] = new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { S = deviceToken }
+                    },
                     ["platform"] = new AttributeValueUpdate
                     {
                         Action = AttributeAction.PUT,
@@ -103,29 +119,58 @@ public class UserDeviceRepository : DynamoRepository, IUserDeviceRepository
                 }
 
                 var updateResponse = await UpdateItemAsync(
-                    DynamoMapper.CreateKey(existing.Id),
+                    DynamoMapper.CreateKey(recordToRebind.Id),
                     updates,
                     _userDeviceTableName
                 );
 
                 if (updateResponse.HttpStatusCode == HttpStatusCode.OK)
                 {
-                    existing.Platform = platform;
-                    existing.IsActive = true;
-                    existing.LastSeenAt = now;
-                    existing.UpdatedDate = now;
+                    recordToRebind.UserId = userId;
+                    recordToRebind.DeviceToken = deviceToken;
+                    recordToRebind.Platform = platform;
+                    recordToRebind.IsActive = true;
+                    recordToRebind.LastSeenAt = now;
+                    recordToRebind.UpdatedDate = now;
 
                     if (!string.IsNullOrWhiteSpace(deviceId))
                     {
-                        existing.DeviceId = deviceId;
+                        recordToRebind.DeviceId = deviceId;
                     }
 
                     if (!string.IsNullOrWhiteSpace(appVersion))
                     {
-                        existing.AppVersion = appVersion;
+                        recordToRebind.AppVersion = appVersion;
                     }
 
-                    return existing;
+                    var duplicateRecords = sameTokenRecords
+                        .Where(x => !string.Equals(x.Id, recordToRebind.Id, StringComparison.Ordinal) && x.IsActive)
+                        .ToList();
+
+                    foreach (var duplicateRecord in duplicateRecords)
+                    {
+                        var deactivateUpdates = new Dictionary<string, AttributeValueUpdate>
+                        {
+                            ["isActive"] = new AttributeValueUpdate
+                            {
+                                Action = AttributeAction.PUT,
+                                Value = new AttributeValue { BOOL = false }
+                            },
+                            ["updatedDate"] = new AttributeValueUpdate
+                            {
+                                Action = AttributeAction.PUT,
+                                Value = new AttributeValue { S = now.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                            }
+                        };
+
+                        await UpdateItemAsync(
+                            DynamoMapper.CreateKey(duplicateRecord.Id),
+                            deactivateUpdates,
+                            _userDeviceTableName
+                        );
+                    }
+
+                    return recordToRebind;
                 }
 
                 return null;
