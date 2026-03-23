@@ -74,6 +74,44 @@ public class QuizCommandController : ControllerBase
         }
     }
 
+    [HttpPatch("{id}/restore")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> RestoreQuiz(string id)
+    {
+        try
+        {
+            var result = await _quizCommand.RestoreQuizAsync(id);
+            return ResponseUtil.Success(result, "Quiz restored successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error restoring quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to restore quiz", 500);
+        }
+    }
+
+    [HttpPut("{id}/questions")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> AssignQuestionsToQuiz(string id, [FromBody] AssignQuizQuestionsRequest request)
+    {
+        try
+        {
+            var result = await _quizCommand.AssignQuestionsAsync(id, request);
+            return ResponseUtil.Success(result, "Quiz questions assigned successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error assigning questions to quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to assign questions to quiz", 500);
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult<ApiResponse<QuizResponse>>> DeleteQuiz(string id)
     {

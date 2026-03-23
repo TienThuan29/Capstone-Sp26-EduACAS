@@ -97,6 +97,29 @@ export const Api = {
     OCR_EXTRACT: '/api/acas/v1/ocr/extract',
   },
 
+  Question: {
+    GET_ALL: "/api/acas/v1/questions",
+    GET_PAGED: "/api/acas/v1/questions/paged",
+    GET_BY_ID: (id: string) => `/api/acas/v1/questions/${id}`,
+    CREATE: "/api/acas/v1/questions",
+    UPDATE: (id: string) => `/api/acas/v1/questions/${id}`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/questions/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/questions/${id}/restore`,
+    DELETE: (id: string) => `/api/acas/v1/questions/${id}`,
+  },
+
+  Quiz: {
+    GET_ALL: "/api/acas/v1/quizzes",
+    GET_PAGED: "/api/acas/v1/quizzes/paged",
+    GET_BY_ID: (id: string) => `/api/acas/v1/quizzes/${id}`,
+    CREATE: "/api/acas/v1/quizzes",
+    UPDATE: (id: string) => `/api/acas/v1/quizzes/${id}`,
+    ASSIGN_QUESTIONS: (id: string) => `/api/acas/v1/quizzes/${id}/questions`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/quizzes/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/quizzes/${id}/restore`,
+    DELETE: (id: string) => `/api/acas/v1/quizzes/${id}`,
+  },
+
   Slot: {
     CREATE: "/api/v1/slots",
     CREATE_ALL_SLOTS: (classroomId: string) => `/api/v1/slots/create-all-slots/${classroomId}`,

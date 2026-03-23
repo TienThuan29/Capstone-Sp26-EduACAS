@@ -10,6 +10,8 @@ namespace AcasService.Application.Commands.Quiz
         Task<QuizResponse> CreateQuizAsync(CreateQuizRequest request);
         Task<QuizResponse> UpdateQuizAsync(string quizId, UpdateQuizRequest request);
         Task<QuizResponse> SoftDeleteQuizAsync(string quizId);
+        Task<QuizResponse> RestoreQuizAsync(string quizId);
+        Task<QuizResponse> AssignQuestionsAsync(string quizId, AssignQuizQuestionsRequest request);
         Task<QuizResponse> DeleteQuizAsync(string quizId);
     }
 
@@ -97,6 +99,60 @@ namespace AcasService.Application.Commands.Quiz
             existing.UpdatedAt = DateTime.UtcNow;
 
             return _quizMapper.ToQuizResponse(existing);
+        }
+
+        public async Task<QuizResponse> RestoreQuizAsync(string quizId)
+        {
+            var existing = await _quizRepository.FindByIdAsync(quizId);
+            if (existing == null)
+            {
+                throw new KeyNotFoundException($"Quiz with id {quizId} not found");
+            }
+
+            existing.IsDeleted = false;
+            existing.UpdatedAt = DateTime.UtcNow;
+
+            var updated = await _quizRepository.UpdateAsync(existing);
+            if (updated == null)
+            {
+                throw new Exception("Failed to restore quiz");
+            }
+
+            return _quizMapper.ToQuizResponse(updated);
+        }
+
+        public async Task<QuizResponse> AssignQuestionsAsync(string quizId, AssignQuizQuestionsRequest request)
+        {
+            var existing = await _quizRepository.FindByIdAsync(quizId);
+            if (existing == null || existing.IsDeleted)
+            {
+                throw new KeyNotFoundException($"Quiz with id {quizId} not found");
+            }
+
+            var normalizedQuestions = request.Questions
+                .GroupBy(x => x.QuestionId)
+                .Select(g => g.First())
+                .OrderBy(x => x.DisplayOrder)
+                .Select(x => new Models.QuizQuestion
+                {
+                    QuizId = quizId,
+                    QuestionId = x.QuestionId,
+                    Marks = x.Marks,
+                    DisplayOrder = x.DisplayOrder
+                })
+                .ToList();
+
+            existing.Questions = normalizedQuestions;
+            existing.TotalQuestions = normalizedQuestions.Count;
+            existing.UpdatedAt = DateTime.UtcNow;
+
+            var updated = await _quizRepository.UpdateAsync(existing);
+            if (updated == null)
+            {
+                throw new Exception("Failed to assign questions to quiz");
+            }
+
+            return _quizMapper.ToQuizResponse(updated);
         }
 
         public async Task<QuizResponse> DeleteQuizAsync(string quizId)

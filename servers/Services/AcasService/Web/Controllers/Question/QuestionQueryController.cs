@@ -35,6 +35,26 @@ public class QuestionQueryController : ControllerBase
         }
     }
 
+    [HttpGet("paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<QuestionResponse>>>> GetPagedQuestions(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool includeDeleted = false,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? type = null)
+    {
+        try
+        {
+            var result = await _questionQuery.GetPagedQuestionsAsync(pageIndex, pageSize, includeDeleted, searchTerm, type);
+            return ResponseUtil.Success(result, "Get paged questions successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged questions");
+            return ResponseUtil.Error<PagedResult<QuestionResponse>>("Get paged questions failed", 500);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<QuestionResponse>>> GetQuestionById(string id)
     {

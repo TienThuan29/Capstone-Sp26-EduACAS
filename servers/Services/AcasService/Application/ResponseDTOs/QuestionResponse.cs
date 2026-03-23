@@ -8,6 +8,7 @@ public class QuestionResponse
     public string Content { get; set; } = string.Empty;
     public string? ImageUrl { get; set; }
     public QuestionType Type { get; set; }
+    public string? TextAnswer { get; set; }
     public bool IsDeleted { get; set; }
     public string CreatedBy { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }

@@ -91,6 +91,16 @@ const Sidebar = () => {
       label: "Problem Banks",
       href: PageUrl.QUESTION_BANKS_PAGE,
     },
+    {
+      icon: ClipboardDocumentListIcon,
+      label: "Question Banks",
+      href: PageUrl.QUESTION_BANK_PAGE,
+    },
+    {
+      icon: BanknotesIcon,
+      label: "Quiz Banks",
+      href: PageUrl.QUIZ_BANK_PAGE,
+    },
   ];
 
   const lecturerClassroomMenuItems = [

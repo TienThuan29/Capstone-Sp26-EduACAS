@@ -22,23 +22,9 @@ public static class DynamoMapper
 			item["imageUrl"] = new AttributeValue { S = question.ImageUrl };
 		}
 
-		if (question.AnswerOptions.Count > 0)
+		if (!string.IsNullOrWhiteSpace(question.TextAnswer))
 		{
-			item["answerOptions"] = new AttributeValue
-			{
-				L = question.AnswerOptions.Select(option => new AttributeValue
-				{
-					M = new Dictionary<string, AttributeValue>
-					{
-						["id"] = new AttributeValue { S = option.Id },
-						["questionId"] = new AttributeValue { S = option.QuestionId },
-						["content"] = new AttributeValue { S = option.Content },
-						["isCorrect"] = new AttributeValue { BOOL = option.IsCorrect },
-						["createdAt"] = new AttributeValue { S = option.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
-						["updatedAt"] = new AttributeValue { S = option.UpdatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
-					}
-				}).ToList()
-			};
+			item["textAnswer"] = new AttributeValue { S = question.TextAnswer };
 		}
 
 		return item;
@@ -54,6 +40,7 @@ public static class DynamoMapper
 			Type = Enum.TryParse<Models.QuestionType>(item["type"].S, true, out var type)
 				? type
 				: Models.QuestionType.SINGLE_CHOICE,
+			TextAnswer = item.ContainsKey("textAnswer") ? item["textAnswer"].S : null,
 			IsDeleted = item.ContainsKey("isDeleted") && item["isDeleted"].BOOL,
 			CreatedBy = item["createdBy"].S,
 			CreatedAt = DateTime.Parse(item["createdAt"].S),

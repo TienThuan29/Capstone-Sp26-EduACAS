@@ -8,6 +8,12 @@ namespace AcasService.Application.Queries.Quiz
     {
         Task<QuizResponse> GetQuizByIdAsync(string quizId);
         Task<List<QuizResponse>> GetAllQuizzesAsync(bool includeDeleted = false);
+        Task<PagedResult<QuizResponse>> GetPagedQuizzesAsync(
+            int pageIndex = 1,
+            int pageSize = 10,
+            bool includeDeleted = false,
+            string? searchTerm = null,
+            string? subjectId = null);
     }
 
     public class QuizQuery : IQuizQuery
@@ -48,6 +54,47 @@ namespace AcasService.Application.Queries.Quiz
             }
 
             return quizzes.Select(_quizMapper.ToQuizResponse).ToList();
+        }
+
+        public async Task<PagedResult<QuizResponse>> GetPagedQuizzesAsync(
+            int pageIndex = 1,
+            int pageSize = 10,
+            bool includeDeleted = false,
+            string? searchTerm = null,
+            string? subjectId = null)
+        {
+            if (pageIndex < 1) pageIndex = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            var quizzes = await _quizRepository.FindAllAsync();
+
+            if (!includeDeleted)
+            {
+                quizzes = quizzes.Where(x => !x.IsDeleted).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var keyword = searchTerm.Trim().ToLowerInvariant();
+                quizzes = quizzes.Where(x => x.Title.ToLowerInvariant().Contains(keyword)).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(subjectId))
+            {
+                quizzes = quizzes.Where(x => x.SubjectId == subjectId).ToList();
+            }
+
+            quizzes = quizzes.OrderByDescending(x => x.UpdatedAt).ToList();
+
+            var totalCount = quizzes.Count;
+            var items = quizzes
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .Select(_quizMapper.ToQuizResponse)
+                .ToList();
+
+            return new PagedResult<QuizResponse>(items, totalCount, pageIndex, pageSize);
         }
     }
 }

@@ -74,6 +74,25 @@ public class QuestionCommandController : ControllerBase
         }
     }
 
+    [HttpPatch("{id}/restore")]
+    public async Task<ActionResult<ApiResponse<QuestionResponse>>> RestoreQuestion(string id)
+    {
+        try
+        {
+            var result = await _questionCommand.RestoreQuestionAsync(id);
+            return ResponseUtil.Success(result, "Question restored successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuestionResponse>("Question not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error restoring question {Id}", id);
+            return ResponseUtil.Error<QuestionResponse>("Failed to restore question", 500);
+        }
+    }
+
     [HttpDelete("{id}")]
     public async Task<ActionResult<ApiResponse<QuestionResponse>>> DeleteQuestion(string id)
     {

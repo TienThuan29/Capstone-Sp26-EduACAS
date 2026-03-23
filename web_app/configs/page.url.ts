@@ -21,6 +21,9 @@ export const PageUrl = {
     // Lecturer routes
     MANAGE_CLASSROOM_PAGE: '/manage-classroom',
     QUESTION_BANKS_PAGE: '/problem-banks',
+    QUESTION_BANK_PAGE: '/question-banks',
+    QUIZ_BANK_PAGE: '/quiz-banks',
+    QUIZ_BANK_DETAIL_PAGE: (id: string) => `/quiz-banks/${id}`,
     PROBLEM_BANKS_CREATE_PAGE: '/problem-banks/create',
     PROBLEM_BANKS_VIEW_PAGE: (id: string) => `/problem-banks/${id}`,
     PROBLEM_BANKS_EDIT_PAGE: (id: string) => `/problem-banks/${id}/edit`,

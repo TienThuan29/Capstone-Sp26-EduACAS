@@ -35,6 +35,26 @@ public class QuizQueryController : ControllerBase
         }
     }
 
+    [HttpGet("paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<QuizResponse>>>> GetPagedQuizzes(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool includeDeleted = false,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? subjectId = null)
+    {
+        try
+        {
+            var result = await _quizQuery.GetPagedQuizzesAsync(pageIndex, pageSize, includeDeleted, searchTerm, subjectId);
+            return ResponseUtil.Success(result, "Get paged quizzes successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged quizzes");
+            return ResponseUtil.Error<PagedResult<QuizResponse>>("Get paged quizzes failed", 500);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<QuizResponse>>> GetQuizById(string id)
     {

@@ -12,6 +12,7 @@ public class QuestionMapper
             Content = question.Content,
             ImageUrl = question.ImageUrl,
             Type = question.Type,
+            TextAnswer = question.TextAnswer,
             IsDeleted = question.IsDeleted,
             CreatedBy = question.CreatedBy,
             CreatedAt = question.CreatedAt,
