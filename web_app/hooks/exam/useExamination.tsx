@@ -59,14 +59,17 @@ export const useExamination = () => {
   );
 
   const getExaminationWithSpecificProblem = useCallback(
-    async (examId: string, problemId: string): Promise<ExaminationSpecificProblemResponse | null> => {
+    async (examId: string, problemId: string): Promise<{ data: ExaminationSpecificProblemResponse | null; serverDate: string | null }> => {
       try {
         const response = await axiosInstance.get(
           Api.Examination.GET_WITH_SPECIFIC_PROBLEM(examId, problemId)
         );
-        return response.data?.dataResponse ?? null;
+        return {
+          data: response.data?.dataResponse ?? null,
+          serverDate: response.headers['date'] || null
+        };
       } catch {
-        return null;
+        return { data: null, serverDate: null };
       }
     },
     [axiosInstance],

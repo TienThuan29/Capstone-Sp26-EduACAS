@@ -202,11 +202,11 @@ builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
-builder.Services.AddScoped<QuizMapper>();
-builder.Services.AddScoped<QuestionMapper>();
-builder.Services.AddScoped<ClassroomQuizMapper>();
-builder.Services.AddScoped<QuizAttemptMapper>();
-builder.Services.AddScoped<StudentAnswerMapper>();
+// builder.Services.AddScoped<QuizMapper>();
+// builder.Services.AddScoped<QuestionMapper>();
+// builder.Services.AddScoped<ClassroomQuizMapper>();
+// builder.Services.AddScoped<QuizAttemptMapper>();
+// builder.Services.AddScoped<StudentAnswerMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();

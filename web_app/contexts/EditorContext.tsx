@@ -107,7 +107,9 @@ interface EditorContextType {
   resetTimer: () => void;
   isExamMode: boolean;
   examDuration: number; // in seconds
-  setExamMode: (isExam: boolean, duration?: number) => void;
+  setExamMode: (isExam: boolean, endTime?: Date) => void;
+  syncServerTime: (serverTimeStr: string) => void;
+  timeOffset: number;
 
   // Layout
   isLeftPanelCollapsed: boolean;
@@ -214,7 +216,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isExamMode, setIsExamModeState] = useState(false);
-  const [examDuration, setExamDuration] = useState(3600); // 1 hour default
+  const [examDuration, setExamDuration] = useState(3600); // 1 hour default (fallback)
+  const [endTime, setEndTime] = useState<Date | null>(null);
+  const [timeOffset, setTimeOffset] = useState(0); // Difference between server and client time
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Layout
@@ -238,20 +242,34 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   // Timer Effect
   useEffect(() => {
     if (isTimerRunning) {
-      timerRef.current = setInterval(() => {
-        setTimerSeconds((prev) => {
-          if (isExamMode) {
-            // Countdown for exam mode
-            if (prev <= 0) {
-              setIsTimerRunning(false);
-              return 0;
+      if (isExamMode && endTime) {
+        // Precise timer for exam mode based on endTime and server offset
+        timerRef.current = setInterval(() => {
+          const serverNow = Date.now() + timeOffset;
+          const diff = Math.floor((endTime.getTime() - serverNow) / 1000);
+          
+          if (diff <= 0) {
+            setTimerSeconds(0);
+            setIsTimerRunning(false);
+            if (timerRef.current) {
+              clearInterval(timerRef.current);
+              timerRef.current = null;
             }
-            return prev - 1;
+            // Trigger auto-submit
+            if (isExamMode) {
+              console.log('Time is up! Auto-submitting...');
+              submitCode();
+            }
+          } else {
+            setTimerSeconds(diff);
           }
-          // Count up for practice mode
-          return prev + 1;
-        });
-      }, 1000);
+        }, 1000);
+      } else {
+        // Count up for practice mode
+        timerRef.current = setInterval(() => {
+          setTimerSeconds((prev) => prev + 1);
+        }, 1000);
+      }
     }
 
     return () => {
@@ -259,7 +277,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         clearInterval(timerRef.current);
       }
     };
-  }, [isTimerRunning, isExamMode]);
+  }, [isTimerRunning, isExamMode, endTime, timeOffset]);
 
   const setCode = useCallback((code: string) => {
     setEditorState((prev) => ({ ...prev, code }));
@@ -349,17 +367,26 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setTimerSeconds(isExamMode ? examDuration : 0);
   }, [isExamMode, examDuration]);
 
-  const setExamMode = useCallback((isExam: boolean, duration?: number) => {
+  const syncServerTime = useCallback((serverTimeStr: string) => {
+    const serverTime = new Date(serverTimeStr).getTime();
+    const clientTime = Date.now();
+    setTimeOffset(serverTime - clientTime);
+  }, []);
+
+  const setExamMode = useCallback((isExam: boolean, end?: Date) => {
     setIsExamModeState(isExam);
-    if (duration) {
-      setExamDuration(duration);
-      setTimerSeconds(duration);
+    if (end) {
+      setEndTime(end);
+      const serverNow = Date.now() + timeOffset;
+      const initialDiff = Math.max(0, Math.floor((end.getTime() - serverNow) / 1000));
+      setTimerSeconds(initialDiff);
     } else if (isExam) {
+       // Fallback if no specific end time is provided but exam mode is on
       setTimerSeconds(examDuration);
     } else {
       setTimerSeconds(0);
     }
-  }, [examDuration]);
+  }, [examDuration, timeOffset]);
 
   const toggleLeftPanel = useCallback(() => {
     setIsLeftPanelCollapsed((prev) => !prev);
@@ -476,6 +503,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     isExamMode,
     examDuration,
     setExamMode,
+    syncServerTime,
+    timeOffset,
     isLeftPanelCollapsed,
     toggleLeftPanel,
     focusWarnings,
