@@ -39,9 +39,39 @@ public class TestResultMapper
       }
 }
 
+public class KeystrokeMapper
+{
+    public KeystrokeLogResponse ToKeystrokeLogResponse(KeystrokeLog keystrokeLog)
+    {
+        return new KeystrokeLogResponse
+        {
+            Id = keystrokeLog.Id,
+            SubmissionId = keystrokeLog.SubmissionId,
+            KeystrokeData = keystrokeLog.KeystrokeData?
+                .Select(ToKeystrokeRecordResponse)
+                .ToList() ?? new List<KeystrokeRecordResponse>(),
+            CreatedAt = keystrokeLog.CreatedAt
+        };
+    }
+
+    public KeystrokeRecordResponse ToKeystrokeRecordResponse(KeystrokeRecord keystrokeRecord)
+    {
+        return new KeystrokeRecordResponse
+        {
+            TimeStartSet = keystrokeRecord.TimeStartSet,
+            TimeOffSet = keystrokeRecord.TimeOffSet,
+            Duration = keystrokeRecord.Duration,
+            Cps = keystrokeRecord.Cps,
+            CharCount = keystrokeRecord.CharCount,
+            Content = keystrokeRecord.Content
+        };
+    }
+}
+
 public class SubmissionMapper
 {
     private readonly TestResultMapper _testResultMapper = new();
+    private readonly KeystrokeMapper _keystrokeMapper = new();
 
     public Submission ToEntity(SubmitProblemRequest request)
     {
@@ -87,6 +117,9 @@ public class SubmissionMapper
             TestResults = submission.TestResults?
                 .Select(_testResultMapper.ToTestResultResponse)
                 .ToList() ?? new List<TestResultResponse>(),
+            KeystrokeLogs = submission.KeystrokeLogs?
+                .Select(_keystrokeMapper.ToKeystrokeLogResponse)
+                .ToList() ?? new List<KeystrokeLogResponse>(),
             RegradingRequestId = submission.RegradingRequestId,
             LecturerFeedback = submission.LecturerFeedback,
             AiFeedback = submission.AiFeedback,

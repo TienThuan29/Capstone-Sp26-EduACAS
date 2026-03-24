@@ -76,6 +76,7 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions",
             configuration["DynamoDB:NotificationTableName"] ?? "acas-notifications",
             configuration["DynamoDB:SlotTableName"] ?? "acas-slots",
+            configuration["DynamoDB:KeystrokeLogsTableName"] ?? "keystrokelogs",
         };
 
         return tables

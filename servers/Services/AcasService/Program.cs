@@ -49,10 +49,14 @@ using AcasService.Application.Commands.Material;
 using AcasService.Application.Queries.Material;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
+using AcasService.Application.Commands.KeystrokeLogs;
 using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
+using AcasService.Application.Queries.KeystrokeLogs;
 using AcasService.Repositories.Caching.Redis.Submission;
+using AcasService.Repositories.Caching.Redis.KeystrokeLogs;
+using AcasService.Repositories.KeystrokeLogs;
 using AcasService.Dev;
 
 
@@ -119,11 +123,13 @@ builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<IKeystrokeLogRepository, KeystrokeLogRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
+builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -158,6 +164,8 @@ builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
+builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
+builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -170,6 +178,7 @@ builder.Services.AddScoped<MaterialMapper>();
 builder.Services.AddScoped<CommentMapper>();
 builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
+builder.Services.AddScoped<KeystrokeLogsMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
 
