@@ -139,8 +139,8 @@ public class KeystrokeLogResponse
     [JsonPropertyName("keystroke_data")]
     public List<KeystrokeRecordResponse> KeystrokeData { get; set; } = new();
 
-    [JsonPropertyName("createdAt")]
-    public DateTime CreatedAt { get; set; }
+    [JsonPropertyName("createdDate")]
+    public DateTime CreatedDate { get; set; }
 }
 
 public class KeystrokeRecordResponse

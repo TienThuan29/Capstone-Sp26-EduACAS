@@ -50,7 +50,7 @@ public class KeystrokeMapper
             KeystrokeData = keystrokeLog.KeystrokeData?
                 .Select(ToKeystrokeRecordResponse)
                 .ToList() ?? new List<KeystrokeRecordResponse>(),
-            CreatedAt = keystrokeLog.CreatedAt
+            CreatedDate = keystrokeLog.CreatedDate
         };
     }
 

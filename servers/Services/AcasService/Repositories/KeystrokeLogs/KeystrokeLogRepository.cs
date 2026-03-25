@@ -26,8 +26,8 @@ public class KeystrokeLogRepository : DynamoRepository, IKeystrokeLogRepository
         {
             if (string.IsNullOrWhiteSpace(keystrokeLog.Id))
                 keystrokeLog.Id = Guid.NewGuid().ToString();
-            if (keystrokeLog.CreatedAt == default)
-                keystrokeLog.CreatedAt = DateTime.UtcNow;
+            if (keystrokeLog.CreatedDate == default)
+                keystrokeLog.CreatedDate = DateTime.UtcNow;
 
             var item = DynamoMapper.ToDynamoItem(keystrokeLog);
             var response = await PutItemAsync(item, _keystrokeLogsTableName);
@@ -57,7 +57,7 @@ public class KeystrokeLogRepository : DynamoRepository, IKeystrokeLogRepository
             var response = await _dynamoDBClient.ScanAsync(request);
             return response.Items
                 .Select(DynamoMapper.ToEntity)
-                .OrderBy(x => x.CreatedAt)
+                .OrderBy(x => x.CreatedDate)
                 .ToList();
         }
         catch (Exception ex)

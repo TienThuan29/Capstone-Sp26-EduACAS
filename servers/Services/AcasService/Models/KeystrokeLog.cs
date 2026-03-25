@@ -30,5 +30,5 @@ public class KeystrokeLog
     [JsonPropertyName("keystroke_data")]
     public List<KeystrokeRecord> KeystrokeData { get; set; } = new List<KeystrokeRecord>();
 
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 }

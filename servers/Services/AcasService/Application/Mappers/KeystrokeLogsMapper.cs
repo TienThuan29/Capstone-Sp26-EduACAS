@@ -13,7 +13,7 @@ public class KeystrokeLogsMapper
             Id = Guid.NewGuid().ToString(),
             SubmissionId = request.SubmissionId,
             KeystrokeData = records,
-            CreatedAt = DateTime.UtcNow
+            CreatedDate = DateTime.UtcNow
         };
     }
 

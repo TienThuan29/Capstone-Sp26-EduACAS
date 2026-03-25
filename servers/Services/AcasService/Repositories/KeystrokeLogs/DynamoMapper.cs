@@ -16,7 +16,7 @@ public static class DynamoMapper
             ["id"] = new AttributeValue { S = keystrokeLog.Id },
             ["submissionId"] = new AttributeValue { S = keystrokeLog.SubmissionId },
             ["keystrokeData"] = new AttributeValue { S = keystrokeDataJson },
-            ["createdAt"] = new AttributeValue { S = keystrokeLog.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+            ["createdDate"] = new AttributeValue { S = keystrokeLog.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
         };
     }
 
@@ -28,13 +28,19 @@ public static class DynamoMapper
             keystrokeData = JsonSerializer.Deserialize<List<Models.KeystrokeRecord>>(keystrokeDataValue.S) ?? [];
         }
 
+        var createdDateRaw = item.ContainsKey("createdDate") && !string.IsNullOrEmpty(item["createdDate"].S)
+            ? item["createdDate"].S
+            : item.ContainsKey("createdAt") && !string.IsNullOrEmpty(item["createdAt"].S)
+                ? item["createdAt"].S
+                : string.Empty;
+
         return new Models.KeystrokeLog
         {
             Id = item["id"].S,
             SubmissionId = item.ContainsKey("submissionId") ? item["submissionId"].S : string.Empty,
             KeystrokeData = keystrokeData,
-            CreatedAt = item.ContainsKey("createdAt") && !string.IsNullOrEmpty(item["createdAt"].S)
-                ? DateTime.Parse(item["createdAt"].S)
+            CreatedDate = !string.IsNullOrEmpty(createdDateRaw)
+                ? DateTime.Parse(createdDateRaw)
                 : DateTime.UtcNow
         };
     }
