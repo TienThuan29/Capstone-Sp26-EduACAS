@@ -73,7 +73,7 @@ public class SubmissionResponse
     [JsonPropertyName("testResults")]
     public List<TestResultResponse> TestResults { get; set; } = new();
 
-    [JsonPropertyName("keystrokeLogs")]
+    [JsonPropertyName("keystroke_logs")]
     public List<KeystrokeLogResponse> KeystrokeLogs { get; set; } = new();
 
     [JsonPropertyName("regradingRequestId")]

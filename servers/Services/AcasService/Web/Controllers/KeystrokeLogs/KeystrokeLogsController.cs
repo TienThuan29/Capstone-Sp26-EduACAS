@@ -53,6 +53,11 @@ public class KeystrokeLogsController : ControllerBase
             var response = await _keystrokeLogsCommand.FlushKeystrokeLogsAsync(request).ConfigureAwait(false);
             return ResponseUtil.Success(response, response.Message, 200);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Invalid keystroke flush request for submission {SubmissionId}", request.SubmissionId);
+            return ResponseUtil.Error<FlushKeystrokeLogsResponse>(ex.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error flushing keystroke logs");

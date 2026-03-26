@@ -19,6 +19,7 @@ import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
 import type { SubmissionResponse } from '@/types/submission';
 import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
+import { useKeystrokeTracking, KeystrokeRecord } from '@/hooks/typing/useKeystrokeTracking';
 
 
 /**
@@ -130,6 +131,11 @@ interface EditorContextType {
   submitCode: () => Promise<void>;
   isRunning: boolean;
   isSubmitting: boolean;
+
+  // Anti-cheat (Keystrokes)
+  keystrokeCount: number;
+  batchLogs: KeystrokeRecord[];
+  flushKeystrokes: (submissionId: string) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -182,6 +188,13 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [selectedCompiler, setSelectedCompiler] = useState<Compiler | null>(null);
   const [examId, setExamIdState] = useState<string | null>(null);
   const [examClassroomId, setExamClassroomIdState] = useState<string | null>(null);
+
+  // Keystroke Tracking
+  const {
+    keystrokeCount,
+    batchLogs,
+    flush: flushKeystrokes,
+  } = useKeystrokeTracking(examId ?? '', user?.id ?? '', problem?.id ?? '', editorState.code);
 
   // Test Cases
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -416,6 +429,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       };
       const result = await saveSubmission(payload);
       if (result != null) {
+        await flushKeystrokes(result.id);
         incrementSubmissionsRefresh();
       }
     } catch (err) {
@@ -432,6 +446,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     editorState.language?.id,
     saveSubmission,
     incrementSubmissionsRefresh,
+    flushKeystrokes,
   ]);
 
   const value: EditorContextType = {
@@ -490,6 +505,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     submitCode,
     isRunning,
     isSubmitting,
+    keystrokeCount,
+    batchLogs,
+    flushKeystrokes,
   };
 
   return (

@@ -87,6 +87,22 @@ export interface TestResultResponse {
   createdDate: string;
 }
 
+export interface KeystrokeRecordResponse {
+  timeStartSet: string;
+  timeOffSet: string;
+  duration: number;
+  cps: number;
+  charCount: number;
+  content: string;
+}
+
+export interface KeystrokeLogResponse {
+  id: string;
+  submissionId: string;
+  keystroke_data: KeystrokeRecordResponse[];
+  createdDate: string;
+}
+
 /** Request body for saving a problem submission (code-editor submit) */
 export interface SubmitProblemRequest {
   examId: string;
@@ -124,6 +140,9 @@ export interface SubmissionResponse {
   finalScore: number;
   gradedDate?: string;
   testResults?: TestResultResponse[];
+  // Support both backend naming conventions.
+  keystroke_logs?: KeystrokeLogResponse[];
+  keystrokeLogs?: KeystrokeLogResponse[];
   problem?: ProblemLiteResponse;
   student?: StudentLiteResponse;
 }

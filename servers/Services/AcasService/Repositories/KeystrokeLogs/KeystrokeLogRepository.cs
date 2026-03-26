@@ -47,6 +47,7 @@ public class KeystrokeLogRepository : DynamoRepository, IKeystrokeLogRepository
             var request = new ScanRequest
             {
                 TableName = _keystrokeLogsTableName,
+                ConsistentRead = true,
                 FilterExpression = "submissionId = :submissionId",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
@@ -55,6 +56,7 @@ public class KeystrokeLogRepository : DynamoRepository, IKeystrokeLogRepository
             };
 
             var response = await _dynamoDBClient.ScanAsync(request);
+
             return response.Items
                 .Select(DynamoMapper.ToEntity)
                 .OrderBy(x => x.CreatedDate)

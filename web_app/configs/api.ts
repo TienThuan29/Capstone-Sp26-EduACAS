@@ -141,4 +141,9 @@ export const Api = {
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
   },
+
+  Proctoring: {
+    CACHE: "/api/v1/keystroke-logs/cache",
+    FLUSH: "/api/v1/keystroke-logs/flush",
+  },
 };
