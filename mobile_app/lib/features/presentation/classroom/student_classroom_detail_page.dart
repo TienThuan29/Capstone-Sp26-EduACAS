@@ -9,10 +9,12 @@ import 'package:mobile/features/services/classroom_service.dart';
 
 class StudentClassroomDetailPage extends StatefulWidget {
   final Classroom classroom;
+  final int initialTabIndex;
 
   const StudentClassroomDetailPage({
     super.key,
     required this.classroom,
+    this.initialTabIndex = 0,
   });
 
   @override
@@ -30,7 +32,10 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    final safeInitialIndex = widget.initialTabIndex < 0
+        ? 0
+        : (widget.initialTabIndex > 1 ? 1 : widget.initialTabIndex);
+    _tabController = TabController(length: 2, initialIndex: safeInitialIndex, vsync: this);
     _enrollController = TextEditingController();
     _isJoined = (widget.classroom.status?.toUpperCase() == 'JOINED');
     _getUserId();

@@ -17,6 +17,7 @@ namespace AcasService.Web.Requests
         public string CreatedBy { get; set; } = string.Empty;
 
         public List<CreateAnswerOptionRequest> AnswerOptions { get; set; } = new();
+        public string? TextAnswer { get; set; }
     }
 
     public class CreateAnswerOptionRequest
@@ -36,5 +37,7 @@ namespace AcasService.Web.Requests
         public QuestionType? Type { get; set; }
 
         public List<CreateAnswerOptionRequest>? AnswerOptions { get; set; }
+
+        public string? TextAnswer { get; set; }
     }
 }

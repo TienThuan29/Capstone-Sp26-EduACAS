@@ -74,6 +74,44 @@ public class DynamoDbResetService : IDynamoDbResetService
         return new ResetResult(true, tablesToWipe.Count + 1, seeded);
     }
 
+    public async Task<ResetResult> ResetAndSeedQuizDataAsync(CancellationToken cancellationToken = default)
+    {
+        var tables = DiscoverTableNames();
+        if (tables.Count == 0)
+        {
+            _logger.LogWarning("No DynamoDB tables discovered for quiz data reset");
+            return new ResetResult(true, 0, 0);
+        }
+
+        var targetEntityTypes = new[] { typeof(Question), typeof(AnswerOption), typeof(Quiz) };
+        var tablesToWipe = tables
+            .Where(t => targetEntityTypes.Contains(t.EntityType))
+            .ToList();
+
+        if (tablesToWipe.Count == 0)
+        {
+            _logger.LogWarning("No target tables found for quiz-related reset");
+            return new ResetResult(true, 0, 0);
+        }
+
+        var totalWiped = 0;
+        foreach (var (tableName, _) in tablesToWipe)
+            totalWiped += await SafeWipeTableAsync(tableName, cancellationToken);
+
+        try
+        {
+            var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
+            var seeded = await SeedQuizQuestionAnswerOptionAsync(tableMap, DateTime.UtcNow, cancellationToken);
+            _logger.LogInformation("Seeded quiz-related data with {Count} items", seeded);
+            return new ResetResult(true, tablesToWipe.Count, seeded);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Quiz data seed failed after wipe");
+            return new ResetResult(false, tablesToWipe.Count, 0, ex.Message);
+        }
+    }
+
     // ───────────────────────────── Discovery ─────────────────────────────
 
     private IReadOnlyList<(string TableName, Type EntityType)> DiscoverTableNames()
@@ -190,6 +228,8 @@ public class DynamoDbResetService : IDynamoDbResetService
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Subject)),
             subjects, Repositories.Subject.DynamoMapper.SubjectToDynamoItem, ct);
+
+        seeded += await SeedQuizQuestionAnswerOptionAsync(tableMap, now, ct);
 
         // 3) Problems
         var problemDtos = LoadJson<ProblemDto>("problems.json");
@@ -534,6 +574,83 @@ public class DynamoDbResetService : IDynamoDbResetService
         return items.Count;
     }
 
+    private async Task<int> SeedQuizQuestionAnswerOptionAsync(
+        Dictionary<string, Type> tableMap,
+        DateTime now,
+        CancellationToken ct)
+    {
+        var seeded = 0;
+
+        var questionDtos = LoadJson<QuestionDto>("questions.json");
+        var questions = questionDtos.Select(q =>
+        {
+            var questionType = Enum.TryParse<QuestionType>(q.Type, true, out var parsedType)
+                ? parsedType
+                : QuestionType.SINGLE_CHOICE;
+
+            return new Question
+            {
+                Id = q.Id,
+                Content = q.Content,
+                ImageUrl = q.ImageUrl,
+                Type = questionType,
+                TextAnswer = q.TextAnswer,
+                IsDeleted = false,
+                CreatedBy = q.CreatedBy,
+                CreatedAt = now.AddMonths(-2),
+                UpdatedAt = now
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(Question)),
+            questions, Repositories.Question.DynamoMapper.QuestionToDynamoItem, ct);
+
+        var answerOptionDtos = LoadJson<AnswerOptionDto>("answer-options.json");
+        var answerOptions = answerOptionDtos.Select(a => new AnswerOption
+        {
+            Id = a.Id,
+            QuestionId = a.QuestionId,
+            Content = a.Content,
+            IsCorrect = a.IsCorrect,
+            CreatedAt = now.AddMonths(-2),
+            UpdatedAt = now
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(AnswerOption)),
+            answerOptions, Repositories.AnswerOption.DynamoMapper.AnswerOptionToDynamoItem, ct);
+
+        var quizDtos = LoadJson<QuizDto>("quizzes.json");
+        var quizzes = quizDtos.Select(q =>
+        {
+            var quizQuestions = (q.Questions ?? new List<QuizQuestionDto>())
+                .Select(item => new QuizQuestion
+                {
+                    QuizId = q.Id,
+                    QuestionId = item.QuestionId,
+                    Marks = item.Marks,
+                    DisplayOrder = item.DisplayOrder
+                })
+                .OrderBy(item => item.DisplayOrder)
+                .ToList();
+
+            return new Quiz
+            {
+                Id = q.Id,
+                SubjectId = q.SubjectId,
+                Title = q.Title,
+                Duration = q.Duration,
+                TotalQuestions = quizQuestions.Count,
+                IsDeleted = false,
+                CreatedBy = q.CreatedBy,
+                CreatedAt = now.AddMonths(-1),
+                UpdatedAt = now,
+                Questions = quizQuestions
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(Quiz)),
+            quizzes, Repositories.Quiz.DynamoMapper.QuizToDynamoItem, ct);
+
+        return seeded;
+    }
+
     private static List<Comment> MapComments(List<CommentDto>? dtos, string issueId, DateTime baseTime)
     {
         if (dtos == null || dtos.Count == 0) return new List<Comment>();
@@ -579,6 +696,41 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string? CodeTemplate { get; set; }
         public string? Content { get; set; }
         public List<TestCaseDto>? TestCases { get; set; }
+    }
+
+    private sealed class QuestionDto
+    {
+        public string Id { get; set; } = "";
+        public string Content { get; set; } = "";
+        public string? ImageUrl { get; set; }
+        public string Type { get; set; } = "SINGLE_CHOICE";
+        public string? TextAnswer { get; set; }
+        public string CreatedBy { get; set; } = "";
+    }
+
+    private sealed class AnswerOptionDto
+    {
+        public string Id { get; set; } = "";
+        public string QuestionId { get; set; } = "";
+        public string Content { get; set; } = "";
+        public bool IsCorrect { get; set; }
+    }
+
+    private sealed class QuizDto
+    {
+        public string Id { get; set; } = "";
+        public string SubjectId { get; set; } = "";
+        public string Title { get; set; } = "";
+        public int Duration { get; set; }
+        public string CreatedBy { get; set; } = "";
+        public List<QuizQuestionDto>? Questions { get; set; }
+    }
+
+    private sealed class QuizQuestionDto
+    {
+        public string QuestionId { get; set; } = "";
+        public double Marks { get; set; }
+        public int DisplayOrder { get; set; }
     }
 
     private sealed class TestCaseDto

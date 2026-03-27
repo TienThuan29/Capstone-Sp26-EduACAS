@@ -66,6 +66,50 @@ public class DeveloperController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Wipes and re-seeds only quiz-related data (Quiz, Question, AnswerOption).
+    /// Only available when running in Development environment.
+    /// </summary>
+    [HttpPost("reset-quiz-data")]
+    [ProducesResponseType(typeof(ResetDbResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ResetDbResponse>> ResetQuizData(CancellationToken cancellationToken)
+    {
+        if (!_env.IsDevelopment())
+        {
+            _logger.LogWarning("reset-quiz-data was called in non-Development environment; rejecting");
+            return StatusCode(403, new ResetDbResponse
+            {
+                Success = false,
+                Message = "This endpoint is only available in Development environment."
+            });
+        }
+
+        try
+        {
+            var result = await _resetService.ResetAndSeedQuizDataAsync(cancellationToken);
+            return Ok(new ResetDbResponse
+            {
+                Success = result.Success,
+                TablesWiped = result.TablesWiped,
+                ItemsSeeded = result.ItemsSeeded,
+                Message = result.Success
+                    ? $"Wiped {result.TablesWiped} quiz-related tables and seeded {result.ItemsSeeded} items."
+                    : result.ErrorMessage
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "reset-quiz-data failed");
+            return StatusCode(500, new ResetDbResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
+    }
 }
 
 public class ResetDbResponse

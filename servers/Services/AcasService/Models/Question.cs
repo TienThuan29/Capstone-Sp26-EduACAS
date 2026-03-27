@@ -17,6 +17,8 @@ public class Question
     [Required]
     public QuestionType Type { get; set; }
 
+    public string? TextAnswer { get; set; }
+
     public bool IsDeleted { get; set; }
 
     [Required]
@@ -27,24 +29,6 @@ public class Question
     public DateTime UpdatedAt { get; set; }
 
     public List<AnswerOption> AnswerOptions { get; set; } = new List<AnswerOption>();
-}
-
-public class AnswerOption
-{
-    [Key]
-    public string Id { get; set; } = string.Empty;
-
-    [Required]
-    public string QuestionId { get; set; } = string.Empty;
-
-    [Required]
-    public string Content { get; set; } = string.Empty;
-
-    public bool IsCorrect { get; set; }
-
-    public DateTime CreatedAt { get; set; }
-
-    public DateTime UpdatedAt { get; set; }
 }
 
 public enum QuestionType

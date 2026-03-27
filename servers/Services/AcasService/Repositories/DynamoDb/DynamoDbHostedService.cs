@@ -78,6 +78,7 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:SlotTableName"] ?? "acas-slots",
             configuration["DynamoDB:QuizTableName"] ?? "acas-quizzes",
             configuration["DynamoDB:QuestionTableName"] ?? "acas-questions",
+            configuration["DynamoDB:AnswerOptionTableName"] ?? "acas-answer-options",
             configuration["DynamoDB:ClassroomQuizTableName"] ?? "acas-classroom-quizzes",
             configuration["DynamoDB:QuizAttemptTableName"] ?? "acas-quiz-attempts",
             configuration["DynamoDB:StudentAnswerTableName"] ?? "acas-student-answers",

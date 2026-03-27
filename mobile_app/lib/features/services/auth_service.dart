@@ -1,4 +1,5 @@
 import 'package:mobile/core/configs/api_config.dart';
+import 'package:mobile/features/services/fcm_service.dart';
 import 'package:mobile/features/models/auth/login_request.dart';
 import 'package:mobile/features/models/auth/login_response.dart';
 import '../../core/network/api_network.dart';
@@ -23,6 +24,9 @@ class AuthService {
         );
         // Save user ID for later API calls
         await TokenStorage.saveUserId(loginResponse.dataResponse!.userProfile.id);
+
+        // Register this device token for realtime FCM notifications.
+        await FcmService.registerCurrentDeviceForLoggedInUser();
       }
 
       return loginResponse;

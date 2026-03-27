@@ -1,4 +1,5 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Commands.Notification;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
 using AcasService.Web.Requests;
@@ -25,6 +26,7 @@ public class SubmissionCommand : ISubmissionCommand
       private readonly ITestcaseEvaluator _testcaseEvaluator;
       private readonly IExaminationRepository _examinationRepository;
       private readonly TestResultMapper _testResultMapper;
+      private readonly IBusinessNotificationService _businessNotificationService;
 
       public SubmissionCommand(
           ISubmissionRepository submissionRepository,
@@ -34,7 +36,8 @@ public class SubmissionCommand : ISubmissionCommand
           IProblemRepository problemRepository,
           ITestcaseEvaluator testcaseEvaluator,
           IExaminationRepository examinationRepository,
-          TestResultMapper testResultMapper)
+              TestResultMapper testResultMapper,
+              IBusinessNotificationService businessNotificationService)
       {
             _submissionRepository = submissionRepository;
             _submissionMapper = submissionMapper;
@@ -44,6 +47,7 @@ public class SubmissionCommand : ISubmissionCommand
             _testcaseEvaluator = testcaseEvaluator;
             _examinationRepository = examinationRepository;
             _testResultMapper = testResultMapper;
+            _businessNotificationService = businessNotificationService;
       }
 
       public async Task<SubmissionResponse?> SubmitProblemAsync(SubmitProblemRequest request)
@@ -147,6 +151,21 @@ public class SubmissionCommand : ISubmissionCommand
                               entity.GradedDate = now;
                               entity.UpdatedDate = now;
                               await _submissionRepository.UpdateAsync(entity);
+
+                                            await _businessNotificationService.NotifyUsersAsync(
+                                                  new[] { submissionReq.StudentId },
+                                                  NotificationType.GRADE_RESULT,
+                                                  "Grading result available",
+                                                  $"Your submission for problem {problemId} has been graded.",
+                                                  new Dictionary<string, object?>
+                                                  {
+                                                        ["submissionId"] = entity.Id,
+                                                        ["examId"] = examId,
+                                                        ["problemId"] = problemId,
+                                                        ["finalScore"] = finalScore,
+                                                        ["gradedDate"] = now
+                                                  }
+                                            );
                         }
 
                         _logger.LogInformation(

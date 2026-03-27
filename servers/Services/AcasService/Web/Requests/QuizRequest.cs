@@ -22,4 +22,19 @@ namespace AcasService.Web.Requests
 
         public int? Duration { get; set; }
     }
+
+    public class AssignQuizQuestionsRequest
+    {
+        public List<QuizQuestionItemRequest> Questions { get; set; } = new();
+    }
+
+    public class QuizQuestionItemRequest
+    {
+        [Required(ErrorMessage = "Question ID is required")]
+        public string QuestionId { get; set; } = string.Empty;
+
+        public double Marks { get; set; }
+
+        public int DisplayOrder { get; set; }
+    }
 }

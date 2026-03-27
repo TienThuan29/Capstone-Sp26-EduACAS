@@ -16,6 +16,9 @@ class ApiConfig {
   // static String get registerEndpoint => '/api/auth/v1/register';
   static String get userProfileEndpoint => '/api/auth/v1/profile';
   static String get refreshTokenEndpoint => '/api/auth/v1/refresh';
+  static String get registerDeviceTokenEndpoint =>
+      '/api/acas/v1/device-token/register';
+  static String get myAnnouncementsEndpoint => '/api/acas/v1/notifications/my';
   static String get examinationsEndpoint => '/api/acas/v1/examinations';
 
   // Classroom endpoints

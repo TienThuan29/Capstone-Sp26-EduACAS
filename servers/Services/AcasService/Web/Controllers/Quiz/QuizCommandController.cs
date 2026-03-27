@@ -1,4 +1,5 @@
 using AcasService.Application.Commands.Quiz;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
 using Microsoft.AspNetCore.Authorization;
@@ -8,7 +9,7 @@ namespace AcasService.Web.Controllers.Quiz;
 
 [ApiController]
 [Route("api/v1/quizzes")]
-[Authorize]
+[Authorize(Roles = "LECTURER, ADMIN")]
 public class QuizCommandController : ControllerBase
 {
     private readonly IQuizCommand _quizCommand;
@@ -20,5 +21,113 @@ public class QuizCommandController : ControllerBase
         _logger = logger;
     }
 
-    // TODO: Implement quiz command endpoints (Create, Update, Delete, etc.)
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> CreateQuiz([FromBody] CreateQuizRequest request)
+    {
+        try
+        {
+            var result = await _quizCommand.CreateQuizAsync(request);
+            return ResponseUtil.Success(result, "Quiz created successfully", 201);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating quiz");
+            return ResponseUtil.Error<QuizResponse>("Failed to create quiz", 500);
+        }
+    }
+
+    [HttpPut("{id}")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> UpdateQuiz(string id, [FromBody] UpdateQuizRequest request)
+    {
+        try
+        {
+            var result = await _quizCommand.UpdateQuizAsync(id, request);
+            return ResponseUtil.Success(result, "Quiz updated successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to update quiz", 500);
+        }
+    }
+
+    [HttpPatch("{id}/soft-delete")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> SoftDeleteQuiz(string id)
+    {
+        try
+        {
+            var result = await _quizCommand.SoftDeleteQuizAsync(id);
+            return ResponseUtil.Success(result, "Quiz soft deleted successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to soft delete quiz", 500);
+        }
+    }
+
+    [HttpPatch("{id}/restore")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> RestoreQuiz(string id)
+    {
+        try
+        {
+            var result = await _quizCommand.RestoreQuizAsync(id);
+            return ResponseUtil.Success(result, "Quiz restored successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error restoring quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to restore quiz", 500);
+        }
+    }
+
+    [HttpPut("{id}/questions")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> AssignQuestionsToQuiz(string id, [FromBody] AssignQuizQuestionsRequest request)
+    {
+        try
+        {
+            var result = await _quizCommand.AssignQuestionsAsync(id, request);
+            return ResponseUtil.Success(result, "Quiz questions assigned successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error assigning questions to quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to assign questions to quiz", 500);
+        }
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<ActionResult<ApiResponse<QuizResponse>>> DeleteQuiz(string id)
+    {
+        try
+        {
+            var result = await _quizCommand.DeleteQuizAsync(id);
+            return ResponseUtil.Success(result, "Quiz deleted successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting quiz {Id}", id);
+            return ResponseUtil.Error<QuizResponse>("Failed to delete quiz", 500);
+        }
+    }
 }
