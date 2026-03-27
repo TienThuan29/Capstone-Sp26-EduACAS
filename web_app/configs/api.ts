@@ -141,4 +141,11 @@ export const Api = {
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
   },
+  ErrorGroup: {
+    GENERATE: "/api/v1/error-groups/generate",
+    CHECK_SIMILARITY: "/api/v1/error-groups/check-similarity",
+    GET_SUMMARY_BY_PROBLEM: (examId: string, problemId: string) => `/api/v1/error-groups/exam/${examId}/problem/${problemId}`,
+    GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
+    GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,
+  },
 };

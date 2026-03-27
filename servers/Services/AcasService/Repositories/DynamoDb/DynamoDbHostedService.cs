@@ -80,7 +80,8 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:QuestionTableName"] ?? "acas-questions",
             configuration["DynamoDB:ClassroomQuizTableName"] ?? "acas-classroom-quizzes",
             configuration["DynamoDB:QuizAttemptTableName"] ?? "acas-quiz-attempts",
-            configuration["DynamoDB:StudentAnswerTableName"] ?? "acas-student-answers"
+            configuration["DynamoDB:StudentAnswerTableName"] ?? "acas-student-answers",
+            configuration["DynamoDB:ErrorGroupTableName"] ?? "acas-error-groups"
         };
 
         return tables

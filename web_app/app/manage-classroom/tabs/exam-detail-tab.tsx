@@ -7,6 +7,7 @@ import type { Examination } from "@/types/examination";
 import { OverviewTabContent } from "../components/exam-detail-tab/overview";
 import { ProblemsTabContent } from "../components/exam-detail-tab/problems";
 import { SubmissionsTabContent } from "../components/exam-detail-tab/submissions";
+import { SimilarityTabContent } from "../components/exam-detail-tab/similarity";
 
 const STATUS_LABELS: Record<number, string> = {
   0: "PENDING",
@@ -34,6 +35,7 @@ export type ExaminationDetailViewProps = {
 const TAB_OVERVIEW = 0;
 const TAB_PROBLEMS = 1;
 const TAB_SUBMISSIONS = 2;
+const TAB_SIMILARITY = 3;
 
 export function ExaminationDetailView({
   examination,
@@ -88,6 +90,11 @@ export function ExaminationDetailView({
           <TabItem title="Submissions" active={activeTab === TAB_SUBMISSIONS}>
             {activeTab === TAB_SUBMISSIONS && (
               <SubmissionsTabContent examination={examination} />
+            )}
+          </TabItem>
+          <TabItem title="Similarity" active={activeTab === TAB_SIMILARITY}>
+            {activeTab === TAB_SIMILARITY && (
+              <SimilarityTabContent examination={examination} />
             )}
           </TabItem>
         </Tabs>

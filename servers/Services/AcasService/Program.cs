@@ -69,6 +69,9 @@ using AcasService.Application.Queries.Question;
 using AcasService.Application.Queries.ClassroomQuiz;
 using AcasService.Application.Queries.QuizAttempt;
 using AcasService.Application.Queries.StudentAnswer;
+using AcasService.Repositories.ErrorGroup;
+using AcasService.Application.Commands.ErrorGroup;
+using AcasService.Application.Queries.ErrorGroup;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -141,6 +144,7 @@ builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
 builder.Services.AddScoped<IClassroomQuizRepository, ClassroomQuizRepository>();
 builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
 builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
+builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
@@ -188,6 +192,9 @@ builder.Services.AddScoped<IQuizAttemptCommand, QuizAttemptCommand>();
 builder.Services.AddScoped<IQuizAttemptQuery, QuizAttemptQuery>();
 builder.Services.AddScoped<IStudentAnswerCommand, StudentAnswerCommand>();
 builder.Services.AddScoped<IStudentAnswerQuery, StudentAnswerQuery>();
+builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
+builder.Services.AddScoped<IErrorGroupQuery, ErrorGroupQuery>();
+builder.Services.AddScoped<IJPlagCommand, JPlagCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -207,6 +214,7 @@ builder.Services.AddScoped<ClassEnrollmentMapper>();
 // builder.Services.AddScoped<ClassroomQuizMapper>();
 // builder.Services.AddScoped<QuizAttemptMapper>();
 // builder.Services.AddScoped<StudentAnswerMapper>();
+builder.Services.AddScoped<ErrorGroupMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();

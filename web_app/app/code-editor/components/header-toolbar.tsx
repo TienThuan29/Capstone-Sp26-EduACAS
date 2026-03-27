@@ -131,12 +131,12 @@ export function HeaderToolbar() {
         </div>
 
         {/* Center Section - Timer */}
-      {isExamMode && (
-        <div className="flex items-center gap-2 rounded-full bg-red-500/10 px-3 py-1 font-mono font-bold text-red-500 border border-red-500/20 whitespace-nowrap shadow-sm">
-          <Clock className="h-3.5 w-3.5" />
-          <span className="text-xs">{formatTime(timerSeconds)}</span>
-        </div>
-      )}
+        {isExamMode && (
+          <div className="flex items-center gap-3 rounded-full bg-red-500/10 px-6 py-2.5 font-mono font-bold text-red-500 border border-red-500/20 whitespace-nowrap shadow-sm">
+            <Clock className="h-6 w-6" />
+            <span className="text-lg">{formatTime(timerSeconds)}</span>
+          </div>
+        )}
 
         {/* Right Section - Settings & Theme */}
         <div className="flex items-center gap-3">

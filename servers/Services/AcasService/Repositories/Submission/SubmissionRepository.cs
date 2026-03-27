@@ -19,7 +19,6 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
         _configuration = configuration;
         _submissionTableName = configuration["DynamoDB:SubmissionTableName"] ??
             throw new ArgumentNullException("DynamoDB:SubmissionTableName is not configured");
-        base.TableName = _submissionTableName;
     }
 
     public async Task<Models.Submission?> CreateAsync(Models.Submission submission)
@@ -196,7 +195,45 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
             var response = await _dynamoDBClient.ScanAsync(request);
             var submissions = response.Items.Select(DynamoMapper.DynamoItemToSubmission).ToList();
 
-            return submissions
+             return submissions
+                .GroupBy(s => s.StudentId)
+                .Select(g => g.OrderByDescending(s => s.Version).First())
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving latest submissions for exam {ExamId}, problem {ProblemId}", examId, problemId);
+            throw;
+        }
+    }
+
+    public async Task<List<Models.Submission>> GetLatestVersionSubmissionsOfProblemInExamPaginatedAsync(string examId, string problemId)
+    {
+        try
+        {
+            var allSubmissions = new List<Models.Submission>();
+            Dictionary<string, AttributeValue>? lastEvaluatedKey = null;
+
+            do
+            {
+                var request = new ScanRequest
+                {
+                    TableName = _submissionTableName,
+                    FilterExpression = "examId = :examId AND problemId = :problemId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":examId"] = new AttributeValue { S = examId },
+                        [":problemId"] = new AttributeValue { S = problemId }
+                    },
+                    ExclusiveStartKey = lastEvaluatedKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(request);
+                allSubmissions.AddRange(response.Items.Select(DynamoMapper.DynamoItemToSubmission));
+                lastEvaluatedKey = response.LastEvaluatedKey;
+            } while (lastEvaluatedKey != null && lastEvaluatedKey.Count > 0);
+
+            return allSubmissions
                 .GroupBy(s => s.StudentId)
                 .Select(g => g.OrderByDescending(s => s.Version).First())
                 .ToList();
@@ -221,9 +258,11 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
                     [":examId"] = new AttributeValue { S = examId }
                 }
             };
+
             var response = await _dynamoDBClient.ScanAsync(request);
-            var submissions = response.Items.Select(DynamoMapper.DynamoItemToSubmission).ToList();
-            var byProblem = submissions
+            var allSubmissions = response.Items.Select(DynamoMapper.DynamoItemToSubmission).ToList();
+
+            var byProblem = allSubmissions
                 .GroupBy(s => s.ProblemId)
                 .ToDictionary(g => g.Key, g => g
                     .GroupBy(s => s.StudentId)

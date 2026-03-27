@@ -172,10 +172,9 @@ public class DynamoDbResetService : IDynamoDbResetService
         var seeded = 0;
         var now = DateTime.UtcNow;
 
-        // 0) Query existing programming languages (id + name) for runtime injection
+        // 0) Programming Languages
+        seeded += await SeedProgrammingLanguagesAsync(tables, ct);
         var languages = await GetExistingLanguagesAsync(tableMap, ct);
-        if (languages.Count == 0)
-            _logger.LogWarning("No programming languages found; examinations will have empty languageId");
         var roundRobinIdx = 0;
 
         // 1) Users
@@ -272,16 +271,28 @@ public class DynamoDbResetService : IDynamoDbResetService
         // 7) Submissions — inject languageId from its exam
         var submDtos = LoadJson<SubmissionDto>("submissions.json");
         submDtos.AddRange(LoadJson<SubmissionDto>("test-submissions.json"));
+        submDtos.AddRange(LoadJson<SubmissionDto>("extra-submissions.json"));
         var submissions = submDtos.Select(s => new Submission
         {
             Id = s.Id, StudentId = s.StudentId, ExamId = s.ExamId,
             ProblemId = s.ProblemId,
             LanguageId = examLangMap.GetValueOrDefault(s.ExamId, languages.Count > 0 ? languages[0].Id : ""),
-            CompilerId = "default", Source = s.Source ?? "", Version = 1,
-            SubmittedDate = now.AddHours(-2), FinalScore = 0f,
-            Status = SubmissionStatus.PENDING, GradedDate = DateTime.MinValue,
+            CompilerId = "default", Source = s.Source ?? "", Version = s.Version > 0 ? s.Version : 1,
+            SubmittedDate = now.AddHours(-2), FinalScore = s.FinalScore,
+            Status = SubmissionStatus.GRADED, GradedDate = now.AddHours(-1),
             RegradingRequestId = "", LecturerFeedback = "", AiFeedback = "",
-            UpdatedDate = now.AddHours(-2), TestResults = new List<TestResult>()
+            UpdatedDate = now.AddHours(-2), 
+            TestResults = (s.TestResults ?? new()).Select(tr => new TestResult
+            {
+                Id = tr.Id ?? Guid.NewGuid().ToString(),
+                TestcaseId = tr.TestcaseId ?? "",
+                Input = tr.Input ?? "",
+                ActualOutput = tr.ActualOutput ?? "",
+                ExpectedOutput = tr.ExpectedOutput ?? "",
+                ExecutionTimeMs = tr.ExecutionTimeMs,
+                Status = Enum.TryParse<TestcaseStatus>(tr.Status, true, out var ts) ? ts : TestcaseStatus.SUCCESS,
+                CreatedDate = now.AddHours(-1)
+            }).ToList()
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Submission)),
             submissions, Repositories.Submission.DynamoMapper.SubmissionToDynamoItem, ct);
@@ -334,6 +345,46 @@ public class DynamoDbResetService : IDynamoDbResetService
     }
 
     // ───────────────────────────── User seeding ─────────────────────────────
+
+    private async Task<int> SeedProgrammingLanguagesAsync(
+        IReadOnlyList<(string TableName, Type EntityType)> tables, 
+        CancellationToken ct)
+    {
+        var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
+        var tableName = GetTableName(tableMap, nameof(ProgrammingLanguage));
+        if (string.IsNullOrEmpty(tableName)) return 0;
+
+        // 1. Tìm và xóa các record bắt đầu bằng __ và kết thúc bằng __
+        var existing = await GetExistingLanguagesAsync(tableMap, ct);
+        var underscoredIds = existing.Where(l => l.Id.StartsWith("__") && l.Id.EndsWith("__")).Select(l => l.Id).ToList();
+        
+        foreach (var id in underscoredIds)
+        {
+            await _dynamoDb.DeleteItemAsync(new DeleteItemRequest
+            {
+                TableName = tableName,
+                Key = new Dictionary<string, AttributeValue> { { PartitionKeyName, new AttributeValue { S = id } } }
+            }, ct);
+            _logger.LogInformation("Đã xóa ngôn ngữ rác: {Id}", id);
+        }
+
+        // 2. Chỉ nạp các ngôn ngữ chưa tồn tại
+        var dtos = LoadJson<ProgrammingLanguageDto>("programming-languages.json");
+        var languagesToSeed = dtos.Where(d => !existing.Any(e => e.Id == d.Id)).Select(d => new Models.ProgrammingLanguage
+        {
+            Id = d.Id,
+            Name = d.Name,
+            Monaco = d.Monaco,
+            Extensions = d.Extensions,
+            Status = Enum.TryParse<PLStatus>(d.Status, true, out var st) ? st : PLStatus.DISABLE,
+            CreatedDate = DateTime.UtcNow.AddYears(-1),
+            UpdatedDate = DateTime.UtcNow
+        }).ToList();
+
+        if (languagesToSeed.Count == 0) return 0;
+
+        return await PutAllAsync(tableName, languagesToSeed, Repositories.ProgrammingLanguage.DynamoMapper.ProgrammingLanguageToDynamoItem, ct);
+    }
 
     private async Task<int> SeedUsersAsync(CancellationToken ct)
     {
@@ -589,6 +640,30 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string ExamId { get; set; } = "";
         public string ProblemId { get; set; } = "";
         public string? Source { get; set; }
+        public string? LanguageId { get; set; }
+        public int Version { get; set; }
+        public float FinalScore { get; set; }
+        public List<TestResultDto>? TestResults { get; set; }
+    }
+
+    private sealed class TestResultDto
+    {
+        public string? Id { get; set; }
+        public string? TestcaseId { get; set; }
+        public string? Input { get; set; }
+        public string? ActualOutput { get; set; }
+        public string? ExpectedOutput { get; set; }
+        public int ExecutionTimeMs { get; set; }
+        public string? Status { get; set; }
+    }
+
+    private sealed class ProgrammingLanguageDto
+    {
+        public string Id { get; set; } = "";
+        public string Name { get; set; } = "";
+        public string Monaco { get; set; } = "";
+        public List<string> Extensions { get; set; } = new();
+        public string Status { get; set; } = "DISABLE";
     }
 
     private sealed class SlotDto
