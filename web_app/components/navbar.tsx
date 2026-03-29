@@ -26,6 +26,8 @@ import {
   ArrowRightEndOnRectangleIcon,
   QuestionMarkCircleIcon,
   AcademicCapIcon,
+  ClipboardDocumentListIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline"
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation"
 
@@ -175,6 +177,18 @@ export default function HomeNavbar() {
                         <span className="flex items-center gap-2">
                           <QuestionMarkCircleIcon className="h-4 w-4" />
                           Problem Banks
+                        </span>
+                      </DropdownItem>
+                      <DropdownItem as={Link} href={PageUrl.QUESTION_BANK_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <ClipboardDocumentListIcon className="h-4 w-4" />
+                          Question Banks
+                        </span>
+                      </DropdownItem>
+                      <DropdownItem as={Link} href={PageUrl.QUIZ_BANK_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <BanknotesIcon className="h-4 w-4" />
+                          Quiz Banks
                         </span>
                       </DropdownItem>
                     </>

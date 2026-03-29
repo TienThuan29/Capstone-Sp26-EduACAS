@@ -29,15 +29,15 @@ public class Notification
 public enum NotificationType
 {
       // normal type
-      SYSTEM,
-      NEW_PRACTICE,
-      NEW_MATERIAL,
-      NEW_EXAMINATION,
-      NEW_DISCUSSION_ISSUE,
-      GRADE_RESULT,
-      REPLY_COMMENT,
+      SYSTEM, // Hệ thống gửi thông báo chung
+      NEW_PRACTICE, //Giảng viên đăng bài tập mới
+      NEW_MATERIAL, //Giảng viên đăng tài liệu mới
+      NEW_EXAMINATION, //Giảng viên đăng đề thi mới
+      NEW_DISCUSSION_ISSUE, //Giảng viên hoặc sinh viên tạo chủ đề thảo luận mới
+      GRADE_RESULT, //Giảng viên đăng điểm mới
+      REPLY_COMMENT, //Giảng viên hoặc sinh viên trả lời bình luận của sinh viên
 
       // academic type
-      ACADEMIC_WARNING_LEVEL_1,
-      ACADEMIC_WARNING_LEVEL_2,
+      ACADEMIC_WARNING_LEVEL_1, // Cảnh báo học vụ cấp độ 1
+      ACADEMIC_WARNING_LEVEL_2, // Cảnh báo học vụ cấp độ 2
 }

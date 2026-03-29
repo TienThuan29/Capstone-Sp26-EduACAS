@@ -1,7 +1,9 @@
 using AcasService.Application.Commands.S3;
+using AcasService.Application.Commands.Notification;
 using AcasService.Application.Mappers;
 using AcasService.Application.Queries.S3;
 using AcasService.Application.ResponseDTOs;
+using AcasService.Models;
 using AcasService.Repositories.Material;
 using AcasService.Repositories.Classroom;
 using AcasService.Web.Requests;
@@ -22,6 +24,7 @@ namespace AcasService.Application.Commands.Material
         private readonly IClassroomRepository _classroomRepository;
         private readonly IPrivateS3Command _privateS3Command;
         private readonly IPrivateS3Query _privateS3Query;
+        private readonly IBusinessNotificationService _businessNotificationService;
         private readonly MaterialMapper _materialMapper;
         private readonly ILogger<MaterialCommand> _logger;
 
@@ -30,6 +33,7 @@ namespace AcasService.Application.Commands.Material
             IClassroomRepository classroomRepository,
             IPrivateS3Command privateS3Command,
             IPrivateS3Query privateS3Query,
+            IBusinessNotificationService businessNotificationService,
             MaterialMapper materialMapper,
             ILogger<MaterialCommand> logger)
         {
@@ -37,6 +41,7 @@ namespace AcasService.Application.Commands.Material
             _classroomRepository = classroomRepository;
             _privateS3Command = privateS3Command;
             _privateS3Query = privateS3Query;
+            _businessNotificationService = businessNotificationService;
             _materialMapper = materialMapper;
             _logger = logger;
         }
@@ -94,6 +99,20 @@ namespace AcasService.Application.Commands.Material
                 await _privateS3Command.DeleteFilesAsync(uploadedFileName);
                 throw new Exception("Failed to create material");
             }
+
+            await _businessNotificationService.NotifyClassroomAsync(
+                createdMaterial.ClassroomId,
+                NotificationType.NEW_MATERIAL,
+                "New material uploaded",
+                "A new study material has been uploaded to your classroom.",
+                payload: new Dictionary<string, object?>
+                {
+                    ["materialId"] = createdMaterial.Id,
+                    ["classroomId"] = createdMaterial.ClassroomId,
+                    ["lecturerId"] = createdMaterial.LecturerId,
+                    ["fileName"] = createdMaterial.Filename
+                }
+            );
 
             return _materialMapper.ToMaterialResponse(createdMaterial);
         }

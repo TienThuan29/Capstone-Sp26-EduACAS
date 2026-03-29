@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Sun, Moon, Plus, Minus, RefreshCw } from "lucide-react";
+import { Sun, Moon, Plus, Minus, RefreshCw, Clock } from "lucide-react";
 import {
   Cog6ToothIcon,
   ArrowLeftIcon,
@@ -26,7 +26,16 @@ export function HeaderToolbar() {
     examClassroomId,
     selectedCompiler,
     setSelectedCompiler,
+    timerSeconds,
+    isExamMode,
   } = useEditorContext();
+
+  const formatTime = (s: number) => {
+    const hrs = Math.floor(s / 3600);
+    const mins = Math.floor((s % 3600) / 60);
+    const secs = s % 60;
+    return `${hrs > 0 ? hrs + ":" : ""}${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const lang = editorState.language;
   const compilers = lang?.compilers ?? [];
@@ -120,6 +129,14 @@ export function HeaderToolbar() {
             <span>Reset</span>
           </Button>
         </div>
+
+        {/* Center Section - Timer */}
+        {isExamMode && (
+          <div className="flex items-center gap-3 rounded-full bg-red-500/10 px-6 py-2.5 font-mono font-bold text-red-500 border border-red-500/20 whitespace-nowrap shadow-sm">
+            <Clock className="h-6 w-6" />
+            <span className="text-lg">{formatTime(timerSeconds)}</span>
+          </div>
+        )}
 
         {/* Right Section - Settings & Theme */}
         <div className="flex items-center gap-3">

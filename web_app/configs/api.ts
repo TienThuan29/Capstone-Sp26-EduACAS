@@ -97,6 +97,38 @@ export const Api = {
     OCR_EXTRACT: '/api/acas/v1/ocr/extract',
   },
 
+  Question: {
+    GET_ALL: "/api/acas/v1/questions",
+    GET_PAGED: "/api/acas/v1/questions/paged",
+    GET_BY_ID: (id: string) => `/api/acas/v1/questions/${id}`,
+    CREATE: "/api/acas/v1/questions",
+    UPDATE: (id: string) => `/api/acas/v1/questions/${id}`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/questions/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/questions/${id}/restore`,
+    DELETE: (id: string) => `/api/acas/v1/questions/${id}`,
+  },
+
+  Quiz: {
+    GET_ALL: "/api/acas/v1/quizzes",
+    GET_PAGED: "/api/acas/v1/quizzes/paged",
+    GET_BY_ID: (id: string) => `/api/acas/v1/quizzes/${id}`,
+    CREATE: "/api/acas/v1/quizzes",
+    UPDATE: (id: string) => `/api/acas/v1/quizzes/${id}`,
+    ASSIGN_QUESTIONS: (id: string) => `/api/acas/v1/quizzes/${id}/questions`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/quizzes/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/quizzes/${id}/restore`,
+    DELETE: (id: string) => `/api/acas/v1/quizzes/${id}`,
+  },
+
+  ClassroomQuiz: {
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/classroom-quizzes/classroom/${classroomId}`,
+    GET_BY_ID: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
+    CREATE: "/api/acas/v1/classroom-quizzes",
+    UPDATE: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/classroom-quizzes/${id}/soft-delete`,
+    DELETE: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
+  },
+
   Slot: {
     CREATE: "/api/v1/slots",
     CREATE_ALL_SLOTS: (classroomId: string) => `/api/v1/slots/create-all-slots/${classroomId}`,
@@ -145,5 +177,12 @@ export const Api = {
   Proctoring: {
     CACHE: "/api/v1/keystroke-logs/cache",
     FLUSH: "/api/v1/keystroke-logs/flush",
+  },
+  ErrorGroup: {
+    GENERATE: "/api/v1/error-groups/generate",
+    CHECK_SIMILARITY: "/api/v1/error-groups/check-similarity",
+    GET_SUMMARY_BY_PROBLEM: (examId: string, problemId: string) => `/api/v1/error-groups/exam/${examId}/problem/${problemId}`,
+    GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
+    GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,
   },
 };

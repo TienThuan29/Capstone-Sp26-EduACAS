@@ -343,4 +343,5 @@ public class AuthCommandController : ControllerBase
             return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
         }
     }
+
 }

@@ -1,0 +1,51 @@
+[
+  {
+    "id": "python",
+    "name": "Python 3",
+    "monaco": "python",
+    "extensions": [".py"],
+    "status": "ENABLE"
+  },
+  {
+    "id": "java",
+    "name": "Java",
+    "monaco": "java",
+    "extensions": [".java"],
+    "status": "ENABLE"
+  },
+  {
+    "id": "c++",
+    "name": "C++",
+    "monaco": "cpp",
+    "extensions": [".cpp", ".h"],
+    "status": "ENABLE"
+  },
+  {
+    "id": "c",
+    "name": "C",
+    "monaco": "c",
+    "extensions": [".c", ".h"],
+    "status": "ENABLE"
+  },
+  {
+    "id": "javascript",
+    "name": "JavaScript",
+    "monaco": "javascript",
+    "extensions": [".js"],
+    "status": "ENABLE"
+  },
+  {
+    "id": "csharp",
+    "name": "C#",
+    "monaco": "csharp",
+    "extensions": [".cs"],
+    "status": "ENABLE"
+  },
+  {
+    "id": "typescript",
+    "name": "TypeScript",
+    "monaco": "typescript",
+    "extensions": [".ts"],
+    "status": "ENABLE"
+  }
+]

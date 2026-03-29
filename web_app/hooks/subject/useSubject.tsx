@@ -72,9 +72,18 @@ export const useSubject = () => {
     [axiosInstance],
   );
 
+  const getSubjectById = useCallback(
+    async (id: string) => {
+      const response = await axiosInstance.get(Api.Subject.GET_BY_ID(id));
+      return response.data?.dataResponse || null;
+    },
+    [axiosInstance],
+  );
+
   return {
     getAllSubjects,
     getActiveSubjects,
+    getSubjectById,
     createSubject,
     updateSubject,
     softDeleteSubject,

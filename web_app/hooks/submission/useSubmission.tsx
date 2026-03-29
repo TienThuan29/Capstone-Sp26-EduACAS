@@ -26,7 +26,29 @@ export const useSubmission = () => {
     [axiosInstance]
   );
 
+  const getLatestSubmissionsByExamAndProblem = useCallback(
+    async (examId: string, problemId: string): Promise<SubmissionResponse[]> => {
+      const response = await axiosInstance.get<ApiResponse<SubmissionResponse[]>>(
+        Api.Submission.GET_LATEST_BY_EXAM_AND_PROBLEM(examId, problemId)
+      );
+      return response.data?.dataResponse ?? [];
+    },
+    [axiosInstance]
+  );
+
+  const getLatestSubmissionsByExam = useCallback(
+    async (examId: string): Promise<any[]> => {
+      const response = await axiosInstance.get<ApiResponse<any[]>>(
+        Api.Submission.GET_LATEST_BY_EXAM(examId)
+      );
+      return response.data?.dataResponse ?? [];
+    },
+    [axiosInstance]
+  );
+
   return {
     getSubmissionById,
+    getLatestSubmissionsByExamAndProblem,
+    getLatestSubmissionsByExam,
   };
 };

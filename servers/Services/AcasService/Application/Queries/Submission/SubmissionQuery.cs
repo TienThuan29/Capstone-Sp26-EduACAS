@@ -79,12 +79,19 @@ public class SubmissionQuery : ISubmissionQuery
             var problems = await _problemQuery.GetProblemsByIdsAsync(problemIds).ConfigureAwait(false);
             var problemLiteById = problems.ToDictionary(p => p.Id, p => new ProblemLiteResponse { Id = p.Id, Title = p.Title });
 
+            var studentIds = byProblem.Values.SelectMany(list => list.Select(s => s.StudentId)).Distinct().ToList();
+            var studentProfiles = await _userRequestProducer.GetUsersByIdsAsync(studentIds).ConfigureAwait(false);
+            var studentById = studentProfiles.ToDictionary(p => p.Id, p => _submissionMapper.ToStudentLiteResponse(p));
+
             return byProblem
                 .Select(kv => new ProblemSubmissionsResponse
                 {
                     ProblemId = kv.Key,
                     Submissions = kv.Value
-                        .Select(s => _submissionMapper.ToResponse(s, problemLiteById.GetValueOrDefault(kv.Key)))
+                        .Select(s => _submissionMapper.ToResponse(
+                            s, 
+                            problemLiteById.GetValueOrDefault(kv.Key),
+                            studentById.GetValueOrDefault(s.StudentId)))
                         .ToList()
                 })
                 .ToList();

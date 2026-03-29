@@ -48,7 +48,6 @@ export function CodeEditorClient({
   // Initialize from examination, then restore draft if one exists
   useEffect(() => {
     if (!examination) return;
-    // console.log('Examination:', examination);
     setProblem(examination.problem);
     setExamBackLink(examination.id, examination.classroom?.id ?? null);
     setTestCases(examination.problem.testCases);
@@ -67,8 +66,8 @@ export function CodeEditorClient({
       // ignore localStorage errors
     }
 
-    if (examination.mode === Mode.EXAMINATION) {
-      setExamMode(true, getExamDuration(examination.startDatetime, examination.endDatetime));
+    if (examination.endDatetime) {
+      setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
   }, [examination, setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer, setExamBackLink, problemId, examId]);
