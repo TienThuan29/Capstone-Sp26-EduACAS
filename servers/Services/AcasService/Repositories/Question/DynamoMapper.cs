@@ -13,8 +13,8 @@ public static class DynamoMapper
 			["type"] = new AttributeValue { S = question.Type.ToString() },
 			["isDeleted"] = new AttributeValue { BOOL = question.IsDeleted },
 			["createdBy"] = new AttributeValue { S = question.CreatedBy },
-			["createdAt"] = new AttributeValue { S = question.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
-			["updatedAt"] = new AttributeValue { S = question.UpdatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+			["createdAt"] = new AttributeValue { S = question.CreatedAt.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
+			["updatedAt"] = new AttributeValue { S = question.UpdatedAt.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
 		};
 
 		if (!string.IsNullOrWhiteSpace(question.ImageUrl))
@@ -43,8 +43,8 @@ public static class DynamoMapper
 			TextAnswer = item.ContainsKey("textAnswer") ? item["textAnswer"].S : null,
 			IsDeleted = item.ContainsKey("isDeleted") && item["isDeleted"].BOOL,
 			CreatedBy = item["createdBy"].S,
-			CreatedAt = DateTime.Parse(item["createdAt"].S),
-			UpdatedAt = DateTime.Parse(item["updatedAt"].S)
+			CreatedAt = DateTime.Parse(item["createdAt"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
+			UpdatedAt = DateTime.Parse(item["updatedAt"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal)
 		};
 
 		if (item.TryGetValue("answerOptions", out var answerOptionsAttribute) && answerOptionsAttribute.L != null)
@@ -57,8 +57,8 @@ public static class DynamoMapper
 					QuestionId = attribute.M["questionId"].S,
 					Content = attribute.M["content"].S,
 					IsCorrect = attribute.M["isCorrect"].BOOL,
-					CreatedAt = DateTime.Parse(attribute.M["createdAt"].S),
-					UpdatedAt = DateTime.Parse(attribute.M["updatedAt"].S)
+					CreatedAt = DateTime.Parse(attribute.M["createdAt"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
+					UpdatedAt = DateTime.Parse(attribute.M["updatedAt"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal)
 				})
 				.ToList();
 		}

@@ -32,8 +32,9 @@ import {
 } from '@heroicons/react/24/outline';
 import type { Examination } from '@/types/examination';
 import type { ClassroomStudentResponse } from '@/types/classroom';
-import type { ErrorGroupSummary, JPlagMatchSummary } from '@/types/error-group';
+import type { ErrorGroupSummary } from '@/types/error-group';
 import type { TestCaseResponse } from '@/types/problem';
+import type { ProgrammingLanguage } from '@/types/language';
 import { useStudentClassroom } from '@/hooks/classroom/useStudentClassroom';
 import { useErrorGroup } from '@/hooks/error-group/useErrorGroup';
 import { useProblem } from '@/hooks/problem/useProblem';
@@ -77,6 +78,7 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
     name2: string;
     score: number;
     problemTitle: string;
+    language: ProgrammingLanguage;
   } | null>(null);
 
   const classId = examination.classroom?.id;
@@ -418,7 +420,6 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
                                                 size="xs"
                                                 outline
                                                 color="dark"
-                                                className="cursor-pointer"
                                                 onClick={() => setDiffModalPair({
                                                   groupId: group.id,
                                                   sub1Id: match.submission1Id,
@@ -426,7 +427,8 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
                                                   name1,
                                                   name2,
                                                   score,
-                                                  problemTitle
+                                                  problemTitle,
+                                                  language: examination.programmingLanguage
                                                 })}
                                               >
                                                 <EyeIcon className="h-4 w-4" />

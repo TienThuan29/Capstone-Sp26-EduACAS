@@ -16,4 +16,13 @@ namespace AcasService.Web.Requests
         [Required(ErrorMessage = "Attempt ID is required")]
         public string AttemptId { get; set; } = string.Empty;
     }
+
+    public class UpdateQuizAnswerRequest
+    {
+        [Required(ErrorMessage = "Question ID is required")]
+        public string QuestionId { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Selected Option ID is required")]
+        public string SelectedOptionId { get; set; } = string.Empty;
+    }
 }

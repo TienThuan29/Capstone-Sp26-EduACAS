@@ -3,10 +3,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Modal, ModalHeader, ModalBody, Spinner, Badge, Button } from 'flowbite-react';
 import { Monaco, Editor } from '@monaco-editor/react';
-import { X, FileCode, Layers, Info } from 'lucide-react';
+import { X, FileCode, Layers, Info, Cpu } from 'lucide-react';
 import { useSubmission } from '@/hooks/submission/useSubmission';
 import { useErrorGroup } from '@/hooks/error-group/useErrorGroup';
 import type { ErrorGroupDetail, JPlagMatchDetailGroup } from '@/types/error-group';
+import type { ProgrammingLanguage } from '@/types/language';
 
 type SimilarityDiffModalProps = {
   pair: {
@@ -17,6 +18,7 @@ type SimilarityDiffModalProps = {
     name2: string;
     score: number;
     problemTitle: string;
+    language: ProgrammingLanguage;
   } | null;
   onClose: () => void;
 };
@@ -173,46 +175,72 @@ export function SimilarityDiffModal({ pair, onClose }: SimilarityDiffModalProps)
   return (
     <Modal show={!!pair} onClose={onClose} size="7xl" className="h-screen py-10">
       <ModalHeader className="border-b dark:border-gray-700 bg-white p-5 relative">
-        <div className="grid grid-cols-[2.2fr_1fr_1fr] w-full items-center pr-12 gap-8">
-          {/* Section 1: All identity on one line */}
-          <div className="flex items-center gap-4 min-w-0">
-            <div className="bg-[#1F4E79] p-2 rounded-xl text-white shadow-sm shrink-0">
-              <FileCode className="h-5 w-5" />
+        <div className="flex justify-between items-center w-full pr-12 gap-10">
+          {/* Section 1: Identity & Names (Left-aligned, grows to available space) */}
+          <div className="flex items-center gap-6 min-w-0 flex-1">
+            <div className="bg-[#1F4E79] p-2.5 rounded-xl text-white shadow-sm shrink-0">
+              <FileCode className="h-6 w-6" />
             </div>
-            <div className="flex items-center gap-3 overflow-hidden">
-              <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest shrink-0 border-r pr-3 border-gray-200">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-[0.2em] mb-1">
                 {pair.problemTitle}
               </span>
-              <div className="flex items-center gap-2 overflow-hidden">
-                <span className="text-lg font-extrabold text-[#1F4E79] dark:text-blue-300 whitespace-nowrap overflow-hidden text-ellipsis">
+              <div className="flex items-center gap-4 min-w-0">
+                <span className="text-xl font-extrabold text-[#1F4E79] dark:text-blue-300 whitespace-nowrap">
                   {pair.name1}
                 </span>
-                <span className="text-gray-400 font-medium text-sm italic shrink-0">vs</span>
-                <span className="text-lg font-extrabold text-[#1F4E79] dark:text-blue-300 whitespace-nowrap overflow-hidden text-ellipsis">
+                <span className="text-gray-400 font-medium text-sm italic shrink-0 px-1">vs</span>
+                <span className="text-xl font-extrabold text-[#1F4E79] dark:text-blue-300 whitespace-nowrap">
                   {pair.name2}
                 </span>
               </div>
             </div>
           </div>
 
-          {/* Section 2: Similarity Score (Stable Position) */}
-          <div className="flex justify-center">
-            <div className="flex items-center gap-3 px-5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-inner">
-              <div className={`h-3 w-3 rounded-full ${pair.score > 80 ? 'bg-red-500 animate-pulse' : 'bg-yellow-400 shadow-[0_0_8px_rgba(250,204,21,0.5)]'}`}></div>
-              <span className="text-lg font-black text-gray-800 dark:text-gray-100 leading-none whitespace-nowrap">
-                {pair.score}% <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Similarity</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Section 3: Segment Count (Stable Position) */}
-          <div className="flex justify-end">
-            {matchDetails && (
-              <div className="flex items-center gap-3 px-5 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-2xl shadow-inner">
-                <Layers className="h-5 w-5 text-[#1F4E79]" />
-                <span className="text-lg font-black text-gray-800 dark:text-gray-100 leading-none whitespace-nowrap">
-                  {matchDetails.details.length} <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest ml-1">Segments</span>
+          {/* Section 2: Metadata (Right-aligned, fixed size) */}
+          <div className="flex items-center gap-8 shrink-0">
+            {/* Language */}
+            <div className="flex items-center gap-3 border-l pl-8 border-gray-200 dark:border-gray-700 h-10">
+              <div className="bg-[#C9A24D]/10 p-1.5 rounded-lg shrink-0">
+                <Cpu className="h-4 w-4 text-[#C9A24D]" />
+              </div>
+              <div className="flex flex-col leading-tight">
+                <span className="text-[9px] font-black text-gray-400 uppercase tracking-tighter">Language</span>
+                <span className="text-[11px] font-bold text-[#C9A24D] uppercase">
+                  {pair.language.name}
                 </span>
+              </div>
+            </div>
+
+            {/* Similarity Badge */}
+            <div className="flex items-center gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700">
+              <div
+                className={`w-2.5 h-2.5 rounded-full animate-pulse shrink-0 ${
+                  pair.score >= 80
+                    ? 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]'
+                    : pair.score >= 50
+                    ? 'bg-orange-400 shadow-[0_0_8px_rgba(251,146,60,0.5)]'
+                    : 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.5)]'
+                }`}
+              />
+              <div className="flex items-baseline gap-1.5 overflow-hidden">
+                <span className="text-xl font-black text-gray-800 dark:text-gray-100 tabular-nums">
+                  {pair.score}%
+                </span>
+                <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Similarity</span>
+              </div>
+            </div>
+
+            {/* Segments Badge */}
+            {matchDetails && (
+              <div className="flex items-center gap-3 px-5 py-2.5 bg-gray-50 dark:bg-gray-800/50 rounded-2xl border border-gray-100 dark:border-gray-700">
+                <Layers className="h-5 w-5 text-gray-400 shrink-0" />
+                <div className="flex items-baseline gap-1.5 overflow-hidden">
+                  <span className="text-xl font-black text-gray-800 dark:text-gray-100 tabular-nums">
+                    {matchDetails.details.length}
+                  </span>
+                  <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Segments</span>
+                </div>
               </div>
             )}
           </div>
@@ -249,7 +277,7 @@ export function SimilarityDiffModal({ pair, onClose }: SimilarityDiffModalProps)
                       height="calc(100% - 31px)"
                       value={code1}
                       theme="light"
-                      language="csharp"
+                      language={pair.language.monaco}
                       onMount={(editor, monaco) => {
                         handleEditor1Mount(editor, monaco);
                       }}
@@ -279,7 +307,7 @@ export function SimilarityDiffModal({ pair, onClose }: SimilarityDiffModalProps)
                       height="calc(100% - 31px)"
                       value={code2}
                       theme="light"
-                      language="csharp"
+                      language={pair.language.monaco}
                       onMount={(editor, monaco) => {
                         handleEditor2Mount(editor, monaco);
                       }}

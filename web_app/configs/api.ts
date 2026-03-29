@@ -120,6 +120,15 @@ export const Api = {
     DELETE: (id: string) => `/api/acas/v1/quizzes/${id}`,
   },
 
+  ClassroomQuiz: {
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/classroom-quizzes/classroom/${classroomId}`,
+    GET_BY_ID: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
+    CREATE: "/api/acas/v1/classroom-quizzes",
+    UPDATE: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/classroom-quizzes/${id}/soft-delete`,
+    DELETE: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
+  },
+
   Slot: {
     CREATE: "/api/v1/slots",
     CREATE_ALL_SLOTS: (classroomId: string) => `/api/v1/slots/create-all-slots/${classroomId}`,

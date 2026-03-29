@@ -103,7 +103,7 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
   return (
     <ToastContext.Provider value={{ showToast, showSuccess, showError, showWarning, showInfo }}>
       {children}
-      <div className="fixed top-5 right-5 z-50 flex flex-col gap-2">
+      <div className="fixed top-5 right-5 z-[9999] flex flex-col gap-2">
         {toasts.map((toast) => {
           const config = getToastConfig(toast.type);
           const Icon = config.icon;

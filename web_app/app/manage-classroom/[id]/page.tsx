@@ -33,6 +33,7 @@ import {
   ExamsTab,
   MaterialsTab,
   StudentTab,
+  QuizzesTab,
 } from "@/app/manage-classroom/tabs";
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
@@ -65,6 +66,7 @@ function ClassroomContent() {
 
   const activeTab = searchParams.get("tab") || "overview";
   const initialExamId = searchParams.get("examId");
+  const initialQuizId = searchParams.get("quizId");
 
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
@@ -78,6 +80,9 @@ function ClassroomContent() {
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [showEnrolKey, setShowEnrolKey] = useState(false);
   const [examDetailBack, setExamDetailBack] = useState<(() => void) | null>(
+    null
+  );
+  const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(
     null
   );
 
@@ -158,6 +163,16 @@ function ClassroomContent() {
       const p = new URLSearchParams(searchParams?.toString() ?? "");
       if (examId) p.set("examId", examId);
       else p.delete("examId");
+      router.replace(`${pathname}?${p.toString()}`);
+    },
+    [router, searchParams, pathname]
+  );
+
+  const updateQuizIdInUrl = useCallback(
+    (quizId: string | null) => {
+      const p = new URLSearchParams(searchParams?.toString() ?? "");
+      if (quizId) p.set("quizId", quizId);
+      else p.delete("quizId");
       router.replace(`${pathname}?${p.toString()}`);
     },
     [router, searchParams, pathname]
@@ -286,6 +301,15 @@ function ClassroomContent() {
         return <DashboardTab />;
       case "slots":
         return <SlotsTab maxSlot={classroom.maxSlot} />;
+      case "quizzes":
+        return (
+          <QuizzesTab
+            classId={classId}
+            setQuizDetailBack={setQuizDetailBack}
+            initialQuizId={initialQuizId}
+            onQuizIdInUrlChange={updateQuizIdInUrl}
+          />
+        );
       case "discussion":
         return (
           <DiscussionTab
@@ -320,6 +344,13 @@ function ClassroomContent() {
               label="Back to list"
               icon={<ArrowLeftIcon className="h-4 w-4" />}
               onClick={examDetailBack}
+            />
+          )}
+          {activeTab === "quizzes" && quizDetailBack && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={quizDetailBack}
             />
           )}
           {activeTab === "discussion" && searchParams.get("issue") && (

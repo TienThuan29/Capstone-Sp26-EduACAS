@@ -18,6 +18,4 @@ public class QuizAttemptQueryController : ControllerBase
         _quizAttemptQuery = quizAttemptQuery;
         _logger = logger;
     }
-
-    // TODO: Implement quiz attempt query endpoints (GetById, GetByStudent, GetByQuiz, etc.)
 }

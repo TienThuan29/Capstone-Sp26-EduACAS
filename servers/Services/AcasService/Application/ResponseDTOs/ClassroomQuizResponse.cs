@@ -1,45 +1,17 @@
-using System.ComponentModel.DataAnnotations;
-using AcasService.Dev;
+using AcasService.Models;
 
-namespace AcasService.Models;
+namespace AcasService.Application.ResponseDTOs;
 
-[DynamoDBEntity("ClassroomQuizTableName")]
-public class ClassroomQuiz
+public class ClassroomQuizResponse
 {
-    [Key]
     public string Id { get; set; } = string.Empty;
-
-    [Required]
     public string ClassroomId { get; set; } = string.Empty;
-
-    [Required]
     public string QuizId { get; set; } = string.Empty;
-
     public DateTime StartTime { get; set; }
-
     public DateTime EndTime { get; set; }
-
     public int MaxOfAttempts { get; set; }
-
-    [MaxLength(50)]
     public string? Passcode { get; set; }
-
-    [Required]
     public ClassroomQuizStatus Status { get; set; }
-
-    public bool IsDeleted { get; set; }
-
-    [Required]
-    public string CreatedBy { get; set; } = string.Empty;
-
     public DateTime CreatedAt { get; set; }
-
     public DateTime UpdatedAt { get; set; }
-}
-
-public enum ClassroomQuizStatus
-{
-    DRAFT,
-    PUBLISHED,
-    CLOSED
 }

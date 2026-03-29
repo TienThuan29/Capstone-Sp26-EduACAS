@@ -78,6 +78,7 @@ using AcasService.Application.Queries.StudentAnswer;
 using AcasService.Repositories.ErrorGroup;
 using AcasService.Application.Commands.ErrorGroup;
 using AcasService.Application.Queries.ErrorGroup;
+using AcasService.Repositories.Caching.Redis.Quiz;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -156,6 +157,7 @@ builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
+builder.Services.AddScoped<IQuizCache, QuizCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
