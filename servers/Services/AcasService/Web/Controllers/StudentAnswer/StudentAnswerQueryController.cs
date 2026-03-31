@@ -1,4 +1,5 @@
 using AcasService.Application.Queries.StudentAnswer;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,5 +20,18 @@ public class StudentAnswerQueryController : ControllerBase
         _logger = logger;
     }
 
-    // TODO: Implement student answer query endpoints (GetByAttempt, GetById, etc.)
+    [HttpGet("attempt/{attemptId}")]
+    public async Task<ActionResult<ApiResponse<List<StudentAnswerResponse>>>> GetByAttemptId(string attemptId)
+    {
+        try
+        {
+            var result = await _studentAnswerQuery.GetByAttemptIdAsync(attemptId);
+            return ResponseUtil.Success(result, "Get student answers by attempt successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting student answers for attempt {AttemptId}", attemptId);
+            return ResponseUtil.Error<List<StudentAnswerResponse>>("Get student answers by attempt failed", 500);
+        }
+    }
 }
