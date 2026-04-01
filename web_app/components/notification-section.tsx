@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 import { Dropdown } from "flowbite-react";
 import { BellIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/contexts/AuthContext";
-import { useSignalRNotification } from "@/hooks/useSignalRNotification";
+import { useSignalRNotification } from "@/hooks/notification/useSignalRNotification";
 import { useToast } from "@/hooks/useToast";
 import type { RealtimeNotification } from "@/types/notification";
 

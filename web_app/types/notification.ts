@@ -19,3 +19,25 @@ export type RealtimeNotification = {
   payload: Record<string, unknown>;
   sentDate: string;
 };
+
+export type Notification = {
+  id: string;
+  targetUserId: string;
+  title: string;
+  body: string;
+  type: NotificationType;
+  payload: Record<string, unknown>;
+  sentDate: string;
+  isRead: boolean;
+  isDeleted: boolean;
+};
+
+export interface PagedNotifications {
+  items: Notification[];
+  totalCount: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}

@@ -66,7 +66,16 @@ const Sidebar = () => {
   };
 
   const studentMenuItems = [
-    { icon: Squares2X2Icon, label: "Dashboard", href: PageUrl.DASHBOARD_PAGE },
+    {
+      icon: Squares2X2Icon,
+      label: "Overview",
+      href: PageUrl.DEFAULT_PAGE,
+    },
+    // { 
+    //   icon: Squares2X2Icon, 
+    //   label: "Dashboard", 
+    //   href: PageUrl.DASHBOARD_PAGE 
+    // },
     {
       icon: AcademicCapIcon,
       label: "Classrooms",
@@ -81,6 +90,11 @@ const Sidebar = () => {
   ];
 
   const lecturerMenuItems = [
+    {
+      icon: Squares2X2Icon,
+      label: "Overview",
+      href: PageUrl.DEFAULT_PAGE,
+    },
     {
       icon: AcademicCapIcon,
       label: "My Classrooms",

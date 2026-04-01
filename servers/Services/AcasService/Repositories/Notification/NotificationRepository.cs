@@ -44,7 +44,8 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
             var key = DynamoMapper.CreateKey(id);
             var response = await GetItemAsync(key, _notificationTableName);
             if (response.Item.Count == 0) return null;
-            return DynamoMapper.DynamoItemToNotification(response.Item);
+            var notification = DynamoMapper.DynamoItemToNotification(response.Item);
+            return notification.IsDeleted ? null : notification;
         }
         catch (Exception ex)
         {
@@ -60,10 +61,14 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
             var request = new ScanRequest
             {
                 TableName = _notificationTableName,
-                FilterExpression = "targetUserId = :targetUserId",
+                // Soft delete: if the item has isDeleted=true, exclude it.
+                // For backward compatibility, treat missing isDeleted as false.
+                FilterExpression =
+                    "targetUserId = :targetUserId AND (attribute_not_exists(isDeleted) OR isDeleted = :isDeletedFalse)",
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
-                    [":targetUserId"] = new AttributeValue { S = targetUserId }
+                    [":targetUserId"] = new AttributeValue { S = targetUserId },
+                    [":isDeletedFalse"] = new AttributeValue { BOOL = false }
                 }
             };
 

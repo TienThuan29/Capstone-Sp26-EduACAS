@@ -21,8 +21,8 @@ public class ClassroomNotification : NotificationProviderBase
             if (string.IsNullOrEmpty(notification.Id))
                   notification.Id = Guid.NewGuid().ToString();
 
-            // var created = await _notificationRepository.CreateAsync(notification);
-            var created = notification;
+            var created = await _notificationRepository.CreateAsync(notification);
+            // var created = notification;
             if (created == null)
                   return false;
 

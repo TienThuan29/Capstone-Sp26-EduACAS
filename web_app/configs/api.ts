@@ -59,6 +59,10 @@ export const Api = {
 
   Classroom: {
     GET_STUDENT_CLASSROOMS: "/api/acas/v1/classrooms/student",
+    /** Redis-backed recently viewed classroom IDs (path uses `student/{userId}`; userId is student or lecturer). */
+    GET_STUDENT_RECENT: (userId: string) => `/api/acas/v1/classrooms/student/${userId}/recent`,
+    /** Records a classroom view (Redis sorted set); userId is student or lecturer. */
+    RECORD_RECENT_ACCESS: (userId: string) => `/api/acas/v1/classrooms/student/${userId}/recent-access`,
     GET_ALL_CLASSROOMS: "/api/acas/v1/classrooms",
     GET_BY_ID: "/api/acas/v1/classrooms",
     ENROLL: "/api/acas/v1/class-enrollments/enroll",
@@ -131,6 +135,12 @@ export const Api = {
   Notification: {
     /** SignalR hub for real-time notifications */
     HUB: "/api/acas/v1/hubs/notification",
+    /** GET paged notifications by userId */
+    GET_BY_USER: "/api/acas/v1/notifications",
+    /** PATCH mark notification as read */
+    MARK_READ: (id: string) => `/api/acas/v1/notifications/${id}/mark-read`,
+    /** PATCH soft-delete notification */
+    SOFT_DELETE: (id: string) => `/api/acas/v1/notifications/${id}/soft-delete`,
   },
 
   DiscussionIssue: {

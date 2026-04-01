@@ -69,6 +69,26 @@ export const useClassroom = () => {
     [axiosInstance],
   );
 
+  const getRecentClassroomIds = useCallback(
+    async (userId: string, limit: number = 5) => {
+      const response = await axiosInstance.get(
+        Api.Classroom.GET_STUDENT_RECENT(userId),
+        { params: { limit } },
+      );
+      return (response.data?.dataResponse ?? []) as string[];
+    },
+    [axiosInstance],
+  );
+
+  const recordClassroomAccess = useCallback(
+    async (userId: string, classroomId: string) => {
+      await axiosInstance.post(Api.Classroom.RECORD_RECENT_ACCESS(userId), {
+        classroomId,
+      });
+    },
+    [axiosInstance],
+  );
+
   const getClassroomById = useCallback(
     async (classId: string, userId?: string) => {
       const url = userId
@@ -158,6 +178,8 @@ export const useClassroom = () => {
   return {
     getAllClassrooms,
     getStudentClassrooms,
+    getRecentClassroomIds,
+    recordClassroomAccess,
     getClassroomById,
     enrollClassroom,
     leaveClassroom,

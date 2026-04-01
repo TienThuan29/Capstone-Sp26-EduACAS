@@ -58,6 +58,7 @@ function ClassroomContent() {
     getSubjects,
     updateClassroom,
     softDeleteClassroom,
+    recordClassroomAccess,
   } = useClassroom();
   const { getExaminationsByClassId } = useExamination();
   const { user } = useAuth();
@@ -139,6 +140,15 @@ function ClassroomContent() {
       fetchClassroomDetail();
     }
   }, [getClassroomById, classId]);
+
+  // useEffect(() => {
+  //   const uid = user?.id;
+  //   if (!uid || !classId || !classroom?.id) return;
+  //   if (user?.role?.toUpperCase() !== "LECTURER") return;
+  //   void recordClassroomAccess(uid, classId).catch(() => {
+  //     /* non-blocking */
+  //   });
+  // }, [user?.id, user?.role, classId, classroom?.id, recordClassroomAccess]);
 
   const fetchExaminations = useCallback(async () => {
     if (!classId) return;
