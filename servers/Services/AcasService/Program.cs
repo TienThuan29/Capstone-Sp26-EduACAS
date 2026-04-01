@@ -52,7 +52,13 @@ using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
+using AcasService.Application.Commands.ExamLog;
+using AcasService.Application.Commands.StudentExamSession;
+using AcasService.Application.Queries.ExamLog;
 using AcasService.Repositories.Caching.Redis.Submission;
+using AcasService.Repositories.Caching.Redis.ExamLog;
+using AcasService.Repositories.ExamLog;
+using AcasService.Repositories.StudentExamSession;
 using AcasService.Dev;
 
 
@@ -119,11 +125,14 @@ builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<IExamLogRepository, ExamLogRepository>();
+builder.Services.AddScoped<IStudentExamSessionRepository, StudentExamSessionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
+builder.Services.AddScoped<IExamLogCache, ExamLogCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -157,6 +166,9 @@ builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
 builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
+builder.Services.AddScoped<IExamLogCommand, ExamLogCommand>();
+builder.Services.AddScoped<IStudentExamSessionCommand, StudentExamSessionCommand>();
+builder.Services.AddScoped<IExamLogQuery, ExamLogQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 
 // mapper
@@ -171,6 +183,7 @@ builder.Services.AddScoped<CommentMapper>();
 builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
+builder.Services.AddScoped<ExamLogMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
 
 // code runner service 

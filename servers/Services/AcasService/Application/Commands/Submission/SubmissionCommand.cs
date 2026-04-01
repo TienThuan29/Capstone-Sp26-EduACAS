@@ -5,6 +5,7 @@ using AcasService.Web.Requests;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Repositories.Examination;
 using AcasService.Repositories.Problem;
+using AcasService.Repositories.StudentExamSession;
 using AcasService.Repositories.Submission;
 
 namespace AcasService.Application.Commands.Submission;
@@ -24,6 +25,7 @@ public class SubmissionCommand : ISubmissionCommand
       private readonly IProblemRepository _problemRepository;
       private readonly ITestcaseEvaluator _testcaseEvaluator;
       private readonly IExaminationRepository _examinationRepository;
+      private readonly IStudentExamSessionRepository _studentExamSessionRepository;
       private readonly TestResultMapper _testResultMapper;
 
       public SubmissionCommand(
@@ -34,6 +36,7 @@ public class SubmissionCommand : ISubmissionCommand
           IProblemRepository problemRepository,
           ITestcaseEvaluator testcaseEvaluator,
           IExaminationRepository examinationRepository,
+          IStudentExamSessionRepository studentExamSessionRepository,
           TestResultMapper testResultMapper)
       {
             _submissionRepository = submissionRepository;
@@ -43,11 +46,25 @@ public class SubmissionCommand : ISubmissionCommand
             _problemRepository = problemRepository;
             _testcaseEvaluator = testcaseEvaluator;
             _examinationRepository = examinationRepository;
+            _studentExamSessionRepository = studentExamSessionRepository;
             _testResultMapper = testResultMapper;
       }
 
       public async Task<SubmissionResponse?> SubmitProblemAsync(SubmitProblemRequest request)
       {
+            var examination = await _examinationRepository.GetByIdAsync(request.ExamId);
+            if (examination != null && examination.Mode == Mode.EXAMINATION)
+            {
+                  var session = await _studentExamSessionRepository.GetByStudentAndExamAsync(request.StudentId, request.ExamId);
+                  if (session == null || session.Phase != StudentExamSessionPhase.Active)
+                  {
+                        _logger.LogWarning(
+                              "Submission rejected: student {StudentId} exam {ExamId} session phase invalid (session missing or not Active)",
+                              request.StudentId, request.ExamId);
+                        throw new InvalidOperationException("Exam session is not active. Start the exam from the exam page before submitting.");
+                  }
+            }
+
             var submission = _submissionMapper.ToEntity(request);
 
             var cacheKey = _submissionCache.GetSubmissionsListKey(request.StudentId, request.ExamId, request.ProblemId);

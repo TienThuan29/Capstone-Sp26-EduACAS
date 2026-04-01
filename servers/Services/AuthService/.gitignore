@@ -373,3 +373,4 @@ appsettings.*.json
 
 # Docker
 .dockerignore
+Diagrams/

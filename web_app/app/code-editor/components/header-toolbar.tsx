@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Sun, Moon, Plus, Minus, RefreshCw } from "lucide-react";
 import {
@@ -9,12 +9,17 @@ import {
   PaperAirplaneIcon,
 } from "@heroicons/react/24/outline";
 import { useEditorContext } from "@/contexts/EditorContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { EXAM_SESSION_SYNC_EVENT } from "@/utils/student-exam-session";
+import { useStudentExamSession } from "@/hooks/exam/useStudentExamSession";
+import type { StudentExamSessionPhase } from "@/types/student-exam-session";
 import { ConfirmModal } from "./confirm-modal";
 import { EditorSettingsModal } from "./editor-settings-modal";
 import { Button, Dropdown, DropdownItem } from "flowbite-react";
 
 export function HeaderToolbar() {
   const router = useRouter();
+  const { user } = useAuth();
   const {
     editorState,
     setFontSize,
@@ -40,6 +45,33 @@ export function HeaderToolbar() {
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const { getByExam } = useStudentExamSession();
+  const [serverPhase, setServerPhase] = useState<StudentExamSessionPhase | null | undefined>(undefined);
+  const studentId = user?.id ?? "";
+
+  useEffect(() => {
+    if (!examId || !studentId) {
+      setServerPhase(undefined);
+      return;
+    }
+    const load = async () => {
+      try {
+        const s = await getByExam(examId);
+        setServerPhase(s?.phase ?? null);
+      } catch {
+        setServerPhase(null);
+      }
+    };
+    const onSync = () => {
+      void load();
+    };
+    void load();
+    window.addEventListener(EXAM_SESSION_SYNC_EVENT, onSync);
+    return () => window.removeEventListener(EXAM_SESSION_SYNC_EVENT, onSync);
+  }, [examId, studentId, getByExam]);
+
+  const isExamEnded = serverPhase === "LOCKED" || serverPhase === "COMPLETED";
+  const isExamSessionLoading = Boolean(examId && serverPhase === undefined);
 
   return (
     <>
@@ -51,7 +83,7 @@ export function HeaderToolbar() {
             size="sm"
             color="green"
             onClick={() => setShowSubmitModal(true)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || isExamEnded || isExamSessionLoading}
             className="flex cursor-pointer items-center gap-1.5"
           >
             <PaperAirplaneIcon className="h-4 w-4" />

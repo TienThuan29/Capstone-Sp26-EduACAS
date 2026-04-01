@@ -37,6 +37,8 @@ import { formatDate } from "@/utils/datetime-utils";
 import { CustomPagination } from "@/components/custom-pagination";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { SubmissionDetail } from "./submission-detail";
+import { useExamLog } from "@/hooks/exam/useExamLog";
+import { deriveExamViolationFlag, type ExamViolationFlag } from "@/utils/exam-log-flag";
 
 export type SubmissionsTabContentProps = {
   examination: Examination;
@@ -55,6 +57,7 @@ export function SubmissionsTabContent({
 }: SubmissionsTabContentProps) {
   const { getStudentsByClassId } = useStudentClassroom();
   const { getLatestSubmissionsByExam, runAutoGrading } = useSubmissionLecturer();
+  const { getExamLogsBySubmission } = useExamLog();
 
   const [students, setStudents] = useState<ClassroomStudentResponse[]>([]);
   const [problemSubmissions, setProblemSubmissions] = useState<
@@ -80,6 +83,8 @@ export function SubmissionsTabContent({
     message: string;
     detail?: AutoGradeProblemResponse;
   } | null>(null);
+  const [submissionFlags, setSubmissionFlags] = useState<Record<string, ExamViolationFlag>>({});
+  const [flagLoadingBySubmission, setFlagLoadingBySubmission] = useState<Record<string, boolean>>({});
 
   const classId = examination.classroom?.id;
   const examId = examination.id;
@@ -102,6 +107,21 @@ export function SubmissionsTabContent({
     if (!selectedProblemId) return problemSubmissions;
     return problemSubmissions.filter((p) => p.problemId === selectedProblemId);
   }, [problemSubmissions, selectedProblemId]);
+
+  const visibleSubmissionIds = useMemo(() => {
+    const ids: string[] = [];
+    for (const { problemId, submissions } of displayedProblems) {
+      const currentPage = currentPageByProblem[problemId] ?? 1;
+      const pageItems = submissions.slice(
+        (currentPage - 1) * SUBMISSIONS_PAGE_SIZE,
+        currentPage * SUBMISSIONS_PAGE_SIZE,
+      );
+      for (const sub of pageItems) {
+        ids.push(sub.id);
+      }
+    }
+    return ids;
+  }, [currentPageByProblem, displayedProblems]);
 
   /**
    * Fetch data for the submissions tab (single batch request for all problems).
@@ -137,6 +157,28 @@ export function SubmissionsTabContent({
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    const idsToFetch = visibleSubmissionIds.filter(
+      (id) => submissionFlags[id] == null && !flagLoadingBySubmission[id],
+    );
+    if (idsToFetch.length === 0) return;
+
+    idsToFetch.forEach((id) => {
+      setFlagLoadingBySubmission((prev) => ({ ...prev, [id]: true }));
+      void (async () => {
+        try {
+          const logs = await getExamLogsBySubmission(id);
+          const flag = deriveExamViolationFlag(logs);
+          setSubmissionFlags((prev) => ({ ...prev, [id]: flag }));
+        } catch {
+          setSubmissionFlags((prev) => ({ ...prev, [id]: "CLEAN" }));
+        } finally {
+          setFlagLoadingBySubmission((prev) => ({ ...prev, [id]: false }));
+        }
+      })();
+    });
+  }, [flagLoadingBySubmission, getExamLogsBySubmission, submissionFlags, visibleSubmissionIds]);
 
   useEffect(() => {
     if (!gradingConfirmLoading) {
@@ -369,6 +411,7 @@ export function SubmissionsTabContent({
                           <TableHeadCell>Submitted</TableHeadCell>
                           <TableHeadCell>Score</TableHeadCell>
                           <TableHeadCell>Status</TableHeadCell>
+                          <TableHeadCell>Flag</TableHeadCell>
                           <TableHeadCell>Action</TableHeadCell>
                           <TableHeadCell>
                             <span className="sr-only">Actions</span>
@@ -407,6 +450,28 @@ export function SubmissionsTabContent({
                               >
                                 {sub.status}
                               </Badge>
+                            </TableCell>
+                            <TableCell>
+                              {flagLoadingBySubmission[sub.id] ? (
+                                <Badge color="gray" size="sm">Checking</Badge>
+                              ) : (
+                                <Badge
+                                  color={
+                                    submissionFlags[sub.id] === "CRITICAL"
+                                      ? "failure"
+                                      : submissionFlags[sub.id] === "WARNING"
+                                        ? "warning"
+                                        : "success"
+                                  }
+                                  size="sm"
+                                >
+                                  {submissionFlags[sub.id] === "CRITICAL"
+                                    ? "Critical"
+                                    : submissionFlags[sub.id] === "WARNING"
+                                      ? "Warning"
+                                      : "Clean"}
+                                </Badge>
+                              )}
                             </TableCell>
                             <TableCell className="flex items-center gap-2">
                               {/* for manual grading */}
@@ -456,7 +521,7 @@ export function SubmissionsTabContent({
 
       {gradingConfirmLoading && (
         <div
-          className="fixed inset-0 z-[100] flex cursor-wait flex-col items-center justify-center gap-4 bg-gray-500/60 dark:bg-gray-900/70"
+          className="fixed inset-0 z-100 flex cursor-wait flex-col items-center justify-center gap-4 bg-gray-500/60 dark:bg-gray-900/70"
           aria-hidden="true"
         >
           <Spinner size="xl" color="info" />

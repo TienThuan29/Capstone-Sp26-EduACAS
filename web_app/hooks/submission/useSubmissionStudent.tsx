@@ -3,7 +3,7 @@
 import { useCallback } from 'react';
 import useAxios from '@/hooks/useAxios';
 import { Api } from '@/configs/api';
-import type { SubmitProblemRequest, SubmissionResponse } from '@/types/submission';
+import type { ProblemSubmissionsResponse, SubmitProblemRequest, SubmissionResponse } from '@/types/submission';
 
 interface ApiResponse<T> {
   success?: boolean;
@@ -48,10 +48,21 @@ export const useSubmissionStudent = () => {
     },
     [axiosInstance]
   );
+  
+  const getLatestSubmissionsByExam = useCallback(
+    async (examId: string): Promise<ProblemSubmissionsResponse[]> => {
+      const response = await axiosInstance.get<ApiResponse<ProblemSubmissionsResponse[]>>(
+        Api.Submission.GET_LATEST_BY_EXAM(examId)
+      );
+      return response.data?.dataResponse ?? [];
+    },
+    [axiosInstance]
+  );
 
   return {
     saveSubmission,
     getSubmissionsByStudentId,
     getLatestSubmissionsByExamAndProblem,
+    getLatestSubmissionsByExam,
   };
 };

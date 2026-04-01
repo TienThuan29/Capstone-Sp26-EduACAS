@@ -29,11 +29,20 @@ public class SubmissionCommandController : ControllerBase
     {
         try
         {
+            var userId = User.FindFirst("id")?.Value;
+            if (!string.IsNullOrEmpty(userId) && !string.Equals(userId, request.StudentId, StringComparison.Ordinal))
+                return ResponseUtil.Error<SubmissionResponse>("Student id does not match authenticated user", 403);
+
             var result = await _submissionCommand.SubmitProblemAsync(request);
             if (result == null)
                 return ResponseUtil.Error<SubmissionResponse>("Failed to save submission", 500);
 
             return ResponseUtil.Success(result, "Submission saved successfully", 201);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Submission rejected");
+            return ResponseUtil.Error<SubmissionResponse>(ex.Message, 403);
         }
         catch (Exception ex)
         {
