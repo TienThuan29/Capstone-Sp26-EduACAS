@@ -38,6 +38,7 @@ namespace AuthService.Models
         public DateTime? CreatedDate { get; set; }
         
         public DateTime? UpdatedDate { get; set; }
+
     }
 
     public enum Role

@@ -1,5 +1,7 @@
 using AcasService.Application.Commands.Notification;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
+using AcasService.Web.Requests;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,6 +21,29 @@ public class NotificationCommandController : ControllerBase
     {
         _logger = logger;
         _notificationCommand = notificationCommand;
+    }
+
+    [HttpPost]
+    public async Task<ActionResult<ApiResponse<NotificationDispatchResponse>>> CreateAndPush([FromBody] CreateNotificationRequest request)
+    {
+        try
+        {
+            var response = await _notificationCommand.CreateAndSendAsync(request);
+            return ResponseUtil.Success(response, "Notification pushed successfully", 201);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Invalid notification type"))
+        {
+            return ResponseUtil.Error<NotificationDispatchResponse>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Failed to create notification"))
+        {
+            return ResponseUtil.Error<NotificationDispatchResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating notification");
+            return ResponseUtil.Error<NotificationDispatchResponse>("Failed to create notification", 500);
+        }
     }
 
     [HttpPatch("{id}/mark-read")]
@@ -67,4 +92,3 @@ public class NotificationCommandController : ControllerBase
         }
     }
 }
-

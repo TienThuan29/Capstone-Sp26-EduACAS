@@ -1,0 +1,69 @@
+[
+  {
+    "id": "quiz-001",
+    "subjectId": "sub-001",
+    "title": "Python Basics Quiz",
+    "duration": 20,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      {
+        "questionId": "qzq-001",
+        "marks": 1,
+        "displayOrder": 1
+      },
+      {
+        "questionId": "qzq-002",
+        "marks": 2,
+        "displayOrder": 2
+      },
+      {
+        "questionId": "qzq-003",
+        "marks": 3,
+        "displayOrder": 3
+      }
+    ]
+  },
+  {
+    "id": "quiz-002",
+    "subjectId": "sub-002",
+    "title": "DSA Foundation Quiz",
+    "duration": 25,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      {
+        "questionId": "qzq-004",
+        "marks": 2,
+        "displayOrder": 1
+      },
+      {
+        "questionId": "qzq-005",
+        "marks": 3,
+        "displayOrder": 2
+      }
+    ]
+  },
+  {
+    "id": "quiz-003",
+    "subjectId": "sub-003",
+    "title": "OOP and SQL Quick Check",
+    "duration": 30,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      {
+        "questionId": "qzq-006",
+        "marks": 2,
+        "displayOrder": 1
+      },
+      {
+        "questionId": "qzq-007",
+        "marks": 3,
+        "displayOrder": 2
+      },
+      {
+        "questionId": "qzq-008",
+        "marks": 1,
+        "displayOrder": 3
+      }
+    ]
+  }
+]

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { CodeEditorClient } from '../components/code-editor-client';
 import { useExamination } from '@/hooks/exam/useExamination';
+import { useEditorContext } from '@/contexts/EditorContext';
 import { ExaminationSpecificProblemResponse } from '@/types/examination';
 import { FullPageLoader } from '@/components/loading-effect';
 
@@ -18,6 +19,7 @@ export default function CodeEditorPage({ params, searchParams }: PageProps) {
   const [isLoading, setIsLoading] = useState(true);
   
   const { getExaminationWithSpecificProblem } = useExamination();
+  const { syncServerTime } = useEditorContext();
 
   // Unwrap params and searchParams
   useEffect(() => {
@@ -37,8 +39,15 @@ export default function CodeEditorPage({ params, searchParams }: PageProps) {
       if (examId && problemId) {
         try {
           setIsLoading(true);
-          const data = await getExaminationWithSpecificProblem(examId, problemId);
-          setExamWithSpecProblem(data);
+          const result = await getExaminationWithSpecificProblem(examId, problemId);
+          if (result && result.data) {
+            setExamWithSpecProblem(result.data);
+            if (result.serverDate) {
+              syncServerTime(result.serverDate);
+            }
+          } else {
+            setExamWithSpecProblem(null);
+          }
         } catch (error) {
           console.error('Error fetching examination data:', error);
           setExamWithSpecProblem(null);

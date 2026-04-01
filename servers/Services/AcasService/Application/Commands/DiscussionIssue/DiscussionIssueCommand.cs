@@ -1,4 +1,5 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Commands.Notification;
 using AcasService.Application.Queries.DiscussionIssue;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Models;
@@ -30,17 +31,20 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
       private readonly IDiscussionIssueRepository _repository;
       private readonly DiscussionIssueMapper _discussionIssueMapper;
       private readonly IDiscussionIssueQuery _discussionIssueQuery;
+      private readonly IBusinessNotificationService _businessNotificationService;
       private readonly ILogger<DiscussionIssueCommand> _logger;
 
       public DiscussionIssueCommand(
           IDiscussionIssueRepository repository,
           DiscussionIssueMapper discussionIssueMapper,
           IDiscussionIssueQuery discussionIssueQuery,
+                              IBusinessNotificationService businessNotificationService,
           ILogger<DiscussionIssueCommand> logger)
       {
             _repository = repository;
             _discussionIssueMapper = discussionIssueMapper;
             _discussionIssueQuery = discussionIssueQuery;
+                                    _businessNotificationService = businessNotificationService;
             _logger = logger;
       }
 
@@ -60,6 +64,24 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   Comments = new List<Models.Comment>()
             };
             var created = await _repository.CreateAsync(issue);
+
+            if (created != null)
+            {
+                  await _businessNotificationService.NotifyClassroomAsync(
+                      created.ClassroomId,
+                      NotificationType.NEW_DISCUSSION_ISSUE,
+                      "New discussion topic",
+                      $"A new discussion topic '{created.Title}' has been posted.",
+                      excludeUserId: created.AuthorId,
+                      payload: new Dictionary<string, object?>
+                      {
+                            ["discussionIssueId"] = created.Id,
+                            ["classroomId"] = created.ClassroomId,
+                            ["authorId"] = created.AuthorId
+                      }
+                  );
+            }
+
             return created == null ? null : await _discussionIssueQuery.GetByIdAsync(created.Id);
       }
 

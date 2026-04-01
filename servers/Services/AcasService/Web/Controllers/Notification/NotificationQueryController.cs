@@ -47,4 +47,41 @@ public class NotificationQueryController : ControllerBase
                 stack: ex.StackTrace);
         }
     }
+
+    [HttpGet("my")]
+    public async Task<ActionResult<ApiResponse<List<NotificationResponse>>>> GetMyNotifications()
+    {
+        try
+        {
+            var userId = User.FindFirst("id")?.Value;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return ResponseUtil.Error<List<NotificationResponse>>("User not authenticated", 401);
+            }
+
+            var notifications = await _notificationQuery.GetByTargetUserIdAsync(userId);
+            return ResponseUtil.Success(notifications, "Notifications retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting current user notifications");
+            return ResponseUtil.Error<List<NotificationResponse>>("Failed to get notifications", 500);
+        }
+    }
+
+    [HttpGet("target/{targetUserId}")]
+    [Authorize(Roles = "ADMIN,LECTURER")]
+    public async Task<ActionResult<ApiResponse<List<NotificationResponse>>>> GetByTargetUserId(string targetUserId)
+    {
+        try
+        {
+            var notifications = await _notificationQuery.GetByTargetUserIdAsync(targetUserId);
+            return ResponseUtil.Success(notifications, "Notifications retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting notifications for user {TargetUserId}", targetUserId);
+            return ResponseUtil.Error<List<NotificationResponse>>("Failed to get notifications", 500);
+        }
+    }
 }

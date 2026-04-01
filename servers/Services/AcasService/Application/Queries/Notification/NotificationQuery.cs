@@ -1,7 +1,6 @@
-using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Mappers;
+using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Notification;
-using AcasService.Models;
 
 namespace AcasService.Application.Queries.Notification;
 
@@ -11,12 +10,13 @@ public interface INotificationQuery
         string userId,
         int pageIndex = 1,
         int pageSize = 10);
+
+    Task<List<NotificationResponse>> GetByTargetUserIdAsync(string targetUserId);
 }
 
 public class NotificationQuery : INotificationQuery
 {
     private readonly ILogger<NotificationQuery> _logger;
-
     private readonly INotificationRepository _notificationRepository;
     private readonly NotificationMapper _notificationMapper;
 
@@ -45,7 +45,6 @@ public class NotificationQuery : INotificationQuery
             if (pageSize > 100) pageSize = 100;
 
             var all = await _notificationRepository.FindByTargetUserIdAsync(userId);
-            // Unread first, then by newest sent date.
             var ordered = all
                 .OrderBy(n => n.IsRead)
                 .ThenByDescending(n => n.SentDate)
@@ -68,5 +67,18 @@ public class NotificationQuery : INotificationQuery
             _logger.LogError(ex, "Error retrieving notifications for user {UserId}", userId);
             throw;
         }
+    }
+
+    public async Task<List<NotificationResponse>> GetByTargetUserIdAsync(string targetUserId)
+    {
+        if (string.IsNullOrWhiteSpace(targetUserId))
+            throw new ArgumentException("targetUserId is required", nameof(targetUserId));
+
+        var notifications = await _notificationRepository.FindByTargetUserIdAsync(targetUserId);
+
+        return notifications
+            .OrderByDescending(n => n.SentDate)
+            .Select(n => _notificationMapper.ToNotificationResponse(n))
+            .ToList();
     }
 }

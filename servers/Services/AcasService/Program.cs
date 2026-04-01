@@ -28,6 +28,13 @@ using AcasService.Repositories.S3;
 using AcasService.Repositories.Subject;
 using AcasService.Repositories.Submission;
 using AcasService.Repositories.Notification;
+using AcasService.Repositories.Quiz;
+using AcasService.Repositories.Question;
+using AcasService.Repositories.AnswerOption;
+using AcasService.Repositories.ClassroomQuiz;
+using AcasService.Repositories.QuizAttempt;
+using AcasService.Repositories.StudentAnswer;
+using AcasService.Repositories.UserDevice;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -47,16 +54,32 @@ using AcasService.Repositories.Slot;
 using AcasService.Application.Queries.ClassEnrollments;
 using AcasService.Application.Queries.Slot;
 using AcasService.Application.Commands.Material;
+using AcasService.Application.Commands.Notification;
+using AcasService.Application.Commands.UserDevice;
 using AcasService.Application.Queries.Material;
+using AcasService.Application.Queries.Notification;
+using AcasService.Application.Queries.UserDevice;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
 using AcasService.Application.Commands.DiscussionIssue;
-using AcasService.Application.Commands.Notification;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
-using AcasService.Application.Queries.Notification;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Dev;
+using AcasService.Application.Commands.Quiz;
+using AcasService.Application.Commands.Question;
+using AcasService.Application.Commands.ClassroomQuiz;
+using AcasService.Application.Commands.QuizAttempt;
+using AcasService.Application.Commands.StudentAnswer;
+using AcasService.Application.Queries.Quiz;
+using AcasService.Application.Queries.Question;
+using AcasService.Application.Queries.ClassroomQuiz;
+using AcasService.Application.Queries.QuizAttempt;
+using AcasService.Application.Queries.StudentAnswer;
+using AcasService.Repositories.ErrorGroup;
+using AcasService.Application.Commands.ErrorGroup;
+using AcasService.Application.Queries.ErrorGroup;
+using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 
 
@@ -124,10 +147,19 @@ builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<IQuestionRepository, QuestionRepository>();
+builder.Services.AddScoped<IAnswerOptionRepository, AnswerOptionRepository>();
+builder.Services.AddScoped<IClassroomQuizRepository, ClassroomQuizRepository>();
+builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
+builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
+builder.Services.AddScoped<IQuizCache, QuizCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -164,8 +196,25 @@ builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
-builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<IQuizCommand, QuizCommand>();
+builder.Services.AddScoped<IQuizQuery, QuizQuery>();
+builder.Services.AddScoped<IQuestionCommand, QuestionCommand>();
+builder.Services.AddScoped<IQuestionQuery, QuestionQuery>();
+builder.Services.AddScoped<IClassroomQuizCommand, ClassroomQuizCommand>();
+builder.Services.AddScoped<IClassroomQuizQuery, ClassroomQuizQuery>();
+builder.Services.AddScoped<IQuizAttemptCommand, QuizAttemptCommand>();
+builder.Services.AddScoped<IQuizAttemptQuery, QuizAttemptQuery>();
+builder.Services.AddScoped<IStudentAnswerCommand, StudentAnswerCommand>();
+builder.Services.AddScoped<IStudentAnswerQuery, StudentAnswerQuery>();
+builder.Services.AddScoped<IFirebaseCloudMessageService, FirebaseCloudMessageService>();
 builder.Services.AddScoped<INotificationCommand, NotificationCommand>();
+builder.Services.AddScoped<IBusinessNotificationService, BusinessNotificationService>();
+builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<IUserDeviceCommand, UserDeviceCommand>();
+builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
+builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
+builder.Services.AddScoped<IErrorGroupQuery, ErrorGroupQuery>();
+builder.Services.AddScoped<IJPlagCommand, JPlagCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -181,6 +230,12 @@ builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
+builder.Services.AddScoped<QuizMapper>();
+builder.Services.AddScoped<QuestionMapper>();
+builder.Services.AddScoped<ClassroomQuizMapper>();
+builder.Services.AddScoped<QuizAttemptMapper>();
+builder.Services.AddScoped<StudentAnswerMapper>();
+builder.Services.AddScoped<ErrorGroupMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
@@ -280,6 +335,7 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
