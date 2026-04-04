@@ -141,6 +141,17 @@ export default function QuizBanksPage() {
     fetchData();
   }, [mounted, user?.id, fetchData]);
 
+  useEffect(() => {
+    if (loading) return;
+    if (totalPages === 0 && pageIndex !== 1) {
+      setPageIndex(1);
+      return;
+    }
+    if (totalPages > 0 && pageIndex > totalPages) {
+      setPageIndex(totalPages);
+    }
+  }, [loading, totalPages, pageIndex]);
+
   const subjectMap = useMemo(() => {
     return subjects.reduce<Record<string, string>>((acc, subject) => {
       acc[subject.id] = subject.subjectName;
