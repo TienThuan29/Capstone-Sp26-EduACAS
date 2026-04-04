@@ -175,6 +175,16 @@ export const useClassroom = () => {
     [axiosInstance],
   );
 
+  const regenerateEnrolKey = useCallback(
+    async (classroomId: string) => {
+      const response = await axiosInstance.post(
+        Api.Classroom.REGENERATE_ENROL_KEY(classroomId),
+      );
+      return response.data;
+    },
+    [axiosInstance],
+  );
+
   return {
     getAllClassrooms,
     getStudentClassrooms,
@@ -187,5 +197,6 @@ export const useClassroom = () => {
     getSubjects,
     updateClassroom,
     softDeleteClassroom,
+    regenerateEnrolKey,
   };
 };

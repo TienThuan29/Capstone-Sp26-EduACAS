@@ -107,6 +107,11 @@ const Sidebar = () => {
       href: PageUrl.QUESTION_BANKS_PAGE,
     },
     {
+      icon: DocumentTextIcon,
+      label: "Examination Banks",
+      href: PageUrl.EXAM_BANK_PAGE,
+    },
+    {
       icon: ClipboardDocumentListIcon,
       label: "Question Banks",
       href: PageUrl.QUESTION_BANK_PAGE,
