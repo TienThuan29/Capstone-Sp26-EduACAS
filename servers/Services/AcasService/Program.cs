@@ -424,6 +424,18 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// ============================================================
+// Startup validation: Check Java version required by JPlag
+// ============================================================
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    var javaCheck = ValidateJavaVersion(logger);
+    if (!javaCheck) throw new InvalidOperationException(
+        "FATAL: AcasService requires JDK 25 (Java 25) to run JPlag similarity check. " +
+        "Please install JDK 25 or higher and ensure 'java' is in your PATH. " +
+        "Current Java version is insufficient.");
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger(c =>
@@ -478,5 +490,55 @@ app.MapControllers();
 // Map at /api/v1/hubs/notification so gateway forwards /api/acas/v1/hubs/* -> /api/v1/hubs/*
 app.MapHub<NotificationHub>("/api/v1/hubs/notification");
 app.MapHealthChecks("/health");
+
+// Startup validation helpers
+static bool ValidateJavaVersion(ILogger logger)
+{
+    try
+    {
+        var psi = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "java",
+            Arguments = "-version",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        using var process = System.Diagnostics.Process.Start(psi);
+        if (process == null)
+        {
+            logger.LogCritical("JAVA CHECK: Cannot start 'java' process. Is Java installed?");
+            return false;
+        }
+        string stderr = process.StandardError.ReadToEnd();
+        string stdout = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        string versionOutput = !string.IsNullOrWhiteSpace(stderr) ? stderr : stdout;
+
+        int major = 0;
+        var match = System.Text.RegularExpressions.Regex.Match(
+            versionOutput, @"version\s+""?(\d+)\.");
+        if (match.Success) major = int.Parse(match.Groups[1].Value);
+
+        logger.LogInformation("JAVA CHECK: Detected Java version (major={Major}) for JPlag compatibility", major);
+
+        if (major < 25)
+        {
+            logger.LogCritical(
+                "JAVA CHECK FAILED: JPlag JAR requires JDK 25 (class file version 69.0) but current Java version reports major={Major}. " +
+                "UnsupportedClassVersionError will occur when running similarity checks. Please install JDK 25.",
+                major);
+            return false;
+        }
+
+        return true;
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "JAVA CHECK FAILED: Could not execute 'java -version'. Is Java installed and in PATH?");
+        return false;
+    }
+}
 
 app.Run();

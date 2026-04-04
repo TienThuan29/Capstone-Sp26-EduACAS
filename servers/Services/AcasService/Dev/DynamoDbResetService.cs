@@ -3,15 +3,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using AcasService.Models;
-using AcasService.Repositories.Classroom;
-using AcasService.Repositories.ClassroomEnrollment;
-using AcasService.Repositories.DiscussionIssue;
-using AcasService.Repositories.Examination;
-using AcasService.Repositories.Material;
-using AcasService.Repositories.Problem;
-using AcasService.Repositories.Subject;
-using AcasService.Repositories.Submission;
-using AcasService.Repositories.Slot;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
 
@@ -101,7 +92,9 @@ public class DynamoDbResetService : IDynamoDbResetService
         try
         {
             var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
-            var seeded = await SeedQuizQuestionAnswerOptionAsync(tableMap, DateTime.UtcNow, cancellationToken);
+            var seedIdMap = await BuildQuizForeignKeyMapFromDynamoAsync(tableMap, cancellationToken);
+            var seeded = await SeedQuizQuestionAnswerOptionAsync(
+                tableMap, DateTime.UtcNow, seedIdMap, cancellationToken);
             _logger.LogInformation("Seeded quiz-related data with {Count} items", seeded);
             return new ResetResult(true, tablesToWipe.Count, seeded);
         }
@@ -209,43 +202,51 @@ public class DynamoDbResetService : IDynamoDbResetService
         var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
         var seeded = 0;
         var now = DateTime.UtcNow;
+        var seedIdMap = new Dictionary<string, string>(StringComparer.Ordinal);
 
-        // 0) Programming Languages
-        seeded += await SeedProgrammingLanguagesAsync(tables, ct);
+        // Programming languages: read only from DynamoDB (table is not wiped by reset).
         var languages = await GetExistingLanguagesAsync(tableMap, ct);
+        if (languages.Count == 0)
+            _logger.LogWarning("No programming languages in DynamoDB; exam/submission language fields may be empty");
         var roundRobinIdx = 0;
 
         // 1) Users
-        seeded += await SeedUsersAsync(ct);
+        seeded += await SeedUsersAsync(seedIdMap, ct);
 
         // 2) Subjects
         var subjectDtos = LoadJson<SubjectDto>("subjects.json");
         var subjects = subjectDtos.Select(s => new Subject
         {
-            Id = s.Id, SubjectCode = s.SubjectCode, SubjectName = s.SubjectName,
-            Description = s.Description ?? string.Empty, CreatedBy = s.CreatedBy,
+            Id = AllocateSeedId(seedIdMap, s.Id),
+            SubjectCode = s.SubjectCode, SubjectName = s.SubjectName,
+            Description = s.Description ?? string.Empty,
+            CreatedBy = RemapSeedId(seedIdMap, s.CreatedBy, "subject.createdBy"),
             IsDeleted = false, CreatedDate = now.AddMonths(-6), UpdatedDate = now
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Subject)),
             subjects, Repositories.Subject.DynamoMapper.SubjectToDynamoItem, ct);
 
-        seeded += await SeedQuizQuestionAnswerOptionAsync(tableMap, now, ct);
+        seeded += await SeedQuizQuestionAnswerOptionAsync(tableMap, now, seedIdMap, ct);
 
         // 3) Problems
         var problemDtos = LoadJson<ProblemDto>("problems.json");
         var problems = problemDtos.Select(dto =>
         {
+            var newProblemId = AllocateSeedId(seedIdMap, dto.Id);
             var difficulty = Enum.TryParse<Difficulty>(dto.Difficulty, true, out var d) ? d : Difficulty.EASY;
             return new Problem
             {
-                Id = dto.Id, LecturerId = dto.LecturerId, Title = dto.Title,
+                Id = newProblemId,
+                LecturerId = RemapSeedId(seedIdMap, dto.LecturerId, "problem.lecturerId"),
+                Title = dto.Title,
                 Content = dto.Content, FileName = null, Difficulty = difficulty,
                 CodeTemplates = new Dictionary<string, string> { ["default"] = dto.CodeTemplate ?? "" },
                 CreatedDate = now.AddMonths(-3), UpdatedDate = now,
                 Tags = dto.Tags ?? Array.Empty<string>(), IsDeleted = false,
                 TestCases = (dto.TestCases ?? new()).Select(tc => new TestCase
                 {
-                    Id = tc.Id ?? Guid.NewGuid().ToString(), ProblemId = dto.Id,
+                    Id = string.IsNullOrEmpty(tc.Id) ? Guid.NewGuid().ToString() : AllocateSeedId(seedIdMap, tc.Id!),
+                    ProblemId = newProblemId,
                     InputData = tc.Input ?? "", ExpectedOutput = tc.ExpectedOutput ?? "",
                     IsPublic = tc.IsPublic, IsCaseInsensitive = tc.IsCaseInsensitive,
                     IsFloatingPoint = tc.IsFloatingPoint, FloatingPointTolerance = tc.FloatingPointTolerance,
@@ -261,8 +262,10 @@ public class DynamoDbResetService : IDynamoDbResetService
         var classroomDtos = LoadJson<ClassroomDto>("classrooms.json");
         var classrooms = classroomDtos.Select(c => new Classroom
         {
-            Id = c.Id, ClassCode = c.ClassCode, ClassName = c.ClassName,
-            LecturerId = c.LecturerId, SubjectId = c.SubjectId,
+            Id = AllocateSeedId(seedIdMap, c.Id),
+            ClassCode = c.ClassCode, ClassName = c.ClassName,
+            LecturerId = RemapSeedId(seedIdMap, c.LecturerId, "classroom.lecturerId"),
+            SubjectId = RemapSeedId(seedIdMap, c.SubjectId, "classroom.subjectId"),
             SemesterName = c.SemesterName ?? "Spring 2026", EnrolKey = c.EnrolKey ?? "",
             MaxSlot = c.MaxSlot, CreatedDate = now.AddMonths(-2),
             UpdatedDate = now, EndDate = now.AddMonths(4), IsDeleted = false
@@ -274,13 +277,15 @@ public class DynamoDbResetService : IDynamoDbResetService
         var enrollmentDtos = LoadJson<EnrollmentDto>("enrollments.json");
         var enrollments = enrollmentDtos.Select(e => new ClassEnrollment
         {
-            Id = e.Id, ClassId = e.ClassId, StudentId = e.StudentId,
+            Id = AllocateSeedId(seedIdMap, e.Id),
+            ClassId = RemapSeedId(seedIdMap, e.ClassId, "enrollment.classId"),
+            StudentId = RemapSeedId(seedIdMap, e.StudentId, "enrollment.studentId"),
             JoinedDate = now.AddDays(-30), MovedOutDate = null, IsJoining = true
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(ClassEnrollment)),
             enrollments, Repositories.ClassroomEnrollment.DynamoMapper.ToDynamoItem, ct);
 
-        // 6) Examinations — inject programmingLanguageId at runtime
+        // 6) Examinations — programmingLanguageId only from DynamoDB rows
         var examDtos = LoadJson<ExaminationDto>("examinations.json");
         var examinations = new List<Examination>();
         foreach (var e in examDtos)
@@ -290,49 +295,60 @@ public class DynamoDbResetService : IDynamoDbResetService
             var mode = Enum.TryParse<Mode>(e.Mode, true, out var m) ? m : Mode.EXAMINATION;
             examinations.Add(new Examination
             {
-                Id = e.Id, ExamName = e.ExamName, ProgrammingLanguageId = langId,
-                ClassroomId = e.ClassroomId, Description = e.Description ?? "",
+                Id = AllocateSeedId(seedIdMap, e.Id),
+                ExamName = e.ExamName, ProgrammingLanguageId = langId,
+                ClassroomId = RemapSeedId(seedIdMap, e.ClassroomId, "examination.classroomId"),
+                Description = e.Description ?? "",
                 TotalMark = e.TotalMark, Status = status, Mode = mode,
                 IsPublicResult = true, IsDeleted = false,
                 StartDatetime = now.AddDays(-7), EndDatetime = now.AddDays(30),
                 CreatedDate = now.AddDays(-14), UpdatedDate = now,
                 Problems = (e.Problems ?? new()).Select(p => new ExaminationProblem
                 {
-                    ProblemId = p.ProblemId, Mark = p.Mark
+                    ProblemId = RemapSeedId(seedIdMap, p.ProblemId, "examination.problemId"),
+                    Mark = p.Mark
                 }).ToList()
             });
         }
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Examination)),
             examinations, Repositories.Examination.DynamoMapper.ExaminationToDynamoItem, ct);
 
-        // Build exam lookup for submission language injection
         var examLangMap = examinations.ToDictionary(e => e.Id, e => e.ProgrammingLanguageId);
 
-        // 7) Submissions — inject languageId from its exam
+        // 7) Submissions — languageId from resolved exam language (DynamoDB-only)
         var submDtos = LoadJson<SubmissionDto>("submissions.json");
         submDtos.AddRange(LoadJson<SubmissionDto>("test-submissions.json"));
         submDtos.AddRange(LoadJson<SubmissionDto>("extra-submissions.json"));
-        var submissions = submDtos.Select(s => new Submission
+        var submissions = submDtos.Select(s =>
         {
-            Id = s.Id, StudentId = s.StudentId, ExamId = s.ExamId,
-            ProblemId = s.ProblemId,
-            LanguageId = examLangMap.GetValueOrDefault(s.ExamId, languages.Count > 0 ? languages[0].Id : ""),
-            CompilerId = "default", Source = s.Source ?? "", Version = s.Version > 0 ? s.Version : 1,
-            SubmittedDate = now.AddHours(-2), FinalScore = s.FinalScore,
-            Status = SubmissionStatus.GRADED, GradedDate = now.AddHours(-1),
-            RegradingRequestId = "", LecturerFeedback = "", AiFeedback = "",
-            UpdatedDate = now.AddHours(-2), 
-            TestResults = (s.TestResults ?? new()).Select(tr => new TestResult
+            var examId = RemapSeedId(seedIdMap, s.ExamId, "submission.examId");
+            var defaultLang = languages.Count > 0 ? languages[0].Id : "";
+            return new Submission
             {
-                Id = tr.Id ?? Guid.NewGuid().ToString(),
-                TestcaseId = tr.TestcaseId ?? "",
-                Input = tr.Input ?? "",
-                ActualOutput = tr.ActualOutput ?? "",
-                ExpectedOutput = tr.ExpectedOutput ?? "",
-                ExecutionTimeMs = tr.ExecutionTimeMs,
-                Status = Enum.TryParse<TestcaseStatus>(tr.Status, true, out var ts) ? ts : TestcaseStatus.SUCCESS,
-                CreatedDate = now.AddHours(-1)
-            }).ToList()
+                Id = AllocateSeedId(seedIdMap, s.Id),
+                StudentId = RemapSeedId(seedIdMap, s.StudentId, "submission.studentId"),
+                ExamId = examId,
+                ProblemId = RemapSeedId(seedIdMap, s.ProblemId, "submission.problemId"),
+                LanguageId = examLangMap.GetValueOrDefault(examId, defaultLang),
+                CompilerId = "default", Source = s.Source ?? "", Version = s.Version > 0 ? s.Version : 1,
+                SubmittedDate = now.AddHours(-2), FinalScore = s.FinalScore,
+                Status = SubmissionStatus.GRADED, GradedDate = now.AddHours(-1),
+                RegradingRequestId = "", LecturerFeedback = "", AiFeedback = "",
+                UpdatedDate = now.AddHours(-2),
+                TestResults = (s.TestResults ?? new()).Select(tr => new TestResult
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    TestcaseId = string.IsNullOrEmpty(tr.TestcaseId)
+                        ? ""
+                        : RemapSeedId(seedIdMap, tr.TestcaseId, "submission.testcaseId"),
+                    Input = tr.Input ?? "",
+                    ActualOutput = tr.ActualOutput ?? "",
+                    ExpectedOutput = tr.ExpectedOutput ?? "",
+                    ExecutionTimeMs = tr.ExecutionTimeMs,
+                    Status = Enum.TryParse<TestcaseStatus>(tr.Status, true, out var ts) ? ts : TestcaseStatus.SUCCESS,
+                    CreatedDate = now.AddHours(-1)
+                }).ToList()
+            };
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Submission)),
             submissions, Repositories.Submission.DynamoMapper.SubmissionToDynamoItem, ct);
@@ -341,10 +357,14 @@ public class DynamoDbResetService : IDynamoDbResetService
         var slotDtos = LoadJson<SlotDto>("slots.json");
         var slots = slotDtos.Select(s => new Slot
         {
-            Id = s.Id, ClassroomId = s.ClassroomId, SlotNumber = s.SlotNumber ?? "1",
+            Id = AllocateSeedId(seedIdMap, s.Id),
+            ClassroomId = RemapSeedId(seedIdMap, s.ClassroomId, "slot.classroomId"),
+            SlotNumber = s.SlotNumber ?? "1",
             Title = s.Title ?? "", Description = s.Description ?? "",
             CreatedDate = now.AddMonths(-1), UpdatedDate = now,
-            ExaminationIds = s.ExaminationIds ?? new List<string>()
+            ExaminationIds = (s.ExaminationIds ?? new List<string>())
+                .Select(eid => RemapSeedId(seedIdMap, eid, "slot.examinationId"))
+                .ToList()
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Slot)),
             slots, Repositories.Slot.DynamoMapper.SlotToDynamoItem, ct);
@@ -353,7 +373,9 @@ public class DynamoDbResetService : IDynamoDbResetService
         var materialDtos = LoadJson<MaterialDto>("materials.json");
         var materials = materialDtos.Select(m => new Material
         {
-            Id = m.Id, LecturerId = m.LecturerId, ClassroomId = m.ClassroomId,
+            Id = AllocateSeedId(seedIdMap, m.Id),
+            LecturerId = RemapSeedId(seedIdMap, m.LecturerId, "material.lecturerId"),
+            ClassroomId = RemapSeedId(seedIdMap, m.ClassroomId, "material.classroomId"),
             Filename = m.Filename ?? "", FileUrl = m.FileUrl ?? "",
             Description = m.Description ?? "", IsDeleted = false,
             CreatedDate = now.AddDays(-14)
@@ -367,14 +389,21 @@ public class DynamoDbResetService : IDynamoDbResetService
         {
             var status = Enum.TryParse<DiscussionIssueStatus>(d.Status, true, out var s)
                 ? s : DiscussionIssueStatus.OPEN;
+            var newIssueId = AllocateSeedId(seedIdMap, d.Id);
             return new DiscussionIssue
             {
-                Id = d.Id, ClassroomId = d.ClassroomId, Title = d.Title ?? "",
-                AuthorId = d.AuthorId, Content = d.Content ?? "",
-                RefProblemId = d.RefProblemId ?? "", Status = status,
+                Id = newIssueId,
+                ClassroomId = RemapSeedId(seedIdMap, d.ClassroomId, "discussion.classroomId"),
+                Title = d.Title ?? "",
+                AuthorId = RemapSeedId(seedIdMap, d.AuthorId, "discussion.authorId"),
+                Content = d.Content ?? "",
+                RefProblemId = string.IsNullOrEmpty(d.RefProblemId)
+                    ? ""
+                    : RemapSeedId(seedIdMap, d.RefProblemId, "discussion.refProblemId"),
+                Status = status,
                 ViewCount = d.ViewCount, IsDeleted = false,
                 CreatedDate = now.AddDays(-10), UpdatedDate = now,
-                Comments = MapComments(d.Comments, d.Id, now),
+                Comments = MapComments(d.Comments, newIssueId, seedIdMap, now),
                 Attachments = Array.Empty<string>()
             };
         }).ToList();
@@ -385,48 +414,7 @@ public class DynamoDbResetService : IDynamoDbResetService
     }
 
     // ───────────────────────────── User seeding ─────────────────────────────
-
-    private async Task<int> SeedProgrammingLanguagesAsync(
-        IReadOnlyList<(string TableName, Type EntityType)> tables, 
-        CancellationToken ct)
-    {
-        var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
-        var tableName = GetTableName(tableMap, nameof(ProgrammingLanguage));
-        if (string.IsNullOrEmpty(tableName)) return 0;
-
-        // 1. Tìm và xóa các record bắt đầu bằng __ và kết thúc bằng __
-        var existing = await GetExistingLanguagesAsync(tableMap, ct);
-        var underscoredIds = existing.Where(l => l.Id.StartsWith("__") && l.Id.EndsWith("__")).Select(l => l.Id).ToList();
-        
-        foreach (var id in underscoredIds)
-        {
-            await _dynamoDb.DeleteItemAsync(new DeleteItemRequest
-            {
-                TableName = tableName,
-                Key = new Dictionary<string, AttributeValue> { { PartitionKeyName, new AttributeValue { S = id } } }
-            }, ct);
-            _logger.LogInformation("Đã xóa ngôn ngữ rác: {Id}", id);
-        }
-
-        // 2. Chỉ nạp các ngôn ngữ chưa tồn tại
-        var dtos = LoadJson<ProgrammingLanguageDto>("programming-languages.json");
-        var languagesToSeed = dtos.Where(d => !existing.Any(e => e.Id == d.Id)).Select(d => new Models.ProgrammingLanguage
-        {
-            Id = d.Id,
-            Name = d.Name,
-            Monaco = d.Monaco,
-            Extensions = d.Extensions,
-            Status = Enum.TryParse<PLStatus>(d.Status, true, out var st) ? st : PLStatus.DISABLE,
-            CreatedDate = DateTime.UtcNow.AddYears(-1),
-            UpdatedDate = DateTime.UtcNow
-        }).ToList();
-
-        if (languagesToSeed.Count == 0) return 0;
-
-        return await PutAllAsync(tableName, languagesToSeed, Repositories.ProgrammingLanguage.DynamoMapper.ProgrammingLanguageToDynamoItem, ct);
-    }
-
-    private async Task<int> SeedUsersAsync(CancellationToken ct)
+    private async Task<int> SeedUsersAsync(Dictionary<string, string> seedIdMap, CancellationToken ct)
     {
         var userTableName = _configuration["Dev:UserTableName"] ?? "acas-users";
         var secretKey = _configuration["Dev:HashingSecretKey"]
@@ -437,10 +425,11 @@ public class DynamoDbResetService : IDynamoDbResetService
 
         foreach (var u in userDtos)
         {
+            var userId = AllocateSeedId(seedIdMap, u.Id);
             var hashedPassword = HashPassword(u.Password ?? "123456", secretKey);
             var item = new Dictionary<string, AttributeValue>
             {
-                ["id"] = new() { S = u.Id },
+                ["id"] = new() { S = userId },
                 ["roleNumber"] = new() { S = u.RoleNumber ?? "" },
                 ["email"] = new() { S = u.Email ?? "" },
                 ["password"] = new() { S = hashedPassword },
@@ -529,24 +518,147 @@ public class DynamoDbResetService : IDynamoDbResetService
         return results;
     }
 
+    /// <summary>
+    /// Maps seed JSON ids for users/subjects to current DynamoDB partition keys so quiz-only reset
+    /// still points at existing rows after a full seed assigned random UUIDs.
+    /// </summary>
+    private async Task<Dictionary<string, string>> BuildQuizForeignKeyMapFromDynamoAsync(
+        Dictionary<string, Type> tableMap, CancellationToken ct)
+    {
+        var map = new Dictionary<string, string>(StringComparer.Ordinal);
+
+        var subjectTable = GetTableName(tableMap, nameof(Subject));
+        if (!string.IsNullOrEmpty(subjectTable))
+        {
+            var codeToId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            var request = new ScanRequest
+            {
+                TableName = subjectTable,
+                ProjectionExpression = "#pk, #sc",
+                ExpressionAttributeNames = new Dictionary<string, string>
+                {
+                    ["#pk"] = PartitionKeyName,
+                    ["#sc"] = "subjectCode"
+                }
+            };
+
+            ScanResponse response;
+            do
+            {
+                response = await _dynamoDb.ScanAsync(request, ct);
+                foreach (var item in response.Items)
+                {
+                    var id = item.TryGetValue(PartitionKeyName, out var idAv) ? idAv.S : "";
+                    var code = item.TryGetValue("subjectCode", out var cAv) ? cAv.S : "";
+                    if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(code))
+                        codeToId[code] = id;
+                }
+                request.ExclusiveStartKey = response.LastEvaluatedKey;
+            } while (response.LastEvaluatedKey != null && response.LastEvaluatedKey.Count > 0);
+
+            foreach (var s in LoadJson<SubjectDto>("subjects.json"))
+            {
+                if (codeToId.TryGetValue(s.SubjectCode, out var dynamoId))
+                    map[s.Id] = dynamoId;
+            }
+        }
+
+        var userTableName = _configuration["Dev:UserTableName"] ?? "acas-users";
+        var emailToId = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        var userScan = new ScanRequest
+        {
+            TableName = userTableName,
+            ProjectionExpression = "#pk, #em",
+            ExpressionAttributeNames = new Dictionary<string, string>
+            {
+                ["#pk"] = PartitionKeyName,
+                ["#em"] = "email"
+            }
+        };
+
+        ScanResponse userResponse;
+        do
+        {
+            userResponse = await _dynamoDb.ScanAsync(userScan, ct);
+            foreach (var item in userResponse.Items)
+            {
+                var id = item.TryGetValue(PartitionKeyName, out var idAv) ? idAv.S : "";
+                var email = item.TryGetValue("email", out var eAv) ? eAv.S : "";
+                if (!string.IsNullOrEmpty(id) && !string.IsNullOrEmpty(email))
+                    emailToId[email] = id;
+            }
+            userScan.ExclusiveStartKey = userResponse.LastEvaluatedKey;
+        } while (userResponse.LastEvaluatedKey != null && userResponse.LastEvaluatedKey.Count > 0);
+
+        foreach (var u in LoadJson<UserDto>("users.json"))
+        {
+            if (!string.IsNullOrEmpty(u.Email) && emailToId.TryGetValue(u.Email, out var dynamoId))
+                map[u.Id] = dynamoId;
+        }
+
+        return map;
+    }
+
     private string ResolveLangId(
         string? marker, List<(string Id, string Name)> languages, ref int roundRobinIdx)
     {
         if (languages.Count == 0) return "";
 
-        if (string.IsNullOrEmpty(marker))
+        if (string.IsNullOrWhiteSpace(marker))
             return languages[roundRobinIdx++ % languages.Count].Id;
+
+        var byId = languages.FirstOrDefault(l => l.Id == marker);
+        if (!string.IsNullOrEmpty(byId.Id)) return byId.Id;
 
         if (marker.StartsWith("__") && marker.EndsWith("__"))
         {
             var hint = marker.Trim('_').ToLowerInvariant();
             var match = languages.FirstOrDefault(l => l.Name.ToLowerInvariant().Contains(hint));
             if (!string.IsNullOrEmpty(match.Id)) return match.Id;
-            _logger.LogWarning("No language match for marker '{Marker}'; using round-robin", marker);
+            _logger.LogWarning("No DynamoDB language match for marker '{Marker}'; using round-robin", marker);
             return languages[roundRobinIdx++ % languages.Count].Id;
         }
 
-        return marker;
+        var m = marker.Trim();
+        var byName = languages.FirstOrDefault(l =>
+            l.Name.Contains(m, StringComparison.OrdinalIgnoreCase)
+            || LanguageHintMatchesStoredName(l.Name, m));
+        if (!string.IsNullOrEmpty(byName.Id)) return byName.Id;
+
+        _logger.LogWarning("No DynamoDB language match for '{Marker}'; using round-robin", marker);
+        return languages[roundRobinIdx++ % languages.Count].Id;
+    }
+
+    /// <summary>Maps seed hints like "csharp" to DynamoDB language display names (e.g. C#).</summary>
+    private static bool LanguageHintMatchesStoredName(string storedName, string seedHint)
+    {
+        var n = storedName.ToLowerInvariant().Replace(" ", "");
+        var h = seedHint.ToLowerInvariant().Replace(" ", "").Replace("#", "sharp");
+        if (h.Length == 0) return false;
+        if (n.Contains(h, StringComparison.Ordinal) || h.Contains(n, StringComparison.Ordinal)) return true;
+        if ((h is "csharp" or "c#") && (n.Contains("c#", StringComparison.Ordinal) || n.Contains("csharp", StringComparison.Ordinal)))
+            return true;
+        return false;
+    }
+
+    private static string AllocateSeedId(Dictionary<string, string> seedIdMap, string seedKey)
+    {
+        if (string.IsNullOrEmpty(seedKey))
+            return Guid.NewGuid().ToString();
+        if (!seedIdMap.TryGetValue(seedKey, out var newId))
+        {
+            newId = Guid.NewGuid().ToString();
+            seedIdMap[seedKey] = newId;
+        }
+        return newId;
+    }
+
+    private string RemapSeedId(Dictionary<string, string> seedIdMap, string? refKey, string context)
+    {
+        if (string.IsNullOrEmpty(refKey)) return "";
+        if (seedIdMap.TryGetValue(refKey, out var mapped)) return mapped;
+        _logger.LogWarning("Seed reference '{RefKey}' has no allocated id ({Context})", refKey, context);
+        return refKey;
     }
 
     private static string? GetTableName(Dictionary<string, Type> tableMap, string entityName)
@@ -577,6 +689,7 @@ public class DynamoDbResetService : IDynamoDbResetService
     private async Task<int> SeedQuizQuestionAnswerOptionAsync(
         Dictionary<string, Type> tableMap,
         DateTime now,
+        Dictionary<string, string> seedIdMap,
         CancellationToken ct)
     {
         var seeded = 0;
@@ -590,13 +703,13 @@ public class DynamoDbResetService : IDynamoDbResetService
 
             return new Question
             {
-                Id = q.Id,
+                Id = AllocateSeedId(seedIdMap, q.Id),
                 Content = q.Content,
                 ImageUrl = q.ImageUrl,
                 Type = questionType,
                 TextAnswer = q.TextAnswer,
                 IsDeleted = false,
-                CreatedBy = q.CreatedBy,
+                CreatedBy = RemapSeedId(seedIdMap, q.CreatedBy, "question.createdBy"),
                 CreatedAt = now.AddMonths(-2),
                 UpdatedAt = now
             };
@@ -607,8 +720,8 @@ public class DynamoDbResetService : IDynamoDbResetService
         var answerOptionDtos = LoadJson<AnswerOptionDto>("answer-options.json");
         var answerOptions = answerOptionDtos.Select(a => new AnswerOption
         {
-            Id = a.Id,
-            QuestionId = a.QuestionId,
+            Id = AllocateSeedId(seedIdMap, a.Id),
+            QuestionId = RemapSeedId(seedIdMap, a.QuestionId, "answerOption.questionId"),
             Content = a.Content,
             IsCorrect = a.IsCorrect,
             CreatedAt = now.AddMonths(-2),
@@ -620,11 +733,12 @@ public class DynamoDbResetService : IDynamoDbResetService
         var quizDtos = LoadJson<QuizDto>("quizzes.json");
         var quizzes = quizDtos.Select(q =>
         {
+            var newQuizId = AllocateSeedId(seedIdMap, q.Id);
             var quizQuestions = (q.Questions ?? new List<QuizQuestionDto>())
                 .Select(item => new QuizQuestion
                 {
-                    QuizId = q.Id,
-                    QuestionId = item.QuestionId,
+                    QuizId = newQuizId,
+                    QuestionId = RemapSeedId(seedIdMap, item.QuestionId, "quiz.questionId"),
                     Marks = item.Marks,
                     DisplayOrder = item.DisplayOrder
                 })
@@ -633,13 +747,13 @@ public class DynamoDbResetService : IDynamoDbResetService
 
             return new Quiz
             {
-                Id = q.Id,
-                SubjectId = q.SubjectId,
+                Id = newQuizId,
+                SubjectId = RemapSeedId(seedIdMap, q.SubjectId, "quiz.subjectId"),
                 Title = q.Title,
                 Duration = q.Duration,
                 TotalQuestions = quizQuestions.Count,
                 IsDeleted = false,
-                CreatedBy = q.CreatedBy,
+                CreatedBy = RemapSeedId(seedIdMap, q.CreatedBy, "quiz.createdBy"),
                 CreatedAt = now.AddMonths(-1),
                 UpdatedAt = now,
                 Questions = quizQuestions
@@ -651,17 +765,20 @@ public class DynamoDbResetService : IDynamoDbResetService
         return seeded;
     }
 
-    private static List<Comment> MapComments(List<CommentDto>? dtos, string issueId, DateTime baseTime)
+    private List<Comment> MapComments(
+        List<CommentDto>? dtos, string remappedIssueId, Dictionary<string, string> seedIdMap, DateTime baseTime)
     {
         if (dtos == null || dtos.Count == 0) return new List<Comment>();
         return dtos.Select((c, i) => new Comment
         {
-            Id = c.Id, IssueId = issueId, AuthorId = c.AuthorId,
+            Id = AllocateSeedId(seedIdMap, c.Id),
+            IssueId = remappedIssueId,
+            AuthorId = RemapSeedId(seedIdMap, c.AuthorId, "comment.authorId"),
             Content = c.Content ?? "", Attachments = Array.Empty<string>(),
             UpVoteCount = c.UpVoteCount, IsDeleted = false,
             CreatedDate = baseTime.AddDays(-9).AddHours(i),
             UpdatedDate = baseTime.AddDays(-9).AddHours(i),
-            Replies = MapComments(c.Replies, issueId, baseTime.AddDays(-8))
+            Replies = MapComments(c.Replies, remappedIssueId, seedIdMap, baseTime.AddDays(-8))
         }).ToList();
     }
 
@@ -807,15 +924,6 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string? ExpectedOutput { get; set; }
         public int ExecutionTimeMs { get; set; }
         public string? Status { get; set; }
-    }
-
-    private sealed class ProgrammingLanguageDto
-    {
-        public string Id { get; set; } = "";
-        public string Name { get; set; } = "";
-        public string Monaco { get; set; } = "";
-        public List<string> Extensions { get; set; } = new();
-        public string Status { get; set; } = "DISABLE";
     }
 
     private sealed class SlotDto

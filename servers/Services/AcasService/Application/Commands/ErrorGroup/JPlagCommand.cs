@@ -13,6 +13,11 @@ public interface IJPlagCommand
 
 public class JPlagCommand : IJPlagCommand
 {
+    private const int MinTokenMatchBaseCStyle = 8;
+    private const int MinTokenMatchBaseScriptLike = 6;
+    private const int MinTokenMatchBasePythonLike = 5;
+    private const int MinTokenMatchBaseDefault = 3;
+
     private readonly string _jarPath;
     private readonly ILogger<JPlagCommand> _logger;
 
@@ -33,9 +38,7 @@ public class JPlagCommand : IJPlagCommand
         string sessionId = Guid.NewGuid().ToString();
         string tempDir = Path.Combine(Path.GetTempPath(), "AcasJPlag", sessionId);
         string submissionDir = Path.Combine(tempDir, "submissions");
-        
-        string resultBaseName = Path.Combine(tempDir, "results"); 
-
+        string resultBaseName = Path.Combine(tempDir, "results");
         string resultZipPath = resultBaseName + ".jplag";
 
         try
@@ -127,6 +130,7 @@ public class JPlagCommand : IJPlagCommand
 
             _logger.LogWarning("JPlag hoàn tất thành công. Đang phân tích kết quả...");
             var results = await ExtractMatchesFromArchiveAsync(resultZipPath);
+
             _logger.LogWarning("Đã tìm thấy {Count} cặp tương đồng từ JPlag.", results.Count);
             foreach(var m in results.Take(10)) {
                 _logger.LogWarning("  - Match: {S1} vs {S2} ({Sim}%)", m.Submission1Id, m.Submission2Id, Math.Round(m.SimilarityScore * 100, 2));
@@ -158,10 +162,10 @@ public class JPlagCommand : IJPlagCommand
     private int CalculateMinTokenMatch(string language, string sourceCode)
     {
         int baseM = language.ToLower() switch {
-        "csharp" or "c#" or "java" or "cpp" or "c++" or "c" => 8, 
-        "javascript" or "typescript" or "go" or "golang" or "rust" => 6, 
-        "python" or "python3" or "kotlin" or "swift" or "scala" => 5, 
-        _ => 3
+            "csharp" or "c#" or "java" or "cpp" or "c++" or "c" => MinTokenMatchBaseCStyle,
+            "javascript" or "typescript" or "go" or "golang" or "rust" => MinTokenMatchBaseScriptLike,
+            "python" or "python3" or "kotlin" or "swift" or "scala" => MinTokenMatchBasePythonLike,
+            _ => MinTokenMatchBaseDefault
         };
 
         int lineCount = sourceCode.Split('\n').Length;
@@ -307,6 +311,7 @@ public class JPlagCommand : IJPlagCommand
 
         return results;
     }
+    
     private string GetExtensionForLanguage(string lang) => lang.ToLower() switch {
         "csharp" or "c#" => "cs",
         "java" => "java",
