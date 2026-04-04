@@ -31,6 +31,8 @@ public class ExaminationTemplateCommand : IExaminationTemplateCommand
 
     public async Task<ExaminationTemplateResponse?> CreateAsync(ExaminationTemplateRequest request)
     {
+        ValidateExaminationTemplate(request.ExamName, request.TotalMark, request.Problems);
+
         try
         {
             var model = _mapper.ToExaminationTemplateModel(request);
@@ -46,6 +48,8 @@ public class ExaminationTemplateCommand : IExaminationTemplateCommand
 
     public async Task<ExaminationTemplateResponse?> UpdateAsync(string id, UpdateExaminationTemplateRequest request)
     {
+        ValidateExaminationTemplate(request.ExamName, request.TotalMark, request.Problems);
+
         try
         {
             var existing = await _repository.FindByIdAsync(id);
@@ -62,6 +66,32 @@ public class ExaminationTemplateCommand : IExaminationTemplateCommand
         {
             _logger.LogError(ex, "Error updating examination template {Id}", id);
             throw;
+        }
+    }
+
+    private static void ValidateExaminationTemplate(
+        string examName,
+        float totalMark,
+        List<ExamTempProblemRequest>? problems)
+    {
+        if (totalMark < 1 || totalMark > 10)
+        {
+            throw new ArgumentException("Total mark must be between 1 and 10.");
+        }
+
+        if (problems != null && problems.Count > 0)
+        {
+            if (problems.Exists(p => p.Mark <= 0f))
+            {
+                throw new ArgumentException("Each problem must have a mark greater than zero.");
+            }
+
+            var problemMarksSum = problems.Sum(p => p.Mark);
+            if (problemMarksSum > totalMark)
+            {
+                throw new ArgumentException(
+                    $"Sum of problem marks ({problemMarksSum:F1}) cannot exceed total mark ({totalMark:F1}).");
+            }
         }
     }
 

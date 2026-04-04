@@ -35,6 +35,11 @@ public class ExamTemplateCommandController : ControllerBase
             var created = await _examinationTemplateCommand.CreateAsync(request);
             return ResponseUtil.Success(created, "Examination template created successfully", 201);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Validation error while creating examination template");
+            return ResponseUtil.Error<ExaminationTemplateResponse>(ex.Message, 400);
+        }
         catch (KeyNotFoundException ex)
         {
             _logger.LogWarning(ex, "Related resource not found while creating examination template");
@@ -64,10 +69,10 @@ public class ExamTemplateCommandController : ControllerBase
             }
             return ResponseUtil.Success(updated, "Examination template updated successfully", 200);
         }
-        catch (KeyNotFoundException ex)
+        catch (ArgumentException ex)
         {
-            _logger.LogWarning(ex, "Examination template not found: {Id}", id);
-            return ResponseUtil.Error<ExaminationTemplateResponse>(ex.Message, 404);
+            _logger.LogWarning(ex, "Validation error while updating examination template {Id}", id);
+            return ResponseUtil.Error<ExaminationTemplateResponse>(ex.Message, 400);
         }
         catch (Exception ex)
         {
