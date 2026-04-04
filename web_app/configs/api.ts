@@ -160,6 +160,23 @@ export const Api = {
     AUTO_GRADE: '/api/v1/submissions/auto-grade',
   },
 
+  StudentExamSession: {
+    ACTIVE: '/api/acas/v1/student-exam-sessions/active',
+    BY_EXAM: (examId: string) => `/api/acas/v1/student-exam-sessions/by-exam/${encodeURIComponent(examId)}`,
+    START: '/api/acas/v1/student-exam-sessions/start',
+    COMPLETE: '/api/acas/v1/student-exam-sessions/complete',
+    LOCK: '/api/acas/v1/student-exam-sessions/lock',
+    ACTIVE_PROBLEM: '/api/acas/v1/student-exam-sessions/active-problem',
+  },
+
+  ExamLog: {
+    CREATE: '/api/v1/exam-logs',
+    CACHE: '/api/v1/exam-logs/cache',
+    FLUSH_CACHE: '/api/v1/exam-logs/cache/flush',
+    GET_BY_ID: (id: string) => `/api/v1/exam-logs/${id}`,
+    GET_BY_SUBMISSION: (submissionId: string) => `/api/v1/exam-logs/submission/${submissionId}`,
+  },
+
   TestcaseGeneration: {
     PREVIEW: '/api/acas/v1/testcase-generation/preview',
   },

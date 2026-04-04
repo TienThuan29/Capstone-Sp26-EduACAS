@@ -113,6 +113,47 @@ export interface SubmitProblemRequest {
   compilerId: string;
 }
 
+export interface CreateExamLogRequest {
+  submissionId: string;
+  eventType: string;
+  eventDetail: string;
+  message: string;
+  severity: 'info' | 'warning' | 'critical';
+  isViolation: boolean;
+  clientTimestamp: string;
+}
+
+export interface CacheExamLogEntryRequest {
+  eventType: string;
+  eventDetail: string;
+  message: string;
+  severity: 'info' | 'warning' | 'critical';
+  isViolation: boolean;
+  clientTimestamp: string;
+}
+
+export interface CacheExamLogsRequest {
+  sessionKey: string;
+  entries: CacheExamLogEntryRequest[];
+}
+
+export interface FlushCachedExamLogsRequest {
+  sessionKey: string;
+  submissionId: string;
+}
+
+export interface ExamLogResponse {
+  id: string;
+  submissionId: string;
+  eventType: string;
+  eventDetail: string;
+  message: string;
+  severity: 'info' | 'warning' | 'critical' | string;
+  isViolation: boolean;
+  clientTimestamp: string;
+  createdDate: string;
+}
+
 export interface ProblemLiteResponse {
   id: string;
   title: string;
