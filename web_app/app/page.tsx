@@ -1,18 +1,22 @@
 "use client"
 
 import { Card } from "flowbite-react"
-import Image from "next/image"
-import Link from "next/link"
 import {
   LaptopIcon,
   SparklesIcon,
   ChartStatsIcon,
 } from "@/components/svg-icons"
-import { heroStats, features, communityStats, programmingLanguages } from "@/MockData/landingPageData"
+import { features, communityStats, programmingLanguages } from "@/MockData/landingPageData"
 import Footer from "@/components/footer"
 import HomeNavbar from "@/components/navbar"
-import HeroCarousel from "@/components/carousel"
-import { LOGO_EDU_ACAS, PLACEHOLDER } from "@/assets/images"
+import HeroParallaxBackground from "@/components/HeroParallaxBackground"
+import { PLACEHOLDER } from "@/assets/images"
+
+const heroStats = [
+  { number: "4+", label: "Languages" },
+  { number: "∞", label: "Exercises" },
+  { number: "24/7", label: "Support" },
+]
 
 export default function Home() {
 
@@ -22,16 +26,12 @@ export default function Home() {
       <HomeNavbar />
 
       {/* Hero Section */}
-      <section id="home" className="py-20 px-4 min-h-screen flex items-center bg-[#F5F7FA] dark:bg-gray-800 relative overflow-hidden">
-        {/* Carousel Slider Background */}
+      {/* <section id="home" className="py-20 px-4 min-h-screen flex items-center bg-[#F5F7FA] dark:bg-gray-800 relative overflow-hidden">
         <HeroCarousel />
-
         <div className="container mx-auto px-6 max-w-7xl relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            {/* Logo Section */}
             <div className="flex justify-center">
               <div className="relative w-full max-w-md">
-                {/* Glowing effect behind card */}
                 <div 
                   className="absolute inset-0 rounded-2xl blur-2xl opacity-30 animate-pulse"
                   style={{ background: 'linear-gradient(135deg, #1F4E79 0%, #C9A24D 100%)' }}
@@ -49,7 +49,6 @@ export default function Home() {
                     className="rounded-xl w-full"
                   />
                   
-                  {/* Animated corner brackets */}
                   <div 
                     className="absolute -top-4 -left-4 text-4xl font-mono font-bold animate-pulse" 
                     style={{ color: "#1F4E79", animationDuration: '2s' }}
@@ -63,14 +62,12 @@ export default function Home() {
                     {"/>"}
                   </div>
                   
-                  {/* Decorative corner dots */}
                   <div className="absolute -top-2 -right-2 w-4 h-4 rounded-full bg-[#C9A24D] animate-ping" style={{ animationDuration: '3s' }} />
                   <div className="absolute -bottom-2 -left-2 w-4 h-4 rounded-full bg-[#1F4E79] animate-ping" style={{ animationDuration: '3s', animationDelay: '1.5s' }} />
                 </div>
               </div>
             </div>
-
-            {/* Content Section */}
+        
             <div className="space-y-6">
               <div
                 className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-bold animate-pulse"
@@ -105,14 +102,12 @@ export default function Home() {
                     className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-all duration-300 hover:shadow-2xl relative overflow-hidden group"
                     style={{ backgroundColor: "#1F4E79" }}
                   >
-                    {/* Button shine effect */}
                     <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white to-transparent opacity-0 group-hover:opacity-20 transform -skew-x-12 group-hover:translate-x-full transition-all duration-700" />
                     <span className="relative">Get started</span>
                   </button>
                 </Link>
               </div>
 
-              {/* Stats with enhanced styling */}
               <div className="grid grid-cols-3 gap-4 pt-6">
                 {heroStats.map((stat, index) => (
                   <div 
@@ -134,7 +129,18 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </section>
+      </section> */}
+
+      {/* Hero Section — 2.5D Parallax Floating Background */}
+      <HeroParallaxBackground
+        title="Edu-ACAS"
+        subtitle="Connecting instructors and students in teaching, learning, and practicing programming languages"
+        ctaLabel="Get started"
+        ctaHref="/login"
+        secondaryCta={{ label: "Explore platform →", href: "/login" }}
+        stats={heroStats}
+        appearance="auto"
+      />
 
       {/* Features Section */}
       <section id="features" className="py-20 px-4 bg-white dark:bg-gray-900">

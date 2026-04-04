@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { ArrowRightIcon } from "@heroicons/react/24/outline"
 import { FOOTER_BG, LOGO_EDU_ACAS } from "@/assets/images"
 
 export default function Footer() {
@@ -42,23 +43,27 @@ export default function Footer() {
             <h4 className="text-base font-bold mb-4 text-white">Languages</h4>
             <ul className="space-y-2 text-white opacity-80 text-sm">
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Python
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Python</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → JavaScript
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>JavaScript</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Java
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Java</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → SQL
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>SQL</span>
                 </a>
               </li>
             </ul>
@@ -67,23 +72,27 @@ export default function Footer() {
             <h4 className="text-base font-bold mb-4 text-white">Support</h4>
             <ul className="space-y-2 text-white opacity-80 text-sm">
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Documentation
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Documentation</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Guides
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Guides</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → FAQ
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>FAQ</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Contact
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Contact</span>
                 </a>
               </li>
             </ul>
@@ -92,18 +101,21 @@ export default function Footer() {
             <h4 className="text-base font-bold mb-4 text-white">About</h4>
             <ul className="space-y-2 text-white opacity-80 text-sm">
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → About us
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>About us</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Blog
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Blog</span>
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:opacity-100 transition-opacity">
-                  → Community
+                <a href="#" className="hover:opacity-100 transition-opacity flex items-center gap-2">
+                  <ArrowRightIcon className="h-4 w-4" />
+                  <span>Community</span>
                 </a>
               </li>
             </ul>
