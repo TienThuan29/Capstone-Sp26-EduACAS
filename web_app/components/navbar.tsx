@@ -29,6 +29,7 @@ import {
   AcademicCapIcon,
   ClipboardDocumentListIcon,
   BanknotesIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline"
 import { NotificationSection } from "@/components/notification-section"
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation"
@@ -49,6 +50,9 @@ export default function HomeNavbar() {
     { href: PageUrl.ABOUT_US_PAGE, label: "About Us" },
     { href: PageUrl.FEATURES_PAGE, label: "Features" },
     { href: PageUrl.CONTACT_PAGE, label: "Contact" },
+    ...(isLoggedIn()
+      ? [{ href: PageUrl.DEFAULT_PAGE, label: "Dashboard" }]
+      : []),
   ]
 
   const studentNavLinks = [
@@ -171,10 +175,22 @@ export default function HomeNavbar() {
                 {
                   isLecturer && (
                     <>
+                      <DropdownItem as={Link} href={PageUrl.DEFAULT_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <Squares2X2Icon className="h-4 w-4" />
+                          Dashboard
+                        </span>
+                      </DropdownItem>
                       <DropdownItem as={Link} href={PageUrl.MANAGE_CLASSROOM_PAGE}>
                         <span className="flex items-center gap-2">
                           <Squares2X2Icon className="h-4 w-4" />
-                          My classes
+                          My classrooms
+                        </span>
+                      </DropdownItem>
+                      <DropdownItem as={Link} href={PageUrl.QUESTION_BANKS_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <DocumentTextIcon className="h-4 w-4" />
+                          Examination Banks
                         </span>
                       </DropdownItem>
                       <DropdownItem as={Link} href={PageUrl.QUESTION_BANKS_PAGE}>
@@ -200,10 +216,10 @@ export default function HomeNavbar() {
                 }
                 {
                   isAdmin && (
-                    <DropdownItem as={Link} href={PageUrl.ADMIN_PAGE}>
+                    <DropdownItem as={Link} href={PageUrl.DEFAULT_PAGE}>
                       <span className="flex items-center gap-2">
                         <Squares2X2Icon className="h-4 w-4" />
-                        Admin Dashboard
+                        Dashboard
                       </span>
                     </DropdownItem>
                   )
