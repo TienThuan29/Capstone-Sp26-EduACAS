@@ -59,6 +59,7 @@ function ClassroomContent() {
     getSubjects,
     updateClassroom,
     softDeleteClassroom,
+    regenerateEnrolKey,
     recordClassroomAccess,
   } = useClassroom();
   const { getExaminationsByClassId } = useExamination();
@@ -72,12 +73,14 @@ function ClassroomContent() {
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshingClassroom, setRefreshingClassroom] = useState(false);
   const [examsLoading, setExamsLoading] = useState(false);
 
   // -- Update & Delete States --
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [regeneratingEnrolKey, setRegeneratingEnrolKey] = useState(false);
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [showEnrolKey, setShowEnrolKey] = useState(false);
   const [examDetailBack, setExamDetailBack] = useState<(() => void) | null>(
@@ -137,6 +140,24 @@ function ClassroomContent() {
       console.error("Failed to fetch data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const refreshClassroomData = async () => {
+    try {
+      setRefreshingClassroom(true);
+      const data = await getClassroomById(classId);
+      if (data) {
+        setClassroom(data);
+        setFormData((prev) => ({
+          ...prev,
+          enrolKey: data.enrolKey || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to refresh classroom data:", error);
+    } finally {
+      setRefreshingClassroom(false);
     }
   };
 
@@ -260,6 +281,25 @@ function ClassroomContent() {
     }
   };
 
+  const handleRegenerateEnrolKey = async () => {
+    if (!classroom) return;
+    try {
+      setRegeneratingEnrolKey(true);
+      const result = await regenerateEnrolKey(classroom.id);
+      if (result.success) {
+        showSuccess("Enrol key regenerated successfully");
+        refreshClassroomData();
+      } else {
+        showError(result.message || "Failed to regenerate enrol key");
+      }
+    } catch (error) {
+      console.error("Regenerate enrol key failed", error);
+      showError("Failed to regenerate enrol key");
+    } finally {
+      setRegeneratingEnrolKey(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex min-h-screen flex-col">
@@ -333,6 +373,8 @@ function ClassroomContent() {
             classroom={classroom}
             onOpenUpdateModal={() => setOpenUpdateModal(true)}
             onOpenDeleteModal={() => setOpenDeleteModal(true)}
+            onRegenerateEnrolKey={handleRegenerateEnrolKey}
+            isRegeneratingKey={regeneratingEnrolKey}
           />
         );
     }

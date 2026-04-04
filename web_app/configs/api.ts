@@ -73,6 +73,7 @@ export const Api = {
     CREATE_CLASSROOM: "/api/acas/v1/classrooms",
     UPDATE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}`,
     SOFT_DELETE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}/soft-delete`,
+    REGENERATE_ENROL_KEY: (id: string) => `/api/acas/v1/classrooms/${id}/regenerate-enrol-key`,
   },
 
   Examination: {
@@ -220,5 +221,16 @@ export const Api = {
 
   Formatter: {
     FORMAT: "/api/v1/format",
+  },
+
+  ExaminationTemplate: {
+    GET_BY_ID: (id: string) => `/api/acas/v1/examination-templates/${id}`,
+    GET_ALL: "/api/acas/v1/examination-templates",
+    GET_BY_LECTURER: (lecturerId: string) => `/api/acas/v1/examination-templates/by-lecturer/${lecturerId}`,
+    CREATE: "/api/acas/v1/examination-templates",
+    UPDATE: (id: string) => `/api/acas/v1/examination-templates/${id}`,
+    DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}`,
+    SOFT_DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/examination-templates/${id}/restore`,
   },
 };

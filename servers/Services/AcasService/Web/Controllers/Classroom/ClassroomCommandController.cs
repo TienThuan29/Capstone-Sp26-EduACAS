@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Commands.Classroom;
+using AcasService.Application.Commands.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -93,6 +93,26 @@ namespace AcasService.Web.Controllers.Classroom
                 _logger.LogError(ex, "Error deleting classroom");
                 return ResponseUtil.Error<bool>("Failed to delete classroom", 500);
             }
-        }   
+        }
+
+        [HttpPost("{id}/regenerate-enrol-key")]
+        public async Task<ActionResult<ApiResponse<ClassroomResponse>>> RegenerateEnrolKey(string id)
+        {
+            try
+            {
+                var result = await _classroomCommand.RegenerateEnrolKeyAsync(id);
+                return ResponseUtil.Success(result, "Enrol key regenerated successfully", 200);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Classroom not found for enrol key regeneration");
+                return ResponseUtil.Error<ClassroomResponse>("Classroom not found", 404);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error regenerating enrol key");
+                return ResponseUtil.Error<ClassroomResponse>("Failed to regenerate enrol key", 500);
+            }
+        }
     }
 }
