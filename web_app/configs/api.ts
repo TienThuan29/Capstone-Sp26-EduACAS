@@ -217,4 +217,8 @@ export const Api = {
     GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
     GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,
   },
+
+  Formatter: {
+    FORMAT: "/api/v1/format",
+  },
 };

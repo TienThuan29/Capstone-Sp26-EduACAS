@@ -91,6 +91,7 @@ using AcasService.Application.Commands.ErrorGroup;
 using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
+using AcasService.Application.Commands.Formatters;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -235,6 +236,7 @@ builder.Services.AddScoped<IErrorGroupQuery, ErrorGroupQuery>();
 builder.Services.AddScoped<IJPlagCommand, JPlagCommand>();
 builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
 builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
+builder.Services.AddScoped<ICodeFormatterCommand, CodeFormatterCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -262,6 +264,7 @@ builder.Services.AddScoped<ErrorGroupMapper>();
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
+builder.Services.AddHttpClient<ICodeFormatterApi, CodeFormatterApi>();
 builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
 
 // Azure Form Recognizer configuration

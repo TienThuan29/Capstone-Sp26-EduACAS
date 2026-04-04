@@ -456,15 +456,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       };
       const result = await saveSubmission(payload);
       if (result != null) {
-<<<<<<< HEAD
-        await flushKeystrokes(result.id);
-=======
         try {
-          // Do not flush exam logs on submit; global finish will flush (latest per problem).
+          await flushKeystrokes(result.id);
         } catch (err) {
           console.error('submitCode: post-submit side-effects failed:', err);
         }
->>>>>>> 39ca40c34f8d4183b91b1061edbec65570e0ad22
         incrementSubmissionsRefresh();
       }
       return result;
