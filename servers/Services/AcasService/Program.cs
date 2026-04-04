@@ -92,6 +92,10 @@ using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 using AcasService.Application.Commands.Formatters;
+using AcasService.Repositories.ExaminationTemplate;
+using AcasService.Application.Commands.ExaminationTemplate;
+using AcasService.Application.Queries.ExaminationTemplate;
+using AcasService.Application.Mappers;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -170,6 +174,7 @@ builder.Services.AddScoped<IClassroomQuizRepository, ClassroomQuizRepository>();
 builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
 builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
 builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
+builder.Services.AddScoped<IExaminationTemplateRepository, ExaminationTemplateRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
@@ -234,6 +239,8 @@ builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
 builder.Services.AddScoped<IErrorGroupQuery, ErrorGroupQuery>();
 builder.Services.AddScoped<IJPlagCommand, JPlagCommand>();
+builder.Services.AddScoped<IExaminationTemplateCommand, ExaminationTemplateCommand>();
+builder.Services.AddScoped<IExaminationTemplateQuery, ExaminationTemplateQuery>();
 builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
 builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
 builder.Services.AddScoped<ICodeFormatterCommand, CodeFormatterCommand>();
@@ -260,6 +267,7 @@ builder.Services.AddScoped<ClassroomQuizMapper>();
 builder.Services.AddScoped<QuizAttemptMapper>();
 builder.Services.AddScoped<StudentAnswerMapper>();
 builder.Services.AddScoped<ErrorGroupMapper>();
+builder.Services.AddScoped<ExaminationTemplateMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
