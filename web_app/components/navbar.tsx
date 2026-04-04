@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/useToast"
 import { PageUrl } from "@/configs/page.url"
+import { LOGO_EDU_ACAS_SINGLE } from "@/assets/images"
 import {
   Squares2X2Icon,
   UserCircleIcon,
@@ -64,7 +65,7 @@ export default function HomeNavbar() {
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center rounded-full p-1">
                 <Image
-                  src="/logo-single.png"
+                  src={LOGO_EDU_ACAS_SINGLE}
                   alt="Edu-ACAS Logo"
                   width={28}
                   height={24}

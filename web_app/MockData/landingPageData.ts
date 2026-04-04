@@ -6,6 +6,12 @@ import {
   CheckCircleIcon,
   BarChartIcon,
 } from "@/components/svg-icons"
+import {
+  PYTHON_CODE_IMG,
+  JAVASCRIPT_CODE_IMG,
+  JAVA_CODE_IMG,
+  SQL_CODE_IMG,
+} from "@/assets/images"
 
 export const heroStats = [
   { number: "4+", label: "Languages" },
@@ -60,25 +66,25 @@ export const communityStats = [
 
 export const programmingLanguages = [
   {
-    img: "/python-code-editor-with-syntax-highlighting-showin.png",
+    img: PYTHON_CODE_IMG,
     title: "Python programming",
     desc: "Learn Python through hands-on exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
     badge: "Python",
   },
   {
-    img: "/javascript-code-with-colorful-syntax-highlighting-.png",
+    img: JAVASCRIPT_CODE_IMG,
     title: "JavaScript",
     desc: "Master JavaScript with interactive exercises on ES6+, asynchronous programming, and DOM manipulation. Detailed content will be added later.",
     badge: "JavaScript",
   },
   {
-    img: "/java-code-showing-class-structure-and-object-orien.png",
+    img: JAVA_CODE_IMG,
     title: "Java development",
     desc: "Learn Java with exercises on OOP, data structures, and enterprise application development. Detailed content will be added later.",
     badge: "Java",
   },
   {
-    img: "/sql-query-editor-showing-database-tables-and-selec.png",
+    img: SQL_CODE_IMG,
     title: "SQL & Databases",
     desc: "Practice SQL queries, database design, and work effectively with relational databases. Detailed content will be added later.",
     badge: "SQL",

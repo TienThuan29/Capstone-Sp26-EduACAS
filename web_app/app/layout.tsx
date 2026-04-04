@@ -8,6 +8,7 @@ import { ActiveExamSessionGate } from "@/components/student-exam-session/active-
 import { GlobalDisallowedRouteExamGuard } from "@/components/student-exam-session/global-disallowed-route-exam-guard";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,7 +26,7 @@ export const metadata: Metadata = {
   description:
     "Automated Console-based Programming Assessment System for University Education",
   icons: {
-    icon: "/images/EduACAS-single.png",
+    icon: LOGO_EDU_ACAS_SINGLE,
   },
 };
 

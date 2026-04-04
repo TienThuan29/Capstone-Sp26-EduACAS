@@ -8,6 +8,7 @@ import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { PageUrl } from "@/configs/page.url";
+import { LOGO_EDU_ACAS_2_TRANS, LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
 import { Button, Modal, ModalHeader, ModalBody } from "flowbite-react";
 import {
   ChevronLeftIcon,
@@ -246,7 +247,7 @@ const Sidebar = () => {
             <div className="flex flex-1 justify-center">
               <Link href={PageUrl.HOME_PAGE} className="block" prefetch={false}>
                 <Image
-                  src="/images/EduACAS-2-trans.png"
+                  src={LOGO_EDU_ACAS_2_TRANS}
                   alt="Edu-ACAS Logo"
                   width={142}
                   height={64}
@@ -266,7 +267,7 @@ const Sidebar = () => {
           <div className={`flex w-full flex-col items-center gap-2`}>
             <Link href={PageUrl.HOME_PAGE} className="block" prefetch={false}>
               <Image
-                src="/images/EduACAS-single.png"
+                src={LOGO_EDU_ACAS_SINGLE}
                 alt="Edu-ACAS Logo"
                 width={64}
                 height={64}

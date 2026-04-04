@@ -12,6 +12,7 @@ import { heroStats, features, communityStats, programmingLanguages } from "@/Moc
 import Footer from "@/components/footer"
 import HomeNavbar from "@/components/navbar"
 import HeroCarousel from "@/components/carousel"
+import { LOGO_EDU_ACAS, PLACEHOLDER } from "@/assets/images"
 
 export default function Home() {
 
@@ -41,7 +42,7 @@ export default function Home() {
                   style={{ border: "3px solid #C9A24D" }}
                 >
                   <Image
-                    src="/images/Edu-ACAS logo.png"
+                    src={LOGO_EDU_ACAS}
                     alt="Edu-ACAS Logo"
                     width={400}
                     height={400}
@@ -246,7 +247,7 @@ export default function Home() {
                 style={{ borderColor: "#C9A24D" }}
               >
                 <div className="relative aspect-video overflow-hidden bg-[#1E1E1E] dark:bg-gray-900">
-                  <img src={item.img || "/placeholder.svg"} alt={item.title} className="w-full h-full object-cover" />
+                  <img src={item.img || PLACEHOLDER} alt={item.title} className="w-full h-full object-cover" />
                   <div
                     className="absolute top-3 right-3 px-3 py-1 rounded-full font-mono text-sm font-semibold"
                     style={{ backgroundColor: "#C9A24D", color: "#FFFFFF" }}

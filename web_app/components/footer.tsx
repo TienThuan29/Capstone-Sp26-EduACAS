@@ -1,4 +1,5 @@
 import Image from "next/image"
+import { FOOTER_BG, LOGO_EDU_ACAS } from "@/assets/images"
 
 export default function Footer() {
   return (
@@ -6,7 +7,7 @@ export default function Footer() {
       id="contact"
       className="py-12 px-4 relative min-h-[400px] bg-[#1F4E79] dark:bg-gray-900"
       style={{
-        backgroundImage: 'url(/footer.png)',
+        backgroundImage: `url(${FOOTER_BG})`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -26,7 +27,7 @@ export default function Footer() {
           <div>
             <div className="mb-4 inline-block p-3 rounded-lg bg-white dark:bg-transparent">
               <Image 
-                src="/images/Edu-ACAS logo.png" 
+                src={LOGO_EDU_ACAS} 
                 alt="Edu-ACAS Logo" 
                 width={80}
                 height={80}
