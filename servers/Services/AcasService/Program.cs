@@ -61,10 +61,14 @@ using AcasService.Application.Queries.Notification;
 using AcasService.Application.Queries.UserDevice;
 using AcasService.Repositories.Material;
 using AcasService.Application.Commands.Submission;
+using AcasService.Application.Commands.KeystrokeLogs;
 using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
+using AcasService.Application.Queries.KeystrokeLogs;
 using AcasService.Repositories.Caching.Redis.Submission;
+using AcasService.Repositories.Caching.Redis.KeystrokeLogs;
+using AcasService.Repositories.KeystrokeLogs;
 using AcasService.Dev;
 using AcasService.Application.Commands.Quiz;
 using AcasService.Application.Commands.Question;
@@ -146,6 +150,7 @@ builder.Services.AddScoped<IMaterialRepository, MaterialRepository>();
 builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository>();
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
+builder.Services.AddScoped<IKeystrokeLogRepository, KeystrokeLogRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
@@ -159,6 +164,7 @@ builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
+builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
 builder.Services.AddScoped<IQuizCache, QuizCache>();
 
 // Command and Query
@@ -215,6 +221,8 @@ builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
 builder.Services.AddScoped<IErrorGroupQuery, ErrorGroupQuery>();
 builder.Services.AddScoped<IJPlagCommand, JPlagCommand>();
+builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
+builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
@@ -228,6 +236,7 @@ builder.Services.AddScoped<MaterialMapper>();
 builder.Services.AddScoped<CommentMapper>();
 builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
+builder.Services.AddScoped<KeystrokeLogsMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
 builder.Services.AddScoped<QuizMapper>();

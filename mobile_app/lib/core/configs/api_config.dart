@@ -42,6 +42,23 @@ class ApiConfig {
   static String examinationByIdEndpoint(String id) =>
       '/api/acas/v1/examinations/$id';
 
+    // Quiz endpoints
+    static String quizzesByIdEndpoint(String id) => '/api/acas/v1/quizzes/$id';
+    static String questionByIdEndpoint(String id) => '/api/acas/v1/questions/$id';
+    static String classroomQuizzesByClassroomEndpoint(String classroomId) =>
+      '/api/acas/v1/classroom-quizzes/classroom/$classroomId';
+    static String quizAttemptStartEndpoint() => '/api/acas/v1/quiz-attempts/start';
+    static String quizAttemptAnswerEndpoint(String attemptId) =>
+      '/api/acas/v1/quiz-attempts/$attemptId/answers';
+    static String quizAttemptSubmitEndpoint(String attemptId) =>
+      '/api/acas/v1/quiz-attempts/$attemptId/submit';
+    static String quizAttemptByIdEndpoint(String attemptId) =>
+      '/api/acas/v1/quiz-attempts/$attemptId';
+    static String quizAttemptsByStudentEndpoint(String studentId) =>
+      '/api/acas/v1/quiz-attempts/student/$studentId';
+    static String studentAnswersByAttemptEndpoint(String attemptId) =>
+      '/api/acas/v1/student-answers/attempt/$attemptId';
+
   // S3 endpoints
   static String privateFileUrlEndpoint(String filename) =>
       '/api/acas/v1/private-s3/file/${Uri.encodeComponent(filename)}';

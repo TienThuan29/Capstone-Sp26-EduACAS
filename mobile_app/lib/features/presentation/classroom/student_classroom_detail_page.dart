@@ -4,6 +4,7 @@ import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/presentation/classroom/widgets/student_materials_tab.dart';
 import 'package:mobile/features/presentation/classroom/widgets/student_discussions_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/student_quizzes_tab.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/services/classroom_service.dart';
 
@@ -34,8 +35,8 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
     super.initState();
     final safeInitialIndex = widget.initialTabIndex < 0
         ? 0
-        : (widget.initialTabIndex > 1 ? 1 : widget.initialTabIndex);
-    _tabController = TabController(length: 2, initialIndex: safeInitialIndex, vsync: this);
+      : (widget.initialTabIndex > 2 ? 2 : widget.initialTabIndex);
+    _tabController = TabController(length: 3, initialIndex: safeInitialIndex, vsync: this);
     _enrollController = TextEditingController();
     _isJoined = (widget.classroom.status?.toUpperCase() == 'JOINED');
     _getUserId();
@@ -74,6 +75,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
                     controller: _tabController,
                     children: [
                       StudentMaterialsTab(classroomId: widget.classroom.id),
+                      StudentQuizzesTab(classroomId: widget.classroom.id),
                       StudentDiscussionsTab(
                         classroomId: widget.classroom.id,
                         classroomName: widget.classroom.className,
@@ -311,6 +313,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
         labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         tabs: const [
           Tab(text: 'Materials'),
+          Tab(text: 'Quizzes'),
           Tab(text: 'Discussions'),
         ],
       ),
