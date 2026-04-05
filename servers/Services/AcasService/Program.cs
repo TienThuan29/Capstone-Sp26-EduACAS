@@ -96,6 +96,10 @@ using AcasService.Repositories.ExaminationTemplate;
 using AcasService.Application.Commands.ExaminationTemplate;
 using AcasService.Application.Queries.ExaminationTemplate;
 using AcasService.Application.Mappers;
+using AcasService.Application.Jobs;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.Redis.StackExchange;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -136,6 +140,28 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddHostedService<RedisHostedService>();
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
+
+// Hangfire configuration — uses the same Redis connection already configured above
+builder.Services.AddHangfire((sp, config) =>
+{
+    config.UseRedisStorage(
+        sp.GetRequiredService<IConnectionMultiplexer>(),
+        new RedisStorageOptions
+        {
+            Prefix = "hangfire:"
+        });
+
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings();
+});
+
+// Hangfire background server — processes scheduled jobs
+builder.Services.AddHangfireServer(options =>
+{
+    options.SchedulePollingInterval = TimeSpan.FromSeconds(1);
+    options.WorkerCount = Environment.ProcessorCount * 2;
+});
 
 // RabbitMQ Producer
 builder.Services.AddSingleton<UserRequestProducer>();
@@ -194,6 +220,7 @@ builder.Services.AddScoped<IRecordClassroomAccessCommand, RecordClassroomAccessC
 builder.Services.AddScoped<IGetRecentClassroomsQuery, GetRecentClassroomsQuery>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
+builder.Services.AddScoped<IExaminationJobScheduling, ExaminationJobScheduling>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
@@ -520,6 +547,13 @@ if (app.Environment.IsProduction())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Hangfire Dashboard — accessible at /hangfire (localhost only in dev)
+app.MapHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+});
+
 // Map at /api/v1/hubs/notification so gateway forwards /api/acas/v1/hubs/* -> /api/v1/hubs/*
 app.MapHub<NotificationHub>("/api/v1/hubs/notification");
 app.MapHealthChecks("/health");
@@ -575,3 +609,16 @@ static bool ValidateJavaVersion(ILogger logger)
 }
 
 app.Run();
+
+/// <summary>
+/// Protects the /hangfire dashboard from unauthorized access.</summary>
+public class HangfireDashboardAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        var httpContext = context.GetHttpContext();
+
+        return httpContext.Request.Host.Host.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+               || httpContext.Request.Host.Host.Contains("127.0.0.1");
+    }
+}

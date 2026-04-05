@@ -46,8 +46,8 @@ export interface Examination {
   description: string;
   isPublicResult: boolean;
   totalMark: number;
-  status: number;
-  mode: number;
+  status: ExaminationStatus;
+  mode: ExaminationMode;
   isDeleted: boolean;
   createdDate: string;
   updatedDate: string;

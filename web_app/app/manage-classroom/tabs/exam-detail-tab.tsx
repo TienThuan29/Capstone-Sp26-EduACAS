@@ -3,21 +3,21 @@
 import { useState } from "react";
 import { Button, Tabs, TabItem } from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import type { Examination } from "@/types/examination";
+import type { Examination, ExaminationStatus, ExaminationMode } from "@/types/examination";
 import { OverviewTabContent } from "../components/exam-detail-tab/overview";
 import { ProblemsTabContent } from "../components/exam-detail-tab/problems";
 import { SubmissionsTabContent } from "../components/exam-detail-tab/submissions";
 import { SimilarityTabContent } from "../components/exam-detail-tab/similarity";
 
-const STATUS_LABELS: Record<number, string> = {
-  0: "PENDING",
-  1: "ONGOING",
-  2: "COMPLETED",
+const STATUS_LABELS: Record<ExaminationStatus, string> = {
+  PENDING: "PENDING",
+  ONGOING: "ONGOING",
+  COMPLETED: "COMPLETED",
 };
 
-const MODE_LABELS: Record<number, string> = {
-  0: "PRACTICAL",
-  1: "EXAMINATION",
+const MODE_LABELS: Record<ExaminationMode, string> = {
+  PRACTICAL: "PRACTICAL",
+  EXAMINATION: "EXAMINATION",
 };
 
 // ---------------------------------------------------------------------------
@@ -44,9 +44,8 @@ export function ExaminationDetailView({
   showBackInHeader = true,
 }: ExaminationDetailViewProps) {
   const [activeTab, setActiveTab] = useState(TAB_OVERVIEW);
-  const statusLabel =
-    STATUS_LABELS[examination.status as 0 | 1 | 2] ?? "PENDING";
-  const modeLabel = MODE_LABELS[examination.mode as 0 | 1] ?? "PRACTICAL";
+  const statusLabel = STATUS_LABELS[examination.status] ?? "PENDING";
+  const modeLabel = MODE_LABELS[examination.mode] ?? "PRACTICAL";
   const problems = examination.problems ?? [];
 
   return (
