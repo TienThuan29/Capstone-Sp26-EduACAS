@@ -186,6 +186,8 @@ export interface SubmissionResponse {
   keystrokeLogs?: KeystrokeLogResponse[];
   problem?: ProblemLiteResponse;
   student?: StudentLiteResponse;
+  /** Max mark for this problem in the exam — used to validate score overrides. */
+  maxMark?: number;
 }
 
 /** One problem's submissions from GET exam/{examId}/latest-all */

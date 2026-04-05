@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Spinner,
@@ -20,6 +21,7 @@ import {
   ModalBody,
 } from "flowbite-react";
 import {
+  ArrowPathIcon,
   CommandLineIcon,
   DocumentTextIcon,
   EyeIcon,
@@ -55,8 +57,9 @@ type ProblemSubmissions = {
 export function SubmissionsTabContent({
   examination,
 }: SubmissionsTabContentProps) {
+  const router = useRouter();
   const { getStudentsByClassId } = useStudentClassroom();
-  const { getLatestSubmissionsByExam, runAutoGrading } = useSubmissionLecturer();
+  const { getLatestSubmissionsByExam, runAutoGrading, reGradeSubmission } = useSubmissionLecturer();
   const { getExamLogsBySubmission } = useExamLog();
 
   const [students, setStudents] = useState<ClassroomStudentResponse[]>([]);
@@ -85,6 +88,13 @@ export function SubmissionsTabContent({
   } | null>(null);
   const [submissionFlags, setSubmissionFlags] = useState<Record<string, ExamViolationFlag>>({});
   const [flagLoadingBySubmission, setFlagLoadingBySubmission] = useState<Record<string, boolean>>({});
+
+  /** Single re-grade modal state */
+  const [regradeTarget, setRegradeTarget] = useState<{
+    submission: SubmissionResponse;
+    studentName: string;
+  } | null>(null);
+  const [regradeLoading, setRegradeLoading] = useState(false);
 
   const classId = examination.classroom?.id;
   const examId = examination.id;
@@ -257,6 +267,29 @@ export function SubmissionsTabContent({
     runAutoGrading,
     fetchData,
   ]);
+
+  /**
+   * Handle re-grade for a single submission.
+   */
+  const handleRegrade = useCallback(async () => {
+    if (!regradeTarget) return;
+    const { submission } = regradeTarget;
+    setRegradeLoading(true);
+    try {
+      await reGradeSubmission(
+        submission.id,
+        submission.languageId ?? "",
+        submission.compilerId ?? ""
+      );
+      void fetchData();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Re-grading failed.";
+      setGradingResult({ success: false, message });
+    } finally {
+      setRegradeLoading(false);
+      setRegradeTarget(null);
+    }
+  }, [regradeTarget, reGradeSubmission, fetchData]);
 
   if (loading) {
     return (
@@ -474,12 +507,29 @@ export function SubmissionsTabContent({
                               )}
                             </TableCell>
                             <TableCell className="flex items-center gap-2">
-                              {/* for manual grading */}
-                              <Tooltip content="View in editor">
+                              {/* Re-grade single submission */}
+                              <Tooltip content="Re-grade">
                                 <Button
                                   size="xs"
                                   color="light"
                                   className="cursor-pointer"
+                                  onClick={() =>
+                                    setRegradeTarget({
+                                      submission: sub,
+                                      studentName: studentIdToName[sub.studentId] ?? sub.studentId,
+                                    })
+                                  }
+                                >
+                                  <ArrowPathIcon className="h-4 w-4" />
+                                </Button>
+                              </Tooltip>
+                              {/* View in editor */}
+                              <Tooltip content="Review in editor">
+                                <Button
+                                  size="xs"
+                                  color="light"
+                                  className="cursor-pointer"
+                                  onClick={() => router.push(`/lecturer/submission/${sub.id}`)}
                                 >
                                   <CommandLineIcon className="h-4 w-4" />
                                 </Button>
@@ -544,6 +594,14 @@ export function SubmissionsTabContent({
         }
         onConfirm={handleRunAutoGrading}
       />
+
+      <RegradeConfirmModal
+        show={regradeTarget !== null}
+        target={regradeTarget}
+        loading={regradeLoading}
+        onClose={() => setRegradeTarget(null)}
+        onConfirm={handleRegrade}
+      />
     </div>
   );
 }
@@ -593,6 +651,64 @@ function ConfirmRunningGradingForProblemModal({
             className="cursor-pointer"
           >
             Run auto grading
+          </Button>
+        </div>
+      </ModalBody>
+    </Modal>
+  );
+}
+
+// -- confirm re-grade single submission modal
+
+type RegradeConfirmModalProps = {
+  show: boolean;
+  target: { submission: SubmissionResponse; studentName: string } | null;
+  loading: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+};
+
+function RegradeConfirmModal({
+  show,
+  target,
+  loading,
+  onClose,
+  onConfirm,
+}: RegradeConfirmModalProps) {
+  const sub = target?.submission;
+  const studentName = target?.studentName ?? sub?.studentId;
+
+  return (
+    <Modal show={show} onClose={onClose} size="md" popup>
+      <ModalHeader />
+      <ModalBody>
+        <h3 className="mb-4 text-lg font-semibold text-gray-900 dark:text-white">
+          Re-grade submission
+        </h3>
+        <p className="mb-2 text-gray-500 dark:text-gray-400">
+          Re-grade the submission from{" "}
+          <span className="font-medium text-gray-900 dark:text-white">{studentName}</span>?
+        </p>
+        {sub?.problem?.title && (
+          <p className="mb-4 text-sm text-gray-400">
+            Problem: {sub.problem.title}
+          </p>
+        )}
+        <p className="mb-6 text-sm text-gray-500 dark:text-gray-400">
+          The submission will be re-run against hidden test cases and re-scored.
+        </p>
+        <div className="flex justify-end gap-3">
+          <Button color="gray" onClick={onClose} className="cursor-pointer">
+            Cancel
+          </Button>
+          <Button
+            color="green"
+            onClick={() => void Promise.resolve(onConfirm())}
+            disabled={loading}
+            className="cursor-pointer"
+          >
+            {loading ? <Spinner size="sm" className="mr-2" /> : null}
+            Re-grade
           </Button>
         </div>
       </ModalBody>

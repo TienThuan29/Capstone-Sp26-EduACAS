@@ -66,4 +66,48 @@ public class SubmissionCommandController : ControllerBase
             return ResponseUtil.Error<AutoGradeProblemResponse>("Auto-grading failed", 500);
         }
     }
+
+    [HttpPost("{id}/regrade")]
+    public async Task<ActionResult<ApiResponse<AutoGradeSubmissionResult>>> RegradeSubmission(
+        string id,
+        [FromBody] SingleSubmissionRegradeRequest request)
+    {
+        try
+        {
+            var result = await _submissionCommand.RegradeSingleSubmissionAsync(id, request);
+            if (!string.IsNullOrEmpty(result.ErrorMessage))
+                return ResponseUtil.Error<AutoGradeSubmissionResult>(result.ErrorMessage, 400);
+            return ResponseUtil.Success(result, "Re-grading completed", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error re-grading submission {SubmissionId}", id);
+            return ResponseUtil.Error<AutoGradeSubmissionResult>("Re-grading failed", 500);
+        }
+    }
+
+    [HttpPatch("{id}/score")]
+    [Authorize(Roles = "LECTURER, ADMIN")]
+    public async Task<ActionResult<ApiResponse<bool>>> OverrideSubmissionScore(
+        string id,
+        [FromBody] SubmissionScoreOverrideRequest request)
+    {
+        try
+        {
+            var success = await _submissionCommand.OverrideSubmissionScoreAsync(id, request.FinalScore, request.MaxMark);
+            if (!success)
+                return ResponseUtil.Error<bool>("Submission not found or update failed", 400);
+            return ResponseUtil.Success(success, "Score updated successfully", 200);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Score override validation failed for submission {SubmissionId}", id);
+            return ResponseUtil.Error<bool>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error overriding score for submission {SubmissionId}", id);
+            return ResponseUtil.Error<bool>("Failed to update score", 500);
+        }
+    }
 }
