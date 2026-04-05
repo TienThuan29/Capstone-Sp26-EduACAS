@@ -180,4 +180,13 @@ export const Api = {
     GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
     GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,
   },
+  QuizAttempt: {
+    START: "/api/acas/v1/quiz-attempts/start",
+    UPDATE_ANSWER: (id: string) => `/api/acas/v1/quiz-attempts/${id}/answers`,
+    SUBMIT: (id: string) => `/api/acas/v1/quiz-attempts/${id}/submit`,
+    GET_HISTORY_BY_CLASSROOM_QUIZ_STUDENT: (classroomQuizId: string, studentId: string) => 
+      `/api/acas/v1/quiz-attempts/history/classroom-quiz/${classroomQuizId}/student/${studentId}`,
+    GET_SUBMISSIONS_PAGED: (classroomQuizId: string, pageIndex: number, pageSize: number) =>
+      `/api/acas/v1/quiz-attempts/submissions/classroom-quiz/${classroomQuizId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  },
 };

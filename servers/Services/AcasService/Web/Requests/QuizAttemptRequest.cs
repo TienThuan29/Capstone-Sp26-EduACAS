@@ -9,6 +9,8 @@ namespace AcasService.Web.Requests
 
         [Required(ErrorMessage = "Student ID is required")]
         public string StudentId { get; set; } = string.Empty;
+
+        public string Passcode { get; set; } = string.Empty;
     }
 
     public class SubmitQuizAttemptRequest

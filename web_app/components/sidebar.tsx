@@ -181,6 +181,11 @@ const Sidebar = () => {
       href: `${pathname}?tab=exams`,
     },
     {
+      icon: PencilSquareIcon,
+      label: "Quizzes",
+      href: `${pathname}?tab=quizzes`,
+    },
+    {
       icon: PuzzlePieceIcon,
       label: "Practise Exercises",
       href: `${pathname}?tab=practise`,

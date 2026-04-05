@@ -35,6 +35,7 @@ using AcasService.Repositories.ClassroomQuiz;
 using AcasService.Repositories.QuizAttempt;
 using AcasService.Repositories.StudentAnswer;
 using AcasService.Repositories.UserDevice;
+using AcasService.Application.BackgroundServices;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -119,6 +120,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 builder.Services.AddHostedService<RedisHostedService>();
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
+builder.Services.AddHostedService<ClassroomQuizWorker>();
 
 // RabbitMQ Producer
 builder.Services.AddSingleton<UserRequestProducer>();
