@@ -8,6 +8,7 @@ import type {
   ProblemSubmissionsResponse,
   BulkSubmissionGradingRequest,
   AutoGradeProblemResponse,
+  AutoGradeSubmissionResult,
 } from '@/types/submission';
 
 interface ApiResponse<T> {
@@ -60,9 +61,39 @@ export const useSubmissionLecturer = () => {
     [axiosInstance]
   );
 
+  const reGradeSubmission = useCallback(
+    async (submissionId: string, languageId: string, compilerId: string): Promise<AutoGradeSubmissionResult> => {
+      const response = await axiosInstance.post<ApiResponse<AutoGradeSubmissionResult>>(
+        Api.Submission.RE_GRADE(submissionId),
+        { compilerId, languageId }
+      );
+      const data = response.data?.dataResponse;
+      if (!data) {
+        throw new Error(response.data?.error ?? 'Re-grading failed');
+      }
+      return data;
+    },
+    [axiosInstance]
+  );
+
+  const overrideSubmissionScore = useCallback(
+    async (submissionId: string, finalScore: number, maxMark: number): Promise<void> => {
+      const response = await axiosInstance.patch<ApiResponse<boolean>>(
+        Api.Submission.OVERRIDE_SCORE(submissionId),
+        { finalScore, maxMark }
+      );
+      if (!response.data?.dataResponse) {
+        throw new Error(response.data?.error ?? 'Score override failed');
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     getLatestSubmissionsByExamAndProblem,
     getLatestSubmissionsByExam,
     runAutoGrading,
+    reGradeSubmission,
+    overrideSubmissionScore,
   };
 };
