@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense, useMemo } from "react";
+import { useCallback, useEffect, useState, Suspense, useMemo, useRef } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Spinner,
@@ -213,6 +213,28 @@ function ClassroomContent() {
     if ((activeTab === "exams" || activeTab === "practise-ex") && classId) {
       fetchExaminations();
     }
+  }, [activeTab, classId, fetchExaminations]);
+
+  // Poll exam statuses every 30 seconds so background job transitions are reflected without manual refresh.
+  // Only active when on the exams tab.
+  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (activeTab === "exams" && classId) {
+      examsPollRef.current = setInterval(() => {
+        void fetchExaminations();
+      }, 30_000);
+    } else {
+      if (examsPollRef.current !== null) {
+        clearInterval(examsPollRef.current);
+        examsPollRef.current = null;
+      }
+    }
+    return () => {
+      if (examsPollRef.current !== null) {
+        clearInterval(examsPollRef.current);
+        examsPollRef.current = null;
+      }
+    };
   }, [activeTab, classId, fetchExaminations]);
 
   useEffect(() => {

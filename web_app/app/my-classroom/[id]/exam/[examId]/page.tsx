@@ -12,7 +12,7 @@ import { ArrowLeftIcon, ClockIcon, CheckIcon } from "@heroicons/react/24/outline
 import Sidebar from "@/components/sidebar";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useProblem } from "@/hooks/problem/useProblem";
-import type { Examination, Problem } from "@/types/examination";
+import type { Examination, Problem, ExaminationMode } from "@/types/examination";
 import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import { CustomPagination } from "@/components/custom-pagination";
 import { normalizeDifficulty } from "@/types/problem";
@@ -37,9 +37,9 @@ import { buildExamTrackerStorageKeys } from "@/utils/test-tracker/storageKeys";
 
 const PROBLEMS_PER_PAGE = 5;
 
-const MODE_LABELS: Record<number, string> = {
-  0: "PRACTICAL",
-  1: "EXAMINATION",
+const MODE_LABELS: Record<ExaminationMode, string> = {
+  PRACTICAL: "PRACTICAL",
+  EXAMINATION: "EXAMINATION",
 };
 
 function ExamDetailContent() {
@@ -116,7 +116,7 @@ function ExamDetailContent() {
   useEffect(() => {
     if (!examId || !studentId) return;
     if (examination === null) return;
-    if (examination.mode !== 1) {
+    if (examination.mode !== "EXAMINATION") {
       setServerSession(null);
       setSessionLoading(false);
       return;
@@ -237,7 +237,7 @@ function ExamDetailContent() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!examination || examination.mode !== 1 || !isSessionActive) return;
+    if (!examination || examination.mode !== "EXAMINATION" || !isSessionActive) return;
     try {
       const pending = sessionStorage.getItem(EXAM_RESUME_FULLSCREEN_EXAM_ID_KEY);
       if (pending !== examId) return;
@@ -249,7 +249,7 @@ function ExamDetailContent() {
     }
   }, [examId, examination?.id, examination?.mode, isSessionActive]);
 
-  if (loading || (examination?.mode === 1 && sessionLoading)) {
+  if (loading || (examination?.mode === "EXAMINATION" && sessionLoading)) {
     return (
       <div className="flex min-h-screen">
         {!shouldHideSidebar && <Sidebar />}
@@ -281,7 +281,7 @@ function ExamDetailContent() {
   const endDate = new Date(examination.endDatetime);
   const durationMs = endDate.getTime() - startDate.getTime();
   const durationStr = formatDurationMs(durationMs);
-  const modeLabel = MODE_LABELS[examination.mode as 0 | 1] ?? "PRACTICAL";
+  const modeLabel = MODE_LABELS[examination.mode] ?? "PRACTICAL";
 
   const isUpcoming = startDate > new Date();
   const isExpired = endDate < new Date();
@@ -345,7 +345,7 @@ function ExamDetailContent() {
             </div>
           </div>
 
-          {examination.mode === 1 && (
+          {examination.mode === "EXAMINATION" && (
             <div className="mt-4 flex items-center justify-end gap-3">
               {isSessionActive ? (
                 <Button color="red" className="cursor-pointer" onClick={() => setShowFinishModal(true)}>
@@ -457,10 +457,10 @@ function ExamDetailContent() {
                       <div className="flex items-center gap-4">
                         <Button
                           className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                          disabled={examination.mode === 1 && isSessionEnded}
+                          disabled={examination.mode === "EXAMINATION" && isSessionEnded}
                           onClick={() => {
-                            if (examination.mode === 1 && isSessionEnded) return;
-                            if (examination.mode === 1 && !isSessionActive) {
+                            if (examination.mode === "EXAMINATION" && isSessionEnded) return;
+                            if (examination.mode === "EXAMINATION" && !isSessionActive) {
                               setPendingSolveProblemId(problem.id);
                               setShowStartModal(true);
                               return;
@@ -493,7 +493,7 @@ function ExamDetailContent() {
         </div>
       </div>
 
-      {examination.mode === 1 && (
+      {examination.mode === "EXAMINATION" && (
         <ExamSessionGuard
           examId={examId}
           classroomId={classId}

@@ -29,7 +29,7 @@ import {
   EyeIcon,
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
-import type { Examination, ExaminationRequest } from "@/types/examination";
+import type { Examination, ExaminationRequest, ExaminationStatus, ExaminationMode } from "@/types/examination";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage";
 import { useExaminationTemplate } from "@/hooks/examination-template/useExaminationTemplate";
@@ -37,18 +37,18 @@ import type { ProgrammingLanguage } from "@/types/language";
 import type { ExaminationTemplateResponse } from "@/types/examination-template";
 import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/contexts/AuthContext";
-import { formatDate } from "@/utils/datetime-utils";
+import { formatDate, toLocalDatetimeString, toUtcIsoString, toLocalNowString } from "@/utils/datetime-utils";
 import { ExaminationDetailView } from "./exam-detail-tab";
 
-const STATUS_LABELS: Record<number, string> = {
-  0: "PENDING",
-  1: "ONGOING",
-  2: "COMPLETED",
+const STATUS_LABELS: Record<ExaminationStatus, string> = {
+  PENDING: "PENDING",
+  ONGOING: "ONGOING",
+  COMPLETED: "COMPLETED",
 };
 
-const MODE_LABELS: Record<number, string> = {
-  0: "PRACTICAL",
-  1: "EXAMINATION",
+const MODE_LABELS: Record<ExaminationMode, string> = {
+  PRACTICAL: "PRACTICAL",
+  EXAMINATION: "EXAMINATION",
 };
 
 const STATUS_OPTIONS: ExaminationRequest["status"][] = [
@@ -156,10 +156,8 @@ export function ExamsTab({
         problemId: p.problemId,
         mark: p.mark,
       })),
-      startDatetime: new Date().toISOString().slice(0, 16),
-      endDatetime: new Date(Date.now() + 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 16),
+      startDatetime: toLocalNowString(),
+      endDatetime: toLocalNowString(60 * 60 * 1000),
     });
     setOpenFormModal(true);
   };
@@ -178,18 +176,14 @@ export function ExamsTab({
     setFormData({
       ...emptyForm,
       classroomId: classId,
-      startDatetime: new Date().toISOString().slice(0, 16),
-      endDatetime: new Date(Date.now() + 60 * 60 * 1000)
-        .toISOString()
-        .slice(0, 16),
+      startDatetime: toLocalNowString(),
+      endDatetime: toLocalNowString(60 * 60 * 1000),
     });
     setOpenFormModal(true);
   };
 
   const openEdit = (exam: Examination) => {
     setEditingExam(exam);
-    const statusKey = exam.status as 0 | 1 | 2;
-    const modeKey = exam.mode as 0 | 1;
     setFormData({
       examName: exam.examName,
       programmingLanguageId: exam.programmingLanguage.id,
@@ -198,13 +192,13 @@ export function ExamsTab({
         mark: ep.mark,
       })),
       classroomId: exam.classroom.id,
-      startDatetime: exam.startDatetime.slice(0, 16),
-      endDatetime: exam.endDatetime.slice(0, 16),
+      startDatetime: toLocalDatetimeString(exam.startDatetime),
+      endDatetime: toLocalDatetimeString(exam.endDatetime),
       description: exam.description ?? "",
       isPublicResult: exam.isPublicResult,
       totalMark: exam.totalMark,
-      status: (STATUS_LABELS[statusKey] ?? "PENDING") as ExaminationRequest["status"],
-      mode: (MODE_LABELS[modeKey] ?? "PRACTICAL") as ExaminationRequest["mode"],
+      status: exam.status,
+      mode: exam.mode,
     });
     setOpenFormModal(true);
   };
@@ -267,13 +261,19 @@ export function ExamsTab({
       showError("Total mark must be between 0 and 10");
       return;
     }
+    // Convert datetime-local strings (Vietnam local) to UTC ISO for the API.
+    const payload = {
+      ...formData,
+      startDatetime: toUtcIsoString(formData.startDatetime),
+      endDatetime: toUtcIsoString(formData.endDatetime),
+    };
     try {
       setActionLoading(true);
       if (editingExam) {
-        await updateExamination(editingExam.id, formData);
+        await updateExamination(editingExam.id, payload);
         showSuccess("Examination updated successfully");
       } else {
-        await createExamination(formData);
+        await createExamination(payload);
         showSuccess("Examination created successfully");
       }
       setOpenFormModal(false);
@@ -378,10 +378,8 @@ export function ExamsTab({
             </TableHead>
             <TableBody>
               {examinations.map((exam) => {
-                const statusKey = exam.status as 0 | 1 | 2;
-                const modeKey = exam.mode as 0 | 1;
-                const statusLabel = STATUS_LABELS[statusKey] ?? "PENDING";
-                const modeLabel = MODE_LABELS[modeKey] ?? "PRACTICAL";
+                const statusLabel = STATUS_LABELS[exam.status] ?? "PENDING";
+                const modeLabel = MODE_LABELS[exam.mode] ?? "PRACTICAL";
                 return (
                   <TableRow key={exam.id}>
                     <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
