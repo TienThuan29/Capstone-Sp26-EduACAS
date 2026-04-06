@@ -44,7 +44,6 @@ class ApiConfig {
 
     // Quiz endpoints
     static String quizzesByIdEndpoint(String id) => '/api/acas/v1/quizzes/$id';
-    static String questionByIdEndpoint(String id) => '/api/acas/v1/questions/$id';
     static String classroomQuizzesByClassroomEndpoint(String classroomId) =>
       '/api/acas/v1/classroom-quizzes/classroom/$classroomId';
     static String quizAttemptStartEndpoint() => '/api/acas/v1/quiz-attempts/start';
