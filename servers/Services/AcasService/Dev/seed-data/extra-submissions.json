@@ -1,0 +1,112 @@
+[
+  {
+    "id": "subm-extra-001", "studentId": "usr-stu-001", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 5.0,
+    "source": "a = int(input())\nb = int(input())\nprint(a + b)",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-002", "studentId": "usr-stu-002", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 5.0,
+    "source": "x = int(input())\ny = int(input())\nresult = x + y\nprint(result)",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-003", "studentId": "usr-stu-003", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "using System;\nnamespace EduACAS.Testing {\n    class Program {\n        // Validation logic common to many solutions\n        static bool IsValidInput(string s) {\n            if (string.IsNullOrWhiteSpace(s)) return false;\n            foreach (char c in s) { if (!char.IsDigit(c) && c != '-') return false; }\n            return true;\n        }\n\n        static void Main(string[] args) {\n            try {\n                string input1 = Console.ReadLine();\n                string input2 = Console.ReadLine();\n                if (!IsValidInput(input1) || !IsValidInput(input2)) return;\n                int a = int.Parse(input1);\n                int b = int.Parse(input2);\n                Console.WriteLine(a + b);\n            } catch (Exception ex) {\n                Console.WriteLine(\"An error occurred: \" + ex.Message);\n            }\n        }\n    }\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-extra-004", "studentId": "usr-stu-004", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "using System;\nnamespace SE_Capstone.Project {\n    class Calculator {\n        // Shared utility function\n        static bool IsValidInput(string s) {\n            if (string.IsNullOrWhiteSpace(s)) return false;\n            foreach (char c in s) { if (!char.IsDigit(c) && c != '-') return false; }\n            return true;\n        }\n\n        static void Main(string[] args) {\n            var val1 = Console.ReadLine();\n            var val2 = Console.ReadLine();\n            if (IsValidInput(val1) && IsValidInput(val2)) {\n                int x = Convert.ToInt32(val1);\n                int y = Convert.ToInt32(val2);\n                int result = x + y;\n                Console.WriteLine(result);\n            } else {\n                Console.WriteLine(\"Error in input\");\n            }\n        }\n    }\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-extra-005", "studentId": "usr-stu-005", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "using System;\nnamespace MySubmission {\n    class EntryPoint {\n        static void Main() {\n            // Approach using a simple try-parse loop\n            try {\n                string s1 = Console.ReadLine();\n                string s2 = Console.ReadLine();\n                if (s1 == null || s2 == null) return;\n                int numA = int.Parse(s1.Trim());\n                int numB = int.Parse(s2.Trim());\n                Console.WriteLine(numA + numB);\n            } catch {\n                // Quietly exit\n            }\n        }\n    }\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-extra-006", "studentId": "usr-stu-006", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 4.0,
+    "source": "using System;\nnamespace IdenticalTest {\n    class Program {\n        static void Main() {\n            for(int i=0; i<50; i++) Console.WriteLine(\"Identical line \" + i);\n            Console.WriteLine(\"Error\");\n        }\n    }\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "Error" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-007", "studentId": "usr-stu-007", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 4.0,
+    "source": "using System;\nnamespace IdenticalTest {\n    class Program {\n        static void Main() {\n            for(int i=0; i<50; i++) Console.WriteLine(\"Identical line \" + i);\n            Console.WriteLine(\"Error\");\n        }\n    }\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "Error" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-008", "studentId": "usr-stu-008", "examId": "exam-001", "problemId": "prob-001", "version": 2, "finalScore": 5.0,
+    "source": "import math\na = int(input())\nb = int(input())\nprint(a + b)",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-009", "studentId": "usr-stu-001", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 5.0,
+    "source": "a = int(input())\nb = int(input())\nprint(a + b)",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-010", "studentId": "usr-stu-002", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 5.0,
+    "source": "x = int(input())\ny = int(input())\nres = x + y\nprint(res)",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "SUCCESS" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "SUCCESS" } ]
+  },
+  {
+    "id": "subm-extra-011", "studentId": "usr-stu-003", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "def validate(v):\n    \"\"\"Common validation helper\"\"\"\n    return v.strip().isdigit()\n\na = input()\nb = input()\nif validate(a) and validate(b):\n    print(int(a) + int(b))",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-extra-012", "studentId": "usr-stu-004", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "import sys\ndef validate(v):\n    # Copied from tutorial\n    return v.strip().isdigit()\n\nlines = sys.stdin.readlines()\nif len(lines) >= 2:\n    v1 = lines[0].strip()\n    v2 = lines[1].strip()\n    if validate(v1) and validate(v2):\n        print(int(v1) + int(v2))",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-extra-013", "studentId": "usr-stu-005", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "try:\n    numbers = [int(input()) for _ in range(2)]\n    print(sum(numbers))\nexcept EOFError:\n    pass\nexcept ValueError:\n    print(\"Invalid input\")",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-extra-014", "studentId": "usr-stu-006", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 0.0,
+    "source": "print('Something completely different')",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "Something completely different" }, { "testcaseId": "tc-001-02", "status": "FAIL", "actualOutput": "Something completely different" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Something completely different" }, { "testcaseId": "tc-001-04", "status": "FAIL", "actualOutput": "Something completely different" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Something completely different" } ]
+  },
+  {
+    "id": "subm-extra-015", "studentId": "usr-stu-007", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 0.0,
+    "source": "while True: pass # Timeout test simulation",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "Timeout" }, { "testcaseId": "tc-001-02", "status": "FAIL", "actualOutput": "Timeout" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Timeout" }, { "testcaseId": "tc-001-04", "status": "FAIL", "actualOutput": "Timeout" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Timeout" } ]
+  },
+  {
+    "id": "subm-extra-016", "studentId": "usr-stu-008", "examId": "exam-test-python", "problemId": "prob-001", "version": 2, "finalScore": 3.0,
+    "source": "a = int(input())\nb = int(input())\nif a < 0 or b < 0: print(0)\nelse: print(a + b)",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "SUCCESS" }, { "testcaseId": "tc-001-02", "status": "SUCCESS" }, { "testcaseId": "tc-001-03", "status": "FAIL", "actualOutput": "Output: 0" }, { "testcaseId": "tc-001-04", "status": "SUCCESS" }, { "testcaseId": "tc-001-05", "status": "FAIL", "actualOutput": "Output: 0" } ]
+  },
+  {
+    "id": "subm-seed-py-01", "studentId": "usr-stu-001", "examId": "exam-test-python", "problemId": "prob-010", "version": 1, "finalScore": 0.0,
+    "source": "import math\nr = float(input())\nprint(math.pi * r**2)",
+    "testResults": [ { "testcaseId": "tc-010-01", "status": "FAIL", "actualOutput": "Error" }, { "testcaseId": "tc-010-02", "status": "FAIL", "actualOutput": "Error" } ]
+  },
+  {
+    "id": "subm-seed-py-02", "studentId": "usr-stu-002", "examId": "exam-test-python", "problemId": "prob-010", "version": 1, "finalScore": 0.0,
+    "source": "import math\n# Plagiarized version\nradius = float(input())\narea = math.pow(radius, 2) * math.pi\nprint(area)",
+    "testResults": [ { "testcaseId": "tc-010-01", "status": "FAIL", "actualOutput": "Error" }, { "testcaseId": "tc-010-02", "status": "FAIL", "actualOutput": "Error" } ]
+  },
+  {
+    "id": "subm-seed-py-03", "studentId": "usr-stu-003", "examId": "exam-test-python", "problemId": "prob-010", "version": 1, "finalScore": 0.0,
+    "source": "import math\n# Another plagiarized version\ndef calc_area(r):\n    return math.pi * (r ** 2)\nprint(calc_area(float(input())))",
+    "testResults": [ { "testcaseId": "tc-010-01", "status": "FAIL", "actualOutput": "Error" }, { "testcaseId": "tc-010-02", "status": "FAIL", "actualOutput": "Error" } ]
+  },
+  {
+    "id": "subm-seed-ts-01", "studentId": "usr-stu-004", "examId": "exam-test-typescript", "problemId": "prob-001", "version": 1, "finalScore": 0.0,
+    "source": "function bubbleSort(arr: number[]): number[] {\n    const n = arr.length;\n    for (let i = 0; i < n; i++) {\n        for (let j = 0; j < n - i - 1; j++) {\n            if (arr[j] > arr[j + 1]) {\n                [arr[j], arr[j + 1]] = [arr[j + 1], arr[j]];\n            }\n        }\n    }\n    return arr;\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "TS_Error" } ]
+  },
+  {
+    "id": "subm-seed-ts-02", "studentId": "usr-stu-005", "examId": "exam-test-typescript", "problemId": "prob-001", "version": 1, "finalScore": 0.0,
+    "source": "const sortArray = (list: number[]): number[] => {\n    let size = list.length;\n    for (let x = 0; x < size; x++) {\n        for (let y = 0; y < size - x - 1; y++) {\n            if (list[y] > list[y + 1]) {\n                let temp = list[y];\n                list[y] = list[y + 1];\n                list[y + 1] = temp;\n            }\n        }\n    }\n    return list;\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "TS_Error" } ]
+  },
+  {
+    "id": "subm-seed-ts-03", "studentId": "usr-stu-006", "examId": "exam-test-typescript", "problemId": "prob-001", "version": 1, "finalScore": 0.0,
+    "source": "function myBubble(data: number[]) {\n    for(var i=0; i<data.length; i++) {\n        for(var j=0; j<data.length-i-1; j++) {\n            if(data[j] > data[j+1]) {\n                var t = data[j];\n                data[j] = data[j+1];\n                data[j+1] = t;\n            }\n        }\n    }\n    return data;\n}",
+    "testResults": [ { "testcaseId": "tc-001-01", "status": "FAIL", "actualOutput": "TS_Error" } ]
+  }
+]

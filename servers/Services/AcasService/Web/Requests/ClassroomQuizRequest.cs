@@ -19,6 +19,7 @@ namespace AcasService.Web.Requests
 
         public int MaxOfAttempts { get; set; } = 1;
 
+        [MaxLength(50, ErrorMessage = "Passcode cannot exceed 50 characters")]
         public string? Passcode { get; set; }
 
         [Required(ErrorMessage = "CreatedBy is required")]
@@ -33,6 +34,7 @@ namespace AcasService.Web.Requests
 
         public int? MaxOfAttempts { get; set; }
 
+        [MaxLength(50, ErrorMessage = "Passcode cannot exceed 50 characters")]
         public string? Passcode { get; set; }
 
         public ClassroomQuizStatus? Status { get; set; }

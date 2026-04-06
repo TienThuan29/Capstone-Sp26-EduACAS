@@ -9,4 +9,6 @@ public interface IQuizAttemptRepository
     Task<List<Models.QuizAttempt>> FindByStudentIdAsync(string studentId);
     Task<Models.QuizAttempt?> UpdateAsync(Models.QuizAttempt quizAttempt);
     Task DeleteAsync(string quizAttemptId);
+    Task<int> GetMaxAttemptNumberAsync(string classroomQuizId);
+    Task<int> GetMaxAttemptNumberAsync(string classroomQuizId, string studentId);
 }

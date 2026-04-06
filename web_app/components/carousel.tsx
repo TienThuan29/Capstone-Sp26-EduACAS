@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react"
 import Image from "next/image"
+import { HERO_CODE_1, HERO_CODE_2, HERO_CODE_3 } from "@/assets/images"
 
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0)
@@ -9,17 +10,17 @@ export default function HeroCarousel() {
 
   const slides = [
     {
-      src: "/hero-slide-images/code-1.jpg",
+      src: HERO_CODE_1,
       alt: "Code background 1",
       gradient: "linear-gradient(135deg, rgba(31, 78, 121, 0.7) 0%, rgba(201, 162, 77, 0.5) 100%)",
     },
     {
-      src: "/hero-slide-images/code-2.jpg",
+      src: HERO_CODE_2,
       alt: "Code background 2",
       gradient: "linear-gradient(135deg, rgba(201, 162, 77, 0.6) 0%, rgba(31, 78, 121, 0.6) 100%)",
     },
     {
-      src: "/hero-slide-images/code-3.jpg",
+      src: HERO_CODE_3,
       alt: "Code background 3",
       gradient: "linear-gradient(135deg, rgba(31, 78, 121, 0.65) 0%, rgba(201, 162, 77, 0.55) 100%)",
     },

@@ -24,6 +24,10 @@ public class Notification
       public Dictionary<string, object?> Payload { get; set; } = new();
       
       public DateTime SentDate { get; set; }
+
+      public bool IsRead { get; set; } = false;
+
+      public bool IsDeleted { get; set; } = false;
 }
 
 public enum NotificationType

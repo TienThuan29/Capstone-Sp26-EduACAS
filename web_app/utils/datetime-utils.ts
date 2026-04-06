@@ -74,6 +74,40 @@ export function formatGradedDate(
   }
 }
 
+/**
+ * Converts UTC ISO string to local 'YYYY-MM-DDTHH:mm' for datetime-local input.
+ */
+export function toLocalDatetimeString(
+  isoString: string | null | undefined
+): string {
+  if (!isoString) return "";
+  try {
+    const d = new Date(isoString);
+    if (Number.isNaN(d.getTime())) return "";
+
+    const pad = (n: number) => n.toString().padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
+      d.getHours()
+    )}:${pad(d.getMinutes())}`;
+  } catch {
+    return "";
+  }
+}
+
+/**
+ * Converts local 'YYYY-MM-DDTHH:mm' from datetime-local input to UTC ISO string.
+ */
+export function toUtcIsoString(localString: string | null | undefined): string {
+  if (!localString) return "";
+  try {
+    const d = new Date(localString);
+    if (Number.isNaN(d.getTime())) return "";
+    return d.toISOString();
+  } catch {
+    return "";
+  }
+}
+
 export function formatDurationMs(ms: number): string {
   const totalMinutes = Math.round(ms / (1000 * 60));
   if (totalMinutes < 60) return `${totalMinutes} minutes`;

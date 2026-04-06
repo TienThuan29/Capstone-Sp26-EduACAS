@@ -26,7 +26,7 @@ function ClassroomContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getClassroomById, leaveClassroom } = useClassroom();
+  const { getClassroomById, leaveClassroom, recordClassroomAccess } = useClassroom();
   const { getExaminationsByClassId } = useExamination();
   const { user } = useAuth();
 
@@ -80,6 +80,14 @@ function ClassroomContent() {
       fetchClassroomDetail();
     }
   }, [getClassroomById, studentId, classId]);
+
+  // useEffect(() => {
+  //   if (!studentId || !classId || !classroom?.id) return;
+  //   if (user?.role?.toUpperCase() !== "STUDENT") return;
+  //   void recordClassroomAccess(studentId, classId).catch(() => {
+  //     /* non-blocking; Redis may be unavailable */
+  //   });
+  // }, [studentId, classId, classroom?.id, user?.role, recordClassroomAccess]);
 
   useEffect(() => {
     const fetchExaminations = async () => {

@@ -11,6 +11,7 @@ public interface ISubmissionRepository
     Task<List<Models.Submission>> GetByProblemIdAsync(string problemId);
 
     Task<List<Models.Submission>> GetLatestVersionSubmissionsOfProblemInExam(string examId, string problemId);
+    Task<List<Models.Submission>> GetLatestVersionSubmissionsOfProblemInExamPaginatedAsync(string examId, string problemId);
 
     Task<Dictionary<string, List<Models.Submission>>> GetLatestVersionSubmissionsByExamAsync(string examId);
 }

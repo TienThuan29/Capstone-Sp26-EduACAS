@@ -2,7 +2,7 @@
   {
     "id": "exam-001",
     "examName": "Midterm Exam - Intro to Programming G1",
-    "programmingLanguageId": "",
+    "programmingLanguageId": "python",
     "classroomId": "cls-001",
     "description": "Midterm covering basic I/O and string operations. Exact string comparison.",
     "totalMark": 10.0,
@@ -118,7 +118,7 @@
   {
     "id": "exam-test-python",
     "examName": "Full Test - Python",
-    "programmingLanguageId": "__python__",
+    "programmingLanguageId": "python",
     "classroomId": "cls-007",
     "description": "Complete test covering all 25 problems in Python.",
     "totalMark": 10.0,
@@ -143,7 +143,7 @@
   {
     "id": "exam-test-java",
     "examName": "Full Test - Java",
-    "programmingLanguageId": "__java__",
+    "programmingLanguageId": "java",
     "classroomId": "cls-007",
     "description": "Complete test covering all 25 problems in Java.",
     "totalMark": 10.0,
@@ -168,7 +168,7 @@
   {
     "id": "exam-test-cpp",
     "examName": "Full Test - C++",
-    "programmingLanguageId": "__c++__",
+    "programmingLanguageId": "c++",
     "classroomId": "cls-007",
     "description": "Complete test covering all 25 problems in C++.",
     "totalMark": 10.0,
@@ -193,7 +193,7 @@
   {
     "id": "exam-test-c",
     "examName": "Full Test - C",
-    "programmingLanguageId": "__c__",
+    "programmingLanguageId": "c",
     "classroomId": "cls-007",
     "description": "Complete test covering all 25 problems in C.",
     "totalMark": 10.0,
@@ -218,9 +218,34 @@
   {
     "id": "exam-test-javascript",
     "examName": "Full Test - JavaScript",
-    "programmingLanguageId": "__javascript__",
+    "programmingLanguageId": "javascript",
     "classroomId": "cls-007",
     "description": "Complete test covering all 25 problems in JavaScript.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "problems": [
+      { "problemId": "prob-001", "mark": 0.5 }, { "problemId": "prob-002", "mark": 0.5 },
+      { "problemId": "prob-003", "mark": 0.5 }, { "problemId": "prob-004", "mark": 0.5 },
+      { "problemId": "prob-005", "mark": 0.5 }, { "problemId": "prob-006", "mark": 0.375 },
+      { "problemId": "prob-007", "mark": 0.375 }, { "problemId": "prob-008", "mark": 0.375 },
+      { "problemId": "prob-009", "mark": 0.375 }, { "problemId": "prob-010", "mark": 0.375 },
+      { "problemId": "prob-011", "mark": 0.375 }, { "problemId": "prob-012", "mark": 0.375 },
+      { "problemId": "prob-013", "mark": 0.375 }, { "problemId": "prob-014", "mark": 0.375 },
+      { "problemId": "prob-015", "mark": 0.375 }, { "problemId": "prob-016", "mark": 0.375 },
+      { "problemId": "prob-017", "mark": 0.375 }, { "problemId": "prob-018", "mark": 0.375 },
+      { "problemId": "prob-019", "mark": 0.375 }, { "problemId": "prob-020", "mark": 0.375 },
+      { "problemId": "prob-021", "mark": 0.375 }, { "problemId": "prob-022", "mark": 0.375 },
+      { "problemId": "prob-023", "mark": 0.375 }, { "problemId": "prob-024", "mark": 0.375 },
+      { "problemId": "prob-025", "mark": 0.375 }
+    ]
+  },
+  {
+    "id": "exam-test-typescript",
+    "examName": "Full Test - TypeScript",
+    "programmingLanguageId": "typescript",
+    "classroomId": "cls-007",
+    "description": "Complete test covering all 25 problems in TypeScript.",
     "totalMark": 10.0,
     "status": "ONGOING",
     "mode": "EXAMINATION",

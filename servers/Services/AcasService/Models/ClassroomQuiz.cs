@@ -21,6 +21,7 @@ public class ClassroomQuiz
 
     public int MaxOfAttempts { get; set; }
 
+    [MaxLength(50)]
     public string? Passcode { get; set; }
 
     [Required]

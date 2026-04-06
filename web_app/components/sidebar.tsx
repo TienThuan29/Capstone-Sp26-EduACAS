@@ -8,6 +8,7 @@ import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { PageUrl } from "@/configs/page.url";
+import { LOGO_EDU_ACAS_2_TRANS, LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
 import { Button, Modal, ModalHeader, ModalBody } from "flowbite-react";
 import {
   ChevronLeftIcon,
@@ -66,7 +67,16 @@ const Sidebar = () => {
   };
 
   const studentMenuItems = [
-    { icon: Squares2X2Icon, label: "Dashboard", href: PageUrl.DASHBOARD_PAGE },
+    {
+      icon: Squares2X2Icon,
+      label: "Overview",
+      href: PageUrl.DEFAULT_PAGE,
+    },
+    // { 
+    //   icon: Squares2X2Icon, 
+    //   label: "Dashboard", 
+    //   href: PageUrl.DASHBOARD_PAGE 
+    // },
     {
       icon: AcademicCapIcon,
       label: "Classrooms",
@@ -82,6 +92,11 @@ const Sidebar = () => {
 
   const lecturerMenuItems = [
     {
+      icon: Squares2X2Icon,
+      label: "Overview",
+      href: PageUrl.DEFAULT_PAGE,
+    },
+    {
       icon: AcademicCapIcon,
       label: "My Classrooms",
       href: PageUrl.MANAGE_CLASSROOM_PAGE,
@@ -90,6 +105,11 @@ const Sidebar = () => {
       icon: QuestionMarkCircleIcon,
       label: "Problem Banks",
       href: PageUrl.QUESTION_BANKS_PAGE,
+    },
+    {
+      icon: DocumentTextIcon,
+      label: "Examination Banks",
+      href: PageUrl.EXAM_BANK_PAGE,
     },
     {
       icon: ClipboardDocumentListIcon,
@@ -123,6 +143,11 @@ const Sidebar = () => {
       href: `${pathname}?tab=exams`,
     },
     {
+      icon: ClipboardDocumentListIcon,
+      label: "Manage Quizzes",
+      href: `${pathname}?tab=quizzes`,
+    },
+    {
       icon: BookOpenIcon,
       label: "Manage Materials",
       href: `${pathname}?tab=materials`,
@@ -133,7 +158,7 @@ const Sidebar = () => {
       href: `${pathname}?tab=students`,
     },
     {
-      icon: ChatBubbleLeftRightIcon ,
+      icon: ChatBubbleLeftRightIcon,
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
@@ -187,7 +212,7 @@ const Sidebar = () => {
       href: `${pathname}?tab=materials`,
     },
     {
-      icon: ChatBubbleLeftRightIcon ,
+      icon: ChatBubbleLeftRightIcon,
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
@@ -215,9 +240,8 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${
-        isExpanded ? "w-64" : "w-20"
-      } ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"} border-r`}
+      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${isExpanded ? "w-64" : "w-20"
+        } ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"} border-r`}
     >
       {/* Logo */}
       <div
@@ -228,7 +252,7 @@ const Sidebar = () => {
             <div className="flex flex-1 justify-center">
               <Link href={PageUrl.HOME_PAGE} className="block" prefetch={false}>
                 <Image
-                  src="/images/EduACAS-2-trans.png"
+                  src={LOGO_EDU_ACAS_2_TRANS}
                   alt="Edu-ACAS Logo"
                   width={142}
                   height={64}
@@ -248,7 +272,7 @@ const Sidebar = () => {
           <div className={`flex w-full flex-col items-center gap-2`}>
             <Link href={PageUrl.HOME_PAGE} className="block" prefetch={false}>
               <Image
-                src="/images/EduACAS-single.png"
+                src={LOGO_EDU_ACAS_SINGLE}
                 alt="Edu-ACAS Logo"
                 width={64}
                 height={64}
@@ -282,11 +306,10 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                  isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <IconComponent className="h-5 w-5 shrink-0" />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -310,11 +333,10 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-                  isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                }`}
+                  }`}
               >
                 <IconComponent className="h-5 w-5 shrink-0" />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -331,11 +353,10 @@ const Sidebar = () => {
         {/* Dark Mode Toggle Button */}
         <button
           onClick={toggleTheme}
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-            isDarkMode
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
               ? "text-gray-300 hover:bg-gray-800"
               : "text-gray-700 hover:bg-gray-100"
-          }`}
+            }`}
         >
           {isDarkMode ? (
             <MoonIcon className="h-5 w-5 shrink-0" />
@@ -354,11 +375,10 @@ const Sidebar = () => {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLoggingOut}
-            className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-              isDarkMode
+            className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isDarkMode
                 ? "text-red-400 hover:bg-red-900/20"
                 : "text-red-600 hover:bg-red-50"
-            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
+              } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
             {isLoggingOut ? "Logging out..." : "Logout"}
@@ -367,11 +387,10 @@ const Sidebar = () => {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLoggingOut}
-            className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${
-              isDarkMode
+            className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${isDarkMode
                 ? "text-red-400 hover:bg-red-900/20"
                 : "text-red-600 hover:bg-red-50"
-            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
+              } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
           </button>

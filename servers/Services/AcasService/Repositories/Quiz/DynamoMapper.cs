@@ -15,8 +15,8 @@ public static class DynamoMapper
 			["totalQuestions"] = new AttributeValue { N = quiz.TotalQuestions.ToString() },
 			["isDeleted"] = new AttributeValue { BOOL = quiz.IsDeleted },
 			["createdBy"] = new AttributeValue { S = quiz.CreatedBy },
-			["createdAt"] = new AttributeValue { S = quiz.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
-			["updatedAt"] = new AttributeValue { S = quiz.UpdatedAt.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+			["createdAt"] = new AttributeValue { S = quiz.CreatedAt.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
+			["updatedAt"] = new AttributeValue { S = quiz.UpdatedAt.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
 		};
 
 		if (quiz.Questions.Count > 0)
@@ -50,8 +50,8 @@ public static class DynamoMapper
 			TotalQuestions = item.ContainsKey("totalQuestions") ? int.Parse(item["totalQuestions"].N) : 0,
 			IsDeleted = item.ContainsKey("isDeleted") && item["isDeleted"].BOOL,
 			CreatedBy = item["createdBy"].S,
-			CreatedAt = DateTime.Parse(item["createdAt"].S),
-			UpdatedAt = DateTime.Parse(item["updatedAt"].S)
+			CreatedAt = DateTime.Parse(item["createdAt"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
+			UpdatedAt = DateTime.Parse(item["updatedAt"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal)
 		};
 
 		if (item.TryGetValue("questions", out var questionsAttribute) && questionsAttribute.L != null)

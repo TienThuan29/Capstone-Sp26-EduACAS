@@ -27,12 +27,16 @@ import {
   PencilIcon,
   TrashIcon,
   EyeIcon,
+  DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import type { Examination, ExaminationRequest } from "@/types/examination";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage";
+import { useExaminationTemplate } from "@/hooks/examination-template/useExaminationTemplate";
 import type { ProgrammingLanguage } from "@/types/language";
+import type { ExaminationTemplateResponse } from "@/types/examination-template";
 import { useToast } from "@/hooks/useToast";
+import { useAuth } from "@/contexts/AuthContext";
 import { formatDate } from "@/utils/datetime-utils";
 import { ExaminationDetailView } from "./exam-detail-tab";
 
@@ -94,6 +98,7 @@ export function ExamsTab({
   onExamIdInUrlChange,
 }: PractiseTabProps) {
   const { showSuccess, showError } = useToast();
+  const { user } = useAuth();
   const {
     createExamination,
     updateExamination,
@@ -102,14 +107,19 @@ export function ExamsTab({
   } = useExamination();
 
   const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
+  const { getAll: getAllTemplates } = useExaminationTemplate();
+
   const [languages, setLanguages] = useState<ProgrammingLanguage[]>([]);
   const [openFormModal, setOpenFormModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const [openTemplateModal, setOpenTemplateModal] = useState(false);
   const [editingExam, setEditingExam] = useState<Examination | null>(null);
   const [examToDelete, setExamToDelete] = useState<Examination | null>(null);
   const [examToView, setExamToView] = useState<Examination | null>(null);
   const [formData, setFormData] = useState<ExaminationRequest>(emptyForm);
   const [actionLoading, setActionLoading] = useState(false);
+  const [templateList, setTemplateList] = useState<ExaminationTemplateResponse[]>([]);
+  const [templateLoading, setTemplateLoading] = useState(false);
 
   const loadLanguages = useCallback(async () => {
     try {
@@ -120,6 +130,44 @@ export function ExamsTab({
       showError("Failed to load programming languages");
     }
   }, [getEnabledProgrammingLanguages, showError]);
+
+  const loadTemplates = useCallback(async () => {
+    setTemplateLoading(true);
+    try {
+      const result = await getAllTemplates(1, 100);
+      setTemplateList(result.items.filter((t) => !t.isDeleted));
+    } catch (e) {
+      console.error("Failed to load exam templates", e);
+      showError("Failed to load exam templates");
+    } finally {
+      setTemplateLoading(false);
+    }
+  }, [getAllTemplates, showError]);
+
+  const openFromTemplate = (template: ExaminationTemplateResponse) => {
+    setOpenTemplateModal(false);
+    setEditingExam(null);
+    setFormData({
+      ...emptyForm,
+      classroomId: classId,
+      examName: template.examName,
+      totalMark: template.totalMark,
+      problems: template.problems.map((p) => ({
+        problemId: p.problemId,
+        mark: p.mark,
+      })),
+      startDatetime: new Date().toISOString().slice(0, 16),
+      endDatetime: new Date(Date.now() + 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 16),
+    });
+    setOpenFormModal(true);
+  };
+
+  const handleOpenTemplateModal = () => {
+    void loadTemplates();
+    setOpenTemplateModal(true);
+  };
 
   useEffect(() => {
     loadLanguages();
@@ -281,14 +329,24 @@ export function ExamsTab({
         <h2 className="border-l-8 border-[#1F4E79] pl-4 text-3xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
         Examinations
         </h2>
-        <Button
-          color="dark"
-          className="bg-[#1F4E79] hover:bg-[#2A6BA3] cursor-pointer"
-          onClick={openCreate}
-        >
-          <PlusIcon className="mr-2 h-5 w-5" />
-          Add examination
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            color="light"
+            className="cursor-pointer border border-[#1F4E79] text-[#1F4E79] hover:bg-[#1F4E79]/10 dark:border-[#C9A24D] dark:text-[#C9A24D] dark:hover:bg-[#C9A24D]/10"
+            onClick={handleOpenTemplateModal}
+          >
+            <DocumentDuplicateIcon className="mr-2 h-5 w-5" />
+            From Template
+          </Button>
+          <Button
+            color="dark"
+            className="bg-[#1F4E79] hover:bg-[#2A6BA3] cursor-pointer"
+            onClick={openCreate}
+          >
+            <PlusIcon className="mr-2 h-5 w-5" />
+            Blank Exam
+          </Button>
+        </div>
       </div>
 
       {loading ? (
@@ -415,6 +473,14 @@ export function ExamsTab({
         examToDelete={examToDelete}
         actionLoading={actionLoading}
         onConfirm={handleDelete}
+      />
+
+      <TemplatePickerModal
+        show={openTemplateModal}
+        onClose={() => setOpenTemplateModal(false)}
+        templates={templateList}
+        loading={templateLoading}
+        onSelect={openFromTemplate}
       />
     </div>
   );
@@ -673,6 +739,70 @@ function DeleteExaminationModal({
           </div>
         </div>
       </ModalBody>
+    </Modal>
+  );
+}
+
+type TemplatePickerModalProps = {
+  show: boolean;
+  onClose: () => void;
+  templates: ExaminationTemplateResponse[];
+  loading: boolean;
+  onSelect: (template: ExaminationTemplateResponse) => void;
+};
+
+function TemplatePickerModal({
+  show,
+  onClose,
+  templates,
+  loading,
+  onSelect,
+}: TemplatePickerModalProps) {
+  return (
+    <Modal show={show} onClose={onClose} size="lg">
+      <ModalHeader>Select Exam Template</ModalHeader>
+      <ModalBody>
+        {loading ? (
+          <div className="flex justify-center py-8">
+            <Spinner size="xl" />
+          </div>
+        ) : templates.length === 0 ? (
+          <p className="py-8 text-center text-gray-500">
+            No exam templates found. Create one in the Examination Bank first.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {templates.map((t) => (
+              <div
+                key={t.id}
+                className="flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 px-4 py-3 transition-colors hover:border-[#1F4E79] hover:bg-blue-50 dark:border-gray-600 dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D]/10"
+                onClick={() => onSelect(t)}
+              >
+                <div>
+                  <p className="font-medium text-gray-900 dark:text-white">{t.examName}</p>
+                  <p className="text-sm text-gray-500">
+                    {t.problems.length} problem{t.problems.length !== 1 ? "s" : ""} &middot; Total mark: {t.totalMark}
+                  </p>
+                  {t.description && (
+                    <p className="mt-1 text-xs text-gray-400 line-clamp-1">{t.description}</p>
+                  )}
+                </div>
+                <div className="flex flex-col items-end gap-1">
+                  <Badge color="info">{t.problems.length}</Badge>
+                  <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                    {t.totalMark} pts
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </ModalBody>
+      <ModalFooter>
+        <Button color="gray" onClick={onClose} className="cursor-pointer">
+          Cancel
+        </Button>
+      </ModalFooter>
     </Modal>
   );
 }

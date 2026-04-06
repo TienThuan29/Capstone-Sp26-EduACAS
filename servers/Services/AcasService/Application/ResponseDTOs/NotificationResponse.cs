@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using AcasService.Models;
 
 namespace AcasService.Application.ResponseDTOs;
 
@@ -17,13 +18,19 @@ public class NotificationResponse
     public string Body { get; set; } = string.Empty;
 
     [JsonPropertyName("type")]
-    public string Type { get; set; } = string.Empty;
+    public NotificationType Type { get; set; }
 
     [JsonPropertyName("payload")]
     public Dictionary<string, object?> Payload { get; set; } = new();
 
     [JsonPropertyName("sentDate")]
     public DateTime SentDate { get; set; }
+
+    [JsonPropertyName("isRead")]
+    public bool IsRead { get; set; }
+
+    [JsonPropertyName("isDeleted")]
+    public bool IsDeleted { get; set; }
 }
 
 public class NotificationDispatchResponse
