@@ -5,9 +5,9 @@ import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
 import {
   ClassroomQuiz,
-  ClassroomQuizStatus,
   CreateClassroomQuizRequest,
   UpdateClassroomQuizRequest,
+  PagedClassroomQuizResult,
 } from "@/types/quiz";
 
 function normalizeQuiz(data: any): ClassroomQuiz {
@@ -24,6 +24,24 @@ export const useClassroomQuiz = () => {
       );
       const list = response.data?.dataResponse ?? [];
       return Array.isArray(list) ? list.map((item: Record<string, unknown>) => normalizeQuiz(item)) : [];
+    },
+    [axiosInstance]
+  );
+
+  const getClassroomQuizzesByClassroomPaged = useCallback(
+    async (
+      classroomId: string,
+      pageIndex: number = 1,
+      pageSize: number = 10,
+      includeDrafts: boolean = false
+    ): Promise<PagedClassroomQuizResult> => {
+      const response = await axiosInstance.get(
+        `${Api.ClassroomQuiz.GET_BY_CLASSROOM(classroomId)}/paged`,
+        {
+          params: { pageIndex, pageSize, includeDrafts },
+        }
+      );
+      return response.data?.dataResponse;
     },
     [axiosInstance]
   );
@@ -80,6 +98,7 @@ export const useClassroomQuiz = () => {
 
   return {
     getClassroomQuizzesByClassroom,
+    getClassroomQuizzesByClassroomPaged,
     getClassroomQuizById,
     createClassroomQuiz,
     updateClassroomQuiz,

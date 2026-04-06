@@ -6,8 +6,11 @@ using AcasService.Repositories.QuizAttempt;
 using AcasService.Repositories.Quiz;
 using AcasService.Repositories.Question;
 using AcasService.Repositories.StudentAnswer;
+using AcasService.Repositories.AnswerOption;
 using AcasService.Models;
 using AcasService.Web.Requests;
+using AcasService.Messaging.User;
+using AcasService.Application.Queries.QuizAttempt;
 
 namespace AcasService.Application.Commands.QuizAttempt
 {
@@ -16,6 +19,7 @@ namespace AcasService.Application.Commands.QuizAttempt
         Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request);
         Task UpdateAnswerAsync(string attemptId, UpdateQuizAnswerRequest request);
         Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId);
+        
     }
 
     public class QuizAttemptCommand : IQuizAttemptCommand
@@ -25,9 +29,13 @@ namespace AcasService.Application.Commands.QuizAttempt
         private readonly IQuizRepository _quizRepository;
         private readonly IQuestionRepository _questionRepository;
         private readonly IStudentAnswerRepository _studentAnswerRepository;
+        private readonly IAnswerOptionRepository _answerOptionRepository;
+        private readonly UserRequestProducer _userRequestProducer;
         private readonly IQuizCache _quizCache;
         private readonly QuizAttemptMapper _mapper;
         private readonly ILogger<QuizAttemptCommand> _logger;
+        private readonly IQuizAttemptQuery _quizAttemptQuery;
+        
 
         public QuizAttemptCommand(
             IQuizAttemptRepository repository,
@@ -35,18 +43,24 @@ namespace AcasService.Application.Commands.QuizAttempt
             IQuizRepository quizRepository,
             IQuestionRepository questionRepository,
             IStudentAnswerRepository studentAnswerRepository,
+            IAnswerOptionRepository answerOptionRepository,
+            UserRequestProducer userRequestProducer,
             IQuizCache quizCache,
             QuizAttemptMapper mapper,
-            ILogger<QuizAttemptCommand> logger)
+            ILogger<QuizAttemptCommand> logger,
+            IQuizAttemptQuery quizAttemptQuery)
         {
             _repository = repository;
             _classroomQuizRepository = classroomQuizRepository;
             _quizRepository = quizRepository;
             _questionRepository = questionRepository;
             _studentAnswerRepository = studentAnswerRepository;
+            _answerOptionRepository = answerOptionRepository;
+            _userRequestProducer = userRequestProducer;
             _quizCache = quizCache;
             _mapper = mapper;
             _logger = logger;
+            _quizAttemptQuery = quizAttemptQuery;
         }
 
         public async Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request)
@@ -55,32 +69,39 @@ namespace AcasService.Application.Commands.QuizAttempt
             {
                 var classroomQuiz = await _classroomQuizRepository.FindByIdAsync(request.ClassroomQuizId);
                 if (classroomQuiz == null)
-                {
-                    _logger.LogError($"ClassroomQuiz with ID {request.ClassroomQuizId} not found.");
                     throw new KeyNotFoundException($"ClassroomQuiz with ID {request.ClassroomQuizId} not found.");
-                }
 
-                if (classroomQuiz.Status != Models.ClassroomQuizStatus.PUBLISHED)
+                if (classroomQuiz.Status == Models.ClassroomQuizStatus.DRAFT)
+                    throw new InvalidOperationException("This quiz is currently in DRAFT mode and not yet available for students.");
+
+                if (!string.IsNullOrEmpty(classroomQuiz.Passcode) && classroomQuiz.Passcode != request.Passcode)
                 {
-                    _logger.LogError($"ClassroomQuiz {request.ClassroomQuizId} is not published.");
-                    throw new InvalidOperationException("This quiz is not currently available.");
+                    throw new ArgumentException("Incorrect passcode. Please try again.");
                 }
 
                 var now = DateTime.UtcNow;
-                if (now < classroomQuiz.StartTime || now > classroomQuiz.EndTime)
+                _logger.LogInformation($"Checking time for quiz {request.ClassroomQuizId}. Now: {now}, Start: {classroomQuiz.StartTime}, End: {classroomQuiz.EndTime}");
+                
+                if (now < classroomQuiz.StartTime)
                 {
-                    _logger.LogError($"Current time {now} is outside quiz time range ({classroomQuiz.StartTime} - {classroomQuiz.EndTime}).");
-                    throw new InvalidOperationException("The quiz is not currently in its active time range.");
+                    var waitTime = classroomQuiz.StartTime - now;
+                    throw new InvalidOperationException($"The quiz has not started yet. Starts in {(int)waitTime.TotalMinutes} minutes (at {classroomQuiz.StartTime.ToLocalTime():HH:mm dd/MM/yyyy}).");
                 }
+
+                if (now > classroomQuiz.EndTime || classroomQuiz.Status == Models.ClassroomQuizStatus.CLOSED)
+                    throw new InvalidOperationException("The quiz has already ended.");
 
                 int currentMax = await _repository.GetMaxAttemptNumberAsync(request.ClassroomQuizId, request.StudentId);
                 int nextAttempt = currentMax + 1;
 
                 if (nextAttempt > classroomQuiz.MaxOfAttempts)
-                {
-                    _logger.LogError($"Student {request.StudentId} has reached max attempts ({classroomQuiz.MaxOfAttempts}) for quiz {request.ClassroomQuizId}.");
                     throw new InvalidOperationException($"You have already reached the maximum allowed attempts ({classroomQuiz.MaxOfAttempts}) for this quiz.");
-                }
+
+                var quiz = await _quizRepository.FindByIdAsync(classroomQuiz.QuizId);
+                if (quiz == null) throw new Exception("Base quiz not found.");
+
+                var durationEndTime = now.AddMinutes(quiz.Duration);
+                var deadline = durationEndTime < classroomQuiz.EndTime ? durationEndTime : classroomQuiz.EndTime;
 
                 var newAttempt = new Models.QuizAttempt
                 {
@@ -88,18 +109,15 @@ namespace AcasService.Application.Commands.QuizAttempt
                     ClassroomQuizId = request.ClassroomQuizId,
                     StudentId = request.StudentId,
                     StartTime = now,
+                    EndTime = deadline, 
                     Status = Models.QuizAttemptStatus.INPROGRESS,
                     AttemptNumber = nextAttempt
                 };
 
                 var created = await _repository.CreateAsync(newAttempt);
-                if (created == null)
-                {
-                    _logger.LogError("Failed to create quiz attempt record");
-                    throw new Exception("Failed to start quiz attempt");
-                }
+                if (created == null) throw new Exception("Failed to start quiz attempt");
 
-                return _mapper.ToQuizAttemptResponse(created);
+                return await _quizAttemptQuery.BuildEnrichedResponse(created);
             }
             catch (Exception ex)
             {
@@ -113,25 +131,17 @@ namespace AcasService.Application.Commands.QuizAttempt
             try
             {
                 var attempt = await _repository.FindByIdAsync(attemptId);
-                if (attempt == null)
-                {
-                    _logger.LogError($"QuizAttempt with ID {attemptId} not found.");
-                    throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
-                }
+                if (attempt == null) throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
 
                 if (attempt.Status != Models.QuizAttemptStatus.INPROGRESS)
-                {
-                    _logger.LogError($"Cannot update answer for attempt {attemptId} because status is {attempt.Status}.");
                     throw new InvalidOperationException("Cannot update answers for a submitted or abandoned quiz.");
-                }
 
                 var key = _quizCache.GetQuizAttemptKey(attemptId);
                 var answers = await _quizCache.GetAsync<Dictionary<string, string>>(key) ?? new Dictionary<string, string>();
                 
-                answers[request.QuestionId] = request.SelectedOptionId;
+                answers[request.QuestionId.ToLower()] = request.SelectedOptionId ?? request.TextAnswer ?? "";
                 
                 await _quizCache.SetAsync(key, answers);
-                _logger.LogInformation($"Updated answer for attempt {attemptId}, question {request.QuestionId} in Redis.");
             }
             catch (Exception ex)
             {
@@ -145,21 +155,15 @@ namespace AcasService.Application.Commands.QuizAttempt
             try
             {
                 var attempt = await _repository.FindByIdAsync(attemptId);
-                if (attempt == null)
-                {
-                    _logger.LogError($"QuizAttempt with ID {attemptId} not found.");
-                    throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
-                }
+                if (attempt == null) throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
 
                 if (attempt.Status != Models.QuizAttemptStatus.INPROGRESS)
-                {
-                    _logger.LogError($"Cannot submit attempt {attemptId} because status is {attempt.Status}.");
                     throw new InvalidOperationException("This quiz has already been submitted or is no longer active.");
-                }
 
                 var cacheKey = _quizCache.GetQuizAttemptKey(attemptId);
-                var cachedAnswers = await _quizCache.GetAsync<Dictionary<string, string>>(cacheKey) ?? new Dictionary<string, string>();
-
+                var cachedAnswersRaw = await _quizCache.GetAsync<Dictionary<string, string>>(cacheKey) ?? new Dictionary<string, string>();
+                var cachedAnswers = cachedAnswersRaw.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value);
+                
                 var classroomQuiz = await _classroomQuizRepository.FindByIdAsync(attempt.ClassroomQuizId);
                 if (classroomQuiz == null) throw new Exception("Classroom quiz configuration not found.");
 
@@ -172,15 +176,71 @@ namespace AcasService.Application.Commands.QuizAttempt
                 foreach (var quizQuestion in quiz.Questions)
                 {
                     var question = await _questionRepository.FindByIdAsync(quizQuestion.QuestionId);
-                    if (question == null) continue;
+                    if (question == null) 
+                    {
+                        _logger.LogWarning($"Question ID {quizQuestion.QuestionId} not found during grading.");
+                        continue;
+                    }
 
-                    cachedAnswers.TryGetValue(question.Id, out var selectedOptionId);
+                    if (question.AnswerOptions == null || !question.AnswerOptions.Any())
+                    {
+                        _logger.LogInformation($"Fetching answer options for question {question.Id}...");
+                        question.AnswerOptions = await _answerOptionRepository.FindByQuestionIdAsync(question.Id);
+                    }
+
+                    string studentValue = "";
+                    cachedAnswers.TryGetValue(question.Id.ToLower(), out studentValue);
+                    studentValue ??= "";
                     
                     bool isCorrect = false;
-                    if (!string.IsNullOrEmpty(selectedOptionId))
+
+                    if (question.Type == Models.QuestionType.ESSAY)
                     {
-                        var correctOption = question.AnswerOptions.FirstOrDefault(o => o.IsCorrect);
-                        if (correctOption != null && correctOption.Id == selectedOptionId)
+                        if (!string.IsNullOrWhiteSpace(question.TextAnswer) && !string.IsNullOrWhiteSpace(studentValue))
+                        {
+                            var normalizedExpected = question.TextAnswer.Replace("\r", "").Trim();
+                            var normalizedActual = studentValue.Replace("\r", "").Trim();
+                            isCorrect = normalizedExpected.Equals(normalizedActual, StringComparison.OrdinalIgnoreCase);
+                            if (isCorrect) totalScore += quizQuestion.Marks;
+                        }
+
+                        studentAnswers.Add(new Models.StudentAnswer
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            AttemptId = attemptId,
+                            QuestionId = question.Id,
+                            TextAnswer = studentValue,
+                            IsCorrect = isCorrect
+                        });
+                        continue;
+                    }
+
+                    if (question.Type == Models.QuestionType.MULTIPLE_CHOICE)
+                    {
+                        var correctOptionIds = question.AnswerOptions?.Where(o => o.IsCorrect).Select(o => o.Id.Trim().ToLower()).OrderBy(id => id).ToList() ?? new List<string>();
+                        var studentSelectedIds = studentValue.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim().ToLower()).OrderBy(id => id).ToList();
+
+                        if (correctOptionIds.Count > 0 && correctOptionIds.SequenceEqual(studentSelectedIds))
+                        {
+                            isCorrect = true;
+                            totalScore += quizQuestion.Marks;
+                        }
+
+                        studentAnswers.Add(new Models.StudentAnswer
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            AttemptId = attemptId,
+                            QuestionId = question.Id,
+                            AnswerOptionId = studentValue,
+                            IsCorrect = isCorrect
+                        });
+                        continue;
+                    }
+
+                    var correctOption = question.AnswerOptions?.FirstOrDefault(o => o.IsCorrect);
+                    if (!string.IsNullOrEmpty(studentValue) && correctOption != null)
+                    {
+                        if (correctOption.Id.Trim().Equals(studentValue.Trim(), StringComparison.OrdinalIgnoreCase))
                         {
                             isCorrect = true;
                             totalScore += quizQuestion.Marks;
@@ -192,7 +252,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                         Id = Guid.NewGuid().ToString(),
                         AttemptId = attemptId,
                         QuestionId = question.Id,
-                        AnswerOptionId = selectedOptionId,
+                        AnswerOptionId = studentValue,
                         IsCorrect = isCorrect
                     });
                 }
@@ -206,8 +266,7 @@ namespace AcasService.Application.Commands.QuizAttempt
 
                 await _quizCache.RemoveAsync(cacheKey);
 
-                _logger.LogInformation($"Attempt {attemptId} submitted successfully. Final Score: {totalScore}");
-                return _mapper.ToQuizAttemptResponse(attempt);
+                return await _quizAttemptQuery.BuildEnrichedResponse(attempt);
             }
             catch (Exception ex)
             {
@@ -215,5 +274,8 @@ namespace AcasService.Application.Commands.QuizAttempt
                 throw;
             }
         }
+
+       
+        
     }
 }

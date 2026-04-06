@@ -284,15 +284,8 @@ export function ProblemsTabContent({
         description: examination.description,
         isPublicResult: examination.isPublicResult,
         totalMark: examination.totalMark,
-        status:
-          (["PENDING", "ONGOING", "COMPLETED"][examination.status] as
-            | "PENDING"
-            | "ONGOING"
-            | "COMPLETED") ?? "PENDING",
-        mode:
-          (["PRACTICAL", "EXAMINATION"][examination.mode] as
-            | "PRACTICAL"
-            | "EXAMINATION") ?? "PRACTICAL",
+        status: examination.status,
+        mode: examination.mode,
       };
 
       // console.log("Updating examination with payload:", JSON.stringify(payload, null, 2));

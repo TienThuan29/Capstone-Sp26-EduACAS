@@ -13,15 +13,21 @@ import {
   Badge,
   Tabs,
   TabItem,
+  Label,
+  Select,
 } from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import type {
+  ExamLogResponse,
   KeystrokeRecordResponse,
   SubmissionResponse,
   TestResultResponse,
 } from "@/types/submission";
+// import type {  SubmissionResponse, TestResultResponse } from "@/types/submission";
 import { useSubmission } from "@/hooks/submission/useSubmission";
+import { useExamLog } from "@/hooks/exam/useExamLog";
 import { formatDate, formatGradedDate } from "@/utils/datetime-utils";
+import { deriveExamViolationFlag } from "@/utils/exam-log-flag";
 
 export type SubmissionDetailProps = {
   submissionId: string;
@@ -150,9 +156,14 @@ export function SubmissionDetail({
   onBack,
 }: SubmissionDetailProps) {
   const { getSubmissionById } = useSubmission();
+  const { getExamLogsBySubmission } = useExamLog();
   const [submission, setSubmission] = useState<SubmissionResponse | null>(null);
+  const [examLogs, setExamLogs] = useState<ExamLogResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [logsLoading, setLogsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<"all" | "info" | "warning" | "critical">("all");
+  const [violationFilter, setViolationFilter] = useState<"all" | "only_violation" | "only_non_violation">("all");
 
   const fetchSubmission = useCallback(async () => {
     setLoading(true);
@@ -174,9 +185,55 @@ export function SubmissionDetail({
     fetchSubmission();
   }, [fetchSubmission]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLogsLoading(true);
+    void (async () => {
+      try {
+        const logs = await getExamLogsBySubmission(submissionId);
+        if (!cancelled) {
+          setExamLogs(logs);
+        }
+      } catch {
+        if (!cancelled) {
+          setExamLogs([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLogsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getExamLogsBySubmission, submissionId]);
+
   const results = submission?.testResults ?? [];
+
+  // LMKhoi
   const keystrokeLogs = submission?.keystroke_logs ?? submission?.keystrokeLogs ?? [];
   const keystrokeRecords = keystrokeLogs.flatMap((log) => log.keystroke_data ?? []);
+
+  // Tamtc
+  const filteredExamLogs = examLogs.filter((log) => {
+    const normalizedSeverity = String(log.severity).toLowerCase();
+    const passSeverity = severityFilter === "all" || normalizedSeverity === severityFilter;
+    const passViolation =
+      violationFilter === "all"
+      || (violationFilter === "only_violation" && log.isViolation)
+      || (violationFilter === "only_non_violation" && !log.isViolation);
+    return passSeverity && passViolation;
+  });
+  const violationFlag = deriveExamViolationFlag(examLogs);
+  const flagColor =
+    violationFlag === "CRITICAL"
+      ? "failure"
+      : violationFlag === "WARNING"
+        ? "warning"
+        : "success";
+  // ------------
 
   return (
     <div className=" border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -198,6 +255,9 @@ export function SubmissionDetail({
             </span>
           )}
         </h3>
+        <Badge color={flagColor} size="sm">
+          {violationFlag === "CLEAN" ? "Clean" : violationFlag === "WARNING" ? "Warning" : "Critical"}
+        </Badge>
       </div>
       <div className="p-4 [&_button[role=tab]]:cursor-pointer">
         {loading && (
@@ -309,6 +369,7 @@ export function SubmissionDetail({
                   <TestResultsTable results={results} />
                 )}
               </TabItem>
+              {/* LMKhoi */}
               <TabItem title={`Keystroke Log (${keystrokeRecords.length})`}>
                 {keystrokeRecords.length === 0 ? (
                   <p className="rounded-lg border border-gray-200 bg-gray-50 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
@@ -318,6 +379,107 @@ export function SubmissionDetail({
                   <KeystrokeLogsViewer records={keystrokeRecords} />
                 )}
               </TabItem>
+              {/* Tamtc */}
+              <TabItem title={`Violation logs (${examLogs.length})`}>
+                {logsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner size="lg" />
+                  </div>
+                ) : examLogs.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+                    No exam logs found for this submission.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="log-severity-filter" className="mb-1 block">
+                          Severity
+                        </Label>
+                        <Select
+                          id="log-severity-filter"
+                          value={severityFilter}
+                          onChange={(e) => setSeverityFilter(e.target.value as "all" | "info" | "warning" | "critical")}
+                        >
+                          <option value="all">All</option>
+                          <option value="info">Info</option>
+                          <option value="warning">Warning</option>
+                          <option value="critical">Critical</option>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="log-violation-filter" className="mb-1 block">
+                          Violation
+                        </Label>
+                        <Select
+                          id="log-violation-filter"
+                          value={violationFilter}
+                          onChange={(e) => setViolationFilter(e.target.value as "all" | "only_violation" | "only_non_violation")}
+                        >
+                          <option value="all">All</option>
+                          <option value="only_violation">Only violations</option>
+                          <option value="only_non_violation">Only non-violations</option>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {filteredExamLogs.length === 0 ? (
+                      <p className="rounded-lg border border-gray-200 bg-gray-50 py-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+                        No logs match current filters.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                    <Table hoverable>
+                      <TableHead>
+                        <TableRow>
+                          <TableHeadCell>Time</TableHeadCell>
+                          <TableHeadCell>Type</TableHeadCell>
+                          <TableHeadCell>Severity</TableHeadCell>
+                          <TableHeadCell>Violation</TableHeadCell>
+                          <TableHeadCell>Message</TableHeadCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[...filteredExamLogs]
+                          .sort((a, b) => new Date(a.clientTimestamp).getTime() - new Date(b.clientTimestamp).getTime())
+                          .map((log) => (
+                            <TableRow key={log.id}>
+                              <TableCell className="whitespace-nowrap">
+                                {formatDate(log.clientTimestamp)}
+                              </TableCell>
+                              <TableCell className="font-mono text-xs">{log.eventType}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  color={
+                                    String(log.severity).toLowerCase() === "critical"
+                                      ? "failure"
+                                      : String(log.severity).toLowerCase() === "warning"
+                                        ? "warning"
+                                        : "info"
+                                  }
+                                  size="sm"
+                                >
+                                  {String(log.severity).toUpperCase()}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge color={log.isViolation ? "failure" : "success"} size="sm">
+                                  {log.isViolation ? "Yes" : "No"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="max-w-[480px] whitespace-pre-wrap wrap-break-word">
+                                {log.message}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TabItem>
+              {/* // Tamtc */}
             </Tabs>
           </div>
         )}

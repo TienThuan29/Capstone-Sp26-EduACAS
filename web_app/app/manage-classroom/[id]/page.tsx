@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense, useMemo } from "react";
+import { useCallback, useEffect, useState, Suspense, useMemo, useRef } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Spinner,
@@ -59,6 +59,8 @@ function ClassroomContent() {
     getSubjects,
     updateClassroom,
     softDeleteClassroom,
+    regenerateEnrolKey,
+    recordClassroomAccess,
   } = useClassroom();
   const { getExaminationsByClassId } = useExamination();
   const { user } = useAuth();
@@ -71,12 +73,14 @@ function ClassroomContent() {
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshingClassroom, setRefreshingClassroom] = useState(false);
   const [examsLoading, setExamsLoading] = useState(false);
 
   // -- Update & Delete States --
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [regeneratingEnrolKey, setRegeneratingEnrolKey] = useState(false);
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [showEnrolKey, setShowEnrolKey] = useState(false);
   const [examDetailBack, setExamDetailBack] = useState<(() => void) | null>(
@@ -139,11 +143,38 @@ function ClassroomContent() {
     }
   };
 
+  const refreshClassroomData = async () => {
+    try {
+      setRefreshingClassroom(true);
+      const data = await getClassroomById(classId);
+      if (data) {
+        setClassroom(data);
+        setFormData((prev) => ({
+          ...prev,
+          enrolKey: data.enrolKey || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to refresh classroom data:", error);
+    } finally {
+      setRefreshingClassroom(false);
+    }
+  };
+
   useEffect(() => {
     if (classId) {
       fetchClassroomDetail();
     }
   }, [getClassroomById, classId]);
+
+  // useEffect(() => {
+  //   const uid = user?.id;
+  //   if (!uid || !classId || !classroom?.id) return;
+  //   if (user?.role?.toUpperCase() !== "LECTURER") return;
+  //   void recordClassroomAccess(uid, classId).catch(() => {
+  //     /* non-blocking */
+  //   });
+  // }, [user?.id, user?.role, classId, classroom?.id, recordClassroomAccess]);
 
   const fetchExaminations = useCallback(async () => {
     if (!classId) return;
@@ -182,6 +213,28 @@ function ClassroomContent() {
     if ((activeTab === "exams" || activeTab === "practise-ex") && classId) {
       fetchExaminations();
     }
+  }, [activeTab, classId, fetchExaminations]);
+
+  // Poll exam statuses every 30 seconds so background job transitions are reflected without manual refresh.
+  // Only active when on the exams tab.
+  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (activeTab === "exams" && classId) {
+      examsPollRef.current = setInterval(() => {
+        void fetchExaminations();
+      }, 30_000);
+    } else {
+      if (examsPollRef.current !== null) {
+        clearInterval(examsPollRef.current);
+        examsPollRef.current = null;
+      }
+    }
+    return () => {
+      if (examsPollRef.current !== null) {
+        clearInterval(examsPollRef.current);
+        examsPollRef.current = null;
+      }
+    };
   }, [activeTab, classId, fetchExaminations]);
 
   useEffect(() => {
@@ -247,6 +300,25 @@ function ClassroomContent() {
       showError("Delete failed");
     } finally {
       setActionLoading(false);
+    }
+  };
+
+  const handleRegenerateEnrolKey = async () => {
+    if (!classroom) return;
+    try {
+      setRegeneratingEnrolKey(true);
+      const result = await regenerateEnrolKey(classroom.id);
+      if (result.success) {
+        showSuccess("Enrol key regenerated successfully");
+        refreshClassroomData();
+      } else {
+        showError(result.message || "Failed to regenerate enrol key");
+      }
+    } catch (error) {
+      console.error("Regenerate enrol key failed", error);
+      showError("Failed to regenerate enrol key");
+    } finally {
+      setRegeneratingEnrolKey(false);
     }
   };
 
@@ -323,6 +395,8 @@ function ClassroomContent() {
             classroom={classroom}
             onOpenUpdateModal={() => setOpenUpdateModal(true)}
             onOpenDeleteModal={() => setOpenDeleteModal(true)}
+            onRegenerateEnrolKey={handleRegenerateEnrolKey}
+            isRegeneratingKey={regeneratingEnrolKey}
           />
         );
     }

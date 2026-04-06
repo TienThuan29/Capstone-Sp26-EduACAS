@@ -35,11 +35,13 @@ using AcasService.Repositories.ClassroomQuiz;
 using AcasService.Repositories.QuizAttempt;
 using AcasService.Repositories.StudentAnswer;
 using AcasService.Repositories.UserDevice;
+using AcasService.Application.BackgroundServices;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
 using Amazon.S3;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.IdentityModel.Tokens;
 // using Microsoft.OpenApi.Models;
 using Microsoft.OpenApi;
@@ -68,6 +70,12 @@ using AcasService.Application.Queries.KeystrokeLogs;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Repositories.Caching.Redis.KeystrokeLogs;
 using AcasService.Repositories.KeystrokeLogs;
+using AcasService.Application.Commands.ExamLog;
+using AcasService.Application.Commands.StudentExamSession;
+using AcasService.Application.Queries.ExamLog;
+using AcasService.Repositories.Caching.Redis.ExamLog;
+using AcasService.Repositories.ExamLog;
+using AcasService.Repositories.StudentExamSession;
 using AcasService.Dev;
 using AcasService.Application.Commands.Quiz;
 using AcasService.Application.Commands.Question;
@@ -83,6 +91,16 @@ using AcasService.Repositories.ErrorGroup;
 using AcasService.Application.Commands.ErrorGroup;
 using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
+using AcasService.Web.Controllers.Notification;
+using AcasService.Application.Commands.Formatters;
+using AcasService.Repositories.ExaminationTemplate;
+using AcasService.Application.Commands.ExaminationTemplate;
+using AcasService.Application.Queries.ExaminationTemplate;
+using AcasService.Application.Mappers;
+using AcasService.Application.Jobs;
+using Hangfire;
+using Hangfire.Dashboard;
+using Hangfire.Redis.StackExchange;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -124,6 +142,28 @@ builder.Services.AddHostedService<RedisHostedService>();
 builder.Services.AddSingleton<RabbitMqHostedService>();
 builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredService<RabbitMqHostedService>());
 
+// Hangfire configuration — uses the same Redis connection already configured above
+builder.Services.AddHangfire((sp, config) =>
+{
+    config.UseRedisStorage(
+        sp.GetRequiredService<IConnectionMultiplexer>(),
+        new RedisStorageOptions
+        {
+            Prefix = "hangfire:"
+        });
+
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings();
+});
+
+// Hangfire background server — processes scheduled jobs
+builder.Services.AddHangfireServer(options =>
+{
+    options.SchedulePollingInterval = TimeSpan.FromSeconds(1);
+    options.WorkerCount = Environment.ProcessorCount * 2;
+});
+
 // RabbitMQ Producer
 builder.Services.AddSingleton<UserRequestProducer>();
 
@@ -149,6 +189,8 @@ builder.Services.AddScoped<IDiscussionIssueRepository, DiscussionIssueRepository
 builder.Services.AddScoped<IDiscussionIssueQuery, DiscussionIssueQuery>();
 builder.Services.AddScoped<ISubmissionRepository, SubmissionRepository>();
 builder.Services.AddScoped<IKeystrokeLogRepository, KeystrokeLogRepository>();
+builder.Services.AddScoped<IExamLogRepository, ExamLogRepository>();
+builder.Services.AddScoped<IStudentExamSessionRepository, StudentExamSessionRepository>();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<IUserDeviceRepository, UserDeviceRepository>();
 builder.Services.AddScoped<IDynamoDbResetService, DynamoDbResetService>();
@@ -159,11 +201,13 @@ builder.Services.AddScoped<IClassroomQuizRepository, ClassroomQuizRepository>();
 builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
 builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
 builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
+builder.Services.AddScoped<IExaminationTemplateRepository, ExaminationTemplateRepository>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
 builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
 builder.Services.AddScoped<IQuizCache, QuizCache>();
+builder.Services.AddScoped<IExamLogCache, ExamLogCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -173,8 +217,11 @@ builder.Services.AddScoped<ISubjectCommand, SubjectCommand>();
 builder.Services.AddScoped<ISubjectQuery, SubjectQuery>();
 builder.Services.AddScoped<IClassroomCommand, ClassroomCommand>();  
 builder.Services.AddScoped<IClassroomQuery, ClassroomQuery>();
+builder.Services.AddScoped<IRecordClassroomAccessCommand, RecordClassroomAccessCommand>();
+builder.Services.AddScoped<IGetRecentClassroomsQuery, GetRecentClassroomsQuery>();
 builder.Services.AddScoped<IExaminationCommand, ExaminationCommand>();
 builder.Services.AddScoped<IExaminationQuery, ExaminationQuery>();
+builder.Services.AddScoped<IExaminationJobScheduling, ExaminationJobScheduling>();
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
@@ -197,6 +244,9 @@ builder.Services.AddScoped<IExecutionCommand, ExecutionCommand>();
 builder.Services.AddScoped<IDiscussionIssueCommand, DiscussionIssueCommand>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
+builder.Services.AddScoped<IExamLogCommand, ExamLogCommand>();
+builder.Services.AddScoped<IStudentExamSessionCommand, StudentExamSessionCommand>();
+builder.Services.AddScoped<IExamLogQuery, ExamLogQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<IQuizCommand, QuizCommand>();
 builder.Services.AddScoped<IQuizQuery, QuizQuery>();
@@ -217,11 +267,16 @@ builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
 builder.Services.AddScoped<IErrorGroupQuery, ErrorGroupQuery>();
 builder.Services.AddScoped<IJPlagCommand, JPlagCommand>();
+builder.Services.AddScoped<IExaminationTemplateCommand, ExaminationTemplateCommand>();
+builder.Services.AddScoped<IExaminationTemplateQuery, ExaminationTemplateQuery>();
 builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
 builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
+builder.Services.AddScoped<IClassroomQuizJobScheduling, ClassroomQuizJobScheduling>();
+builder.Services.AddScoped<ICodeFormatterCommand, CodeFormatterCommand>();
 
 // mapper
 builder.Services.AddScoped<ProblemMapper>();
+builder.Services.AddScoped<NotificationMapper>();
 builder.Services.AddScoped<SlotMapper>();
 builder.Services.AddScoped<SubjectMapper>();
 builder.Services.AddScoped<ClassroomMapper>();
@@ -233,6 +288,7 @@ builder.Services.AddScoped<DiscussionIssueMapper>();
 builder.Services.AddScoped<TestResultMapper>();
 builder.Services.AddScoped<KeystrokeLogsMapper>();
 builder.Services.AddScoped<SubmissionMapper>();
+builder.Services.AddScoped<ExamLogMapper>();
 builder.Services.AddScoped<ClassEnrollmentMapper>();
 builder.Services.AddScoped<QuizMapper>();
 builder.Services.AddScoped<QuestionMapper>();
@@ -240,10 +296,12 @@ builder.Services.AddScoped<ClassroomQuizMapper>();
 builder.Services.AddScoped<QuizAttemptMapper>();
 builder.Services.AddScoped<StudentAnswerMapper>();
 builder.Services.AddScoped<ErrorGroupMapper>();
+builder.Services.AddScoped<ExaminationTemplateMapper>();
 
 // code runner service 
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
+builder.Services.AddHttpClient<ICodeFormatterApi, CodeFormatterApi>();
 builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
 
 // Azure Form Recognizer configuration
@@ -282,6 +340,17 @@ builder.Services.AddAuthentication(options =>
     // Add event handlers for debugging
     options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
     {
+        OnMessageReceived = context =>
+        {
+            // SignalR sends token via query string when using WebSockets (no Authorization header)
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/hubs") || path.StartsWithSegments("/api/acas/v1/hubs") || path.StartsWithSegments("/api/v1/hubs")))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        },
         OnAuthenticationFailed = context =>
         {
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILogger<Program>>();
@@ -313,11 +382,16 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8080")
+        policy.WithOrigins("http://localhost:8080", "http://localhost:3000")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
+
+builder.Services.AddSingleton<IUserIdProvider, SubClaimUserIdProvider>();
+builder.Services.AddSignalR();
+builder.Services.AddScoped<ClassroomNotification>();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
@@ -412,6 +486,18 @@ builder.Services.AddRateLimiter(options =>
 
 var app = builder.Build();
 
+// ============================================================
+// Startup validation: Check Java version required by JPlag
+// ============================================================
+{
+    var logger = app.Services.GetRequiredService<ILogger<Program>>();
+    var javaCheck = ValidateJavaVersion(logger);
+    if (!javaCheck) throw new InvalidOperationException(
+        "FATAL: AcasService requires JDK 25 (Java 25) to run JPlag similarity check. " +
+        "Please install JDK 25 or higher and ensure 'java' is in your PATH. " +
+        "Current Java version is insufficient.");
+}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger(c =>
@@ -463,6 +549,78 @@ if (app.Environment.IsProduction())
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+
+// Hangfire Dashboard — accessible at /hangfire (localhost only in dev)
+app.MapHangfireDashboard("/hangfire", new DashboardOptions
+{
+    Authorization = new[] { new HangfireDashboardAuthorizationFilter() }
+});
+
+// Map at /api/v1/hubs/notification so gateway forwards /api/acas/v1/hubs/* -> /api/v1/hubs/*
+app.MapHub<NotificationHub>("/api/v1/hubs/notification");
 app.MapHealthChecks("/health");
 
+// Startup validation helpers
+static bool ValidateJavaVersion(ILogger logger)
+{
+    try
+    {
+        var psi = new System.Diagnostics.ProcessStartInfo
+        {
+            FileName = "java",
+            Arguments = "-version",
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
+        };
+        using var process = System.Diagnostics.Process.Start(psi);
+        if (process == null)
+        {
+            logger.LogCritical("JAVA CHECK: Cannot start 'java' process. Is Java installed?");
+            return false;
+        }
+        string stderr = process.StandardError.ReadToEnd();
+        string stdout = process.StandardOutput.ReadToEnd();
+        process.WaitForExit();
+        string versionOutput = !string.IsNullOrWhiteSpace(stderr) ? stderr : stdout;
+
+        int major = 0;
+        var match = System.Text.RegularExpressions.Regex.Match(
+            versionOutput, @"version\s+""?(\d+)\.");
+        if (match.Success) major = int.Parse(match.Groups[1].Value);
+
+        logger.LogInformation("JAVA CHECK: Detected Java version (major={Major}) for JPlag compatibility", major);
+
+        if (major < 25)
+        {
+            logger.LogCritical(
+                "JAVA CHECK FAILED: JPlag JAR requires JDK 25 (class file version 69.0) but current Java version reports major={Major}. " +
+                "UnsupportedClassVersionError will occur when running similarity checks. Please install JDK 25.",
+                major);
+            return false;
+        }
+
+        return true;
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "JAVA CHECK FAILED: Could not execute 'java -version'. Is Java installed and in PATH?");
+        return false;
+    }
+}
+
 app.Run();
+
+/// <summary>
+/// Protects the /hangfire dashboard from unauthorized access.</summary>
+public class HangfireDashboardAuthorizationFilter : IDashboardAuthorizationFilter
+{
+    public bool Authorize(DashboardContext context)
+    {
+        var httpContext = context.GetHttpContext();
+
+        return httpContext.Request.Host.Host.Contains("localhost", StringComparison.OrdinalIgnoreCase)
+               || httpContext.Request.Host.Host.Contains("127.0.0.1");
+    }
+}

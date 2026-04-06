@@ -130,7 +130,7 @@ interface EditorContextType {
 
   // Actions
   runCode: () => Promise<void>;
-  submitCode: () => Promise<void>;
+  submitCode: () => Promise<SubmissionResponse | null>;
   isRunning: boolean;
   isSubmitting: boolean;
 
@@ -438,11 +438,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setIsRunning(false);
   }, []);
 
-  const submitCode = useCallback(async () => {
+  const submitCode = useCallback(async (): Promise<SubmissionResponse | null> => {
     const studentId = user?.id;
     if (!examId || !problem?.id || !studentId || !selectedCompiler) {
       console.warn('submitCode: missing examId, problemId, studentId, or selectedCompiler');
-      return;
+      return null;
     }
     setIsSubmitting(true);
     try {
@@ -456,11 +456,17 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       };
       const result = await saveSubmission(payload);
       if (result != null) {
-        await flushKeystrokes(result.id);
+        try {
+          await flushKeystrokes(result.id);
+        } catch (err) {
+          console.error('submitCode: post-submit side-effects failed:', err);
+        }
         incrementSubmissionsRefresh();
       }
+      return result;
     } catch (err) {
       console.error('submitCode failed:', err);
+      return null;
     } finally {
       setIsSubmitting(false);
     }

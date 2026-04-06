@@ -21,7 +21,7 @@ public class ErrorGroupCommand : IErrorGroupCommand
     private readonly ILogger<ErrorGroupCommand> _logger;
 
     public ErrorGroupCommand(
-        ISubmissionRepository submissionRepository, 
+        ISubmissionRepository submissionRepository,
         IErrorGroupRepository errorGroupRepository,
         IJPlagCommand jplagCommand,
         ILogger<ErrorGroupCommand> logger)
@@ -32,14 +32,14 @@ public class ErrorGroupCommand : IErrorGroupCommand
         _logger = logger;
     }
 
-    public Task<Models.ErrorGroup?> GetByIdAsync(string id) =>
-        _errorGroupRepository.GetByIdAsync(id);
+    public Task<Models.ErrorGroup?> GetByIdAsync(string id) => _errorGroupRepository.GetByIdAsync(id);
 
     public async Task<List<Models.ErrorGroup>> GetByProblemIdAsync(string examId, string problemId)
     {
         return await _errorGroupRepository.GetByProblemIdAsync(examId, problemId);
     }
- public async Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId)
+
+    public async Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId)
     {
         try
         {
@@ -89,7 +89,7 @@ public class ErrorGroupCommand : IErrorGroupCommand
     {
         var groups = await _errorGroupRepository.GetByProblemIdPaginatedAsync(examId, problemId);
         if (groups == null || groups.Count == 0) return;
-        
+
         await ProcessCheckSimilarityForGroups(groups);
     }
 

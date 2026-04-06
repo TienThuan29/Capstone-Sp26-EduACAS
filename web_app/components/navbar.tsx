@@ -20,6 +20,7 @@ import { usePathname } from "next/navigation"
 import { useAuth } from "@/contexts/AuthContext"
 import { useToast } from "@/hooks/useToast"
 import { PageUrl } from "@/configs/page.url"
+import { LOGO_EDU_ACAS_SINGLE } from "@/assets/images"
 import {
   Squares2X2Icon,
   UserCircleIcon,
@@ -28,7 +29,9 @@ import {
   AcademicCapIcon,
   ClipboardDocumentListIcon,
   BanknotesIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline"
+import { NotificationSection } from "@/components/notification-section"
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation"
 
 export default function HomeNavbar() {
@@ -47,6 +50,9 @@ export default function HomeNavbar() {
     { href: PageUrl.ABOUT_US_PAGE, label: "About Us" },
     { href: PageUrl.FEATURES_PAGE, label: "Features" },
     { href: PageUrl.CONTACT_PAGE, label: "Contact" },
+    ...(isLoggedIn()
+      ? [{ href: PageUrl.DEFAULT_PAGE, label: "Dashboard" }]
+      : []),
   ]
 
   const studentNavLinks = [
@@ -63,7 +69,7 @@ export default function HomeNavbar() {
             <div className="flex items-center space-x-3">
               <div className="flex items-center justify-center rounded-full p-1">
                 <Image
-                  src="/logo-single.png"
+                  src={LOGO_EDU_ACAS_SINGLE}
                   alt="Edu-ACAS Logo"
                   width={28}
                   height={24}
@@ -102,16 +108,18 @@ export default function HomeNavbar() {
             <DarkThemeToggle className="hidden lg:flex" />
             <NavbarToggle className="lg:hidden" />
             {isLoggedIn() && user ? (
-              <Dropdown
-                inline
-                placement="bottom-end"
-                theme={{
-                  floating: {
-                    base: "z-[100] w-fit divide-y divide-gray-100 rounded-lg shadow focus:outline-none border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700",
-                  },
-                }}
-                label={
-                  <div className="flex items-center gap-2 cursor-pointer">
+              <>
+                <NotificationSection />
+                <Dropdown
+                  inline
+                  placement="bottom-end"
+                  theme={{
+                    floating: {
+                      base: "z-[100] w-fit divide-y divide-gray-100 rounded-lg shadow focus:outline-none border border-gray-200 bg-white dark:border-gray-600 dark:bg-gray-700",
+                    },
+                  }}
+                  label={
+                    <div className="flex items-center gap-2 cursor-pointer">
                     {user.avatarUrl ? (
                       <Avatar
                         rounded
@@ -167,10 +175,22 @@ export default function HomeNavbar() {
                 {
                   isLecturer && (
                     <>
+                      <DropdownItem as={Link} href={PageUrl.DEFAULT_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <Squares2X2Icon className="h-4 w-4" />
+                          Dashboard
+                        </span>
+                      </DropdownItem>
                       <DropdownItem as={Link} href={PageUrl.MANAGE_CLASSROOM_PAGE}>
                         <span className="flex items-center gap-2">
                           <Squares2X2Icon className="h-4 w-4" />
-                          My classes
+                          My classrooms
+                        </span>
+                      </DropdownItem>
+                      <DropdownItem as={Link} href={PageUrl.QUESTION_BANKS_PAGE}>
+                        <span className="flex items-center gap-2">
+                          <DocumentTextIcon className="h-4 w-4" />
+                          Examination Banks
                         </span>
                       </DropdownItem>
                       <DropdownItem as={Link} href={PageUrl.QUESTION_BANKS_PAGE}>
@@ -196,10 +216,10 @@ export default function HomeNavbar() {
                 }
                 {
                   isAdmin && (
-                    <DropdownItem as={Link} href={PageUrl.ADMIN_PAGE}>
+                    <DropdownItem as={Link} href={PageUrl.DEFAULT_PAGE}>
                       <span className="flex items-center gap-2">
                         <Squares2X2Icon className="h-4 w-4" />
-                        Admin Dashboard
+                        Dashboard
                       </span>
                     </DropdownItem>
                   )
@@ -221,6 +241,7 @@ export default function HomeNavbar() {
                   </span>
                 </DropdownItem>
               </Dropdown>
+              </>
             ) : (
               <>
                 <Button

@@ -2,6 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
+import { LOGO_EDU_ACAS } from "@/assets/images";
 
 export default function AuthWallpaper() {
   return (
@@ -29,7 +30,7 @@ export default function AuthWallpaper() {
         <div className="mb-8">
           <div className="inline-block p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 mb-6">
             <Image 
-              src="/images/Edu-ACAS logo.png" 
+              src={LOGO_EDU_ACAS} 
               alt="Edu-ACAS Logo" 
               width={240}
               height={96}

@@ -87,6 +87,28 @@ class ApiConfig {
   static String problemByIdEndpoint(String id) =>
       '/api/acas/v1/problems/$id';
 
+    // Subject endpoints
+    static String get subjectsEndpoint => '/api/acas/v1/subjects';
+
+    // Question endpoints
+    static String get questionsEndpoint => '/api/acas/v1/questions';
+    static String get questionsPagedEndpoint => '/api/acas/v1/questions/paged';
+    static String questionByIdEndpoint(String id) => '/api/acas/v1/questions/$id';
+    static String softDeleteQuestionEndpoint(String id) =>
+      '/api/acas/v1/questions/$id/soft-delete';
+    static String restoreQuestionEndpoint(String id) =>
+      '/api/acas/v1/questions/$id/restore';
+
+    // Quiz endpoints
+    static String get quizzesEndpoint => '/api/acas/v1/quizzes';
+    static String get quizzesPagedEndpoint => '/api/acas/v1/quizzes/paged';
+    static String quizByIdEndpoint(String id) => '/api/acas/v1/quizzes/$id';
+    static String assignQuizQuestionsEndpoint(String id) =>
+      '/api/acas/v1/quizzes/$id/questions';
+    static String softDeleteQuizEndpoint(String id) =>
+      '/api/acas/v1/quizzes/$id/soft-delete';
+    static String restoreQuizEndpoint(String id) => '/api/acas/v1/quizzes/$id/restore';
+
   static Duration get requestTimeout {
     try {
       final timeoutSeconds =

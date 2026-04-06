@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useMemo, useRef, useState, Suspense, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   Spinner,
@@ -12,34 +12,75 @@ import { ArrowLeftIcon, ClockIcon, CheckIcon } from "@heroicons/react/24/outline
 import Sidebar from "@/components/sidebar";
 import { useExamination } from "@/hooks/exam/useExamination";
 import { useProblem } from "@/hooks/problem/useProblem";
-import type { Examination, Problem } from "@/types/examination";
+import type { Examination, Problem, ExaminationMode } from "@/types/examination";
 import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import { CustomPagination } from "@/components/custom-pagination";
 import { normalizeDifficulty } from "@/types/problem";
 import { formatDate, formatDurationMs } from "@/utils/datetime-utils";
 import { toExamProblem } from "@/utils/exam-problem";
+import { useAuth } from "@/contexts/AuthContext";
+import { buildExamSessionStorageKeys } from "@/utils/test-tracker/examSessionKeys";
+import {
+  clearExamSessionClientStorage,
+  dispatchExamActiveProblemChanged,
+  EXAM_RESUME_FULLSCREEN_EXAM_ID_KEY,
+  mapServerPhaseToLocal,
+  mirrorExamSessionPhaseToLocalStorage,
+} from "@/utils/student-exam-session";
+import { ExamSessionGuard } from "@/components/test-tracker/exam-session-guard";
+import { useStudentExamSession } from "@/hooks/exam/useStudentExamSession";
+import type { StudentExamSessionDto } from "@/types/student-exam-session";
+import { ConfirmModal } from "@/app/code-editor/components/confirm-modal";
+import { useSubmissionStudent } from "@/hooks/submission/useSubmissionStudent";
+import { useExamLog } from "@/hooks/exam/useExamLog";
+import { buildExamTrackerStorageKeys } from "@/utils/test-tracker/storageKeys";
 
 const PROBLEMS_PER_PAGE = 5;
 
-const MODE_LABELS: Record<number, string> = {
-  0: "PRACTICAL",
-  1: "EXAMINATION",
+const MODE_LABELS: Record<ExaminationMode, string> = {
+  PRACTICAL: "PRACTICAL",
+  EXAMINATION: "EXAMINATION",
 };
 
 function ExamDetailContent() {
   const params = useParams();
   const router = useRouter();
+  const { user } = useAuth();
   const { getExaminationById } = useExamination();
   const { getProblemsByIds } = useProblem();
+  const { getLatestSubmissionsByExam } = useSubmissionStudent();
+  const { flushCachedExamLogs } = useExamLog();
+  const { getByExam, start, complete, setActiveProblem } = useStudentExamSession();
 
   const classId = params.id as string;
   const examId = params.examId as string;
+  const studentId = user?.id ?? "";
+  const sessionKeys = useMemo(
+    () => (examId && studentId ? buildExamSessionStorageKeys(examId, studentId) : null),
+    [examId, studentId],
+  );
 
   const [examination, setExamination] = useState<Examination | null>(null);
   const [problems, setProblems] = useState<(Problem & { mark: number })[]>([]);
   const [loading, setLoading] = useState(true);
   const [problemsLoading, setProblemsLoading] = useState(false);
   const [problemsPage, setProblemsPage] = useState(1);
+  const [showStartModal, setShowStartModal] = useState(false);
+  const [pendingSolveProblemId, setPendingSolveProblemId] = useState<string | null>(null);
+  const [showFinishModal, setShowFinishModal] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
+  const autoFinishTriggeredRef = useRef(false);
+  const [serverSession, setServerSession] = useState<StudentExamSessionDto | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(false);
+  const [showFullscreenResumeModal, setShowFullscreenResumeModal] = useState(false);
+
+  const sessionPhase = mapServerPhaseToLocal(serverSession?.phase);
+  const isSessionActive = sessionPhase === "active";
+  const isSessionLocked = sessionPhase === "locked";
+  const isSessionCompleted = sessionPhase === "completed";
+  const isSessionEnded = isSessionLocked || isSessionCompleted;
+  const shouldHideNavigationUi = isSessionActive;
+  const shouldHideSidebar = isSessionActive;
 
   const problemsTotalPages = Math.max(1, Math.ceil(problems.length / PROBLEMS_PER_PAGE));
   const currentProblemsPage = Math.min(Math.max(1, problemsPage), problemsTotalPages);
@@ -67,6 +108,44 @@ function ExamDetailContent() {
       fetchExamination();
     }
   }, [examId, getExaminationById]);
+
+  useEffect(() => {
+    setShowFullscreenResumeModal(false);
+  }, [examId]);
+
+  useEffect(() => {
+    if (!examId || !studentId) return;
+    if (examination === null) return;
+    if (examination.mode !== "EXAMINATION") {
+      setServerSession(null);
+      setSessionLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setSessionLoading(true);
+    void (async () => {
+      try {
+        const s = await getByExam(examId);
+        if (cancelled) return;
+        setServerSession(s);
+        if (sessionKeys) {
+          if (s?.phase === "ACTIVE") {
+            mirrorExamSessionPhaseToLocalStorage(sessionKeys, "ACTIVE", classId);
+          } else if (!s || s.phase === "NOTSTARTED") {
+            mirrorExamSessionPhaseToLocalStorage(sessionKeys, null, classId);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load exam session:", error);
+        if (!cancelled) setServerSession(null);
+      } finally {
+        if (!cancelled) setSessionLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [classId, examId, studentId, examination?.id, examination?.mode, getByExam, sessionKeys]);
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -111,10 +190,69 @@ function ExamDetailContent() {
     fetchProblems();
   }, [examination?.id, examination?.examProblems, examination?.programmingLanguage?.id, getProblemsByIds]);
 
-  if (loading) {
+  const finalizeSession = useCallback(async (targetPhase: "locked" | "completed") => {
+    if (!sessionKeys || isFinishing) return;
+    setIsFinishing(true);
+    try {
+      if (targetPhase === "completed") {
+        const updated = await complete(examId);
+        setServerSession(updated ?? null);
+      }
+      const latest = await getLatestSubmissionsByExam(examId);
+      const byProblem = new Map(latest.map((p) => [p.problemId, p.submissions]));
+      for (const [pid, subs] of byProblem.entries()) {
+        const mine = subs.find((s) => s.studentId === studentId);
+        if (!mine?.id) continue;
+        const trackerKeys = buildExamTrackerStorageKeys(examId, pid, studentId);
+        await flushCachedExamLogs({ sessionKey: trackerKeys.sessionKey, submissionId: mine.id });
+      }
+      clearExamSessionClientStorage(examId, studentId);
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      }
+      if (targetPhase === "locked") {
+        const refreshed = await getByExam(examId);
+        setServerSession(refreshed);
+      }
+    } finally {
+      setIsFinishing(false);
+      setShowFinishModal(false);
+    }
+  }, [
+    complete,
+    examId,
+    flushCachedExamLogs,
+    getByExam,
+    getLatestSubmissionsByExam,
+    isFinishing,
+    sessionKeys,
+    studentId,
+  ]);
+
+  useEffect(() => {
+    if (!isSessionLocked || autoFinishTriggeredRef.current) return;
+    autoFinishTriggeredRef.current = true;
+    void finalizeSession("locked");
+  }, [finalizeSession, isSessionLocked]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!examination || examination.mode !== "EXAMINATION" || !isSessionActive) return;
+    try {
+      const pending = sessionStorage.getItem(EXAM_RESUME_FULLSCREEN_EXAM_ID_KEY);
+      if (pending !== examId) return;
+      sessionStorage.removeItem(EXAM_RESUME_FULLSCREEN_EXAM_ID_KEY);
+      if (document.fullscreenElement) return;
+      setShowFullscreenResumeModal(true);
+    } catch {
+      /* ignore */
+    }
+  }, [examId, examination?.id, examination?.mode, isSessionActive]);
+
+  if (loading || (examination?.mode === "EXAMINATION" && sessionLoading)) {
     return (
       <div className="flex min-h-screen">
-        <Sidebar />
+        {!shouldHideSidebar && <Sidebar />}
         <div className="ml-20 flex flex-grow items-center justify-center bg-gray-50 lg:ml-64 dark:bg-gray-900">
           <Spinner size="xl" color="info" />
         </div>
@@ -125,7 +263,7 @@ function ExamDetailContent() {
   if (!examination) {
     return (
       <div className="flex min-h-screen">
-        <Sidebar />
+        {!shouldHideSidebar && <Sidebar />}
         <div className="container mx-auto ml-20 flex flex-grow flex-col items-center justify-center bg-gray-50 px-4 pt-24 pb-8 lg:ml-64 dark:bg-gray-900">
           <h2 className="mb-4 text-2xl font-bold text-gray-700 dark:text-gray-300">
             Examination not found
@@ -143,7 +281,7 @@ function ExamDetailContent() {
   const endDate = new Date(examination.endDatetime);
   const durationMs = endDate.getTime() - startDate.getTime();
   const durationStr = formatDurationMs(durationMs);
-  const modeLabel = MODE_LABELS[examination.mode as 0 | 1] ?? "PRACTICAL";
+  const modeLabel = MODE_LABELS[examination.mode] ?? "PRACTICAL";
 
   const isUpcoming = startDate > new Date();
   const isExpired = endDate < new Date();
@@ -151,10 +289,11 @@ function ExamDetailContent() {
 
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
-      <Sidebar />
+      {!shouldHideSidebar && <Sidebar />}
 
       <div className="ml-20 flex-grow p-4 lg:ml-64 lg:p-8">
         {/* Back button */}
+        {!shouldHideNavigationUi && (
         <div className="mb-6">
           <DefaultOutlineCustomButton
             label="Back to Exams"
@@ -163,6 +302,7 @@ function ExamDetailContent() {
             className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
           />
         </div>
+        )}
         {/* Exam Header */}
         <div className=" bg-white p-6 dark:bg-gray-800">
           <div className="flex flex-wrap items-start justify-between gap-4">
@@ -204,6 +344,22 @@ function ExamDetailContent() {
               <div className="text-sm text-gray-500">Total marks</div>
             </div>
           </div>
+
+          {examination.mode === "EXAMINATION" && (
+            <div className="mt-4 flex items-center justify-end gap-3">
+              {isSessionActive ? (
+                <Button color="red" className="cursor-pointer" onClick={() => setShowFinishModal(true)}>
+                  Finish exam
+                </Button>
+              ) : isSessionLocked ? (
+                <Badge color="failure">Exam locked</Badge>
+              ) : isSessionCompleted ? (
+                <Badge color="success">Completed</Badge>
+              ) : (
+                <Badge color="warning">Exam not started</Badge>
+              )}
+            </div>
+          )}
 
           {examination.description && (
             <p className="mt-4 text-gray-600 dark:text-gray-400">
@@ -301,7 +457,19 @@ function ExamDetailContent() {
                       <div className="flex items-center gap-4">
                         <Button
                           className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                          disabled={examination.mode === "EXAMINATION" && isSessionEnded}
                           onClick={() => {
+                            if (examination.mode === "EXAMINATION" && isSessionEnded) return;
+                            if (examination.mode === "EXAMINATION" && !isSessionActive) {
+                              setPendingSolveProblemId(problem.id);
+                              setShowStartModal(true);
+                              return;
+                            }
+                            if (sessionKeys) {
+                              localStorage.setItem(sessionKeys.activeProblemIdStorageKey, problem.id);
+                              dispatchExamActiveProblemChanged();
+                            }
+                            void setActiveProblem(examId, problem.id);
                             router.push(`/code-editor/${problem.id}?examId=${examId}`);
                           }}
                         >
@@ -313,15 +481,93 @@ function ExamDetailContent() {
                   );
                 })}
               </div>
-              <CustomPagination
-                currentPage={currentProblemsPage}
-                totalPages={problemsTotalPages}
-                onPageChange={setProblemsPage}
-              />
+              {!shouldHideNavigationUi && (
+                <CustomPagination
+                  currentPage={currentProblemsPage}
+                  totalPages={problemsTotalPages}
+                  onPageChange={setProblemsPage}
+                />
+              )}
             </>
           )}
         </div>
       </div>
+
+      {examination.mode === "EXAMINATION" && (
+        <ExamSessionGuard
+          examId={examId}
+          classroomId={classId}
+          showOverlay={true}
+          serverPhase={serverSession?.phase ?? null}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={showStartModal}
+        onClose={() => {
+          setShowStartModal(false);
+          setPendingSolveProblemId(null);
+        }}
+        onConfirm={async () => {
+          setShowStartModal(false);
+          const pid = pendingSolveProblemId;
+          setPendingSolveProblemId(null);
+          if (!pid || !sessionKeys) return;
+
+          try {
+            const started = await start(examId);
+            if (!started) return;
+            mirrorExamSessionPhaseToLocalStorage(sessionKeys, started.phase, classId);
+            setServerSession(started);
+            void setActiveProblem(examId, pid);
+            try {
+              await document.documentElement.requestFullscreen();
+            } catch {
+              // ignore; fullscreen requires user gesture in some browsers
+            }
+            window.dispatchEvent(new CustomEvent("exam:reset-clipboard"));
+            localStorage.setItem(sessionKeys.activeProblemIdStorageKey, pid);
+            dispatchExamActiveProblemChanged();
+            router.push(`/code-editor/${pid}?examId=${examId}`);
+          } catch (error) {
+            console.error("Failed to start exam session:", error);
+          }
+        }}
+        title="Confirm start"
+        message="You are about to start the exam. The app will enter fullscreen and enable violation monitoring."
+        confirmText="Start"
+        cancelText="Cancel"
+        confirmVariant="green"
+      />
+
+      <ConfirmModal
+        isOpen={showFullscreenResumeModal}
+        onClose={() => setShowFullscreenResumeModal(false)}
+        onConfirm={() => {
+          void document.documentElement
+            .requestFullscreen()
+            .then(() => setShowFullscreenResumeModal(false))
+            .catch(() => {});
+        }}
+        title="Enter fullscreen"
+        message="To continue your exam in protected mode, please enter fullscreen."
+        confirmText="Enter fullscreen"
+        cancelText="Not now"
+        confirmVariant="green"
+      />
+
+      <ConfirmModal
+        isOpen={showFinishModal}
+        onClose={() => !isFinishing && setShowFinishModal(false)}
+        onConfirm={async () => {
+          await finalizeSession("completed");
+        }}
+        title="Confirm finish"
+        message="After you finish, you cannot continue the exam and violation logs will be saved."
+        confirmText={isFinishing ? "Finishing..." : "Finish"}
+        cancelText="Cancel"
+        confirmVariant="red"
+      />
     </div>
   );
 }
