@@ -3,14 +3,15 @@
 import { useCallback } from "react";
 import useAxios from "@/hooks/useAxios";
 import { Api } from "@/configs/api";
+import type { ExaminationStatus, ExaminationMode } from "@/types/examination";
 
 export interface ExaminationBasicResponse {
   id: string;
   examName: string;
   startDatetime: string;
   endDatetime: string;
-  status: string;
-  mode: string;
+  status: ExaminationStatus;
+  mode: ExaminationMode;
 }
 
 export interface SlotResponse {

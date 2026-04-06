@@ -2,12 +2,12 @@
 
 import { useRouter } from "next/navigation";
 import { Button, Card, Spinner, Badge } from "flowbite-react";
-import type { Examination } from "@/types/examination";
+import type { Examination, ExaminationMode } from "@/types/examination";
 import { formatDate } from "@/utils/datetime-utils";
 
-const MODE_LABELS: Record<number, string> = {
-  0: "PRACTICAL",
-  1: "EXAMINATION",
+const MODE_LABELS: Record<ExaminationMode, string> = {
+  PRACTICAL: "PRACTICAL",
+  EXAMINATION: "EXAMINATION",
 };
 
 type ExamsTabProps = {
@@ -51,7 +51,7 @@ export function ExamsTab({
             const isUpcoming = startDate > new Date();
             const isExpired = endDate < new Date();
             const isActive = !isUpcoming && !isExpired;
-            const modeLabel = MODE_LABELS[exam.mode as 0 | 1] ?? "PRACTICAL";
+            const modeLabel = MODE_LABELS[exam.mode] ?? "PRACTICAL";
             const problemCount = exam.examProblems?.length ?? 0;
 
             return (

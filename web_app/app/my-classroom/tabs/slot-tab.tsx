@@ -16,17 +16,18 @@ import {
 } from "flowbite-react";
 import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useSlot, SlotResponse } from "@/hooks/classroom/useSlot";
+import type { ExaminationStatus, ExaminationMode } from "@/types/examination";
 import { formatDate } from "@/utils/datetime-utils";
 
-const STATUS_LABELS: Record<number, string> = {
-  0: "PENDING",
-  1: "ONGOING",
-  2: "COMPLETED",
+const STATUS_LABELS: Record<ExaminationStatus, string> = {
+  PENDING: "PENDING",
+  ONGOING: "ONGOING",
+  COMPLETED: "COMPLETED",
 };
 
-const MODE_LABELS: Record<number, string> = {
-  0: "PRACTICAL",
-  1: "EXAMINATION",
+const MODE_LABELS: Record<ExaminationMode, string> = {
+  PRACTICAL: "PRACTICAL",
+  EXAMINATION: "EXAMINATION",
 };
 
 export function SlotTab() {
@@ -150,12 +151,8 @@ export function SlotTab() {
                           {hasExams ? (
                             <ul className="space-y-2 text-sm">
                               {slot.examinations?.map((exam) => {
-                                const statusKey = Number(exam.status) as 0 | 1 | 2;
-                                const modeKey = Number(exam.mode) as 0 | 1;
-                                const statusLabel =
-                                  STATUS_LABELS[statusKey] ?? "PENDING";
-                                const modeLabel =
-                                  MODE_LABELS[modeKey] ?? "PRACTICAL";
+                                const statusLabel = STATUS_LABELS[exam.status] ?? "PENDING";
+                                const modeLabel = MODE_LABELS[exam.mode] ?? "PRACTICAL";
                                 return (
                                   <li
                                     key={exam.id}

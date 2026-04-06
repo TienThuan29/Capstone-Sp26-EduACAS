@@ -35,6 +35,8 @@ public class ClassroomQuiz
     public DateTime CreatedAt { get; set; }
 
     public DateTime UpdatedAt { get; set; }
+    
+    public string? CloseJobId { get; set; }
 }
 
 public enum ClassroomQuizStatus

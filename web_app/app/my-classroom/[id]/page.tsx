@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Spinner, Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -110,6 +110,34 @@ function ClassroomContent() {
 
     fetchExaminations();
   }, [getExaminationsByClassId, activeTab, classId]);
+
+  // Poll exam statuses every 30 seconds so background job transitions are reflected for students.
+  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  useEffect(() => {
+    if (activeTab === "exams" && classId) {
+      examsPollRef.current = setInterval(() => {
+        void (async () => {
+          try {
+            const data = await getExaminationsByClassId(classId);
+            setExaminations(data);
+          } catch {
+            // non-blocking — stale data is better than a broken UI
+          }
+        })();
+      }, 30_000);
+    } else {
+      if (examsPollRef.current !== null) {
+        clearInterval(examsPollRef.current);
+        examsPollRef.current = null;
+      }
+    }
+    return () => {
+      if (examsPollRef.current !== null) {
+        clearInterval(examsPollRef.current);
+        examsPollRef.current = null;
+      }
+    };
+  }, [activeTab, classId, getExaminationsByClassId]);
 
   if (loading) {
     return (

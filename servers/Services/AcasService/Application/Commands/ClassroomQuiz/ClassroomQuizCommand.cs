@@ -5,6 +5,7 @@ using AcasService.Repositories.ClassroomQuiz;
 using AcasService.Repositories.QuizAttempt;
 using AcasService.Repositories.Quiz;
 using AcasService.Web.Requests;
+using AcasService.Application.Jobs;
 
 namespace AcasService.Application.Commands.ClassroomQuiz
 {
@@ -22,6 +23,7 @@ namespace AcasService.Application.Commands.ClassroomQuiz
         private readonly IQuizAttemptRepository _quizAttemptRepository;
         private readonly IQuizRepository _quizRepository;
         private readonly ClassroomQuizMapper _mapper;
+        private readonly IClassroomQuizJobScheduling _jobScheduling;
         private readonly ILogger<ClassroomQuizCommand> _logger;
 
         public ClassroomQuizCommand(
@@ -29,12 +31,14 @@ namespace AcasService.Application.Commands.ClassroomQuiz
             IQuizAttemptRepository quizAttemptRepository,
             IQuizRepository quizRepository,
             ClassroomQuizMapper mapper,
+            IClassroomQuizJobScheduling jobScheduling,
             ILogger<ClassroomQuizCommand> logger)
         {
             _repository = repository;
             _quizAttemptRepository = quizAttemptRepository;
             _quizRepository = quizRepository;
             _mapper = mapper;
+            _jobScheduling = jobScheduling;
             _logger = logger;
         }
 
@@ -173,6 +177,19 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 existing.Status = request.Status.Value;
             }
 
+            if (existing.Status == ClassroomQuizStatus.PUBLISHED)
+            {
+                if (isDraft || (request.EndTime.HasValue && request.EndTime.Value != existing.EndTime))
+                {
+                    existing.CloseJobId = await _jobScheduling.RescheduleCloseJobAsync(existing.CloseJobId, id, existing.EndTime);
+                }
+            }
+            else if (existing.Status == ClassroomQuizStatus.CLOSED && isPublished)
+            {
+                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId ?? "");
+                existing.CloseJobId = null;
+            }
+
             existing.UpdatedAt = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(existing);
             if (updated == null)
@@ -199,6 +216,11 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 throw new InvalidOperationException("Cannot delete an ongoing quiz. Please close it first.");
             }
 
+            if (!string.IsNullOrEmpty(existing.CloseJobId))
+            {
+                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId);
+            }
+
             await _repository.SoftDeleteAsync(id);
         }
 
@@ -216,6 +238,11 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 existing.EndTime > now)
             {
                 throw new InvalidOperationException("Cannot delete an ongoing quiz.");
+            }
+
+            if (!string.IsNullOrEmpty(existing.CloseJobId))
+            {
+                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId);
             }
 
             await _repository.DeleteAsync(id);
