@@ -125,6 +125,12 @@ export const Api = {
     DELETE: (id: string) => `/api/acas/v1/quizzes/${id}`,
   },
 
+  QuizAttempt: {
+    GET_BY_ID: (id: string) => `/api/acas/v1/quiz-attempts/${id}`,
+    GET_BY_STUDENT: (studentId: string) =>
+      `/api/acas/v1/quiz-attempts/student/${studentId}`,
+  },
+
   ClassroomQuiz: {
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/classroom-quizzes/classroom/${classroomId}`,
     GET_BY_ID: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,

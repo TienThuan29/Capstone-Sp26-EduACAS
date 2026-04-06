@@ -370,7 +370,7 @@ function ClassroomContent() {
       case "students":
         return <StudentTab classId={classId} />;
       case "dashboard":
-        return <DashboardTab />;
+        return <DashboardTab classId={classId} />;
       case "slots":
         return <SlotsTab maxSlot={classroom.maxSlot} />;
       case "quizzes":
