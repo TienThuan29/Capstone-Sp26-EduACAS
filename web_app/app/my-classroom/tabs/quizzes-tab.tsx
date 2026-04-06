@@ -38,10 +38,12 @@ import { SharedQuizOverview } from "@/components/quiz/shared-quiz-overview";
 
 function QuizAttemptHistoryCard({
     attempts,
-    quizDetail
+    quizDetail,
+    onViewAttempt
 }: {
     attempts: QuizAttemptResponse[];
     quizDetail: Quiz | null;
+    onViewAttempt: (attempt: QuizAttemptResponse) => void;
 }) {
     if (attempts.length === 0) {
         return (
@@ -70,7 +72,11 @@ function QuizAttemptHistoryCard({
                     </TableHead>
                     <TableBody>
                         {attempts.map((attempt) => (
-                            <TableRow key={attempt.id} className="border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors">
+                            <TableRow 
+                                key={attempt.id} 
+                                className="border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors cursor-pointer group"
+                                onClick={() => onViewAttempt(attempt)}
+                            >
                                 <TableCell className="text-center font-bold text-gray-900 dark:text-white">{attempt.attemptNumber}</TableCell>
                                 <TableCell className="text-center text-gray-600 dark:text-gray-400 text-sm whitespace-nowrap">
                                     {formatDate(attempt.startTime)}
@@ -179,10 +185,14 @@ export function QuizzesTab({
 
     const [showPasscodeModal, setShowPasscodeModal] = useState(false);
     const [activeAttempt, setActiveAttempt] = useState<QuizAttemptResponse | null>(null);
+    const [viewingAttempt, setViewingAttempt] = useState<QuizAttemptResponse | null>(null);
+    const [activeTab, setActiveTab] = useState(0);
 
     const backToList = useCallback(() => {
         setSelectedQuiz(null);
+        setViewingAttempt(null);
         setQuizDetailBack?.(null);
+        setActiveTab(0);
     }, [setQuizDetailBack]);
 
     const fetchQuizzes = useCallback(async () => {
@@ -291,8 +301,21 @@ export function QuizzesTab({
     if (activeAttempt) {
         return (
             <QuizTakingView
+                key={activeAttempt.id}
                 attempt={activeAttempt}
                 onSubmitted={onQuizFinished}
+            />
+        );
+    }
+
+    if (viewingAttempt) {
+        return (
+            <QuizTakingView
+                key={viewingAttempt.id}
+                attempt={viewingAttempt}
+                onSubmitted={() => {}}
+                readOnly={true}
+                onBack={() => setViewingAttempt(null)}
             />
         );
     }
@@ -312,8 +335,8 @@ export function QuizzesTab({
                 </div>
 
                 <div className="p-4 [&_button[role=tab]]:cursor-pointer">
-                    <Tabs>
-                        <TabItem title="Overview" active>
+                    <Tabs aria-label="Quiz detail tabs" onActiveTabChange={(tab) => setActiveTab(tab)}>
+                        <TabItem title="Overview" active={activeTab === 0}>
                             {loadingDetail ? (
                                 <div className="flex justify-center py-20">
                                     <Spinner size="xl" />
@@ -346,11 +369,12 @@ export function QuizzesTab({
                                 </div>
                             )}
                         </TabItem>
-                        <TabItem title={`History (${attemptsHistory.length})`}>
+                        <TabItem title={`History (${attemptsHistory.length})`} active={activeTab === 1}>
                             <div className="pt-4">
                                 <QuizAttemptHistoryCard
                                     attempts={attemptsHistory}
                                     quizDetail={quizDetail}
+                                    onViewAttempt={(a) => setViewingAttempt(a)}
                                 />
                             </div>
                         </TabItem>

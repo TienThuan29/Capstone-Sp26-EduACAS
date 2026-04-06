@@ -28,11 +28,19 @@ public static class DynamoMapper
             item["payload"] = new AttributeValue { S = JsonSerializer.Serialize(notification.Payload, JsonOptions) };
         }
 
+        // New flags: keep persisted state for read/unread and soft-delete.
+        item["isRead"] = new AttributeValue { BOOL = notification.IsRead };
+        item["isDeleted"] = new AttributeValue { BOOL = notification.IsDeleted };
+
         return item;
     }
 
     public static Models.Notification DynamoItemToNotification(Dictionary<string, AttributeValue> item)
     {
+        // Backward compatibility: older records may not have isRead/isDeleted yet.
+        var isRead = item.ContainsKey("isRead") ? item["isRead"].BOOL : false;
+        var isDeleted = item.ContainsKey("isDeleted") ? item["isDeleted"].BOOL : false;
+
         var notification = new Models.Notification
         {
             Id = item["id"].S,
@@ -40,7 +48,9 @@ public static class DynamoMapper
             Title = item["title"].S,
             Body = item["body"].S,
             Type = Enum.Parse<Models.NotificationType>(item["type"].S),
-            SentDate = DateTime.Parse(item["sentDate"].S)
+            SentDate = DateTime.Parse(item["sentDate"].S),
+            IsRead = isRead,
+            IsDeleted = isDeleted
         };
 
         if (item.ContainsKey("payload") && !string.IsNullOrEmpty(item["payload"].S))

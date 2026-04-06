@@ -1,6 +1,7 @@
 export interface QuizAnswerOption {
   id: string;
   content: string;
+  isCorrect?: boolean;
 }
 
 export interface QuizQuestion {
@@ -8,6 +9,9 @@ export interface QuizQuestion {
   quizId: string;
   questionId: string;
   content: string;
+  type: 'MULTIPLE_CHOICE' | 'SINGLE_CHOICE' | 'ESSAY';
+  textAnswer?: string;
+  correctCount: number;
   options: QuizAnswerOption[];
   marks: number;
   displayOrder: number;
@@ -103,6 +107,7 @@ export interface QuizAttemptResponse {
   correctAnswers?: number;
   totalQuestions?: number;
   answers: Record<string, string>;
+  questionResults: Record<string, boolean>;
   questions: QuizQuestion[];
   quizTitle?: string;
   duration: number;
@@ -116,5 +121,6 @@ export interface StartQuizAttemptRequest {
 
 export interface UpdateQuizAnswerRequest {
   questionId: string;
-  selectedOptionId: string;
+  selectedOptionId?: string;
+  textAnswer?: string;
 }

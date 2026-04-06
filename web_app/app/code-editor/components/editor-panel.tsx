@@ -6,6 +6,7 @@ import { loader } from '@monaco-editor/react';
 import type { OnMount, OnChange } from '@monaco-editor/react';
 import type * as monaco from 'monaco-editor';
 import { useEditorContext } from '@/contexts/EditorContext';
+import { useCodeFormatter } from '@/hooks/formatter/useCodeFormatter';
 
 // Ensure Monaco loads with correct worker paths so syntax highlighting works (e.g. in Next.js)
 loader.config({
@@ -49,6 +50,7 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
 
 export function EditorPanel() {
   const { editorState, setCode } = useEditorContext();
+  const { formatCode, isFormatting } = useCodeFormatter();
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const previousCodeRef = useRef(editorState.code);
 
@@ -62,7 +64,28 @@ export function EditorPanel() {
         console.log('Save shortcut captured');
       }
     );
-  }, []);
+
+    // Register "Format Code" in the editor context menu
+    editor.addAction({
+      id: 'format-code-action',
+      label: 'Format Code',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
+      ],
+      contextMenuGroupId: '9_cutcopypaste',
+      contextMenuOrder: 4,
+      run: async (ed) => {
+        const langId = editorState.language?.id ?? '';
+        if (!langId) return;
+
+        const currentCode = ed.getValue();
+        const result = await formatCode({ source: currentCode, lang: langId });
+        if (result !== null) {
+          ed.setValue(result);
+        }
+      },
+    });
+  }, [editorState.language?.id, formatCode]);
 
   // Handle code changes
   const handleEditorChange: OnChange = useCallback(

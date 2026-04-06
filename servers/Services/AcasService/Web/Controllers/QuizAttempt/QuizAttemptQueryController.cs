@@ -1,4 +1,5 @@
-using AcasService.Application.Commands.QuizAttempt;
+using AcasService.Application.ResponseDTOs;
+using AcasService.Application.Queries.QuizAttempt;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -11,12 +12,12 @@ namespace AcasService.Web.Controllers.QuizAttempt;
 [Authorize]
 public class QuizAttemptQueryController : ControllerBase
 {
-    private readonly IQuizAttemptCommand _quizAttemptCommand;
+    private readonly IQuizAttemptQuery _quizAttemptQuery;
     private readonly ILogger<QuizAttemptQueryController> _logger;
 
-    public QuizAttemptQueryController(IQuizAttemptCommand quizAttemptCommand, ILogger<QuizAttemptQueryController> logger)
+    public QuizAttemptQueryController(IQuizAttemptQuery quizAttemptQuery, ILogger<QuizAttemptQueryController> logger)
     {
-        _quizAttemptCommand = quizAttemptCommand;
+        _quizAttemptQuery = quizAttemptQuery;
         _logger = logger;
     }
 
@@ -25,7 +26,7 @@ public class QuizAttemptQueryController : ControllerBase
     {
         try
         {
-            var result = await _quizAttemptCommand.GetHistoryAsync(classroomQuizId, studentId);
+            var result = await _quizAttemptQuery.GetHistoryAsync(classroomQuizId, studentId);
             if (result == null || result.Count == 0)
             {
                 return ResponseUtil.Error<List<QuizAttemptResponse>>("No history found", 404);
@@ -47,13 +48,47 @@ public class QuizAttemptQueryController : ControllerBase
     {
         try
         {
-            var result = await _quizAttemptCommand.GetPagedSubmissionsAsync(classroomQuizId, pageIndex, pageSize);
+            var result = await _quizAttemptQuery.GetPagedSubmissionsAsync(classroomQuizId, pageIndex, pageSize);
             return ResponseUtil.Success(result, "Quiz submissions retrieved successfully", 200);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"Error retrieving quiz submissions for quiz {classroomQuizId}");
             return ResponseUtil.Error<PagedResult<QuizAttemptResponse>>("Failed to retrieve quiz submissions", 500);
+        }
+    }
+
+    [HttpGet("{id}")]
+    public async Task<ActionResult<ApiResponse<QuizAttemptResponse>>> GetById(string id)
+    {
+        try
+        {
+            var result = await _quizAttemptQuery.GetByIdAsync(id);
+            return ResponseUtil.Success(result, "Get quiz attempt successfully", 200);
+        }
+        catch (KeyNotFoundException)
+        {
+            return ResponseUtil.Error<QuizAttemptResponse>("Quiz attempt not found", 404);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting quiz attempt {Id}", id);
+            return ResponseUtil.Error<QuizAttemptResponse>("Get quiz attempt failed", 500);
+        }
+    }
+
+    [HttpGet("student/{studentId}")]
+    public async Task<ActionResult<ApiResponse<List<QuizAttemptResponse>>>> GetByStudentId(string studentId)
+    {
+        try
+        {
+            var result = await _quizAttemptQuery.GetByStudentIdAsync(studentId);
+            return ResponseUtil.Success(result, "Get student quiz attempts successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting quiz attempts for student {StudentId}", studentId);
+            return ResponseUtil.Error<List<QuizAttemptResponse>>("Get student quiz attempts failed", 500);
         }
     }
 }

@@ -21,10 +21,8 @@ namespace AcasService.Web.Requests
 
     public class UpdateQuizAnswerRequest
     {
-        [Required(ErrorMessage = "Question ID is required")]
         public string QuestionId { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Selected Option ID is required")]
-        public string SelectedOptionId { get; set; } = string.Empty;
+        public string? SelectedOptionId { get; set; }
+        public string? TextAnswer { get; set; }
     }
 }

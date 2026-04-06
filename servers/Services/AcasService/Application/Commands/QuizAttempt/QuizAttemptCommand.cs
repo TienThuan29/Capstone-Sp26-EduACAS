@@ -10,6 +10,7 @@ using AcasService.Repositories.AnswerOption;
 using AcasService.Models;
 using AcasService.Web.Requests;
 using AcasService.Messaging.User;
+using AcasService.Application.Queries.QuizAttempt;
 
 namespace AcasService.Application.Commands.QuizAttempt
 {
@@ -18,8 +19,7 @@ namespace AcasService.Application.Commands.QuizAttempt
         Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request);
         Task UpdateAnswerAsync(string attemptId, UpdateQuizAnswerRequest request);
         Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId);
-        Task<List<QuizAttemptResponse>> GetHistoryAsync(string classroomQuizId, string studentId);
-        Task<ResponseDTOs.PagedResult<QuizAttemptResponse>> GetPagedSubmissionsAsync(string classroomQuizId, int pageIndex, int pageSize);
+        
     }
 
     public class QuizAttemptCommand : IQuizAttemptCommand
@@ -34,6 +34,8 @@ namespace AcasService.Application.Commands.QuizAttempt
         private readonly IQuizCache _quizCache;
         private readonly QuizAttemptMapper _mapper;
         private readonly ILogger<QuizAttemptCommand> _logger;
+        private readonly IQuizAttemptQuery _quizAttemptQuery;
+        
 
         public QuizAttemptCommand(
             IQuizAttemptRepository repository,
@@ -45,7 +47,8 @@ namespace AcasService.Application.Commands.QuizAttempt
             UserRequestProducer userRequestProducer,
             IQuizCache quizCache,
             QuizAttemptMapper mapper,
-            ILogger<QuizAttemptCommand> logger)
+            ILogger<QuizAttemptCommand> logger,
+            IQuizAttemptQuery quizAttemptQuery)
         {
             _repository = repository;
             _classroomQuizRepository = classroomQuizRepository;
@@ -57,6 +60,7 @@ namespace AcasService.Application.Commands.QuizAttempt
             _quizCache = quizCache;
             _mapper = mapper;
             _logger = logger;
+            _quizAttemptQuery = quizAttemptQuery;
         }
 
         public async Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request)
@@ -70,7 +74,6 @@ namespace AcasService.Application.Commands.QuizAttempt
                 if (classroomQuiz.Status == Models.ClassroomQuizStatus.DRAFT)
                     throw new InvalidOperationException("This quiz is currently in DRAFT mode and not yet available for students.");
 
-                // Validate Passcode
                 if (!string.IsNullOrEmpty(classroomQuiz.Passcode) && classroomQuiz.Passcode != request.Passcode)
                 {
                     throw new ArgumentException("Incorrect passcode. Please try again.");
@@ -97,8 +100,6 @@ namespace AcasService.Application.Commands.QuizAttempt
                 var quiz = await _quizRepository.FindByIdAsync(classroomQuiz.QuizId);
                 if (quiz == null) throw new Exception("Base quiz not found.");
 
-                // Rule 8: Calculation of attempt end time
-                // The deadline is the sooner of: (Start + Duration) OR (ClassroomQuiz EndTime)
                 var durationEndTime = now.AddMinutes(quiz.Duration);
                 var deadline = durationEndTime < classroomQuiz.EndTime ? durationEndTime : classroomQuiz.EndTime;
 
@@ -108,7 +109,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                     ClassroomQuizId = request.ClassroomQuizId,
                     StudentId = request.StudentId,
                     StartTime = now,
-                    EndTime = deadline, // Store the calculated deadline
+                    EndTime = deadline, 
                     Status = Models.QuizAttemptStatus.INPROGRESS,
                     AttemptNumber = nextAttempt
                 };
@@ -116,7 +117,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                 var created = await _repository.CreateAsync(newAttempt);
                 if (created == null) throw new Exception("Failed to start quiz attempt");
 
-                return await BuildEnrichedResponse(created);
+                return await _quizAttemptQuery.BuildEnrichedResponse(created);
             }
             catch (Exception ex)
             {
@@ -138,7 +139,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                 var key = _quizCache.GetQuizAttemptKey(attemptId);
                 var answers = await _quizCache.GetAsync<Dictionary<string, string>>(key) ?? new Dictionary<string, string>();
                 
-                answers[request.QuestionId] = request.SelectedOptionId;
+                answers[request.QuestionId.ToLower()] = request.SelectedOptionId ?? request.TextAnswer ?? "";
                 
                 await _quizCache.SetAsync(key, answers);
             }
@@ -160,8 +161,9 @@ namespace AcasService.Application.Commands.QuizAttempt
                     throw new InvalidOperationException("This quiz has already been submitted or is no longer active.");
 
                 var cacheKey = _quizCache.GetQuizAttemptKey(attemptId);
-                var cachedAnswers = await _quizCache.GetAsync<Dictionary<string, string>>(cacheKey) ?? new Dictionary<string, string>();
-
+                var cachedAnswersRaw = await _quizCache.GetAsync<Dictionary<string, string>>(cacheKey) ?? new Dictionary<string, string>();
+                var cachedAnswers = cachedAnswersRaw.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value);
+                
                 var classroomQuiz = await _classroomQuizRepository.FindByIdAsync(attempt.ClassroomQuizId);
                 if (classroomQuiz == null) throw new Exception("Classroom quiz configuration not found.");
 
@@ -180,36 +182,69 @@ namespace AcasService.Application.Commands.QuizAttempt
                         continue;
                     }
 
-                    // ENSURE AnswerOptions are loaded (they might not be by default in repository)
                     if (question.AnswerOptions == null || !question.AnswerOptions.Any())
                     {
                         _logger.LogInformation($"Fetching answer options for question {question.Id}...");
                         question.AnswerOptions = await _answerOptionRepository.FindByQuestionIdAsync(question.Id);
                     }
 
-                    cachedAnswers.TryGetValue(question.Id, out var selectedOptionId);
+                    string studentValue = "";
+                    cachedAnswers.TryGetValue(question.Id.ToLower(), out studentValue);
+                    studentValue ??= "";
                     
                     bool isCorrect = false;
-                    var correctOption = question.AnswerOptions?.FirstOrDefault(o => o.IsCorrect);
-                    
-                    _logger.LogInformation($"Grading Question {question.Id}: Student selected '{selectedOptionId}', Correct Option is '{correctOption?.Id}'");
 
-                    if (!string.IsNullOrEmpty(selectedOptionId) && correctOption != null)
+                    if (question.Type == Models.QuestionType.ESSAY)
                     {
-                        if (correctOption.Id.Trim().Equals(selectedOptionId.Trim(), StringComparison.OrdinalIgnoreCase))
+                        if (!string.IsNullOrWhiteSpace(question.TextAnswer) && !string.IsNullOrWhiteSpace(studentValue))
+                        {
+                            var normalizedExpected = question.TextAnswer.Replace("\r", "").Trim();
+                            var normalizedActual = studentValue.Replace("\r", "").Trim();
+                            isCorrect = normalizedExpected.Equals(normalizedActual, StringComparison.OrdinalIgnoreCase);
+                            if (isCorrect) totalScore += quizQuestion.Marks;
+                        }
+
+                        studentAnswers.Add(new Models.StudentAnswer
+                        {
+                            Id = Guid.NewGuid().ToString(),
+                            AttemptId = attemptId,
+                            QuestionId = question.Id,
+                            TextAnswer = studentValue,
+                            IsCorrect = isCorrect
+                        });
+                        continue;
+                    }
+
+                    if (question.Type == Models.QuestionType.MULTIPLE_CHOICE)
+                    {
+                        var correctOptionIds = question.AnswerOptions?.Where(o => o.IsCorrect).Select(o => o.Id.Trim().ToLower()).OrderBy(id => id).ToList() ?? new List<string>();
+                        var studentSelectedIds = studentValue.Split(',', StringSplitOptions.RemoveEmptyEntries).Select(id => id.Trim().ToLower()).OrderBy(id => id).ToList();
+
+                        if (correctOptionIds.Count > 0 && correctOptionIds.SequenceEqual(studentSelectedIds))
                         {
                             isCorrect = true;
                             totalScore += quizQuestion.Marks;
-                            _logger.LogInformation($"Match found for Question {question.Id}! +{quizQuestion.Marks} marks.");
                         }
-                        else 
+
+                        studentAnswers.Add(new Models.StudentAnswer
                         {
-                            _logger.LogInformation($"NO match for Question {question.Id}. '{correctOption.Id}' != '{selectedOptionId}'");
-                        }
+                            Id = Guid.NewGuid().ToString(),
+                            AttemptId = attemptId,
+                            QuestionId = question.Id,
+                            AnswerOptionId = studentValue,
+                            IsCorrect = isCorrect
+                        });
+                        continue;
                     }
-                    else if (correctOption == null)
+
+                    var correctOption = question.AnswerOptions?.FirstOrDefault(o => o.IsCorrect);
+                    if (!string.IsNullOrEmpty(studentValue) && correctOption != null)
                     {
-                        _logger.LogWarning($"NO correct option defined for Question {question.Id}!");
+                        if (correctOption.Id.Trim().Equals(studentValue.Trim(), StringComparison.OrdinalIgnoreCase))
+                        {
+                            isCorrect = true;
+                            totalScore += quizQuestion.Marks;
+                        }
                     }
 
                     studentAnswers.Add(new Models.StudentAnswer
@@ -217,7 +252,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                         Id = Guid.NewGuid().ToString(),
                         AttemptId = attemptId,
                         QuestionId = question.Id,
-                        AnswerOptionId = selectedOptionId,
+                        AnswerOptionId = studentValue,
                         IsCorrect = isCorrect
                     });
                 }
@@ -231,7 +266,7 @@ namespace AcasService.Application.Commands.QuizAttempt
 
                 await _quizCache.RemoveAsync(cacheKey);
 
-                return await BuildEnrichedResponse(attempt);
+                return await _quizAttemptQuery.BuildEnrichedResponse(attempt);
             }
             catch (Exception ex)
             {
@@ -240,109 +275,7 @@ namespace AcasService.Application.Commands.QuizAttempt
             }
         }
 
-        public async Task<List<QuizAttemptResponse>> GetHistoryAsync(string classroomQuizId, string studentId)
-        {
-            var attempts = await _repository.FindHistoryAsync(classroomQuizId, studentId);
-            var result = new List<QuizAttemptResponse>();
-            foreach (var a in attempts)
-            {
-                result.Add(await BuildEnrichedResponse(a));
-            }
-            return result.OrderByDescending(r => r.AttemptNumber).ToList();
-        }
-
-        public async Task<ResponseDTOs.PagedResult<QuizAttemptResponse>> GetPagedSubmissionsAsync(string classroomQuizId, int pageIndex, int pageSize)
-        {
-            var pagedAttempts = await _repository.FindPagedByClassroomQuizIdAsync(classroomQuizId, pageIndex, pageSize);
-            
-            // Fetch student profiles in batch
-            var studentIds = pagedAttempts.Items.Select(a => a.StudentId).Distinct().ToList();
-            var profiles = await _userRequestProducer.GetUsersByIdsAsync(studentIds);
-            var profileMap = profiles.ToDictionary(p => p.Id);
-
-            var enrichedItems = new List<QuizAttemptResponse>();
-            foreach (var attempt in pagedAttempts.Items)
-            {
-                var response = await BuildEnrichedResponse(attempt);
-                
-                if (profileMap.TryGetValue(attempt.StudentId, out var profile))
-                {
-                    response.StudentName = profile.Fullname;
-                    response.StudentEmail = profile.Email;
-                }
-                else
-                {
-                    response.StudentName = "Unknown Student";
-                    response.StudentEmail = "Unknown Email";
-                }
-                
-                enrichedItems.Add(response);
-            }
-
-            return new ResponseDTOs.PagedResult<QuizAttemptResponse>(
-                enrichedItems, 
-                pagedAttempts.TotalCount, 
-                pagedAttempts.PageIndex, 
-                pagedAttempts.PageSize
-            );
-        }
-
-        private async Task<QuizAttemptResponse> BuildEnrichedResponse(Models.QuizAttempt attempt)
-        {
-            var response = _mapper.ToQuizAttemptResponse(attempt);
-            
-            var classroomQuiz = await _classroomQuizRepository.FindByIdAsync(attempt.ClassroomQuizId);
-            if (classroomQuiz == null) return response;
-
-            var quiz = await _quizRepository.FindByIdAsync(classroomQuiz.QuizId);
-            if (quiz == null)
-            {
-                _logger.LogWarning($"Base Quiz {classroomQuiz.QuizId} not found for attempt {attempt.Id}");
-                return response;
-            }
-
-            response.QuizTitle = quiz.Title;
-            response.Duration = quiz.Duration;
-            response.TotalQuestions = quiz.TotalQuestions;
-
-            _logger.LogInformation($"Enriching attempt {attempt.Id} for Quiz '{quiz.Title}'. Questions in quiz: {quiz.Questions.Count}");
-
-            if (attempt.Status == Models.QuizAttemptStatus.INPROGRESS)
-            {
-                int addedCount = 0;
-                foreach (var qq in quiz.Questions)
-                {
-                    var qDetails = await _questionRepository.FindByIdAsync(qq.QuestionId);
-                    if (qDetails != null)
-                    {
-                        // Fetch Answer Options for this question!
-                        qDetails.AnswerOptions = await _answerOptionRepository.FindByQuestionIdAsync(qq.QuestionId);
-                        
-                        response.Questions.Add(_mapper.ToStudentQuizQuestionResponse(qq, qDetails));
-                        addedCount++;
-                    }
-                    else
-                    {
-                        _logger.LogWarning($"Question detail for ID {qq.QuestionId} not found in database!");
-                    }
-                }
-                _logger.LogInformation($"Successfully added {addedCount} out of {quiz.Questions.Count} questions to response.");
-            }
-
-            if (attempt.Status == Models.QuizAttemptStatus.SUBMITTED)
-            {
-                var studentAnswers = await _studentAnswerRepository.FindByAttemptIdAsync(attempt.Id);
-                response.CorrectAnswers = studentAnswers.Count(a => a.IsCorrect);
-                // Also provide the selections
-                response.Answers = studentAnswers.ToDictionary(a => a.QuestionId, a => a.AnswerOptionId ?? "");
-            }
-            else
-            {
-                var cacheKey = _quizCache.GetQuizAttemptKey(attempt.Id);
-                response.Answers = await _quizCache.GetAsync<Dictionary<string, string>>(cacheKey) ?? new Dictionary<string, string>();
-            }
-
-            return response;
-        }
+       
+        
     }
 }

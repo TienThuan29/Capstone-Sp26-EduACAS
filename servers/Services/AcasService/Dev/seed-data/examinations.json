@@ -2,7 +2,7 @@
   {
     "id": "exam-001",
     "examName": "Midterm Exam - Intro to Programming G1",
-    "programmingLanguageId": "csharp",
+    "programmingLanguageId": "python",
     "classroomId": "cls-001",
     "description": "Midterm covering basic I/O and string operations. Exact string comparison.",
     "totalMark": 10.0,

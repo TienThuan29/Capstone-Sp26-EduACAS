@@ -13,11 +13,21 @@ import {
   Badge,
   Tabs,
   TabItem,
+  Label,
+  Select,
 } from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import type { SubmissionResponse, TestResultResponse } from "@/types/submission";
+import type {
+  ExamLogResponse,
+  KeystrokeRecordResponse,
+  SubmissionResponse,
+  TestResultResponse,
+} from "@/types/submission";
+// import type {  SubmissionResponse, TestResultResponse } from "@/types/submission";
 import { useSubmission } from "@/hooks/submission/useSubmission";
+import { useExamLog } from "@/hooks/exam/useExamLog";
 import { formatDate, formatGradedDate } from "@/utils/datetime-utils";
+import { deriveExamViolationFlag } from "@/utils/exam-log-flag";
 
 export type SubmissionDetailProps = {
   submissionId: string;
@@ -76,15 +86,84 @@ function TestResultsTable({ results }: { results: TestResultResponse[] }) {
   );
 }
 
+function KeystrokeLogsViewer({ records }: { records: KeystrokeRecordResponse[] }) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+
+  if (!records || records.length === 0) {
+    return null;
+  }
+
+  const selectedRecord = records[selectedIndex];
+
+  return (
+    <div className="flex flex-col md:flex-row overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <div className="md:w-1/3 max-h-[500px] overflow-y-auto border-r border-gray-200 dark:border-gray-700">
+        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+          {records.map((record, index) => (
+            <li
+              key={`${record.timeStartSet}-${record.timeOffSet}-${index}`}
+              className={`cursor-pointer p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                selectedIndex === index
+                  ? "border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                  : "border-l-4 border-transparent"
+              }`}
+              onClick={() => setSelectedIndex(index)}
+            >
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                  {record.timeOffSet || `Log #${index + 1}`}
+                </span>
+                <Badge color="gray" size="sm">
+                  {record.charCount} chars
+                </Badge>
+              </div>
+              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <span>CPS: {record.cps}</span>
+                <span>Dur: {record.duration}ms</span>
+              </div>
+              <div className="mt-1 text-xs text-gray-400 dark:text-gray-500 truncate">
+                {record.timeStartSet}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+      <div className="md:w-2/3 max-h-[500px] overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900">
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+            Code Snapshot
+            <span className="ml-2 font-normal text-gray-500">
+              at {selectedRecord.timeOffSet}
+            </span>
+          </h4>
+          <Badge color="info">
+            Length: {selectedRecord.content?.length || 0}
+          </Badge>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+          <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 dark:text-gray-200 [word-break:break-word]">
+            {selectedRecord.content || "Empty content"}
+          </pre>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function SubmissionDetail({
   submissionId,
   studentName,
   onBack,
 }: SubmissionDetailProps) {
   const { getSubmissionById } = useSubmission();
+  const { getExamLogsBySubmission } = useExamLog();
   const [submission, setSubmission] = useState<SubmissionResponse | null>(null);
+  const [examLogs, setExamLogs] = useState<ExamLogResponse[]>([]);
   const [loading, setLoading] = useState(false);
+  const [logsLoading, setLogsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [severityFilter, setSeverityFilter] = useState<"all" | "info" | "warning" | "critical">("all");
+  const [violationFilter, setViolationFilter] = useState<"all" | "only_violation" | "only_non_violation">("all");
 
   const fetchSubmission = useCallback(async () => {
     setLoading(true);
@@ -106,7 +185,55 @@ export function SubmissionDetail({
     fetchSubmission();
   }, [fetchSubmission]);
 
+  useEffect(() => {
+    let cancelled = false;
+    setLogsLoading(true);
+    void (async () => {
+      try {
+        const logs = await getExamLogsBySubmission(submissionId);
+        if (!cancelled) {
+          setExamLogs(logs);
+        }
+      } catch {
+        if (!cancelled) {
+          setExamLogs([]);
+        }
+      } finally {
+        if (!cancelled) {
+          setLogsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getExamLogsBySubmission, submissionId]);
+
   const results = submission?.testResults ?? [];
+
+  // LMKhoi
+  const keystrokeLogs = submission?.keystroke_logs ?? submission?.keystrokeLogs ?? [];
+  const keystrokeRecords = keystrokeLogs.flatMap((log) => log.keystroke_data ?? []);
+
+  // Tamtc
+  const filteredExamLogs = examLogs.filter((log) => {
+    const normalizedSeverity = String(log.severity).toLowerCase();
+    const passSeverity = severityFilter === "all" || normalizedSeverity === severityFilter;
+    const passViolation =
+      violationFilter === "all"
+      || (violationFilter === "only_violation" && log.isViolation)
+      || (violationFilter === "only_non_violation" && !log.isViolation);
+    return passSeverity && passViolation;
+  });
+  const violationFlag = deriveExamViolationFlag(examLogs);
+  const flagColor =
+    violationFlag === "CRITICAL"
+      ? "failure"
+      : violationFlag === "WARNING"
+        ? "warning"
+        : "success";
+  // ------------
 
   return (
     <div className=" border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
@@ -128,6 +255,9 @@ export function SubmissionDetail({
             </span>
           )}
         </h3>
+        <Badge color={flagColor} size="sm">
+          {violationFlag === "CLEAN" ? "Clean" : violationFlag === "WARNING" ? "Warning" : "Critical"}
+        </Badge>
       </div>
       <div className="p-4 [&_button[role=tab]]:cursor-pointer">
         {loading && (
@@ -239,6 +369,117 @@ export function SubmissionDetail({
                   <TestResultsTable results={results} />
                 )}
               </TabItem>
+              {/* LMKhoi */}
+              <TabItem title={`Keystroke Log (${keystrokeRecords.length})`}>
+                {keystrokeRecords.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+                    No keystroke logs for this submission.
+                  </p>
+                ) : (
+                  <KeystrokeLogsViewer records={keystrokeRecords} />
+                )}
+              </TabItem>
+              {/* Tamtc */}
+              <TabItem title={`Violation logs (${examLogs.length})`}>
+                {logsLoading ? (
+                  <div className="flex justify-center py-8">
+                    <Spinner size="lg" />
+                  </div>
+                ) : examLogs.length === 0 ? (
+                  <p className="rounded-lg border border-gray-200 bg-gray-50 py-8 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+                    No exam logs found for this submission.
+                  </p>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="log-severity-filter" className="mb-1 block">
+                          Severity
+                        </Label>
+                        <Select
+                          id="log-severity-filter"
+                          value={severityFilter}
+                          onChange={(e) => setSeverityFilter(e.target.value as "all" | "info" | "warning" | "critical")}
+                        >
+                          <option value="all">All</option>
+                          <option value="info">Info</option>
+                          <option value="warning">Warning</option>
+                          <option value="critical">Critical</option>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="log-violation-filter" className="mb-1 block">
+                          Violation
+                        </Label>
+                        <Select
+                          id="log-violation-filter"
+                          value={violationFilter}
+                          onChange={(e) => setViolationFilter(e.target.value as "all" | "only_violation" | "only_non_violation")}
+                        >
+                          <option value="all">All</option>
+                          <option value="only_violation">Only violations</option>
+                          <option value="only_non_violation">Only non-violations</option>
+                        </Select>
+                      </div>
+                    </div>
+
+                    {filteredExamLogs.length === 0 ? (
+                      <p className="rounded-lg border border-gray-200 bg-gray-50 py-6 text-center text-sm text-gray-500 dark:border-gray-700 dark:bg-gray-800/50 dark:text-gray-400">
+                        No logs match current filters.
+                      </p>
+                    ) : (
+                      <div className="overflow-x-auto">
+                    <Table hoverable>
+                      <TableHead>
+                        <TableRow>
+                          <TableHeadCell>Time</TableHeadCell>
+                          <TableHeadCell>Type</TableHeadCell>
+                          <TableHeadCell>Severity</TableHeadCell>
+                          <TableHeadCell>Violation</TableHeadCell>
+                          <TableHeadCell>Message</TableHeadCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[...filteredExamLogs]
+                          .sort((a, b) => new Date(a.clientTimestamp).getTime() - new Date(b.clientTimestamp).getTime())
+                          .map((log) => (
+                            <TableRow key={log.id}>
+                              <TableCell className="whitespace-nowrap">
+                                {formatDate(log.clientTimestamp)}
+                              </TableCell>
+                              <TableCell className="font-mono text-xs">{log.eventType}</TableCell>
+                              <TableCell>
+                                <Badge
+                                  color={
+                                    String(log.severity).toLowerCase() === "critical"
+                                      ? "failure"
+                                      : String(log.severity).toLowerCase() === "warning"
+                                        ? "warning"
+                                        : "info"
+                                  }
+                                  size="sm"
+                                >
+                                  {String(log.severity).toUpperCase()}
+                                </Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge color={log.isViolation ? "failure" : "success"} size="sm">
+                                  {log.isViolation ? "Yes" : "No"}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="max-w-[480px] whitespace-pre-wrap wrap-break-word">
+                                {log.message}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </TabItem>
+              {/* // Tamtc */}
             </Tabs>
           </div>
         )}

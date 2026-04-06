@@ -22,6 +22,7 @@ export const PageUrl = {
     MANAGE_CLASSROOM_PAGE: '/manage-classroom',
     QUESTION_BANKS_PAGE: '/problem-banks',
     QUESTION_BANK_PAGE: '/question-banks',
+    EXAM_BANK_PAGE: '/exam-banks',
     QUIZ_BANK_PAGE: '/quiz-banks',
     QUIZ_BANK_DETAIL_PAGE: (id: string) => `/quiz-banks/${id}`,
     PROBLEM_BANKS_CREATE_PAGE: '/problem-banks/create',

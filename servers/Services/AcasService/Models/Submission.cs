@@ -40,6 +40,8 @@ public class Submission
     public string AiFeedback { get; set; } = string.Empty;
 
     public DateTime UpdatedDate { get; set; }
+
+    public List<KeystrokeLog> KeystrokeLogs { get; set; } = new List<KeystrokeLog>();
 }
 
 public class TestResult

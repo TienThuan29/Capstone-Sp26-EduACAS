@@ -19,6 +19,7 @@ import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
 import type { SubmissionResponse } from '@/types/submission';
 import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
+import { useKeystrokeTracking, KeystrokeRecord } from '@/hooks/typing/useKeystrokeTracking';
 
 
 /**
@@ -129,9 +130,14 @@ interface EditorContextType {
 
   // Actions
   runCode: () => Promise<void>;
-  submitCode: () => Promise<void>;
+  submitCode: () => Promise<SubmissionResponse | null>;
   isRunning: boolean;
   isSubmitting: boolean;
+
+  // Anti-cheat (Keystrokes)
+  keystrokeCount: number;
+  batchLogs: KeystrokeRecord[];
+  flushKeystrokes: (submissionId: string) => Promise<void>;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -184,6 +190,13 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [selectedCompiler, setSelectedCompiler] = useState<Compiler | null>(null);
   const [examId, setExamIdState] = useState<string | null>(null);
   const [examClassroomId, setExamClassroomIdState] = useState<string | null>(null);
+
+  // Keystroke Tracking
+  const {
+    keystrokeCount,
+    batchLogs,
+    flush: flushKeystrokes,
+  } = useKeystrokeTracking(examId ?? '', user?.id ?? '', problem?.id ?? '', editorState.code);
 
   // Test Cases
   const [testCases, setTestCases] = useState<TestCase[]>([]);
@@ -425,11 +438,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setIsRunning(false);
   }, []);
 
-  const submitCode = useCallback(async () => {
+  const submitCode = useCallback(async (): Promise<SubmissionResponse | null> => {
     const studentId = user?.id;
     if (!examId || !problem?.id || !studentId || !selectedCompiler) {
       console.warn('submitCode: missing examId, problemId, studentId, or selectedCompiler');
-      return;
+      return null;
     }
     setIsSubmitting(true);
     try {
@@ -443,10 +456,17 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       };
       const result = await saveSubmission(payload);
       if (result != null) {
+        try {
+          await flushKeystrokes(result.id);
+        } catch (err) {
+          console.error('submitCode: post-submit side-effects failed:', err);
+        }
         incrementSubmissionsRefresh();
       }
+      return result;
     } catch (err) {
       console.error('submitCode failed:', err);
+      return null;
     } finally {
       setIsSubmitting(false);
     }
@@ -459,6 +479,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     editorState.language?.id,
     saveSubmission,
     incrementSubmissionsRefresh,
+    flushKeystrokes,
   ]);
 
   const value: EditorContextType = {
@@ -519,6 +540,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     submitCode,
     isRunning,
     isSubmitting,
+    keystrokeCount,
+    batchLogs,
+    flushKeystrokes,
   };
 
   return (

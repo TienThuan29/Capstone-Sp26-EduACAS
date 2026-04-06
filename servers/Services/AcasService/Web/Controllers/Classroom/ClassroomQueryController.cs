@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Queries.Classroom;
+using AcasService.Application.Queries.Classroom;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using AcasService.Web.Requests;
@@ -12,10 +12,16 @@ namespace AcasService.Web.Controllers.Classroom
     {
         private readonly ILogger<ClassroomQueryController> _logger;
         private readonly IClassroomQuery _classroomQuery;
-        public ClassroomQueryController(ILogger<ClassroomQueryController> logger, IClassroomQuery classroomQuery)
+        private readonly IGetRecentClassroomsQuery _recentClassroomsQuery;
+
+        public ClassroomQueryController(
+            ILogger<ClassroomQueryController> logger,
+            IClassroomQuery classroomQuery,
+            IGetRecentClassroomsQuery recentClassroomsQuery)
         {
             _logger = logger;
             _classroomQuery = classroomQuery;
+            _recentClassroomsQuery = recentClassroomsQuery;
         }
 
         [HttpGet]
@@ -73,6 +79,24 @@ namespace AcasService.Web.Controllers.Classroom
             }
         }
     
+
+        /// <summary>Returns recently viewed classroom IDs from Redis (most recent first).</summary>
+        [HttpGet("student/{studentId}/recent")]
+        public async Task<ActionResult<ApiResponse<List<string>>>> GetRecentClassroomIds(
+            string studentId,
+            [FromQuery] int limit = 5)
+        {
+            try
+            {
+                var ids = await _recentClassroomsQuery.GetRecentClassroomIdsAsync(studentId, limit);
+                return ResponseUtil.Success(ids.ToList(), "Get recent classroom IDs successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching recent classroom IDs for student {StudentId}", studentId);
+                return ResponseUtil.Error<List<string>>("Internal Server Error", 500);
+            }
+        }
 
         [HttpGet("student/{studentId}")]
         public async Task<ActionResult<ApiResponse<List<ClassroomResponse>>>> GetClassroomsByStudentId(string studentId)
