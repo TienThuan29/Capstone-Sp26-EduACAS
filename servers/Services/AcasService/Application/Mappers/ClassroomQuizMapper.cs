@@ -7,6 +7,25 @@ public class ClassroomQuizMapper
 {
     public ClassroomQuizResponse ToClassroomQuizResponse(ClassroomQuiz classroomQuiz)
     {
+        var now = DateTime.UtcNow;
+        var effectiveStatus = classroomQuiz.Status;
+
+        if (classroomQuiz.Status != ClassroomQuizStatus.DRAFT)
+        {
+            if (now < classroomQuiz.StartTime)
+            {
+                effectiveStatus = ClassroomQuizStatus.PUBLISHED; 
+            }
+            else if (now > classroomQuiz.EndTime)
+            {
+                effectiveStatus = ClassroomQuizStatus.CLOSED;
+            }
+            else
+            {
+                effectiveStatus = ClassroomQuizStatus.PUBLISHED;
+            }
+        }
+
         return new ClassroomQuizResponse
         {
             Id = classroomQuiz.Id,
@@ -16,7 +35,7 @@ public class ClassroomQuizMapper
             EndTime = classroomQuiz.EndTime,
             MaxOfAttempts = classroomQuiz.MaxOfAttempts,
             Passcode = classroomQuiz.Passcode,
-            Status = classroomQuiz.Status,
+            Status = effectiveStatus,
             CreatedAt = classroomQuiz.CreatedAt,
             UpdatedAt = classroomQuiz.UpdatedAt
         };

@@ -241,4 +241,13 @@ export const Api = {
     SOFT_DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}/soft-delete`,
     RESTORE: (id: string) => `/api/acas/v1/examination-templates/${id}/restore`,
   },
+  QuizAttempt: {
+    START: "/api/acas/v1/quiz-attempts/start",
+    UPDATE_ANSWER: (id: string) => `/api/acas/v1/quiz-attempts/${id}/answers`,
+    SUBMIT: (id: string) => `/api/acas/v1/quiz-attempts/${id}/submit`,
+    GET_HISTORY_BY_CLASSROOM_QUIZ_STUDENT: (classroomQuizId: string, studentId: string) =>
+      `/api/acas/v1/quiz-attempts/history/classroom-quiz/${classroomQuizId}/student/${studentId}`,
+    GET_SUBMISSIONS_PAGED: (classroomQuizId: string, pageIndex: number, pageSize: number) =>
+      `/api/acas/v1/quiz-attempts/submissions/classroom-quiz/${classroomQuizId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  },
 };

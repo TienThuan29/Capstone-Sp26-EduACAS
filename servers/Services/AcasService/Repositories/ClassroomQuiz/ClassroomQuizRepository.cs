@@ -57,6 +57,44 @@ public class ClassroomQuizRepository : DynamoRepository, IClassroomQuizRepositor
         return response.Items.Select(DynamoMapper.DynamoItemToClassroomQuiz).ToList();
     }
 
+    public async Task<(List<Models.ClassroomQuiz> Items, int TotalCount)> FindByClassroomIdPagedAsync(string classroomId, int pageNumber, int pageSize, bool includeDrafts = false)
+    {
+        var filterExpression = "classroomId = :cid AND isDeleted = :deleted";
+        var expressionValues = new Dictionary<string, AttributeValue>
+        {
+            [":cid"] = new AttributeValue { S = classroomId },
+            [":deleted"] = new AttributeValue { BOOL = false }
+        };
+
+        if (!includeDrafts)
+        {
+            filterExpression += " AND #status <> :draft";
+            expressionValues[":draft"] = new AttributeValue { S = "DRAFT" };
+        }
+
+        var scanRequest = new Amazon.DynamoDBv2.Model.ScanRequest
+        {
+            TableName = _classroomQuizTableName,
+            FilterExpression = filterExpression,
+            ExpressionAttributeValues = expressionValues
+        };
+
+        if (!includeDrafts)
+        {
+            scanRequest.ExpressionAttributeNames = new Dictionary<string, string> { ["#status"] = "status" };
+        }
+
+        var response = await _dynamoDBClient.ScanAsync(scanRequest);
+        var allItems = response.Items.Select(DynamoMapper.DynamoItemToClassroomQuiz)
+                                    .OrderByDescending(x => x.CreatedAt)
+                                    .ToList();
+
+        var totalCount = allItems.Count;
+        var pagedItems = allItems.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
+
+        return (pagedItems, totalCount);
+    }
+
     public async Task<Models.ClassroomQuiz?> UpdateAsync(Models.ClassroomQuiz classroomQuiz)
     {
         var item = DynamoMapper.ClassroomQuizToDynamoItem(classroomQuiz);
@@ -77,7 +115,6 @@ public class ClassroomQuizRepository : DynamoRepository, IClassroomQuizRepositor
 
     public async Task DeleteAsync(string classroomQuizId)
     {
-        var key = new Dictionary<string, AttributeValue> { ["id"] = new AttributeValue { S = classroomQuizId } };
-        await DeleteItemAsync(key, _classroomQuizTableName);
+        await SoftDeleteAsync(classroomQuizId);
     }
 }

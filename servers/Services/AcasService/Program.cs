@@ -35,6 +35,7 @@ using AcasService.Repositories.ClassroomQuiz;
 using AcasService.Repositories.QuizAttempt;
 using AcasService.Repositories.StudentAnswer;
 using AcasService.Repositories.UserDevice;
+using AcasService.Application.BackgroundServices;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;
@@ -270,6 +271,7 @@ builder.Services.AddScoped<IExaminationTemplateCommand, ExaminationTemplateComma
 builder.Services.AddScoped<IExaminationTemplateQuery, ExaminationTemplateQuery>();
 builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
 builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
+builder.Services.AddScoped<IClassroomQuizJobScheduling, ClassroomQuizJobScheduling>();
 builder.Services.AddScoped<ICodeFormatterCommand, CodeFormatterCommand>();
 
 // mapper

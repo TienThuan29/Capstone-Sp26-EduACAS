@@ -34,6 +34,11 @@ public class QuizAttemptCommandController : ControllerBase
             _logger.LogWarning(ex, $"Classroom quiz {request.ClassroomQuizId} not found");
             return ResponseUtil.Error<QuizAttemptResponse>("Quiz not found", 404);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Validation error starting quiz attempt");
+            return ResponseUtil.Error<QuizAttemptResponse>(ex.Message, 400);
+        }
         catch (InvalidOperationException ex)
         {
             _logger.LogWarning(ex, $"Invalid start attempt for student {request.StudentId} and quiz {request.ClassroomQuizId}");

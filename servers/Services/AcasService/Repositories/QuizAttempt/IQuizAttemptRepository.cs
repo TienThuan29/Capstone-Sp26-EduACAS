@@ -11,4 +11,6 @@ public interface IQuizAttemptRepository
     Task DeleteAsync(string quizAttemptId);
     Task<int> GetMaxAttemptNumberAsync(string classroomQuizId);
     Task<int> GetMaxAttemptNumberAsync(string classroomQuizId, string studentId);
+    Task<List<Models.QuizAttempt>> FindHistoryAsync(string classroomQuizId, string studentId);
+    Task<Application.ResponseDTOs.PagedResult<Models.QuizAttempt>> FindPagedByClassroomQuizIdAsync(string classroomQuizId, int pageIndex, int pageSize);
 }
