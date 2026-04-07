@@ -34,6 +34,22 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
     _loadReview();
   }
 
+  String _normalizeQuestionType(String rawType) {
+    return rawType.trim().toUpperCase();
+  }
+
+  String _questionTypeLabel(String rawType) {
+    switch (_normalizeQuestionType(rawType)) {
+      case 'MULTIPLE_CHOICE':
+        return 'Multiple choice';
+      case 'ESSAY':
+        return 'Essay';
+      case 'SINGLE_CHOICE':
+      default:
+        return 'Single choice';
+    }
+  }
+
   Future<void> _loadReview() async {
     setState(() {
       _isLoading = true;
@@ -311,11 +327,37 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
 
   Widget _buildQuestionReviewCard(int index, QuestionDetail question) {
     final answer = _answersByQuestionId[question.id];
-    AnswerOptionDetail? selectedOption;
-    for (final option in question.answerOptions) {
-      if (option.id == answer?.answerOptionId) {
-        selectedOption = option;
-        break;
+    final normalizedType = _normalizeQuestionType(question.type);
+
+    String yourAnswerText = 'Not answered';
+    if (answer != null) {
+      if (normalizedType == 'ESSAY') {
+        final text = answer.textAnswer?.trim() ?? '';
+        yourAnswerText = text.isNotEmpty ? text : 'Not answered';
+      } else if (normalizedType == 'MULTIPLE_CHOICE') {
+        final selectedIds = (answer.answerOptionId ?? '')
+            .split(',')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toSet();
+        final selectedContents = question.answerOptions
+            .where((option) => selectedIds.contains(option.id))
+            .map((option) => option.content)
+            .toList();
+        if (selectedContents.isNotEmpty) {
+          yourAnswerText = selectedContents.join(', ');
+        }
+      } else {
+        AnswerOptionDetail? selectedOption;
+        for (final option in question.answerOptions) {
+          if (option.id == answer.answerOptionId) {
+            selectedOption = option;
+            break;
+          }
+        }
+        if (selectedOption != null) {
+          yourAnswerText = selectedOption.content;
+        }
       }
     }
 
@@ -332,6 +374,11 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
             'Question $index',
             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w700),
           ),
+          const SizedBox(height: 4),
+          Text(
+            _questionTypeLabel(question.type),
+            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 6),
           Text(
             question.content,
@@ -339,7 +386,7 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
           ),
           const SizedBox(height: 12),
           Text(
-            selectedOption != null ? 'Your answer: ${selectedOption.content}' : 'Your answer: Not answered',
+            'Your answer: $yourAnswerText',
             style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
           const SizedBox(height: 8),

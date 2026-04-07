@@ -135,6 +135,7 @@ class QuizAttemptInfo {
   final String status;
   final double? finalScore;
   final int attemptNumber;
+  final Map<String, String> answers;
 
   QuizAttemptInfo({
     required this.id,
@@ -145,6 +146,7 @@ class QuizAttemptInfo {
     required this.status,
     required this.finalScore,
     required this.attemptNumber,
+    required this.answers,
   });
 
   factory QuizAttemptInfo.fromJson(Map<String, dynamic> json) {
@@ -157,6 +159,8 @@ class QuizAttemptInfo {
       status: (json['status'] ?? '').toString(),
       finalScore: (json['finalScore'] as num?)?.toDouble(),
       attemptNumber: (json['attemptNumber'] as num?)?.toInt() ?? 1,
+      answers: ((json['answers'] as Map<String, dynamic>?) ?? const <String, dynamic>{})
+          .map((key, value) => MapEntry(key.toString(), (value ?? '').toString())),
     );
   }
 

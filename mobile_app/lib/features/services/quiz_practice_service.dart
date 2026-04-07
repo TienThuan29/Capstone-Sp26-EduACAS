@@ -231,16 +231,23 @@ class QuizPracticeService {
   static Future<void> updateAnswer({
     required String attemptId,
     required String questionId,
-    required String selectedOptionId,
+    String? selectedOptionId,
+    String? textAnswer,
   }) async {
     try {
+      if ((selectedOptionId == null || selectedOptionId.trim().isEmpty) &&
+          (textAnswer == null || textAnswer.trim().isEmpty)) {
+        throw Exception('Answer content is required');
+      }
+
       final token = await _token();
       await ApiNetwork.postWithAuth(
         endpoint: ApiConfig.quizAttemptAnswerEndpoint(attemptId),
         token: token,
         body: {
           'questionId': questionId,
-          'selectedOptionId': selectedOptionId,
+          if (selectedOptionId != null) 'selectedOptionId': selectedOptionId,
+          if (textAnswer != null) 'textAnswer': textAnswer,
         },
       );
     } catch (e) {

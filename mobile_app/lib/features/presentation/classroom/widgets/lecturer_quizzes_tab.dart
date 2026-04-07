@@ -173,6 +173,64 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
     }
   }
 
+  Future<void> _changeQuizStatus({
+    required ClassroomQuiz classroomQuiz,
+    required String targetStatus,
+  }) async {
+    try {
+      await QuizPracticeService.updateClassroomQuiz(
+        classroomQuizId: classroomQuiz.id,
+        status: targetStatus,
+      );
+
+      if (!mounted) return;
+      _showSnack('Quiz status updated to $targetStatus');
+      _loadData();
+    } catch (e) {
+      _showSnack(e.toString().replaceFirst('Exception: ', ''), isError: true);
+    }
+  }
+
+  Widget _buildQuickStatusAction(ClassroomQuiz item) {
+    final normalized = item.status.trim().toUpperCase();
+
+    if (normalized == 'DRAFT') {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: OutlinedButton.icon(
+          onPressed: () => _changeQuizStatus(classroomQuiz: item, targetStatus: 'PUBLISHED'),
+          icon: const Icon(Icons.publish_rounded, size: 16),
+          label: const Text('Published'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.success,
+            side: BorderSide(color: AppColors.success.withValues(alpha: 0.6)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      );
+    }
+
+    if (normalized == 'PUBLISHED') {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: OutlinedButton.icon(
+          onPressed: () => _changeQuizStatus(classroomQuiz: item, targetStatus: 'CLOSED'),
+          icon: const Icon(Icons.lock_rounded, size: 16),
+          label: const Text('Close'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.error,
+            side: BorderSide(color: AppColors.error.withValues(alpha: 0.6)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
   void _showSnack(String message, {bool isError = false}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -339,6 +397,8 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
                     'Max attempts: ${item.maxOfAttempts}',
                     style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                   ),
+                  const SizedBox(height: 8),
+                  _buildQuickStatusAction(item),
                   const SizedBox(height: 8),
                   const Row(
                     children: [
