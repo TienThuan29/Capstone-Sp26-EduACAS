@@ -44,9 +44,15 @@ class ApiConfig {
 
     // Quiz endpoints
     static String quizzesByIdEndpoint(String id) => '/api/acas/v1/quizzes/$id';
-    static String questionByIdEndpoint(String id) => '/api/acas/v1/questions/$id';
     static String classroomQuizzesByClassroomEndpoint(String classroomId) =>
       '/api/acas/v1/classroom-quizzes/classroom/$classroomId';
+    static String classroomQuizByIdEndpoint(String id) =>
+      '/api/acas/v1/classroom-quizzes/$id';
+    static String get createClassroomQuizEndpoint => '/api/acas/v1/classroom-quizzes';
+    static String updateClassroomQuizEndpoint(String id) =>
+      '/api/acas/v1/classroom-quizzes/$id';
+    static String softDeleteClassroomQuizEndpoint(String id) =>
+      '/api/acas/v1/classroom-quizzes/$id/soft-delete';
     static String quizAttemptStartEndpoint() => '/api/acas/v1/quiz-attempts/start';
     static String quizAttemptAnswerEndpoint(String attemptId) =>
       '/api/acas/v1/quiz-attempts/$attemptId/answers';
@@ -56,6 +62,12 @@ class ApiConfig {
       '/api/acas/v1/quiz-attempts/$attemptId';
     static String quizAttemptsByStudentEndpoint(String studentId) =>
       '/api/acas/v1/quiz-attempts/student/$studentId';
+    static String quizSubmissionsPagedEndpoint({
+      required String classroomQuizId,
+      int pageIndex = 1,
+      int pageSize = 10,
+    }) =>
+      '/api/acas/v1/quiz-attempts/submissions/classroom-quiz/$classroomQuizId?pageIndex=$pageIndex&pageSize=$pageSize';
     static String studentAnswersByAttemptEndpoint(String attemptId) =>
       '/api/acas/v1/student-answers/attempt/$attemptId';
 
