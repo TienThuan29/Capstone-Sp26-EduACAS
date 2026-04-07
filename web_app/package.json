@@ -28,6 +28,7 @@
     "@tiptap/pm": "^3.19.0",
     "@tiptap/react": "^3.19.0",
     "@tiptap/starter-kit": "^3.19.0",
+    "@tremor/react": "^3.18.7",
     "axios": "^1.13.2",
     "clang-format": "^1.8.0",
     "clsx": "^2.1.1",
@@ -46,6 +47,7 @@
     "react-dom": "^19.1.0",
     "react-markdown": "^10.1.0",
     "react-resizable-panels": "^4.5.8",
+    "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
     "turndown": "^7.2.2"
   },

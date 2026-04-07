@@ -92,6 +92,7 @@ using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 using AcasService.Application.Commands.Formatters;
+using AcasService.Repositories.AcademicWarning;
 using AcasService.Repositories.ExaminationTemplate;
 using AcasService.Application.Commands.ExaminationTemplate;
 using AcasService.Application.Queries.ExaminationTemplate;
@@ -100,6 +101,7 @@ using AcasService.Application.Jobs;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.Redis.StackExchange;
+using AcasService.Application.Queries.ClassroomDashboard;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -201,6 +203,12 @@ builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
 builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
 builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 builder.Services.AddScoped<IExaminationTemplateRepository, ExaminationTemplateRepository>();
+
+// Academic Warning
+builder.Services.AddScoped<IAcademicWarningRepository, AcademicWarningRepository>();
+
+// Classroom Dashboard
+builder.Services.AddScoped<IClassroomDashboardQuery, ClassroomDashboardQuery>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();

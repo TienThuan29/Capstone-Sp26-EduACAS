@@ -6,8 +6,10 @@
     "classroomId": "cls-001",
     "description": "Midterm covering basic I/O and string operations. Exact string comparison.",
     "totalMark": 10.0,
-    "status": "ONGOING",
+    "status": "COMPLETED",
     "mode": "EXAMINATION",
+    "startDatetime": "2026-02-15T08:00:00",
+    "endDatetime": "2026-02-15T10:00:00",
     "problems": [
       { "problemId": "prob-001", "mark": 5.0 },
       { "problemId": "prob-002", "mark": 5.0 }
@@ -20,14 +22,70 @@
     "classroomId": "cls-001",
     "description": "Practice session on conditional logic. Case-insensitive output.",
     "totalMark": 10.0,
-    "status": "ONGOING",
+    "status": "COMPLETED",
     "mode": "PRACTICAL",
+    "startDatetime": "2026-02-20T14:00:00",
+    "endDatetime": "2026-02-20T16:00:00",
     "problems": [
       { "problemId": "prob-006", "mark": 3.0 },
       { "problemId": "prob-007", "mark": 3.0 },
       { "problemId": "prob-008", "mark": 4.0 }
     ]
   },
+  {
+    "id": "exam-cs101-01",
+    "examName": "Lab Test 1 - Intro to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-001",
+    "description": "Lab test on basic input/output and arithmetic operations.",
+    "totalMark": 10.0,
+    "status": "COMPLETED",
+    "mode": "PRACTICAL",
+    "startDatetime": "2026-01-20T08:00:00",
+    "endDatetime": "2026-01-20T10:00:00",
+    "problems": [
+      { "problemId": "prob-001", "mark": 3.0 },
+      { "problemId": "prob-002", "mark": 3.0 },
+      { "problemId": "prob-003", "mark": 4.0 }
+    ]
+  },
+  {
+    "id": "exam-cs101-02",
+    "examName": "Lab Test 2 - Intro to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-001",
+    "description": "Lab test on control flow and string manipulation.",
+    "totalMark": 10.0,
+    "status": "COMPLETED",
+    "mode": "PRACTICAL",
+    "startDatetime": "2026-02-05T08:00:00",
+    "endDatetime": "2026-02-05T10:00:00",
+    "problems": [
+      { "problemId": "prob-004", "mark": 3.0 },
+      { "problemId": "prob-005", "mark": 3.0 },
+      { "problemId": "prob-006", "mark": 4.0 }
+    ]
+  },
+  {
+    "id": "exam-cs101-03",
+    "examName": "Final Exam - Intro to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-001",
+    "description": "Final exam covering all topics including functions, lists, and file I/O.",
+    "totalMark": 10.0,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "startDatetime": "2026-03-15T08:00:00",
+    "endDatetime": "2026-03-15T11:00:00",
+    "problems": [
+      { "problemId": "prob-001", "mark": 2.0 },
+      { "problemId": "prob-002", "mark": 2.0 },
+      { "problemId": "prob-003", "mark": 2.0 },
+      { "problemId": "prob-004", "mark": 2.0 },
+      { "problemId": "prob-005", "mark": 2.0 }
+    ]
+  },
+
   {
     "id": "exam-003",
     "examName": "Midterm Exam - DSA G1",

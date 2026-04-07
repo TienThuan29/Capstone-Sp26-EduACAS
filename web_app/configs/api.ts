@@ -74,6 +74,13 @@ export const Api = {
     UPDATE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}`,
     SOFT_DELETE_CLASSROOM: (id: string) => `/api/acas/v1/classrooms/${id}/soft-delete`,
     REGENERATE_ENROL_KEY: (id: string) => `/api/acas/v1/classrooms/${id}/regenerate-enrol-key`,
+
+    // Classroom Dashboard
+    GET_DASHBOARD_SCORE_DISTRIBUTION: (classroomId: string, mode?: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/score-distribution${mode ? `?mode=${mode}` : ""}`,
+    GET_DASHBOARD_AT_RISK: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/at-risk`,
+    GET_DASHBOARD_WARNINGS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/warnings`,
+    GET_CLASS_STATS: "/api/acas/v1/classrooms/dashboard/stats",
+    GET_EXAM_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics`,
   },
 
   Examination: {
@@ -234,5 +241,56 @@ export const Api = {
     DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}/soft-delete`,
     RESTORE: (id: string) => `/api/acas/v1/examination-templates/${id}/restore`,
+  },
+
+  Grading: {
+    // Dashboard Overview
+    GET_OVERVIEW: "/api/acas/v1/grading/dashboard/overview",
+    GET_CLASS_DASHBOARD: (classroomId: string) =>
+      `/api/acas/v1/grading/dashboard/classroom/${classroomId}`,
+    GET_STUDENT_DASHBOARD: (studentId: string) =>
+      `/api/acas/v1/grading/dashboard/student/${studentId}/classes`,
+
+    // Settings
+    GET_SETTINGS: (classroomId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/settings`,
+    UPDATE_SETTINGS: (classroomId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/settings`,
+
+    // Progress
+    GET_CLASS_PROGRESS: (classroomId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/progress`,
+    GET_STUDENT_PROGRESS: (classroomId: string, studentId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/students/${studentId}/progress`,
+    GET_STUDENT_HISTORY: (classroomId: string, studentId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/students/${studentId}/progress/history`,
+    SUBMIT_EXAM_RESULT: (classroomId: string, studentId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/students/${studentId}/progress/exam-result`,
+
+    // Warnings
+    GET_WARNINGS: "/api/acas/v1/grading/warnings",
+    GET_WARNING: (warningId: string) =>
+      `/api/acas/v1/grading/warnings/${warningId}`,
+    MARK_WARNING_READ: (warningId: string) =>
+      `/api/acas/v1/grading/warnings/${warningId}/read`,
+    RESOLVE_WARNING: (warningId: string) =>
+      `/api/acas/v1/grading/warnings/${warningId}/resolve`,
+    SEND_WARNING_NOTIFICATION: (warningId: string) =>
+      `/api/acas/v1/grading/warnings/${warningId}/send-notification`,
+    GET_CLASS_WARNINGS: (classroomId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/warnings`,
+    GET_WARNING_STATS: (classroomId: string) =>
+      `/api/acas/v1/grading/classrooms/${classroomId}/warnings/stats`,
+
+    // Recommendations
+    GET_RECOMMENDATIONS: "/api/acas/v1/grading/recommendations",
+    GET_RECOMMENDATION: (recommendationId: string) => `/api/acas/v1/grading/recommendations/${recommendationId}`,
+    COMPLETE_RECOMMENDATION: (recommendationId: string) => `/api/acas/v1/grading/recommendations/${recommendationId}/complete`,
+    CREATE_RECOMMENDATION: (warningId: string) => `/api/acas/v1/grading/warnings/${warningId}/recommendations`,
+    GET_STUDENT_RECOMMENDATIONS: (studentId: string) => `/api/acas/v1/grading/students/${studentId}/recommendations`,
+
+    // Export
+    EXPORT_REPORT: (classroomId: string) =>
+      `/api/acas/v1/grading/dashboard/export/classroom/${classroomId}`,
   },
 };
