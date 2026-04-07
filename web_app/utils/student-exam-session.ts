@@ -38,6 +38,30 @@ export function dispatchExamActiveProblemChanged(): void {
   window.dispatchEvent(new CustomEvent(EXAM_ACTIVE_PROBLEM_CHANGED_EVENT));
 }
 
+/** sessionStorage: exam id that should show lock notice modal after redirecting from code editor. */
+export const EXAM_LOCKED_NOTICE_EXAM_ID_KEY = 'exam-locked-notice-exam-id';
+
+export function markExamLockedNotice(examId: string): void {
+  if (typeof window === 'undefined' || !examId) return;
+  try {
+    window.sessionStorage.setItem(EXAM_LOCKED_NOTICE_EXAM_ID_KEY, examId);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function consumeExamLockedNotice(examId: string): boolean {
+  if (typeof window === 'undefined' || !examId) return false;
+  try {
+    const value = window.sessionStorage.getItem(EXAM_LOCKED_NOTICE_EXAM_ID_KEY);
+    if (value !== examId) return false;
+    window.sessionStorage.removeItem(EXAM_LOCKED_NOTICE_EXAM_ID_KEY);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** sessionStorage: exam id to request fullscreen on exam detail after resume gate (value = examId). */
 export const EXAM_RESUME_FULLSCREEN_EXAM_ID_KEY = 'exam-resume-fullscreen-exam-id';
 
@@ -142,6 +166,7 @@ export function clearExamSessionClientStorage(examId: string, studentId: string)
   window.localStorage.removeItem(keys.activeProblemIdStorageKey);
   window.localStorage.removeItem(keys.fullscreenLockStorageKey);
   window.localStorage.removeItem(keys.sessionKey);
+  window.localStorage.removeItem(`${keys.sessionKey}:guard-started-at`);
   window.localStorage.removeItem(keys.aggregatedViolationsStorageKey);
   window.localStorage.removeItem(keys.aggregatedLogsStorageKey);
   window.localStorage.removeItem(keys.aggregatedAnswerStorageKey);

@@ -63,23 +63,25 @@ class ApiConfig {
   static String privateFileUrlEndpoint(String filename) =>
       '/api/acas/v1/private-s3/file/${Uri.encodeComponent(filename)}';
 
-  // Discussion Issue endpoints
-  static String discussionIssuesByClassroomEndpoint(String classroomId) =>
-      '/api/acas/v1/discussion-issues/classroom/$classroomId';
-  static String get createDiscussionIssueEndpoint =>
+  // Discussion Issue endpoints (matches web app)
+  static String get discussionIssuesBaseEndpoint =>
       '/api/acas/v1/discussion-issues';
   static String discussionIssueByIdEndpoint(String id) =>
       '/api/acas/v1/discussion-issues/$id';
+  static String get discussionIssueCountEndpoint =>
+      '/api/acas/v1/discussion-issues/count';
+  static String changeDiscussionStatusEndpoint(String id) =>
+      '/api/acas/v1/discussion-issues/$id/status';
   static String softDeleteDiscussionIssueEndpoint(String id) =>
       '/api/acas/v1/discussion-issues/$id/soft-delete';
 
-  // Comment endpoints
-  static String commentsByDiscussionIssueEndpoint(String discussionIssueId) =>
-      '/api/acas/v1/comments/discussion-issue/$discussionIssueId';
-  static String get createCommentEndpoint => '/api/acas/v1/comments';
-  static String commentByIdEndpoint(String id) => '/api/acas/v1/comments/$id';
-  static String softDeleteCommentEndpoint(String id) =>
-      '/api/acas/v1/comments/$id/soft-delete';
+  // Comment endpoints (nested under discussion-issues, matches web app)
+  static String get writeCommentEndpoint =>
+      '/api/acas/v1/discussion-issues/comments';
+  static String get replyCommentEndpoint =>
+      '/api/acas/v1/discussion-issues/comments/reply';
+  static String get upvoteCommentEndpoint =>
+      '/api/acas/v1/discussion-issues/comments/upvote';
 
   // Problem endpoints
   static String problemsByLecturerEndpoint(String lecturerId) =>

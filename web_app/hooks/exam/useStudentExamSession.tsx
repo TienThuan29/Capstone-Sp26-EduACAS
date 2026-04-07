@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import axios from 'axios';
 import useAxios from '@/hooks/useAxios';
 import { Api } from '@/configs/api';
 import type { StudentExamSessionDto } from '@/types/student-exam-session';
@@ -13,6 +14,9 @@ interface ApiResponse<T> {
 
 export const useStudentExamSession = () => {
   const axiosInstance = useAxios();
+
+  const isExpectedBadRequest = (error: unknown): boolean =>
+    axios.isAxiosError(error) && error.response?.status === 400;
 
   const getActive = useCallback(async (): Promise<StudentExamSessionDto | null> => {
     const { data } = await axiosInstance.get<ApiResponse<StudentExamSessionDto | null>>(Api.StudentExamSession.ACTIVE);
@@ -51,24 +55,56 @@ export const useStudentExamSession = () => {
 
   const lock = useCallback(
     async (examId: string, lockReason?: string): Promise<StudentExamSessionDto | null> => {
-      const { data } = await axiosInstance.post<ApiResponse<StudentExamSessionDto>>(Api.StudentExamSession.LOCK, {
-        examId,
-        lockReason,
-      });
-      return data?.dataResponse ?? null;
+      const current = await getByExam(examId);
+      if (!current || current.phase !== 'ACTIVE') {
+        return current;
+      }
+
+      try {
+        const { data } = await axiosInstance.post<ApiResponse<StudentExamSessionDto>>(Api.StudentExamSession.LOCK, {
+          examId,
+          lockReason,
+        });
+        return data?.dataResponse ?? null;
+      } catch (error) {
+        if (isExpectedBadRequest(error)) {
+          try {
+            return await getByExam(examId);
+          } catch {
+            return current;
+          }
+        }
+        throw error;
+      }
     },
-    [axiosInstance]
+    [axiosInstance, getByExam]
   );
 
   const setActiveProblem = useCallback(
     async (examId: string, problemId: string | null): Promise<StudentExamSessionDto | null> => {
-      const { data } = await axiosInstance.post<ApiResponse<StudentExamSessionDto>>(
-        Api.StudentExamSession.ACTIVE_PROBLEM,
-        { examId, problemId }
-      );
-      return data?.dataResponse ?? null;
+      const current = await getByExam(examId);
+      if (!current || current.phase !== 'ACTIVE') {
+        return current;
+      }
+
+      try {
+        const { data } = await axiosInstance.post<ApiResponse<StudentExamSessionDto>>(
+          Api.StudentExamSession.ACTIVE_PROBLEM,
+          { examId, problemId }
+        );
+        return data?.dataResponse ?? null;
+      } catch (error) {
+        if (isExpectedBadRequest(error)) {
+          try {
+            return await getByExam(examId);
+          } catch {
+            return current;
+          }
+        }
+        throw error;
+      }
     },
-    [axiosInstance]
+    [axiosInstance, getByExam]
   );
 
   return { getActive, getByExam, start, complete, lock, setActiveProblem };
