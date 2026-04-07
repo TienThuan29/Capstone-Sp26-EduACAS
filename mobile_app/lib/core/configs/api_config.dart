@@ -44,6 +44,11 @@ class ApiConfig {
 
     // Quiz endpoints
     static String quizzesByIdEndpoint(String id) => '/api/acas/v1/quizzes/$id';
+    static String get classroomQuizzesEndpoint => '/api/acas/v1/classroom-quizzes';
+    static String classroomQuizByIdEndpoint(String id) =>
+      '/api/acas/v1/classroom-quizzes/$id';
+    static String softDeleteClassroomQuizEndpoint(String id) =>
+      '/api/acas/v1/classroom-quizzes/$id/soft-delete';
     static String classroomQuizzesByClassroomEndpoint(String classroomId) =>
       '/api/acas/v1/classroom-quizzes/classroom/$classroomId';
     static String quizAttemptStartEndpoint() => '/api/acas/v1/quiz-attempts/start';

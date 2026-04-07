@@ -107,6 +107,8 @@ namespace AcasService.Application.Commands.ClassroomQuiz
             bool isPublished = existing.Status == ClassroomQuizStatus.PUBLISHED;
             bool isOngoing = isPublished && existing.StartTime <= now && existing.EndTime > now;
             bool isClosed = existing.Status == ClassroomQuizStatus.CLOSED;
+            bool startTimeChanged = false;
+            bool endTimeChanged = false;
 
             if (request.StartTime.HasValue && request.StartTime.Value != existing.StartTime)
             {
@@ -121,6 +123,7 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 }
                 
                 existing.StartTime = request.StartTime.Value;
+                startTimeChanged = true;
             }
 
             if (request.EndTime.HasValue)
@@ -141,6 +144,7 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 }
                 
                 existing.EndTime = request.EndTime.Value;
+                endTimeChanged = true;
             }
 
             if (request.MaxOfAttempts.HasValue && request.MaxOfAttempts.Value != existing.MaxOfAttempts)
@@ -177,16 +181,18 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 existing.Status = request.Status.Value;
             }
 
-            if (existing.Status == ClassroomQuizStatus.PUBLISHED)
+            bool becamePublished = !isPublished && existing.Status == ClassroomQuizStatus.PUBLISHED;
+            bool isStillPublished = isPublished && existing.Status == ClassroomQuizStatus.PUBLISHED;
+            bool becameClosed = isPublished && existing.Status == ClassroomQuizStatus.CLOSED;
+
+            if (becamePublished || (isStillPublished && (startTimeChanged || endTimeChanged)))
             {
-                if (isDraft || (request.EndTime.HasValue && request.EndTime.Value != existing.EndTime))
-                {
-                    existing.CloseJobId = await _jobScheduling.RescheduleCloseJobAsync(existing.CloseJobId, id, existing.EndTime);
-                }
+                _jobScheduling.RescheduleJobs(id, existing.StartTime, existing.EndTime);
             }
-            else if (existing.Status == ClassroomQuizStatus.CLOSED && isPublished)
+            else if (becameClosed)
             {
-                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId ?? "");
+                _jobScheduling.CancelJobs(id);
+                existing.OpenJobId = null;
                 existing.CloseJobId = null;
             }
 
@@ -216,9 +222,9 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 throw new InvalidOperationException("Cannot delete an ongoing quiz. Please close it first.");
             }
 
-            if (!string.IsNullOrEmpty(existing.CloseJobId))
+            if (!string.IsNullOrEmpty(existing.OpenJobId) || !string.IsNullOrEmpty(existing.CloseJobId))
             {
-                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId);
+                _jobScheduling.CancelJobs(id);
             }
 
             await _repository.SoftDeleteAsync(id);
@@ -240,9 +246,9 @@ namespace AcasService.Application.Commands.ClassroomQuiz
                 throw new InvalidOperationException("Cannot delete an ongoing quiz.");
             }
 
-            if (!string.IsNullOrEmpty(existing.CloseJobId))
+            if (!string.IsNullOrEmpty(existing.OpenJobId) || !string.IsNullOrEmpty(existing.CloseJobId))
             {
-                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId);
+                _jobScheduling.CancelJobs(id);
             }
 
             await _repository.DeleteAsync(id);

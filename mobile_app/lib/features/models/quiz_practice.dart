@@ -1,3 +1,10 @@
+enum ClassroomQuizLifecycle {
+  draft,
+  published,
+  closed,
+  unknown,
+}
+
 class ClassroomQuiz {
   final String id;
   final String classroomId;
@@ -30,6 +37,30 @@ class ClassroomQuiz {
       passcode: json['passcode'],
       status: (json['status'] ?? '').toString(),
     );
+  }
+
+  ClassroomQuizLifecycle get lifecycleStatus {
+    final raw = status.trim().toUpperCase();
+    switch (raw) {
+      case '0':
+      case 'DRAFT':
+        return ClassroomQuizLifecycle.draft;
+      case '1':
+      case 'PUBLISHED':
+        return ClassroomQuizLifecycle.published;
+      case '2':
+      case 'CLOSED':
+        return ClassroomQuizLifecycle.closed;
+      default:
+        return ClassroomQuizLifecycle.unknown;
+    }
+  }
+
+  bool get isPublishedStatus => lifecycleStatus == ClassroomQuizLifecycle.published;
+  bool get isClosedStatus => lifecycleStatus == ClassroomQuizLifecycle.closed;
+
+  bool isWithinActiveWindow(DateTime nowUtc) {
+    return !nowUtc.isBefore(startTime) && nowUtc.isBefore(endTime);
   }
 }
 

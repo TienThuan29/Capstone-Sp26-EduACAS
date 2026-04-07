@@ -2,92 +2,193 @@ using Hangfire;
 using AcasService.Models;
 using AcasService.Repositories.ClassroomQuiz;
 
-namespace AcasService.Application.Jobs
+namespace AcasService.Application.Jobs;
+
+/// <summary>
+/// Service responsible for scheduling and managing classroom quiz status transition jobs
+/// using Hangfire delayed jobs backed by Redis.
+/// </summary>
+public interface IClassroomQuizJobScheduling
 {
-    public interface IClassroomQuizJobScheduling
+    /// <summary>
+    /// Schedules two jobs for a classroom quiz:
+    ///   1. Open job  — transitions DRAFT -> PUBLISHED at StartTime
+    ///   2. Close job — transitions PUBLISHED -> CLOSED at EndTime
+    /// </summary>
+    void ScheduleJobs(string classroomQuizId, DateTime startTime, DateTime endTime);
+
+    /// <summary>
+    /// Cancels previously scheduled open and close jobs for the given classroom quiz.
+    /// </summary>
+    void CancelJobs(string classroomQuizId);
+
+    /// <summary>
+    /// Reschedules jobs when start/end time changes.
+    /// </summary>
+    void RescheduleJobs(string classroomQuizId, DateTime newStartTime, DateTime newEndTime);
+}
+
+public class ClassroomQuizJobScheduling : IClassroomQuizJobScheduling
+{
+    private readonly IClassroomQuizRepository _repository;
+    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly ILogger<ClassroomQuizJobScheduling> _logger;
+
+    public ClassroomQuizJobScheduling(
+        IClassroomQuizRepository repository,
+        IBackgroundJobClient backgroundJobClient,
+        ILogger<ClassroomQuizJobScheduling> logger)
     {
-        Task<string> ScheduleCloseJobAsync(string classroomQuizId, DateTime endTime);
-        Task CancelCloseJobAsync(string jobId);
-        Task<string> RescheduleCloseJobAsync(string? oldJobId, string classroomQuizId, DateTime newEndTime);
+        _repository = repository;
+        _backgroundJobClient = backgroundJobClient;
+        _logger = logger;
     }
 
-    public class ClassroomQuizJobScheduling : IClassroomQuizJobScheduling
+    public void ScheduleJobs(string classroomQuizId, DateTime startTime, DateTime endTime)
     {
-        private readonly IClassroomQuizRepository _repository;
-        private readonly IBackgroundJobClient _jobClient;
-        private readonly ILogger<ClassroomQuizJobScheduling> _logger;
+        var startUtc = EnsureUtc(startTime);
+        var endUtc = EnsureUtc(endTime);
+        var now = DateTime.UtcNow;
 
-        public ClassroomQuizJobScheduling(
-            IClassroomQuizRepository repository, 
-            IBackgroundJobClient jobClient,
-            ILogger<ClassroomQuizJobScheduling> logger)
+        if (endUtc <= now)
         {
-            _repository = repository;
-            _jobClient = jobClient;
-            _logger = logger;
+            _logger.LogWarning(
+                "ClassroomQuiz {ClassroomQuizId} EndTime {EndTime} is not in the future. Skipping job scheduling.",
+                classroomQuizId,
+                endUtc);
+            return;
         }
 
-        public async Task<string> ScheduleCloseJobAsync(string classroomQuizId, DateTime endTime)
+        if (startUtc >= now)
         {
-            var now = DateTime.UtcNow;
-            var delay = endTime - now;
+            var openDelay = startUtc - now;
+            var openJobId = _backgroundJobClient.Schedule<ClassroomQuizJobScheduling>(
+                job => job.MarkQuizAsOpenAsync(classroomQuizId),
+                openDelay);
 
-            if (delay < TimeSpan.Zero) delay = TimeSpan.Zero;
+            _logger.LogInformation(
+                "Scheduled OPEN job for classroom quiz {ClassroomQuizId} at {StartTime} (delay: {Delay}, JobId: {JobId})",
+                classroomQuizId, startUtc, openDelay, openJobId);
+        }
+        else
+        {
+            var openJobId = _backgroundJobClient.Schedule<ClassroomQuizJobScheduling>(
+                job => job.MarkQuizAsOpenAsync(classroomQuizId),
+                TimeSpan.Zero);
 
-            var jobId = _jobClient.Schedule<ClassroomQuizJobScheduling>(
-                s => s.CloseQuizAsync(classroomQuizId),
-                delay);
-
-            _logger.LogInformation($"Scheduled CLOSE job for ClassroomQuiz {classroomQuizId} at {endTime} (JobId: {jobId})");
-            return await Task.FromResult(jobId);
+            _logger.LogInformation(
+                "ClassroomQuiz {ClassroomQuizId} StartTime {StartTime} is in the past. OPEN job scheduled immediately (JobId: {JobId}).",
+                classroomQuizId, startUtc, openJobId);
         }
 
-        public async Task CancelCloseJobAsync(string jobId)
-        {
-            if (string.IsNullOrEmpty(jobId)) return;
-            
-            _jobClient.Delete(jobId);
-            _logger.LogInformation($"Cancelled scheduled job {jobId}");
-            await Task.CompletedTask;
-        }
+        var closeDelay = endUtc - now;
+        var closeJobId = _backgroundJobClient.Schedule<ClassroomQuizJobScheduling>(
+            job => job.MarkQuizAsClosedAsync(classroomQuizId),
+            closeDelay);
 
-        public async Task<string> RescheduleCloseJobAsync(string? oldJobId, string classroomQuizId, DateTime newEndTime)
+        _logger.LogInformation(
+            "Scheduled CLOSE job for classroom quiz {ClassroomQuizId} at {EndTime} (delay: {Delay}, JobId: {JobId})",
+            classroomQuizId, endUtc, closeDelay, closeJobId);
+    }
+
+    public void CancelJobs(string classroomQuizId)
+    {
+        var openJobId = GetOpenJobId(classroomQuizId);
+        var closeJobId = GetCloseJobId(classroomQuizId);
+
+        var openDeleted = _backgroundJobClient.Delete(openJobId);
+        var closeDeleted = _backgroundJobClient.Delete(closeJobId);
+
+        _logger.LogInformation(
+            "Cancelled jobs for classroom quiz {ClassroomQuizId}: open={OpenDeleted}, close={CloseDeleted}",
+            classroomQuizId, openDeleted, closeDeleted);
+    }
+
+    public void RescheduleJobs(string classroomQuizId, DateTime newStartTime, DateTime newEndTime)
+    {
+        CancelJobs(classroomQuizId);
+        ScheduleJobs(classroomQuizId, newStartTime, newEndTime);
+    }
+
+    public async Task MarkQuizAsOpenAsync(string classroomQuizId)
+    {
+        try
         {
-            if (!string.IsNullOrEmpty(oldJobId))
+            var quiz = await _repository.FindByIdAsync(classroomQuizId);
+            if (quiz == null)
             {
-                await CancelCloseJobAsync(oldJobId);
+                _logger.LogWarning("OPEN job failed: ClassroomQuiz {ClassroomQuizId} not found", classroomQuizId);
+                return;
             }
-            return await ScheduleCloseJobAsync(classroomQuizId, newEndTime);
+
+            if (quiz.Status == ClassroomQuizStatus.PUBLISHED)
+            {
+                _logger.LogInformation("OPEN job skipped: ClassroomQuiz {ClassroomQuizId} is already PUBLISHED", classroomQuizId);
+                return;
+            }
+
+            if (quiz.Status == ClassroomQuizStatus.CLOSED)
+            {
+                _logger.LogInformation("OPEN job skipped: ClassroomQuiz {ClassroomQuizId} is already CLOSED", classroomQuizId);
+                return;
+            }
+
+            quiz.Status = ClassroomQuizStatus.PUBLISHED;
+            quiz.UpdatedAt = DateTime.UtcNow;
+            await _repository.UpdateAsync(quiz);
+
+            _logger.LogInformation("ClassroomQuiz {ClassroomQuizId} transitioned to PUBLISHED", classroomQuizId);
         }
-
-        public async Task CloseQuizAsync(string classroomQuizId)
+        catch (Exception ex)
         {
-            try 
-            {
-                var quiz = await _repository.FindByIdAsync(classroomQuizId);
-                if (quiz == null)
-                {
-                    _logger.LogWarning($"CLOSE job failed: ClassroomQuiz {classroomQuizId} not found.");
-                    return;
-                }
-
-                if (quiz.Status != ClassroomQuizStatus.PUBLISHED)
-                {
-                    _logger.LogInformation($"CLOSE job skipped: ClassroomQuiz {classroomQuizId} is already {quiz.Status}.");
-                    return;
-                }
-
-                quiz.Status = ClassroomQuizStatus.CLOSED;
-                quiz.UpdatedAt = DateTime.UtcNow;
-                
-                await _repository.UpdateAsync(quiz);
-                _logger.LogInformation($"ClassroomQuiz {classroomQuizId} has been automatically CLOSED by scheduled job.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error during automated CLOSING of ClassroomQuiz {classroomQuizId}");
-                throw; 
-            }
+            _logger.LogError(ex, "OPEN job failed for classroom quiz {ClassroomQuizId}", classroomQuizId);
+            throw;
         }
     }
+
+    public async Task MarkQuizAsClosedAsync(string classroomQuizId)
+    {
+        try
+        {
+            var quiz = await _repository.FindByIdAsync(classroomQuizId);
+            if (quiz == null)
+            {
+                _logger.LogWarning("CLOSE job failed: ClassroomQuiz {ClassroomQuizId} not found", classroomQuizId);
+                return;
+            }
+
+            if (quiz.Status == ClassroomQuizStatus.CLOSED)
+            {
+                _logger.LogInformation("CLOSE job skipped: ClassroomQuiz {ClassroomQuizId} is already CLOSED", classroomQuizId);
+                return;
+            }
+
+            quiz.Status = ClassroomQuizStatus.CLOSED;
+            quiz.UpdatedAt = DateTime.UtcNow;
+            await _repository.UpdateAsync(quiz);
+
+            _logger.LogInformation("ClassroomQuiz {ClassroomQuizId} transitioned to CLOSED", classroomQuizId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "CLOSE job failed for classroom quiz {ClassroomQuizId}", classroomQuizId);
+            throw;
+        }
+    }
+
+    private static DateTime EnsureUtc(DateTime dt)
+    {
+        return dt.Kind switch
+        {
+            DateTimeKind.Utc => dt,
+            DateTimeKind.Local => dt.ToUniversalTime(),
+            _ => DateTime.SpecifyKind(dt, DateTimeKind.Utc)
+        };
+    }
+
+    private static string GetOpenJobId(string classroomQuizId) =>
+        $"classroom-quiz-open:{classroomQuizId}";
+
+    private static string GetCloseJobId(string classroomQuizId) =>
+        $"classroom-quiz-close:{classroomQuizId}";
 }

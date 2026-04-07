@@ -242,8 +242,8 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
 
   Widget _buildRetakeSection() {
     final now = DateTime.now().toUtc();
-    final isPublished = widget.classroomQuiz.status.toUpperCase() == 'PUBLISHED';
-    final inWindow = now.isAfter(widget.classroomQuiz.startTime) && now.isBefore(widget.classroomQuiz.endTime);
+    final isPublished = widget.classroomQuiz.isPublishedStatus;
+    final inWindow = widget.classroomQuiz.isWithinActiveWindow(now);
     final usedAttempts = _attempt?.attemptNumber ?? 0;
     final hasAttemptsLeft = usedAttempts < widget.classroomQuiz.maxOfAttempts;
     final canRetake = isPublished && inWindow && hasAttemptsLeft;

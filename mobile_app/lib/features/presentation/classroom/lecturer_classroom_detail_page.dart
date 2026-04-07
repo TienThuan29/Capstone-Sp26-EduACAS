@@ -3,6 +3,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/features/presentation/classroom/widgets/materials_tab.dart';
 import 'package:mobile/features/presentation/classroom/widgets/discussions_tab.dart';
+import 'package:mobile/features/presentation/classroom/widgets/lecturer_quizzes_tab.dart';
 import 'package:mobile/core/widgets/background.dart';
 
 class ClassroomDetailPage extends StatefulWidget {
@@ -24,7 +25,7 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -53,6 +54,7 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
                       classroomId: widget.classroom.id,
                       classroomName: widget.classroom.className,
                     ),
+                    LecturerQuizzesTab(classroomId: widget.classroom.id),
                   ],
                 ),
               ),
@@ -152,6 +154,7 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
         tabs: const [
           Tab(text: 'Materials'),
           Tab(text: 'Discussions'),
+          Tab(text: 'Quizzes'),
         ],
       ),
     );
