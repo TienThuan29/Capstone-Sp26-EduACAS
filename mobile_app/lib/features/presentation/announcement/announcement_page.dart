@@ -231,7 +231,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           'classId',
         ]);
         if (classroomId != null) {
-          await _openClassroom(classroomId, initialTabIndex: 2);
+          await _openClassroom(classroomId, initialTabIndex: 3);
         }
         return;
       }

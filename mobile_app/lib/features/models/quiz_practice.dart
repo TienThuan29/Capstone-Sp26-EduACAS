@@ -166,6 +166,7 @@ class QuizAttemptInfo {
   final String status;
   final double? finalScore;
   final int attemptNumber;
+  final Map<String, String> answers;
 
   QuizAttemptInfo({
     required this.id,
@@ -176,6 +177,7 @@ class QuizAttemptInfo {
     required this.status,
     required this.finalScore,
     required this.attemptNumber,
+    required this.answers,
   });
 
   factory QuizAttemptInfo.fromJson(Map<String, dynamic> json) {
@@ -186,8 +188,10 @@ class QuizAttemptInfo {
       startTime: DateTime.tryParse(json['startTime'] ?? '')?.toUtc() ?? DateTime.now().toUtc(),
       endTime: DateTime.tryParse((json['endTime'] ?? '').toString())?.toUtc(),
       status: (json['status'] ?? '').toString(),
-      finalScore: (json['finalScore'] as num?)?.toDouble(),
+        finalScore: (json['finalScore'] as num?)?.toDouble() ?? (json['score'] as num?)?.toDouble(),
       attemptNumber: (json['attemptNumber'] as num?)?.toInt() ?? 1,
+      answers: ((json['answers'] as Map<String, dynamic>?) ?? const <String, dynamic>{})
+          .map((key, value) => MapEntry(key.toString(), (value ?? '').toString())),
     );
   }
 
@@ -222,6 +226,63 @@ class StudentAnswerInfo {
       answerOptionId: json['answerOptionId'],
       textAnswer: json['textAnswer'],
       isCorrect: json['isCorrect'] == true,
+    );
+  }
+}
+
+class PagedQuizSubmissionResult {
+  final List<QuizSubmissionInfo> items;
+  final int totalCount;
+  final int pageIndex;
+  final int pageSize;
+  final int totalPages;
+
+  const PagedQuizSubmissionResult({
+    required this.items,
+    required this.totalCount,
+    required this.pageIndex,
+    required this.pageSize,
+    required this.totalPages,
+  });
+}
+
+class QuizSubmissionInfo {
+  final String id;
+  final String classroomQuizId;
+  final String studentId;
+  final String? studentName;
+  final String? studentEmail;
+  final DateTime startTime;
+  final DateTime? endTime;
+  final String status;
+  final double? score;
+  final int attemptNumber;
+
+  const QuizSubmissionInfo({
+    required this.id,
+    required this.classroomQuizId,
+    required this.studentId,
+    required this.studentName,
+    required this.studentEmail,
+    required this.startTime,
+    required this.endTime,
+    required this.status,
+    required this.score,
+    required this.attemptNumber,
+  });
+
+  factory QuizSubmissionInfo.fromJson(Map<String, dynamic> json) {
+    return QuizSubmissionInfo(
+      id: (json['id'] ?? '').toString(),
+      classroomQuizId: (json['classroomQuizId'] ?? '').toString(),
+      studentId: (json['studentId'] ?? '').toString(),
+      studentName: json['studentName']?.toString(),
+      studentEmail: json['studentEmail']?.toString(),
+      startTime: DateTime.tryParse((json['startTime'] ?? '').toString())?.toUtc() ?? DateTime.now().toUtc(),
+      endTime: DateTime.tryParse((json['endTime'] ?? '').toString())?.toUtc(),
+      status: (json['status'] ?? '').toString(),
+      score: (json['score'] as num?)?.toDouble() ?? (json['finalScore'] as num?)?.toDouble(),
+      attemptNumber: (json['attemptNumber'] as num?)?.toInt() ?? 1,
     );
   }
 }

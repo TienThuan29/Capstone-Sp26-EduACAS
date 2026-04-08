@@ -4,7 +4,8 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/quiz.dart';
 import 'package:mobile/features/models/quiz_practice.dart';
-import 'package:mobile/features/services/classroom_quiz_service.dart';
+import 'package:mobile/features/presentation/quiz/lecturer_quiz_submissions_page.dart';
+import 'package:mobile/features/services/quiz_practice_service.dart';
 import 'package:mobile/features/services/quiz_service.dart';
 
 class LecturerQuizzesTab extends StatefulWidget {
@@ -25,7 +26,7 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
 
   List<ClassroomQuiz> _classroomQuizzes = [];
   List<Quiz> _quizBank = [];
-  final Map<String, Quiz> _quizById = {};
+  final Map<String, QuizDetail> _quizDetailsByQuizId = {};
 
   @override
   void initState() {
@@ -40,16 +41,32 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
     });
 
     try {
-      final quizzes = await ClassroomQuizService.getClassroomQuizzes(widget.classroomId);
-      final paged = await QuizService.getQuizzesPaged(pageIndex: 1, pageSize: 100, includeDeleted: false);
+      final quizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId);
+
+      final detailFutures = quizzes
+          .map((q) async => MapEntry(q.quizId, await QuizPracticeService.getQuizById(q.quizId)))
+          .toList();
+      final loadedDetails = await Future.wait(detailFutures);
+
+      List<Quiz> quizBank = const [];
+      try {
+        final paged = await QuizService.getQuizzesPaged(pageIndex: 1, pageSize: 100, includeDeleted: false);
+        quizBank = paged.items;
+      } catch (_) {
+        // Keep classroom assignments visible even if quiz bank fails to load.
+      }
+
+      quizzes.sort((a, b) => b.startTime.compareTo(a.startTime));
 
       if (!mounted) return;
       setState(() {
         _classroomQuizzes = quizzes;
-        _quizBank = paged.items;
-        _quizById
+        _quizBank = quizBank;
+        _quizDetailsByQuizId
           ..clear()
-          ..addEntries(paged.items.map((e) => MapEntry(e.id, e)));
+          ..addEntries(
+            loadedDetails.where((entry) => entry.value != null).map((entry) => MapEntry(entry.key, entry.value!)),
+          );
         _isLoading = false;
       });
     } catch (e) {
@@ -63,85 +80,83 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
 
   Future<void> _openCreateSheet() async {
     if (_quizBank.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No quiz in quiz bank. Please create a quiz first.'),
-          backgroundColor: AppColors.warning,
-        ),
-      );
+      _showSnack('No quiz available in quiz bank', isError: true);
       return;
     }
 
-    final result = await showModalBottomSheet<_CreateClassroomQuizPayload>(
+    final payload = await showModalBottomSheet<_ClassroomQuizFormValue>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (_) => _CreateClassroomQuizSheet(quizBank: _quizBank),
+      builder: (_) => _ClassroomQuizFormSheet(quizzes: _quizBank),
     );
 
-    if (result == null) return;
+    if (payload == null) return;
 
     try {
       final userId = await TokenStorage.getUserId();
       if (userId == null || userId.isEmpty) {
-        throw Exception('Missing user id. Please login again.');
+        throw Exception('Cannot identify lecturer account');
       }
 
-      await ClassroomQuizService.createClassroomQuiz(
+      await QuizPracticeService.createClassroomQuiz(
         classroomId: widget.classroomId,
-        quizId: result.quizId,
-        startTimeUtc: result.startTimeLocal.toUtc(),
-        endTimeUtc: result.endTimeLocal.toUtc(),
-        maxOfAttempts: result.maxAttempts,
-        passcode: result.passcode,
+        quizId: payload.quizId,
+        startTime: payload.startTime,
+        endTime: payload.endTime,
+        maxOfAttempts: payload.maxOfAttempts,
+        passcode: payload.passcode,
         createdBy: userId,
-        publishAfterCreate: result.publishAfterCreate,
       );
 
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Quiz assigned to classroom successfully.'),
-          backgroundColor: AppColors.success,
-        ),
-      );
+      _showSnack('Quiz assigned successfully');
       _loadData();
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(e.toString().replaceFirst('Exception: ', '')),
-          backgroundColor: AppColors.error,
-        ),
-      );
+      _showSnack(e.toString().replaceFirst('Exception: ', ''), isError: true);
     }
   }
 
-  Future<void> _closeQuiz(ClassroomQuiz item) async {
+  Future<void> _openEditSheet(ClassroomQuiz classroomQuiz) async {
+    final payload = await showModalBottomSheet<_ClassroomQuizFormValue>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _ClassroomQuizFormSheet(
+        quizzes: _quizBank,
+        initial: classroomQuiz,
+      ),
+    );
+
+    if (payload == null) return;
+
     try {
-      await ClassroomQuizService.updateClassroomQuiz(id: item.id, status: 2);
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Quiz has been closed.'), backgroundColor: AppColors.success),
+      await QuizPracticeService.updateClassroomQuiz(
+        classroomQuizId: classroomQuiz.id,
+        startTime: payload.startTime,
+        endTime: payload.endTime,
+        maxOfAttempts: payload.maxOfAttempts,
+        passcode: payload.passcode,
+        status: payload.status,
       );
+
+      if (!mounted) return;
+      _showSnack('Quiz assignment updated');
       _loadData();
     } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
-      );
+      _showSnack(e.toString().replaceFirst('Exception: ', ''), isError: true);
     }
   }
 
-  Future<void> _softDeleteQuiz(ClassroomQuiz item) async {
+  Future<void> _deleteQuizAssignment(ClassroomQuiz classroomQuiz) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Remove classroom quiz'),
-        content: const Text('Soft delete this classroom quiz assignment?'),
+        title: const Text('Remove quiz assignment'),
+        content: const Text('This assignment will be soft deleted. Continue?'),
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Remove')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Delete')),
         ],
       ),
     );
@@ -149,18 +164,81 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
     if (confirmed != true) return;
 
     try {
-      await ClassroomQuizService.softDeleteClassroomQuiz(item.id);
+      await QuizPracticeService.softDeleteClassroomQuiz(classroomQuiz.id);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Classroom quiz removed.'), backgroundColor: AppColors.success),
-      );
+      _showSnack('Quiz assignment removed');
       _loadData();
     } catch (e) {
+      _showSnack(e.toString().replaceFirst('Exception: ', ''), isError: true);
+    }
+  }
+
+  Future<void> _changeQuizStatus({
+    required ClassroomQuiz classroomQuiz,
+    required String targetStatus,
+  }) async {
+    try {
+      await QuizPracticeService.updateClassroomQuiz(
+        classroomQuizId: classroomQuiz.id,
+        status: targetStatus,
+      );
+
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(e.toString()), backgroundColor: AppColors.error),
+      _showSnack('Quiz status updated to $targetStatus');
+      _loadData();
+    } catch (e) {
+      _showSnack(e.toString().replaceFirst('Exception: ', ''), isError: true);
+    }
+  }
+
+  Widget _buildQuickStatusAction(ClassroomQuiz item) {
+    final normalized = item.status.trim().toUpperCase();
+
+    if (normalized == 'DRAFT') {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: OutlinedButton.icon(
+          onPressed: () => _changeQuizStatus(classroomQuiz: item, targetStatus: 'PUBLISHED'),
+          icon: const Icon(Icons.publish_rounded, size: 16),
+          label: const Text('Published'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.success,
+            side: BorderSide(color: AppColors.success.withValues(alpha: 0.6)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
       );
     }
+
+    if (normalized == 'PUBLISHED') {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: OutlinedButton.icon(
+          onPressed: () => _changeQuizStatus(classroomQuiz: item, targetStatus: 'CLOSED'),
+          icon: const Icon(Icons.lock_rounded, size: 16),
+          label: const Text('Close'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.error,
+            side: BorderSide(color: AppColors.error.withValues(alpha: 0.6)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  void _showSnack(String message, {bool isError = false}) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? AppColors.error : AppColors.success,
+      ),
+    );
   }
 
   @override
@@ -170,196 +248,206 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
         const GradientBackground(),
         Column(
           children: [
-            _buildHeader(),
-            Expanded(child: _buildBody()),
+            _buildTopBar(),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  : _error != null
+                      ? _buildErrorState()
+                      : _buildQuizList(),
+            ),
           ],
         ),
       ],
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildTopBar() {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
       child: Row(
         children: [
           const Expanded(
             child: Text(
               'Classroom Quizzes',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
           ElevatedButton.icon(
             onPressed: _openCreateSheet,
             icon: const Icon(Icons.add_rounded),
-            label: const Text('Assign'),
+            label: const Text('Assign Quiz'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBody() {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: AppColors.primary));
-    }
-
-    if (_error != null) {
+  Widget _buildQuizList() {
+    if (_classroomQuizzes.isEmpty) {
       return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(Icons.error_outline, color: AppColors.error, size: 48),
-              const SizedBox(height: 12),
-              Text(_error!, textAlign: TextAlign.center),
-              const SizedBox(height: 12),
-              ElevatedButton(onPressed: _loadData, child: const Text('Retry')),
-            ],
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.quiz_outlined, size: 56, color: Colors.grey[300]),
+            const SizedBox(height: 10),
+            Text(
+              'No quiz assignment yet.',
+              style: TextStyle(color: Colors.grey[600], fontSize: 15),
+            ),
+          ],
         ),
       );
     }
 
-    if (_classroomQuizzes.isEmpty) {
-      return const Center(
-        child: Text('No classroom quizzes yet.', style: TextStyle(color: AppColors.textSecondary)),
-      );
-    }
-
-    final sorted = [..._classroomQuizzes]
-      ..sort((a, b) => b.startTime.compareTo(a.startTime));
-
     return RefreshIndicator(
       onRefresh: _loadData,
       child: ListView.builder(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
-        itemCount: sorted.length,
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 24),
+        itemCount: _classroomQuizzes.length,
         itemBuilder: (context, index) {
-          final item = sorted[index];
-          final quiz = _quizById[item.quizId];
-          return _ClassroomQuizCard(
-            item: item,
-            quizTitle: quiz?.title ?? item.quizId,
-            duration: quiz?.duration,
-            onClose: item.isClosedStatus ? null : () => _closeQuiz(item),
-            onRemove: () => _softDeleteQuiz(item),
+          final item = _classroomQuizzes[index];
+          final detail = _quizDetailsByQuizId[item.quizId];
+          final title = detail?.title ?? 'Quiz ${item.quizId}';
+
+          return InkWell(
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => LecturerQuizSubmissionsPage(
+                    classroomQuiz: item,
+                    quizTitle: title,
+                  ),
+                ),
+              );
+            },
+            borderRadius: BorderRadius.circular(14),
+            child: Container(
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey.withValues(alpha: 0.12)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          title,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      _StatusChip(status: item.status),
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'edit') {
+                            _openEditSheet(item);
+                          } else if (value == 'delete') {
+                            _deleteQuizAssignment(item);
+                          }
+                        },
+                        itemBuilder: (_) => const [
+                          PopupMenuItem(value: 'edit', child: Text('Edit')),
+                          PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Duration: ${detail?.duration ?? '-'} min • Questions: ${detail?.totalQuestions ?? '-'}',
+                    style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Window: ${_fmt(item.startTime)} - ${_fmt(item.endTime)}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textLight),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Max attempts: ${item.maxOfAttempts}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildQuickStatusAction(item),
+                  const SizedBox(height: 8),
+                  const Row(
+                    children: [
+                      Icon(Icons.insights_rounded, size: 15, color: AppColors.primary),
+                      SizedBox(width: 6),
+                      Text(
+                        'Tap to view student scores',
+                        style: TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                  if (item.passcode != null && item.passcode!.trim().isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      'Passcode: ${item.passcode}',
+                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           );
         },
       ),
     );
   }
-}
 
-class _ClassroomQuizCard extends StatelessWidget {
-  final ClassroomQuiz item;
-  final String quizTitle;
-  final int? duration;
-  final VoidCallback? onClose;
-  final VoidCallback onRemove;
-
-  const _ClassroomQuizCard({
-    required this.item,
-    required this.quizTitle,
-    required this.duration,
-    required this.onClose,
-    required this.onRemove,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final status = item.lifecycleStatus;
-    final now = DateTime.now().toUtc();
-
-    String statusText = 'UNKNOWN';
-    Color statusColor = AppColors.textSecondary;
-    switch (status) {
-      case ClassroomQuizLifecycle.draft:
-        statusText = 'DRAFT';
-        statusColor = Colors.amber;
-        break;
-      case ClassroomQuizLifecycle.published:
-        if (item.isWithinActiveWindow(now)) {
-          statusText = 'ONGOING';
-          statusColor = AppColors.success;
-        } else if (now.isBefore(item.startTime)) {
-          statusText = 'SCHEDULED';
-          statusColor = AppColors.primary;
-        } else {
-          statusText = 'PUBLISHED';
-          statusColor = AppColors.primary;
-        }
-        break;
-      case ClassroomQuizLifecycle.closed:
-        statusText = 'CLOSED';
-        statusColor = AppColors.error;
-        break;
-      case ClassroomQuizLifecycle.unknown:
-        statusText = 'UNKNOWN';
-        statusColor = AppColors.textSecondary;
-        break;
-    }
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.18)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  quizTitle,
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  statusText,
-                  style: TextStyle(color: statusColor, fontWeight: FontWeight.w700, fontSize: 11),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text('Duration: ${duration ?? '-'} min', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-          const SizedBox(height: 4),
-          Text('Window: ${_fmt(item.startTime)} - ${_fmt(item.endTime)}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-          const SizedBox(height: 4),
-          Text('Attempts: ${item.maxOfAttempts}', style: const TextStyle(color: AppColors.textSecondary, fontSize: 12)),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onClose,
-                  icon: const Icon(Icons.lock_outline_rounded),
-                  label: const Text('Close'),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton.icon(
-                  onPressed: onRemove,
-                  icon: const Icon(Icons.delete_outline_rounded),
-                  label: const Text('Remove'),
-                ),
-              ),
-            ],
-          ),
-        ],
+  Widget _buildErrorState() {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline_rounded, size: 56, color: AppColors.error),
+            const SizedBox(height: 10),
+            Text(
+              _error ?? 'Failed to load quizzes',
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: 14),
+            ElevatedButton.icon(
+              onPressed: _loadData,
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Retry'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -368,48 +456,88 @@ class _ClassroomQuizCard extends StatelessWidget {
     final local = dt.toLocal();
     final day = local.day.toString().padLeft(2, '0');
     final month = local.month.toString().padLeft(2, '0');
+    final year = local.year.toString();
     final hour = local.hour.toString().padLeft(2, '0');
     final minute = local.minute.toString().padLeft(2, '0');
-    return '$day/$month $hour:$minute';
+    return '$day/$month/$year $hour:$minute';
   }
 }
 
-class _CreateClassroomQuizPayload {
-  final String quizId;
-  final DateTime startTimeLocal;
-  final DateTime endTimeLocal;
-  final int maxAttempts;
-  final String? passcode;
-  final bool publishAfterCreate;
+class _StatusChip extends StatelessWidget {
+  final String status;
 
-  _CreateClassroomQuizPayload({
-    required this.quizId,
-    required this.startTimeLocal,
-    required this.endTimeLocal,
-    required this.maxAttempts,
-    required this.passcode,
-    required this.publishAfterCreate,
-  });
-}
-
-class _CreateClassroomQuizSheet extends StatefulWidget {
-  final List<Quiz> quizBank;
-
-  const _CreateClassroomQuizSheet({required this.quizBank});
+  const _StatusChip({required this.status});
 
   @override
-  State<_CreateClassroomQuizSheet> createState() => _CreateClassroomQuizSheetState();
+  Widget build(BuildContext context) {
+    final normalized = status.toUpperCase();
+    Color background;
+    Color text;
+
+    if (normalized == 'PUBLISHED') {
+      background = AppColors.success.withValues(alpha: 0.14);
+      text = AppColors.success;
+    } else if (normalized == 'CLOSED') {
+      background = AppColors.error.withValues(alpha: 0.14);
+      text = AppColors.error;
+    } else {
+      background = Colors.orange.withValues(alpha: 0.16);
+      text = Colors.orange.shade800;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        normalized,
+        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: text),
+      ),
+    );
+  }
 }
 
-class _CreateClassroomQuizSheetState extends State<_CreateClassroomQuizSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _attemptController = TextEditingController(text: '1');
-  final _passcodeController = TextEditingController();
+class _ClassroomQuizFormSheet extends StatefulWidget {
+  final List<Quiz> quizzes;
+  final ClassroomQuiz? initial;
 
-  String? _quizId;
-  DateTime? _startLocal;
-  DateTime? _endLocal;
-  bool _publishAfterCreate = true;
+  const _ClassroomQuizFormSheet({
+    required this.quizzes,
+    this.initial,
+  });
+
+  @override
+  State<_ClassroomQuizFormSheet> createState() => _ClassroomQuizFormSheetState();
+}
+
+class _ClassroomQuizFormSheetState extends State<_ClassroomQuizFormSheet> {
+  late final TextEditingController _attemptController;
+  late final TextEditingController _passcodeController;
+
+  late String _selectedQuizId;
+  late DateTime _startTime;
+  late DateTime _endTime;
+  late String _status;
+
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final now = DateTime.now();
+    final initial = widget.initial;
+
+    _selectedQuizId = initial?.quizId ?? (widget.quizzes.isNotEmpty ? widget.quizzes.first.id : '');
+    _startTime = initial?.startTime.toLocal() ?? now.add(const Duration(minutes: 15));
+    _endTime = initial?.endTime.toLocal() ?? now.add(const Duration(hours: 1));
+    _status = (initial?.status.toUpperCase() ?? 'DRAFT');
+
+    _attemptController = TextEditingController(text: (initial?.maxOfAttempts ?? 1).toString());
+    _passcodeController = TextEditingController(text: initial?.passcode ?? '');
+  }
 
   @override
   void dispose() {
@@ -418,159 +546,214 @@ class _CreateClassroomQuizSheetState extends State<_CreateClassroomQuizSheet> {
     super.dispose();
   }
 
-  Future<void> _pickDateTime({required bool isStart}) async {
-    final initial = isStart
-        ? (_startLocal ?? DateTime.now().add(const Duration(minutes: 10)))
-        : (_endLocal ?? (_startLocal?.add(const Duration(hours: 1)) ?? DateTime.now().add(const Duration(hours: 1))));
+  Future<void> _pickStartTime() async {
+    final picked = await _pickDateTime(_startTime);
+    if (picked == null) return;
+    setState(() => _startTime = picked);
+  }
 
+  Future<void> _pickEndTime() async {
+    final picked = await _pickDateTime(_endTime);
+    if (picked == null) return;
+    setState(() => _endTime = picked);
+  }
+
+  Future<DateTime?> _pickDateTime(DateTime initial) async {
     final date = await showDatePicker(
       context: context,
       initialDate: initial,
-      firstDate: DateTime.now().subtract(const Duration(days: 1)),
-      lastDate: DateTime.now().add(const Duration(days: 365)),
+      firstDate: DateTime.now().subtract(const Duration(days: 365 * 2)),
+      lastDate: DateTime.now().add(const Duration(days: 365 * 5)),
     );
-    if (date == null || !mounted) return;
+    if (date == null) return null;
 
+    if (!mounted) return null;
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(initial),
+      initialTime: TimeOfDay(hour: initial.hour, minute: initial.minute),
     );
-    if (time == null || !mounted) return;
+    if (time == null) return null;
 
-    final selected = DateTime(date.year, date.month, date.day, time.hour, time.minute);
-
-    setState(() {
-      if (isStart) {
-        _startLocal = selected;
-        if (_endLocal != null && !_endLocal!.isAfter(selected)) {
-          _endLocal = selected.add(const Duration(hours: 1));
-        }
-      } else {
-        _endLocal = selected;
-      }
-    });
+    return DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
   }
 
   void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    if (_quizId == null || _quizId!.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select a quiz'), backgroundColor: AppColors.warning),
-      );
+    final maxAttempts = int.tryParse(_attemptController.text.trim()) ?? 0;
+    if (_selectedQuizId.isEmpty) {
+      _showError('Please select a quiz');
       return;
     }
-    if (_startLocal == null || _endLocal == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please choose start and end time'), backgroundColor: AppColors.warning),
-      );
+    if (maxAttempts <= 0) {
+      _showError('Max attempts must be greater than 0');
       return;
     }
-    if (!_endLocal!.isAfter(_startLocal!)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('End time must be after start time'), backgroundColor: AppColors.warning),
-      );
+    if (!_endTime.isAfter(_startTime)) {
+      _showError('End time must be after start time');
       return;
     }
 
-    final maxAttempts = int.tryParse(_attemptController.text.trim()) ?? 1;
-
+    setState(() => _isSubmitting = true);
     Navigator.pop(
       context,
-      _CreateClassroomQuizPayload(
-        quizId: _quizId!,
-        startTimeLocal: _startLocal!,
-        endTimeLocal: _endLocal!,
-        maxAttempts: maxAttempts,
-        passcode: _passcodeController.text.trim().isEmpty ? null : _passcodeController.text.trim(),
-        publishAfterCreate: _publishAfterCreate,
+      _ClassroomQuizFormValue(
+        quizId: _selectedQuizId,
+        startTime: _startTime,
+        endTime: _endTime,
+        maxOfAttempts: maxAttempts,
+        passcode: _passcodeController.text.trim(),
+        status: _status,
       ),
+    );
+  }
+
+  void _showError(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: AppColors.error),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isEdit = widget.initial != null;
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      padding: EdgeInsets.only(
-        left: 16,
-        right: 16,
-        top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + 16,
-      ),
-      child: Form(
-        key: _formKey,
+      padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + bottomInset),
+      child: SafeArea(
+        top: false,
         child: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Assign Quiz To Classroom', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-              const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _quizId,
-                decoration: const InputDecoration(labelText: 'Quiz', border: OutlineInputBorder()),
-                items: widget.quizBank
-                    .map((quiz) => DropdownMenuItem<String>(
-                          value: quiz.id,
-                          child: Text('${quiz.title} (${quiz.duration}m)'),
-                        ))
-                    .toList(),
-                onChanged: (value) => setState(() => _quizId = value),
-                validator: (value) => (value == null || value.isEmpty) ? 'Select a quiz' : null,
+              Text(
+                isEdit ? 'Edit Assignment' : 'Assign Quiz',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
               ),
-              const SizedBox(height: 10),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedQuizId,
+                decoration: const InputDecoration(
+                  labelText: 'Quiz',
+                  filled: true,
+                  fillColor: AppColors.background,
+                  border: OutlineInputBorder(),
+                ),
+                items: widget.quizzes
+                    .map(
+                      (quiz) => DropdownMenuItem<String>(
+                        value: quiz.id,
+                        child: Text(
+                          quiz.title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    )
+                    .toList(),
+                onChanged: isEdit
+                    ? null
+                    : (value) {
+                        if (value != null) {
+                          setState(() => _selectedQuizId = value);
+                        }
+                      },
+              ),
+              const SizedBox(height: 12),
               Row(
                 children: [
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _pickDateTime(isStart: true),
-                      icon: const Icon(Icons.play_circle_outline_rounded),
-                      label: Text(_startLocal == null ? 'Start time' : _fmt(_startLocal!)),
+                    child: _DateTimeField(
+                      label: 'Start Time',
+                      value: _fmt(_startTime),
+                      onTap: _pickStartTime,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () => _pickDateTime(isStart: false),
-                      icon: const Icon(Icons.stop_circle_outlined),
-                      label: Text(_endLocal == null ? 'End time' : _fmt(_endLocal!)),
+                    child: _DateTimeField(
+                      label: 'End Time',
+                      value: _fmt(_endTime),
+                      onTap: _pickEndTime,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 10),
-              TextFormField(
+              const SizedBox(height: 12),
+              TextField(
                 controller: _attemptController,
                 keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: 'Max attempts', border: OutlineInputBorder()),
-                validator: (value) {
-                  final n = int.tryParse(value ?? '');
-                  if (n == null || n <= 0) return 'Enter attempts > 0';
-                  return null;
-                },
-              ),
-              const SizedBox(height: 10),
-              TextFormField(
-                controller: _passcodeController,
-                decoration: const InputDecoration(labelText: 'Passcode (optional)', border: OutlineInputBorder()),
-              ),
-              const SizedBox(height: 10),
-              SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Publish immediately'),
-                value: _publishAfterCreate,
-                onChanged: (value) => setState(() => _publishAfterCreate = value),
+                decoration: const InputDecoration(
+                  labelText: 'Max Attempts',
+                  filled: true,
+                  fillColor: AppColors.background,
+                  border: OutlineInputBorder(),
+                ),
               ),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: _submit,
-                  icon: const Icon(Icons.check_circle_outline_rounded),
-                  label: const Text('Create Assignment'),
+              TextField(
+                controller: _passcodeController,
+                decoration: const InputDecoration(
+                  labelText: 'Passcode (Optional)',
+                  filled: true,
+                  fillColor: AppColors.background,
+                  border: OutlineInputBorder(),
                 ),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                initialValue: _status,
+                decoration: const InputDecoration(
+                  labelText: 'Status',
+                  filled: true,
+                  fillColor: AppColors.background,
+                  border: OutlineInputBorder(),
+                ),
+                items: const [
+                  DropdownMenuItem<String>(value: 'DRAFT', child: Text('DRAFT')),
+                  DropdownMenuItem<String>(value: 'PUBLISHED', child: Text('PUBLISHED')),
+                  DropdownMenuItem<String>(value: 'CLOSED', child: Text('CLOSED')),
+                ],
+                onChanged: (value) {
+                  if (value != null) {
+                    setState(() => _status = value);
+                  }
+                },
+              ),
+              const SizedBox(height: 18),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: _isSubmitting ? null : () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _isSubmitting ? null : _submit,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Text(isEdit ? 'Save Changes' : 'Assign'),
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -582,8 +765,68 @@ class _CreateClassroomQuizSheetState extends State<_CreateClassroomQuizSheet> {
   String _fmt(DateTime dt) {
     final day = dt.day.toString().padLeft(2, '0');
     final month = dt.month.toString().padLeft(2, '0');
+    final year = dt.year.toString();
     final hour = dt.hour.toString().padLeft(2, '0');
     final minute = dt.minute.toString().padLeft(2, '0');
-    return '$day/$month ${dt.year} $hour:$minute';
+    return '$day/$month/$year $hour:$minute';
   }
+}
+
+class _DateTimeField extends StatelessWidget {
+  final String label;
+  final String value;
+  final VoidCallback onTap;
+
+  const _DateTimeField({
+    required this.label,
+    required this.value,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: label,
+          filled: true,
+          fillColor: AppColors.background,
+          border: const OutlineInputBorder(),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                value,
+                style: const TextStyle(fontSize: 13, color: AppColors.textPrimary),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Icon(Icons.schedule_rounded, size: 18, color: AppColors.textSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ClassroomQuizFormValue {
+  final String quizId;
+  final DateTime startTime;
+  final DateTime endTime;
+  final int maxOfAttempts;
+  final String passcode;
+  final String status;
+
+  const _ClassroomQuizFormValue({
+    required this.quizId,
+    required this.startTime,
+    required this.endTime,
+    required this.maxOfAttempts,
+    required this.passcode,
+    required this.status,
+  });
 }

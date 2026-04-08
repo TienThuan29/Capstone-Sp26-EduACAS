@@ -50,6 +50,7 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
                   controller: _tabController,
                   children: [
                     MaterialsTab(classroomId: widget.classroom.id),
+                    LecturerQuizzesTab(classroomId: widget.classroom.id),
                     DiscussionsTab(
                       classroomId: widget.classroom.id,
                       classroomName: widget.classroom.className,
@@ -153,6 +154,7 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
         labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         tabs: const [
           Tab(text: 'Materials'),
+          Tab(text: 'Quizzes'),
           Tab(text: 'Discussions'),
           Tab(text: 'Quizzes'),
         ],
