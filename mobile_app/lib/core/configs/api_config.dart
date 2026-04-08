@@ -62,6 +62,8 @@ class ApiConfig {
       '/api/acas/v1/quiz-attempts/$attemptId';
     static String quizAttemptsByStudentEndpoint(String studentId) =>
       '/api/acas/v1/quiz-attempts/student/$studentId';
+    static String submissionsByStudentEndpoint(String studentId) =>
+      '/api/acas/v1/submissions/student/$studentId';
     static String quizSubmissionsPagedEndpoint({
       required String classroomQuizId,
       int pageIndex = 1,

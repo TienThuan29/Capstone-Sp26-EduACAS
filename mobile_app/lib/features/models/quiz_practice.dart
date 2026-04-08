@@ -157,7 +157,7 @@ class QuizAttemptInfo {
       startTime: DateTime.tryParse(json['startTime'] ?? '')?.toUtc() ?? DateTime.now().toUtc(),
       endTime: DateTime.tryParse((json['endTime'] ?? '').toString())?.toUtc(),
       status: (json['status'] ?? '').toString(),
-      finalScore: (json['finalScore'] as num?)?.toDouble(),
+        finalScore: (json['finalScore'] as num?)?.toDouble() ?? (json['score'] as num?)?.toDouble(),
       attemptNumber: (json['attemptNumber'] as num?)?.toInt() ?? 1,
       answers: ((json['answers'] as Map<String, dynamic>?) ?? const <String, dynamic>{})
           .map((key, value) => MapEntry(key.toString(), (value ?? '').toString())),
