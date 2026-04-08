@@ -22,7 +22,7 @@ public class ClassroomQuizMapper
             }
             else
             {
-                effectiveStatus = ClassroomQuizStatus.PUBLISHED;
+                effectiveStatus = ClassroomQuizStatus.ONGOING;
             }
         }
 

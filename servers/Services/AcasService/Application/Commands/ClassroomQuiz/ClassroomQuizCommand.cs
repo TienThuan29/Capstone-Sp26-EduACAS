@@ -102,34 +102,40 @@ namespace AcasService.Application.Commands.ClassroomQuiz
             }
 
             var now = DateTime.UtcNow;
+            var oldStatus = existing.Status;
             
-            bool isDraft = existing.Status == ClassroomQuizStatus.DRAFT;
-            bool isPublished = existing.Status == ClassroomQuizStatus.PUBLISHED;
-            bool isOngoing = isPublished && existing.StartTime <= now && existing.EndTime > now;
-            bool isClosed = existing.Status == ClassroomQuizStatus.CLOSED;
-
-            if (request.StartTime.HasValue && request.StartTime.Value != existing.StartTime)
+            if (request.StartTime.HasValue && Math.Abs((request.StartTime.Value - existing.StartTime).TotalSeconds) >= 60)
             {
-                if (!isDraft && (isOngoing || isClosed))
+                if (oldStatus == ClassroomQuizStatus.ONGOING || oldStatus == ClassroomQuizStatus.CLOSED)
                 {
                     throw new InvalidOperationException("Cannot change start time once the quiz has started or ended.");
                 }
                 
-                if (isDraft && request.StartTime.Value < now.AddMinutes(-1))
+                if (oldStatus == ClassroomQuizStatus.DRAFT && request.StartTime.Value < now.AddMinutes(-5))
                 {
-                    throw new ArgumentException("Start time must be in the future.");
+                    throw new ArgumentException("Start time cannot be in the past.");
                 }
-                
+
+                if (oldStatus == ClassroomQuizStatus.PUBLISHED && request.StartTime.Value < now)
+                {
+                    throw new ArgumentException("Cannot update PUBLISHED quiz to a past start time. Use ONGOING instead.");
+                }
+
                 existing.StartTime = request.StartTime.Value;
             }
 
-            if (request.EndTime.HasValue)
+            if (request.EndTime.HasValue && Math.Abs((request.EndTime.Value - existing.EndTime).TotalSeconds) >= 60)
             {
+                if (oldStatus == ClassroomQuizStatus.ONGOING && request.EndTime.Value < existing.EndTime)
+                {
+                    throw new InvalidOperationException("Cannot reduce end time while quiz is ongoing. Please use CLOSED status to end it early.");
+                }
+
                 if (request.EndTime.Value <= existing.StartTime)
                 {
                     throw new ArgumentException("End time must be after start time.");
                 }
-                
+
                 var quiz = await _quizRepository.FindByIdAsync(existing.QuizId);
                 if (quiz != null)
                 {
@@ -145,48 +151,115 @@ namespace AcasService.Application.Commands.ClassroomQuiz
 
             if (request.MaxOfAttempts.HasValue && request.MaxOfAttempts.Value != existing.MaxOfAttempts)
             {
-                if (!isDraft && (isOngoing || isClosed))
+                if (oldStatus == ClassroomQuizStatus.ONGOING || oldStatus == ClassroomQuizStatus.CLOSED)
                 {
-                    throw new InvalidOperationException("Cannot change MaxAttempts once the quiz has started or ended.");
-                }
-
-                int maxAttemptNumberUsed = await _quizAttemptRepository.GetMaxAttemptNumberAsync(id);
-                if (request.MaxOfAttempts.Value < maxAttemptNumberUsed)
-                {
-                    throw new InvalidOperationException($"Cannot update MaxAttempts to {request.MaxOfAttempts.Value}. A student has already used {maxAttemptNumberUsed} attempts.");
+                    if (request.MaxOfAttempts.Value < existing.MaxOfAttempts)
+                    {
+                        int maxAttemptNumberUsed = await _quizAttemptRepository.GetMaxAttemptNumberAsync(id);
+                        if (request.MaxOfAttempts.Value < maxAttemptNumberUsed)
+                        {
+                            throw new InvalidOperationException($"Cannot reduce MaxAttempts to {request.MaxOfAttempts.Value}. A student has already used {maxAttemptNumberUsed} attempts.");
+                        }
+                    }
                 }
                 
                 existing.MaxOfAttempts = request.MaxOfAttempts.Value;
             }
 
-            if (request.Passcode != null) 
+            if (request.Passcode != null && request.Passcode != existing.Passcode) 
             {
-                if (isClosed)
+                if (oldStatus == ClassroomQuizStatus.CLOSED)
                 {
                     throw new InvalidOperationException("Cannot change passcode of a closed quiz.");
                 }
                 existing.Passcode = request.Passcode;
             }
-            
-            if (isClosed && existing.EndTime > now)
-            {
-                existing.Status = ClassroomQuizStatus.PUBLISHED;
-            }
-            else if (request.Status.HasValue)
-            {
-                existing.Status = request.Status.Value;
-            }
 
-            if (existing.Status == ClassroomQuizStatus.PUBLISHED)
+            if (request.Status.HasValue && request.Status.Value != oldStatus)
             {
-                if (isDraft || (request.EndTime.HasValue && request.EndTime.Value != existing.EndTime))
+                var newStatus = request.Status.Value;
+
+                if (oldStatus == ClassroomQuizStatus.DRAFT)
                 {
-                    existing.CloseJobId = await _jobScheduling.RescheduleCloseJobAsync(existing.CloseJobId, id, existing.EndTime);
+                    if (newStatus == ClassroomQuizStatus.PUBLISHED)
+                    {
+                        if (existing.StartTime <= now) 
+                            throw new InvalidOperationException("Cannot publish to the past. Please update StartTime or move to ONGOING.");
+                        existing.Status = newStatus;
+                    }
+                    else if (newStatus == ClassroomQuizStatus.ONGOING)
+                    {
+                        existing.StartTime = now; 
+                        var quiz = await _quizRepository.FindByIdAsync(existing.QuizId);
+                        if (quiz != null && (existing.EndTime - existing.StartTime).TotalMinutes < quiz.Duration)
+                        {
+                            throw new InvalidOperationException("End time is too close to start now. Please extend EndTime first.");
+                        }
+                        existing.Status = newStatus;
+                    }
+                    else if (newStatus == ClassroomQuizStatus.CLOSED)
+                    {
+                        throw new InvalidOperationException("Cannot transition DRAFT directly to CLOSED.");
+                    }
+                }
+                else if (oldStatus == ClassroomQuizStatus.PUBLISHED)
+                {
+                    if (newStatus == ClassroomQuizStatus.DRAFT)
+                    {
+                        existing.Status = newStatus;
+                    }
+                    else if (newStatus == ClassroomQuizStatus.ONGOING)
+                    {
+                        existing.StartTime = now;
+                        existing.Status = newStatus;
+                    }
+                    else if (newStatus == ClassroomQuizStatus.CLOSED)
+                    {
+                        throw new InvalidOperationException("Cannot transition PUBLISHED directly to CLOSED. Move to DRAFT to retract.");
+                    }
+                }
+                else if (oldStatus == ClassroomQuizStatus.ONGOING)
+                {
+                    if (newStatus == ClassroomQuizStatus.CLOSED)
+                    {
+                        existing.EndTime = now;
+                        existing.Status = newStatus;
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException($"Cannot move from ONGOING back to {newStatus}.");
+                    }
                 }
             }
-            else if (existing.Status == ClassroomQuizStatus.CLOSED && isPublished)
+
+            if (existing.Status == ClassroomQuizStatus.CLOSED && existing.EndTime > now)
             {
+                existing.Status = ClassroomQuizStatus.ONGOING;
+            }
+
+            if (existing.Status == ClassroomQuizStatus.DRAFT)
+            {
+                await _jobScheduling.CancelStartJobAsync(existing.StartJobId ?? "");
                 await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId ?? "");
+                existing.StartJobId = null;
+                existing.CloseJobId = null;
+            }
+            else if (existing.Status == ClassroomQuizStatus.PUBLISHED)
+            {
+                existing.StartJobId = await _jobScheduling.RescheduleStartJobAsync(existing.StartJobId, id, existing.StartTime);
+                existing.CloseJobId = await _jobScheduling.RescheduleCloseJobAsync(existing.CloseJobId, id, existing.EndTime);
+            }
+            else if (existing.Status == ClassroomQuizStatus.ONGOING)
+            {
+                await _jobScheduling.CancelStartJobAsync(existing.StartJobId ?? "");
+                existing.StartJobId = null;
+                existing.CloseJobId = await _jobScheduling.RescheduleCloseJobAsync(existing.CloseJobId, id, existing.EndTime);
+            }
+            else if (existing.Status == ClassroomQuizStatus.CLOSED)
+            {
+                await _jobScheduling.CancelStartJobAsync(existing.StartJobId ?? "");
+                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId ?? "");
+                existing.StartJobId = null;
                 existing.CloseJobId = null;
             }
 
@@ -203,23 +276,15 @@ namespace AcasService.Application.Commands.ClassroomQuiz
         public async Task SoftDeleteClassroomQuizAsync(string id)
         {
             var existing = await _repository.FindByIdAsync(id);
-            if (existing == null)
-            {
-                throw new KeyNotFoundException($"ClassroomQuiz with ID {id} not found.");
-            }
+            if (existing == null) throw new KeyNotFoundException($"ClassroomQuiz with ID {id} not found.");
 
-            var now = DateTime.UtcNow;
-            if (existing.Status == ClassroomQuizStatus.PUBLISHED && 
-                existing.StartTime <= now && 
-                existing.EndTime > now)
+            if (existing.Status == ClassroomQuizStatus.ONGOING)
             {
                 throw new InvalidOperationException("Cannot delete an ongoing quiz. Please close it first.");
             }
 
-            if (!string.IsNullOrEmpty(existing.CloseJobId))
-            {
-                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId);
-            }
+            await _jobScheduling.CancelStartJobAsync(existing.StartJobId ?? "");
+            await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId ?? "");
 
             await _repository.SoftDeleteAsync(id);
         }
@@ -227,25 +292,18 @@ namespace AcasService.Application.Commands.ClassroomQuiz
         public async Task DeleteClassroomQuizAsync(string id)
         {
             var existing = await _repository.FindByIdAsync(id);
-            if (existing == null)
-            {
-                throw new KeyNotFoundException($"ClassroomQuiz with ID {id} not found.");
-            }
+            if (existing == null) throw new KeyNotFoundException($"ClassroomQuiz with ID {id} not found.");
 
-            var now = DateTime.UtcNow;
-            if (existing.Status == ClassroomQuizStatus.PUBLISHED && 
-                existing.StartTime <= now && 
-                existing.EndTime > now)
+            if (existing.Status == ClassroomQuizStatus.ONGOING)
             {
                 throw new InvalidOperationException("Cannot delete an ongoing quiz.");
             }
 
-            if (!string.IsNullOrEmpty(existing.CloseJobId))
-            {
-                await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId);
-            }
+            await _jobScheduling.CancelStartJobAsync(existing.StartJobId ?? "");
+            await _jobScheduling.CancelCloseJobAsync(existing.CloseJobId ?? "");
 
             await _repository.DeleteAsync(id);
         }
     }
 }
+

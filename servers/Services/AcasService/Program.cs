@@ -35,7 +35,6 @@ using AcasService.Repositories.ClassroomQuiz;
 using AcasService.Repositories.QuizAttempt;
 using AcasService.Repositories.StudentAnswer;
 using AcasService.Repositories.UserDevice;
-using AcasService.Application.BackgroundServices;
 using Amazon;
 using Amazon.DynamoDBv2;
 using Amazon.Extensions.NETCore.Setup;

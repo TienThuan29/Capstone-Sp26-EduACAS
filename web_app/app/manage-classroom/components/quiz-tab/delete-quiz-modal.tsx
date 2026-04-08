@@ -51,6 +51,18 @@ export function DeleteQuizModal({
                         Are you sure you want to remove <span className="font-semibold text-gray-900 dark:text-white">"{quizTitle}"</span> from this classroom?
                     </p>
 
+                    {(quizToDelete.status === 'ONGOING' || quizToDelete.status === 'CLOSED') && (
+                        <div className="mb-6 rounded-lg bg-orange-50 p-4 text-xs text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
+                            <p className="font-bold flex items-center justify-center gap-2">
+                                <ExclamationTriangleIcon className="h-4 w-4" />
+                                Cannot delete active/past quiz
+                            </p>
+                            <p className="mt-1">
+                                Assignments that are currently <strong>ONGOING</strong> or have been <strong>CLOSED</strong> cannot be removed to preserve academic records and student attempts.
+                            </p>
+                        </div>
+                    )}
+
                     <div className="mb-8 rounded-lg bg-gray-50 p-3 text-xs text-gray-500 dark:bg-gray-800/50 dark:text-gray-400">
                         <p className="flex items-center justify-center gap-1">
                             <TrashIcon className="h-3 w-3" />
@@ -62,7 +74,7 @@ export function DeleteQuizModal({
                         <Button
                             color="failure"
                             onClick={onConfirm}
-                            disabled={actionLoading}
+                            disabled={actionLoading || quizToDelete.status === 'ONGOING' || quizToDelete.status === 'CLOSED'}
                             className="bg-red-600 hover:bg-red-700 dark:bg-red-600 cursor-pointer"
                         >
                             {actionLoading ? (

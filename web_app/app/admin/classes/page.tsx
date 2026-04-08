@@ -103,8 +103,8 @@ export default function ClassesManagement() {
 
   const filteredClasses = classes.filter(cls => {
     const matchesSearch = cls.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cls.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         cls.teacher.toLowerCase().includes(searchTerm.toLowerCase())
+      cls.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cls.teacher.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesFilter = filterStatus === 'all' || cls.status === filterStatus
     return matchesSearch && matchesFilter
   })
@@ -150,7 +150,7 @@ export default function ClassesManagement() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (editingClass) {
-      setClasses(classes.map(cls => 
+      setClasses(classes.map(cls =>
         cls.id === editingClass.id ? { ...cls, ...formData } : cls
       ))
     } else {

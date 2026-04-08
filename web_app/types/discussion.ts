@@ -4,6 +4,7 @@ export type DiscussionIssueStatus = "OPEN" | "CLOSED";
 export interface AuthorDisplay {
   fullName: string;
   avatarUrl?: string;
+  email?: string;
 }
 
 /** List item from GET paged (DiscussionIssueListResponse). */
@@ -17,6 +18,7 @@ export interface DiscussionIssueListItem {
   createdDate: string;
   status: DiscussionIssueStatus;
   tags: string[];
+  isDeleted: boolean;
 }
 
 export interface PagedDiscussionIssues {

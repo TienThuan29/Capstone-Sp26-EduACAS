@@ -110,6 +110,24 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting notification {Id}", id);
+        }
+    }
+
+    public async Task<List<Models.Notification>> FindAllAsync()
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _notificationTableName };
+
+            var response = await _dynamoDBClient.ScanAsync(request);
+            return response.Items
+                .Select(item => DynamoMapper.DynamoItemToNotification(item))
+                .OrderByDescending(n => n.SentDate)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error scanning all notifications");
             throw;
         }
     }
