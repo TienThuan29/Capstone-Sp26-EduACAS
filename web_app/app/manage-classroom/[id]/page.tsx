@@ -215,28 +215,6 @@ function ClassroomContent() {
     }
   }, [activeTab, classId, fetchExaminations]);
 
-  // Poll exam statuses every 30 seconds so background job transitions are reflected without manual refresh.
-  // Only active when on the exams tab.
-  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => {
-    if (activeTab === "exams" && classId) {
-      examsPollRef.current = setInterval(() => {
-        void fetchExaminations();
-      }, 30_000);
-    } else {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    }
-    return () => {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    };
-  }, [activeTab, classId, fetchExaminations]);
-
   useEffect(() => {
     if (openUpdateModal) {
       const fetchSubjects = async () => {
