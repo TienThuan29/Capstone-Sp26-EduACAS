@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/core/theme/app_colors.dart';
@@ -22,11 +20,8 @@ class StudentQuizzesTab extends StatefulWidget {
 }
 
 class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
-  static const Duration _backgroundRefreshInterval = Duration(seconds: 30);
-
   bool _isLoading = true;
   String? _error;
-  Timer? _backgroundRefreshTimer;
 
   List<ClassroomQuiz> _classroomQuizzes = [];
   final Map<String, QuizDetail> _quizDetailsByQuizId = {};
@@ -37,29 +32,13 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
   void initState() {
     super.initState();
     _loadData();
-    _startBackgroundRefresh();
   }
 
-  @override
-  void dispose() {
-    _backgroundRefreshTimer?.cancel();
-    super.dispose();
-  }
-
-  void _startBackgroundRefresh() {
-    _backgroundRefreshTimer?.cancel();
-    _backgroundRefreshTimer = Timer.periodic(_backgroundRefreshInterval, (_) {
-      _loadData(showLoading: false, keepCurrentError: true);
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
     });
-  }
-
-  Future<void> _loadData({bool showLoading = true, bool keepCurrentError = false}) async {
-    if (showLoading) {
-      setState(() {
-        _isLoading = true;
-        _error = null;
-      });
-    }
 
     try {
       final quizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId);
@@ -103,15 +82,9 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
           ..clear()
           ..addAll(maxAttemptNoByClassroomQuizId);
         _isLoading = false;
-        if (!keepCurrentError) {
-          _error = null;
-        }
       });
     } catch (e) {
       if (!mounted) return;
-      if (!showLoading) {
-        return;
-      }
       setState(() {
         _error = e.toString().replaceFirst('Exception: ', '');
         _isLoading = false;
@@ -171,60 +144,17 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
               onStart: quizDetail == null
                   ? null
                   : () async {
-                    final messenger = ScaffoldMessenger.maybeOf(context);
-                    final navigator = Navigator.of(context);
-
-                      final latestQuizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId);
-                      if (!mounted) return;
-
-                      final latestClassroomQuiz = latestQuizzes.firstWhere(
-                        (q) => q.id == classroomQuiz.id,
-                        orElse: () => classroomQuiz,
-                      );
-
-                      final now = DateTime.now().toUtc();
-                        final isPublished = latestClassroomQuiz.isPublishedStatus;
-                        final isClosed =
-                          latestClassroomQuiz.isClosedStatus || !now.isBefore(latestClassroomQuiz.endTime);
-                        final isNotStarted = now.isBefore(latestClassroomQuiz.startTime);
-                      final hasReachedMaxAttempts =
-                          usedAttempts >= latestClassroomQuiz.maxOfAttempts;
-                      final canStartNow =
-                          isPublished && !isClosed && !isNotStarted && !hasReachedMaxAttempts;
-
-                      if (!canStartNow) {
-                        var message = 'Quiz is not available at this moment.';
-                        if (isNotStarted) {
-                          message = 'Quiz has not started yet.';
-                        } else if (!isPublished) {
-                          message = 'Quiz is waiting to be opened by scheduler.';
-                        } else if (isClosed) {
-                          message = 'Quiz has already closed.';
-                        } else if (hasReachedMaxAttempts) {
-                          message = 'You have reached the maximum attempts.';
-                        }
-
-                        messenger?.showSnackBar(
-                          SnackBar(
-                            content: Text(message),
-                            backgroundColor: AppColors.warning,
-                          ),
-                        );
-
-                        _loadData(showLoading: false, keepCurrentError: true);
-                        return;
-                      }
-
-                      await navigator.push(
+                      await Navigator.push(
+                        context,
                         MaterialPageRoute(
                           builder: (_) => QuizAttemptPage(
-                            classroomQuiz: latestClassroomQuiz,
+                            classroomQuiz: classroomQuiz,
                             quizDetail: quizDetail,
                           ),
                         ),
                       );
                       if (mounted) {
-                        _loadData(showLoading: false, keepCurrentError: true);
+                        _loadData();
                       }
                     },
               onReview: (quizDetail == null || latestAttempt == null)
@@ -287,18 +217,18 @@ class _QuizCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now().toUtc();
-    final isPublished = classroomQuiz.isPublishedStatus;
-    final isClosed = classroomQuiz.isClosedStatus || !now.isBefore(classroomQuiz.endTime);
+    final isOngoing = classroomQuiz.status.toUpperCase() == 'ONGOING';
+    final isClosed = now.isAfter(classroomQuiz.endTime) || classroomQuiz.status.toUpperCase() == 'CLOSED';
     final isNotStarted = now.isBefore(classroomQuiz.startTime);
     final hasReachedMaxAttempts = usedAttempts >= classroomQuiz.maxOfAttempts;
 
-    final canStart = isPublished && !isClosed && !isNotStarted && !hasReachedMaxAttempts;
+    final canStart = isOngoing && !isClosed && !isNotStarted && !hasReachedMaxAttempts;
 
     String startLabel = 'Start';
-    if (isNotStarted) {
+    if (!isOngoing) {
+      startLabel = 'Unavailable';
+    } else if (isNotStarted) {
       startLabel = 'Not started';
-    } else if (!isPublished) {
-      startLabel = 'Waiting publish';
     } else if (isClosed) {
       startLabel = 'Closed';
     } else if (hasReachedMaxAttempts) {

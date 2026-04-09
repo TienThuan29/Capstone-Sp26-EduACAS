@@ -467,7 +467,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   ),
                 ),
                 Text(
-                  'Thông báo theo tài khoản của bạn',
+                  'Announcements based on your account',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -495,7 +495,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         children: [
           Expanded(
             child: _FilterButton(
-              label: 'Tất cả',
+              label: 'All',
               count: _items.length,
               selected: _selectedFilter == AnnouncementFilter.all,
               onTap: () => setState(() => _selectedFilter = AnnouncementFilter.all),
@@ -503,7 +503,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           Expanded(
             child: _FilterButton(
-              label: 'Chưa đọc',
+              label: 'Unread',
               count: _unreadCount,
               showUnreadDot: _unreadCount > 0,
               selected: _selectedFilter == AnnouncementFilter.unread,
@@ -512,7 +512,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           Expanded(
             child: _FilterButton(
-              label: 'Đã xác nhận',
+              label: 'Confirmed',
               count: _confirmedCount,
               selected: _selectedFilter == AnnouncementFilter.confirmed,
               onTap: () => setState(() => _selectedFilter = AnnouncementFilter.confirmed),
@@ -538,14 +538,14 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                 Icon(Icons.notifications_none_rounded, size: 64, color: Colors.grey[350]),
                 const SizedBox(height: 14),
                 Text(
-                  'Không có thông báo',
+                  'No announcements available',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textPrimary,
                       ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Thông báo mới sẽ hiển thị ở đây.',
+                  'New announcements will appear here.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -637,7 +637,7 @@ class _AnnouncementCard extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 _StatusPill(
-                  label: isAcknowledged ? 'Đã xác nhận' : 'Chưa đọc',
+                  label: isAcknowledged ? 'Confirmed' : 'Unread',
                   color: statusColor,
                 ),
               ],
