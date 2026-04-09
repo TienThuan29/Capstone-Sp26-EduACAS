@@ -200,7 +200,24 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
         child: OutlinedButton.icon(
           onPressed: () => _changeQuizStatus(classroomQuiz: item, targetStatus: 'PUBLISHED'),
           icon: const Icon(Icons.publish_rounded, size: 16),
-          label: const Text('Published'),
+          label: const Text('Publish'),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.blue.shade700,
+            side: BorderSide(color: Colors.blue.withValues(alpha: 0.6)),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          ),
+        ),
+      );
+    }
+
+    if (normalized == 'PUBLISHED') {
+      return Align(
+        alignment: Alignment.centerRight,
+        child: OutlinedButton.icon(
+          onPressed: () => _changeQuizStatus(classroomQuiz: item, targetStatus: 'ONGOING'),
+          icon: const Icon(Icons.play_arrow_rounded, size: 16),
+          label: const Text('Open'),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.success,
             side: BorderSide(color: AppColors.success.withValues(alpha: 0.6)),
@@ -211,7 +228,7 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
       );
     }
 
-    if (normalized == 'PUBLISHED') {
+    if (normalized == 'ONGOING') {
       return Align(
         alignment: Alignment.centerRight,
         child: OutlinedButton.icon(
@@ -474,9 +491,12 @@ class _StatusChip extends StatelessWidget {
     Color background;
     Color text;
 
-    if (normalized == 'PUBLISHED') {
+    if (normalized == 'ONGOING') {
       background = AppColors.success.withValues(alpha: 0.14);
       text = AppColors.success;
+    } else if (normalized == 'PUBLISHED') {
+      background = Colors.blue.withValues(alpha: 0.14);
+      text = Colors.blue.shade700;
     } else if (normalized == 'CLOSED') {
       background = AppColors.error.withValues(alpha: 0.14);
       text = AppColors.error;
@@ -725,6 +745,7 @@ class _ClassroomQuizFormSheetState extends State<_ClassroomQuizFormSheet> {
                 items: const [
                   DropdownMenuItem<String>(value: 'DRAFT', child: Text('DRAFT')),
                   DropdownMenuItem<String>(value: 'PUBLISHED', child: Text('PUBLISHED')),
+                  DropdownMenuItem<String>(value: 'ONGOING', child: Text('ONGOING')),
                   DropdownMenuItem<String>(value: 'CLOSED', child: Text('CLOSED')),
                 ],
                 onChanged: (value) {
