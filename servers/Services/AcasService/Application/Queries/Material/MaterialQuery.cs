@@ -2,7 +2,8 @@ using AcasService.Application.Mappers;
 using AcasService.Application.Queries.S3;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Material;
-
+using AcasService.Messaging.User;
+using AcasService.Application.Utils;
 namespace AcasService.Application.Queries.Material
 {
     public interface IMaterialQuery
@@ -10,6 +11,7 @@ namespace AcasService.Application.Queries.Material
         Task<MaterialResponse> GetMaterialByIdAsync(string materialId);
         Task<List<MaterialResponse>> GetMaterialsByClassroomIdAsync(string classroomId);
         Task<List<MaterialResponse>> GetAllMaterialsAsync();
+        Task<PagedResult<MaterialResponse>> GetAdminMaterialsAsync(string? searchTerm, int pageIndex, int pageSize);
     }
 
     public class MaterialQuery : IMaterialQuery
@@ -17,17 +19,20 @@ namespace AcasService.Application.Queries.Material
         private readonly IMaterialRepository _materialRepository;
         private readonly IPrivateS3Query _privateS3Query;
         private readonly MaterialMapper _materialMapper;
+        private readonly UserRequestProducer _userRequestProducer;
         private readonly ILogger<MaterialQuery> _logger;
 
         public MaterialQuery(
             IMaterialRepository materialRepository,
             IPrivateS3Query privateS3Query,
             MaterialMapper materialMapper,
+            UserRequestProducer userRequestProducer,
             ILogger<MaterialQuery> logger)
         {
             _materialRepository = materialRepository;
             _privateS3Query = privateS3Query;
             _materialMapper = materialMapper;
+            _userRequestProducer = userRequestProducer;
             _logger = logger;
         }
 
@@ -88,6 +93,43 @@ namespace AcasService.Application.Queries.Material
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error getting all materials");
+                throw;
+            }
+        }
+        public async Task<PagedResult<MaterialResponse>> GetAdminMaterialsAsync(string? searchTerm, int pageIndex, int pageSize)
+        {
+            try
+            {
+                var materials = await _materialRepository.FindAllAsync();
+                
+                if (!string.IsNullOrEmpty(searchTerm))
+                {
+                    materials = materials.Where(m => m.Filename.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) || 
+                                                   m.Description.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+                }
+
+                materials = materials.OrderByDescending(m => m.CreatedDate).ToList();
+                var totalCount = materials.Count;
+                var pagedMaterials = materials.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+
+                var lecturerIds = pagedMaterials.Select(m => m.LecturerId).Distinct().ToList();
+                var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
+                var userById = userProfiles.ToDictionary(u => u.Id);
+
+                var fileUrls = await _privateS3Query.GetFileUrlsAsync(pagedMaterials.Select(m => m.Filename));
+
+                var responses = pagedMaterials.Select(m => {
+                    var user = userById.GetValueOrDefault(m.LecturerId);
+                    var resp = _materialMapper.ToMaterialResponse(m, user?.Fullname ?? "Unknown", user?.Email ?? "Unknown");
+                    resp.FileUrl = fileUrls.GetValueOrDefault(m.Filename) ?? string.Empty;
+                    return resp;
+                }).ToList();
+
+                return new PagedResult<MaterialResponse>(responses, totalCount, pageIndex, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting admin materials");
                 throw;
             }
         }

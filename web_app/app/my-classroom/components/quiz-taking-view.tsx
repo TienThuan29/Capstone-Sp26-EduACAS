@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button, Card, Badge, Spinner, Textarea } from 'flowbite-react';
+import { Button, Card, Badge, Spinner, Textarea, Modal, ModalHeader, ModalBody } from 'flowbite-react';
 import {
   ClockIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   CheckCircleIcon,
+  ExclamationTriangleIcon,
 } from '@heroicons/react/24/outline';
 import { QuizAttemptResponse, QuizQuestion } from '@/types/quiz';
 import { useQuizAttempt } from '@/hooks/quiz/useQuizAttempt';
@@ -132,21 +133,27 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
     }
   };
 
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+
   const handleSubmit = async () => {
     if (!attempt || isSubmitting) return;
-    if (confirm("Are you sure you want to submit your quiz?")) {
-      setIsSubmitting(true);
-      try {
-        const result = await submitAttempt(attempt.id);
-        if (result) {
-          showSuccess("Quiz submitted successfully!");
-          onSubmitted();
-        }
-      } catch {
-        showError("Failed to submit quiz.");
-      } finally {
-        setIsSubmitting(false);
+    setShowSubmitModal(true);
+  };
+
+  const confirmSubmit = async () => {
+    if (!attempt || isSubmitting) return;
+    setIsSubmitting(true);
+    setShowSubmitModal(false);
+    try {
+      const result = await submitAttempt(attempt.id);
+      if (result) {
+        showSuccess("Quiz submitted successfully!");
+        onSubmitted();
       }
+    } catch {
+      showError("Failed to submit quiz.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -245,7 +252,7 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
                   className="w-full font-extrabold shadow-sm transition-all rounded-lg uppercase tracking-widest text-xs"
                   onClick={onBack}
                 >
-                  BACK TO LIST
+                  CLOSE REVIEW
                 </Button>
               )}
             </div>
@@ -467,6 +474,45 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
           </Button>
         </div>
       </div>
+
+      <Modal show={showSubmitModal} size="md" popup onClose={() => setShowSubmitModal(false)}>
+        <ModalHeader />
+        <ModalBody>
+          <div className="text-center p-4">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-blue-50 text-[#1F4E79] dark:bg-blue-900/20 dark:text-blue-400">
+              <ExclamationTriangleIcon className="h-10 w-10 text-orange-500" />
+            </div>
+
+            <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
+              Submit Quiz?
+            </h3>
+
+            <p className="mb-6 text-gray-500 dark:text-gray-400">
+              Are you sure you want to finish and submit your answers? This action cannot be undone.
+            </p>
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+              <Button
+                color="gray"
+                onClick={() => setShowSubmitModal(false)}
+                disabled={isSubmitting}
+                className="cursor-pointer"
+              >
+                No, cancel
+              </Button>
+              <Button
+                color="info"
+                onClick={confirmSubmit}
+                disabled={isSubmitting}
+                className="bg-[#1F4E79] hover:bg-[#2A6BA3] dark:bg-blue-600 dark:hover:bg-blue-700 cursor-pointer text-white"
+              >
+                {isSubmitting ? <Spinner size="sm" className="mr-2" /> : null}
+                Yes, Submit
+              </Button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 };

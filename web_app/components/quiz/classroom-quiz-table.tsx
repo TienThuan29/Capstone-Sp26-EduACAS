@@ -19,6 +19,7 @@ import { CountdownTimer } from "@/components/quiz/shared-quiz-overview";
 export const STATUS_COLOR: Record<ClassroomQuizStatus, string> = {
     DRAFT: "warning",
     PUBLISHED: "success",
+    ONGOING: "info",
     CLOSED: "failure",
 };
 
@@ -84,17 +85,17 @@ export function ClassroomQuizTable({
                                             {cq.status}
                                         </Badge>
                                         
-                                        {cq.status === 'PUBLISHED' && (
+                                        {(cq.status === 'PUBLISHED' || cq.status === 'ONGOING') && (
                                             <div className="text-[10px] font-medium text-gray-400 whitespace-nowrap tabular-nums">
-                                                {new Date(cq.startTime) > new Date() ? (
+                                                {cq.status === 'PUBLISHED' ? (
                                                     <span className="flex items-center gap-1">
-                                                        <CountdownTimer targetDate={cq.startTime} onEnd={onTimerEnd} />
+                                                        Starts: <CountdownTimer targetDate={cq.startTime} onEnd={onTimerEnd} />
                                                     </span>
-                                                ) : new Date(cq.endTime) > new Date() ? (
+                                                ) : (
                                                     <span className="flex items-center gap-1">
-                                                        <CountdownTimer targetDate={cq.endTime} onEnd={onTimerEnd} />
+                                                        Ends: <CountdownTimer targetDate={cq.endTime} onEnd={onTimerEnd} />
                                                     </span>
-                                                ) : null}
+                                                )}
                                             </div>
                                         )}
                                     </div>

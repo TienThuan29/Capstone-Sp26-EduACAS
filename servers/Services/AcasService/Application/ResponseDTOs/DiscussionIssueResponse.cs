@@ -11,6 +11,9 @@ public class AuthorDisplayResponse
 
     [JsonPropertyName("avatarUrl")]
     public string AvatarUrl { get; set; } = string.Empty;
+
+    [JsonPropertyName("email")]
+    public string Email { get; set; } = string.Empty;
 }
 
 /// <summary>
@@ -44,6 +47,9 @@ public class DiscussionIssueListResponse
 
     [JsonPropertyName("tags")]
     public string[] Tags { get; set; } = Array.Empty<string>();
+
+    [JsonPropertyName("isDeleted")]
+    public bool IsDeleted { get; set; }
 }
 
 /// <summary>

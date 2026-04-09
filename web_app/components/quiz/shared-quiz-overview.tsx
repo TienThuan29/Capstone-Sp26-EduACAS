@@ -115,8 +115,11 @@ export function SharedQuizOverview({
   const start = new Date(classroomQuiz.startTime);
   const end = new Date(classroomQuiz.endTime);
   const now = new Date();
-  const isUpcoming = start > now;
-  const isOngoing = start <= now && end > now;
+  
+  // Logical flags for UI
+  const isUpcoming = classroomQuiz.status === 'PUBLISHED' && start > now;
+  const isOngoing = classroomQuiz.status === 'ONGOING' || (classroomQuiz.status === 'PUBLISHED' && start <= now && end > now);
+  const isClosed = classroomQuiz.status === 'CLOSED' || end <= now;
 
   const handleCopyPasscode = () => {
     if (classroomQuiz.passcode) {
@@ -163,7 +166,7 @@ export function SharedQuizOverview({
           </div>
 
           <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-x-8 px-6 py-4 items-center">
-            {classroomQuiz.status !== 'CLOSED' ? (
+            {classroomQuiz.status !== 'CLOSED' && classroomQuiz.status !== 'DRAFT' ? (
               <div className="flex items-start gap-4 py-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#1F4E79]/10 text-[#1F4E79] dark:bg-[#C9A24D]/10 dark:text-[#C9A24D]">
                   <ClockIcon className="h-5 w-5" />
@@ -269,9 +272,9 @@ export function SharedQuizOverview({
                     {quizDetail.totalQuestions}
                   </span>
                 </div>
-                <div className="flex flex-col gap-1">
-                  <span className="text-gray-500 dark:text-gray-400">Subject</span>
-                  <span className="font-bold text-gray-900 dark:text-white">
+                <div className="flex justify-between items-start group">
+                  <span className="text-gray-500 dark:text-gray-400 shrink-0">Subject</span>
+                  <span className="font-bold text-gray-900 dark:text-white text-right break-words pl-8">
                     {subjectName || "Loading..."}
                   </span>
                 </div>

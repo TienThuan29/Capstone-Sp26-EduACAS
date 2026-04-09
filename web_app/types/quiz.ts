@@ -30,11 +30,12 @@ export interface Quiz {
   questions: QuizQuestion[];
 }
 
-export type ClassroomQuizStatus = 'DRAFT' | 'PUBLISHED' | 'CLOSED';
+export type ClassroomQuizStatus = 'DRAFT' | 'PUBLISHED' | 'ONGOING' | 'CLOSED';
 
 export const CLASSROOM_QUIZ_STATUS: Record<ClassroomQuizStatus, ClassroomQuizStatus> = {
   DRAFT: 'DRAFT',
   PUBLISHED: 'PUBLISHED',
+  ONGOING: 'ONGOING',
   CLOSED: 'CLOSED',
 };
 
@@ -78,7 +79,7 @@ export interface PagedClassroomQuizResult {
   hasNextPage: boolean;
 }
 
-export type QuizAttemptStatus = 'INPROGRESS' | 'SUBMITTED' | 'EXPIRED' | 'ABANDONED';
+export type QuizAttemptStatus = 'INPROGRESS' | 'SUBMITTED' | 'ABANDONED';
 
 export interface QuizAttempt {
   id: string;

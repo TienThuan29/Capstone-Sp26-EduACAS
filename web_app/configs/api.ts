@@ -20,6 +20,7 @@ export const Api = {
 
   User: {
     GET_ALL: "/api/auth/v1/users",
+    GET_PAGED: "/api/auth/v1/users/list/paged",
     UPDATE: (id: string) => `/api/auth/v1/users/${id}`,
   },
 
@@ -149,11 +150,13 @@ export const Api = {
   },
 
   Material: {
+    BASE: '/api/acas/v1/materials',
     CREATE: '/api/acas/v1/materials',
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
+    GET_ADMIN: '/api/acas/v1/materials/admin',
   },
 
   Submission: {
@@ -195,6 +198,8 @@ export const Api = {
     HUB: "/api/acas/v1/hubs/notification",
     /** GET paged notifications by userId */
     GET_BY_USER: "/api/acas/v1/notifications",
+    /** GET paged notifications for admin */
+    GET_ADMIN: "/api/acas/v1/notifications/admin",
     /** PATCH mark notification as read */
     MARK_READ: (id: string) => `/api/acas/v1/notifications/${id}/mark-read`,
     /** PATCH soft-delete notification */
@@ -213,6 +218,7 @@ export const Api = {
     UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
+    GET_ADMIN: "/api/acas/v1/discussion-issues/admin",
   },
 
   Proctoring: {

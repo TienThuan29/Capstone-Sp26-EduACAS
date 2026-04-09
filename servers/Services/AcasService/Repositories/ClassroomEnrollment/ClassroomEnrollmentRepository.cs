@@ -104,6 +104,30 @@ public class ClassroomEnrollmentRepository : DynamoRepository, IClassroomEnrollm
         }
     }
 
+    public async Task<int> GetStudentCountByClassIdAsync(string classId)
+    {
+        try
+        {
+            var scanRequest = new ScanRequest
+            {
+                TableName = _classroomEnrollmentTableName,
+                FilterExpression = "classId = :classId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":classId"] = new AttributeValue { S = classId }
+                },
+                Select = Select.COUNT
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(scanRequest);
+            return response.Count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error counting enrollments for class {ClassId}", classId);
+            return 0;
+        }
+    }
 
     public async Task<List<Models.ClassEnrollment>> FindByStudentIdAsync(string studentId)
     {

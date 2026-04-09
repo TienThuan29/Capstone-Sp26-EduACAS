@@ -355,11 +355,11 @@ export function QuizzesTab({
                                                     <Button
                                                         size="md"
                                                         onClick={handleTakeQuiz}
-                                                        disabled={selectedQuiz.status === 'CLOSED' || isUpcoming}
+                                                        disabled={selectedQuiz.status !== 'ONGOING'}
                                                         className="bg-[#1F4E79] hover:bg-[#2A6BA3] shadow-md disabled:opacity-50 disabled:grayscale transition-all rounded-lg px-16 py-1"
                                                     >
                                                         <span className="text-[15px] font-extrabold tracking-widest uppercase whitespace-nowrap">
-                                                            {isUpcoming ? 'Not Started' : selectedQuiz.status === 'CLOSED' ? 'Closed' : 'START QUIZ'}
+                                                            {selectedQuiz.status === 'PUBLISHED' ? 'Upcoming' : selectedQuiz.status === 'CLOSED' ? 'Closed' : selectedQuiz.status === 'DRAFT' ? 'Internal' : 'START QUIZ'}
                                                         </span>
                                                     </Button>
                                                 </div>

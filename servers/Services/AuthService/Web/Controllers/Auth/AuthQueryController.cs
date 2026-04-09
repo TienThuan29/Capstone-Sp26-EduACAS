@@ -48,7 +48,7 @@ public class AuthQueryController : ControllerBase
             return ResponseUtil.Error<UserProfileResponse>("Internal Server Error", 500);
         }
     }
-    
+
     [HttpGet("users")]
     public async Task<ActionResult<ApiResponse<List<UserProfileResponse>>>> GetAllUsers()
     {
@@ -61,6 +61,27 @@ public class AuthQueryController : ControllerBase
         {
             _logger.LogError(ex, "Error getting all users");
             return ResponseUtil.Error<List<UserProfileResponse>>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpGet("users/list/paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<UserProfileResponse>>>> GetPagedUsers(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null,
+        [FromQuery] string? role = null,
+        [FromQuery] bool? isEnable = null
+    )
+    {
+        try
+        {
+            var pagedUsers = await _userQuery.GetPagedUsersAsync(pageIndex, pageSize, searchTerm, role, isEnable);
+            return ResponseUtil.Success(pagedUsers, "Paged users retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged users");
+            return ResponseUtil.Error<PagedResult<UserProfileResponse>>("Internal Server Error", 500);
         }
     }
 }

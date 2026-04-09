@@ -184,4 +184,39 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
             throw;
         }
     }
+
+    public async Task<List<Models.DiscussionIssue>> FindAllAsync()
+    {
+        try
+        {
+            var issues = new List<Models.DiscussionIssue>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _discussionIssueTableName
+                };
+                if (lastKey != null && lastKey.Count > 0)
+                    scanRequest.ExclusiveStartKey = lastKey;
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+
+                foreach (var item in response.Items)
+                {
+                    issues.Add(DynamoMapper.DynamoItemToDiscussionIssue(item));
+                }
+
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return issues;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding all discussion issues");
+            throw;
+        }
+    }
 }
