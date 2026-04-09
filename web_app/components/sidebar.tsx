@@ -187,6 +187,9 @@ const Sidebar = () => {
       href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
     },
     { icon: UsersIcon, label: "Manage Users", href: PageUrl.ADMIN_USERS_PAGE },
+    { icon: BellIcon, label: "Manage Notifications", href: PageUrl.ADMIN_NOTIFICATIONS_PAGE },
+    { icon: ChatBubbleLeftRightIcon, label: "Manage Discussions", href: PageUrl.ADMIN_DISCUSSIONS_PAGE },
+    { icon: BookOpenIcon, label: "Manage Materials", href: PageUrl.ADMIN_MATERIALS_PAGE },
   ];
 
   const classroomMenuItems = [

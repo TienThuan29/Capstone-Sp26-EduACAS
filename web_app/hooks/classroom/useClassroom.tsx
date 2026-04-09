@@ -160,7 +160,18 @@ export const useClassroom = () => {
         Api.Classroom.UPDATE_CLASSROOM(classroomId),
         payload,
       );
-      return response.data;
+      return response.data?.dataResponse;
+    },
+    [axiosInstance],
+  );
+
+  const createClassroom = useCallback(
+    async (payload: any) => {
+      const response = await axiosInstance.post(
+        Api.Classroom.CREATE_CLASSROOM,
+        payload,
+      );
+      return response.data?.dataResponse;
     },
     [axiosInstance],
   );
@@ -170,7 +181,7 @@ export const useClassroom = () => {
       const response = await axiosInstance.patch(
         Api.Classroom.SOFT_DELETE_CLASSROOM(classroomId),
       );
-      return response.data;
+      return response.data?.dataResponse;
     },
     [axiosInstance],
   );
@@ -196,6 +207,7 @@ export const useClassroom = () => {
     getLecturerClassrooms,
     getSubjects,
     updateClassroom,
+    createClassroom,
     softDeleteClassroom,
     regenerateEnrolKey,
   };

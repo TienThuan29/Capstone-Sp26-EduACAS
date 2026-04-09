@@ -30,6 +30,7 @@ export interface Classroom {
   isDeleted: boolean;
   enrollment?: Enrollment;
   maxSlot: number;
+  studentCount: number;
 }
 
 // student classroom response

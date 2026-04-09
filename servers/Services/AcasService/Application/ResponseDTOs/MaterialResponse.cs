@@ -25,6 +25,12 @@ namespace AcasService.Application.ResponseDTOs
         [JsonPropertyName("isDeleted")]
         public bool IsDeleted { get; set; }
 
+        [JsonPropertyName("lecturerName")]
+        public string LecturerName { get; set; } = string.Empty;
+
+        [JsonPropertyName("lecturerEmail")]
+        public string LecturerEmail { get; set; } = string.Empty;
+
         [JsonPropertyName("createdDate")]
         public DateTime CreatedDate { get; set; }
     }

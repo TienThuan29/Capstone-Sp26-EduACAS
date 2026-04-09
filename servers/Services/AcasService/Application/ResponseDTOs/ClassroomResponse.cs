@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace AcasService.Application.ResponseDTOs
 {
@@ -41,8 +41,10 @@ namespace AcasService.Application.ResponseDTOs
         public int MaxSlot { get; set; }
 
         [JsonPropertyName("enrollment")]
-        public EnrollmentInfoResponse Enrollment { get; set; }
-       = new EnrollmentInfoResponse();
+        public EnrollmentInfoResponse Enrollment { get; set; } = new EnrollmentInfoResponse();
+
+        [JsonPropertyName("studentCount")]
+        public int StudentCount { get; set; }
 
     }
 

@@ -8,6 +8,7 @@ public interface IUserRepository
     Task<Models.User?> FindByEmailAsync(string email);
     Task<Models.User?> FindByGoogleIdAsync(string googleId);
     Task<List<Models.User>> FindAllAsync();
+    Task<(List<Models.User> items, int totalCount)> FindPagedAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null);
 
     Task<Models.User?> UpdatePasswordAsync(Models.User user);
     Task<Models.User?> UpdateGoogleIdAsync(string userId, string googleId);

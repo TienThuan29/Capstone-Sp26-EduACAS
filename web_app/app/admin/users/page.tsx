@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
-import { Avatar, Badge, Spinner, Button, Modal, ModalHeader, ModalBody, ModalFooter, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react"
+import { Avatar, Badge, Spinner, Button, Modal, ModalHeader, ModalBody, Label, TextInput, Select, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Pagination } from "flowbite-react"
 import {
   UserIcon,
   MagnifyingGlassIcon,
@@ -54,7 +54,7 @@ type GrantAccountModalProps = {
 export default function UsersManagement() {
   const { isDark } = useThemeContext()
   const toast = useToast()
-  const { getAllUsers, grantAccount, updateUser } = useUserManagement()
+  const { getAllUsers, getPagedUsers, grantAccount, updateUser } = useUserManagement()
   const toastRef = useRef(toast)
   toastRef.current = toast
   const [mounted, setMounted] = useState(false)
@@ -63,6 +63,11 @@ export default function UsersManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [filterRole, setFilterRole] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [totalPages, setTotalPages] = useState(1)
+  const [totalCount, setTotalCount] = useState(0)
+
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null)
@@ -83,20 +88,33 @@ export default function UsersManagement() {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getAllUsers()
-      setUsers(data)
+      const data = await getPagedUsers(currentPage, pageSize, searchTerm, filterRole, filterStatus)
+      if (data) {
+        setUsers(data.items)
+        setTotalPages(data.totalPages)
+        setTotalCount(data.totalCount)
+      }
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       toastRef.current.showError(err.response?.data?.message || 'Cannot load user list')
     } finally {
       setLoading(false)
     }
-  }, [getAllUsers])
+  }, [getPagedUsers, currentPage, pageSize, searchTerm, filterRole, filterStatus])
 
   useEffect(() => {
     setMounted(true)
-    fetchUsers()
-  }, [fetchUsers])
+  }, [])
+
+  useEffect(() => {
+    if (mounted) {
+      fetchUsers()
+    }
+  }, [mounted, fetchUsers])
+
+  const onPageChange = (page: number) => {
+    setCurrentPage(page)
+  }
 
   const handleGrantAccount = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -161,22 +179,11 @@ export default function UsersManagement() {
   if (!mounted) return null
 
   const statsCardsData = [
-    { title: 'Total', value: users.length, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
+    { title: 'Total', value: totalCount, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
     { title: 'Student', value: users.filter(u => u.role === 'STUDENT').length, icon: <UserCircleIcon className="h-6 w-6" />, accent: 'green' },
     { title: 'Lecturer', value: users.filter(u => u.role === 'LECTURER').length, icon: <AcademicCapIcon className="h-6 w-6" />, accent: 'blue' },
     { title: 'Admin', value: users.filter(u => u.role === 'ADMIN').length, icon: <ShieldCheckIcon className="h-6 w-6" />, accent: 'red' },
   ]
-
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.fullname.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.roleNumber.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesRole = filterRole === 'all' || user.role === filterRole
-    const matchesStatus = filterStatus === 'all' || 
-                         (filterStatus === 'active' && user.isEnable) ||
-                         (filterStatus === 'disabled' && !user.isEnable)
-    return matchesSearch && matchesRole && matchesStatus
-  })
 
   const getRoleIcon = (role: string) => {
     switch (role) {
@@ -207,11 +214,11 @@ export default function UsersManagement() {
   const getRoleText = (role: string) => {
     switch (role) {
       case 'ADMIN':
-        return 'Admin'
+        return 'ADMIN'
       case 'LECTURER':
-        return 'Lecturer'
+        return 'LECTURER'
       case 'STUDENT':
-        return 'Student'
+        return 'STUDENT'
       default:
         return role
     }
@@ -221,7 +228,6 @@ export default function UsersManagement() {
     <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
-        {/* Header */}
         <div className="mb-8 flex justify-between items-center">
           <div>
             <h1 className={`text-4xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
@@ -231,7 +237,7 @@ export default function UsersManagement() {
               Manage all users in the system
             </p>
           </div>
-          
+
           <DefaultCustomButton
             label="Grant Account"
             icon={<PlusIcon className="h-5 w-5" />}
@@ -240,7 +246,6 @@ export default function UsersManagement() {
           />
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-4 mb-6">
           {statsCardsData.map((stat) => {
             const style = userStatsAccentStyles[stat.accent]
@@ -272,151 +277,168 @@ export default function UsersManagement() {
           })}
         </div>
 
-        {/* Toolbar */}
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <div className="flex gap-4 flex-1">
-            <div className="flex-1 max-w-md">
-              <TextInput
-                type="text"
-                icon={MagnifyingGlassIcon}
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <Select
-              value={filterRole}
-              onChange={(e) => setFilterRole(e.target.value)}
-              className="min-w-[150px]"
-            >
-              <option value="all">All roles</option>
-              <option value="STUDENT">Student</option>
-              <option value="LECTURER">Lecturer</option>
-              <option value="ADMIN">Admin</option>
-            </Select>
-            <Select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="min-w-[150px]"
-            >
-              <option value="all">All status</option>
-              <option value="active">Active</option>
-              <option value="disabled">Disabled</option>
-            </Select>
-          </div>
-        </div>
+        <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+          <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
+            <form className="flex-grow max-w-md flex gap-3" onSubmit={(e) => { e.preventDefault(); fetchUsers(); }}>
+              <div className="flex-1">
+                <TextInput
+                  type="text"
+                  icon={MagnifyingGlassIcon}
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  theme={{
+                    field: {
+                      input: {
+                        colors: {
+                          gray: `${isDark ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500" : "bg-white border-gray-200 text-gray-900 focus:ring-blue-500"}`
+                        }
+                      }
+                    }
+                  }}
+                />
+              </div>
+            </form>
 
-        {/* Table */}
-        <Card className="overflow-x-auto">
-          {loading ? (
-            <div className="flex justify-center items-center">
-              <Spinner size="xl" />
-              <span className={`ml-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Loading data...</span>
+            <div className="flex gap-3">
+              <div className="w-40">
+                <Select
+                  value={filterRole}
+                  onChange={(e) => setFilterRole(e.target.value)}
+                  className="w-full"
+                >
+                  <option value="all">ALL ROLES</option>
+                  <option value="STUDENT">STUDENT</option>
+                  <option value="LECTURER">LECTURER</option>
+                  <option value="ADMIN">ADMIN</option>
+                </Select>
+              </div>
+              <div className="w-40">
+                <Select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="w-full"
+                >
+                  <option value="all">ALL STATUS</option>
+                  <option value="active">ACTIVE</option>
+                  <option value="disabled">DISABLED</option>
+                </Select>
+              </div>
             </div>
-          ) : (
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableHeadCell>User</TableHeadCell>
-                <TableHeadCell>Role Number</TableHeadCell>
-                <TableHeadCell>Email</TableHeadCell>
-                <TableHeadCell>Role</TableHeadCell>
-                <TableHeadCell>Status</TableHeadCell>
-                <TableHeadCell>First Login</TableHeadCell>
-                <TableHeadCell>Created Date</TableHeadCell>
-                <TableHeadCell>Action</TableHeadCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {filteredUsers.length === 0 ? (
+          </div>
+
+          <div className="overflow-x-auto">
+            <Table hoverable>
+              <TableHead>
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center">
-                    <div className="flex flex-col items-center justify-center">
-                      <UserIcon className={`w-12 h-12 mb-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
-                      <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>
-                        No users found
-                      </p>
-                    </div>
-                  </TableCell>
+                  <TableHeadCell>User</TableHeadCell>
+                  <TableHeadCell className="text-center">Role Number</TableHeadCell>
+                  <TableHeadCell className="text-center">Email</TableHeadCell>
+                  <TableHeadCell className="text-center">Role</TableHeadCell>
+                  <TableHeadCell className="text-center">Status</TableHeadCell>
+                  <TableHeadCell className="text-center">First Login</TableHeadCell>
+                  <TableHeadCell className="text-center">Created Date</TableHeadCell>
+                  <TableHeadCell className="text-center">Action</TableHeadCell>
                 </TableRow>
-              ) : (
-                filteredUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-3">
-                        <Avatar
-                          img={user.avatarUrl}
-                          alt={user.fullname}
-                          rounded
-                          size="md"
-                          className="shrink-0"
-                        />
-                        <div>
-                          <div className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                            {user.fullname}
-                          </div>
-                          {user.birthday && (
-                            <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                              {formatDateOnly(user.birthday)}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                      {user.roleNumber}
-                    </TableCell>
-                    <TableCell>{user.email}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getRoleIcon(user.role)}
-                        <Badge color={getRoleBadgeColor(user.role)}>
-                          {getRoleText(user.role)}
-                        </Badge>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge color={user.isEnable ? 'success' : 'failure'}>
-                        {user.isEnable ? 'Active' : 'Disabled'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge color={user.firstLogin ? 'warning' : 'gray'}>
-                        {user.firstLogin ? 'Not changed password' : 'Changed password'}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                          {formatDateOnly(user.createdDate)}
-                        </span>
-                        <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                          {formatTime(user.createdDate)}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Button size="xs" color="blue" onClick={() => handleEdit(user)}>
-                        <PencilIcon className="w-4 h-4 mr-1" />
-                        Edit
-                      </Button>
+              </TableHead>
+              <TableBody className="divide-y-0">
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center py-10">
+                      <Spinner size="xl" />
+                      <div className={`mt-3 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>Loading users...</div>
                     </TableCell>
                   </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-          )}
-        </Card>
+                ) : users.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className=" py-10">
+                      <div className="flex flex-col">
+                        <UserIcon className={`w-12 h-12 mb-2 ${isDark ? 'text-gray-600' : 'text-gray-400'}`} />
+                        <p className={isDark ? 'text-gray-400' : 'text-gray-500'}>No users found</p>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  users.map((user) => (
+                    <TableRow key={user.id} className={isDark ? "hover:bg-gray-700" : "hover:bg-gray-50"}>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <Avatar img={user.avatarUrl} alt={user.fullname} rounded size="sm" className="shrink-0" />
+                          <div className="flex flex-col">
+                            <span className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{user.fullname}</span>
+                            {user.birthday && (
+                              <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{formatDateOnly(user.birthday)}</span>
+                            )}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className={`text-center font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {user.roleNumber}
+                      </TableCell>
+                      <TableCell className={`text-center ${isDark ? "text-gray-300" : "text-gray-700"}`}>{user.email}</TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <Badge color={getRoleBadgeColor(user.role)} className="font-bold">
+                            {getRoleText(user.role)}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <Badge color={user.isEnable ? 'success' : 'failure'} className="font-bold">
+                            {user.isEnable ? 'ACTIVE' : 'DISABLED'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <Badge color={user.firstLogin ? 'warning' : 'gray'} className="font-bold">
+                            {user.firstLogin ? 'PENDING' : 'CHANGED'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex flex-col items-center">
+                          <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatDateOnly(user.createdDate)}</span>
+                          <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{formatTime(user.createdDate)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex justify-center">
+                          <Button
+                            size="xs"
+                            color="failure"
+                            onClick={() => handleEdit(user)}
+                            disabled={user.role === 'ADMIN'}
+                          >
+                            <PencilIcon className="w-4 h-4 mr-1" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
 
-        {/* Summary */}
-        {!loading && filteredUsers.length > 0 && (
-          <Card className="mt-4">
-            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
-              Display <span className="font-semibold">{filteredUsers.length}</span> out of <span className="font-semibold">{users.length}</span> users
-            </p>
-          </Card>
-        )}
+          {!loading && totalPages > 1 && (
+            <div className="flex justify-center mt-6 py-4 border-t border-gray-100 dark:border-gray-700">
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={onPageChange}
+                showIcons
+              />
+            </div>
+          )}
+
+          {!loading && users.length > 0 && (
+            <div className={`mt-4 pt-4 border-t border-gray-50 dark:border-gray-700 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+              Showing {((currentPage - 1) * pageSize) + 1} to {Math.min(currentPage * pageSize, totalCount)} of {totalCount} users
+            </div>
+          )}
+        </div>
 
         <GrantAccountModal
           show={showGrantModal}
@@ -519,12 +541,12 @@ function GrantAccountModal({
               value={grantForm.role}
               onChange={(e) => setGrantForm({ ...grantForm, role: e.target.value })}
             >
-              <option value="STUDENT">Student</option>
-              <option value="LECTURER">Lecturer</option>
+              <option value="STUDENT">STUDENT</option>
+              <option value="LECTURER">LECTURER</option>
             </Select>
           </div>
         </ModalBody>
-        <ModalFooter>
+        <div className="p-6 border-t dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-700/50">
           <Button color="gray" onClick={onClose} className='cursor-pointer'>
             Cancel
           </Button>
@@ -538,7 +560,7 @@ function GrantAccountModal({
               'Grant account'
             )}
           </Button>
-        </ModalFooter>
+        </div>
       </form>
     </Modal>
   )
@@ -612,9 +634,9 @@ function EditUserModal({
                 value={editForm.role}
                 onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}
               >
-                <option value="STUDENT">Student</option>
-                <option value="LECTURER">Lecturer</option>
-                <option value="ADMIN">Admin</option>
+                <option value="STUDENT">STUDENT</option>
+                <option value="LECTURER">LECTURER</option>
+                <option value="ADMIN">ADMIN</option>
               </Select>
             </div>
             <div>
@@ -631,7 +653,7 @@ function EditUserModal({
               </Select>
             </div>
           </ModalBody>
-          <ModalFooter>
+          <div className="p-6 border-t dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-700/50">
             <Button color="gray" onClick={onClose} className='cursor-pointer'>
               Cancel
             </Button>
@@ -645,7 +667,7 @@ function EditUserModal({
                 'Update'
               )}
             </Button>
-          </ModalFooter>
+          </div>
         </form>
       )}
     </Modal>

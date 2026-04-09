@@ -71,25 +71,25 @@ namespace AcasService.Application.Commands.QuizAttempt
                 if (classroomQuiz == null)
                     throw new KeyNotFoundException($"ClassroomQuiz with ID {request.ClassroomQuizId} not found.");
 
-                if (classroomQuiz.Status == Models.ClassroomQuizStatus.DRAFT)
-                    throw new InvalidOperationException("This quiz is currently in DRAFT mode and not yet available for students.");
-
-                if (!string.IsNullOrEmpty(classroomQuiz.Passcode) && classroomQuiz.Passcode != request.Passcode)
+                if (classroomQuiz.Status != Models.ClassroomQuizStatus.ONGOING)
                 {
-                    throw new ArgumentException("Incorrect passcode. Please try again.");
+                    if (classroomQuiz.Status == Models.ClassroomQuizStatus.DRAFT)
+                        throw new InvalidOperationException("This quiz is currently in DRAFT mode and not yet available for students.");
+                    
+                    if (classroomQuiz.Status == Models.ClassroomQuizStatus.PUBLISHED)
+                        throw new InvalidOperationException("This quiz has been scheduled but not yet started (PUBLISHED).");
+                    
+                    if (classroomQuiz.Status == Models.ClassroomQuizStatus.CLOSED)
+                        throw new InvalidOperationException("The quiz has already ended (CLOSED).");
+
+                    throw new InvalidOperationException($"Quiz is not available (Current Status: {classroomQuiz.Status})");
                 }
 
                 var now = DateTime.UtcNow;
-                _logger.LogInformation($"Checking time for quiz {request.ClassroomQuizId}. Now: {now}, Start: {classroomQuiz.StartTime}, End: {classroomQuiz.EndTime}");
-                
-                if (now < classroomQuiz.StartTime)
+                if (now < classroomQuiz.StartTime || now > classroomQuiz.EndTime)
                 {
-                    var waitTime = classroomQuiz.StartTime - now;
-                    throw new InvalidOperationException($"The quiz has not started yet. Starts in {(int)waitTime.TotalMinutes} minutes (at {classroomQuiz.StartTime.ToLocalTime():HH:mm dd/MM/yyyy}).");
+                    throw new InvalidOperationException("The quiz is not within its valid time window.");
                 }
-
-                if (now > classroomQuiz.EndTime || classroomQuiz.Status == Models.ClassroomQuizStatus.CLOSED)
-                    throw new InvalidOperationException("The quiz has already ended.");
 
                 int currentMax = await _repository.GetMaxAttemptNumberAsync(request.ClassroomQuizId, request.StudentId);
                 int nextAttempt = currentMax + 1;
