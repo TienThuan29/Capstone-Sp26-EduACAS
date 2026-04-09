@@ -15,7 +15,8 @@ public interface INotificationQuery
 
     Task<PagedResult<NotificationResponse>> GetAllNotificationsAsync(
         int pageIndex = 1, 
-        int pageSize = 10);
+        int pageSize = 10,
+        string? searchTerm = null);
 }
 
 public class NotificationQuery : INotificationQuery
@@ -88,7 +89,8 @@ public class NotificationQuery : INotificationQuery
 
     public async Task<PagedResult<NotificationResponse>> GetAllNotificationsAsync(
         int pageIndex = 1,
-        int pageSize = 10)
+        int pageSize = 10,
+        string? searchTerm = null)
     {
         try
         {
@@ -97,8 +99,23 @@ public class NotificationQuery : INotificationQuery
             if (pageSize > 100) pageSize = 100;
 
             var all = await _notificationRepository.FindAllAsync();
-            var totalCount = all.Count;
-            var itemsOnPage = all
+            
+            // Filter by search term if provided
+            var filtered = all.AsEnumerable();
+            if (!string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                filtered = filtered.Where(n => 
+                    (n.Title != null && n.Title.ToLower().Contains(lowerSearch)) || 
+                    (n.Body != null && n.Body.ToLower().Contains(lowerSearch)) ||
+                    (n.TargetUserId != null && n.TargetUserId.ToLower().Contains(lowerSearch)) ||
+                    (n.Type != null && n.Type.ToString().ToLower().Contains(lowerSearch))
+                );
+            }
+
+            var list = filtered.ToList();
+            var totalCount = list.Count;
+            var itemsOnPage = list
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
@@ -111,7 +128,7 @@ public class NotificationQuery : INotificationQuery
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving all notifications for admin");
+            _logger.LogError(ex, "Error retrieving all notifications for admin with search term {SearchTerm}", searchTerm);
             throw;
         }
     }

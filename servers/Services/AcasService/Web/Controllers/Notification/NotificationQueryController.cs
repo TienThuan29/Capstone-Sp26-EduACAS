@@ -89,11 +89,12 @@ public class NotificationQueryController : ControllerBase
     [Authorize(Roles = "ADMIN")]
     public async Task<ActionResult<ApiResponse<PagedResult<NotificationResponse>>>> GetAdminNotifications(
         [FromQuery] int pageIndex = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null)
     {
         try
         {
-            var result = await _notificationQuery.GetAllNotificationsAsync(pageIndex, pageSize);
+            var result = await _notificationQuery.GetAllNotificationsAsync(pageIndex, pageSize, searchTerm);
             return ResponseUtil.Success(result, "Notifications retrieved successfully for admin", 200);
         }
         catch (Exception ex)

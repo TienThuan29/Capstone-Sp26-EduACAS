@@ -193,8 +193,11 @@ export const useNotification = ({
   );
 
   const getAllNotificationsAdmin = useCallback(
-    async (pageIndex: number, pageSize: number) => {
-      const url = `${Api.Notification.GET_ADMIN}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+    async (pageIndex: number, pageSize: number, searchTerm?: string) => {
+      let url = `${Api.Notification.GET_ADMIN}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+      if (searchTerm) {
+        url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+      }
       const response = await axiosInstance.get<ApiResponse<PagedNotifications>>(url);
       return response.data?.dataResponse;
     },

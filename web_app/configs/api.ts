@@ -20,6 +20,7 @@ export const Api = {
 
   User: {
     GET_ALL: "/api/auth/v1/users",
+    GET_PAGED: "/api/auth/v1/users/list/paged",
     UPDATE: (id: string) => `/api/auth/v1/users/${id}`,
   },
 
@@ -143,11 +144,13 @@ export const Api = {
   },
 
   Material: {
+    BASE: '/api/acas/v1/materials',
     CREATE: '/api/acas/v1/materials',
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
+    GET_ADMIN: '/api/acas/v1/materials/admin',
   },
 
   Submission: {

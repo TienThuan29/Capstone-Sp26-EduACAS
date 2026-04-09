@@ -37,5 +37,6 @@ export const PageUrl = {
     ADMIN_USERS_PAGE: '/admin/users',
     ADMIN_NOTIFICATIONS_PAGE: '/admin/notifications',
     ADMIN_DISCUSSIONS_PAGE: '/admin/discussions',
+    ADMIN_MATERIALS_PAGE: '/admin/materials',
 
 }
