@@ -33,6 +33,7 @@ import {
   BanknotesIcon,
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -194,6 +195,11 @@ const Sidebar = () => {
       icon: AcademicCapIcon,
       label: "Overview",
       href: `${pathname}?tab=overview`,
+    },
+    {
+      icon: ChartBarIcon,
+      label: "Dashboard",
+      href: `${pathname}?tab=dashboard`,
     },
     {
       icon: ClipboardDocumentListIcon,

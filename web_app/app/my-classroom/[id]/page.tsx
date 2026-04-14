@@ -20,6 +20,7 @@ import {
   OverviewTab,
   SlotTab,
   DiscussionTab,
+  StudentDashboardTab,
 } from "@/app/my-classroom/tabs";
 
 function ClassroomContent() {
@@ -187,6 +188,14 @@ function ClassroomContent() {
           <DiscussionTab
             classId={classId}
             hideBackButton={!!searchParams.get("issue")}
+          />
+        );
+      case "dashboard":
+        return (
+          <StudentDashboardTab
+            classroomId={classId}
+            classroomName={classroom.className}
+            studentId={studentId}
           />
         );
       default:

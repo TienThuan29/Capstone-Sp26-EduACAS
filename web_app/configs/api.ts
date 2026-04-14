@@ -81,6 +81,13 @@ export const Api = {
     GET_DASHBOARD_WARNINGS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/warnings`,
     GET_CLASS_STATS: "/api/acas/v1/classrooms/dashboard/stats",
     GET_EXAM_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics`,
+
+    // Student Dashboard
+    GET_STUDENT_OVERVIEW: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/overview`,
+    GET_STUDENT_EXAM_SCORES: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/exam-scores`,
+    GET_STUDENT_WARNINGS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/warnings`,
+    GET_STUDENT_SCORE_TREND: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/score-trend`,
+    GET_STUDENT_SUBMISSION_STATS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/submission-stats`,
   },
 
   Examination: {

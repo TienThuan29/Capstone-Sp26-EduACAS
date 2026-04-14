@@ -209,6 +209,7 @@ builder.Services.AddScoped<IAcademicWarningRepository, AcademicWarningRepository
 
 // Classroom Dashboard
 builder.Services.AddScoped<IClassroomDashboardQuery, ClassroomDashboardQuery>();
+builder.Services.AddScoped<IStudentDashboardQuery, StudentDashboardQuery>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
