@@ -29,8 +29,8 @@ class DiscussionIssueManagementPage extends StatefulWidget {
 
 class _DiscussionIssueManagementPageState
     extends State<DiscussionIssueManagementPage> {
-  List<DiscussionIssue> _issues = [];
-  List<DiscussionIssue> _filteredIssues = [];
+  List<DiscussionIssueListItem> _issues = [];
+  List<DiscussionIssueListItem> _filteredIssues = [];
   bool _isLoading = true;
   String _searchQuery = '';
   String _sortBy = 'newest'; // newest, oldest, most_comments
@@ -54,8 +54,12 @@ class _DiscussionIssueManagementPageState
     try {
       _currentUserId = await TokenStorage.getUserId();
 
-      final data = await DiscussionIssueService.getByClassroomId(widget.classroomId);
-      _issues = data.map((json) => DiscussionIssue.fromJson(json)).toList();
+      final paged = await DiscussionIssueService.getPagedByClassroom(
+        widget.classroomId,
+        pageIndex: 1,
+        pageSize: 100,
+      );
+      _issues = paged.items;
       _applyFilters();
     } catch (e) {
       if (mounted) {
@@ -72,15 +76,14 @@ class _DiscussionIssueManagementPageState
   }
 
   void _applyFilters() {
-    var filtered = _issues.where((issue) => !issue.isDeleted).toList();
+    var filtered = List<DiscussionIssueListItem>.from(_issues);
 
     // Search filter
     if (_searchQuery.isNotEmpty) {
       final query = _searchQuery.toLowerCase();
       filtered = filtered.where((issue) {
         return issue.title.toLowerCase().contains(query) ||
-            issue.content.toLowerCase().contains(query) ||
-            issue.authorName.toLowerCase().contains(query);
+            issue.displayName.toLowerCase().contains(query);
       }).toList();
     }
 
@@ -100,7 +103,7 @@ class _DiscussionIssueManagementPageState
     setState(() => _filteredIssues = filtered);
   }
 
-  Future<void> _deleteIssue(DiscussionIssue issue) async {
+  Future<void> _deleteIssue(DiscussionIssueListItem issue) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -123,7 +126,7 @@ class _DiscussionIssueManagementPageState
     if (confirmed != true) return;
 
     try {
-      await DiscussionIssueService.delete(issue.id);
+      await DiscussionIssueService.softDelete(issue.id);
 
       setState(() {
         _issues.removeWhere((i) => i.id == issue.id);
@@ -151,7 +154,7 @@ class _DiscussionIssueManagementPageState
   }
 
   void _navigateToCreate() async {
-    final result = await Navigator.push<DiscussionIssue>(
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => CreateEditIssuePage(
@@ -159,39 +162,32 @@ class _DiscussionIssueManagementPageState
         ),
       ),
     );
-    if (result != null) {
-      setState(() {
-        _issues.insert(0, result);
-        _applyFilters();
-      });
+    if (result == true) {
+      _loadData(); // Reload paged list
     }
   }
 
-  void _navigateToEdit(DiscussionIssue issue) async {
-    final result = await Navigator.push<DiscussionIssue>(
+  void _navigateToEdit(DiscussionIssueListItem issue) async {
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(
         builder: (_) => CreateEditIssuePage(
           classroomId: widget.classroomId,
-          existingIssue: issue,
+          existingIssueId: issue.id,
         ),
       ),
     );
-    if (result != null) {
-      setState(() {
-        final index = _issues.indexWhere((i) => i.id == result.id);
-        if (index != -1) _issues[index] = result;
-        _applyFilters();
-      });
+    if (result == true) {
+      _loadData(); // Reload paged list
     }
   }
 
-  void _navigateToDetail(DiscussionIssue issue) {
+  void _navigateToDetail(DiscussionIssueListItem issue) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => DiscussionDetailPage(
-          issue: issue,
+          issueId: issue.id,
         ),
       ),
     );
@@ -445,7 +441,7 @@ class _StatChip extends StatelessWidget {
 // ──────────────────────────────────────────────
 
 class _IssueCard extends StatelessWidget {
-  final DiscussionIssue issue;
+  final DiscussionIssueListItem issue;
   final String currentUserId;
   final VoidCallback onTap;
   final VoidCallback onEdit;
@@ -495,8 +491,8 @@ class _IssueCard extends StatelessWidget {
                         radius: 20,
                         backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                         child: Text(
-                          issue.authorName.isNotEmpty
-                              ? issue.authorName[0].toUpperCase()
+                          issue.displayName.isNotEmpty
+                              ? issue.displayName[0].toUpperCase()
                               : '?',
                           style: const TextStyle(
                             color: AppColors.primary,
@@ -526,7 +522,7 @@ class _IssueCard extends StatelessWidget {
                             Row(
                               children: [
                                 Text(
-                                  issue.authorName,
+                                  issue.displayName,
                                   style: const TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -587,20 +583,6 @@ class _IssueCard extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // Content preview
-                  if (issue.content.isNotEmpty) ...[
-                    Text(
-                      issue.content,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textSecondary,
-                        height: 1.5,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 16),
-                  ],
                   // Footer row
                   Row(
                     children: [
@@ -652,12 +634,12 @@ class _IssueCard extends StatelessWidget {
 
 class CreateEditIssuePage extends StatefulWidget {
   final String classroomId;
-  final DiscussionIssue? existingIssue;
+  final String? existingIssueId;
 
   const CreateEditIssuePage({
     super.key,
     required this.classroomId,
-    this.existingIssue,
+    this.existingIssueId,
   });
 
   @override
@@ -669,14 +651,33 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
   bool _isSubmitting = false;
-  bool get _isEditing => widget.existingIssue != null;
+  bool _isLoadingExisting = false;
+  bool get _isEditing => widget.existingIssueId != null;
 
   @override
   void initState() {
     super.initState();
     if (_isEditing) {
-      _titleController.text = widget.existingIssue!.title;
-      _contentController.text = widget.existingIssue!.content;
+      _loadExistingIssue();
+    }
+  }
+
+  Future<void> _loadExistingIssue() async {
+    setState(() => _isLoadingExisting = true);
+    try {
+      final issue = await DiscussionIssueService.getById(widget.existingIssueId!);
+      if (issue != null && mounted) {
+        _titleController.text = issue.title;
+        _contentController.text = issue.content;
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to load issue: $e'), backgroundColor: AppColors.error),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoadingExisting = false);
     }
   }
 
@@ -692,21 +693,19 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
 
     setState(() => _isSubmitting = true);
     try {
-      Map<String, dynamic>? result;
+      DiscussionIssue? result;
       if (_isEditing) {
         result = await DiscussionIssueService.update(
-          issueId: widget.existingIssue!.id,
+          issueId: widget.existingIssueId!,
           title: _titleController.text.trim(),
           content: _contentController.text.trim(),
         );
       } else {
         final userId = await TokenStorage.getUserId() ?? '';
-        final userName = await TokenStorage.getUserName() ?? '';
         result = await DiscussionIssueService.create(
           classroomId: widget.classroomId,
           title: _titleController.text.trim(),
           authorId: userId,
-          authorName: userName,
           content: _contentController.text.trim(),
         );
       }
@@ -720,7 +719,7 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
             backgroundColor: AppColors.success,
           ),
         );
-        Navigator.pop(context, DiscussionIssue.fromJson(result));
+        Navigator.pop(context, true);
       }
     } catch (e) {
       if (mounted) {
@@ -768,7 +767,9 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
           ),
         ],
       ),
-      body: Form(
+      body: _isLoadingExisting
+          ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+          : Form(
         key: _formKey,
         child: ListView(
           padding: const EdgeInsets.all(16),

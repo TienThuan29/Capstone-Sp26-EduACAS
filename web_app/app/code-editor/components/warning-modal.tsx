@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, AlertTriangle, ShieldAlert, Info, RefreshCw } from 'lucide-react';
+import { X, AlertTriangle, ShieldAlert, Info } from 'lucide-react';
 import clsx from 'clsx';
 import type { ViolationOverlayAlertType } from '@/hooks/exam/useExamViolationGuard';
 
@@ -28,24 +28,20 @@ export function WarningModal({
   const resolvedVariant: 'warning' | 'error' | 'info' =
     alertType === 'lock'
       ? 'error'
-      : alertType === 'reload'
-        ? 'info'
-        : alertType === 'violation'
-          ? 'warning'
-          : variant;
+      : alertType === 'violation'
+        ? 'warning'
+        : variant;
 
   const Icon =
-    alertType === 'reload'
-      ? RefreshCw
-      : alertType === 'violation'
-        ? AlertTriangle
-        : alertType === 'lock'
+    alertType === 'violation'
+      ? AlertTriangle
+      : alertType === 'lock'
+        ? ShieldAlert
+        : resolvedVariant === 'error'
           ? ShieldAlert
-          : resolvedVariant === 'error'
-            ? ShieldAlert
-            : resolvedVariant === 'info'
-              ? Info
-              : AlertTriangle;
+          : resolvedVariant === 'info'
+            ? Info
+            : AlertTriangle;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

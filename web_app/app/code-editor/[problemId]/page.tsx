@@ -1,11 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { CodeEditorClient } from '../components/code-editor-client';
 import { useExamination } from '@/hooks/exam/useExamination';
 import { useEditorContext } from '@/contexts/EditorContext';
 import { ExaminationSpecificProblemResponse } from '@/types/examination';
 import { FullPageLoader } from '@/components/loading-effect';
+import { useAuth } from '@/contexts/AuthContext';
+import { ExamSessionGuard } from '@/components/test-tracker/exam-session-guard';
 
 interface PageProps {
   params: Promise<{problemId: string;}>;
@@ -20,6 +22,12 @@ export default function CodeEditorPage({ params, searchParams }: PageProps) {
   
   const { getExaminationWithSpecificProblem } = useExamination();
   const { syncServerTime } = useEditorContext();
+  const { user } = useAuth();
+
+  // Render ExamSessionGuard early so violation detection runs even during loading.
+  const showLoadingGuard = useMemo(() => {
+    return !!examId && !!user?.id && isLoading;
+  }, [examId, user?.id, isLoading]);
 
   // Unwrap params and searchParams
   useEffect(() => {
@@ -65,11 +73,21 @@ export default function CodeEditorPage({ params, searchParams }: PageProps) {
   }, [examId, problemId, getExaminationWithSpecificProblem]);
 
   if (!problemId) {
-    return <FullPageLoader isLoading={isLoading} />;
+    return (
+      <>
+        <FullPageLoader isLoading={isLoading} />
+        {showLoadingGuard && <ExamSessionGuard examId={examId!} showOverlay={true} serverPhase={null} />}
+      </>
+    );
   }
 
   if (isLoading) {
-    return <FullPageLoader isLoading message="Loading problem..." />;
+    return (
+      <>
+        <FullPageLoader isLoading message="Loading problem..." />
+        {showLoadingGuard && <ExamSessionGuard examId={examId!} showOverlay={true} serverPhase={null} />}
+      </>
+    );
   }
 
   if (!examWithSpecProblem) {

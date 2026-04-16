@@ -24,7 +24,7 @@ class ApiNetwork {
       debugPrint('Connectivity test failed: $e');
 
       try {
-        final response = await http
+        await http
             .post(
               Uri.parse('${ApiConfig.baseUrl}${ApiConfig.loginEndpoint}'),
               headers: {'Content-Type': 'application/json'},
@@ -393,11 +393,9 @@ class ApiNetwork {
       debugPrint(' Request Headers: $headers');
 
       final response = await http
-          .patch(
-            url,
-            headers: headers,
-            body: body == null ? null : jsonEncode(body),
-          )
+          .patch(url,
+              headers: headers,
+              body: body != null ? jsonEncode(body) : null)
           .timeout(
             ApiConfig.requestTimeout,
             onTimeout: () {
