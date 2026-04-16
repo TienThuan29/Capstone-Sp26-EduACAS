@@ -1,5 +1,30 @@
 import 'classroom.dart';
 
+int _asInt(dynamic value, {int fallback = 0}) {
+  if (value is int) return value;
+  if (value is num) return value.toInt();
+  if (value is String) return int.tryParse(value.trim()) ?? fallback;
+  return fallback;
+}
+
+double _asDouble(dynamic value, {double fallback = 0}) {
+  if (value is double) return value;
+  if (value is num) return value.toDouble();
+  if (value is String) return double.tryParse(value.trim()) ?? fallback;
+  return fallback;
+}
+
+bool _asBool(dynamic value, {bool fallback = false}) {
+  if (value is bool) return value;
+  if (value is num) return value != 0;
+  if (value is String) {
+    final normalized = value.trim().toLowerCase();
+    if (normalized == 'true' || normalized == '1') return true;
+    if (normalized == 'false' || normalized == '0') return false;
+  }
+  return fallback;
+}
+
 class ProgrammingLanguage {
   final String id;
   final String name;
@@ -161,7 +186,7 @@ class Problem {
       title: json['title'] ?? '',
       content: json['content'] ?? '',
       fileName: json['fileName'],
-      difficulty: json['difficulty'] ?? 0,
+      difficulty: _asInt(json['difficulty']),
       codeTemplate: json['codeTemplate'],
       testCases: (json['testCases'] as List<dynamic>?)
               ?.map((e) => TestCase.fromJson(e as Map<String, dynamic>))
@@ -203,7 +228,7 @@ class ExamProblem {
   factory ExamProblem.fromJson(Map<String, dynamic> json) {
     return ExamProblem(
       problemId: json['problemId'] ?? '',
-      mark: (json['mark'] ?? 0).toDouble(),
+      mark: _asDouble(json['mark']),
       title: json['title'] ?? '',
     );
   }
@@ -225,8 +250,9 @@ enum ExaminationMode {
   const ExaminationMode(this.value);
 
   static ExaminationMode fromValue(int value) {
+    final parsedValue = _asInt(value);
     return ExaminationMode.values.firstWhere(
-      (mode) => mode.value == value,
+      (mode) => mode.value == parsedValue,
       orElse: () => ExaminationMode.practical,
     );
   }
@@ -241,8 +267,9 @@ enum ExaminationStatus {
   const ExaminationStatus(this.value);
 
   static ExaminationStatus fromValue(int value) {
+    final parsedValue = _asInt(value);
     return ExaminationStatus.values.firstWhere(
-      (status) => status.value == value,
+      (status) => status.value == parsedValue,
       orElse: () => ExaminationStatus.pending,
     );
   }
@@ -304,11 +331,11 @@ class Examination {
       startDatetime: json['startDatetime'] ?? '',
       endDatetime: json['endDatetime'] ?? '',
       description: json['description'] ?? '',
-      isPublicResult: json['isPublicResult'] ?? false,
-      totalMark: (json['totalMark'] ?? 0).toDouble(),
-      status: ExaminationStatus.fromValue(json['status'] ?? 0),
-      mode: ExaminationMode.fromValue(json['mode'] ?? 0),
-      isDeleted: json['isDeleted'] ?? false,
+      isPublicResult: _asBool(json['isPublicResult']),
+      totalMark: _asDouble(json['totalMark']),
+      status: ExaminationStatus.fromValue(_asInt(json['status'])),
+      mode: ExaminationMode.fromValue(_asInt(json['mode'])),
+      isDeleted: _asBool(json['isDeleted']),
       createdDate: json['createdDate'] ?? '',
       updatedDate: json['updatedDate'] ?? '',
     );

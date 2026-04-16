@@ -29,6 +29,16 @@ public class ClassroomQuizCommandController : ControllerBase
             var result = await _classroomQuizCommand.CreateClassroomQuizAsync(request);
             return ResponseUtil.Success(result, "Create classroom quiz assignment successfully", 201);
         }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, "Validation error creating classroom quiz assignment");
+            return ResponseUtil.Error<ClassroomQuizResponse>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, "Invalid operation creating classroom quiz assignment");
+            return ResponseUtil.Error<ClassroomQuizResponse>(ex.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error creating classroom quiz assignment");
@@ -48,6 +58,11 @@ public class ClassroomQuizCommandController : ControllerBase
         {
             _logger.LogWarning(ex, $"Classroom quiz assignment {id} not found for update");
             return ResponseUtil.Error<ClassroomQuizResponse>("Classroom quiz assignment not found", 404);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogWarning(ex, $"Validation error updating classroom quiz assignment {id}");
+            return ResponseUtil.Error<ClassroomQuizResponse>(ex.Message, 400);
         }
         catch (InvalidOperationException ex)
         {

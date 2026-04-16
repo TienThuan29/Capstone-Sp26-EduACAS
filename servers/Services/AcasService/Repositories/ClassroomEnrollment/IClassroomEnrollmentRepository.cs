@@ -16,4 +16,5 @@ public interface IClassroomEnrollmentRepository
     Task<Dictionary<string, Models.ClassEnrollment?>> FindByClassIdsAndStudentIdAsync(IEnumerable<string> classIds, string studentId);
 
     Task<List<Models.ClassEnrollment>> FindByClassIdAsync(string classId);
+    Task<int> GetStudentCountByClassIdAsync(string classId);
 }

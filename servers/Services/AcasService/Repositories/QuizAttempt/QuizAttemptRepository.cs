@@ -178,5 +178,63 @@ public async Task<int> GetMaxAttemptNumberAsync(string classroomQuizId, string s
 
     return response.Items.Max(i => int.Parse(i["attemptNumber"].N));
 }
+
+    public async Task<List<Models.QuizAttempt>> FindHistoryAsync(string classroomQuizId, string studentId)
+    {
+        var filterExpression = "classroomQuizId = :cqid AND studentId = :sid";
+        var attributeValues = new Dictionary<string, AttributeValue> {
+            [":cqid"] = new AttributeValue { S = classroomQuizId },
+            [":sid"] = new AttributeValue { S = studentId }
+        };
+
+        var scanRequest = new Amazon.DynamoDBv2.Model.ScanRequest {
+            TableName = _quizAttemptTableName,
+            FilterExpression = filterExpression,
+            ExpressionAttributeValues = attributeValues
+        };
+
+        var response = await _dynamoDBClient.ScanAsync(scanRequest);
+        return response.Items.Select(item => new Models.QuizAttempt
+        {
+            Id = item["id"].S,
+            ClassroomQuizId = item["classroomQuizId"].S,
+            StudentId = item["studentId"].S,
+            StartTime = DateTime.Parse(item["startTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
+            EndTime = item.ContainsKey("endTime") ? DateTime.Parse(item["endTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal) : null,
+            Status = Enum.Parse<Models.QuizAttemptStatus>(item["status"].S),
+            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N) : null,
+            AttemptNumber = int.Parse(item["attemptNumber"].N)
+        }).ToList();
+    }
+
+    public async Task<Application.ResponseDTOs.PagedResult<Models.QuizAttempt>> FindPagedByClassroomQuizIdAsync(string classroomQuizId, int pageIndex, int pageSize)
+    {
+        var filterExpression = "classroomQuizId = :cqid";
+        var attributeValues = new Dictionary<string, AttributeValue> {
+            [":cqid"] = new AttributeValue { S = classroomQuizId }
+        };
+
+        var scanRequest = new Amazon.DynamoDBv2.Model.ScanRequest {
+            TableName = _quizAttemptTableName,
+            FilterExpression = filterExpression,
+            ExpressionAttributeValues = attributeValues
+        };
+
+        var response = await _dynamoDBClient.ScanAsync(scanRequest);
+        var allAttempts = response.Items.Select(item => new Models.QuizAttempt
+        {
+            Id = item["id"].S,
+            ClassroomQuizId = item["classroomQuizId"].S,
+            StudentId = item["studentId"].S,
+            StartTime = DateTime.Parse(item["startTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
+            EndTime = item.ContainsKey("endTime") ? DateTime.Parse(item["endTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal) : null,
+            Status = Enum.Parse<Models.QuizAttemptStatus>(item["status"].S),
+            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N) : null,
+            AttemptNumber = int.Parse(item["attemptNumber"].N)
+        }).OrderByDescending(a => a.StartTime).ToList();
+
+        var pagedItems = allAttempts.Skip((pageIndex - 1) * pageSize).Take(pageSize).ToList();
+        return new Application.ResponseDTOs.PagedResult<Models.QuizAttempt>(pagedItems, allAttempts.Count, pageIndex, pageSize);
+    }
 }
 

@@ -20,6 +20,7 @@ export const Api = {
 
   User: {
     GET_ALL: "/api/auth/v1/users",
+    GET_PAGED: "/api/auth/v1/users/list/paged",
     UPDATE: (id: string) => `/api/auth/v1/users/${id}`,
   },
 
@@ -125,6 +126,12 @@ export const Api = {
     DELETE: (id: string) => `/api/acas/v1/quizzes/${id}`,
   },
 
+  QuizAttempt: {
+    GET_BY_ID: (id: string) => `/api/acas/v1/quiz-attempts/${id}`,
+    GET_BY_STUDENT: (studentId: string) =>
+      `/api/acas/v1/quiz-attempts/student/${studentId}`,
+  },
+
   ClassroomQuiz: {
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/classroom-quizzes/classroom/${classroomId}`,
     GET_BY_ID: (id: string) => `/api/acas/v1/classroom-quizzes/${id}`,
@@ -143,11 +150,13 @@ export const Api = {
   },
 
   Material: {
+    BASE: '/api/acas/v1/materials',
     CREATE: '/api/acas/v1/materials',
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
+    GET_ADMIN: '/api/acas/v1/materials/admin',
   },
 
   Submission: {
@@ -189,6 +198,8 @@ export const Api = {
     HUB: "/api/acas/v1/hubs/notification",
     /** GET paged notifications by userId */
     GET_BY_USER: "/api/acas/v1/notifications",
+    /** GET paged notifications for admin */
+    GET_ADMIN: "/api/acas/v1/notifications/admin",
     /** PATCH mark notification as read */
     MARK_READ: (id: string) => `/api/acas/v1/notifications/${id}/mark-read`,
     /** PATCH soft-delete notification */
@@ -207,6 +218,7 @@ export const Api = {
     UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
+    GET_ADMIN: "/api/acas/v1/discussion-issues/admin",
   },
 
   Proctoring: {
@@ -234,5 +246,14 @@ export const Api = {
     DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/examination-templates/${id}/soft-delete`,
     RESTORE: (id: string) => `/api/acas/v1/examination-templates/${id}/restore`,
+  },
+  QuizAttempt: {
+    START: "/api/acas/v1/quiz-attempts/start",
+    UPDATE_ANSWER: (id: string) => `/api/acas/v1/quiz-attempts/${id}/answers`,
+    SUBMIT: (id: string) => `/api/acas/v1/quiz-attempts/${id}/submit`,
+    GET_HISTORY_BY_CLASSROOM_QUIZ_STUDENT: (classroomQuizId: string, studentId: string) =>
+      `/api/acas/v1/quiz-attempts/history/classroom-quiz/${classroomQuizId}/student/${studentId}`,
+    GET_SUBMISSIONS_PAGED: (classroomQuizId: string, pageIndex: number, pageSize: number) =>
+      `/api/acas/v1/quiz-attempts/submissions/classroom-quiz/${classroomQuizId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
   },
 };

@@ -7,6 +7,11 @@ public class ClassroomMapper
 {
     public ClassroomResponse ToClassroomResponse(Classroom classroom, Subject subject, UserProfileResponse? lecturerProfile)
     {
+        return ToClassroomResponse(classroom, subject, lecturerProfile, 0);
+    }
+
+    public ClassroomResponse ToClassroomResponse(Classroom classroom, Subject subject, UserProfileResponse? lecturerProfile, int studentCount)
+    {
         var subjectLite = new SubjectLiteResponse();
         if (subject != null)
         {
@@ -48,7 +53,8 @@ public class ClassroomMapper
             UpdatedDate = classroom.UpdatedDate,
             MaxSlot = classroom.MaxSlot,
             EndDate = classroom.EndDate,
-            IsDeleted = classroom.IsDeleted
+            IsDeleted = classroom.IsDeleted,
+            StudentCount = studentCount
         };
     }
 
@@ -59,8 +65,19 @@ public class ClassroomMapper
         ClassEnrollment? classEnrollment
     )
     {
+        return ToClassroomResponse(classroom, subject, lecturerProfile, classEnrollment, 0);
+    }
 
-        var response = ToClassroomResponse(classroom, subject, lecturerProfile);
+    public ClassroomResponse ToClassroomResponse(
+        Classroom classroom,
+        Subject subject,
+        UserProfileResponse? lecturerProfile,
+        ClassEnrollment? classEnrollment,
+        int studentCount
+    )
+    {
+
+        var response = ToClassroomResponse(classroom, subject, lecturerProfile, studentCount);
 
 
         var enrollmentInfo = new EnrollmentInfoResponse();

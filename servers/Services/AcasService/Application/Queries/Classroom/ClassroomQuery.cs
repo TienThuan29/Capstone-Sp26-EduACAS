@@ -109,12 +109,21 @@ namespace AcasService.Application.Queries.Classroom
                     enrollmentByClassId = await _classroomEnrollmentRepository.FindByClassIdsAndStudentIdAsync(classIds, userId);
                 }
 
+                Dictionary<string, int> studentCountByClassId = new();
+                var countTasks = itemsOnPage.Select(async c => 
+                {
+                    var count = await _classroomEnrollmentRepository.GetStudentCountByClassIdAsync(c.Id);
+                    studentCountByClassId[c.Id] = count;
+                });
+                await Task.WhenAll(countTasks);
+
                 var responses = itemsOnPage
                     .Select(classroom => _classroomMapper.ToClassroomResponse(
                         classroom,
                         subjectById.GetValueOrDefault(classroom.SubjectId),
                         userById.GetValueOrDefault(classroom.LecturerId),
-                        enrollmentByClassId.GetValueOrDefault(classroom.Id)))
+                        enrollmentByClassId.GetValueOrDefault(classroom.Id),
+                        studentCountByClassId.GetValueOrDefault(classroom.Id, 0)))
                     .ToList();
 
                 return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);

@@ -8,6 +8,7 @@ namespace AcasService.Application.Queries.ClassroomQuiz
     {
         Task<ClassroomQuizResponse?> GetClassroomQuizByIdAsync(string id);
         Task<List<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdAsync(string classroomId);
+        Task<PagedResult<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdPagedAsync(string classroomId, int pageIndex, int pageSize, bool includeDrafts = false);
     }
 
     public class ClassroomQuizQuery : IClassroomQuizQuery
@@ -55,6 +56,21 @@ namespace AcasService.Application.Queries.ClassroomQuiz
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error occurred while fetching classroom quizzes for classroom ID {classroomId}.");
+                throw;
+            }
+        }
+
+        public async Task<PagedResult<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdPagedAsync(string classroomId, int pageIndex, int pageSize, bool includeDrafts = false)
+        {
+            try
+            {
+                var (items, totalCount) = await _repository.FindByClassroomIdPagedAsync(classroomId, pageIndex, pageSize, includeDrafts);
+                var mappedItems = items.Select(_mapper.ToClassroomQuizResponse).ToList();
+                return new PagedResult<ClassroomQuizResponse>(mappedItems, totalCount, pageIndex, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while fetching paged classroom quizzes for classroom ID {classroomId}.");
                 throw;
             }
         }

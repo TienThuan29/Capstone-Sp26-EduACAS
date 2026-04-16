@@ -64,7 +64,8 @@ public class DiscussionIssueMapper
             CommentCount = CountComments(issue.Comments),
             CreatedDate = issue.CreatedDate,
             Status = issue.Status,
-            Tags = Array.Empty<string>()
+            Tags = Array.Empty<string>(),
+            IsDeleted = issue.IsDeleted
         };
     }
 

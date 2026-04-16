@@ -270,6 +270,7 @@ builder.Services.AddScoped<IExaminationTemplateCommand, ExaminationTemplateComma
 builder.Services.AddScoped<IExaminationTemplateQuery, ExaminationTemplateQuery>();
 builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
 builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
+builder.Services.AddScoped<IClassroomQuizJobScheduling, ClassroomQuizJobScheduling>();
 builder.Services.AddScoped<ICodeFormatterCommand, CodeFormatterCommand>();
 
 // mapper

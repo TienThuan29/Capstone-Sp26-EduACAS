@@ -17,16 +17,13 @@ import { useToast } from "@/hooks/useToast";
 import { toUtcIsoString } from "@/utils/datetime-utils";
 import { PageUrl } from "@/configs/page.url";
 import { useRouter } from "next/navigation";
-import type {
-  ClassroomQuiz,
-} from "@/types/quiz";
+import type { ClassroomQuiz, ClassroomQuizStatus } from "@/types/quiz";
 import { ClassroomQuizDetailView } from "./quiz-detail-tab";
-
-// New specialized components
-import { QuizListTable } from "../components/quiz-tab/quiz-list-table";
+import { ClassroomQuizTable } from "@/components/quiz/classroom-quiz-table";
 import { ImportQuizModal } from "../components/quiz-tab/import-quiz-modal";
 import { QuizFormModal } from "../components/quiz-tab/quiz-form-modal";
 import { DeleteQuizModal } from "../components/quiz-tab/delete-quiz-modal";
+
 
 type QuizzesTabProps = {
   classId: string;
@@ -45,7 +42,7 @@ export function QuizzesTab({
   const { user } = useAuth();
   const { showSuccess, showError } = useToast();
   const {
-    getClassroomQuizzesByClassroom,
+    getClassroomQuizzesByClassroomPaged,
     getClassroomQuizById,
     createClassroomQuiz,
     updateClassroomQuiz,
@@ -57,30 +54,33 @@ export function QuizzesTab({
   const [quizNameMap, setQuizNameMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [pageSize] = useState(10);
 
-  // Modal control states
   const [showAddDropdown, setShowAddDropdown] = useState(false);
   const [openImportModal, setOpenImportModal] = useState(false);
   const [openFormModal, setOpenFormModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
 
-  // Data states for modals
   const [selectedQuizId, setSelectedQuizId] = useState<string | null>(null);
   const [editingQuiz, setEditingQuiz] = useState<ClassroomQuiz | null>(null);
   const [quizToDelete, setQuizToDelete] = useState<ClassroomQuiz | null>(null);
   const [quizToView, setQuizToView] = useState<ClassroomQuiz | null>(null);
 
-  // ── Fetch classroom quizzes ────────────────────────────
   const fetchQuizzes = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getClassroomQuizzesByClassroom(classId);
+      const dataPaged = await getClassroomQuizzesByClassroomPaged(classId, currentPage, pageSize, true);
+      const data = dataPaged.items;
       setClassroomQuizzes(data);
+      setTotalPages(dataPaged.totalPages);
 
       const uniqueQuizIds = [...new Set(data.map((q) => q.quizId))];
-      const nameMap: Record<string, string> = {};
+      const nameMap: Record<string, string> = { ...quizNameMap };
       await Promise.all(
         uniqueQuizIds.map(async (qid) => {
+          if (nameMap[qid]) return;
           try {
             const quiz = await getQuizById(qid);
             if (quiz) nameMap[qid] = quiz.title;
@@ -96,13 +96,12 @@ export function QuizzesTab({
     } finally {
       setLoading(false);
     }
-  }, [classId, getClassroomQuizzesByClassroom, showError]);
+  }, [classId, getClassroomQuizzesByClassroomPaged, currentPage, pageSize, showError, getQuizById]);
 
   useEffect(() => {
     fetchQuizzes();
   }, [fetchQuizzes]);
 
-  // ── Detail view logic ─────────────────────────
   const backToList = useCallback(() => {
     setQuizToView(null);
     onQuizIdInUrlChange?.(null);
@@ -128,7 +127,6 @@ export function QuizzesTab({
     }
   }, [initialQuizId, classroomQuizzes, getClassroomQuizById, showError]);
 
-  // ── Handlers ──────────────────────────────────────────
   const handleOpenImport = () => {
     setShowAddDropdown(false);
     setOpenImportModal(true);
@@ -157,6 +155,7 @@ export function QuizzesTab({
     endTime: string;
     maxOfAttempts: number;
     passcode: string;
+    status: ClassroomQuizStatus;
   }) => {
     try {
       setActionLoading(true);
@@ -169,7 +168,8 @@ export function QuizzesTab({
           endTime: endTimeUtc,
           maxOfAttempts: data.maxOfAttempts,
           passcode: data.passcode || undefined,
-        });
+          status: data.status,
+        } as any);
         showSuccess("Quiz assignment updated");
       } else {
         await createClassroomQuiz({
@@ -208,7 +208,7 @@ export function QuizzesTab({
     }
   };
 
-  // ── Render ─────────────────────────────────────────────
+
   return (
     <div className="space-y-6">
       {quizToView ? (
@@ -273,19 +273,22 @@ export function QuizzesTab({
               <Spinner size="xl" />
             </div>
           ) : (
-            <QuizListTable
+            <ClassroomQuizTable
               classroomQuizzes={classroomQuizzes}
               quizNameMap={quizNameMap}
               onViewDetail={(cq) => {
                 setQuizToView(cq);
                 onQuizIdInUrlChange?.(cq.id);
               }}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={(page) => setCurrentPage(page)}
             />
           )}
         </>
       )}
 
-      {/* New Components replacing the inline Modals */}
+
       <ImportQuizModal
         show={openImportModal}
         onClose={() => setOpenImportModal(false)}

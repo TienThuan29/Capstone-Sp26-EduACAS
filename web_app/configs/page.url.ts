@@ -35,5 +35,8 @@ export const PageUrl = {
     ADMIN_SUBJECTS_PAGE: '/admin/subjects',
     ADMIN_PROGRAMMING_LANGUAGES_PAGE: '/admin/programming-languages',
     ADMIN_USERS_PAGE: '/admin/users',
+    ADMIN_NOTIFICATIONS_PAGE: '/admin/notifications',
+    ADMIN_DISCUSSIONS_PAGE: '/admin/discussions',
+    ADMIN_MATERIALS_PAGE: '/admin/materials',
 
 }

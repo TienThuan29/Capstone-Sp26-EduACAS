@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Mappers;
+using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Subject;
 
@@ -49,7 +49,7 @@ namespace AcasService.Application.Queries.Subject
                 
                 if (subject == null) {
                     _logger.LogWarning("Subject not found with id: {Id}", subjectId);
-                    throw new KeyNotFoundException($"Subject with id {subjectId} not found.");
+                    return null;
                 }
 
                 
