@@ -20,6 +20,7 @@ export const Api = {
 
   User: {
     GET_ALL: "/api/auth/v1/users",
+    GET_PAGED: "/api/auth/v1/users/list/paged",
     UPDATE: (id: string) => `/api/auth/v1/users/${id}`,
   },
 
@@ -97,6 +98,8 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/examinations/${id}`,
     DELETE: (id: string) => `/api/acas/v1/examinations/${id}`,
     GET_WITH_SPECIFIC_PROBLEM: (examId: string, problemId: string) => `/api/acas/v1/examinations/${examId}/with-problem/${problemId}`,
+    GET_LATEST_BY_EXAM: (examId: string) => `/api/v1/submissions/exam/${examId}/latest-all`,
+    GET_SUBMISSION_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
   },
 
   S3: {
@@ -157,11 +160,13 @@ export const Api = {
   },
 
   Material: {
+    BASE: '/api/acas/v1/materials',
     CREATE: '/api/acas/v1/materials',
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
+    GET_ADMIN: '/api/acas/v1/materials/admin',
   },
 
   Submission: {
@@ -203,6 +208,8 @@ export const Api = {
     HUB: "/api/acas/v1/hubs/notification",
     /** GET paged notifications by userId */
     GET_BY_USER: "/api/acas/v1/notifications",
+    /** GET paged notifications for admin */
+    GET_ADMIN: "/api/acas/v1/notifications/admin",
     /** PATCH mark notification as read */
     MARK_READ: (id: string) => `/api/acas/v1/notifications/${id}/mark-read`,
     /** PATCH soft-delete notification */
@@ -221,12 +228,14 @@ export const Api = {
     UPVOTE_COMMENT: "/api/acas/v1/discussion-issues/comments/upvote",
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
+    GET_ADMIN: "/api/acas/v1/discussion-issues/admin",
   },
 
   Proctoring: {
     CACHE: "/api/v1/keystroke-logs/cache",
     FLUSH: "/api/v1/keystroke-logs/flush",
   },
+
   ErrorGroup: {
     GENERATE: "/api/v1/error-groups/generate",
     CHECK_SIMILARITY: "/api/v1/error-groups/check-similarity",
@@ -297,7 +306,37 @@ export const Api = {
     GET_STUDENT_RECOMMENDATIONS: (studentId: string) => `/api/acas/v1/grading/students/${studentId}/recommendations`,
 
     // Export
-    EXPORT_REPORT: (classroomId: string) =>
-      `/api/acas/v1/grading/dashboard/export/classroom/${classroomId}`,
+    EXPORT_REPORT: (classroomId: string) => `/api/acas/v1/grading/dashboard/export/classroom/${classroomId}`,
+  },
+  
+  QuizAttempt: {
+    GET_BY_ID: (id: string) => `/api/acas/v1/quiz-attempts/${id}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/acas/v1/quiz-attempts/student/${studentId}`,
+    START: "/api/acas/v1/quiz-attempts/start",
+    UPDATE_ANSWER: (id: string) => `/api/acas/v1/quiz-attempts/${id}/answers`,
+    SUBMIT: (id: string) => `/api/acas/v1/quiz-attempts/${id}/submit`,
+    GET_HISTORY_BY_CLASSROOM_QUIZ_STUDENT: (classroomQuizId: string, studentId: string) => `/api/acas/v1/quiz-attempts/history/classroom-quiz/${classroomQuizId}/student/${studentId}`,
+    GET_SUBMISSIONS_PAGED: (classroomQuizId: string, pageIndex: number, pageSize: number) => `/api/acas/v1/quiz-attempts/submissions/classroom-quiz/${classroomQuizId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
+  },
+
+  RegradingRequest: {
+    BASE: "/api/v1/regrading-requests",
+    GET_BY_ID: (id: string) => `/api/v1/regrading-requests/${id}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/regrading-requests/student/${studentId}`,
+    GET_BY_EXAM: (examId: string) => `/api/v1/regrading-requests/exam/${examId}`,
+    GET_BY_SUBMISSION: (submissionId: string) => `/api/v1/regrading-requests/submission/${submissionId}`,
+    GET_ALL_PAGED: (pageIndex: number, pageSize: number, studentId?: string, examId?: string, status?: string) => {
+      const params = new URLSearchParams();
+      params.append("pageIndex", String(pageIndex));
+      params.append("pageSize", String(pageSize));
+      if (studentId) params.append("studentId", studentId);
+      if (examId) params.append("examId", examId);
+      if (status) params.append("status", status);
+      return `/api/v1/regrading-requests?${params.toString()}`;
+    },
+    CREATE: "/api/v1/regrading-requests",
+    APPROVE: (id: string) => `/api/v1/regrading-requests/${id}/approve`,
+    REJECT: (id: string) => `/api/v1/regrading-requests/${id}/reject`,
+    CANCEL: (id: string) => `/api/v1/regrading-requests/${id}/cancel`,
   },
 };

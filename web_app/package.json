@@ -41,6 +41,7 @@
     "lowlight": "^3.3.0",
     "lucide-react": "^0.563.0",
     "marked": "^17.0.1",
+    "monaco-editor": "^0.55.1",
     "next": "^16.2.2",
     "prettier-plugin-java": "^2.8.1",
     "react": "^19.1.0",
@@ -49,6 +50,7 @@
     "react-resizable-panels": "^4.5.8",
     "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
+    "socket.io-client": "^4.8.3",
     "turndown": "^7.2.2"
   },
   "devDependencies": {

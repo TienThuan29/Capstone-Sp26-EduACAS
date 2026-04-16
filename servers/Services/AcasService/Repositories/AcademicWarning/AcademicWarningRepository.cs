@@ -80,6 +80,43 @@ public class AcademicWarningRepository : DynamoRepository, IAcademicWarningRepos
         }
     }
 
+    public async Task<List<Models.AcademicWarning>> FindByStudentIdsAsync(List<string> studentIds)
+    {
+        if (studentIds == null || studentIds.Count == 0)
+            return new List<Models.AcademicWarning>();
+
+        try
+        {
+            var filterValues = new Dictionary<string, AttributeValue>();
+            var filterExpressions = new List<string>();
+
+            for (int i = 0; i < studentIds.Count; i++)
+            {
+                var key = $":studentId{i}";
+                filterValues[key] = new AttributeValue { S = studentIds[i] };
+                filterExpressions.Add($"studentId = {key}");
+            }
+
+            var request = new ScanRequest
+            {
+                TableName = _academicWarningTableName,
+                FilterExpression = string.Join(" OR ", filterExpressions)
+            };
+            request.ExpressionAttributeValues = filterValues;
+
+            var response = await _dynamoDBClient.ScanAsync(request);
+            return response.Items
+                .Select(item => DynamoMapper.DynamoItemToAcademicWarning(item))
+                .OrderByDescending(aw => aw.SentDate)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding academic warnings for {Count} students", studentIds.Count);
+            throw;
+        }
+    }
+
     public async Task<List<Models.AcademicWarning>> FindByClassroomIdAsync(string classroomId)
     {
         try

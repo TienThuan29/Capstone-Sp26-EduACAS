@@ -25,6 +25,7 @@ interface CodeEditorClientProps {
   examination: ExaminationSpecificProblemResponse;
 }
 
+const MAX_TOLERANCE = 3;
 const DRAFT_SAVE_DEBOUNCE_MS = 1500;
 const DRAFT_STORAGE_PREFIX = 'code-editor-draft-';
 
@@ -167,10 +168,15 @@ export function CodeEditorClient({
     setProblem(examination.problem);
     setExamBackLink(examination.id, examination.classroom?.id ?? null);
     setTestCases(examination.problem.testCases);
-    setLanguage(examination.programmingLanguage);
-    if (examination.problem.codeTemplate?.trim()) {
-      setCode(examination.problem.codeTemplate);
-    }
+    const template = (() => {
+      const langId = examination.programmingLanguage?.id ?? '';
+      const langTemplates = (examination.problem as unknown as Record<string, unknown>).codeTemplates as Record<string, string> | undefined;
+      return (langId && langTemplates?.[langId]?.trim()) ??
+        langTemplates?.['default']?.trim() ??
+        '';
+    })();
+    setLanguage(examination.programmingLanguage, template);
+    setCode(template);
 
     const key = getDraftStorageKey(problemId, examId);
     try {
@@ -302,7 +308,7 @@ export function CodeEditorClient({
     violationStorageKey: storageKeys?.violationStorageKey ?? '',
     logsStorageKey: storageKeys?.logsStorageKey ?? '',
     answerStorageKey: storageKeys?.answerStorageKey ?? '',
-    maxTolerance: 3,
+    maxTolerance: MAX_TOLERANCE,
     answer: editorState.code,
     violationCountRef,
     isInitializingRef,

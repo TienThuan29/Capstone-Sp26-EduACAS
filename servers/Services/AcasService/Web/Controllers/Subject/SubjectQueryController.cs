@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Queries.Subject;
+using AcasService.Application.Queries.Subject;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
 using Microsoft.AspNetCore.Authorization;
@@ -42,12 +42,8 @@ public class SubjectQueryController : ControllerBase
         try
         {
             var result = await _subjectQuery.GetSubjectByIdAsync(id);
+            if (result == null) return ResponseUtil.Error<SubjectResponse>("Subject not found", 404);
             return ResponseUtil.Success(result, "Get subject successfully", 200);
-        }
-        catch (KeyNotFoundException ex)
-        {
-            _logger.LogWarning(ex, "Subject not found with id: {Id}", id);
-            return ResponseUtil.Error<SubjectResponse>("Subject not found", 404);
         }
         catch (Exception ex)
         {

@@ -84,4 +84,23 @@ public class NotificationQueryController : ControllerBase
             return ResponseUtil.Error<List<NotificationResponse>>("Failed to get notifications", 500);
         }
     }
+
+    [HttpGet("admin")]
+    [Authorize(Roles = "ADMIN")]
+    public async Task<ActionResult<ApiResponse<PagedResult<NotificationResponse>>>> GetAdminNotifications(
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10,
+        [FromQuery] string? searchTerm = null)
+    {
+        try
+        {
+            var result = await _notificationQuery.GetAllNotificationsAsync(pageIndex, pageSize, searchTerm);
+            return ResponseUtil.Success(result, "Notifications retrieved successfully for admin", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting notifications for admin");
+            return ResponseUtil.Error<PagedResult<NotificationResponse>>("Failed to get notifications", 500);
+        }
+    }
 }

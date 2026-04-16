@@ -102,6 +102,9 @@ using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.Redis.StackExchange;
 using AcasService.Application.Queries.ClassroomDashboard;
+using AcasService.Repositories.RegradingRequest;
+using AcasService.Application.Commands.RegradingRequests;
+using AcasService.Application.Queries.RegradingRequests;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -211,6 +214,11 @@ builder.Services.AddScoped<IAcademicWarningRepository, AcademicWarningRepository
 builder.Services.AddScoped<IClassroomDashboardQuery, ClassroomDashboardQuery>();
 builder.Services.AddScoped<IStudentDashboardQuery, StudentDashboardQuery>();
 
+// Regrading Request
+builder.Services.AddScoped<IRegradingRequestRepository, RegradingRequestRepository>();
+builder.Services.AddScoped<IRegradingRequestCommand, RegradingRequestCommand>();
+builder.Services.AddScoped<IRegradingRequestQuery, RegradingRequestQuery>();
+
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
 builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
@@ -279,6 +287,7 @@ builder.Services.AddScoped<IExaminationTemplateCommand, ExaminationTemplateComma
 builder.Services.AddScoped<IExaminationTemplateQuery, ExaminationTemplateQuery>();
 builder.Services.AddScoped<IKeystrokeLogsCommand, KeystrokeLogsCommand>();
 builder.Services.AddScoped<IKeystrokeLogsQuery, KeystrokeLogsQuery>();
+builder.Services.AddScoped<IClassroomQuizJobScheduling, ClassroomQuizJobScheduling>();
 builder.Services.AddScoped<ICodeFormatterCommand, CodeFormatterCommand>();
 
 // mapper

@@ -48,6 +48,8 @@ export interface Examination {
   totalMark: number;
   status: ExaminationStatus;
   mode: ExaminationMode;
+  useStrict: boolean;
+  minScoreThreshold: number;
   isDeleted: boolean;
   createdDate: string;
   updatedDate: string;
@@ -74,6 +76,8 @@ export interface ExaminationRequest {
   totalMark: number;
   status: ExaminationStatus;
   mode: ExaminationMode;
+  useStrict: boolean;
+  minScoreThreshold: number;
 }
 
 export interface ExamProblem {

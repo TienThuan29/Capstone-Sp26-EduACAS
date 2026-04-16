@@ -188,6 +188,8 @@ export interface SubmissionResponse {
   student?: StudentLiteResponse;
   /** Max mark for this problem in the exam — used to validate score overrides. */
   maxMark?: number;
+  /** ID of the associated regrading request, null if not requested */
+  regradingRequestId?: string | null;
 }
 
 /** One problem's submissions from GET exam/{examId}/latest-all */

@@ -21,6 +21,7 @@ import {
   SlotTab,
   DiscussionTab,
   StudentDashboardTab,
+  QuizzesTab,
 } from "@/app/my-classroom/tabs";
 
 function ClassroomContent() {
@@ -39,6 +40,7 @@ function ClassroomContent() {
   const [examsLoading, setExamsLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(null);
 
   const studentId = user?.id;
   const classId = params.id as string;
@@ -112,31 +114,31 @@ function ClassroomContent() {
 
   // Poll exam statuses every 30 seconds so background job transitions are reflected for students.
   const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => {
-    if (activeTab === "exams" && classId) {
-      examsPollRef.current = setInterval(() => {
-        void (async () => {
-          try {
-            const data = await getExaminationsByClassId(classId);
-            setExaminations(data);
-          } catch {
-            // non-blocking — stale data is better than a broken UI
-          }
-        })();
-      }, 30_000);
-    } else {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    }
-    return () => {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    };
-  }, [activeTab, classId, getExaminationsByClassId]);
+  // useEffect(() => {
+  //   if (activeTab === "exams" && classId) {
+  //     examsPollRef.current = setInterval(() => {
+  //       void (async () => {
+  //         try {
+  //           const data = await getExaminationsByClassId(classId);
+  //           setExaminations(data);
+  //         } catch {
+  //           // non-blocking — stale data is better than a broken UI
+  //         }
+  //       })();
+  //     }, 30_000);
+  //   } else {
+  //     if (examsPollRef.current !== null) {
+  //       clearInterval(examsPollRef.current);
+  //       examsPollRef.current = null;
+  //     }
+  //   }
+  //   return () => {
+  //     if (examsPollRef.current !== null) {
+  //       clearInterval(examsPollRef.current);
+  //       examsPollRef.current = null;
+  //     }
+  //   };
+  // }, [activeTab, classId, getExaminationsByClassId]);
 
   if (loading) {
     return (
@@ -183,6 +185,13 @@ function ClassroomContent() {
         return <PractiseTab />;
       case "slots":
         return <SlotTab />;
+      case "quizzes":
+        return (
+          <QuizzesTab
+            classId={classId}
+            setQuizDetailBack={setQuizDetailBack}
+          />
+        );
       case "discussion":
         return (
           <DiscussionTab
@@ -236,6 +245,14 @@ function ClassroomContent() {
                   scroll: false,
                 })
               }
+              className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
+            />
+          )}
+          {activeTab === "quizzes" && quizDetailBack && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={quizDetailBack}
               className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
             />
           )}

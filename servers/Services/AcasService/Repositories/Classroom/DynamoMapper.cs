@@ -20,6 +20,19 @@ public static class DynamoMapper
             ["maxSlot"] = new AttributeValue { N = classroom.MaxSlot.ToString() },
             ["isDeleted"] = new AttributeValue { BOOL = classroom.IsDeleted }
         };
+
+        if (classroom.GradingSettings != null)
+        {
+            item["gradingSettings"] = new AttributeValue
+            {
+                M = new Dictionary<string, AttributeValue>
+                {
+                    ["avgScoreThreshold"] = new AttributeValue { N = classroom.GradingSettings.AvgScoreThreshold.ToString() },
+                    ["minExamCount"] = new AttributeValue { N = classroom.GradingSettings.MinExamCount.ToString() }
+                }
+            };
+        }
+
         if (classroom.UpdatedDate.HasValue)
         {
             item["updatedDate"] = new AttributeValue { S = classroom.UpdatedDate.Value.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") };
@@ -50,6 +63,21 @@ public static class DynamoMapper
                 ? DateTime.Parse(item["updatedDate"].S)
                 : null
         };
+
+        if (item.ContainsKey("gradingSettings") && item["gradingSettings"].M != null)
+        {
+            var gs = item["gradingSettings"].M;
+            classroom.GradingSettings = new Models.GradingSettings
+            {
+                AvgScoreThreshold = gs.ContainsKey("avgScoreThreshold") ? float.Parse(gs["avgScoreThreshold"].N) : 0f,
+                MinExamCount = gs.ContainsKey("minExamCount") ? int.Parse(gs["minExamCount"].N) : 0
+            };
+        }
+        else
+        {
+            classroom.GradingSettings = new Models.GradingSettings();
+        }
+
         return classroom;
     }
 

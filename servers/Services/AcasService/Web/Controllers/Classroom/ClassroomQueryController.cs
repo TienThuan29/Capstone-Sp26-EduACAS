@@ -26,13 +26,15 @@ namespace AcasService.Web.Controllers.Classroom
 
         [HttpGet]
         public async Task<ActionResult<ApiResponse<PagedResult<ClassroomResponse>>>> GetAllClassrooms(
-            [FromQuery] string? userId = null, 
-            [FromQuery] int pageIndex = 1, 
+            [FromQuery] string? userId = null,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null,
+            [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                var pagedResult = await _classroomQuery.GetAllClassroomsAsync(userId, pageIndex, pageSize);
+                var pagedResult = await _classroomQuery.GetAllClassroomsAsync(userId, search, status, pageIndex, pageSize);
                 return ResponseUtil.Success(pagedResult, "Get all classrooms successfully", 200);
             }
             catch (Exception ex)

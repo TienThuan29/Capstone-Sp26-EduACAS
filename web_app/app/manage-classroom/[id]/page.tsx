@@ -47,6 +47,8 @@ type UpdateClassroomFormData = {
   enrolKey: string;
   dateEnd: string;
   maxSlot: number | "";
+  avgScoreThreshold: number;
+  minExamCount: number;
 };
 
 function ClassroomContent() {
@@ -100,6 +102,8 @@ function ClassroomContent() {
     enrolKey: "",
     dateEnd: "",
     maxSlot: "",
+    avgScoreThreshold: 0,
+    minExamCount: 2,
   });
 
   const SEMESTERS = useMemo(() => {
@@ -134,6 +138,8 @@ function ClassroomContent() {
             ? new Date(data.endDate).toISOString().split("T")[0]
             : "",
           maxSlot: data.maxSlot || 0,
+          avgScoreThreshold: data.gradingSettings?.avgScoreThreshold ?? 0,
+          minExamCount: data.gradingSettings?.minExamCount ?? 2,
         });
       }
     } catch (error) {
@@ -218,24 +224,24 @@ function ClassroomContent() {
   // Poll exam statuses every 30 seconds so background job transitions are reflected without manual refresh.
   // Only active when on the exams tab.
   const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => {
-    if (activeTab === "exams" && classId) {
-      examsPollRef.current = setInterval(() => {
-        void fetchExaminations();
-      }, 30_000);
-    } else {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    }
-    return () => {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    };
-  }, [activeTab, classId, fetchExaminations]);
+  // useEffect(() => {
+  //   if (activeTab === "exams" && classId) {
+  //     examsPollRef.current = setInterval(() => {
+  //       void fetchExaminations();
+  //     }, 30_000);
+  //   } else {
+  //     if (examsPollRef.current !== null) {
+  //       clearInterval(examsPollRef.current);
+  //       examsPollRef.current = null;
+  //     }
+  //   }
+  //   return () => {
+  //     if (examsPollRef.current !== null) {
+  //       clearInterval(examsPollRef.current);
+  //       examsPollRef.current = null;
+  //     }
+  //   };
+  // }, [activeTab, classId, fetchExaminations]);
 
   useEffect(() => {
     if (openUpdateModal) {
@@ -274,6 +280,10 @@ function ClassroomContent() {
         enrolKey: formData.enrolKey,
         endDate: formData.dateEnd,
         maxSlot: slotVal,
+        gradingSettings: {
+          avgScoreThreshold: Number(formData.avgScoreThreshold) || 0,
+          minExamCount: Number(formData.minExamCount) || 0,
+        },
       };
 
       await updateClassroom(classroom.id, payload);
@@ -372,7 +382,7 @@ function ClassroomContent() {
       case "dashboard":
         return (
           <DashboardTab
-            classroomId={classId}
+            classId={classId}
             classroomName={classroom.className}
           />
         );
@@ -654,6 +664,56 @@ function UpdateClassroomModal({
                 setFormData({ ...formData, dateEnd: e.target.value })
               }
             />
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+            <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Grading Settings
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="avgScoreThreshold">
+                  Avg score threshold
+                </Label>
+                <TextInput
+                  id="avgScoreThreshold"
+                  type="number"
+                  step={0.5}
+                  min={0}
+                  max={10}
+                  value={formData.avgScoreThreshold || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      avgScoreThreshold:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 5.0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minExamCount">
+                  Min exam count
+                </Label>
+                <TextInput
+                  id="minExamCount"
+                  type="number"
+                  min={2}
+                  value={formData.minExamCount || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minExamCount:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 3"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 flex justify-end gap-2">

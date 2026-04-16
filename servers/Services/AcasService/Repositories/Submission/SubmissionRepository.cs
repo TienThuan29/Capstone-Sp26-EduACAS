@@ -129,28 +129,102 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
         }
     }
 
-    public async Task<List<Models.Submission>> GetByExamIdAsync(string examId)
+    public async Task<List<Models.Submission>> GetByStudentIdsAsync(List<string> studentIds)
     {
+        if (studentIds == null || studentIds.Count == 0)
+            return new List<Models.Submission>();
+
         try
         {
+            var filterValues = new Dictionary<string, AttributeValue>();
+            var filterExpressions = new List<string>();
+
+            for (int i = 0; i < studentIds.Count; i++)
+            {
+                var key = $":studentId{i}";
+                filterValues[key] = new AttributeValue { S = studentIds[i] };
+                filterExpressions.Add($"studentId = {key}");
+            }
+
             var request = new ScanRequest
             {
                 TableName = _submissionTableName,
-                FilterExpression = "examId = :examId",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
-                {
-                    [":examId"] = new AttributeValue { S = examId }
-                }
+                FilterExpression = string.Join(" OR ", filterExpressions)
             };
+
+            request.ExpressionAttributeValues = filterValues;
 
             var response = await _dynamoDBClient.ScanAsync(request);
             return response.Items.Select(DynamoMapper.DynamoItemToSubmission).ToList();
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Error retrieving submissions for {Count} students", studentIds.Count);
+            throw;
+        }
+    }
+
+    public async Task<List<Models.Submission>> GetByExamIdAsync(string examId)
+    {
+        try
+        {
+            var allSubmissions = new List<Models.Submission>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var request = new ScanRequest
+                {
+                    TableName = _submissionTableName,
+                    FilterExpression = "examId = :examId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":examId"] = new AttributeValue { S = examId }
+                    },
+                    ExclusiveStartKey = lastKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(request);
+                allSubmissions.AddRange(response.Items.Select(DynamoMapper.DynamoItemToSubmission));
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return allSubmissions;
+        }
+        catch (Exception ex)
+        {
             _logger.LogError(ex, "Error retrieving submissions for exam {ExamId}", examId);
             throw;
         }
+    }
+
+    public async Task<List<Models.Submission>> GetByExamIdsAsync(List<string> examIds)
+    {
+        if (examIds == null || examIds.Count == 0)
+            return new List<Models.Submission>();
+
+        var examIdSet = examIds.ToHashSet(StringComparer.OrdinalIgnoreCase);
+        var allSubmissions = new List<Models.Submission>();
+        Dictionary<string, AttributeValue>? lastKey = null;
+
+        do
+        {
+            var request = new ScanRequest
+            {
+                TableName = _submissionTableName,
+                ExclusiveStartKey = lastKey
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var filtered = response.Items
+                .Where(item => item.TryGetValue("examId", out var v) && examIdSet.Contains(v.S))
+                .Select(DynamoMapper.DynamoItemToSubmission)
+                .ToList();
+            allSubmissions.AddRange(filtered);
+            lastKey = response.LastEvaluatedKey;
+        } while (lastKey != null && lastKey.Count > 0);
+
+        return allSubmissions;
     }
 
     public async Task<List<Models.Submission>> GetByProblemIdAsync(string problemId)

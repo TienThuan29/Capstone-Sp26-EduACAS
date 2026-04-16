@@ -58,36 +58,26 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
     {
         try
         {
-            var enrollments = await _classroomEnrollmentRepository.FindByClassIdAsync(classroomId);
-            var studentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
+            var exams = await _examinationRepository.GetByClassIdAsync(classroomId);
 
-            if (studentIds.Count == 0)
+            if (exams.Count == 0)
             {
                 return GetDefaultScoreDistribution();
             }
 
-            // Get all exams for this classroom
-            var exams = await _examinationRepository.GetByClassIdAsync(classroomId);
-
-            // Filter exams by mode if specified
-            if (!string.IsNullOrEmpty(mode))
+            if (!string.IsNullOrEmpty(mode) && Enum.TryParse<Mode>(mode, true, out var modeEnum))
             {
-                if (Enum.TryParse<Mode>(mode, true, out var modeEnum))
-                {
-                    exams = exams.Where(e => e.Mode == modeEnum).ToList();
-                }
+                exams = exams.Where(e => e.Mode == modeEnum).ToList();
+            }
+
+            if (exams.Count == 0)
+            {
+                return GetDefaultScoreDistribution();
             }
 
             var examIds = exams.Select(e => e.Id).ToHashSet();
 
-            var allSubmissions = new List<Models.Submission>();
-            foreach (var studentId in studentIds)
-            {
-                var studentSubs = await _submissionRepository.GetByStudentIdAsync(studentId);
-                // Filter submissions by exam mode
-                var filteredSubs = studentSubs.Where(s => examIds.Contains(s.ExamId)).ToList();
-                allSubmissions.AddRange(filteredSubs);
-            }
+            var allSubmissions = await _submissionRepository.GetByExamIdsAsync(examIds.ToList());
 
             if (allSubmissions.Count == 0)
             {
@@ -127,15 +117,21 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
             }
 
             var studentScores = new Dictionary<string, List<float>>();
-            var studentWarnings = new Dictionary<string, List<AcademicWarning>>();
+            var studentWarnings = new Dictionary<string, List<Models.AcademicWarning>>();
+
+            var allSubmissions = await _submissionRepository.GetByStudentIdsAsync(studentIds);
+            var allWarnings = await _academicWarningRepository.FindByStudentIdsAsync(studentIds);
 
             foreach (var studentId in studentIds)
             {
-                var submissions = await _submissionRepository.GetByStudentIdAsync(studentId);
-                studentScores[studentId] = submissions.Select(s => s.FinalScore).ToList();
+                studentScores[studentId] = allSubmissions
+                    .Where(s => s.StudentId == studentId)
+                    .Select(s => s.FinalScore)
+                    .ToList();
 
-                var warnings = await _academicWarningRepository.FindByStudentIdAsync(studentId);
-                studentWarnings[studentId] = warnings;
+                studentWarnings[studentId] = allWarnings
+                    .Where(w => w.StudentId == studentId)
+                    .ToList();
             }
 
             var riskStudents = studentScores
@@ -241,30 +237,32 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
             var classrooms = await _classroomRepository.FindByIdsAsync(classroomIds);
             var classroomMap = classrooms.ToDictionary(c => c.Id, c => c);
 
+            var allStudentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
+            var allSubmissions = await _submissionRepository.GetByStudentIdsAsync(allStudentIds);
+            var submissionsByStudentId = allSubmissions
+                .GroupBy(s => s.StudentId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             var result = new List<ClassStatsItem>();
             foreach (var classId in classroomIds)
             {
                 var classEnrollments = enrollments.Where(e => e.ClassId == classId).ToList();
                 var studentIds = classEnrollments.Select(e => e.StudentId).Distinct().ToList();
 
-                var allSubmissions = new List<Models.Submission>();
-                foreach (var studentId in studentIds)
-                {
-                    var subs = await _submissionRepository.GetByStudentIdAsync(studentId);
-                    allSubmissions.AddRange(subs);
-                }
+                var classSubmissions = studentIds
+                    .SelectMany(sid => submissionsByStudentId.TryGetValue(sid, out var list) ? list : Enumerable.Empty<Models.Submission>())
+                    .ToList();
 
-                var warnings = await _academicWarningRepository.FindByClassroomIdAsync(classId);
+                var avgScore = classSubmissions.Count > 0
+                    ? classSubmissions.Average(s => s.FinalScore)
+                    : 0f;
 
                 var atRiskCount = studentIds.Count(studentId =>
                 {
-                    var studentSubs = allSubmissions.Where(s => s.StudentId == studentId).ToList();
-                    return studentSubs.Count > 0 && studentSubs.Average(s => s.FinalScore) < 5f;
+                    if (!submissionsByStudentId.TryGetValue(studentId, out var studentSubs) || studentSubs.Count == 0)
+                        return false;
+                    return studentSubs.Average(s => s.FinalScore) < 5f;
                 });
-
-                var avgScore = allSubmissions.Count > 0
-                    ? allSubmissions.Average(s => s.FinalScore)
-                    : 0f;
 
                 classroomMap.TryGetValue(classId, out var classroom);
                 result.Add(new ClassStatsItem
@@ -305,13 +303,20 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
             var enrollments = await _classroomEnrollmentRepository.FindByClassIdAsync(classroomId);
             var totalStudents = enrollments.Select(e => e.StudentId).Distinct().Count();
 
+            var examIds = exams.Select(e => e.Id).ToList();
+            var allSubmissions = await _submissionRepository.GetByExamIdsAsync(examIds);
+            var submissionsByExamId = allSubmissions
+                .GroupBy(s => s.ExamId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             var result = new List<ExamScoreStatisticsItem>();
 
             foreach (var exam in exams)
             {
-                var submissions = await _submissionRepository.GetByExamIdAsync(exam.Id);
+                submissionsByExamId.TryGetValue(exam.Id, out var submissions);
+                var examSubmissions = submissions ?? new List<Models.Submission>();
 
-                var latestSubmissionsByStudent = submissions
+                var latestSubmissionsByStudent = examSubmissions
                     .GroupBy(s => s.StudentId)
                     .Select(g => g.OrderByDescending(s => s.Version).First())
                     .ToList();

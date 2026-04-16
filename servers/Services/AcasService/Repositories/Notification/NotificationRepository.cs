@@ -110,6 +110,85 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error deleting notification {Id}", id);
+        }
+    }
+
+    public async Task<List<Models.Notification>> FindAllAsync()
+    {
+        try
+        {
+            var allItems = new List<Models.Notification>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var request = new ScanRequest { TableName = _notificationTableName, ExclusiveStartKey = lastKey };
+                var response = await _dynamoDBClient.ScanAsync(request);
+                allItems.AddRange(response.Items.Select(item => DynamoMapper.DynamoItemToNotification(item)));
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return allItems
+                .OrderByDescending(n => n.SentDate)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error scanning all notifications");
+            throw;
+        }
+    }
+
+    public async Task<(List<Models.Notification> Items, int TotalCount)> SearchAsync(string? searchTerm, int pageIndex, int pageSize)
+    {
+        try
+        {
+            var allItems = new List<Models.Notification>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var request = new ScanRequest
+                {
+                    TableName = _notificationTableName,
+                    ExclusiveStartKey = lastKey
+                };
+
+                if (!string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    var lowerSearch = searchTerm.ToLower();
+                    request.FilterExpression =
+                        "contains(#title, :search) OR contains(#body, :search) OR contains(#targetUserId, :search) OR contains(#type, :search)";
+                    request.ExpressionAttributeNames = new Dictionary<string, string>
+                    {
+                        ["#title"] = "title",
+                        ["#body"] = "body",
+                        ["#targetUserId"] = "targetUserId",
+                        ["#type"] = "type"
+                    };
+                    request.ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":search"] = new AttributeValue { S = lowerSearch }
+                    };
+                }
+
+                var response = await _dynamoDBClient.ScanAsync(request);
+                allItems.AddRange(response.Items.Select(item => DynamoMapper.DynamoItemToNotification(item)));
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            var ordered = allItems.OrderByDescending(n => n.SentDate).ToList();
+            var totalCount = ordered.Count;
+            var paged = ordered
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (paged, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error searching notifications with term {SearchTerm}", searchTerm);
             throw;
         }
     }

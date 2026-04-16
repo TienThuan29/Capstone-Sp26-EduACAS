@@ -156,7 +156,7 @@ export default function ListClassroomPage() {
       });
       closeEnrollModal();
       if (activeTab === "all") {
-        const result = await getAllClassrooms(studentId, 1, 500);
+        const result = await getAllClassrooms(studentId);
         setClassrooms(result.items ?? []);
       } else {
         const data = await getStudentClassrooms(studentId);

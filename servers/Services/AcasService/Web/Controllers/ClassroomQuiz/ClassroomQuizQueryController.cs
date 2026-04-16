@@ -54,4 +54,23 @@ public class ClassroomQuizQueryController : ControllerBase
             return ResponseUtil.Error<List<ClassroomQuizResponse>>("Failed to fetch classroom quizzes", 500);
         }
     }
+
+    [HttpGet("classroom/{classroomId}/paged")]
+    public async Task<ActionResult<ApiResponse<PagedResult<ClassroomQuizResponse>>>> GetClassroomQuizzesByClassroomPaged(
+        string classroomId, 
+        [FromQuery] int pageIndex = 1, 
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool includeDrafts = false)
+    {
+        try
+        {
+            var result = await _classroomQuizQuery.GetClassroomQuizzesByClassroomIdPagedAsync(classroomId, pageIndex, pageSize, includeDrafts);
+            return ResponseUtil.Success(result, "Get paged classroom quizzes successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error fetching paged classroom quizzes for classroom {classroomId}");
+            return ResponseUtil.Error<PagedResult<ClassroomQuizResponse>>("Failed to fetch paged classroom quizzes", 500);
+        }
+    }
 }

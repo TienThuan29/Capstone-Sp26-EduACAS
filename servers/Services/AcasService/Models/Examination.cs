@@ -42,6 +42,10 @@ public class Examination
     
     [Required]
     public Mode Mode { get; set; }
+
+    public bool UseStrict { get; set; }
+
+    public float MinScoreThreshold { get; set; }
     
     public bool IsDeleted { get; set; }
     

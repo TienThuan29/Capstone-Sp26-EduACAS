@@ -19,5 +19,13 @@ namespace AcasService.Application.Mappers
                 CreatedDate = material.CreatedDate
             };
         }
+
+        public MaterialResponse ToMaterialResponse(Material material, string lecturerName, string lecturerEmail)
+        {
+            var response = ToMaterialResponse(material);
+            response.LecturerName = lecturerName;
+            response.LecturerEmail = lecturerEmail;
+            return response;
+        }
     }
 }

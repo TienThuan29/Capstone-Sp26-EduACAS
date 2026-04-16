@@ -74,6 +74,8 @@ const emptyForm: ExaminationRequest = {
   totalMark: 0,
   status: "PENDING",
   mode: "PRACTICAL",
+  useStrict: false,
+  minScoreThreshold: 0,
 };
 
 type PractiseTabProps = {
@@ -199,6 +201,8 @@ export function ExamsTab({
       totalMark: exam.totalMark,
       status: exam.status,
       mode: exam.mode,
+      useStrict: exam.useStrict,
+      minScoreThreshold: exam.minScoreThreshold,
     });
     setOpenFormModal(true);
   };
@@ -364,13 +368,13 @@ export function ExamsTab({
           <Table hoverable>
             <TableHead>
               <TableRow>
-                <TableHeadCell>Exam name</TableHeadCell>
-                <TableHeadCell>Language</TableHeadCell>
-                <TableHeadCell>Start</TableHeadCell>
-                <TableHeadCell>End</TableHeadCell>
-                <TableHeadCell>Total mark</TableHeadCell>
-                <TableHeadCell>Status</TableHeadCell>
-                <TableHeadCell>Mode</TableHeadCell>
+                <TableHeadCell className="min-w-[200px]">Exam name</TableHeadCell>
+                <TableHeadCell className="min-w-[120px]">Language</TableHeadCell>
+                <TableHeadCell className="min-w-[140px]">Start</TableHeadCell>
+                <TableHeadCell className="min-w-[140px]">End</TableHeadCell>
+                <TableHeadCell className="min-w-[100px]">Total mark</TableHeadCell>
+                <TableHeadCell className="min-w-[100px]">Status</TableHeadCell>
+                <TableHeadCell className="min-w-[100px]">Mode</TableHeadCell>
                 <TableHeadCell>
                   <span className="sr-only">Actions</span>
                 </TableHeadCell>
@@ -382,18 +386,18 @@ export function ExamsTab({
                 const modeLabel = MODE_LABELS[exam.mode] ?? "PRACTICAL";
                 return (
                   <TableRow key={exam.id}>
-                    <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
+                    <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
                       {exam.examName}
                     </TableCell>
-                    <TableCell>{exam.programmingLanguage?.name ?? "—"}</TableCell>
-                    <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
+                    <TableCell className="whitespace-nowrap min-w-[120px]">{exam.programmingLanguage?.name ?? "—"}</TableCell>
+                    <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400 min-w-[140px]">
                       {formatDate(exam.startDatetime)}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
+                    <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400 min-w-[140px]">
                       {formatDate(exam.endDatetime)}
                     </TableCell>
-                    <TableCell>{exam.totalMark}</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap min-w-[100px]">{exam.totalMark}</TableCell>
+                    <TableCell className="whitespace-nowrap min-w-[100px]">
                       <Badge
                         color={
                           statusLabel === "ONGOING"
@@ -406,10 +410,10 @@ export function ExamsTab({
                         {statusLabel}
                       </Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap min-w-[100px]">
                       <Badge color="info">{modeLabel}</Badge>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="min-w-[120px]">
                       <div className="flex items-center gap-2">
                         <Tooltip content="View detail" placement="top">
                           <Button
@@ -649,11 +653,12 @@ function ExaminationFormModal({
             <Select
               value={formData.mode}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  mode: e.target.value as ExaminationRequest["mode"],
-                })
-              }
+                  setFormData({
+                    ...formData,
+                    mode: e.target.value as ExaminationRequest["mode"],
+                    useStrict: e.target.value === "EXAMINATION" ? formData.useStrict : false,
+                  })
+                }
             >
               {MODE_OPTIONS.map((m) => (
                 <option key={m} value={m}>
@@ -661,6 +666,37 @@ function ExaminationFormModal({
                 </option>
               ))}
             </Select>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="useStrict"
+                checked={formData.mode === "EXAMINATION" ? formData.useStrict : false}
+                disabled={formData.mode === "PRACTICAL"}
+                onChange={(e) =>
+                  setFormData({ ...formData, useStrict: e.target.checked })
+                }
+              />
+              <Label htmlFor="useStrict">Use strict mode</Label>
+            </div>
+            <div>
+              <Label htmlFor="minScoreThreshold">
+                Min score threshold
+              </Label>
+              <TextInput
+                id="minScoreThreshold"
+                type="number"
+                min={0}
+                step={0.5}
+                value={formData.minScoreThreshold || ""}
+                onChange={(e) => {
+                  const raw = Number(e.target.value);
+                  const value = Number.isNaN(raw) ? 0 : Math.max(0, raw);
+                  setFormData({ ...formData, minScoreThreshold: value });
+                }}
+                className="mt-1"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox

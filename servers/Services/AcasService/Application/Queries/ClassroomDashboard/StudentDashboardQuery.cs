@@ -61,32 +61,44 @@ public class StudentDashboardQuery : IStudentDashboardQuery
             var classroom = await _classroomRepository.FindByIdAsync(classroomId);
             var className = classroom?.ClassName ?? "Unknown";
 
-            var enrollments = await _classroomEnrollmentRepository.FindByClassIdAsync(classroomId);
-            var studentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
             var exams = await _examinationRepository.GetByClassIdAsync(classroomId);
             var totalExams = exams.Count;
 
-            var allSubmissions = new List<SubModel>();
-            var studentScores = new Dictionary<string, List<float>>();
-
-            foreach (var sid in studentIds)
+            if (totalExams == 0)
             {
-                var subs = await _submissionRepository.GetByStudentIdAsync(sid);
-                var latestSubs = subs
-                    .GroupBy(s => s.ExamId)
-                    .Select(g => g.OrderByDescending(s => s.Version).First())
-                    .ToList();
-                allSubmissions.AddRange(latestSubs);
-
-                var scoredSubs = latestSubs
-                    .Where(s => s.Status == SubStatus.GRADED)
-                    .Select(s => s.FinalScore)
-                    .ToList();
-                if (scoredSubs.Count > 0)
+                return new StudentDashboardOverviewItem
                 {
-                    studentScores[sid] = scoredSubs;
-                }
+                    ClassId = classroomId,
+                    ClassName = className,
+                    AverageScore = 0,
+                    ClassAverage = 0,
+                    MyRank = 0,
+                    TotalStudents = 0,
+                    Percentile = 0,
+                    Trend = "stable",
+                    TotalExams = 0,
+                    SubmittedExams = 0,
+                    SubmissionRate = 0,
+                    TotalWarnings = 0,
+                    UnreadWarnings = 0
+                };
             }
+
+            var examIds = exams.Select(e => e.Id).ToHashSet();
+            var allSubmissions = await _submissionRepository.GetByExamIdsAsync(examIds.ToList());
+
+            var latestByStudentAndExam = allSubmissions
+                .GroupBy(s => (s.StudentId, s.ExamId))
+                .Select(g => g.OrderByDescending(s => s.Version).First())
+                .ToList();
+
+            var studentScores = latestByStudentAndExam
+                .Where(s => s.Status == SubStatus.GRADED)
+                .GroupBy(s => s.StudentId)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.Select(s => s.FinalScore).ToList()
+                );
 
             var studentAverages = studentScores
                 .Where(kv => kv.Value.Count > 0)
@@ -109,13 +121,11 @@ public class StudentDashboardQuery : IStudentDashboardQuery
                 ? (float)Math.Round((1 - (myRank - 1) / (float)studentAverages.Count) * 100, 1)
                 : 0f;
 
-            var studentSubs = allSubmissions
+            var myLatestSubs = latestByStudentAndExam
                 .Where(s => s.StudentId == studentId)
-                .GroupBy(s => s.ExamId)
-                .Select(g => g.OrderByDescending(s => s.Version).First())
                 .ToList();
 
-            int submittedExams = studentSubs.Count(s => s.Status == SubStatus.GRADED);
+            int submittedExams = myLatestSubs.Count(s => s.Status == SubStatus.GRADED);
             float submissionRate = totalExams > 0
                 ? (float)Math.Round((double)submittedExams / totalExams * 100, 1)
                 : 0f;
@@ -127,14 +137,14 @@ public class StudentDashboardQuery : IStudentDashboardQuery
             int totalWarnings = classWarnings.Count;
             int unreadWarnings = classWarnings.Count(w => !w.IsRead);
 
-            var studentScoresList = studentSubs
+            var studentScoresList = myLatestSubs
                 .Where(s => s.Status == SubStatus.GRADED)
                 .Select(s => s.FinalScore)
                 .OrderBy(s => s)
                 .ToList();
             string trend = DetermineTrend(studentScoresList);
 
-            float myAverage = studentSubs
+            float myAverage = myLatestSubs
                 .Where(s => s.Status == SubStatus.GRADED)
                 .Select(s => s.FinalScore)
                 .DefaultIfEmpty(0f)
@@ -169,27 +179,26 @@ public class StudentDashboardQuery : IStudentDashboardQuery
         try
         {
             var exams = await _examinationRepository.GetByClassIdAsync(classroomId);
-            var enrollments = await _classroomEnrollmentRepository.FindByClassIdAsync(classroomId);
 
-            var studentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
-
-            var allSubmissions = new List<SubModel>();
-
-            foreach (var sid in studentIds)
+            if (exams.Count == 0)
             {
-                var subs = await _submissionRepository.GetByStudentIdAsync(sid);
-                var examSubs = subs.Where(s => exams.Any(e => e.Id == s.ExamId)).ToList();
-                allSubmissions.AddRange(examSubs);
+                return new List<StudentExamScoreItem>();
             }
+
+            var examIds = exams.Select(e => e.Id).ToHashSet();
+            var allSubmissions = await _submissionRepository.GetByExamIdsAsync(examIds.ToList());
+
+            var latestByStudentAndExam = allSubmissions
+                .GroupBy(s => (s.StudentId, s.ExamId))
+                .Select(g => g.OrderByDescending(s => s.Version).First())
+                .ToList();
 
             var result = new List<StudentExamScoreItem>();
 
             foreach (var exam in exams)
             {
-                var examSubs = allSubmissions
+                var examSubs = latestByStudentAndExam
                     .Where(s => s.ExamId == exam.Id)
-                    .GroupBy(s => s.StudentId)
-                    .Select(g => g.OrderByDescending(s => s.Version).First())
                     .ToList();
 
                 var latestForStudent = examSubs.FirstOrDefault(s => s.StudentId == studentId);
@@ -206,8 +215,7 @@ public class StudentDashboardQuery : IStudentDashboardQuery
                 int rank = 0;
                 if (latestForStudent?.Status == SubStatus.GRADED)
                 {
-                    rank = classExamScores
-                        .Count(s => s > latestForStudent.FinalScore) + 1;
+                    rank = classExamScores.Count(s => s > latestForStudent.FinalScore) + 1;
                 }
 
                 result.Add(new StudentExamScoreItem
@@ -227,9 +235,7 @@ public class StudentDashboardQuery : IStudentDashboardQuery
                 });
             }
 
-            return result
-                .OrderByDescending(r => r.SubmittedAt)
-                .ToList();
+            return result.OrderByDescending(r => r.SubmittedAt).ToList();
         }
         catch (Exception ex)
         {
@@ -271,18 +277,25 @@ public class StudentDashboardQuery : IStudentDashboardQuery
         try
         {
             var exams = await _examinationRepository.GetByClassIdAsync(classroomId);
-            var examDict = exams.ToDictionary(e => e.Id);
 
-            var submissions = await _submissionRepository.GetByStudentIdAsync(studentId);
+            if (exams.Count == 0)
+            {
+                return new List<StudentScoreTrendItem>();
+            }
 
-            var latestSubs = submissions
-                .Where(s => examDict.ContainsKey(s.ExamId))
+            var examIds = exams.Select(e => e.Id).ToHashSet();
+            var submissions = await _submissionRepository.GetByExamIdsAsync(examIds.ToList());
+
+            var studentSubs = submissions
+                .Where(s => s.StudentId == studentId && examIds.Contains(s.ExamId))
                 .GroupBy(s => s.ExamId)
                 .Select(g => g.OrderByDescending(s => s.Version).First())
                 .Where(s => s.Status == SubStatus.GRADED)
                 .ToList();
 
-            return latestSubs
+            var examDict = exams.ToDictionary(e => e.Id);
+
+            return studentSubs
                 .OrderBy(s => s.SubmittedDate)
                 .Select(s => new StudentScoreTrendItem
                 {
@@ -310,11 +323,27 @@ public class StudentDashboardQuery : IStudentDashboardQuery
             var exams = await _examinationRepository.GetByClassIdAsync(classroomId);
             int totalExams = exams.Count;
 
-            var submissions = await _submissionRepository.GetByStudentIdAsync(studentId);
+            if (totalExams == 0)
+            {
+                return new StudentSubmissionStatsItem
+                {
+                    ClassId = classroomId,
+                    ClassName = className,
+                    TotalExams = 0,
+                    SubmittedExams = 0,
+                    SubmissionRate = 0,
+                    LatestSubmissionTime = null,
+                    IsLate = false
+                };
+            }
+
             var examIds = exams.Select(e => e.Id).ToHashSet();
+            var examDict = exams.ToDictionary(e => e.Id);
+
+            var submissions = await _submissionRepository.GetByExamIdsAsync(examIds.ToList());
 
             var latestSubs = submissions
-                .Where(s => examIds.Contains(s.ExamId))
+                .Where(s => s.StudentId == studentId && examIds.Contains(s.ExamId))
                 .GroupBy(s => s.ExamId)
                 .Select(g => g.OrderByDescending(s => s.Version).First())
                 .ToList();
@@ -331,9 +360,9 @@ public class StudentDashboardQuery : IStudentDashboardQuery
 
             bool isLate = latestSubs.Any(s =>
             {
-                var exam = exams.FirstOrDefault(e => e.Id == s.ExamId);
-                if (exam == null || s.SubmittedDate == default) return false;
-                return s.SubmittedDate > exam.EndDatetime;
+                if (s.SubmittedDate == default) return false;
+                return examDict.TryGetValue(s.ExamId, out var exam)
+                    && s.SubmittedDate > exam.EndDatetime;
             });
 
             return new StudentSubmissionStatsItem

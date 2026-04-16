@@ -15,6 +15,7 @@ import {
   XCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useStudentDashboard } from "@/hooks/dashboard/useStudentDashboard";
+import { ExamDetailPanel } from "@/app/my-classroom/components/exam-detail-panel";
 import type {
   StudentDashboardOverview,
   StudentExamScore,
@@ -94,6 +95,7 @@ export function StudentDashboardTab({
   const [warnings, setWarnings] = useState<StudentWarning[]>([]);
   const [scoreTrend, setScoreTrend] = useState<StudentScoreTrend[]>([]);
   const [submissionStats, setSubmissionStats] = useState<StudentSubmissionStats | null>(null);
+  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
 
   const isFetchingRef = useRef(false);
 
@@ -145,6 +147,20 @@ export function StudentDashboardTab({
 
   const maxScore = Math.max(10, ...scoreTrend.map((s) => s.score));
 
+  // ── Exam detail view ────────────────────────────────────────────────────────
+  if (selectedExamId) {
+    return (
+      <div className="h-full">
+        <ExamDetailPanel
+          examId={selectedExamId}
+          studentId={studentId}
+          onClose={() => setSelectedExamId(null)}
+        />
+      </div>
+    );
+  }
+
+  // ── Dashboard view ─────────────────────────────────────────────────────────
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -347,9 +363,10 @@ export function StudentDashboardTab({
               </p>
             ) : (
               examScores.slice(0, 5).map((exam) => (
-                <div
+                <button
                   key={exam.examId}
-                  className="flex items-center justify-between rounded-md border border-gray-100 bg-gray-50 p-3 dark:border-gray-700 dark:bg-gray-700/30"
+                  onClick={() => setSelectedExamId(exam.examId)}
+                  className="cursor-pointer flex w-full items-center justify-between rounded-md border border-gray-100 bg-gray-50 p-3 text-left transition-colors hover:bg-blue-50 dark:border-gray-700 dark:bg-gray-700/30 dark:hover:bg-blue-900/10"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium text-gray-900 dark:text-white">
@@ -398,12 +415,11 @@ export function StudentDashboardTab({
                       </>
                     )}
                   </div>
-                </div>
+                </button>
               ))
             )}
           </div>
         </div>
-
         {/* Warnings + Submission Stats */}
         <div className="space-y-6">
           {/* My Warnings */}
