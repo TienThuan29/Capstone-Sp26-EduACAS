@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 /* @import "flowbite-react/plugin/tailwindcss"; */
 /* Flowbite: Tailwind v4 + Turbopack cannot resolve flowbite-react/plugin/tailwindcss
    Use @source with the CLI-generated class list. */

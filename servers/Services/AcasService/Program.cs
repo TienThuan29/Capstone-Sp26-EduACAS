@@ -13,6 +13,7 @@ using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.S3;
 using AcasService.Application.Queries.Subject;
 using AcasService.Application.Queries.DiscussionIssue;
+using AcasService.Application.Queries.StudentExamSession;
 using AcasService.Application.Utils;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
@@ -92,6 +93,7 @@ using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 using AcasService.Application.Commands.Formatters;
+using AcasService.Application.Thirdparty;
 using AcasService.Repositories.AcademicWarning;
 using AcasService.Repositories.ExaminationTemplate;
 using AcasService.Application.Commands.ExaminationTemplate;
@@ -207,7 +209,22 @@ builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
 builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 builder.Services.AddScoped<IExaminationTemplateRepository, ExaminationTemplateRepository>();
 
+// Email Service
+builder.Services.AddSingleton(new SmtpEmailConfig
+{
+    Host = builder.Configuration["Smtp:Host"] ?? "smtp.gmail.com",
+    Port = builder.Configuration.GetValue<int>("Smtp:Port", 587),
+    Username = builder.Configuration["Smtp:Username"] ?? "",
+    Password = builder.Configuration["Smtp:Password"] ?? "",
+    FromAddress = builder.Configuration["Smtp:FromAddress"] ?? "noreply@eduacas.com",
+    FromName = builder.Configuration["Smtp:FromName"] ?? "EduACAS",
+    EnableSsl = builder.Configuration.GetValue<bool>("Smtp:EnableSsl", true),
+    UseDefaultCredentials = builder.Configuration.GetValue<bool>("Smtp:UseDefaultCredentials", false)
+});
+builder.Services.AddSingleton<IEmailService, EmailService>();
+
 // Academic Warning
+builder.Services.AddScoped<IAcademicWarningCommand, AcademicWarningCommand>();
 builder.Services.AddScoped<IAcademicWarningRepository, AcademicWarningRepository>();
 
 // Classroom Dashboard
@@ -262,6 +279,7 @@ builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
 builder.Services.AddScoped<IExamLogCommand, ExamLogCommand>();
 builder.Services.AddScoped<IStudentExamSessionCommand, StudentExamSessionCommand>();
+builder.Services.AddScoped<IStudentExamSessionQuery, StudentExamSessionQuery>();
 builder.Services.AddScoped<IExamLogQuery, ExamLogQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<IQuizCommand, QuizCommand>();

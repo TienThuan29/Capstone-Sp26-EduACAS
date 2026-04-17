@@ -25,6 +25,7 @@ export interface Problem {
   difficulty: number;
   codeTemplate: string;
   testCases: TestCase[];
+  tags?: string[];
   createdDate: string;
   updatedDate: string;
 }
@@ -94,7 +95,8 @@ export interface ExaminationSpecificProblemResponse {
   startDatetime: string;
   endDatetime: string;
   description: string;
-  mode: Mode;
+  mode: "PRACTICAL" | "EXAMINATION";
+  useStrict: boolean;
 }
 
 export enum Mode {

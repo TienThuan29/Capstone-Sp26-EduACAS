@@ -177,6 +177,7 @@ export const Api = {
     GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
     GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
     GET_LATEST_BY_EXAM: (examId: string) => `/api/v1/submissions/exam/${examId}/latest-all`,
+    GET_VERSIONS: (submissionId: string) => `/api/v1/submissions/${submissionId}/versions`,
     AUTO_GRADE: '/api/v1/submissions/auto-grade',
     RE_GRADE: (id: string) => `/api/v1/submissions/${id}/regrade`,
     OVERRIDE_SCORE: (id: string) => `/api/v1/submissions/${id}/score`,
@@ -185,6 +186,9 @@ export const Api = {
   StudentExamSession: {
     ACTIVE: '/api/acas/v1/student-exam-sessions/active',
     BY_EXAM: (examId: string) => `/api/acas/v1/student-exam-sessions/by-exam/${encodeURIComponent(examId)}`,
+    GET_BY_EXAM: (examId: string) => `/api/acas/v1/student-exam-sessions/exam/${encodeURIComponent(examId)}`,
+    HARD_DELETE: (examId: string, studentId: string) =>
+      `/api/acas/v1/student-exam-sessions/${encodeURIComponent(examId)}/${encodeURIComponent(studentId)}`,
     START: '/api/acas/v1/student-exam-sessions/start',
     COMPLETE: '/api/acas/v1/student-exam-sessions/complete',
     LOCK: '/api/acas/v1/student-exam-sessions/lock',
@@ -338,5 +342,10 @@ export const Api = {
     APPROVE: (id: string) => `/api/v1/regrading-requests/${id}/approve`,
     REJECT: (id: string) => `/api/v1/regrading-requests/${id}/reject`,
     CANCEL: (id: string) => `/api/v1/regrading-requests/${id}/cancel`,
+  },
+
+  AcademicWarning: {
+    SEND_BATCH: "/api/v1/academic-warnings/batch",
+    SEND_SINGLE: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
   },
 };

@@ -132,4 +132,7 @@ public class ExaminationSpecProblemResponse
     [JsonPropertyName("mode")]
     public Mode Mode { get; set; }
 
+    [JsonPropertyName("useStrict")]
+    public bool UseStrict { get; set; }
+
 }

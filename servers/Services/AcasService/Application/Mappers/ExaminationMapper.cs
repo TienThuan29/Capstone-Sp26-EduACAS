@@ -100,7 +100,8 @@ public class ExaminationMapper
             StartDatetime = exam.StartDatetime,
             EndDatetime = exam.EndDatetime,
             Description = exam.Description,
-            Mode = exam.Mode
+            Mode = exam.Mode,
+            UseStrict = exam.UseStrict
         };
     }
 }

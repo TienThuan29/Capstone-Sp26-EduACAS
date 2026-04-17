@@ -64,7 +64,7 @@ export const useExamination = () => {
         const response = await axiosInstance.get(
           Api.Examination.GET_WITH_SPECIFIC_PROBLEM(examId, problemId)
         );
-        console.log("Response data:", response.data);
+        console.log("Response data:", JSON.stringify(response.data, null, 2));
         return {
           data: response.data?.dataResponse ?? null,
           serverDate: response.headers['date'] || null

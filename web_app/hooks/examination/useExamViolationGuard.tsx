@@ -16,7 +16,7 @@ export type LogEntry = {
 
 type ExamScreen = 'intro' | 'exam' | 'end';
 
-export type ViolationOverlayAlertType = 'violation' | 'reload' | 'lock';
+export type ViolationOverlayAlertType = 'violation' | 'lock';
 
 export type ViolationOverlay = {
   title: string;
@@ -53,7 +53,7 @@ type UseExamViolationGuardParams = {
     message: string,
     detail: Record<string, unknown>,
   ) => void;
-  onForceSubmit: () => void;
+  onForceSubmit: () => void | Promise<void>;
   enableDevtoolsInDevelopment?: boolean;
 };
 
@@ -120,6 +120,33 @@ const getSelectedTextFromEvent = (event: Event): string => {
   return window.getSelection()?.toString() || '';
 };
 
+const FULLSCREEN_VIEWPORT_TOLERANCE_PX = 4;
+const FULLSCREEN_CHROME_TOLERANCE_PX = 12;
+
+const isFullscreenActive = (): boolean => {
+  if (typeof window === 'undefined' || typeof document === 'undefined') {
+    return false;
+  }
+
+  const browserWindow = window as Window & { fullScreen?: boolean };
+  if (typeof browserWindow.fullScreen === 'boolean' && browserWindow.fullScreen) {
+    return true;
+  }
+
+  if (document.fullscreenElement) {
+    return true;
+  }
+
+  const near = (a: number, b: number): boolean => Math.abs(a - b) <= FULLSCREEN_VIEWPORT_TOLERANCE_PX;
+  const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  const matchesScreen = near(viewportWidth, window.screen.width)
+    && near(viewportHeight, window.screen.height);
+  const browserChromeHidden = Math.abs(window.outerHeight - window.innerHeight) <= FULLSCREEN_CHROME_TOLERANCE_PX;
+
+  return matchesScreen && browserChromeHidden;
+};
+
 // ═══════════════════════════════════════════════════════════════════
 // OVERLAY BUILDERS
 // ═══════════════════════════════════════════════════════════════════
@@ -131,14 +158,6 @@ const buildViolationOverlay = (msg: string, maxTolerance: number, currentCount: 
   showBtn: true,
   alertType: 'violation',
 });
-
-const OVERLAY_RELOAD: ViolationOverlay = {
-  title: 'Exam session restored',
-  msg: 'The page was reloaded. Your work has been saved automatically.',
-  sub: 'Please grant fullscreen permission again to continue the exam.',
-  showBtn: true,
-  alertType: 'reload',
-};
 
 const buildCriticalLockOverlay = (reason: string): ViolationOverlay => ({
   title: 'Exam locked',
@@ -211,13 +230,22 @@ export function useExamViolationGuard({
   const fullscreenExitAtRef = useRef<number | null>(null);
   const fullscreenViolationTimeoutRef = useRef<number | null>(null);
   const fullscreenViolationLoggedRef = useRef(false);
+  const fullscreenWatchdogStartAtRef = useRef<number | null>(null);
+  const fullscreenWatchdogWarningShownRef = useRef(false);
 
   const FULLSCREEN_EXIT_GRACE_MS = 500;
-  const STARTUP_GUARD_GRACE_MS = 3500;
-  const isSessionActiveStatus = (status: string | null): boolean => status === 'in_progress' || status === 'active';
+  const FULLSCREEN_ENFORCEMENT_INTERVAL_MS = 500;
+  const STARTUP_GUARD_GRACE_MS = 1200;
+  const isSessionActiveStatus = (status: string | null): boolean => {
+    const normalized = status?.trim().toLowerCase();
+    return normalized === 'in_progress' || normalized === 'active';
+  };
   const isWithinStartupGuardGrace = (current: LatestParams): boolean => {
     const startedAt = current.examStartTimeRef.current;
-    if (startedAt <= 0) return true;
+    if (startedAt <= 0) {
+      current.examStartTimeRef.current = Date.now();
+      return true;
+    }
     return (Date.now() - startedAt) < STARTUP_GUARD_GRACE_MS;
   };
   const applyViolationOutcome = (
@@ -230,7 +258,7 @@ export function useExamViolationGuard({
     options: { includeLockedInDetail?: boolean } = {}
   ) => {
     const includeLockedInDetail = options.includeLockedInDetail ?? true;
-    const isExceededTolerance = count > current.maxTolerance;
+    const isExceededTolerance = count >= current.maxTolerance;
     const shouldLock = forceLock || isExceededTolerance;
 
     if (shouldLock) {
@@ -250,7 +278,26 @@ export function useExamViolationGuard({
 
       current.setScreen('exam');
       current.setOverlay(buildCriticalLockOverlay(reason));
-      current.onForceSubmit();
+      // onForceSubmit may be async in some callers; never let it become an unhandled rejection.
+      try {
+        void Promise.resolve(current.onForceSubmit()).catch((err) => {
+          current.onLog(
+            'FORCE_SUBMIT_FAILED',
+            'critical',
+            false,
+            'Force submit failed after exam lock',
+            { error: String(err) },
+          );
+        });
+      } catch (err) {
+        current.onLog(
+          'FORCE_SUBMIT_FAILED',
+          'critical',
+          false,
+          'Force submit threw synchronously after exam lock',
+          { error: String(err) },
+        );
+      }
       return;
     }
 
@@ -320,18 +367,6 @@ export function useExamViolationGuard({
       return;
     }
 
-    const getNavigationType = (): string => {
-      try {
-        const entries = performance.getEntriesByType?.('navigation') as PerformanceNavigationTiming[] | undefined;
-        return entries?.[0]?.type ?? 'navigate';
-      } catch {
-        return 'navigate';
-      }
-    };
-
-    const navigationType = getNavigationType();
-    const isHardReload = navigationType === 'reload';
-
     // Chỉ khởi tạo violation/logs khi có key tracker hợp lệ (trang exam chưa chọn problem từng truyền key rỗng).
     if (current.violationStorageKey) {
       if (!localStorage.getItem(current.violationStorageKey)) {
@@ -351,16 +386,6 @@ export function useExamViolationGuard({
     const status = localStorage.getItem(current.examStatusStorageKey);
     const isSessionActive = status === 'in_progress' || status === 'active';
 
-    // performance.navigation.type vẫn là "reload" cho cả tab sau một lần F5; mỗi lần vào lại editor remount hook
-    // nên không được hiện overlay lại. Chỉ hiện tối đa một lần mỗi lần tải document (timeOrigin đổi khi load mới).
-    const reloadOverlayStorageKey = isHardReload
-      ? `exam-reload-overlay-shown:${performance.timeOrigin}`
-      : '';
-    const shouldShowReloadOverlay =
-      isHardReload &&
-      reloadOverlayStorageKey !== '' &&
-      !sessionStorage.getItem(reloadOverlayStorageKey);
-
     if (isSessionActive) {
       if (current.restoreAnswers) {
         current.restoreAnswers((key) => localStorage.getItem(key));
@@ -376,19 +401,6 @@ export function useExamViolationGuard({
       }
 
       current.setScreen('exam');
-      if (shouldShowReloadOverlay && reloadOverlayStorageKey) {
-        try {
-          sessionStorage.setItem(reloadOverlayStorageKey, '1');
-        } catch {
-          // ignore quota / private mode
-        }
-        current.onLog(
-          'SYSTEM_RELOAD', 'warning', false,
-          'Exam session restored after page reload',
-          { navigationType },
-        );
-        current.setOverlay(OVERLAY_RELOAD);
-      }
     }
 
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
@@ -397,7 +409,10 @@ export function useExamViolationGuard({
       if (s === 'in_progress' || s === 'active') {
         latest.isReloadingRef.current = true;
         event.preventDefault();
-        event.returnValue = '';
+        (event as any).returnValue = '';
+        setTimeout(() => {
+          latest.isReloadingRef.current = false;
+        }, 100);
       }
     };
 
@@ -446,10 +461,14 @@ export function useExamViolationGuard({
       if (!isExamInProgress(current) || current.isInitializingRef.current || current.isReloadingRef.current) return;
       if (isWithinStartupGuardGrace(current)) return;
 
-      if (!document.fullscreenElement) {
+      if (!isFullscreenActive()) {
         if (fullscreenExitAtRef.current === null) {
           fullscreenExitAtRef.current = Date.now();
           fullscreenViolationLoggedRef.current = false;
+        }
+
+        if (fullscreenWatchdogStartAtRef.current === null) {
+          fullscreenWatchdogStartAtRef.current = Date.now();
         }
 
         if (fullscreenViolationTimeoutRef.current !== null) {
@@ -460,7 +479,7 @@ export function useExamViolationGuard({
           const latest = latestRef.current;
 
           if (
-            document.fullscreenElement
+            isFullscreenActive()
             || fullscreenViolationLoggedRef.current
             || !isExamInProgress(latest)
             || latest.isInitializingRef.current
@@ -494,7 +513,7 @@ export function useExamViolationGuard({
       }
 
       const durationAwayMs = consumeAwayDuration(fullscreenExitAtRef);
-      if (durationAwayMs > 0 && !fullscreenViolationLoggedRef.current) {
+      if (durationAwayMs >= FULLSCREEN_EXIT_GRACE_MS && !fullscreenViolationLoggedRef.current) {
         processViolation(
           current,
           'FULLSCREEN_EXIT',
@@ -505,6 +524,8 @@ export function useExamViolationGuard({
         );
       }
 
+      fullscreenWatchdogStartAtRef.current = null;
+      fullscreenWatchdogWarningShownRef.current = false;
       fullscreenViolationLoggedRef.current = false;
     };
 
@@ -577,26 +598,6 @@ export function useExamViolationGuard({
         const internalClipboard = internalClipboardRef.current;
         const toProblemId = findProblemId(event.target);
         const isInternalClipboardPaste = isValidInternalClipboard(internalClipboard) && internalClipboard.text === pasteData;
-        const isCrossProblemPaste =
-          isInternalClipboardPaste
-          && !!internalClipboard?.fromProblemId
-          && !!toProblemId
-          && internalClipboard.fromProblemId !== toProblemId;
-
-        if (isCrossProblemPaste) {
-          event.preventDefault();
-          processViolation(
-            current,
-            'CROSS_PROBLEM_PASTE',
-            'Pasted copied content across different problems',
-            {
-              fromProblemId: internalClipboard?.fromProblemId ?? null,
-              toProblemId,
-            },
-          );
-          return;
-        }
-
         if (!isInternalClipboardPaste) {
           // Chặn nội dung dán từ nguồn bên ngoài
           event.preventDefault();
@@ -819,7 +820,17 @@ export function useExamViolationGuard({
         removeDevtoolsListener = () => removeDetectListener(handleDevtoolsDetect);
         disableDetector = () => detector.setEnable(false);
       })
-      .catch(() => {});
+      .catch((err) => {
+        if (isEffectDisposed) return;
+        const current = latestRef.current;
+        current.onLog(
+          'DEVTOOLS_DETECTOR_LOAD_FAILED',
+          'warning',
+          false,
+          'DevTools detector failed to load; DevTools violations may not be detected',
+          { error: String(err) },
+        );
+      });
 
     // ── REGISTER LISTENERS ──────────────────────────────────
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -937,5 +948,78 @@ export function useExamViolationGuard({
     }, 3000);
 
     return () => window.clearInterval(watchdog);
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────
+  // EFFECT 5: Fullscreen state enforcement
+  // After startup grace, periodically verify that fullscreen is active.
+  // This catches the case where the page reloads (browser exits
+  // fullscreen) and no `fullscreenchange` event fires because the
+  // page was never in fullscreen after load. It also provides a
+  // fallback strike when users stay out of fullscreen (e.g. F11 path
+  // where some browsers may skip `fullscreenchange`).
+  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const check = window.setInterval(() => {
+      const current = latestRef.current;
+      if (!current.examStatusStorageKey || !current.violationStorageKey) return;
+      if (current.isInitializingRef.current || current.isReloadingRef.current) return;
+      if (isWithinStartupGuardGrace(current)) return;
+
+      const status = localStorage.getItem(current.examStatusStorageKey);
+      if (!isSessionActiveStatus(status)) return;
+
+      if (!isFullscreenActive()) {
+        if (fullscreenWatchdogStartAtRef.current === null) {
+          fullscreenWatchdogStartAtRef.current = Date.now();
+        }
+
+        if (!fullscreenWatchdogWarningShownRef.current && !fullscreenViolationLoggedRef.current) {
+          fullscreenWatchdogWarningShownRef.current = true;
+          current.setOverlay({
+            title: 'Fullscreen required',
+            msg: 'You are not in fullscreen mode. Please return to fullscreen to continue your exam.',
+            sub: 'If you do not return to fullscreen, this will be recorded as a violation.',
+            showBtn: true,
+            alertType: 'violation',
+          });
+          current.onLog(
+            'FULLSCREEN_NOT_ACTIVE', 'warning', false,
+            'Exam is active but fullscreen is not enabled (e.g. after page reload)',
+            {},
+          );
+        }
+
+        const durationAwayMs = Math.max(0, Date.now() - fullscreenWatchdogStartAtRef.current);
+        if (
+          durationAwayMs >= FULLSCREEN_EXIT_GRACE_MS
+          && !fullscreenViolationLoggedRef.current
+          && current.examStatusStorageKey.trim()
+          && current.violationStorageKey.trim()
+        ) {
+          current.violationCountRef.current += 1;
+          const count = current.violationCountRef.current;
+          localStorage.setItem(current.violationStorageKey, String(count));
+          fullscreenViolationLoggedRef.current = true;
+          applyViolationOutcome(
+            current,
+            'FULLSCREEN_EXIT',
+            'Exited fullscreen mode',
+            count,
+            { durationAwayMs, detectedBy: 'fullscreen_enforcement' },
+            false,
+            { includeLockedInDetail: false },
+          );
+        }
+
+        return;
+      }
+
+      fullscreenWatchdogStartAtRef.current = null;
+      fullscreenWatchdogWarningShownRef.current = false;
+      fullscreenViolationLoggedRef.current = false;
+    }, FULLSCREEN_ENFORCEMENT_INTERVAL_MS);
+
+    return () => window.clearInterval(check);
   }, []);
 }

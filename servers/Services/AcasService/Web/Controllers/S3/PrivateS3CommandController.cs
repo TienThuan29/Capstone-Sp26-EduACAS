@@ -8,11 +8,11 @@ namespace AcasService.Web.Controllers.S3;
 
 [ApiController]
 [Route("api/v1/private-s3")]
-[Authorize(Roles = "LECTURER, ADMIN")]
+[Authorize]  // Allow any authenticated user
 public class PrivateS3CommandController : ControllerBase
 {
     private readonly ILogger<PrivateS3CommandController> _logger;
-    
+
     private readonly IPrivateS3Command _privateS3Command;
 
     public PrivateS3CommandController(ILogger<PrivateS3CommandController> logger, IPrivateS3Command privateS3Command)
@@ -22,6 +22,7 @@ public class PrivateS3CommandController : ControllerBase
     }
 
     [HttpPost("upload")]
+    [Authorize(Roles = "STUDENT, LECTURER, ADMIN")]  // Allow students to upload files
     [Consumes("multipart/form-data")]
     public async Task<ActionResult<ApiResponse<object>>> UploadFile([FromForm] UploadFileRequest request)
     {
@@ -49,8 +50,9 @@ public class PrivateS3CommandController : ControllerBase
         }
     }
 
-    
+
     [HttpDelete("delete/{filename}")]
+    [Authorize(Roles = "LECTURER, ADMIN")]  // Only lecturers and admins can delete files
     public async Task<ActionResult<ApiResponse<object>>> DeleteFile([FromRoute] string filename)
     {
         try

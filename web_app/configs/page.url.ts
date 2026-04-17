@@ -17,6 +17,7 @@ export const PageUrl = {
     ASSIGNMENTS_PAGE: '/assignments',
     ANNOUNCEMENTS_PAGE: '/announcements',
     PROFILE_PAGE: '/profile',
+    NOTIFICATIONS_PAGE: '/notifications',
 
     // Lecturer routes
     MANAGE_CLASSROOM_PAGE: '/manage-classroom',

@@ -18,9 +18,13 @@ import {
   EyeIcon,
   ChatBubbleLeftRightIcon,
   CloudArrowUpIcon,
+  SparklesIcon,
+  UserCircleIcon,
 } from "@heroicons/react/24/outline";
+import ReactMarkdown from "react-markdown";
 import { useExaminationDetail } from "@/hooks/examination/useExaminationDetail";
 import { useRegradingRequest } from "@/hooks/regrading-request/useRegradingRequest";
+import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import type { Examination } from "@/types/examination";
 import type { ProblemSubmissionsResponse, SubmissionResponse, TestResultResponse } from "@/types/submission";
 import type { RegradingRequest } from "@/types/regrading-request";
@@ -107,7 +111,7 @@ function SubmissionDetailModal({
   regradingRequests = [],
 }: SubmissionDetailModalProps) {
   const { submitFromExamDetail } = useRegradingRequest();
-  const [activeSection, setActiveSection] = useState<"info" | "code" | "testresults" | "regrading">("info");
+  const [activeSection, setActiveSection] = useState<"info" | "code" | "testresults" | "aifeedback" | "lecturerfeedback">("info");
   const [regradingReason, setRegradingReason] = useState("");
   const [regradingSuccess, setRegradingSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -116,25 +120,13 @@ function SubmissionDetailModal({
     (r) => r.submissionId === submission?.id
   );
 
-  const handleRegradingSubmit = async () => {
-    // if (!regradingReason.trim() || !submission) return;
-    // setSubmitting(true);
-    // try {
-    //   const ok = await submitFromExamDetail(examId, submission.id, regradingReason.trim());
-    //   if (ok) {
-    //     setRegradingSuccess(true);
-    //     setRegradingReason("");
-    //   }
-    // } finally {
-    //   setSubmitting(false);
-    // }
-  };
-
   const sectionTabs = [
     { id: "info" as const, label: "Info", icon: DocumentTextIcon },
     { id: "code" as const, label: "Source Code", icon: CodeBracketIcon },
     { id: "testresults" as const, label: "Test Results", icon: BugAntIcon },
-    { id: "regrading" as const, label: "Regrading", icon: ClipboardDocumentListIcon },
+    { id: "aifeedback" as const, label: "AI Feedback", icon: SparklesIcon },
+    { id: "lecturerfeedback" as const, label: "Lecturer Feedback", icon: UserCircleIcon },
+    // { id: "regrading" as const, label: "Regrading", icon: ClipboardDocumentListIcon },
   ];
 
   if (!submission) return null;
@@ -331,7 +323,7 @@ function SubmissionDetailModal({
                     Test Results
                   </h4>
                   <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-medium text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
-                    {submission.testResults?.filter((t) => t.status === "PASSED").length ?? 0} / {submission.testResults?.length ?? 0} Passed
+                    {submission.testResults?.filter((t) => t.status === "SUCCESS").length ?? 0} / {submission.testResults?.length ?? 0} Passed
                   </span>
                 </div>
                 {submission.testResults && submission.testResults.length > 0 ? (
@@ -351,7 +343,57 @@ function SubmissionDetailModal({
               </div>
             )}
 
-            {activeSection === "regrading" && (
+            {activeSection === "aifeedback" && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <SparklesIcon className="h-5 w-5 text-yellow-500" />
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                    AI Feedback
+                  </h4>
+                </div>
+                {submission.aiFeedback ? (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown>{submission.aiFeedback}</ReactMarkdown>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+                    <SparklesIcon className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      No AI feedback available yet
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeSection === "lecturerfeedback" && (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-2">
+                  <UserCircleIcon className="h-5 w-5 text-blue-500" />
+                  <h4 className="text-sm font-medium text-gray-900 dark:text-white">
+                    Lecturer Feedback
+                  </h4>
+                </div>
+                {submission.lecturerFeedback ? (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown>{submission.lecturerFeedback}</ReactMarkdown>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
+                    <UserCircleIcon className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
+                    <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                      No lecturer feedback available yet
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* {activeSection === "regrading" && (
               <div className="space-y-4">
                 <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
                   <div className="mb-3 flex items-center gap-2">
@@ -399,8 +441,6 @@ function SubmissionDetailModal({
                     </div>
                   )}
                 </div>
-
-                {/* Existing Regrading Requests */}
                 {relatedRegrading.length > 0 && (
                   <div className="space-y-3">
                     <h4 className="text-sm font-medium text-gray-900 dark:text-white">
@@ -412,7 +452,7 @@ function SubmissionDetailModal({
                   </div>
                 )}
               </div>
-            )}
+            )} */}
           </div>
         </div>
       </ModalBody>
@@ -426,7 +466,7 @@ function SubmissionDetailModal({
 
 function TestResultItem({ result, index }: { result: TestResultResponse; index: number }) {
   const [expanded, setExpanded] = useState(false);
-  const isPassed = result.status?.toUpperCase() === "PASSED";
+  const isPassed = result.status?.toUpperCase() === "SUCCESS";
 
   return (
     <div className={`rounded-lg border p-3 ${
@@ -436,7 +476,7 @@ function TestResultItem({ result, index }: { result: TestResultResponse; index: 
     }`}>
       <button
         onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center justify-between"
+        className="flex w-full items-center justify-between cursor-pointer"
       >
         <div className="flex items-center gap-3">
           <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
@@ -491,59 +531,6 @@ function TestResultItem({ result, index }: { result: TestResultResponse; index: 
           </div>
         </div>
       )}
-    </div>
-  );
-}
-
-// ============================================================================
-// Regrading Request Card Component
-// ============================================================================
-
-function RegradingRequestCard({ request }: { request: RegradingRequest }) {
-  const statusConfig: Record<string, { color: string; icon: typeof ClockIcon }> = {
-    PENDING: { color: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300", icon: ClockIcon },
-    APPROVED: { color: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300", icon: CheckCircleIcon },
-    REJECTED: { color: "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300", icon: XCircleIcon },
-    CANCELED: { color: "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300", icon: XMarkIcon },
-  };
-  const config = statusConfig[request.status] || statusConfig.PENDING;
-  const StatusIcon = config.icon;
-
-  return (
-    <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-medium ${config.color}`}>
-            <StatusIcon className="h-3 w-3" />
-            {request.statusName || request.status}
-          </span>
-          <span className="text-xs text-gray-500 dark:text-gray-400">
-            {formatDate(request.createdDate)}
-          </span>
-        </div>
-      </div>
-      
-      <div className="space-y-2">
-        <div>
-          <p className="text-xs font-medium text-gray-500 dark:text-gray-400">Reason</p>
-          <p className="text-sm text-gray-900 dark:text-gray-200">{request.reason}</p>
-        </div>
-        
-        {request.lecturerNote && (
-          <div>
-            <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-              Lecturer Note ({request.statusName || request.status})
-            </p>
-            <p className="text-sm text-gray-900 dark:text-gray-200">{request.lecturerNote}</p>
-          </div>
-        )}
-        
-        {request.handledDate && (
-          <p className="text-xs text-gray-400 dark:text-gray-500">
-            Handled on: {formatDate(request.handledDate)}
-          </p>
-        )}
-      </div>
     </div>
   );
 }
@@ -670,15 +657,18 @@ interface SubmissionsTabProps {
   exam: Examination;
   submissions: ProblemSubmissionsResponse[];
   onViewSubmission: (submission: SubmissionResponse, problemTitle: string, maxMark: number) => void;
+  regradingRequests?: RegradingRequest[];
+  onRegradingSuccess?: () => void;
 }
 
-function SubmissionsTab({ exam, submissions, onViewSubmission }: SubmissionsTabProps) {
+function SubmissionsTab({ exam, submissions, onViewSubmission, regradingRequests = [], onRegradingSuccess }: SubmissionsTabProps) {
   // Regrading modal state
   const [regradingModal, setRegradingModal] = useState<{
     isOpen: boolean;
     submission: SubmissionResponse | null;
     problemTitle: string;
     maxMark: number;
+    existingRequest?: RegradingRequest | null;
   }>({ isOpen: false, submission: null, problemTitle: "", maxMark: 0 });
 
   // Find the latest version for each problem
@@ -687,12 +677,12 @@ function SubmissionsTab({ exam, submissions, onViewSubmission }: SubmissionsTabP
     return Math.max(...subs.map((s) => s.version));
   };
 
-  const openRegradingModal = (sub: SubmissionResponse, problemTitle: string, maxMark: number) => {
-    setRegradingModal({ isOpen: true, submission: sub, problemTitle, maxMark });
+  const openRegradingModal = (sub: SubmissionResponse, problemTitle: string, maxMark: number, existingRequest?: RegradingRequest | null) => {
+    setRegradingModal({ isOpen: true, submission: sub, problemTitle, maxMark, existingRequest });
   };
 
   const closeRegradingModal = () => {
-    setRegradingModal({ isOpen: false, submission: null, problemTitle: "", maxMark: 0 });
+    setRegradingModal({ isOpen: false, submission: null, problemTitle: "", maxMark: 0, existingRequest: undefined });
   };
 
   return (
@@ -721,6 +711,7 @@ function SubmissionsTab({ exam, submissions, onViewSubmission }: SubmissionsTabP
               </div>
               <div className="space-y-2">
                 {ps.submissions.map((sub) => {
+                  console.log(sub.regradingRequestId)
                   const isLatest = sub.version === latestVersion;
                   return (
                     <div
@@ -760,7 +751,7 @@ function SubmissionsTab({ exam, submissions, onViewSubmission }: SubmissionsTabP
                           <EyeIcon className="mr-1 h-3 w-3" />
                           View
                         </Button>
-                        {!sub.regradingRequestId && (
+                        {!sub.regradingRequestId && isLatest && (
                           <Button
                             size="xs"
                             color="blue"
@@ -771,11 +762,24 @@ function SubmissionsTab({ exam, submissions, onViewSubmission }: SubmissionsTabP
                             Regrade
                           </Button>
                         )}
-                        {sub.regradingRequestId && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
-                            <ClipboardDocumentListIcon className="h-3 w-3" />
-                            Regraded
+                        {!sub.regradingRequestId && !isLatest && (
+                          <span className="text-xs text-gray-400" title="Only the latest submission can be regraded">
+                            Not eligible
                           </span>
+                        )}
+                        {sub.regradingRequestId && (
+                          <Button
+                            size="xs"
+                            color="yellow"
+                            onClick={() => {
+                              const existingReq = regradingRequests.find((r) => r.id === sub.regradingRequestId);
+                              openRegradingModal(sub, problemTitle, maxMark, existingReq);
+                            }}
+                            className="cursor-pointer"
+                          >
+                            <ClipboardDocumentListIcon className="mr-1 h-3 w-3" />
+                            View Request
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -795,6 +799,8 @@ function SubmissionsTab({ exam, submissions, onViewSubmission }: SubmissionsTabP
         problemTitle={regradingModal.problemTitle}
         maxMark={regradingModal.maxMark}
         examId={exam?.id ?? ""}
+        existingRegradingRequest={regradingModal.existingRequest}
+        onSuccess={onRegradingSuccess}
       />
     </div>
   );
@@ -811,22 +817,91 @@ interface RegradingModalProps {
   problemTitle: string;
   maxMark: number;
   examId: string;
+  existingRegradingRequest?: RegradingRequest | null;
+  onSuccess?: () => void;
 }
 
-function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, examId }: RegradingModalProps) {
-  const { submitFromExamDetail } = useRegradingRequest();
+function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, examId, existingRegradingRequest, onSuccess }: RegradingModalProps) {
+  const { submitFromExamDetail, getById, cancel } = useRegradingRequest();
+  const { uploadFile, getFileUrl } = usePrivateS3();
   const [reason, setReason] = useState("");
-  const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState<string[]>([]);
+  const [uploadedPresignedUrls, setUploadedPresignedUrls] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<RegradingRequest | null>(null);
+  const [existingImageUrls, setExistingImageUrls] = useState<string[]>([]); // Presigned URLs for existing request images
+  const [canceling, setCanceling] = useState(false);
+
+  // Determine if we're viewing an existing request or creating a new one
+  const isViewingExisting = Boolean(submission?.regradingRequestId || existingRegradingRequest);
+
+  // Load existing regrading request when modal opens
+  useEffect(() => {
+    if (!isOpen || !submission?.regradingRequestId) {
+      // Reset state when modal closes
+      setExistingRequest(null);
+      setExistingImageUrls([]);
+      setReason("");
+      setUploadedImageUrls([]);
+      setUploadedPresignedUrls([]);
+      setSuccess(false);
+      return;
+    }
+
+    const loadExisting = async () => {
+      setLoadingExisting(true);
+      try {
+        // Use passed existing request or fetch by ID
+        if (existingRegradingRequest) {
+          setExistingRequest(existingRegradingRequest);
+          // Convert existing image filenames to presigned URLs
+          await convertExistingImageUrls(existingRegradingRequest.imageUrls || []);
+        } else {
+          const req = await getById(submission.regradingRequestId!);
+          setExistingRequest(req);
+          // Convert existing image filenames to presigned URLs
+          await convertExistingImageUrls(req?.imageUrls || []);
+        }
+      } catch (err) {
+        console.error("Failed to load regrading request:", err);
+      } finally {
+        setLoadingExisting(false);
+      }
+    };
+
+    loadExisting();
+  }, [isOpen, submission?.regradingRequestId, existingRegradingRequest, getById]);
+
+  // Convert S3 filenames to presigned URLs for existing request images
+  const convertExistingImageUrls = async (imageUrls: string[]) => {
+    if (!imageUrls || imageUrls.length === 0) {
+      setExistingImageUrls([]);
+      return;
+    }
+
+    const urls: string[] = [];
+    for (const filename of imageUrls) {
+      try {
+        const presignedUrl = await getFileUrl(filename);
+        urls.push(presignedUrl);
+      } catch {
+        // If getFileUrl fails, use the filename itself (though preview won't work)
+        urls.push(filename);
+      }
+    }
+    setExistingImageUrls(urls);
+  };
 
   const MAX_IMAGES = 10;
   const MAX_IMAGE_SIZE_MB = 10;
   const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 
   const validateFiles = (files: File[]): { valid: boolean; error?: string } => {
-    const currentCount = imageUrls.length;
+    const currentCount = uploadedImageUrls.length;
     if (currentCount + files.length > MAX_IMAGES) {
       return { valid: false, error: `Maximum ${MAX_IMAGES} images allowed. You can add ${MAX_IMAGES - currentCount} more.` };
     }
@@ -854,20 +929,32 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
     }
 
     setUploadError(null);
+    setUploading(true);
 
-    // Convert files to data URLs for preview (in production, upload to storage first)
-    const newUrls: string[] = [];
-    for (const file of files) {
-      const reader = new FileReader();
-      const url = await new Promise<string>((resolve) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-      newUrls.push(url);
+    try {
+      const filenames: string[] = [];
+      const presignedUrls: string[] = [];
+      for (const file of files) {
+        const filename = await uploadFile(file);
+        filenames.push(filename);
+        // Get presigned URL for preview
+        try {
+          const presignedUrl = await getFileUrl(filename);
+          presignedUrls.push(presignedUrl);
+        } catch {
+          // If getFileUrl fails, use filename (though preview won't work)
+          presignedUrls.push(filename);
+        }
+      }
+      setUploadedImageUrls((prev) => [...prev, ...filenames]);
+      setUploadedPresignedUrls((prev) => [...prev, ...presignedUrls]);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      setUploadError(err.response?.data?.message ?? "Failed to upload images");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
     }
-
-    setImageUrls((prev) => [...prev, ...newUrls]);
-    e.target.value = "";
   };
 
   const handleDrop = async (e: React.DragEvent) => {
@@ -882,22 +969,35 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
     }
 
     setUploadError(null);
+    setUploading(true);
 
-    const newUrls: string[] = [];
-    for (const file of files) {
-      const reader = new FileReader();
-      const url = await new Promise<string>((resolve) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.readAsDataURL(file);
-      });
-      newUrls.push(url);
+    try {
+      const filenames: string[] = [];
+      const presignedUrls: string[] = [];
+      for (const file of files) {
+        const filename = await uploadFile(file);
+        filenames.push(filename);
+        // Get presigned URL for preview
+        try {
+          const presignedUrl = await getFileUrl(filename);
+          presignedUrls.push(presignedUrl);
+        } catch {
+          presignedUrls.push(filename);
+        }
+      }
+      setUploadedImageUrls((prev) => [...prev, ...filenames]);
+      setUploadedPresignedUrls((prev) => [...prev, ...presignedUrls]);
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { message?: string } } };
+      setUploadError(err.response?.data?.message ?? "Failed to upload images");
+    } finally {
+      setUploading(false);
     }
-
-    setImageUrls((prev) => [...prev, ...newUrls]);
   };
 
   const handleRemoveImage = (index: number) => {
-    setImageUrls((prev) => prev.filter((_, i) => i !== index));
+    setUploadedImageUrls((prev) => prev.filter((_, i) => i !== index));
+    setUploadedPresignedUrls((prev) => prev.filter((_, i) => i !== index));
     setUploadError(null);
   };
 
@@ -905,18 +1005,40 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
     if (!reason.trim() || !submission) return;
     setSubmitting(true);
     try {
-      const ok = await submitFromExamDetail(examId, submission.id, reason.trim(), imageUrls);
+      // Use filenames (not presigned URLs) for backend storage
+      const ok = await submitFromExamDetail(examId, submission.id, reason.trim(), uploadedImageUrls);
       if (ok) {
         setSuccess(true);
         setReason("");
-        setImageUrls([]);
+        setUploadedImageUrls([]);
+        setUploadedPresignedUrls([]);
+        // Notify parent to refresh data
+        onSuccess?.();
       }
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleCancel = async () => {
+    if (!existingRequest?.id) return;
+    setCanceling(true);
+    try {
+      const ok = await cancel(existingRequest.id);
+      if (ok) {
+        onSuccess?.();
+        onClose();
+      }
+    } finally {
+      setCanceling(false);
+    }
+  };
+
   if (!submission) return null;
+
+  // Determine if viewing existing request
+  const displayRequest = existingRequest || (submission.regradingRequestId ? existingRequest : null);
+  const isViewMode = Boolean(displayRequest);
 
   return (
     <Modal show={isOpen} onClose={onClose} size="lg" popup>
@@ -927,7 +1049,7 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
           </div>
           <div>
             <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-              Request Regrading
+              {isViewMode ? "Regrading Request Details" : "Request Regrading"}
             </h3>
             <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">
               {problemTitle} - v{submission.version}
@@ -953,123 +1075,246 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
             </span>
           </div>
 
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            If you believe there is an error in your grading, please explain your reason below.
-            The lecturer will review your submission and update the score if necessary.
-          </p>
-          <p className="text-red-400 text-sm">Note: Regrading request make just only one time.</p>
-
-          {success ? (
-            <div className="flex items-center gap-2 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-300">
-              <CheckCircleIcon className="h-5 w-5" />
-              <div>
-                <p className="font-medium">Regrading request submitted!</p>
-                <p className="text-xs">The lecturer will review your request shortly.</p>
+          {isViewMode ? (
+            // VIEW MODE: Display existing request
+            loadingExisting ? (
+              <div className="flex items-center justify-center py-8">
+                <Spinner size="md" />
+                <span className="ml-2 text-sm text-gray-500">Loading request details...</span>
               </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Reason for Regrading <span className="text-red-500">*</span>
-                </label>
-                <Textarea
-                  value={reason}
-                  onChange={(e) => setReason(e.target.value)}
-                  placeholder="Explain why you believe your answer deserves a higher score..."
-                  rows={4}
-                  required
-                />
-              </div>
-
-              {/* Image Upload Section */}
-              <div>
-                <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Proof Images <span className="text-gray-400">(optional)</span>
-                </label>
-                <p className="text-xs text-gray-500 mb-2">
-                  Upload up to {MAX_IMAGES} images (max {MAX_IMAGE_SIZE_MB}MB each)
-                </p>
-
-                {/* Drop Zone */}
-                <div
-                  onDragOver={(e) => e.preventDefault()}
-                  onDrop={handleDrop}
-                  className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
-                    uploadError
-                      ? "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/10"
-                      : imageUrls.length >= MAX_IMAGES
-                      ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 cursor-not-allowed opacity-60"
-                      : "border-gray-300 bg-gray-50 hover:border-yellow-400 hover:bg-yellow-50 dark:border-gray-600 dark:bg-gray-800/50 dark:hover:border-yellow-500 dark:hover:bg-yellow-900/10"
-                  }`}
-                >
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={handleFileSelect}
-                    disabled={imageUrls.length >= MAX_IMAGES}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-                  />
-                  <CloudArrowUpIcon className="mx-auto h-8 w-8 text-gray-400" />
-                  <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-                    <span className="font-medium text-yellow-600 dark:text-yellow-400">Click to upload</span> or drag and drop
-                  </p>
-                  <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to {MAX_IMAGE_SIZE_MB}MB</p>
+            ) : displayRequest ? (
+              <div className="space-y-4">
+                {/* Status Badge */}
+                <div className="flex items-center gap-2">
+                  {displayRequest.status === "PENDING" && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-yellow-100 px-3 py-1 text-xs font-medium text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300">
+                      <ClockIcon className="h-3 w-3" />
+                      Pending Review
+                    </span>
+                  )}
+                  {displayRequest.status === "APPROVED" && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-300">
+                      <CheckCircleIcon className="h-3 w-3" />
+                      Approved
+                    </span>
+                  )}
+                  {displayRequest.status === "REJECTED" && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-red-100 px-3 py-1 text-xs font-medium text-red-800 dark:bg-red-900/30 dark:text-red-300">
+                      <XCircleIcon className="h-3 w-3" />
+                      Rejected
+                    </span>
+                  )}
                 </div>
 
-                {/* Error Message */}
-                {uploadError && (
-                  <p className="mt-1 text-xs text-red-500">{uploadError}</p>
+                {/* Reason */}
+                <div>
+                  <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Your Reason
+                  </label>
+                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                    {displayRequest.reason}
+                  </div>
+                </div>
+
+                {/* Lecturer Note */}
+                {displayRequest.lecturerNote && (
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Lecturer's Response
+                    </label>
+                    <div className="rounded-lg border border-gray-200 bg-blue-50 p-3 text-sm text-gray-700 dark:border-gray-700 dark:bg-blue-900/20 dark:text-blue-200">
+                      {displayRequest.lecturerNote}
+                    </div>
+                  </div>
                 )}
 
-                {/* Image Preview Grid */}
-                {imageUrls.length > 0 && (
-                  <div className="mt-3 grid grid-cols-5 gap-2">
-                    {imageUrls.map((url, index) => (
-                      <div key={index} className="relative group">
-                        <img
-                          src={url}
-                          alt={`Proof ${index + 1}`}
-                          className="h-16 w-full rounded-lg object-cover border border-gray-200 dark:border-gray-700"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute -top-1 -right-1 rounded-full bg-red-500 p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                {/* Proof Images */}
+                {existingImageUrls.length > 0 && (
+                  <div>
+                    <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Proof Images ({existingImageUrls.length})
+                    </label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {existingImageUrls.map((url, index) => (
+                        <a
+                          key={index}
+                          href={url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block rounded-lg border border-gray-200 overflow-hidden hover:border-blue-400 transition-colors dark:border-gray-700"
                         >
-                          <XMarkIcon className="h-3 w-3" />
-                        </button>
-                      </div>
-                    ))}
+                          <img
+                            src={url}
+                            alt={`Proof ${index + 1}`}
+                            className="h-24 w-full object-cover"
+                          />
+                        </a>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Submitted Date */}
+                <div className="text-xs text-gray-500">
+                  Submitted: {formatDate(displayRequest.createdDate)}
+                </div>
+
+                {/* Canceled Status Badge */}
+                {displayRequest.status === "CANCELED" && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-3 py-1 text-xs font-medium text-gray-600 dark:bg-gray-800 dark:text-gray-400">
+                    <XCircleIcon className="h-3 w-3" />
+                    Canceled
+                  </span>
+                )}
+
+                {/* Cancel Button - Only show for PENDING requests */}
+                {displayRequest.status === "PENDING" && (
+                  <div className="flex justify-end pt-2">
+                    <Button
+                      color="failure"
+                      size="sm"
+                      onClick={handleCancel}
+                      disabled={canceling}
+                    >
+                      {canceling ? (
+                        <div className="flex items-center gap-2">
+                          <Spinner size="sm" />
+                          Canceling...
+                        </div>
+                      ) : (
+                        "Cancel Request"
+                      )}
+                    </Button>
                   </div>
                 )}
               </div>
-
-              <div className="flex gap-2">
-                <Button
-                  color="light"
-                  onClick={onClose}
-                  className="flex-1"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  color="warning"
-                  onClick={handleSubmit}
-                  disabled={submitting || !reason.trim()}
-                  className="flex-1"
-                >
-                  {submitting ? (
-                    <div className="flex items-center gap-2">
-                      <Spinner size="sm" />
-                      Submitting...
-                    </div>
-                  ) : (
-                    "Submit Request"
-                  )}
-                </Button>
+            ) : (
+              <div className="py-4 text-center text-sm text-gray-500">
+                Failed to load request details.
               </div>
+            )
+          ) : (
+            // CREATE MODE: New regrading request form
+            <div className="space-y-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                If you believe there is an error in your grading, please explain your reason below.
+                The lecturer will review your submission and update the score if necessary.
+              </p>
+              <p className="text-red-400 text-sm">Note: Regrading request make just only one time.</p>
+
+              {success ? (
+                <div className="flex items-center gap-2 rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                  <CheckCircleIcon className="h-5 w-5" />
+                  <div>
+                    <p className="font-medium">Regrading request submitted!</p>
+                    <p className="text-xs">The lecturer will review your request shortly.</p>
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Reason for Regrading <span className="text-red-500">*</span>
+                    </label>
+                    <Textarea
+                      value={reason}
+                      onChange={(e) => setReason(e.target.value)}
+                      placeholder="Explain why you believe your answer deserves a higher score..."
+                      rows={4}
+                      required
+                    />
+                  </div>
+
+                  {/* Image Upload Section */}
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Proof Images <span className="text-gray-400">(optional)</span>
+                    </label>
+                    <p className="text-xs text-gray-500 mb-2">
+                      Upload up to {MAX_IMAGES} images (max {MAX_IMAGE_SIZE_MB}MB each)
+                    </p>
+
+                    {/* Drop Zone */}
+                    <div
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={handleDrop}
+                      className={`relative rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
+                        uploadError
+                          ? "border-red-300 bg-red-50 dark:border-red-800 dark:bg-red-900/10"
+                          : uploadedImageUrls.length >= MAX_IMAGES || uploading
+                          ? "border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800/50 cursor-not-allowed opacity-60"
+                          : "border-gray-300 bg-gray-50 hover:border-yellow-400 hover:bg-yellow-50 dark:border-gray-600 dark:bg-gray-800/50 dark:hover:border-yellow-500 dark:hover:bg-yellow-900/10"
+                      }`}
+                    >
+                      <input
+                        type="file"
+                        accept="image/*"
+                        multiple
+                        onChange={handleFileSelect}
+                        disabled={uploadedImageUrls.length >= MAX_IMAGES || uploading}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                      />
+                      <CloudArrowUpIcon className={`mx-auto h-8 w-8 ${uploading ? "animate-bounce" : "text-gray-400"}`} />
+                      <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                        <span className="font-medium text-yellow-600 dark:text-yellow-400">Click to upload</span> or drag and drop
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1">PNG, JPG, GIF up to {MAX_IMAGE_SIZE_MB}MB</p>
+                    </div>
+
+                    {/* Error Message */}
+                    {uploadError && (
+                      <p className="mt-1 text-xs text-red-500">{uploadError}</p>
+                    )}
+
+                    {/* Image Preview Grid */}
+                    {uploadedPresignedUrls.length > 0 && (
+                      <div className="mt-3 grid grid-cols-5 gap-2">
+                        {uploadedPresignedUrls.map((presignedUrl: string, index: number) => (
+                          <div key={index} className="relative group">
+                            <img
+                              src={presignedUrl}
+                              alt={`Proof ${index + 1}`}
+                              className="h-16 w-full rounded-lg object-cover border border-gray-200 dark:border-gray-700"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveImage(index)}
+                              className="absolute -top-1 -right-1 rounded-full bg-red-500 p-0.5 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <XMarkIcon className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      color="light"
+                      onClick={onClose}
+                      className="flex-1"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      color="blue "
+                      onClick={handleSubmit}
+                      disabled={submitting || !reason.trim()}
+                      className="flex-1"
+                    >
+                      {submitting ? (
+                        <div className="flex items-center gap-2">
+                          <Spinner size="sm" />
+                          Submitting...
+                        </div>
+                      ) : (
+                        "Submit Request"
+                      )}
+                    </Button>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
@@ -1094,7 +1339,7 @@ export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
   const [selectedMaxMark, setSelectedMaxMark] = useState(0);
 
   // Fetch regrading requests for the student
-  const { myRequests } = useRegradingRequest({ enabled: false });
+  const { myRequests, refresh } = useRegradingRequest({ enabled: false });
 
   useEffect(() => {
     void loadDetail(examId);
@@ -1114,6 +1359,12 @@ export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
     setSelectedSubmission(null);
     setSelectedProblemTitle("");
     setSelectedMaxMark(0);
+  };
+
+  const handleRegradingSuccess = () => {
+    // Refresh regrading requests and exam detail
+    void refresh();
+    void loadDetail(examId);
   };
 
   if (loading) {
@@ -1203,6 +1454,8 @@ export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
           exam={exam}
           submissions={submissions}
           onViewSubmission={handleViewSubmission}
+          regradingRequests={myRequests}
+          onRegradingSuccess={handleRegradingSuccess}
         />
       )}
       {/* Submission Detail Modal */}

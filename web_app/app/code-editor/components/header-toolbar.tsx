@@ -11,7 +11,7 @@ import {
 import { useEditorContext } from "@/contexts/EditorContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { EXAM_SESSION_SYNC_EVENT } from "@/utils/student-exam-session";
-import { useStudentExamSession } from "@/hooks/exam/useStudentExamSession";
+import { useStudentExamSession } from "@/hooks/examination/useStudentExamSession";
 import type { StudentExamSessionPhase } from "@/types/student-exam-session";
 import { ConfirmModal } from "./confirm-modal";
 import { EditorSettingsModal } from "./editor-settings-modal";

@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useClassroom, SubjectOption } from "@/hooks/classroom/useClassroom";
 import type { Classroom as ClassroomDetail } from "@/types/classroom";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HomeNavbar from "@/components/navbar";
@@ -221,28 +221,6 @@ function ClassroomContent() {
     }
   }, [activeTab, classId, fetchExaminations]);
 
-  // Poll exam statuses every 30 seconds so background job transitions are reflected without manual refresh.
-  // Only active when on the exams tab.
-  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  // useEffect(() => {
-  //   if (activeTab === "exams" && classId) {
-  //     examsPollRef.current = setInterval(() => {
-  //       void fetchExaminations();
-  //     }, 30_000);
-  //   } else {
-  //     if (examsPollRef.current !== null) {
-  //       clearInterval(examsPollRef.current);
-  //       examsPollRef.current = null;
-  //     }
-  //   }
-  //   return () => {
-  //     if (examsPollRef.current !== null) {
-  //       clearInterval(examsPollRef.current);
-  //       examsPollRef.current = null;
-  //     }
-  //   };
-  // }, [activeTab, classId, fetchExaminations]);
-
   useEffect(() => {
     if (openUpdateModal) {
       const fetchSubjects = async () => {
@@ -421,7 +399,7 @@ function ClassroomContent() {
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
-      <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
+      <main className="ml-20 flex-grow overflow-hidden p-4 transition-all duration-300 lg:ml-64 lg:p-8">
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="Manage classrooms"
@@ -631,8 +609,9 @@ function UpdateClassroomModal({
               onChange={(e) =>
                 setFormData({ ...formData, enrolKey: e.target.value })
               }
-              pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
-              title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
+              disabled={true}
+              // pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
+              // title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
             />
             <div className="mt-2 flex items-center gap-2">
               <Checkbox

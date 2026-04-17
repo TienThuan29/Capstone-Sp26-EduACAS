@@ -350,4 +350,33 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
             throw;
         }
     }
+
+    public async Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId)
+    {
+        try
+        {
+            var request = new ScanRequest
+            {
+                TableName = _submissionTableName,
+                FilterExpression = "studentId = :studentId AND examId = :examId AND problemId = :problemId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":studentId"] = new AttributeValue { S = studentId },
+                    [":examId"] = new AttributeValue { S = examId },
+                    [":problemId"] = new AttributeValue { S = problemId }
+                }
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(request);
+            return response.Items
+                .Select(DynamoMapper.DynamoItemToSubmission)
+                .OrderByDescending(s => s.Version)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving versions for student {StudentId}, exam {ExamId}, problem {ProblemId}", studentId, examId, problemId);
+            throw;
+        }
+    }
 }

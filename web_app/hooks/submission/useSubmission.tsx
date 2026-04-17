@@ -46,9 +46,20 @@ export const useSubmission = () => {
     [axiosInstance]
   );
 
+  const getSubmissionVersions = useCallback(
+    async (submissionId: string): Promise<SubmissionResponse[]> => {
+      const response = await axiosInstance.get<ApiResponse<SubmissionResponse[]>>(
+        Api.Submission.GET_VERSIONS(submissionId)
+      );
+      return response.data?.dataResponse ?? [];
+    },
+    [axiosInstance]
+  );
+
   return {
     getSubmissionById,
     getLatestSubmissionsByExamAndProblem,
     getLatestSubmissionsByExam,
+    getSubmissionVersions,
   };
 };
