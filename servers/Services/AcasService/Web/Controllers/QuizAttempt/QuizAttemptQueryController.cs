@@ -1,3 +1,4 @@
+using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Queries.QuizAttempt;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Application.Utils;
@@ -18,6 +19,43 @@ public class QuizAttemptQueryController : ControllerBase
     {
         _quizAttemptQuery = quizAttemptQuery;
         _logger = logger;
+    }
+
+    [HttpGet("history/classroom-quiz/{classroomQuizId}/student/{studentId}")]
+    public async Task<ActionResult<ApiResponse<List<QuizAttemptResponse>>>> GetHistory(string classroomQuizId, string studentId)
+    {
+        try
+        {
+            var result = await _quizAttemptQuery.GetHistoryAsync(classroomQuizId, studentId);
+            if (result == null || result.Count == 0)
+            {
+                return ResponseUtil.Error<List<QuizAttemptResponse>>("No history found", 404);
+            }
+            return ResponseUtil.Success(result, "Quiz history retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving quiz history for quiz {classroomQuizId} student {studentId}");
+            return ResponseUtil.Error<List<QuizAttemptResponse>>("Failed to retrieve quiz history", 500);
+        }
+    }
+
+    [HttpGet("submissions/classroom-quiz/{classroomQuizId}")]
+    public async Task<ActionResult<ApiResponse<PagedResult<QuizAttemptResponse>>>> GetSubmissions(
+        string classroomQuizId, 
+        [FromQuery] int pageIndex = 1, 
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var result = await _quizAttemptQuery.GetPagedSubmissionsAsync(classroomQuizId, pageIndex, pageSize);
+            return ResponseUtil.Success(result, "Quiz submissions retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error retrieving quiz submissions for quiz {classroomQuizId}");
+            return ResponseUtil.Error<PagedResult<QuizAttemptResponse>>("Failed to retrieve quiz submissions", 500);
+        }
     }
 
     [HttpGet("{id}")]

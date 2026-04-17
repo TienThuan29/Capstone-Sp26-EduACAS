@@ -16,6 +16,11 @@ export interface Enrollment {
   movedOutDate: string | null;
 }
 
+export interface GradingSettings {
+  avgScoreThreshold: number;
+  minExamCount: number;
+}
+
 export interface Classroom {
   id: string;
   classCode: string;
@@ -30,6 +35,8 @@ export interface Classroom {
   isDeleted: boolean;
   enrollment?: Enrollment;
   maxSlot: number;
+  studentCount: number;
+  gradingSettings?: GradingSettings;
 }
 
 // student classroom response

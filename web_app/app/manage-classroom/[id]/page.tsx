@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useClassroom, SubjectOption } from "@/hooks/classroom/useClassroom";
 import type { Classroom as ClassroomDetail } from "@/types/classroom";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HomeNavbar from "@/components/navbar";
@@ -47,6 +47,8 @@ type UpdateClassroomFormData = {
   enrolKey: string;
   dateEnd: string;
   maxSlot: number | "";
+  avgScoreThreshold: number;
+  minExamCount: number;
 };
 
 function ClassroomContent() {
@@ -100,6 +102,8 @@ function ClassroomContent() {
     enrolKey: "",
     dateEnd: "",
     maxSlot: "",
+    avgScoreThreshold: 0,
+    minExamCount: 2,
   });
 
   const SEMESTERS = useMemo(() => {
@@ -134,6 +138,8 @@ function ClassroomContent() {
             ? new Date(data.endDate).toISOString().split("T")[0]
             : "",
           maxSlot: data.maxSlot || 0,
+          avgScoreThreshold: data.gradingSettings?.avgScoreThreshold ?? 0,
+          minExamCount: data.gradingSettings?.minExamCount ?? 2,
         });
       }
     } catch (error) {
@@ -215,28 +221,6 @@ function ClassroomContent() {
     }
   }, [activeTab, classId, fetchExaminations]);
 
-  // Poll exam statuses every 30 seconds so background job transitions are reflected without manual refresh.
-  // Only active when on the exams tab.
-  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => {
-    if (activeTab === "exams" && classId) {
-      examsPollRef.current = setInterval(() => {
-        void fetchExaminations();
-      }, 30_000);
-    } else {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    }
-    return () => {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    };
-  }, [activeTab, classId, fetchExaminations]);
-
   useEffect(() => {
     if (openUpdateModal) {
       const fetchSubjects = async () => {
@@ -274,6 +258,10 @@ function ClassroomContent() {
         enrolKey: formData.enrolKey,
         endDate: formData.dateEnd,
         maxSlot: slotVal,
+        gradingSettings: {
+          avgScoreThreshold: Number(formData.avgScoreThreshold) || 0,
+          minExamCount: Number(formData.minExamCount) || 0,
+        },
       };
 
       await updateClassroom(classroom.id, payload);
@@ -370,7 +358,12 @@ function ClassroomContent() {
       case "students":
         return <StudentTab classId={classId} />;
       case "dashboard":
-        return <DashboardTab />;
+        return (
+          <DashboardTab
+            classId={classId}
+            classroomName={classroom.className}
+          />
+        );
       case "slots":
         return <SlotsTab maxSlot={classroom.maxSlot} />;
       case "quizzes":
@@ -406,7 +399,7 @@ function ClassroomContent() {
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
-      <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
+      <main className="ml-20 flex-grow overflow-hidden p-4 transition-all duration-300 lg:ml-64 lg:p-8">
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="Manage classrooms"
@@ -616,8 +609,9 @@ function UpdateClassroomModal({
               onChange={(e) =>
                 setFormData({ ...formData, enrolKey: e.target.value })
               }
-              pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
-              title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
+              disabled={true}
+              // pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
+              // title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
             />
             <div className="mt-2 flex items-center gap-2">
               <Checkbox
@@ -649,6 +643,56 @@ function UpdateClassroomModal({
                 setFormData({ ...formData, dateEnd: e.target.value })
               }
             />
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+            <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Grading Settings
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="avgScoreThreshold">
+                  Avg score threshold
+                </Label>
+                <TextInput
+                  id="avgScoreThreshold"
+                  type="number"
+                  step={0.5}
+                  min={0}
+                  max={10}
+                  value={formData.avgScoreThreshold || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      avgScoreThreshold:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 5.0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minExamCount">
+                  Min exam count
+                </Label>
+                <TextInput
+                  id="minExamCount"
+                  type="number"
+                  min={2}
+                  value={formData.minExamCount || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minExamCount:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 3"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 flex justify-end gap-2">

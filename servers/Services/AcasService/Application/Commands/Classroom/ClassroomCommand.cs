@@ -60,7 +60,12 @@ namespace AcasService.Application.Commands.Classroom
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = null,
                 EndDate = request.EndDate,
-                IsDeleted = false
+                IsDeleted = false,
+                GradingSettings = new Models.GradingSettings
+                {
+                    AvgScoreThreshold = request.GradingSettings?.AvgScoreThreshold ?? 0f,
+                    MinExamCount = request.GradingSettings?.MinExamCount ?? 0
+                }
             };
             var createdClassroom = await _classroomRepository.CreateAsync(newClassroom);
             if (createdClassroom == null)
@@ -96,6 +101,11 @@ namespace AcasService.Application.Commands.Classroom
             existingClassroom.MaxSlot = request.MaxSlot;
             existingClassroom.EnrolKey = request.EnrolKey;
             existingClassroom.UpdatedDate = DateTime.UtcNow;
+            existingClassroom.GradingSettings = new Models.GradingSettings
+            {
+                AvgScoreThreshold = request.GradingSettings?.AvgScoreThreshold ?? 0f,
+                MinExamCount = request.GradingSettings?.MinExamCount ?? 0
+            };
 
             var updatedClassroom = await _classroomRepository.UpdateAsync(existingClassroom);
             if (updatedClassroom == null)

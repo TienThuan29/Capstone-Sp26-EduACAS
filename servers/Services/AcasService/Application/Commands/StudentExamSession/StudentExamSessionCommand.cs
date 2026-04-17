@@ -15,6 +15,7 @@ public interface IStudentExamSessionCommand
     Task<StudentExamSessionResponse?> CompleteAsync(string studentId, string examId);
     Task<StudentExamSessionResponse?> LockAsync(string studentId, string examId, string? lockReason);
     Task<StudentExamSessionResponse?> SetActiveProblemAsync(string studentId, string examId, string? problemId);
+    Task<bool> HardDeleteAsync(string studentId, string examId);
 }
 
 public class StudentExamSessionCommand : IStudentExamSessionCommand
@@ -142,5 +143,11 @@ public class StudentExamSessionCommand : IStudentExamSessionCommand
         existing.ActiveProblemId = problemId;
         var saved = await _sessionRepository.UpsertAsync(existing);
         return saved == null ? null : ToResponse(saved);
+    }
+
+    public async Task<bool> HardDeleteAsync(string studentId, string examId)
+    {
+        var id = Models.StudentExamSession.ComposeId(studentId, examId);
+        return await _sessionRepository.DeleteAsync(id);
     }
 }

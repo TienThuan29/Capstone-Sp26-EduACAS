@@ -45,6 +45,8 @@ public class ExaminationMapper
             TotalMark = exam.TotalMark,
             Status = exam.Status,
             Mode = exam.Mode,
+            UseStrict = exam.UseStrict,
+            MinScoreThreshold = exam.MinScoreThreshold,
             IsDeleted = exam.IsDeleted,
             CreatedDate = exam.CreatedDate,
             UpdatedDate = exam.UpdatedDate
@@ -69,7 +71,9 @@ public class ExaminationMapper
             IsPublicResult = examRequest.IsPublicResult,
             TotalMark = examRequest.TotalMark,
             Status = status,
-            Mode = mode
+            Mode = mode,
+            UseStrict = examRequest.UseStrict,
+            MinScoreThreshold = examRequest.MinScoreThreshold
         };
     }
 
@@ -96,7 +100,8 @@ public class ExaminationMapper
             StartDatetime = exam.StartDatetime,
             EndDatetime = exam.EndDatetime,
             Description = exam.Description,
-            Mode = exam.Mode
+            Mode = exam.Mode,
+            UseStrict = exam.UseStrict
         };
     }
 }

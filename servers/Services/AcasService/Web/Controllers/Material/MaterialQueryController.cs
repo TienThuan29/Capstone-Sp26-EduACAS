@@ -71,5 +71,24 @@ namespace AcasService.Web.Controllers.Material
                 return ResponseUtil.Error<List<MaterialResponse>>("Internal Server Error", 500);
             }
         }
+
+        [HttpGet("admin")]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<ApiResponse<PagedResult<MaterialResponse>>>> GetAdminMaterials(
+            [FromQuery] string? searchTerm,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            try
+            {
+                var result = await _materialQuery.GetAdminMaterialsAsync(searchTerm, pageIndex, pageSize);
+                return ResponseUtil.Success(result, "Get admin materials successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching materials for admin");
+                return ResponseUtil.Error<PagedResult<MaterialResponse>>("Internal Server Error", 500);
+            }
+        }
     }
 }

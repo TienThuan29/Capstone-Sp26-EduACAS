@@ -142,6 +142,36 @@ export function OverviewTabContent({
           </span>
         }
       />
+      {examination.mode === "EXAMINATION" && (
+        <>
+          <DetailRow
+            label="Strict mode"
+            value={
+              examination.useStrict ? (
+                <span className="inline-block w-fit">
+                <Badge color="warning">Enabled</Badge>
+                </span>
+              ) : (
+                <span className="inline-block w-fit">
+                  <Badge color="gray">Disabled</Badge>
+                </span>
+              )
+            }
+          />
+          <DetailRow
+            label="Min score threshold"
+            value={
+              examination.minScoreThreshold > 0 ? (
+                <span className="rounded bg-amber-100 px-2 py-0.5 text-sm font-semibold text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                  ≥ {examination.minScoreThreshold}
+                </span>
+              ) : (
+                <span className="text-gray-400">No threshold</span>
+              )
+            }
+          />
+        </>
+      )}
       <DetailRow
         label="Created date"
         value={<DateTimeDisplay datetime={examination.createdDate} />}

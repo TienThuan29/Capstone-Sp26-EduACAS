@@ -6,6 +6,7 @@ import {
     ModalBody,
     Label,
     TextInput,
+    Select,
     Spinner,
     Badge,
     Button,
@@ -13,12 +14,13 @@ import {
 import {
     XMarkIcon,
     BookOpenIcon,
+    InformationCircleIcon
 } from "@heroicons/react/24/outline";
 import { useQuiz } from "@/hooks/quiz/useQuiz";
 import { useQuestion } from "@/hooks/question/useQuestion";
 import { useToast } from "@/hooks/useToast";
 import { toLocalDatetimeString } from "@/utils/datetime-utils";
-import { ClassroomQuiz, ClassroomQuizStatus, Quiz } from "@/types/quiz";
+import { ClassroomQuiz, CLASSROOM_QUIZ_STATUS, ClassroomQuizStatus, Quiz } from "@/types/quiz";
 import type { Question } from "@/types/question";
 
 interface QuizFormModalProps {
@@ -33,6 +35,7 @@ interface QuizFormModalProps {
         endTime: string;
         maxOfAttempts: number;
         passcode: string;
+        status: ClassroomQuizStatus;
     }) => Promise<void>;
     actionLoading: boolean;
 }
@@ -55,12 +58,20 @@ export function QuizFormModal({
         endTime: "",
         maxOfAttempts: 1,
         passcode: "",
+        status: CLASSROOM_QUIZ_STATUS.DRAFT as ClassroomQuizStatus,
     });
 
     const [selectedQuizDuration, setSelectedQuizDuration] = useState(0);
     const [selectedQuizObj, setSelectedQuizObj] = useState<Quiz | null>(null);
     const [modalQuestions, setModalQuestions] = useState<Question[]>([]);
     const [loadingQuestions, setLoadingQuestions] = useState(false);
+
+    const now = new Date();
+    const isEditing = !!editingQuiz;
+    const isDraft = editingQuiz?.status === CLASSROOM_QUIZ_STATUS.DRAFT;
+    const isPublished = editingQuiz?.status === CLASSROOM_QUIZ_STATUS.PUBLISHED;
+    const isOngoing = editingQuiz?.status === CLASSROOM_QUIZ_STATUS.ONGOING;
+    const isClosed = editingQuiz?.status === CLASSROOM_QUIZ_STATUS.CLOSED;
 
     const fetchPreviewData = useCallback(async (quizId: string) => {
         setLoadingQuestions(true);
@@ -96,6 +107,7 @@ export function QuizFormModal({
                     endTime: toLocalDatetimeString(editingQuiz.endTime),
                     maxOfAttempts: editingQuiz.maxOfAttempts,
                     passcode: editingQuiz.passcode || "",
+                    status: editingQuiz.status,
                 });
                 fetchPreviewData(editingQuiz.quizId);
             } else if (selectedQuizId) {
@@ -105,6 +117,7 @@ export function QuizFormModal({
                     endTime: "",
                     maxOfAttempts: 1,
                     passcode: "",
+                    status: CLASSROOM_QUIZ_STATUS.DRAFT,
                 });
                 fetchPreviewData(selectedQuizId);
             }
@@ -118,14 +131,22 @@ export function QuizFormModal({
             return;
         }
 
-        const now = new Date();
         const start = new Date(formData.startTime);
         const end = new Date(formData.endTime);
+        const submissionNow = new Date();
+
+        if (!isEditing || isDraft) {
+            if (start.getTime() < submissionNow.getTime() - 300000) {
+                showError("Start time cannot be in the past");
+                return;
+            }
+        }
 
         if (end <= start) {
             showError("End time must be after start time");
             return;
         }
+
         if (selectedQuizDuration > 0) {
             const windowMinutes = (end.getTime() - start.getTime()) / (60 * 1000);
             if (windowMinutes < selectedQuizDuration) {
@@ -136,19 +157,29 @@ export function QuizFormModal({
             }
         }
 
-        if (!editingQuiz || editingQuiz.status === ClassroomQuizStatus.DRAFT) {
-            if (start.getTime() < now.getTime() - 60000) {
-                showError("Start time must be in the future");
-                return;
-            }
-        } else {
-            if (end.getTime() < now.getTime() - 60000) {
-                showError("New end time cannot be in the past");
-                return;
-            }
+        if (isOngoing && end.getTime() < submissionNow.getTime() - 60000) {
+            showError("When ongoing, you can only extend the time (New end time must be in future)");
+            return;
         }
 
         await onSubmit(formData);
+    };
+
+    const getAvailableStatuses = () => {
+        if (!editingQuiz) return [CLASSROOM_QUIZ_STATUS.DRAFT];
+
+        switch (editingQuiz.status) {
+            case CLASSROOM_QUIZ_STATUS.DRAFT:
+                return [CLASSROOM_QUIZ_STATUS.DRAFT, CLASSROOM_QUIZ_STATUS.PUBLISHED, CLASSROOM_QUIZ_STATUS.ONGOING];
+            case CLASSROOM_QUIZ_STATUS.PUBLISHED:
+                return [CLASSROOM_QUIZ_STATUS.DRAFT, CLASSROOM_QUIZ_STATUS.PUBLISHED, CLASSROOM_QUIZ_STATUS.ONGOING];
+            case CLASSROOM_QUIZ_STATUS.ONGOING:
+                return [CLASSROOM_QUIZ_STATUS.ONGOING, CLASSROOM_QUIZ_STATUS.CLOSED];
+            case CLASSROOM_QUIZ_STATUS.CLOSED:
+                return [CLASSROOM_QUIZ_STATUS.CLOSED];
+            default:
+                return [editingQuiz.status];
+        }
     };
 
     return (
@@ -206,13 +237,22 @@ export function QuizFormModal({
                                                             <div
                                                                 key={opt.id}
                                                                 className={`rounded-md border p-3 text-sm transition-all ${opt.isCorrect
-                                                                        ? "border-green-200 bg-green-50 text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300"
-                                                                        : "border-gray-100 bg-gray-50/50 text-gray-600 dark:border-gray-700 dark:bg-gray-800/30 dark:text-gray-400"
+                                                                    ? "border-green-200 bg-green-50 text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300"
+                                                                    : "border-gray-100 bg-gray-50/50 text-gray-600 dark:border-gray-700 dark:bg-gray-800/30 dark:text-gray-400"
                                                                     }`}
                                                             >
                                                                 {opt.content}
                                                             </div>
                                                         ))}
+                                                    </div>
+                                                )}
+
+                                                {q.type === "ESSAY" && q.textAnswer && (
+                                                    <div className="mt-2 space-y-1">
+                                                        <span className="text-[10px] font-bold uppercase tracking-wider text-green-600 dark:text-green-400">Answer:</span>
+                                                        <div className="rounded-md border border-green-200 bg-green-50 p-3 text-sm text-green-700 dark:border-green-900/40 dark:bg-green-900/20 dark:text-green-300">
+                                                            {q.textAnswer}
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
@@ -278,10 +318,10 @@ export function QuizFormModal({
                                                 onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
                                                 required
                                                 className="mt-1"
-                                                disabled={editingQuiz !== null && editingQuiz.status !== ClassroomQuizStatus.DRAFT}
+                                                disabled={isEditing && !isDraft && (isOngoing || isClosed)}
                                             />
-                                            {editingQuiz !== null && editingQuiz.status !== ClassroomQuizStatus.DRAFT && (
-                                                <p className="mt-1 text-[10px] text-orange-500">StartTime cannot be changed for ongoing or closed quizzes.</p>
+                                            {isEditing && (isOngoing || isClosed) && (
+                                                <p className="mt-1 text-[10px] text-orange-500">StartTime cannot be changed once the quiz starts or ends.</p>
                                             )}
                                         </div>
                                         <div>
@@ -293,22 +333,43 @@ export function QuizFormModal({
                                                 onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
                                                 required
                                                 className="mt-1"
+                                                disabled={isEditing && isOngoing && false}
                                             />
+                                            {isOngoing && <p className="mt-1 text-[10px] text-blue-500">Please extend the end time if you wish to delay the closing.</p>}
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <Label htmlFor="maxAttempts">Max Attempts</Label>
-                                        <TextInput
-                                            id="maxAttempts"
-                                            type="number"
-                                            min={1}
-                                            value={formData.maxOfAttempts}
-                                            onChange={(e) => setFormData({ ...formData, maxOfAttempts: parseInt(e.target.value) || 1 })}
-                                            required
-                                            className="mt-1"
-                                        />
-                                        <p className="mt-1 text-xs text-gray-500">Number of times a student can take this quiz.</p>
+                                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                        <div>
+                                            <Label htmlFor="maxAttempts">Max Attempts</Label>
+                                            <TextInput
+                                                id="maxAttempts"
+                                                type="number"
+                                                min={1}
+                                                value={formData.maxOfAttempts}
+                                                onChange={(e) => setFormData({ ...formData, maxOfAttempts: parseInt(e.target.value) || 1 })}
+                                                required
+                                                className="mt-1"
+                                                disabled={isEditing && isClosed}
+                                            />
+                                        </div>
+                                        {isEditing && (
+                                            <div>
+                                                <Label htmlFor="status">Assignment Status</Label>
+                                                <Select
+                                                    id="status"
+                                                    value={formData.status}
+                                                    onChange={(e) => setFormData({ ...formData, status: e.target.value as ClassroomQuizStatus })}
+                                                    required
+                                                    className="mt-1"
+                                                    disabled={isClosed}
+                                                >
+                                                    {getAvailableStatuses().map((s) => (
+                                                        <option key={s} value={s}>{s}</option>
+                                                    ))}
+                                                </Select>
+                                            </div>
+                                        )}
                                     </div>
 
                                     <div>
@@ -320,9 +381,43 @@ export function QuizFormModal({
                                             onChange={(e) => setFormData({ ...formData, passcode: e.target.value })}
                                             maxLength={50}
                                             className="mt-1"
+                                            disabled={isClosed}
                                         />
-                                        <p className="mt-1 text-xs text-gray-500">Students must enter this to start the quiz. Max 50 characters.</p>
+                                        <p className="mt-1 flex items-center gap-1.5 text-xs text-gray-500">
+                                            <InformationCircleIcon className="h-4 w-4" />
+                                            Students must enter this to start the quiz. Max 50 characters.
+                                        </p>
                                     </div>
+
+                                    {formData.status === CLASSROOM_QUIZ_STATUS.DRAFT && (
+                                        <div className="rounded-lg bg-blue-50 p-4 text-sm text-blue-700 dark:bg-blue-900/20 dark:text-blue-300">
+                                            <div className="flex items-center gap-2 font-bold">
+                                                <InformationCircleIcon className="h-5 w-5" />
+                                                Draft Mode
+                                            </div>
+                                            <p className="mt-1 ml-7">Lecturers can preview content, but students will not see this assignment.</p>
+                                        </div>
+                                    )}
+
+                                    {isOngoing && (
+                                        <div className="rounded-lg bg-green-50 p-4 text-sm text-green-700 dark:bg-green-900/20 dark:text-green-300">
+                                            <div className="flex items-center gap-2 font-bold">
+                                                <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+                                                Quiz is Ongoing
+                                            </div>
+                                            <p className="mt-1 ml-7">Quiz is active. You can only extend the end time, change the passcode, or increase the number of attempts.</p>
+                                        </div>
+                                    )}
+
+                                    {isClosed && (
+                                        <div className="rounded-lg bg-red-50 p-4 text-sm text-red-700 dark:bg-red-900/20 dark:text-red-300">
+                                            <div className="flex items-center gap-2 font-bold">
+                                                <InformationCircleIcon className="h-5 w-5" />
+                                                Quiz is Closed
+                                            </div>
+                                            <p className="mt-1 ml-7">The quiz has ended. To reopen, please increase the <strong>End Time</strong> to a future date.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 

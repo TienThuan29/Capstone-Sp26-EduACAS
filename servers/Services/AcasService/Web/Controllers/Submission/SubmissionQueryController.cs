@@ -116,4 +116,41 @@ public class SubmissionQueryController : ControllerBase
                   return ResponseUtil.Error<List<SubmissionResponse>>("Failed to get latest submissions", 500);
             }
       }
+
+      [HttpGet("{submissionId}/versions")]
+      public async Task<ActionResult<ApiResponse<List<SubmissionResponse>>>> GetVersionsBySubmissionId([FromRoute] string submissionId)
+      {
+            try
+            {
+                  var submission = await _submissionQuery.GetSubmissionByIdAsync(submissionId);
+                  if (submission == null)
+                        return ResponseUtil.Error<List<SubmissionResponse>>("Submission not found", 404);
+
+                  var versions = await _submissionQuery.GetVersionsBySubmissionKey(
+                        submission.StudentId,
+                        submission.ExamId,
+                        submission.ProblemId);
+
+                  var problem = await _problemQuery.GetProblemByIdAsync(submission.ProblemId);
+                  ProblemLiteResponse? problemLite = null;
+                  if (problem != null)
+                  {
+                        problemLite = new ProblemLiteResponse
+                        {
+                              Id = problem.Id,
+                              Title = problem.Title
+                        };
+                  }
+
+                  var response = versions
+                        .Select(v => _submissionMapper.ToResponse(v, problemLite))
+                        .ToList();
+                  return ResponseUtil.Success(response, "Versions retrieved successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                  _logger.LogError(ex, "Error getting versions for submission {SubmissionId}", submissionId);
+                  return ResponseUtil.Error<List<SubmissionResponse>>("Failed to get versions", 500);
+            }
+      }
 }

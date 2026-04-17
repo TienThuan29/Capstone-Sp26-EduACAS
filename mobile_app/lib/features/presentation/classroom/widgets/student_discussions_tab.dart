@@ -207,7 +207,7 @@ class _StudentDiscussionsTabState extends State<StudentDiscussionsTab> {
 }
 
 class _DiscussionCard extends StatelessWidget {
-  final DiscussionIssue discussion;
+  final DiscussionIssueListItem discussion;
 
   const _DiscussionCard({required this.discussion});
 
@@ -232,7 +232,7 @@ class _DiscussionCard extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => DiscussionDetailPage(issue: discussion),
+              builder: (context) => DiscussionDetailPage(issueId: discussion.id),
             ),
           );
         },
@@ -249,7 +249,7 @@ class _DiscussionCard extends StatelessWidget {
                     radius: 20,
                     backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                     child: Text(
-                      discussion.authorName.isNotEmpty ? discussion.authorName[0].toUpperCase() : '?',
+                      discussion.displayName.isNotEmpty ? discussion.displayName[0].toUpperCase() : '?',
                       style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                   ),
@@ -268,7 +268,7 @@ class _DiscussionCard extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              discussion.authorName,
+                              discussion.displayName,
                               style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600),
                             ),
                             const SizedBox(width: 8),
@@ -289,16 +289,6 @@ class _DiscussionCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              
-              if (discussion.content.isNotEmpty) ...[
-                Text(
-                  discussion.content,
-                  style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, height: 1.5),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 16),
-              ],
               
               const Divider(height: 1),
               const SizedBox(height: 16),

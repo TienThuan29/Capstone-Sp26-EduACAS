@@ -8,6 +8,7 @@ import { OverviewTabContent } from "../components/exam-detail-tab/overview";
 import { ProblemsTabContent } from "../components/exam-detail-tab/problems";
 import { SubmissionsTabContent } from "../components/exam-detail-tab/submissions";
 import { SimilarityTabContent } from "../components/exam-detail-tab/similarity";
+import { ExamSessionTabContent } from "../components/exam-detail-tab/exam-session";
 
 const STATUS_LABELS: Record<ExaminationStatus, string> = {
   PENDING: "PENDING",
@@ -36,6 +37,7 @@ const TAB_OVERVIEW = 0;
 const TAB_PROBLEMS = 1;
 const TAB_SUBMISSIONS = 2;
 const TAB_SIMILARITY = 3;
+const TAB_SESSIONS = 4;
 
 export function ExaminationDetailView({
   examination,
@@ -94,6 +96,11 @@ export function ExaminationDetailView({
           <TabItem title="Similarity" active={activeTab === TAB_SIMILARITY}>
             {activeTab === TAB_SIMILARITY && (
               <SimilarityTabContent examination={examination} />
+            )}
+          </TabItem>
+          <TabItem title="Sessions" active={activeTab === TAB_SESSIONS}>
+            {activeTab === TAB_SESSIONS && (
+              <ExamSessionTabContent examination={examination} />
             )}
           </TabItem>
         </Tabs>

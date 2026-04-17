@@ -192,6 +192,18 @@ export const useNotification = ({
     [axiosInstance, refresh]
   );
 
+  const getAllNotificationsAdmin = useCallback(
+    async (pageIndex: number, pageSize: number, searchTerm?: string) => {
+      let url = `${Api.Notification.GET_ADMIN}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+      if (searchTerm) {
+        url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+      }
+      const response = await axiosInstance.get<ApiResponse<PagedNotifications>>(url);
+      return response.data?.dataResponse;
+    },
+    [axiosInstance]
+  );
+
   return useMemo(
     () => ({
       notifications: paged.items,
@@ -202,8 +214,18 @@ export const useNotification = ({
       refresh,
       markAsRead,
       softDelete,
+      getAllNotificationsAdmin,
     }),
-    [paged, loading, error, connectionState, refresh, markAsRead, softDelete]
+    [
+      paged,
+      loading,
+      error,
+      connectionState,
+      refresh,
+      markAsRead,
+      softDelete,
+      getAllNotificationsAdmin,
+    ]
   );
 };
 

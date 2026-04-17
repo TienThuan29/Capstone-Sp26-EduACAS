@@ -54,6 +54,7 @@ public class AnswerOptionRepository : DynamoRepository, IAnswerOptionRepository
         {
             request.ExclusiveStartKey = lastEvaluatedKey;
             var response = await _dynamoDBClient.ScanAsync(request);
+            _logger.LogInformation($"Successfully scanned table {_answerOptionTableName} for question {questionId}. Found {response.Items.Count} items.");
             results.AddRange(response.Items.Select(DynamoMapper.DynamoItemToAnswerOption));
             lastEvaluatedKey = response.LastEvaluatedKey;
         } while (lastEvaluatedKey != null && lastEvaluatedKey.Count > 0);

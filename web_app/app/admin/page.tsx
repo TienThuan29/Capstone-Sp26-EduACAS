@@ -132,14 +132,14 @@ export default function AdminDashboard() {
       const teachers = users.filter((u) => u.role === Constant.ROLES.LECTURER).length
 
       setStats({
-        classrooms: classroomsRes.data?.dataResponse?.length || 0,
+        classrooms: classroomsRes.data?.dataResponse?.totalCount || 0,
         subjects: subjectsRes.data?.dataResponse?.length || 0,
         programmingLanguages: languagesRes.data?.dataResponse?.length || 0,
         students,
         teachers
       })
     } catch {
-      toast.showError('Không thể tải thống kê')
+      toast.showError('Cannot load statistics')
     } finally {
       setLoading(false)
     }
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
         </section>
 
         {/* Recent Activities */}
-        <div>
+        {/* <div>
           <h2 className={`text-2xl font-bold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>
             Recent Activities
           </h2>
@@ -313,7 +313,8 @@ export default function AdminDashboard() {
               ))}
             </div>
           </Card>
-        </div>
+        </div> */}
+        
       </main>
     </div>
   )

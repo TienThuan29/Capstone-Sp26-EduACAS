@@ -6,17 +6,18 @@ import { CodingWorkspace } from './coding-workspace';
 import { useEditorContext } from '@/contexts/EditorContext';
 import { ExaminationSpecificProblemResponse, Mode } from '@/types/examination';
 import { useAuth } from '@/contexts/AuthContext';
-import { useExamViolationGuard, type LogEntry, type ViolationOverlay } from '@/hooks/exam/useExamViolationGuard';
+import { useExamViolationGuard, type LogEntry, type ViolationOverlay } from '@/hooks/examination/useExamViolationGuard';
 import { buildExamSessionStorageKeys } from '@/utils/test-tracker/examSessionKeys';
 import { buildExamTrackerStorageKeys } from '@/utils/test-tracker/storageKeys';
 import { WarningModal } from './warning-modal';
-import { useExamLog } from '@/hooks/exam/useExamLog';
-import { useStudentExamSession } from '@/hooks/exam/useStudentExamSession';
+import { useExamLog } from '@/hooks/examination/useExamLog';
+import { useStudentExamSession } from '@/hooks/examination/useStudentExamSession';
 import {
   clearExamSessionClientStorage,
+  markExamLockedNotice,
   mirrorExamSessionPhaseToLocalStorage,
 } from '@/utils/student-exam-session';
-import { useExamination } from '@/hooks/exam/useExamination';
+import { useExamination } from '@/hooks/examination/useExamination';
 import { useProblem } from '@/hooks/problem/useProblem';
 import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
 import { toExamProblem } from '@/utils/exam-problem';
@@ -25,6 +26,7 @@ interface CodeEditorClientProps {
   examination: ExaminationSpecificProblemResponse;
 }
 
+const MAX_TOLERANCE = 3;
 const DRAFT_SAVE_DEBOUNCE_MS = 1500;
 const DRAFT_STORAGE_PREFIX = 'code-editor-draft-';
 
@@ -72,7 +74,25 @@ export function CodeEditorClient({
   const problemId = examination.problem.id;
   const examId = examination.id;
   const studentId = user?.id ?? '';
-  const isExamMode = examination.mode === Mode.EXAMINATION;
+
+  /**
+   * Check if the exam mode is EXAMINATION and useStrict is true.
+   * The backend uses JsonStringEnumConverter, so mode is serialized as "EXAMINATION" (string).
+   */
+  // const isExamMode = useMemo(() => {
+  //   const rawMode = examination.mode as unknown;
+  //   const useStrict = examination.useStrict;
+  //   if (typeof rawMode === 'number' && useStrict) {
+  //     return rawMode === Mode.EXAMINATION;
+  //   }
+  //   if (typeof rawMode === 'string' && useStrict) {
+  //     return rawMode.toUpperCase() === 'EXAMINATION';
+  //   }
+  //   return false;
+  // }, [examination.mode]);
+  const isExamMode = examination.useStrict === true && examination.mode === "EXAMINATION";
+  console.log('strict mode:' , examination.useStrict)
+
   const storageKeys = useMemo(
     () => (studentId ? buildExamTrackerStorageKeys(examId, problemId, studentId) : null),
     [examId, problemId, studentId]
@@ -80,6 +100,26 @@ export function CodeEditorClient({
   const sessionKeys = useMemo(
     () => (studentId ? buildExamSessionStorageKeys(examId, studentId) : null),
     [examId, studentId]
+  );
+  const guardExamStatusStorageKey = useMemo(
+    () => sessionKeys?.phaseStorageKey ?? storageKeys?.examStatusStorageKey ?? '',
+    [sessionKeys?.phaseStorageKey, storageKeys?.examStatusStorageKey]
+  );
+  const guardViolationStorageKey = useMemo(
+    () => sessionKeys?.aggregatedViolationsStorageKey ?? storageKeys?.violationStorageKey ?? '',
+    [sessionKeys?.aggregatedViolationsStorageKey, storageKeys?.violationStorageKey]
+  );
+  const guardLogsStorageKey = useMemo(
+    () => sessionKeys?.aggregatedLogsStorageKey ?? storageKeys?.logsStorageKey ?? '',
+    [sessionKeys?.aggregatedLogsStorageKey, storageKeys?.logsStorageKey]
+  );
+  const guardAnswerStorageKey = useMemo(
+    () => storageKeys?.answerStorageKey ?? sessionKeys?.aggregatedAnswerStorageKey ?? '',
+    [sessionKeys?.aggregatedAnswerStorageKey, storageKeys?.answerStorageKey]
+  );
+  const guardStartStorageKey = useMemo(
+    () => (sessionKeys ? `${sessionKeys.sessionKey}:guard-started-at` : ''),
+    [sessionKeys]
   );
   const [, setLogs] = useState<LogEntry[]>([]);
   const [overlay, setOverlay] = useState<ViolationOverlay | null>(null);
@@ -90,6 +130,24 @@ export function CodeEditorClient({
   const isExamFinishedRef = useRef(false);
   const examStartTimeRef = useRef(0);
   const forceSubmitTriggeredRef = useRef(false);
+
+  const navigateBackToExam = useCallback(() => {
+    const classroomId = examination.classroom?.id;
+    if (classroomId) {
+      router.replace(`/my-classroom/${classroomId}/exam/${examId}`);
+      return;
+    }
+    router.back();
+  }, [examination.classroom?.id, examId, router]);
+
+  const handleGuardOverlay = useCallback((nextOverlay: ViolationOverlay | null) => {
+    if (nextOverlay?.alertType === 'lock') {
+      // Lock flow redirects to exam detail first; lock notice modal is shown there.
+      setOverlay(null);
+      return;
+    }
+    setOverlay(nextOverlay);
+  }, []);
 
   /** Khi bị khóa do vi phạm: nộp bài cho mọi câu trong đề (draft/template), rồi server lock. */
   const submitAllForForceSubmit = useCallback(async () => {
@@ -167,10 +225,15 @@ export function CodeEditorClient({
     setProblem(examination.problem);
     setExamBackLink(examination.id, examination.classroom?.id ?? null);
     setTestCases(examination.problem.testCases);
-    setLanguage(examination.programmingLanguage);
-    if (examination.problem.codeTemplate?.trim()) {
-      setCode(examination.problem.codeTemplate);
-    }
+    const template = (() => {
+      const langId = examination.programmingLanguage?.id ?? '';
+      const langTemplates = (examination.problem as unknown as Record<string, unknown>).codeTemplates as Record<string, string> | undefined;
+      return (langId && langTemplates?.[langId]?.trim()) ??
+        langTemplates?.['default']?.trim() ??
+        '';
+    })();
+    setLanguage(examination.programmingLanguage, template);
+    setCode(template);
 
     const key = getDraftStorageKey(problemId, examId);
     try {
@@ -189,15 +252,35 @@ export function CodeEditorClient({
   }, [examination, setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer, setExamBackLink, problemId, examId]);
 
   useEffect(() => {
-    if (!isExamMode || !storageKeys) return;
-    examStartTimeRef.current = Date.now();
+    if (!isExamMode) return;
+    const now = Date.now();
+    let guardStartedAt = now;
+    if (guardStartStorageKey) {
+      try {
+        const raw = localStorage.getItem(guardStartStorageKey);
+        const parsed = Number.parseInt(raw ?? '', 10);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          guardStartedAt = parsed;
+        } else {
+          localStorage.setItem(guardStartStorageKey, String(now));
+        }
+      } catch {
+        guardStartedAt = now;
+      }
+    }
+    examStartTimeRef.current = guardStartedAt;
     isExamFinishedRef.current = false;
     forceSubmitTriggeredRef.current = false;
     setScreen('exam');
     isInitializingRef.current = false;
-    localStorage.setItem(storageKeys.examStatusStorageKey, 'active');
-    localStorage.setItem(storageKeys.answerStorageKey, '');
-  }, [isExamMode, storageKeys]);
+    if (sessionKeys) {
+      localStorage.setItem(sessionKeys.phaseStorageKey, 'active');
+    }
+    if (storageKeys) {
+      localStorage.setItem(storageKeys.examStatusStorageKey, 'active');
+      localStorage.setItem(storageKeys.answerStorageKey, '');
+    }
+  }, [guardStartStorageKey, isExamMode, sessionKeys, storageKeys]);
 
   // Debounced auto-save of code to localStorage so it survives refresh/navigation
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -265,6 +348,7 @@ export function CodeEditorClient({
         localStorage.setItem(storageKeys.logsStorageKey, JSON.stringify(next));
         return next;
       });
+      // Avoid unhandled rejections (network/offline/401 redirect/etc.)
       void cacheExamLogs({
         sessionKey: storageKeys.sessionKey,
         entries: [
@@ -277,7 +361,7 @@ export function CodeEditorClient({
             clientTimestamp: entry.time,
           },
         ],
-      });
+      }).catch(() => {});
     },
     [cacheExamLogs, storageKeys]
   );
@@ -291,18 +375,80 @@ export function CodeEditorClient({
     const cur = Number.parseInt(localStorage.getItem(storageKeys.violationStorageKey) ?? '0', 10);
     const merged =
       Number.isFinite(agg) && Number.isFinite(cur) ? Math.max(agg, cur) : cur;
-    if (merged > cur) {
+    if (Number.isFinite(merged) && merged >= 0) {
+      localStorage.setItem(sessionKeys.aggregatedViolationsStorageKey, String(merged));
+    }
+    if (merged !== cur) {
       localStorage.setItem(storageKeys.violationStorageKey, String(merged));
     }
     violationCountRef.current = merged;
   }, [isExamMode, sessionKeys, storageKeys]);
 
+  const handleForceSubmitAndReturn = useCallback(async () => {
+    if (forceSubmitTriggeredRef.current) {
+      navigateBackToExam();
+      return;
+    }
+    forceSubmitTriggeredRef.current = true;
+    try {
+      await submitAllForForceSubmit();
+    } catch (err) {
+      console.error('Force submit all problems failed:', err);
+      try {
+        await submitCode();
+      } catch (fallbackErr) {
+        console.error('Fallback submit failed during force submit:', fallbackErr);
+      }
+    }
+
+    let lockedOnServer = false;
+    try {
+      const lockSession = await lock(examId, 'Violation threshold exceeded');
+      lockedOnServer = lockSession?.phase === 'LOCKED';
+    } catch (err) {
+      console.error('Lock request failed during force submit:', err);
+    }
+
+    if (!lockedOnServer) {
+      try {
+        const latestSession = await getByExam(examId);
+        lockedOnServer = latestSession?.phase === 'LOCKED';
+      } catch (err) {
+        console.error('Failed to verify lock state after force submit:', err);
+      }
+    }
+
+    if (lockedOnServer) {
+      markExamLockedNotice(examId);
+      clearExamSessionClientStorage(examId, studentId);
+      if (document.fullscreenElement) {
+        try {
+          await document.exitFullscreen();
+        } catch {
+          // ignore
+        }
+      }
+    } else {
+      console.warn('Lock state not confirmed on server. Preserving local exam session state.');
+    }
+
+    navigateBackToExam();
+  }, [
+    examId,
+    getByExam,
+    lock,
+    navigateBackToExam,
+    studentId,
+    submitAllForForceSubmit,
+    submitCode,
+  ]);
+
   useExamViolationGuard({
-    examStatusStorageKey: storageKeys?.examStatusStorageKey ?? '',
-    violationStorageKey: storageKeys?.violationStorageKey ?? '',
-    logsStorageKey: storageKeys?.logsStorageKey ?? '',
-    answerStorageKey: storageKeys?.answerStorageKey ?? '',
-    maxTolerance: 3,
+    examStatusStorageKey: guardExamStatusStorageKey,
+    violationStorageKey: guardViolationStorageKey,
+    logsStorageKey: guardLogsStorageKey,
+    answerStorageKey: guardAnswerStorageKey,
+    maxTolerance: MAX_TOLERANCE,
     answer: editorState.code,
     violationCountRef,
     isInitializingRef,
@@ -312,35 +458,10 @@ export function CodeEditorClient({
     setAnswer: setCode,
     setLogs,
     setScreen,
-    setOverlay,
+    setOverlay: handleGuardOverlay,
     onLog: handleAppendLog,
-    onForceSubmit: async () => {
-      if (forceSubmitTriggeredRef.current || isSubmitting) return;
-      forceSubmitTriggeredRef.current = true;
-      try {
-        await submitAllForForceSubmit();
-      } catch (err) {
-        console.error('Force submit all problems failed:', err);
-        await submitCode();
-      }
-      try {
-        await lock(examId, 'Violation threshold exceeded');
-      } catch {
-        // session may already be locked server-side
-      }
-      clearExamSessionClientStorage(examId, studentId);
-      if (document.fullscreenElement) {
-        try {
-          await document.exitFullscreen();
-        } catch {
-          // ignore
-        }
-      }
-      const classroomId = examination.classroom?.id;
-      if (classroomId) {
-        router.push(`/my-classroom/${classroomId}/exam/${examId}`);
-      }
-    },
+    onForceSubmit: handleForceSubmitAndReturn,
+    enableDevtoolsInDevelopment: true,
   });
 
   useEffect(() => {
@@ -390,10 +511,21 @@ export function CodeEditorClient({
       const submissionId = localStorage.getItem(storageKeys.lastSubmissionIdStorageKey) ?? '';
       if (!submissionId) return;
 
-      await flushCachedExamLogs({
-        sessionKey: storageKeys.sessionKey,
-        submissionId,
-      });
+      try {
+        await flushCachedExamLogs({
+          sessionKey: storageKeys.sessionKey,
+          submissionId,
+        });
+      } catch (err) {
+        // Event listeners don't await promises; make sure this never becomes an unhandled rejection.
+        handleAppendLog(
+          'EXAM_LOG_FLUSH_FAILED',
+          'warning',
+          false,
+          'Failed to flush cached exam logs while leaving a problem',
+          { error: String(err) },
+        );
+      }
     };
 
     window.addEventListener('exam:leave-problem', handleLeaveProblem as EventListener);

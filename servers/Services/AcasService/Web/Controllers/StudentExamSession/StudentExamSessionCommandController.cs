@@ -102,4 +102,12 @@ public class StudentExamSessionController : ControllerBase
 
         return ResponseUtil.Success(result, "Updated", 200);
     }
+
+    [HttpDelete("{examId}/{studentId}")]
+    [Authorize(Roles = "LECTURER, ADMIN")]
+    public async Task<ActionResult<ApiResponse<bool>>> HardDelete([FromRoute] string examId, [FromRoute] string studentId)
+    {
+        var result = await _command.HardDeleteAsync(studentId, examId);
+        return ResponseUtil.Success(result, result ? "Session deleted" : "Delete failed", 200);
+    }
 }

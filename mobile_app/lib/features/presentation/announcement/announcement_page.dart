@@ -4,14 +4,12 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/announcement.dart';
 import 'package:mobile/features/models/classroom.dart';
-import 'package:mobile/features/models/discussion_issue.dart';
 import 'package:mobile/features/presentation/classroom/student_classroom_detail_page.dart';
 import 'package:mobile/features/presentation/discussion/discussion_detail_page.dart';
 import 'package:mobile/features/presentation/examination/examination_detail_page.dart';
 import 'package:mobile/features/presentation/problem/problem_detail_page.dart';
 import 'package:mobile/features/services/announcement_service.dart';
 import 'package:mobile/features/services/classroom_service.dart';
-import 'package:mobile/features/services/discussion_service.dart';
 import 'package:mobile/features/services/examination_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -231,7 +229,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           'classId',
         ]);
         if (classroomId != null) {
-          await _openClassroom(classroomId, initialTabIndex: 2);
+          await _openClassroom(classroomId, initialTabIndex: 3);
         }
         return;
       }
@@ -322,15 +320,14 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
   }
 
   Future<void> _openDiscussionIssue(String discussionIssueId) async {
-    final raw = await DiscussionIssueService.getById(discussionIssueId);
-    if (!mounted || raw == null) {
+    if (!mounted) {
       return;
     }
 
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => DiscussionDetailPage(issue: DiscussionIssue.fromJson(raw)),
+        builder: (_) => DiscussionDetailPage(issueId: discussionIssueId),
       ),
     );
   }
@@ -467,7 +464,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                   ),
                 ),
                 Text(
-                  'Thông báo theo tài khoản của bạn',
+                  'Announcements based on your account',
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[600],
@@ -495,7 +492,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
         children: [
           Expanded(
             child: _FilterButton(
-              label: 'Tất cả',
+              label: 'All',
               count: _items.length,
               selected: _selectedFilter == AnnouncementFilter.all,
               onTap: () => setState(() => _selectedFilter = AnnouncementFilter.all),
@@ -503,7 +500,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           Expanded(
             child: _FilterButton(
-              label: 'Chưa đọc',
+              label: 'Unread',
               count: _unreadCount,
               showUnreadDot: _unreadCount > 0,
               selected: _selectedFilter == AnnouncementFilter.unread,
@@ -512,7 +509,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
           ),
           Expanded(
             child: _FilterButton(
-              label: 'Đã xác nhận',
+              label: 'Confirmed',
               count: _confirmedCount,
               selected: _selectedFilter == AnnouncementFilter.confirmed,
               onTap: () => setState(() => _selectedFilter = AnnouncementFilter.confirmed),
@@ -538,14 +535,14 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
                 Icon(Icons.notifications_none_rounded, size: 64, color: Colors.grey[350]),
                 const SizedBox(height: 14),
                 Text(
-                  'Không có thông báo',
+                  'No announcements available',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textPrimary,
                       ),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Thông báo mới sẽ hiển thị ở đây.',
+                  'New announcements will appear here.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
@@ -637,7 +634,7 @@ class _AnnouncementCard extends StatelessWidget {
                   const SizedBox(width: 8),
                 ],
                 _StatusPill(
-                  label: isAcknowledged ? 'Đã xác nhận' : 'Chưa đọc',
+                  label: isAcknowledged ? 'Confirmed' : 'Unread',
                   color: statusColor,
                 ),
               ],

@@ -157,7 +157,7 @@ export default function ManageSubjectPage() {
             }
             setOpenModal(false)
             fetchSubjects()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (error: any) {
             console.error("Submit subject failed", error)
             const errorMsg = error.response?.data?.message || (isEditing ? "Update subject failed" : "Create subject failed")

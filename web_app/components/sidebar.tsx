@@ -33,6 +33,7 @@ import {
   BanknotesIcon,
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -72,10 +73,10 @@ const Sidebar = () => {
       label: "Overview",
       href: PageUrl.DEFAULT_PAGE,
     },
-    // { 
-    //   icon: Squares2X2Icon, 
-    //   label: "Dashboard", 
-    //   href: PageUrl.DASHBOARD_PAGE 
+    // {
+    //   icon: Squares2X2Icon,
+    //   label: "Dashboard",
+    //   href: PageUrl.DASHBOARD_PAGE
     // },
     {
       icon: AcademicCapIcon,
@@ -187,6 +188,21 @@ const Sidebar = () => {
       href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
     },
     { icon: UsersIcon, label: "Manage Users", href: PageUrl.ADMIN_USERS_PAGE },
+    {
+      icon: BellIcon,
+      label: "Manage Notifications",
+      href: PageUrl.ADMIN_NOTIFICATIONS_PAGE,
+    },
+    {
+      icon: ChatBubbleLeftRightIcon,
+      label: "Manage Discussions",
+      href: PageUrl.ADMIN_DISCUSSIONS_PAGE,
+    },
+    {
+      icon: BookOpenIcon,
+      label: "Manage Materials",
+      href: PageUrl.ADMIN_MATERIALS_PAGE,
+    },
   ];
 
   const classroomMenuItems = [
@@ -194,6 +210,11 @@ const Sidebar = () => {
       icon: AcademicCapIcon,
       label: "Overview",
       href: `${pathname}?tab=overview`,
+    },
+    {
+      icon: ChartBarIcon,
+      label: "Dashboard",
+      href: `${pathname}?tab=dashboard`,
     },
     {
       icon: ClipboardDocumentListIcon,
@@ -204,6 +225,11 @@ const Sidebar = () => {
       icon: PuzzlePieceIcon,
       label: "Practise Exercises",
       href: `${pathname}?tab=practise`,
+    },
+    {
+      icon: PencilSquareIcon,
+      label: "Quizzes",
+      href: `${pathname}?tab=quizzes`,
     },
     { icon: ClockIcon, label: "Slots", href: `${pathname}?tab=slots` },
     {
@@ -220,7 +246,7 @@ const Sidebar = () => {
 
   const settingsItems = [
     { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
-    { icon: BellIcon, label: "Notifications", href: "#" },
+    { icon: BellIcon, label: "Notifications", href: PageUrl.NOTIFICATIONS_PAGE },
     { icon: Cog6ToothIcon, label: "Settings", href: "#" },
   ];
 
@@ -240,8 +266,9 @@ const Sidebar = () => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${isExpanded ? "w-64" : "w-20"
-        } ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"} border-r`}
+      className={`fixed top-0 left-0 flex h-screen flex-col transition-all duration-300 ${
+        isExpanded ? "w-64" : "w-20"
+      } ${isDarkMode ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"} border-r`}
     >
       {/* Logo */}
       <div
@@ -306,10 +333,11 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+                  isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                }`}
               >
                 <IconComponent className="h-5 w-5 shrink-0" />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -333,10 +361,11 @@ const Sidebar = () => {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
+                className={`flex items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+                  isDarkMode
                     ? "text-gray-300 hover:bg-gray-800"
                     : "text-gray-700 hover:bg-gray-100"
-                  }`}
+                }`}
               >
                 <IconComponent className="h-5 w-5 shrink-0" />
                 {isExpanded && <span className="text-sm">{item.label}</span>}
@@ -353,10 +382,11 @@ const Sidebar = () => {
         {/* Dark Mode Toggle Button */}
         <button
           onClick={toggleTheme}
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${isDarkMode
+          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+            isDarkMode
               ? "text-gray-300 hover:bg-gray-800"
               : "text-gray-700 hover:bg-gray-100"
-            }`}
+          }`}
         >
           {isDarkMode ? (
             <MoonIcon className="h-5 w-5 shrink-0" />
@@ -375,10 +405,11 @@ const Sidebar = () => {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLoggingOut}
-            className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${isDarkMode
+            className={`flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+              isDarkMode
                 ? "text-red-400 hover:bg-red-900/20"
                 : "text-red-600 hover:bg-red-50"
-              } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
+            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
             {isLoggingOut ? "Logging out..." : "Logout"}
@@ -387,10 +418,11 @@ const Sidebar = () => {
           <button
             onClick={() => setShowLogoutModal(true)}
             disabled={isLoggingOut}
-            className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${isDarkMode
+            className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${
+              isDarkMode
                 ? "text-red-400 hover:bg-red-900/20"
                 : "text-red-600 hover:bg-red-50"
-              } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
+            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
           >
             <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
           </button>

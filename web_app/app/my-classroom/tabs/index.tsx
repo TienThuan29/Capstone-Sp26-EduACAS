@@ -5,3 +5,5 @@ export { PractiseTab } from "./practise-tab";
 export { OverviewTab } from "./overview-tab";
 export { SlotTab } from "./slot-tab";
 export { DiscussionTab } from "./discussion-tab";
+export { StudentDashboardTab } from "./dashboard-tab";
+export { QuizzesTab } from "./quizzes-tab";

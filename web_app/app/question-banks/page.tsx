@@ -65,6 +65,32 @@ const QUESTION_TYPE_OPTIONS: Array<{ value: QuestionType; label: string }> = [
   { value: "ESSAY", label: "Essay" },
 ];
 
+const getQuestionTypeBadgeColor = (type: QuestionType) => {
+  switch (type) {
+    case "SINGLE_CHOICE":
+      return "success" as const;
+    case "MULTIPLE_CHOICE":
+      return "purple" as const;
+    case "ESSAY":
+      return "warning" as const;
+    default:
+      return "info" as const;
+  }
+};
+
+const formatQuestionTypeLabel = (type: QuestionType) => {
+  switch (type) {
+    case "SINGLE_CHOICE":
+      return "Single choice";
+    case "MULTIPLE_CHOICE":
+      return "Multiple choice";
+    case "ESSAY":
+      return "Essay";
+    default:
+      return type;
+  }
+};
+
 export default function QuestionBanksPage() {
   const { isDark } = useThemeContext();
   const { user } = useAuth();
@@ -141,6 +167,17 @@ export default function QuestionBanksPage() {
     if (!mounted || !user?.id) return;
     fetchQuestions();
   }, [mounted, user?.id, fetchQuestions]);
+
+  useEffect(() => {
+    if (loading) return;
+    if (totalPages === 0 && pageIndex !== 1) {
+      setPageIndex(1);
+      return;
+    }
+    if (totalPages > 0 && pageIndex > totalPages) {
+      setPageIndex(totalPages);
+    }
+  }, [loading, totalPages, pageIndex]);
 
   if (!mounted) return null;
 
@@ -450,7 +487,9 @@ export default function QuestionBanksPage() {
                       <div className="line-clamp-2 text-sm">{question.content}</div>
                     </TableCell>
                     <TableCell>
-                      <Badge color="info">{question.type}</Badge>
+                      <Badge color={getQuestionTypeBadgeColor(question.type)}>
+                        {formatQuestionTypeLabel(question.type)}
+                      </Badge>
                     </TableCell>
                     <TableCell>{question.answerOptions?.length ?? 0}</TableCell>
                     <TableCell>

@@ -184,6 +184,55 @@ public class UserRepository : DynamoRepository, IUserRepository
         }
     }
 
+    public async Task<(List<Models.User> items, int totalCount)> FindPagedAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null)
+    {
+        try
+        {
+            var scanRequest = new ScanRequest
+            {
+                TableName = _userTableName
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(scanRequest);
+            var allUsers = response.Items.Select(item => DynamoMapper.DynamoItemToUser(item))
+                .OrderByDescending(u => u.CreatedDate)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                var lowerSearch = searchTerm.ToLower();
+                allUsers = allUsers.Where(u => 
+                    (u.Fullname != null && u.Fullname.ToLower().Contains(lowerSearch)) || 
+                    (u.Email != null && u.Email.ToLower().Contains(lowerSearch)) ||
+                    (u.RoleNumber != null && u.RoleNumber.ToLower().Contains(lowerSearch)));
+            }
+
+            if (!string.IsNullOrEmpty(role) && role != "all")
+            {
+                allUsers = allUsers.Where(u => u.Role.ToString().Equals(role, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (isEnable.HasValue)
+            {
+                allUsers = allUsers.Where(u => u.IsEnable == isEnable.Value);
+            }
+
+            var finalResults = allUsers.ToList();
+            var totalCount = finalResults.Count;
+            var items = finalResults
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (items, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding paged users");
+            throw;
+        }
+    }
+
     public async Task<Models.User?> UpdatePasswordAsync(Models.User user)
     {
         try

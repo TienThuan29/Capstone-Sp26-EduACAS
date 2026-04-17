@@ -43,6 +43,12 @@ public class ExaminationResponse
     [JsonPropertyName("mode")]
     public Mode Mode { get; set; }
 
+    [JsonPropertyName("useStrict")]
+    public bool UseStrict { get; set; }
+
+    [JsonPropertyName("minScoreThreshold")]
+    public float MinScoreThreshold { get; set; }
+
     [JsonPropertyName("isDeleted")]
     public bool IsDeleted { get; set; }
 
@@ -125,5 +131,8 @@ public class ExaminationSpecProblemResponse
 
     [JsonPropertyName("mode")]
     public Mode Mode { get; set; }
+
+    [JsonPropertyName("useStrict")]
+    public bool UseStrict { get; set; }
 
 }

@@ -24,7 +24,7 @@ class ApiNetwork {
       debugPrint('Connectivity test failed: $e');
 
       try {
-        final response = await http
+        await http
             .post(
               Uri.parse('${ApiConfig.baseUrl}${ApiConfig.loginEndpoint}'),
               headers: {'Content-Type': 'application/json'},
@@ -338,6 +338,64 @@ class ApiNetwork {
 
       final response = await http
           .put(url, headers: headers, body: jsonEncode(body))
+          .timeout(
+            ApiConfig.requestTimeout,
+            onTimeout: () {
+              throw Exception(
+                'Request timeout after ${ApiConfig.requestTimeout.inSeconds} seconds',
+              );
+            },
+          );
+
+      debugPrint(' Response Status: ${response.statusCode}');
+      debugPrint(' Response Body: ${response.body}');
+
+      return _handleResponse(response);
+    } catch (e) {
+      debugPrint(' Network Error: $e');
+      if (e.toString().contains('timeout')) {
+        throw Exception(
+          'Request timed out. Please check your internet connection and try again.',
+        );
+      } else if (e.toString().contains('SocketException') ||
+          e.toString().contains('Connection refused')) {
+        throw Exception(
+          'Cannot connect to server. Please check your internet connection.',
+        );
+      } else {
+        throw Exception('Network error: $e');
+      }
+    }
+  }
+
+  // Method for PATCH requests with Bearer token
+  static Future<Map<String, dynamic>> patchWithAuth({
+    required String endpoint,
+    required String token,
+    Map<String, dynamic>? body,
+    Map<String, String>? additionalHeaders,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+
+      debugPrint(' PATCH Request URL: $url');
+      if (body != null) {
+        debugPrint(' Request Body: ${jsonEncode(body)}');
+      }
+
+      final headers = {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $token',
+        ...?additionalHeaders,
+      };
+
+      debugPrint(' Request Headers: $headers');
+
+      final response = await http
+          .patch(url,
+              headers: headers,
+              body: body != null ? jsonEncode(body) : null)
           .timeout(
             ApiConfig.requestTimeout,
             onTimeout: () {

@@ -3,6 +3,8 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/presentation/shared/sidebar.dart';
 import 'package:mobile/features/presentation/profile/profile_screen.dart';
+import 'package:mobile/features/presentation/question/question_management_page.dart';
+import 'package:mobile/features/presentation/quiz/quiz_management_page.dart';
 
 /// Role-aware dashboard – same design language, different content per role.
 class DashboardPage extends StatelessWidget {
@@ -72,6 +74,33 @@ class DashboardPage extends StatelessWidget {
           color: AppColors.primary,
           onTap: () => onNavigate(1),
         ),
+        const SizedBox(height: 16),
+        _QuickButton(
+          icon: Icons.help_outline_rounded,
+          label: 'Question Bank',
+          description: 'Create and organize questions for quizzes',
+          color: AppColors.info,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => QuestionManagementPage(onNavigateMainTab: onNavigate),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        _QuickButton(
+          icon: Icons.assignment_rounded,
+          label: 'Quiz Bank',
+          description: 'Create quizzes and assign questions',
+          color: AppColors.accent,
+          onTap: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => QuizManagementPage(onNavigateMainTab: onNavigate),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
         _QuickButton(
           icon: Icons.person_outline_rounded,
           label: 'My Profile',

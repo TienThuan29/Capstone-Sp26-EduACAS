@@ -12,6 +12,11 @@ public interface INotificationQuery
         int pageSize = 10);
 
     Task<List<NotificationResponse>> GetByTargetUserIdAsync(string targetUserId);
+
+    Task<PagedResult<NotificationResponse>> GetAllNotificationsAsync(
+        int pageIndex = 1, 
+        int pageSize = 10,
+        string? searchTerm = null);
 }
 
 public class NotificationQuery : INotificationQuery
@@ -80,5 +85,31 @@ public class NotificationQuery : INotificationQuery
             .OrderByDescending(n => n.SentDate)
             .Select(n => _notificationMapper.ToNotificationResponse(n))
             .ToList();
+    }
+
+    public async Task<PagedResult<NotificationResponse>> GetAllNotificationsAsync(
+        int pageIndex = 1,
+        int pageSize = 10,
+        string? searchTerm = null)
+    {
+        try
+        {
+            if (pageIndex < 1) pageIndex = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100;
+
+            var (itemsOnPage, totalCount) = await _notificationRepository.SearchAsync(searchTerm, pageIndex, pageSize);
+
+            var responses = itemsOnPage
+                .Select(n => _notificationMapper.ToNotificationResponse(n))
+                .ToList();
+
+            return new PagedResult<NotificationResponse>(responses, totalCount, pageIndex, pageSize);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all notifications for admin with search term {SearchTerm}", searchTerm);
+            throw;
+        }
     }
 }

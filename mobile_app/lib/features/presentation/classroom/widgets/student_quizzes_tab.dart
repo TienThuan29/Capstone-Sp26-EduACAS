@@ -217,15 +217,15 @@ class _QuizCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now().toUtc();
-    final isPublished = classroomQuiz.status.toUpperCase() == 'PUBLISHED';
+    final isOngoing = classroomQuiz.status.toUpperCase() == 'ONGOING';
     final isClosed = now.isAfter(classroomQuiz.endTime) || classroomQuiz.status.toUpperCase() == 'CLOSED';
     final isNotStarted = now.isBefore(classroomQuiz.startTime);
     final hasReachedMaxAttempts = usedAttempts >= classroomQuiz.maxOfAttempts;
 
-    final canStart = isPublished && !isClosed && !isNotStarted && !hasReachedMaxAttempts;
+    final canStart = isOngoing && !isClosed && !isNotStarted && !hasReachedMaxAttempts;
 
     String startLabel = 'Start';
-    if (!isPublished) {
+    if (!isOngoing) {
       startLabel = 'Unavailable';
     } else if (isNotStarted) {
       startLabel = 'Not started';

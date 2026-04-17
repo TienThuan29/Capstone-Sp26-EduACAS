@@ -222,7 +222,7 @@ export default function LoginPage() {
               </Button>
             </div>
 
-            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+            {/* <div className="text-center text-sm text-gray-600 dark:text-gray-400">
               Don&apos;t have an account?{" "}
               <Link
                 href="/register"
@@ -230,7 +230,7 @@ export default function LoginPage() {
               >
                 Register now
               </Link>
-            </div>
+            </div> */}
 
             {/* Divider */}
             <div className="relative my-6">

@@ -30,7 +30,7 @@ import {
   DocumentDuplicateIcon,
 } from "@heroicons/react/24/outline";
 import type { Examination, ExaminationRequest, ExaminationStatus, ExaminationMode } from "@/types/examination";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import { useProgrammingLanguage } from "@/hooks/programming-language/useProgrammingLanguage";
 import { useExaminationTemplate } from "@/hooks/examination-template/useExaminationTemplate";
 import type { ProgrammingLanguage } from "@/types/language";
@@ -74,6 +74,8 @@ const emptyForm: ExaminationRequest = {
   totalMark: 0,
   status: "PENDING",
   mode: "PRACTICAL",
+  useStrict: false,
+  minScoreThreshold: 0,
 };
 
 type PractiseTabProps = {
@@ -199,6 +201,8 @@ export function ExamsTab({
       totalMark: exam.totalMark,
       status: exam.status,
       mode: exam.mode,
+      useStrict: exam.useStrict,
+      minScoreThreshold: exam.minScoreThreshold,
     });
     setOpenFormModal(true);
   };
@@ -360,94 +364,118 @@ export function ExamsTab({
           </p>
         </div>
       ) : (
-        <div className="overflow-x-auto border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
-          <Table hoverable>
-            <TableHead>
-              <TableRow>
-                <TableHeadCell>Exam name</TableHeadCell>
-                <TableHeadCell>Language</TableHeadCell>
-                <TableHeadCell>Start</TableHeadCell>
-                <TableHeadCell>End</TableHeadCell>
-                <TableHeadCell>Total mark</TableHeadCell>
-                <TableHeadCell>Status</TableHeadCell>
-                <TableHeadCell>Mode</TableHeadCell>
-                <TableHeadCell>
-                  <span className="sr-only">Actions</span>
-                </TableHeadCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {examinations.map((exam) => {
-                const statusLabel = STATUS_LABELS[exam.status] ?? "PENDING";
-                const modeLabel = MODE_LABELS[exam.mode] ?? "PRACTICAL";
-                return (
-                  <TableRow key={exam.id}>
-                    <TableCell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
-                      {exam.examName}
-                    </TableCell>
-                    <TableCell>{exam.programmingLanguage?.name ?? "—"}</TableCell>
-                    <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {formatDate(exam.startDatetime)}
-                    </TableCell>
-                    <TableCell className="whitespace-nowrap text-gray-600 dark:text-gray-400">
-                      {formatDate(exam.endDatetime)}
-                    </TableCell>
-                    <TableCell>{exam.totalMark}</TableCell>
-                    <TableCell>
-                      <Badge
-                        color={
-                          statusLabel === "ONGOING"
-                            ? "success"
-                            : statusLabel === "COMPLETED"
-                              ? "gray"
-                              : "warning"
-                        }
-                      >
-                        {statusLabel}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge color="info">{modeLabel}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Tooltip content="View detail" placement="top">
-                          <Button
-                            size="xs"
-                            color="light"
-                            onClick={() => openViewDetail(exam)}
-                            className="cursor-pointer"
-                          >
-                            <EyeIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content="Edit" placement="top">
-                          <Button
-                            size="xs"
-                            color="light"
-                            onClick={() => openEdit(exam)}
-                            className="cursor-pointer"
-                          >
-                            <PencilIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                        <Tooltip content="Delete" placement="top">
-                          <Button
-                            size="xs"
-                            color="failure"
-                            onClick={() => openDeleteConfirm(exam)}
-                            className="cursor-pointer"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+        <div className="w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
+          <div className="overflow-x-auto">
+            <Table className="w-full min-w-[900px]">
+              <TableHead className="bg-gray-50 dark:bg-gray-700/50">
+                <TableRow>
+                  <TableHeadCell className="w-[200px]">Exam name</TableHeadCell>
+                  <TableHeadCell className="w-[100px]">Language</TableHeadCell>
+                  <TableHeadCell className="w-[140px]">Start</TableHeadCell>
+                  <TableHeadCell className="w-[140px]">End</TableHeadCell>
+                  <TableHeadCell className="w-[80px]">Total mark</TableHeadCell>
+                  <TableHeadCell className="w-[90px]">Strict</TableHeadCell>
+                  <TableHeadCell className="w-[90px]">Threshold</TableHeadCell>
+                  <TableHeadCell className="w-[100px]">Status</TableHeadCell>
+                  <TableHeadCell className="w-[90px]">Mode</TableHeadCell>
+                  <TableHeadCell className="w-[130px]">
+                    <span className="sr-only">Actions</span>
+                  </TableHeadCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {examinations.map((exam) => {
+                  const statusLabel = STATUS_LABELS[exam.status] ?? "PENDING";
+                  const modeLabel = MODE_LABELS[exam.mode] ?? "PRACTICAL";
+                  return (
+                    <TableRow key={exam.id} className="border-b border-gray-100 dark:border-gray-700 last:border-0 hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                      <TableCell className="font-medium text-gray-900 dark:text-white max-w-[200px]">
+                        <span className="block truncate" title={exam.examName}>{exam.examName}</span>
+                      </TableCell>
+                      <TableCell className="text-gray-600 dark:text-gray-400">{exam.programmingLanguage?.name ?? "—"}</TableCell>
+                      <TableCell className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        {formatDate(exam.startDatetime)}
+                      </TableCell>
+                      <TableCell className="text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                        {formatDate(exam.endDatetime)}
+                      </TableCell>
+                      <TableCell className="text-center">{exam.totalMark}</TableCell>
+                      <TableCell>
+                        {exam.mode === "EXAMINATION" ? (
+                          exam.useStrict ? (
+                            <Badge color="warning" className="text-xs">Strict</Badge>
+                          ) : (
+                            <span className="text-xs text-gray-400">Non-Strict</span>
+                          )
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {exam.minScoreThreshold > 0 ? (
+                          <span className="rounded bg-amber-100 px-1.5 py-0.5 text-xs font-medium text-amber-800 dark:bg-amber-900/30 dark:text-amber-300">
+                            ≥ {exam.minScoreThreshold}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          color={
+                            statusLabel === "ONGOING"
+                              ? "success"
+                              : statusLabel === "COMPLETED"
+                                ? "gray"
+                                : "warning"
+                          }
+                        >
+                          {statusLabel}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge color="info">{modeLabel}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Tooltip content="View detail" placement="top">
+                            <Button
+                              size="xs"
+                              color="light"
+                              onClick={() => openViewDetail(exam)}
+                              className="cursor-pointer"
+                            >
+                              <EyeIcon className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content="Edit" placement="top">
+                            <Button
+                              size="xs"
+                              color="green"
+                              onClick={() => openEdit(exam)}
+                              className="cursor-pointer"
+                            >
+                              <PencilIcon className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
+                          <Tooltip content="Delete" placement="top">
+                            <Button
+                              size="xs"
+                              color="red"
+                              onClick={() => openDeleteConfirm(exam)}
+                              className="cursor-pointer"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         </div>
       )}
 
@@ -649,11 +677,12 @@ function ExaminationFormModal({
             <Select
               value={formData.mode}
               onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  mode: e.target.value as ExaminationRequest["mode"],
-                })
-              }
+                  setFormData({
+                    ...formData,
+                    mode: e.target.value as ExaminationRequest["mode"],
+                    useStrict: e.target.value === "EXAMINATION" ? formData.useStrict : false,
+                  })
+                }
             >
               {MODE_OPTIONS.map((m) => (
                 <option key={m} value={m}>
@@ -661,6 +690,37 @@ function ExaminationFormModal({
                 </option>
               ))}
             </Select>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="useStrict"
+                checked={formData.mode === "EXAMINATION" ? formData.useStrict : false}
+                disabled={formData.mode === "PRACTICAL"}
+                onChange={(e) =>
+                  setFormData({ ...formData, useStrict: e.target.checked })
+                }
+              />
+              <Label htmlFor="useStrict">Use strict mode</Label>
+            </div>
+            <div>
+              <Label htmlFor="minScoreThreshold">
+                Min score threshold
+              </Label>
+              <TextInput
+                id="minScoreThreshold"
+                type="number"
+                min={0}
+                step={0.5}
+                value={formData.minScoreThreshold || ""}
+                onChange={(e) => {
+                  const raw = Number(e.target.value);
+                  const value = Number.isNaN(raw) ? 0 : Math.max(0, raw);
+                  setFormData({ ...formData, minScoreThreshold: value });
+                }}
+                className="mt-1"
+              />
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Checkbox
@@ -740,6 +800,10 @@ function DeleteExaminationModal({
     </Modal>
   );
 }
+
+/**
+ * Modal for picking an exam template
+ */
 
 type TemplatePickerModalProps = {
   show: boolean;

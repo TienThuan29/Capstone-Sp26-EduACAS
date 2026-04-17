@@ -7,11 +7,11 @@ import 'package:mobile/features/services/discussion_service.dart';
 import 'package:mobile/core/widgets/background.dart';
 
 class DiscussionDetailPage extends StatefulWidget {
-  final DiscussionIssue issue;
+  final String issueId;
 
   const DiscussionDetailPage({
     super.key,
-    required this.issue,
+    required this.issueId,
   });
 
   @override
@@ -19,7 +19,7 @@ class DiscussionDetailPage extends StatefulWidget {
 }
 
 class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
-  List<Comment> _comments = [];
+  DiscussionIssue? _issue;
   bool _isLoading = true;
   bool _isSendingComment = false;
   String? _currentUserId;
@@ -34,7 +34,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
 
   Future<void> _loadInitialData() async {
     _currentUserId = await TokenStorage.getUserId();
-    _loadComments();
+    _loadIssue();
   }
 
   @override
@@ -44,44 +44,43 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
     super.dispose();
   }
 
-  Future<void> _loadComments() async {
+  /// Load the full issue (with embedded comments) via getById
+  Future<void> _loadIssue() async {
     setState(() => _isLoading = true);
     try {
-      final data = await CommentService.getByDiscussionIssueId(widget.issue.id);
+      final issue = await DiscussionIssueService.getById(widget.issueId);
       if (mounted) {
         setState(() {
-          _comments = data.map((json) => Comment.fromJson(json)).toList();
+          _issue = issue;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load comments: $e'), backgroundColor: AppColors.error),
+          SnackBar(content: Text('Failed to load discussion: $e'), backgroundColor: AppColors.error),
         );
         setState(() => _isLoading = false);
       }
     }
   }
 
+  /// POST a top-level comment; backend returns updated issue with all comments
   Future<void> _submitComment() async {
     final content = _commentController.text.trim();
     if (content.isEmpty || _currentUserId == null) return;
 
     setState(() => _isSendingComment = true);
     try {
-      final userName = await TokenStorage.getUserName() ?? 'User';
-      final result = await CommentService.create(
-        discussionIssueId: widget.issue.id,
+      final updatedIssue = await CommentService.writeComment(
+        issueId: widget.issueId,
         authorId: _currentUserId!,
-        authorName: userName,
         content: content,
       );
 
-      if (result != null && mounted) {
-        final newComment = Comment.fromJson(result);
+      if (updatedIssue != null && mounted) {
         setState(() {
-          _comments.add(newComment);
+          _issue = updatedIssue;
           _commentController.clear();
           _isSendingComment = false;
         });
@@ -107,107 +106,6 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
     }
   }
 
-  void _showCommentOptions(Comment comment) {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Message Options',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-            ),
-            const SizedBox(height: 16),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.delete_outline_rounded, color: Colors.red, size: 22),
-              ),
-              title: const Text(
-                'Delete Message',
-                style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600),
-              ),
-              subtitle: const Text('This action cannot be undone'),
-              onTap: () {
-                Navigator.pop(context);
-                _deleteComment(comment);
-              },
-            ),
-            const SizedBox(height: 8),
-            ListTile(
-              leading: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withValues(alpha: 0.1),
-                  shape: BoxShape.circle,
-                ),
-                child: const Icon(Icons.close_rounded, color: AppColors.textSecondary, size: 22),
-              ),
-              title: const Text(
-                'Cancel',
-                style: TextStyle(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
-              ),
-              onTap: () => Navigator.pop(context),
-            ),
-            SizedBox(height: MediaQuery.of(context).padding.bottom),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _deleteComment(Comment comment) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Delete Comment'),
-        content: const Text('Are you sure you want to delete this comment?'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.error),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-    if (confirmed != true) return;
-
-    try {
-      await CommentService.delete(comment.id);
-      if (mounted) {
-        setState(() => _comments.removeWhere((c) => c.id == comment.id));
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to delete comment: $e'), backgroundColor: AppColors.error),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -224,28 +122,28 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                     ? const Center(
                         child: CircularProgressIndicator(
                             color: AppColors.primary))
-                    : RefreshIndicator(
-                        onRefresh: _loadComments,
-                        color: AppColors.primary,
-                        child: ListView(
-                          controller: _scrollController,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          children: [
-                            _buildIssueContent(),
-                            const SizedBox(height: 32),
-                            _buildCommentHeader(),
-                            ..._comments.map((comment) => _CommentCard(
-                                  comment: comment,
-                                  currentUserId: _currentUserId ?? '',
-                                  onShowOptions: () =>
-                                      _showCommentOptions(comment),
-                                )),
-                            if (_comments.isEmpty) _buildEmptyComments(),
-                            const SizedBox(height: 20),
-                          ],
-                        ),
-                      ),
+                    : _issue == null
+                        ? const Center(child: Text('Discussion not found'))
+                        : RefreshIndicator(
+                            onRefresh: _loadIssue,
+                            color: AppColors.primary,
+                            child: ListView(
+                              controller: _scrollController,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              children: [
+                                _buildIssueContent(),
+                                const SizedBox(height: 32),
+                                _buildCommentHeader(),
+                                ...(_issue!.comments).map((comment) => _CommentCard(
+                                      comment: comment,
+                                      currentUserId: _currentUserId ?? '',
+                                    )),
+                                if (_issue!.comments.isEmpty) _buildEmptyComments(),
+                                const SizedBox(height: 20),
+                              ],
+                            ),
+                          ),
               ),
               _buildCommentInput(),
             ],
@@ -300,7 +198,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                       overflow: TextOverflow.ellipsis,
                     ),
                     Text(
-                      'Started by ${widget.issue.authorName}',
+                      'Started by ${_issue?.displayName ?? '...'}',
                       style: const TextStyle(
                         fontSize: 13,
                         color: AppColors.textSecondary,
@@ -318,6 +216,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   }
 
   Widget _buildIssueContent() {
+    final issue = _issue!;
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -342,7 +241,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                   radius: 20,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
-                    widget.issue.authorName.isNotEmpty ? widget.issue.authorName[0].toUpperCase() : '?',
+                    issue.displayName.isNotEmpty ? issue.displayName[0].toUpperCase() : '?',
                     style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
                   ),
                 ),
@@ -352,12 +251,12 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        widget.issue.authorName,
+                        issue.displayName,
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 2),
                       Text(
-                        _formatDate(widget.issue.createdDate),
+                        _formatDate(issue.createdDate),
                         style: const TextStyle(fontSize: 11, color: AppColors.textLight),
                       ),
                     ],
@@ -366,19 +265,26 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.1),
+                    color: issue.status == DiscussionIssueStatus.CLOSED
+                        ? Colors.red.withValues(alpha: 0.1)
+                        : AppColors.primary.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Text(
-                    'ISSUE',
-                    style: TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 0.5),
+                  child: Text(
+                    issue.status == DiscussionIssueStatus.CLOSED ? 'CLOSED' : 'OPEN',
+                    style: TextStyle(
+                      color: issue.status == DiscussionIssueStatus.CLOSED ? Colors.red : AppColors.primary,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 20),
             Text(
-              widget.issue.title,
+              issue.title,
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
@@ -389,7 +295,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
             ),
             const SizedBox(height: 12),
             Text(
-              widget.issue.content,
+              issue.content,
               style: const TextStyle(
                 fontSize: 15,
                 color: AppColors.textPrimary,
@@ -397,6 +303,19 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                 fontWeight: FontWeight.w500,
               ),
             ),
+            if (issue.viewCount > 0) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Icon(Icons.visibility_outlined, size: 14, color: Colors.grey[400]),
+                  const SizedBox(width: 4),
+                  Text(
+                    '${issue.viewCount} views',
+                    style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -404,6 +323,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   }
 
   Widget _buildCommentHeader() {
+    final commentCount = _issue?.comments.length ?? 0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20, left: 4),
       child: Row(
@@ -411,7 +331,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
           const Icon(Icons.forum_outlined, size: 18, color: AppColors.textSecondary),
           const SizedBox(width: 12),
           Text(
-            '${_comments.length} Comments',
+            '$commentCount Comments',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(width: 16),
@@ -494,12 +414,10 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
 class _CommentCard extends StatelessWidget {
   final Comment comment;
   final String currentUserId;
-  final VoidCallback onShowOptions;
 
   const _CommentCard({
     required this.comment,
     required this.currentUserId,
-    required this.onShowOptions,
   });
 
   @override
@@ -520,68 +438,73 @@ class _CommentCard extends StatelessWidget {
                   radius: 18,
                   backgroundColor: AppColors.primary.withValues(alpha: 0.1),
                   child: Text(
-                    comment.authorName.isNotEmpty ? comment.authorName[0].toUpperCase() : '?',
+                    comment.displayName.isNotEmpty ? comment.displayName[0].toUpperCase() : '?',
                     style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12),
                   ),
                 ),
                 const SizedBox(width: 12),
               ],
               Flexible(
-                child: GestureDetector(
-                  onLongPress: isOwn ? onShowOptions : null,
-                  onTap: isOwn ? onShowOptions : null,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isOwn ? AppColors.primary : Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: const Radius.circular(16),
-                        topRight: const Radius.circular(16),
-                        bottomLeft: Radius.circular(isOwn ? 16 : 4),
-                        bottomRight: Radius.circular(isOwn ? 4 : 16),
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: isOwn ? AppColors.primary : Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: const Radius.circular(16),
+                      topRight: const Radius.circular(16),
+                      bottomLeft: Radius.circular(isOwn ? 16 : 4),
+                      bottomRight: Radius.circular(isOwn ? 4 : 16),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (!isOwn)
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 6),
+                          child: Text(
+                            comment.displayName,
+                            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        if (!isOwn)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 6),
-                            child: Text(
-                              comment.authorName,
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: AppColors.primary),
+                      Text(
+                        comment.content,
+                        style: TextStyle(
+                          fontSize: 14, 
+                          color: isOwn ? Colors.white : AppColors.textPrimary,
+                          height: 1.4,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      if (comment.upVoteCount > 0) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.thumb_up_outlined, size: 12,
+                                color: isOwn ? Colors.white70 : AppColors.textLight),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${comment.upVoteCount}',
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isOwn ? Colors.white70 : AppColors.textLight,
+                              ),
                             ),
-                          ),
-                        Text(
-                          comment.content,
-                          style: TextStyle(
-                            fontSize: 14, 
-                            color: isOwn ? Colors.white : AppColors.textPrimary,
-                            height: 1.4,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          ],
                         ),
                       ],
-                    ),
+                    ],
                   ),
                 ),
               ),
-              if (isOwn) ...[
-                const SizedBox(width: 8),
-                IconButton(
-                  icon: const Icon(Icons.more_vert_rounded, size: 20, color: AppColors.textSecondary),
-                  onPressed: onShowOptions,
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                ),
-              ],
             ],
           ),
           Padding(
@@ -595,6 +518,19 @@ class _CommentCard extends StatelessWidget {
               style: const TextStyle(fontSize: 10, color: AppColors.textLight, fontWeight: FontWeight.w600),
             ),
           ),
+          // Render replies (nested comments)
+          if (comment.replies.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(left: isOwn ? 0 : 32, top: 8),
+              child: Column(
+                children: comment.replies
+                    .map((reply) => _CommentCard(
+                          comment: reply,
+                          currentUserId: currentUserId,
+                        ))
+                    .toList(),
+              ),
+            ),
         ],
       ),
     );

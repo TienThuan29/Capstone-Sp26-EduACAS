@@ -173,7 +173,21 @@ export const ProblemPickerModal = ({
                       />
                       <div>
                         <p className="text-sm font-medium">{problem.title}</p>
-                        <p className="text-xs text-gray-500">{problem.difficulty}</p>
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {problem.tags && problem.tags.length > 0 ? (
+                            problem.tags.slice(0, 3).map((tag) => (
+                              <span
+                                key={tag}
+                                className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-gray-700 dark:text-gray-300"
+                              >
+                                {tag}
+                              </span>
+                            ))
+                          ) : (
+                            <span className="text-xs text-gray-400">No tags</span>
+                          )}
+                        </div>
+                        <p className="mt-1 text-xs text-gray-500">{problem.difficulty}</p>
                       </div>
                     </div>
                     {isSelected && (

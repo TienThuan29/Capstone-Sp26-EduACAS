@@ -8,7 +8,10 @@ export type NotificationType =
   | "GRADE_RESULT"
   | "REPLY_COMMENT"
   | "ACADEMIC_WARNING_LEVEL_1"
-  | "ACADEMIC_WARNING_LEVEL_2";
+  | "ACADEMIC_WARNING_LEVEL_2"
+  | "NEW_REGRADING_REQUEST"
+  | "REGRADING_APPROVED"
+  | "REGRADING_REJECTED";
 
 export type RealtimeNotification = {
   id: string;

@@ -52,15 +52,8 @@ namespace AcasService.Application.Queries.Question
 
         public async Task<List<QuestionResponse>> GetAllQuestionsAsync(bool includeDeleted = false)
         {
-            var questions = await _questionRepository.FindAllAsync();
-
-            if (!includeDeleted)
-            {
-                questions = questions.Where(x => !x.IsDeleted).ToList();
-            }
-
+            var questions = await _questionRepository.FindAllAsync(includeDeleted);
             await HydrateAnswerOptionsAsync(questions);
-
             return questions.Select(_questionMapper.ToQuestionResponse).ToList();
         }
 
@@ -75,39 +68,16 @@ namespace AcasService.Application.Queries.Question
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            var questions = await _questionRepository.FindAllAsync();
+            var pagedResult = await _questionRepository.FindAllPagedAsync(
+                pageIndex, pageSize, includeDeleted, searchTerm, type);
 
-            if (!includeDeleted)
-            {
-                questions = questions.Where(x => !x.IsDeleted).ToList();
-            }
+            await HydrateAnswerOptionsAsync(pagedResult.Items);
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                var keyword = searchTerm.Trim().ToLowerInvariant();
-                questions = questions.Where(x => x.Content.ToLowerInvariant().Contains(keyword)).ToList();
-            }
-
-            if (!string.IsNullOrWhiteSpace(type) && Enum.TryParse<Models.QuestionType>(type, true, out var parsedType))
-            {
-                questions = questions.Where(x => x.Type == parsedType).ToList();
-            }
-
-            questions = questions.OrderByDescending(x => x.UpdatedAt).ToList();
-
-            var totalCount = questions.Count;
-            var pagedItems = questions
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
-
-            await HydrateAnswerOptionsAsync(pagedItems);
-
-            var items = pagedItems
+            var items = pagedResult.Items
                 .Select(_questionMapper.ToQuestionResponse)
                 .ToList();
 
-            return new PagedResult<QuestionResponse>(items, totalCount, pageIndex, pageSize);
+            return new PagedResult<QuestionResponse>(items, pagedResult.TotalCount, pagedResult.PageIndex, pagedResult.PageSize);
         }
 
         private async Task HydrateAnswerOptionsAsync(List<Models.Question> questions)
