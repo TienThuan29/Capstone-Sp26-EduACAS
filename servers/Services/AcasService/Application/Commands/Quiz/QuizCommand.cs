@@ -129,6 +129,15 @@ namespace AcasService.Application.Commands.Quiz
                 throw new KeyNotFoundException($"Quiz with id {quizId} not found");
             }
 
+            if (request.Questions.Count > 0)
+            {
+                var totalMarks = request.Questions.Sum(q => q.Marks);
+                if (Math.Abs(totalMarks - 10.0) > 0.001)
+                {
+                    throw new ArgumentException($"Total marks of all questions must equal 10. Current total: {totalMarks}");
+                }
+            }
+
             var normalizedQuestions = request.Questions
                 .GroupBy(x => x.QuestionId)
                 .Select(g => g.First())

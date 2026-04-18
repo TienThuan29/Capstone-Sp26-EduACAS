@@ -29,6 +29,7 @@ import { useAdminMaterial } from "@/hooks/material/useAdminMaterial";
 import { Material, PagedMaterials } from "@/types/material";
 import { useToast } from "@/hooks/useToast";
 import { formatDate } from "@/utils/datetime-utils";
+import { AdminMaterialsSkeleton } from "@/components/ui/skeletons"
 
 const PAGE_SIZE = 10;
 
@@ -82,18 +83,22 @@ export default function AdminMaterialsPage() {
     <div className={`min-h-screen flex ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className={`text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
-              Manage Materials
-            </h1>
-            <p className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-              Moderation center for all uploaded educational resources
-            </p>
-          </div>
-        </div>
+        {loading ? (
+          <AdminMaterialsSkeleton />
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className={`text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                  Manage Materials
+                </h1>
+                <p className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                  Moderation center for all uploaded educational resources
+                </p>
+              </div>
+            </div>
 
-        <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+            <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <form className="flex-grow max-w-md flex gap-3" onSubmit={handleSearch}>
               <div className="flex-1">
@@ -229,6 +234,8 @@ export default function AdminMaterialsPage() {
             </>
           )}
         </div>
+          </>
+        )}
       </main>
     </div>
   );

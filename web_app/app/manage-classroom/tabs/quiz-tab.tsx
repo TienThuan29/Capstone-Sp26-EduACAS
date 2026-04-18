@@ -23,6 +23,7 @@ import { ClassroomQuizTable } from "@/components/quiz/classroom-quiz-table";
 import { ImportQuizModal } from "../components/quiz-tab/import-quiz-modal";
 import { QuizFormModal } from "../components/quiz-tab/quiz-form-modal";
 import { DeleteQuizModal } from "../components/quiz-tab/delete-quiz-modal";
+import { QuizzesTabSkeleton } from "@/components/ui/skeletons";
 
 
 type QuizzesTabProps = {
@@ -269,9 +270,7 @@ export function QuizzesTab({
           </div>
 
           {loading ? (
-            <div className="flex justify-center py-20">
-              <Spinner size="xl" />
-            </div>
+            <QuizzesTabSkeleton />
           ) : (
             <ClassroomQuizTable
               classroomQuizzes={classroomQuizzes}

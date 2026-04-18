@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import {
     Badge,
     Button,
-    Spinner,
     Table,
     TableBody,
     TableCell,
@@ -35,6 +34,8 @@ import { formatDate } from "@/utils/datetime-utils";
 import { QuizTakingView } from "../components/quiz-taking-view";
 import { ClassroomQuizTable } from "@/components/quiz/classroom-quiz-table";
 import { SharedQuizOverview } from "@/components/quiz/shared-quiz-overview";
+import { QuizzesSkeleton } from "@/components/ui/skeletons";
+import { QuizDetailSkeleton } from "@/components/ui/skeletons";
 
 function QuizAttemptHistoryCard({
     attempts,
@@ -338,9 +339,7 @@ export function QuizzesTab({
                     <Tabs aria-label="Quiz detail tabs" onActiveTabChange={(tab) => setActiveTab(tab)}>
                         <TabItem title="Overview" active={activeTab === 0}>
                             {loadingDetail ? (
-                                <div className="flex justify-center py-20">
-                                    <Spinner size="xl" />
-                                </div>
+                                <QuizDetailSkeleton />
                             ) : (
                                 <div className="animate-in fade-in duration-300">
                                     <SharedQuizOverview
@@ -397,15 +396,19 @@ export function QuizzesTab({
             <h2 className="text-3xl font-black text-gray-900 dark:text-white border-l-8 border-[#1F4E79] pl-4">
                 Available Quizzes
             </h2>
-            <ClassroomQuizTable
-                classroomQuizzes={classroomQuizzes}
-                quizNameMap={quizNameMap}
-                onViewDetail={handleViewDetail}
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage}
-                onTimerEnd={fetchQuizzes}
-            />
+            {loading ? (
+                <QuizzesSkeleton />
+            ) : (
+                <ClassroomQuizTable
+                    classroomQuizzes={classroomQuizzes}
+                    quizNameMap={quizNameMap}
+                    onViewDetail={handleViewDetail}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                    onTimerEnd={fetchQuizzes}
+                />
+            )}
         </div>
     );
 }

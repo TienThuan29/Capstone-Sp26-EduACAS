@@ -14,6 +14,7 @@ import { ScoreDistributionChart, ExamMode } from "@/components/classroom-dashboa
 import { ExamScoreStatisticsChart } from "@/components/classroom-dashboard/charts/ExamScoreStatisticsChart";
 import { AtRiskStudentsList } from "@/components/classroom-dashboard/lists/AtRiskStudentsList";
 import { RecentWarningsList } from "@/components/classroom-dashboard/lists/RecentWarningsList";
+import { StudentDashboardSkeleton, DashboardTabSkeleton } from "@/components/ui/skeletons";
 import type { ClassroomStudentResponse } from "@/types/classroom";
 import type { ClassroomQuiz } from "@/types/quiz";
 import type { QuizAttempt } from "@/types/quiz-attempt";
@@ -288,11 +289,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
 
   // Show initial loading spinner only before first load attempt
   if (!hasLoadedOnce && (loading || legacyLoading)) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <Spinner size="xl" color="info" />
-      </div>
-    );
+    return <DashboardTabSkeleton />;
   }
 
   if (error || legacyError) {

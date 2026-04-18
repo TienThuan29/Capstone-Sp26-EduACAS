@@ -30,6 +30,7 @@ import type { ExaminationStatus, ExaminationMode } from "@/types/examination";
 import { useToast } from "@/hooks/useToast";
 import { formatDate } from "@/utils/datetime-utils";
 import { AddExamToSlotModal } from "@/app/manage-classroom/components/slot-tab/adding-exam-modal";
+import { SlotsTabSkeleton } from "@/components/ui/skeletons";
 
 const STATUS_LABELS: Record<ExaminationStatus, string> = {
   PENDING: "PENDING",
@@ -209,9 +210,7 @@ export function SlotsTab({ maxSlot }: SlotsTabProps) {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="xl" />
-        </div>
+        <SlotsTabSkeleton />
       ) : slots.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
           <p className="text-gray-500 dark:text-gray-400">

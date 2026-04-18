@@ -38,6 +38,7 @@ import {
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
 import { DiscussionTab } from "../tabs/discussion-tab";
+import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
 
 type UpdateClassroomFormData = {
   classCode: string;
@@ -311,15 +312,7 @@ function ClassroomContent() {
   };
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <HomeNavbar />
-        <div className="flex flex-grow items-center justify-center bg-gray-50 dark:bg-gray-900">
-          <Spinner size="xl" color="info" />
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ClassroomDetailPageSkeleton />;
   }
 
   if (!classroom) {

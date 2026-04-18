@@ -28,6 +28,7 @@ import { useToast } from "@/hooks/useToast";
 import { useNotification } from "@/hooks/notification/useNotification";
 import { useUserManagement } from "@/hooks/user/useUserManagement";
 import type { Notification, NotificationType } from "@/types/notification";
+import { NotificationsManagementSkeleton } from "@/components/ui/skeletons";
 
 export default function NotificationsManagement() {
   const { isDark } = useThemeContext();
@@ -122,18 +123,22 @@ export default function NotificationsManagement() {
     <div className={`min-h-screen flex ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className={`text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
-              Manage Notifications
-            </h1>
-            <p className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-              Monitor and manage system-wide notifications
-            </p>
-          </div>
-        </div>
+        {loading ? (
+          <NotificationsManagementSkeleton />
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className={`text-4xl font-bold mb-2 ${isDark ? "text-white" : "text-gray-900"}`}>
+                  Manage Notifications
+                </h1>
+                <p className={`text-lg ${isDark ? "text-gray-400" : "text-gray-600"}`}>
+                  Monitor and manage system-wide notifications
+                </p>
+              </div>
+            </div>
 
-        <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
+            <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
             <form className="flex-grow max-w-md flex gap-3" onSubmit={handleSearch}>
               <div className="flex-1">
@@ -266,6 +271,8 @@ export default function NotificationsManagement() {
             </div>
           )}
         </div>
+          </>
+        )}
       </main>
     </div>
   );

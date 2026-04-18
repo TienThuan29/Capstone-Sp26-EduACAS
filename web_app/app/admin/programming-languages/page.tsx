@@ -3,17 +3,16 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { useThemeContext } from "@/components/theme-provider"
 import Sidebar from "@/components/sidebar"
-import { 
-  Button, 
-  TextInput, 
-  Badge, 
-  Spinner, 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeadCell, 
-  TableRow 
+import {
+  Button,
+  TextInput,
+  Badge,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeadCell,
+  TableRow
 } from "flowbite-react"
 import {
   CodeBracketIcon,
@@ -26,6 +25,7 @@ import { useProgrammingLanguage } from "@/hooks/programming-language/useProgramm
 import type { ProgrammingLanguage } from "@/types/language"
 import { useToast } from "@/hooks/useToast"
 import LanguageDetail from "./language-detail"
+import { ProgrammingLanguagesManagementSkeleton } from "@/components/ui/skeletons"
 
 export default function ProgrammingLanguagesManagement() {
   const { isDark } = useThemeContext()
@@ -166,9 +166,7 @@ export default function ProgrammingLanguagesManagement() {
             {/* Table */}
             <div className={`overflow-x-auto rounded-lg ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
               {loading ? (
-                <div className="flex justify-center items-center p-8">
-                  <Spinner size="xl" />
-                </div>
+                <ProgrammingLanguagesManagementSkeleton />
               ) : (
                 <Table>
                   <TableHead>

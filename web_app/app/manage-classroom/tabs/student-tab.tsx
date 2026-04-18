@@ -24,6 +24,7 @@ import type { ClassroomStudentResponse } from "@/types/classroom";
 import { formatDateOnly } from "@/utils/datetime-utils";
 import { useToast } from "@/hooks/useToast";
 import { TrashIcon } from "@heroicons/react/24/solid";
+import { StudentTabSkeleton } from "@/components/ui/skeletons";
 
 const PAGE_SIZE = 10;
 
@@ -116,14 +117,7 @@ export function StudentTab({ classId }: StudentTabProps) {
   );
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-white py-16 dark:border-gray-700 dark:bg-gray-800">
-        <Spinner size="xl" color="info" />
-        <p className="mt-4 text-gray-500 dark:text-gray-400">
-          Loading students...
-        </p>
-      </div>
-    );
+    return <StudentTabSkeleton />;
   }
 
   return (

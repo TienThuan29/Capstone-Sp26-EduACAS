@@ -22,6 +22,7 @@ import { useMaterial } from "@/hooks/material/useMaterial";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import { useToast } from "@/hooks/useToast";
 import { formatDate } from "@/utils/datetime-utils";
+import { MaterialsSkeleton } from "@/components/ui/skeletons";
 
 type MaterialsTabProps = {
   classId: string;
@@ -82,11 +83,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Spinner size="xl" color="info" />
-      </div>
-    );
+    return <MaterialsSkeleton />;
   }
 
   return (
