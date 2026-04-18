@@ -1,11 +1,13 @@
 'use client';
 
-import React, { useCallback, useRef, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import dynamic from 'next/dynamic';
 import { loader } from '@monaco-editor/react';
 import type { OnMount, OnChange } from '@monaco-editor/react';
-import type * as monaco from 'monaco-editor';
+import * as monaco from 'monaco-editor';
 import { useEditorContext } from '@/contexts/EditorContext';
+import { useCodeFormatter } from '@/hooks/formatter/useCodeFormatter';
+import { useLspClient, MonacoKind, type LspCompletionItem } from '@/hooks/lsp/useLspClient';
 
 // Ensure Monaco loads with correct worker paths so syntax highlighting works (e.g. in Next.js)
 loader.config({
@@ -26,8 +28,8 @@ const KNOWN_MONACO_IDS = new Set([
   'markdown', 'php', 'python', 'r', 'ruby', 'rust', 'sql', 'typescript', 'xml', 'plaintext',
 ]);
 
-function getMonacoLanguageId(monaco: string | undefined, languageId: string): string {
-  const raw = (monaco ?? '').toLowerCase().trim();
+function getMonacoLanguageId(monacoId: string | undefined, languageId: string): string {
+  const raw = (monacoId ?? '').toLowerCase().trim();
   const fixed = MONACO_ID_FIXES[raw] ?? raw;
   if (KNOWN_MONACO_IDS.has(fixed)) return fixed;
   const fallback = (languageId || 'plaintext').toLowerCase().trim();
@@ -47,14 +49,51 @@ const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
   ),
 });
 
+/** Map our LspCompletionItem to Monaco CompletionItem */
+function mapToMonaco(item: LspCompletionItem): monaco.languages.CompletionItem {
+  let range: monaco.IRange | undefined;
+  if (item.textEdit?.range?.start && item.textEdit?.range?.end) {
+    range = {
+      startLineNumber: item.textEdit.range.start.line + 1,
+      startColumn: item.textEdit.range.start.character + 1,
+      endLineNumber: item.textEdit.range.end.line + 1,
+      endColumn: item.textEdit.range.end.character + 1,
+    };
+  }
+
+  return {
+    label: item.label,
+    kind: item.kind ? (MonacoKind as Record<number, monaco.languages.CompletionItemKind>)[item.kind] ?? monaco.languages.CompletionItemKind.Text : monaco.languages.CompletionItemKind.Text,
+    detail: item.detail,
+    documentation: item.documentation ? { value: item.documentation } : undefined,
+    insertText: item.insertText ?? item.label,
+    insertTextRules: item.insertTextFormat === 2
+      ? monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet
+      : undefined,
+    range,
+    sortText: item.sortText,
+    filterText: item.filterText,
+    commitCharacters: item.commitCharacters,
+  } as monaco.languages.CompletionItem;
+}
+
 export function EditorPanel() {
   const { editorState, setCode } = useEditorContext();
-  const editorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const previousCodeRef = useRef(editorState.code);
+  const { formatCode } = useCodeFormatter();
+
+  const languageId = editorState.language.id;
+  const monacoLanguage = getMonacoLanguageId(editorState.language.monaco, languageId);
+
+  const {
+    isSupported,
+    openDocument,
+    changeDocument,
+    getCompletions,
+  } = useLspClient(languageId);
 
   const handleEditorMount: OnMount = useCallback((editor, monaco) => {
-    editorRef.current = editor;
-    editor.focus();
+    // Open document for local identifier completions
+    openDocument(editor.getValue());
 
     editor.addCommand(
       monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
@@ -62,27 +101,62 @@ export function EditorPanel() {
         console.log('Save shortcut captured');
       }
     );
-  }, []);
 
-  // Handle code changes
+    // Register "Format Code" in the editor context menu
+    editor.addAction({
+      id: 'format-code-action',
+      label: 'Format Code',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
+      ],
+      contextMenuGroupId: '9_cutcopypaste',
+      contextMenuOrder: 4,
+      run: async (ed) => {
+        const langId = editorState.language?.id ?? '';
+        if (!langId) return;
+
+        const currentCode = ed.getValue();
+        const result = await formatCode({ source: currentCode, lang: langId });
+        if (result !== null) {
+          ed.setValue(result);
+        }
+      },
+    });
+
+    // Register completion provider for Java (and other supported languages)
+    if (isSupported) {
+      const completionProvider: monaco.languages.CompletionItemProvider = {
+        triggerCharacters: ['.', '(', ',', "'", '"', '/', '@', '#'],
+        provideCompletionItems: async (model, position) => {
+          try {
+            const result = await getCompletions({
+              line: position.lineNumber - 1,
+              character: position.column - 1,
+            });
+            return {
+              suggestions: result.items.map(mapToMonaco),
+              incomplete: result.isIncomplete ?? false,
+            };
+          } catch (err) {
+            console.error('[EditorPanel] Completion error:', err);
+            return { suggestions: [], incomplete: false };
+          }
+        },
+      };
+
+      monaco.languages.registerCompletionItemProvider(monacoLanguage, completionProvider);
+    }
+  }, [editorState.language?.id, formatCode, monacoLanguage, isSupported, openDocument, getCompletions]);
+
+  // Handle code changes — update context and notify LSP
   const handleEditorChange: OnChange = useCallback(
     (value) => {
       if (value !== undefined) {
-        previousCodeRef.current = value;
         setCode(value);
+        changeDocument(value);
       }
     },
-    [setCode]
-  );
-
-  // Update previous code ref when language changes (code resets)
-  useEffect(() => {
-    previousCodeRef.current = editorState.code;
-  }, [editorState.language, editorState.code]);
-
-  const monacoLanguage = getMonacoLanguageId(
-    editorState.language.monaco,
-    editorState.language.id
+    [setCode, changeDocument]
   );
 
   return (

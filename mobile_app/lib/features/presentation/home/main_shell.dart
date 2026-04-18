@@ -6,7 +6,9 @@ import 'package:mobile/features/presentation/auth/login_page.dart';
 import 'package:mobile/features/presentation/home/dashboard_page.dart';
 import 'package:mobile/features/presentation/classroom/student_classroom_list_page.dart';
 import 'package:mobile/features/presentation/classroom/lecturer_classroom_list_page.dart';
+import 'package:mobile/features/presentation/announcement/announcement_page.dart';
 import 'package:mobile/features/presentation/profile/profile_screen.dart';
+import 'package:mobile/features/services/announcement_service.dart';
 
 /// Unified shell with BottomNavigationBar for quick-access navigation.
 class MainShell extends StatefulWidget {
@@ -20,11 +22,22 @@ class _MainShellState extends State<MainShell> {
   int _currentIndex = 0;
   String _userName = '';
   String? _userRole;
+  bool _pendingAnnouncementJump = false;
+  bool _hasUnreadAnnouncements = false;
 
   @override
   void initState() {
     super.initState();
+    AnnouncementFeed.focusRequestRevision.addListener(_handleAnnouncementFocusRequest);
+    AnnouncementFeed.hasUnreadAnnouncements.addListener(_handleUnreadAnnouncementsChanged);
     _loadUser();
+  }
+
+  @override
+  void dispose() {
+    AnnouncementFeed.focusRequestRevision.removeListener(_handleAnnouncementFocusRequest);
+    AnnouncementFeed.hasUnreadAnnouncements.removeListener(_handleUnreadAnnouncementsChanged);
+    super.dispose();
   }
 
   Future<void> _loadUser() async {
@@ -34,8 +47,42 @@ class _MainShellState extends State<MainShell> {
       setState(() {
         _userName = name ?? 'User';
         _userRole = role?.toUpperCase();
+
+        if (_pendingAnnouncementJump && _userRole == Roles.student) {
+          _currentIndex = 2;
+          _pendingAnnouncementJump = false;
+        }
       });
+
+      if (_userRole == Roles.student) {
+        AnnouncementFeed.refreshUnreadStatus();
+      }
     }
+  }
+
+  void _handleAnnouncementFocusRequest() {
+    if (!mounted) {
+      return;
+    }
+
+    if (_userRole == null) {
+      _pendingAnnouncementJump = true;
+      return;
+    }
+
+    if (_userRole == Roles.student && _currentIndex != 2) {
+      setState(() => _currentIndex = 2);
+    }
+  }
+
+  void _handleUnreadAnnouncementsChanged() {
+    if (!mounted) {
+      return;
+    }
+
+    setState(() {
+      _hasUnreadAnnouncements = AnnouncementFeed.hasUnreadAnnouncements.value;
+    });
   }
 
   // ── Navigation ────────────────────────────────────────
@@ -96,7 +143,12 @@ class _MainShellState extends State<MainShell> {
     return [
       _NavItem('Home', Icons.home_rounded, Icons.home_outlined),
       _NavItem('Classrooms', Icons.class_rounded, Icons.class_outlined),
-      _NavItem('Announcements', Icons.campaign_rounded, Icons.campaign_outlined),
+      _NavItem(
+        'Announcements',
+        Icons.campaign_rounded,
+        Icons.campaign_outlined,
+        showDot: _hasUnreadAnnouncements,
+      ),
       _NavItem('Profile', Icons.person_rounded, Icons.person_outline_rounded),
     ];
   }
@@ -123,42 +175,9 @@ class _MainShellState extends State<MainShell> {
         onNavigate: _selectTab,
       ),
       const StudentClassroomListPage(),
-      _buildPlaceholder(
-        icon: Icons.campaign_rounded,
-        title: 'Announcements',
-        subtitle: 'Coming soon...',
-      ),
+      const AnnouncementPage(),
       ProfileScreen(onLogout: _handleLogout),
     ];
-  }
-
-  Widget _buildPlaceholder({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 64, color: Colors.grey[300]),
-          const SizedBox(height: 16),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                  color: AppColors.textPrimary,
-                ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            subtitle,
-            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                  color: AppColors.textSecondary,
-                ),
-          ),
-        ],
-      ),
-    );
   }
 
   // ── Build ─────────────────────────────────────────────
@@ -197,6 +216,7 @@ class _MainShellState extends State<MainShell> {
                   icon: isSelected ? item.activeIcon : item.icon,
                   label: item.label,
                   isSelected: isSelected,
+                  showDot: item.showDot,
                   onTap: () => _selectTab(i),
                 );
               }),
@@ -213,12 +233,14 @@ class _BottomNavButton extends StatelessWidget {
   final IconData icon;
   final String label;
   final bool isSelected;
+  final bool showDot;
   final VoidCallback onTap;
 
   const _BottomNavButton({
     required this.icon,
     required this.label,
     required this.isSelected,
+    this.showDot = false,
     required this.onTap,
   });
 
@@ -229,7 +251,7 @@ class _BottomNavButton extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
               ? AppColors.primary.withValues(alpha: 0.1)
@@ -239,10 +261,28 @@ class _BottomNavButton extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              icon,
-              size: 24,
-              color: isSelected ? AppColors.primary : AppColors.textLight,
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Icon(
+                  icon,
+                  size: 24,
+                  color: isSelected ? AppColors.primary : AppColors.textLight,
+                ),
+                if (showDot)
+                  Positioned(
+                    right: -18,
+                    top: 8,
+                    child: Container(
+                      width: 8,
+                      height: 8,
+                      decoration: const BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: AppColors.error,
+                      ),
+                    ),
+                  ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
@@ -265,5 +305,11 @@ class _NavItem {
   final String label;
   final IconData activeIcon;
   final IconData icon;
-  const _NavItem(this.label, this.activeIcon, this.icon);
+  final bool showDot;
+  const _NavItem(
+    this.label,
+    this.activeIcon,
+    this.icon, {
+    this.showDot = false,
+  });
 }

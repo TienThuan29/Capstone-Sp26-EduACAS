@@ -87,8 +87,41 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
 
     try {
       final results = await ClassroomService.searchClassroomsByKeyword(query.trim());
+      // Search payload can miss enrollment status, so reuse status from the student's classroom list.
+      final statusByClassId = {
+        for (final c in _allClassrooms) c.id: c.status,
+      };
+
+      final mergedResults = results
+          .map((result) {
+            final mergedStatus = statusByClassId[result.id] ?? result.status;
+            if (mergedStatus == result.status) {
+              return result;
+            }
+
+            return Classroom(
+              id: result.id,
+              className: result.className,
+              classCode: result.classCode,
+              subjectId: result.subjectId,
+              subjectName: result.subjectName,
+              lecturerId: result.lecturerId,
+              lecturerName: result.lecturerName,
+              lecturerEmail: result.lecturerEmail,
+              semesterName: result.semesterName,
+              enrolKey: result.enrolKey,
+              maxSlot: result.maxSlot,
+              isDeleted: result.isDeleted,
+              createdDate: result.createdDate,
+              updatedDate: result.updatedDate,
+              endDate: result.endDate,
+              status: mergedStatus,
+            );
+          })
+          .toList();
+
       setState(() {
-        _searchResults = results;
+        _searchResults = mergedResults;
         _isSearching = false;
       });
     } catch (e) {

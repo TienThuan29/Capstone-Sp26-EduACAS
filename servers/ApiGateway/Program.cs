@@ -65,5 +65,6 @@ if (app.Environment.IsDevelopment())
 }
 
 
+app.UseWebSockets();
 await app.UseOcelot();
 app.Run();

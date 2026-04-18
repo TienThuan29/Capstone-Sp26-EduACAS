@@ -1,0 +1,146 @@
+[
+  {
+    "id": "qzao-001",
+    "questionId": "qzq-001",
+    "content": "def",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-002",
+    "questionId": "qzq-001",
+    "content": "function",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-003",
+    "questionId": "qzq-001",
+    "content": "fun",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-004",
+    "questionId": "qzq-001",
+    "content": "lambda",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-005",
+    "questionId": "qzq-002",
+    "content": "list",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-006",
+    "questionId": "qzq-002",
+    "content": "tuple",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-007",
+    "questionId": "qzq-002",
+    "content": "dictionary",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-008",
+    "questionId": "qzq-002",
+    "content": "class",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-009",
+    "questionId": "qzq-004",
+    "content": "O(log n)",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-010",
+    "questionId": "qzq-004",
+    "content": "O(n)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-011",
+    "questionId": "qzq-004",
+    "content": "O(n log n)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-012",
+    "questionId": "qzq-004",
+    "content": "O(1)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-013",
+    "questionId": "qzq-005",
+    "content": "Array",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-014",
+    "questionId": "qzq-005",
+    "content": "Linked List",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-015",
+    "questionId": "qzq-005",
+    "content": "Stack",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-016",
+    "questionId": "qzq-005",
+    "content": "Binary Tree",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-017",
+    "questionId": "qzq-006",
+    "content": "Polymorphism",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-018",
+    "questionId": "qzq-006",
+    "content": "Encapsulation",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-019",
+    "questionId": "qzq-006",
+    "content": "Composition",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-020",
+    "questionId": "qzq-006",
+    "content": "Abstraction",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-021",
+    "questionId": "qzq-008",
+    "content": "DELETE",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-022",
+    "questionId": "qzq-008",
+    "content": "DROP",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-023",
+    "questionId": "qzq-008",
+    "content": "REMOVE",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-024",
+    "questionId": "qzq-008",
+    "content": "TRUNCATE",
+    "isCorrect": false
+  }
+]

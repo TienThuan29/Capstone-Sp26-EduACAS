@@ -61,4 +61,10 @@ public class ExaminationRequestDTO
     [JsonPropertyName("mode")]
     [RegularExpression(@"^(PRACTICAL|EXAMINATION)$", ErrorMessage = "Mode must be either PRACTICAL or EXAMINATION")]
     public string Mode { get; set; }
+
+    [JsonPropertyName("useStrict")]
+    public bool UseStrict { get; set; }
+
+    [JsonPropertyName("minScoreThreshold")]
+    public float MinScoreThreshold { get; set; }
 }

@@ -31,11 +31,8 @@ public class ClassEnrollmentsQuery : IClassEnrollmentsQuery
         var enrollments = await _enrollmentRepository.FindByClassIdAsync(classId);
         var studentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
 
-        var userProfileTasks = studentIds.Select(id => _userRequestProducer.GetUserByIdAsync(id, cancellationToken));
-        var userProfiles = await Task.WhenAll(userProfileTasks);
-        var userById = studentIds
-            .Zip(userProfiles, (id, profile) => (id, profile))
-            .ToDictionary(x => x.id, x => x.profile);
+        var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(studentIds, cancellationToken);
+        var userById = userProfiles.ToDictionary(x => x.Id, x => x);
 
         return enrollments
             .Select(e => _classEnrollmentMapper.ToClassroomStudentResponse(e, userById.GetValueOrDefault(e.StudentId)))

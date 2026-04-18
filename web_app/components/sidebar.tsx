@@ -8,6 +8,7 @@ import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { PageUrl } from "@/configs/page.url";
+import { LOGO_EDU_ACAS_2_TRANS, LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
 import { Button, Modal, ModalHeader, ModalBody } from "flowbite-react";
 import {
   ChevronLeftIcon,
@@ -32,6 +33,7 @@ import {
   BanknotesIcon,
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
+  ChartBarIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -66,7 +68,16 @@ const Sidebar = () => {
   };
 
   const studentMenuItems = [
-    { icon: Squares2X2Icon, label: "Dashboard", href: PageUrl.DASHBOARD_PAGE },
+    {
+      icon: Squares2X2Icon,
+      label: "Overview",
+      href: PageUrl.DEFAULT_PAGE,
+    },
+    // {
+    //   icon: Squares2X2Icon,
+    //   label: "Dashboard",
+    //   href: PageUrl.DASHBOARD_PAGE
+    // },
     {
       icon: AcademicCapIcon,
       label: "Classrooms",
@@ -82,6 +93,11 @@ const Sidebar = () => {
 
   const lecturerMenuItems = [
     {
+      icon: Squares2X2Icon,
+      label: "Overview",
+      href: PageUrl.DEFAULT_PAGE,
+    },
+    {
       icon: AcademicCapIcon,
       label: "My Classrooms",
       href: PageUrl.MANAGE_CLASSROOM_PAGE,
@@ -90,6 +106,21 @@ const Sidebar = () => {
       icon: QuestionMarkCircleIcon,
       label: "Problem Banks",
       href: PageUrl.QUESTION_BANKS_PAGE,
+    },
+    {
+      icon: DocumentTextIcon,
+      label: "Examination Banks",
+      href: PageUrl.EXAM_BANK_PAGE,
+    },
+    {
+      icon: ClipboardDocumentListIcon,
+      label: "Question Banks",
+      href: PageUrl.QUESTION_BANK_PAGE,
+    },
+    {
+      icon: BanknotesIcon,
+      label: "Quiz Banks",
+      href: PageUrl.QUIZ_BANK_PAGE,
     },
   ];
 
@@ -113,6 +144,11 @@ const Sidebar = () => {
       href: `${pathname}?tab=exams`,
     },
     {
+      icon: ClipboardDocumentListIcon,
+      label: "Manage Quizzes",
+      href: `${pathname}?tab=quizzes`,
+    },
+    {
       icon: BookOpenIcon,
       label: "Manage Materials",
       href: `${pathname}?tab=materials`,
@@ -123,7 +159,7 @@ const Sidebar = () => {
       href: `${pathname}?tab=students`,
     },
     {
-      icon: ChatBubbleLeftRightIcon ,
+      icon: ChatBubbleLeftRightIcon,
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
@@ -152,6 +188,21 @@ const Sidebar = () => {
       href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
     },
     { icon: UsersIcon, label: "Manage Users", href: PageUrl.ADMIN_USERS_PAGE },
+    {
+      icon: BellIcon,
+      label: "Manage Notifications",
+      href: PageUrl.ADMIN_NOTIFICATIONS_PAGE,
+    },
+    {
+      icon: ChatBubbleLeftRightIcon,
+      label: "Manage Discussions",
+      href: PageUrl.ADMIN_DISCUSSIONS_PAGE,
+    },
+    {
+      icon: BookOpenIcon,
+      label: "Manage Materials",
+      href: PageUrl.ADMIN_MATERIALS_PAGE,
+    },
   ];
 
   const classroomMenuItems = [
@@ -159,6 +210,11 @@ const Sidebar = () => {
       icon: AcademicCapIcon,
       label: "Overview",
       href: `${pathname}?tab=overview`,
+    },
+    {
+      icon: ChartBarIcon,
+      label: "Dashboard",
+      href: `${pathname}?tab=dashboard`,
     },
     {
       icon: ClipboardDocumentListIcon,
@@ -170,6 +226,11 @@ const Sidebar = () => {
       label: "Practise Exercises",
       href: `${pathname}?tab=practise`,
     },
+    {
+      icon: PencilSquareIcon,
+      label: "Quizzes",
+      href: `${pathname}?tab=quizzes`,
+    },
     { icon: ClockIcon, label: "Slots", href: `${pathname}?tab=slots` },
     {
       icon: BookOpenIcon,
@@ -177,7 +238,7 @@ const Sidebar = () => {
       href: `${pathname}?tab=materials`,
     },
     {
-      icon: ChatBubbleLeftRightIcon ,
+      icon: ChatBubbleLeftRightIcon,
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
@@ -185,7 +246,7 @@ const Sidebar = () => {
 
   const settingsItems = [
     { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
-    { icon: BellIcon, label: "Notifications", href: "#" },
+    { icon: BellIcon, label: "Notifications", href: PageUrl.NOTIFICATIONS_PAGE },
     { icon: Cog6ToothIcon, label: "Settings", href: "#" },
   ];
 
@@ -218,7 +279,7 @@ const Sidebar = () => {
             <div className="flex flex-1 justify-center">
               <Link href={PageUrl.HOME_PAGE} className="block" prefetch={false}>
                 <Image
-                  src="/images/EduACAS-2-trans.png"
+                  src={LOGO_EDU_ACAS_2_TRANS}
                   alt="Edu-ACAS Logo"
                   width={142}
                   height={64}
@@ -238,7 +299,7 @@ const Sidebar = () => {
           <div className={`flex w-full flex-col items-center gap-2`}>
             <Link href={PageUrl.HOME_PAGE} className="block" prefetch={false}>
               <Image
-                src="/images/EduACAS-single.png"
+                src={LOGO_EDU_ACAS_SINGLE}
                 alt="Edu-ACAS Logo"
                 width={64}
                 height={64}

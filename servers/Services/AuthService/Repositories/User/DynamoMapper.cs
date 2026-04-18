@@ -44,7 +44,7 @@ public static class DynamoMapper
             Email = item["email"].S,
             Password = item["password"].S,
             Fullname = item["fullname"].S,
-            Role = Enum.Parse<Role>(item["role"].S),
+            Role = Enum.Parse<Models.Role>(item["role"].S),
             IsEnable = item["isEnable"].BOOL
         };
 

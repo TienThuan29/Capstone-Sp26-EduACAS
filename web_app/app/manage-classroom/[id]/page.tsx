@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState, Suspense, useMemo } from "react";
+import { useCallback, useEffect, useState, Suspense, useMemo, useRef } from "react";
 import { useParams, usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Spinner,
@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/contexts/AuthContext";
 import { useClassroom, SubjectOption } from "@/hooks/classroom/useClassroom";
 import type { Classroom as ClassroomDetail } from "@/types/classroom";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HomeNavbar from "@/components/navbar";
@@ -33,10 +33,12 @@ import {
   ExamsTab,
   MaterialsTab,
   StudentTab,
+  QuizzesTab,
 } from "@/app/manage-classroom/tabs";
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
 import { DiscussionTab } from "../tabs/discussion-tab";
+import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
 
 type UpdateClassroomFormData = {
   classCode: string;
@@ -46,6 +48,8 @@ type UpdateClassroomFormData = {
   enrolKey: string;
   dateEnd: string;
   maxSlot: number | "";
+  avgScoreThreshold: number;
+  minExamCount: number;
 };
 
 function ClassroomContent() {
@@ -58,6 +62,8 @@ function ClassroomContent() {
     getSubjects,
     updateClassroom,
     softDeleteClassroom,
+    regenerateEnrolKey,
+    recordClassroomAccess,
   } = useClassroom();
   const { getExaminationsByClassId } = useExamination();
   const { user } = useAuth();
@@ -65,19 +71,25 @@ function ClassroomContent() {
 
   const activeTab = searchParams.get("tab") || "overview";
   const initialExamId = searchParams.get("examId");
+  const initialQuizId = searchParams.get("quizId");
 
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
+  const [refreshingClassroom, setRefreshingClassroom] = useState(false);
   const [examsLoading, setExamsLoading] = useState(false);
 
   // -- Update & Delete States --
   const [openUpdateModal, setOpenUpdateModal] = useState(false);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [regeneratingEnrolKey, setRegeneratingEnrolKey] = useState(false);
   const [subjects, setSubjects] = useState<SubjectOption[]>([]);
   const [showEnrolKey, setShowEnrolKey] = useState(false);
   const [examDetailBack, setExamDetailBack] = useState<(() => void) | null>(
+    null
+  );
+  const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(
     null
   );
 
@@ -91,6 +103,8 @@ function ClassroomContent() {
     enrolKey: "",
     dateEnd: "",
     maxSlot: "",
+    avgScoreThreshold: 0,
+    minExamCount: 2,
   });
 
   const SEMESTERS = useMemo(() => {
@@ -125,6 +139,8 @@ function ClassroomContent() {
             ? new Date(data.endDate).toISOString().split("T")[0]
             : "",
           maxSlot: data.maxSlot || 0,
+          avgScoreThreshold: data.gradingSettings?.avgScoreThreshold ?? 0,
+          minExamCount: data.gradingSettings?.minExamCount ?? 2,
         });
       }
     } catch (error) {
@@ -134,11 +150,38 @@ function ClassroomContent() {
     }
   };
 
+  const refreshClassroomData = async () => {
+    try {
+      setRefreshingClassroom(true);
+      const data = await getClassroomById(classId);
+      if (data) {
+        setClassroom(data);
+        setFormData((prev) => ({
+          ...prev,
+          enrolKey: data.enrolKey || "",
+        }));
+      }
+    } catch (error) {
+      console.error("Failed to refresh classroom data:", error);
+    } finally {
+      setRefreshingClassroom(false);
+    }
+  };
+
   useEffect(() => {
     if (classId) {
       fetchClassroomDetail();
     }
   }, [getClassroomById, classId]);
+
+  // useEffect(() => {
+  //   const uid = user?.id;
+  //   if (!uid || !classId || !classroom?.id) return;
+  //   if (user?.role?.toUpperCase() !== "LECTURER") return;
+  //   void recordClassroomAccess(uid, classId).catch(() => {
+  //     /* non-blocking */
+  //   });
+  // }, [user?.id, user?.role, classId, classroom?.id, recordClassroomAccess]);
 
   const fetchExaminations = useCallback(async () => {
     if (!classId) return;
@@ -158,6 +201,16 @@ function ClassroomContent() {
       const p = new URLSearchParams(searchParams?.toString() ?? "");
       if (examId) p.set("examId", examId);
       else p.delete("examId");
+      router.replace(`${pathname}?${p.toString()}`);
+    },
+    [router, searchParams, pathname]
+  );
+
+  const updateQuizIdInUrl = useCallback(
+    (quizId: string | null) => {
+      const p = new URLSearchParams(searchParams?.toString() ?? "");
+      if (quizId) p.set("quizId", quizId);
+      else p.delete("quizId");
       router.replace(`${pathname}?${p.toString()}`);
     },
     [router, searchParams, pathname]
@@ -206,6 +259,10 @@ function ClassroomContent() {
         enrolKey: formData.enrolKey,
         endDate: formData.dateEnd,
         maxSlot: slotVal,
+        gradingSettings: {
+          avgScoreThreshold: Number(formData.avgScoreThreshold) || 0,
+          minExamCount: Number(formData.minExamCount) || 0,
+        },
       };
 
       await updateClassroom(classroom.id, payload);
@@ -235,16 +292,27 @@ function ClassroomContent() {
     }
   };
 
+  const handleRegenerateEnrolKey = async () => {
+    if (!classroom) return;
+    try {
+      setRegeneratingEnrolKey(true);
+      const result = await regenerateEnrolKey(classroom.id);
+      if (result.success) {
+        showSuccess("Enrol key regenerated successfully");
+        refreshClassroomData();
+      } else {
+        showError(result.message || "Failed to regenerate enrol key");
+      }
+    } catch (error) {
+      console.error("Regenerate enrol key failed", error);
+      showError("Failed to regenerate enrol key");
+    } finally {
+      setRegeneratingEnrolKey(false);
+    }
+  };
+
   if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <HomeNavbar />
-        <div className="flex flex-grow items-center justify-center bg-gray-50 dark:bg-gray-900">
-          <Spinner size="xl" color="info" />
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ClassroomDetailPageSkeleton />;
   }
 
   if (!classroom) {
@@ -283,9 +351,23 @@ function ClassroomContent() {
       case "students":
         return <StudentTab classId={classId} />;
       case "dashboard":
-        return <DashboardTab />;
+        return (
+          <DashboardTab
+            classId={classId}
+            classroomName={classroom.className}
+          />
+        );
       case "slots":
         return <SlotsTab maxSlot={classroom.maxSlot} />;
+      case "quizzes":
+        return (
+          <QuizzesTab
+            classId={classId}
+            setQuizDetailBack={setQuizDetailBack}
+            initialQuizId={initialQuizId}
+            onQuizIdInUrlChange={updateQuizIdInUrl}
+          />
+        );
       case "discussion":
         return (
           <DiscussionTab
@@ -299,6 +381,8 @@ function ClassroomContent() {
             classroom={classroom}
             onOpenUpdateModal={() => setOpenUpdateModal(true)}
             onOpenDeleteModal={() => setOpenDeleteModal(true)}
+            onRegenerateEnrolKey={handleRegenerateEnrolKey}
+            isRegeneratingKey={regeneratingEnrolKey}
           />
         );
     }
@@ -308,7 +392,7 @@ function ClassroomContent() {
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
-      <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
+      <main className="ml-20 flex-grow overflow-hidden p-4 transition-all duration-300 lg:ml-64 lg:p-8">
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="Manage classrooms"
@@ -320,6 +404,13 @@ function ClassroomContent() {
               label="Back to list"
               icon={<ArrowLeftIcon className="h-4 w-4" />}
               onClick={examDetailBack}
+            />
+          )}
+          {activeTab === "quizzes" && quizDetailBack && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={quizDetailBack}
             />
           )}
           {activeTab === "discussion" && searchParams.get("issue") && (
@@ -511,8 +602,9 @@ function UpdateClassroomModal({
               onChange={(e) =>
                 setFormData({ ...formData, enrolKey: e.target.value })
               }
-              pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
-              title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
+              disabled={true}
+              // pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
+              // title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
             />
             <div className="mt-2 flex items-center gap-2">
               <Checkbox
@@ -544,6 +636,56 @@ function UpdateClassroomModal({
                 setFormData({ ...formData, dateEnd: e.target.value })
               }
             />
+          </div>
+
+          <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+            <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Grading Settings
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="avgScoreThreshold">
+                  Avg score threshold
+                </Label>
+                <TextInput
+                  id="avgScoreThreshold"
+                  type="number"
+                  step={0.5}
+                  min={0}
+                  max={10}
+                  value={formData.avgScoreThreshold || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      avgScoreThreshold:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 5.0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minExamCount">
+                  Min exam count
+                </Label>
+                <TextInput
+                  id="minExamCount"
+                  type="number"
+                  min={2}
+                  value={formData.minExamCount || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minExamCount:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 3"
+                />
+              </div>
+            </div>
           </div>
 
           <div className="mt-6 flex justify-end gap-2">

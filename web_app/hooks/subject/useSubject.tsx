@@ -21,8 +21,26 @@ export interface UpdateSubjectPayload {
   isDeleted: boolean;
 }
 
+export interface PagedResult<T> {
+  items: T[];
+  totalCount: number;
+  pageIndex: number;
+  pageSize: number;
+  totalPages: number;
+  hasPreviousPage: boolean;
+  hasNextPage: boolean;
+}
+
 export const useSubject = () => {
   const axiosInstance = useAxios();
+
+  const getPagedSubjects = useCallback(
+    async (pageIndex: number = 1, pageSize: number = 10, includeDeleted: boolean = true) => {
+      const response = await axiosInstance.get(`${Api.Subject.GET_PAGED}?page=${pageIndex}&pageSize=${pageSize}&includeDeleted=${includeDeleted}`);
+      return response.data?.dataResponse;
+    },
+    [axiosInstance],
+  );
 
   const getAllSubjects = useCallback(
     async () => {
@@ -72,9 +90,19 @@ export const useSubject = () => {
     [axiosInstance],
   );
 
+  const getSubjectById = useCallback(
+    async (id: string) => {
+      const response = await axiosInstance.get(Api.Subject.GET_BY_ID(id));
+      return response.data?.dataResponse || null;
+    },
+    [axiosInstance],
+  );
+
   return {
     getAllSubjects,
+    getPagedSubjects,
     getActiveSubjects,
+    getSubjectById,
     createSubject,
     updateSubject,
     softDeleteSubject,

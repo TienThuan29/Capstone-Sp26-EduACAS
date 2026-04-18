@@ -4,8 +4,11 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeInit } from "../.flowbite-react/init";
 import { ToastProvider } from "@/contexts/ToastContext";
 import { UserProvider } from "@/contexts/AuthContext";
+import { ActiveExamSessionGate } from "@/components/student-exam-session/active-exam-session-gate";
+import { GlobalDisallowedRouteExamGuard } from "@/components/student-exam-session/global-disallowed-route-exam-guard";
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,7 +26,7 @@ export const metadata: Metadata = {
   description:
     "Automated Console-based Programming Assessment System for University Education",
   icons: {
-    icon: "/images/EduACAS-single.png",
+    icon: LOGO_EDU_ACAS_SINGLE,
   },
 };
 
@@ -44,6 +47,8 @@ export default function RootLayout({
         <ThemeInit />
         <ToastProvider>
           <UserProvider>
+            <ActiveExamSessionGate />
+            <GlobalDisallowedRouteExamGuard />
             <SidebarProvider>
               <ThemeProvider>{children}</ThemeProvider>
             </SidebarProvider>

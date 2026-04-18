@@ -2,6 +2,7 @@
 
 import { Card } from "flowbite-react"
 import Image from "next/image"
+import { LOGO_EDU_ACAS, PLACEHOLDER, PYTHON_CODE_IMG, JAVASCRIPT_CODE_IMG, JAVA_CODE_IMG, SQL_CODE_IMG } from "@/assets/images"
 
 export default function LandingPage() {
   const UsersIcon = () => (
@@ -68,7 +69,7 @@ export default function LandingPage() {
                   style={{ backgroundColor: "#FFFFFF", border: "3px solid #C9A24D" }}
                 >
                   <Image
-                    src="/images/Edu-ACAS logo.png"
+                    src={LOGO_EDU_ACAS}
                     alt="Edu-ACAS Logo"
                     width={400}
                     height={400}
@@ -292,25 +293,25 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {[
               {
-                img: "/python-code-editor-with-syntax-highlighting-showin.jpg",
+                img: PYTHON_CODE_IMG,
                 title: "Lập trình Python",
                 desc: "Học Python qua các bài tập thực hành về cấu trúc dữ liệu, thuật toán và ứng dụng thực tế. Nội dung chi tiết sẽ được bổ sung sau.",
                 badge: "Python",
               },
               {
-                img: "/javascript-code-with-colorful-syntax-highlighting-.jpg",
+                img: JAVASCRIPT_CODE_IMG,
                 title: "JavaScript",
                 desc: "Thành thạo JavaScript với các bài tập tương tác về ES6+, lập trình bất đồng bộ và thao tác DOM. Nội dung chi tiết sẽ được bổ sung sau.",
                 badge: "JavaScript",
               },
               {
-                img: "/java-code-showing-class-structure-and-object-orien.jpg",
+                img: JAVA_CODE_IMG,
                 title: "Phát triển Java",
                 desc: "Tìm hiểu Java với các bài tập về OOP, cấu trúc dữ liệu và phát triển ứng dụng doanh nghiệp. Nội dung chi tiết sẽ được bổ sung sau.",
                 badge: "Java",
               },
               {
-                img: "/sql-query-editor-showing-database-tables-and-selec.jpg",
+                img: SQL_CODE_IMG,
                 title: "SQL & Cơ sở dữ liệu",
                 desc: "Thực hành các câu truy vấn SQL, thiết kế cơ sở dữ liệu và làm việc hiệu quả với cơ sở dữ liệu quan hệ. Nội dung chi tiết sẽ được bổ sung sau.",
                 badge: "SQL",
@@ -322,7 +323,7 @@ export default function LandingPage() {
                 style={{ backgroundColor: "#F5F7FA", borderColor: "#C9A24D" }}
               >
                 <div className="relative aspect-video overflow-hidden" style={{ backgroundColor: "#1E1E1E" }}>
-                  <img src={item.img || "/placeholder.svg"} alt={item.title} className="w-full h-full object-cover" />
+                  <img src={item.img || PLACEHOLDER} alt={item.title} className="w-full h-full object-cover" />
                   <div
                     className="absolute top-3 right-3 px-3 py-1 rounded-full font-mono text-sm font-semibold"
                     style={{ backgroundColor: "#C9A24D", color: "#FFFFFF" }}

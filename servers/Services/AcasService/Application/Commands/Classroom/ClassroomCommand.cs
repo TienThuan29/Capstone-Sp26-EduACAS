@@ -1,4 +1,4 @@
-﻿using AcasService.Application.Mappers;
+using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Messaging.User;
 using AcasService.Repositories.Classroom;
@@ -14,6 +14,7 @@ namespace AcasService.Application.Commands.Classroom
         Task<ClassroomResponse> UpdateClassroomAsync(string classroomId, UpdateClassroomRequest request);
         Task<ClassroomResponse> DeleteClassroomAsync(string classroomId);
         Task<ClassroomResponse> SoftDeleteClassroomAsync(string classroomId);
+        Task<ClassroomResponse> RegenerateEnrolKeyAsync(string classroomId);
     }
 
     public class ClassroomCommand : IClassroomCommand
@@ -59,7 +60,12 @@ namespace AcasService.Application.Commands.Classroom
                 CreatedDate = DateTime.UtcNow,
                 UpdatedDate = null,
                 EndDate = request.EndDate,
-                IsDeleted = false
+                IsDeleted = false,
+                GradingSettings = new Models.GradingSettings
+                {
+                    AvgScoreThreshold = request.GradingSettings?.AvgScoreThreshold ?? 0f,
+                    MinExamCount = request.GradingSettings?.MinExamCount ?? 0
+                }
             };
             var createdClassroom = await _classroomRepository.CreateAsync(newClassroom);
             if (createdClassroom == null)
@@ -95,6 +101,11 @@ namespace AcasService.Application.Commands.Classroom
             existingClassroom.MaxSlot = request.MaxSlot;
             existingClassroom.EnrolKey = request.EnrolKey;
             existingClassroom.UpdatedDate = DateTime.UtcNow;
+            existingClassroom.GradingSettings = new Models.GradingSettings
+            {
+                AvgScoreThreshold = request.GradingSettings?.AvgScoreThreshold ?? 0f,
+                MinExamCount = request.GradingSettings?.MinExamCount ?? 0
+            };
 
             var updatedClassroom = await _classroomRepository.UpdateAsync(existingClassroom);
             if (updatedClassroom == null)
@@ -137,6 +148,30 @@ namespace AcasService.Application.Commands.Classroom
             var subject = await _subjectRepository.FindByIdAsync(existingClassroom.SubjectId);
             var lecturerProfile = await _userRequestProducer.GetUserByIdAsync(existingClassroom.LecturerId);
             return _classroomMapper.ToClassroomResponse(existingClassroom, subject, lecturerProfile);
+        }
+
+        public async Task<ClassroomResponse> RegenerateEnrolKeyAsync(string classroomId)
+        {
+            var existingClassroom = await _classroomRepository.FindByIdAsync(classroomId);
+            if (existingClassroom == null)
+            {
+                _logger.LogError("Classroom not found");
+                throw new KeyNotFoundException("Classroom not found");
+            }
+
+            existingClassroom.EnrolKey = "@" + Guid.NewGuid().ToString("N")[..6];
+            existingClassroom.UpdatedDate = DateTime.UtcNow;
+
+            var updatedClassroom = await _classroomRepository.UpdateAsync(existingClassroom);
+            if (updatedClassroom == null)
+            {
+                _logger.LogError("Failed to regenerate enrol key for classroom");
+                throw new Exception("Failed to regenerate enrol key");
+            }
+
+            var subject = await _subjectRepository.FindByIdAsync(updatedClassroom.SubjectId);
+            var lecturerProfile = await _userRequestProducer.GetUserByIdAsync(updatedClassroom.LecturerId);
+            return _classroomMapper.ToClassroomResponse(updatedClassroom, subject, lecturerProfile);
         }
 
     }

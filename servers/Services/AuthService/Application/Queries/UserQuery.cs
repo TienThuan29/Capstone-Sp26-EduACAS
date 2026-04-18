@@ -13,6 +13,7 @@ public interface IUserQuery
     public Task<AuthResponse> AuthenticateWithGoogleAsync(string idToken);
     public Task<UserProfileResponse> GetProfileAsync(string accessToken);
     public Task<List<UserProfileResponse>> GetAllUsersAsync();
+    public Task<PagedResult<UserProfileResponse>> GetPagedUsersAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null);
 }
 
 public class UserQuery : IUserQuery
@@ -173,6 +174,21 @@ public class UserQuery : IUserQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting all users");
+            throw;
+        }
+    }
+
+    public async Task<PagedResult<UserProfileResponse>> GetPagedUsersAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null)
+    {
+        try
+        {
+            var (items, totalCount) = await _userRepository.FindPagedAsync(pageIndex, pageSize, searchTerm, role, isEnable);
+            var mappedItems = items.Select(user => _userMapper.ToUserResponse(user)).ToList();
+            return new PagedResult<UserProfileResponse>(mappedItems, totalCount, pageIndex, pageSize);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting paged users");
             throw;
         }
     }

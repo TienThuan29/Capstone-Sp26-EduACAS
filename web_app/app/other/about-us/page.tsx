@@ -9,6 +9,7 @@ import {
   SparklesIcon,
 } from "@/components/svg-icons"
 import Image from "next/image"
+import { LOGO_EDU_ACAS } from "@/assets/images"
 
 export default function AboutUsPage() {
   return (
@@ -49,7 +50,7 @@ export default function AboutUsPage() {
                   style={{ border: "3px solid #C9A24D" }}
                 >
                   <Image
-                    src="/images/Edu-ACAS logo.png"
+                    src={LOGO_EDU_ACAS}
                     alt="Edu-ACAS Logo"
                     width={400}
                     height={400}

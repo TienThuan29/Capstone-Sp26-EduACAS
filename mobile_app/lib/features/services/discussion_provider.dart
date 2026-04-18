@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:mobile/core/configs/api_config.dart';
-import 'package:mobile/core/network/api_network.dart';
-import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/discussion_issue.dart';
 import 'package:mobile/features/services/discussion_service.dart';
 
 class DiscussionProvider {
   bool isLoading = false;
   String? errorMessage;
-  List<DiscussionIssue> discussions = [];
+  List<DiscussionIssueListItem> discussions = [];
   String searchQuery = '';
+  int totalCount = 0;
 
   Future<void> fetchDiscussions(Function() onUpdate, {String? classId}) async {
     isLoading = true;
@@ -18,24 +16,17 @@ class DiscussionProvider {
 
     try {
       if (classId != null) {
-        final List<Map<String, dynamic>> rawData = await DiscussionIssueService.getByClassroomId(classId);
-        discussions = rawData.map((json) => DiscussionIssue.fromJson(json)).toList();
-      } else {
-        // Fallback or generic fetch if needed
-        final token = await TokenStorage.getAccessToken();
-        if (token == null) throw Exception('No access token found');
-
-        final response = await ApiNetwork.getWithAuth(
-          endpoint: ApiConfig.createDiscussionIssueEndpoint,
-          token: token,
+        // Use the paged API (fetch first page with large page size for simplicity)
+        final paged = await DiscussionIssueService.getPagedByClassroom(
+          classId,
+          pageIndex: 1,
+          pageSize: 100,
         );
-
-        if (response['success'] == true && response['dataResponse'] != null) {
-          final List<dynamic> data = response['dataResponse'];
-          discussions = data.map((json) => DiscussionIssue.fromJson(json as Map<String, dynamic>)).toList();
-        } else {
-          errorMessage = response['message'] ?? 'Failed to load discussions';
-        }
+        discussions = paged.items;
+        totalCount = paged.totalCount;
+      } else {
+        discussions = [];
+        totalCount = 0;
       }
     } catch (e) {
       debugPrint('Failed to get discussions: $e');
@@ -51,9 +42,11 @@ class DiscussionProvider {
     onUpdate();
   }
 
-  List<DiscussionIssue> getFilteredDiscussions() {
+  List<DiscussionIssueListItem> getFilteredDiscussions() {
     if (searchQuery.isEmpty) return discussions;
     final query = searchQuery.toLowerCase().trim();
-    return discussions.where((d) => d.title.toLowerCase().contains(query)).toList();
+    return discussions
+        .where((d) => d.title.toLowerCase().contains(query))
+        .toList();
   }
 }

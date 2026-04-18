@@ -13,7 +13,7 @@ import {
   TimelineTitle,
   Tooltip,
 } from "flowbite-react";
-import { CheckIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { CheckIcon, PencilIcon, TrashIcon, ArrowPathIcon } from "@heroicons/react/24/solid";
 import {
   ClipboardDocumentIcon,
   EyeIcon,
@@ -28,12 +28,16 @@ type OverviewTabProps = {
   classroom: Classroom;
   onOpenUpdateModal: () => void;
   onOpenDeleteModal: () => void;
+  onRegenerateEnrolKey: () => void;
+  isRegeneratingKey: boolean;
 };
 
 export function OverviewTab({
   classroom,
   onOpenUpdateModal,
   onOpenDeleteModal,
+  onRegenerateEnrolKey,
+  isRegeneratingKey,
 }: OverviewTabProps) {
   const [showEnrolKey, setShowEnrolKey] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -137,6 +141,21 @@ export function OverviewTab({
                       <CheckIcon className="h-4 w-4 text-green-600 dark:text-green-400" />
                     ) : (
                       <ClipboardDocumentIcon className="h-4 w-4" />
+                    )}
+                  </Button>
+                </Tooltip>
+                <Tooltip content="Regenerate enrol key" placement="top">
+                  <Button
+                    color="gray"
+                    size="sm"
+                    onClick={onRegenerateEnrolKey}
+                    disabled={isRegeneratingKey}
+                    className="inline-flex cursor-pointer items-center gap-2"
+                  >
+                    {isRegeneratingKey ? (
+                      <ArrowPathIcon className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <ArrowPathIcon className="h-4 w-4" />
                     )}
                   </Button>
                 </Tooltip>

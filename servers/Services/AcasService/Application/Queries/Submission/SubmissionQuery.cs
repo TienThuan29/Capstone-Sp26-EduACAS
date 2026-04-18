@@ -1,4 +1,5 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.KeystrokeLogs;
 using AcasService.Application.Queries.Problem;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Messaging.User;
@@ -18,6 +19,8 @@ public interface ISubmissionQuery
       Task<List<Models.Submission>> GetTheLatestVersionSubmissionsByExamAndProblemAsync(string examId, string problemId);
 
       Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId);
+
+      Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId);
 }
 
 public class SubmissionQuery : ISubmissionQuery
@@ -25,6 +28,7 @@ public class SubmissionQuery : ISubmissionQuery
       private readonly ISubmissionCache _submissionCache;
       private readonly ISubmissionRepository _submissionRepository;
       private readonly IProblemQuery _problemQuery;
+      private readonly IKeystrokeLogsQuery _keystrokeLogsQuery;
       private readonly UserRequestProducer _userRequestProducer;
       private readonly SubmissionMapper _submissionMapper;
 
@@ -32,12 +36,14 @@ public class SubmissionQuery : ISubmissionQuery
             ISubmissionRepository submissionRepository,
             ISubmissionCache submissionCache,
             IProblemQuery problemQuery,
+            IKeystrokeLogsQuery keystrokeLogsQuery,
             UserRequestProducer userRequestProducer,
             SubmissionMapper submissionMapper)
       {
             _submissionRepository = submissionRepository;
             _submissionCache = submissionCache;
             _problemQuery = problemQuery;
+            _keystrokeLogsQuery = keystrokeLogsQuery;
             _userRequestProducer = userRequestProducer;
             _submissionMapper = submissionMapper;
       }
@@ -50,6 +56,9 @@ public class SubmissionQuery : ISubmissionQuery
             var submission = await _submissionRepository.GetByIdAsync(id).ConfigureAwait(false);
             if (submission == null)
                   return (null, null, null);
+
+            var keystrokeLogs = await _keystrokeLogsQuery.GetBySubmissionIdAsync(id).ConfigureAwait(false);
+            submission.KeystrokeLogs = keystrokeLogs ?? new List<Models.KeystrokeLog>();
 
             var problem = await _problemQuery.GetProblemByIdAsync(submission.ProblemId).ConfigureAwait(false);
             var studentProfile = await _userRequestProducer.GetUserByIdAsync(submission.StudentId).ConfigureAwait(false);
@@ -72,14 +81,24 @@ public class SubmissionQuery : ISubmissionQuery
             var problems = await _problemQuery.GetProblemsByIdsAsync(problemIds).ConfigureAwait(false);
             var problemLiteById = problems.ToDictionary(p => p.Id, p => new ProblemLiteResponse { Id = p.Id, Title = p.Title });
 
+            var studentIds = byProblem.Values.SelectMany(list => list.Select(s => s.StudentId)).Distinct().ToList();
+            var studentProfiles = await _userRequestProducer.GetUsersByIdsAsync(studentIds).ConfigureAwait(false);
+            var studentById = studentProfiles.ToDictionary(p => p.Id, p => _submissionMapper.ToStudentLiteResponse(p));
+
             return byProblem
                 .Select(kv => new ProblemSubmissionsResponse
                 {
                     ProblemId = kv.Key,
                     Submissions = kv.Value
-                        .Select(s => _submissionMapper.ToResponse(s, problemLiteById.GetValueOrDefault(kv.Key)))
+                        .Select(s => _submissionMapper.ToResponse(
+                            s,
+                            problemLiteById.GetValueOrDefault(kv.Key),
+                            studentById.GetValueOrDefault(s.StudentId)))
                         .ToList()
                 })
                 .ToList();
       }
+
+      public Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId) =>
+            _submissionRepository.GetVersionsBySubmissionKey(studentId, examId, problemId);
 }

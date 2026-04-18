@@ -14,6 +14,24 @@ public class BulkSubmissionGradingRequest
   public List<SubmissionGradingRequest> Submissions { get; set; } = new List<SubmissionGradingRequest>();
 }
 
+public class SingleSubmissionRegradeRequest
+{
+  [JsonPropertyName("compilerId")]
+  public string CompilerId { get; set; } = string.Empty;
+
+  [JsonPropertyName("languageId")]
+  public string LanguageId { get; set; } = string.Empty;
+}
+
+public class SubmissionScoreOverrideRequest
+{
+  [JsonPropertyName("finalScore")]
+  public float FinalScore { get; set; }
+
+  [JsonPropertyName("maxMark")]
+  public float MaxMark { get; set; }
+}
+
 public class SubmissionGradingRequest
 {
   [JsonPropertyName("id")]

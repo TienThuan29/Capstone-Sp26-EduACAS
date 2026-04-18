@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, Suspense } from "react";
+import { useEffect, useState, Suspense, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Spinner, Button } from "flowbite-react";
+import { Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClassroom } from "@/hooks/classroom/useClassroom";
 import type { Classroom as ClassroomDetail } from "@/types/classroom";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
@@ -20,13 +20,16 @@ import {
   OverviewTab,
   SlotTab,
   DiscussionTab,
+  StudentDashboardTab,
+  QuizzesTab,
 } from "@/app/my-classroom/tabs";
+import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
 
 function ClassroomContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getClassroomById, leaveClassroom } = useClassroom();
+  const { getClassroomById, leaveClassroom, recordClassroomAccess } = useClassroom();
   const { getExaminationsByClassId } = useExamination();
   const { user } = useAuth();
 
@@ -38,6 +41,7 @@ function ClassroomContent() {
   const [examsLoading, setExamsLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
+  const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(null);
 
   const studentId = user?.id;
   const classId = params.id as string;
@@ -81,6 +85,14 @@ function ClassroomContent() {
     }
   }, [getClassroomById, studentId, classId]);
 
+  // useEffect(() => {
+  //   if (!studentId || !classId || !classroom?.id) return;
+  //   if (user?.role?.toUpperCase() !== "STUDENT") return;
+  //   void recordClassroomAccess(studentId, classId).catch(() => {
+  //     /* non-blocking; Redis may be unavailable */
+  //   });
+  // }, [studentId, classId, classroom?.id, user?.role, recordClassroomAccess]);
+
   useEffect(() => {
     const fetchExaminations = async () => {
       if ((activeTab === "exams" || activeTab === "slots") && classId) {
@@ -102,14 +114,7 @@ function ClassroomContent() {
   }, [getExaminationsByClassId, activeTab, classId]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="ml-20 flex flex-grow items-center justify-center bg-gray-50 lg:ml-64 dark:bg-gray-900">
-          <Spinner size="xl" color="info" />
-        </div>
-      </div>
-    );
+    return <ClassroomDetailPageSkeleton />;
   }
 
   if (!classroom) {
@@ -146,11 +151,26 @@ function ClassroomContent() {
         return <PractiseTab />;
       case "slots":
         return <SlotTab />;
+      case "quizzes":
+        return (
+          <QuizzesTab
+            classId={classId}
+            setQuizDetailBack={setQuizDetailBack}
+          />
+        );
       case "discussion":
         return (
           <DiscussionTab
             classId={classId}
             hideBackButton={!!searchParams.get("issue")}
+          />
+        );
+      case "dashboard":
+        return (
+          <StudentDashboardTab
+            classroomId={classId}
+            classroomName={classroom.className}
+            studentId={studentId}
           />
         );
       default:
@@ -194,6 +214,14 @@ function ClassroomContent() {
               className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
             />
           )}
+          {activeTab === "quizzes" && quizDetailBack && (
+            <DefaultOutlineCustomButton
+              label="Back to list"
+              icon={<ArrowLeftIcon className="h-4 w-4" />}
+              onClick={quizDetailBack}
+              className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
+            />
+          )}
         </div>
 
         {renderTabContent()}
@@ -205,11 +233,7 @@ function ClassroomContent() {
 export default function ClassroomDetailPage() {
   return (
     <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <Spinner size="xl" />
-        </div>
-      }
+      fallback={<ClassroomDetailPageSkeleton />}
     >
       <ClassroomContent />
     </Suspense>

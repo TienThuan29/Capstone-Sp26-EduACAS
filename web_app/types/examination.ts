@@ -25,6 +25,7 @@ export interface Problem {
   difficulty: number;
   codeTemplate: string;
   testCases: TestCase[];
+  tags?: string[];
   createdDate: string;
   updatedDate: string;
 }
@@ -46,8 +47,10 @@ export interface Examination {
   description: string;
   isPublicResult: boolean;
   totalMark: number;
-  status: number;
-  mode: number;
+  status: ExaminationStatus;
+  mode: ExaminationMode;
+  useStrict: boolean;
+  minScoreThreshold: number;
   isDeleted: boolean;
   createdDate: string;
   updatedDate: string;
@@ -74,6 +77,8 @@ export interface ExaminationRequest {
   totalMark: number;
   status: ExaminationStatus;
   mode: ExaminationMode;
+  useStrict: boolean;
+  minScoreThreshold: number;
 }
 
 export interface ExamProblem {
@@ -90,7 +95,8 @@ export interface ExaminationSpecificProblemResponse {
   startDatetime: string;
   endDatetime: string;
   description: string;
-  mode: Mode;
+  mode: "PRACTICAL" | "EXAMINATION";
+  useStrict: boolean;
 }
 
 export enum Mode {

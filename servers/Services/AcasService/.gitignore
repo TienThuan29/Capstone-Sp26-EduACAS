@@ -373,3 +373,6 @@ appsettings.*.json
 
 # Docker
 .dockerignore
+
+# Firebase service account (secret)
+edu-acasnotifite-firebase-adminsdk-fbsvc-d780fbadfb.json

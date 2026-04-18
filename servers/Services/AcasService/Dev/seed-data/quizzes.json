@@ -1,0 +1,140 @@
+[
+  {
+    "id": "quiz-001",
+    "subjectId": "sub-001",
+    "classroomId": "cls-001",
+    "title": "Python Basics Quiz",
+    "duration": 20,
+    "status": "CLOSED",
+    "startDatetime": "2026-02-01T08:00:00",
+    "endDatetime": "2026-02-01T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-01-28T10:00:00",
+    "updatedAt": "2026-02-01T10:05:00",
+    "questions": [
+      { "quizId": "quiz-001", "questionId": "qzq-001", "marks": 1, "displayOrder": 1 },
+      { "quizId": "quiz-001", "questionId": "qzq-002", "marks": 2, "displayOrder": 2 },
+      { "quizId": "quiz-001", "questionId": "qzq-003", "marks": 3, "displayOrder": 3 }
+    ]
+  },
+  {
+    "id": "quiz-002",
+    "subjectId": "sub-002",
+    "classroomId": "cls-002",
+    "title": "DSA Foundation Quiz",
+    "duration": 25,
+    "status": "CLOSED",
+    "startDatetime": "2026-02-10T14:00:00",
+    "endDatetime": "2026-02-10T16:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-02-05T10:00:00",
+    "updatedAt": "2026-02-10T16:05:00",
+    "questions": [
+      { "quizId": "quiz-002", "questionId": "qzq-004", "marks": 2, "displayOrder": 1 },
+      { "quizId": "quiz-002", "questionId": "qzq-005", "marks": 3, "displayOrder": 2 }
+    ]
+  },
+  {
+    "id": "quiz-003",
+    "subjectId": "sub-003",
+    "classroomId": "cls-003",
+    "title": "OOP and SQL Quick Check",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-02-15T08:00:00",
+    "endDatetime": "2026-02-15T10:00:00",
+    "createdBy": "usr-lec-002",
+    "createdAt": "2026-02-10T10:00:00",
+    "updatedAt": "2026-02-15T10:05:00",
+    "questions": [
+      { "quizId": "quiz-003", "questionId": "qzq-006", "marks": 2, "displayOrder": 1 },
+      { "quizId": "quiz-003", "questionId": "qzq-007", "marks": 3, "displayOrder": 2 },
+      { "quizId": "quiz-003", "questionId": "qzq-008", "marks": 1, "displayOrder": 3 }
+    ]
+  },
+  {
+    "id": "quiz-004",
+    "subjectId": "sub-001",
+    "classroomId": "cls-001",
+    "title": "Control Flow Practice",
+    "duration": 30,
+    "status": "PUBLISHED",
+    "startDatetime": "2026-04-20T08:00:00",
+    "endDatetime": "2026-04-20T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-04-01T10:00:00",
+    "updatedAt": "2026-04-01T10:00:00",
+    "questions": [
+      { "quizId": "quiz-004", "questionId": "qzq-009", "marks": 2, "displayOrder": 1 },
+      { "quizId": "quiz-004", "questionId": "qzq-010", "marks": 3, "displayOrder": 2 }
+    ]
+  },
+  {
+    "id": "quiz-005",
+    "subjectId": "sub-001",
+    "classroomId": "cls-006",
+    "title": "Introduction to Programming Quiz",
+    "duration": 45,
+    "status": "CLOSED",
+    "startDatetime": "2026-03-10T08:00:00",
+    "endDatetime": "2026-03-10T10:00:00",
+    "createdBy": "usr-lec-003",
+    "createdAt": "2026-03-05T10:00:00",
+    "updatedAt": "2026-03-10T10:05:00",
+    "questions": [
+      { "quizId": "quiz-005", "questionId": "qzq-011", "marks": 5, "displayOrder": 1 },
+      { "quizId": "quiz-005", "questionId": "qzq-012", "marks": 5, "displayOrder": 2 }
+    ]
+  },
+  {
+    "id": "quiz-006",
+    "subjectId": "sub-004",
+    "classroomId": "cls-004",
+    "title": "Database Design Quiz",
+    "duration": 30,
+    "status": "DRAFT",
+    "startDatetime": "2026-04-25T14:00:00",
+    "endDatetime": "2026-04-25T16:00:00",
+    "createdBy": "usr-lec-002",
+    "createdAt": "2026-04-10T10:00:00",
+    "updatedAt": "2026-04-10T10:00:00",
+    "questions": [
+      { "quizId": "quiz-006", "questionId": "qzq-013", "marks": 2, "displayOrder": 1 },
+      { "quizId": "quiz-006", "questionId": "qzq-014", "marks": 3, "displayOrder": 2 }
+    ]
+  },
+  {
+    "id": "quiz-007",
+    "subjectId": "sub-005",
+    "classroomId": "cls-005",
+    "title": "Software Engineering Principles",
+    "duration": 20,
+    "status": "PUBLISHED",
+    "startDatetime": "2026-04-22T08:00:00",
+    "endDatetime": "2026-04-22T09:00:00",
+    "createdBy": "usr-lec-003",
+    "createdAt": "2026-04-15T10:00:00",
+    "updatedAt": "2026-04-15T10:00:00",
+    "questions": [
+      { "quizId": "quiz-007", "questionId": "qzq-015", "marks": 2, "displayOrder": 1 },
+      { "quizId": "quiz-007", "questionId": "qzq-016", "marks": 2, "displayOrder": 2 }
+    ]
+  },
+  {
+    "id": "quiz-008",
+    "subjectId": "sub-002",
+    "classroomId": "cls-002",
+    "title": "Arrays and Strings Quiz",
+    "duration": 30,
+    "status": "ONGOING",
+    "startDatetime": "2026-04-16T08:00:00",
+    "endDatetime": "2026-04-16T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-04-10T10:00:00",
+    "updatedAt": "2026-04-16T08:00:00",
+    "questions": [
+      { "quizId": "quiz-008", "questionId": "qzq-017", "marks": 2, "displayOrder": 1 },
+      { "quizId": "quiz-008", "questionId": "qzq-018", "marks": 3, "displayOrder": 2 }
+    ]
+  }
+]

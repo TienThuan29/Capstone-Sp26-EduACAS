@@ -73,6 +73,9 @@ public class SubmissionResponse
     [JsonPropertyName("testResults")]
     public List<TestResultResponse> TestResults { get; set; } = new();
 
+    [JsonPropertyName("keystroke_logs")]
+    public List<KeystrokeLogResponse> KeystrokeLogs { get; set; } = new();
+
     [JsonPropertyName("regradingRequestId")]
     public string RegradingRequestId { get; set; } = string.Empty;
 
@@ -123,6 +126,42 @@ public class TestResultResponse
 
     [JsonPropertyName("createdDate")]
     public DateTime CreatedDate { get; set; }
+}
+
+public class KeystrokeLogResponse
+{
+    [JsonPropertyName("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [JsonPropertyName("submissionId")]
+    public string SubmissionId { get; set; } = string.Empty;
+
+    [JsonPropertyName("keystroke_data")]
+    public List<KeystrokeRecordResponse> KeystrokeData { get; set; } = new();
+
+    [JsonPropertyName("createdDate")]
+    public DateTime CreatedDate { get; set; }
+}
+
+public class KeystrokeRecordResponse
+{
+    [JsonPropertyName("timeStartSet")]
+    public string TimeStartSet { get; set; } = string.Empty;
+
+    [JsonPropertyName("timeOffSet")]
+    public string TimeOffSet { get; set; } = string.Empty;
+
+    [JsonPropertyName("duration")]
+    public double Duration { get; set; }
+
+    [JsonPropertyName("cps")]
+    public double Cps { get; set; }
+
+    [JsonPropertyName("charCount")]
+    public int CharCount { get; set; }
+
+    [JsonPropertyName("content")]
+    public string Content { get; set; } = string.Empty;
 }
 
 /// <summary>

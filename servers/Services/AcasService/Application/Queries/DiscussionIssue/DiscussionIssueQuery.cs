@@ -15,6 +15,10 @@ public interface IDiscussionIssueQuery
     Task<int> GetCountByClassroomIdAsync(string classroomId);
 
     Task<DiscussionIssueDetailResponse?> GetByIdAsync(string discussionId);
+    Task<PagedResult<DiscussionIssueListResponse>> GetAllDiscussionIssuesAsync(
+        string? search = null,
+        int pageIndex = 1,
+        int pageSize = 10);
 }
 
 public class DiscussionIssueQuery : IDiscussionIssueQuery
@@ -45,18 +49,15 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        var all = await _discussionIssueRepository.FindByClassroomIdAsync(classroomId);
-        var ordered = all.OrderByDescending(x => x.CreatedDate).ToList();
-        var totalCount = ordered.Count;
-        var items = ordered
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
+        var (items, totalCount) = await _discussionIssueRepository.FindPagedByClassroomIdAsync(classroomId, pageIndex, pageSize);
+
+        var responses = items
             .Select(_discussionIssueMapper.ToListResponse)
             .ToList();
 
-        await EnrichListWithAuthorsAsync(items);
+        await EnrichListWithAuthorsAsync(responses);
 
-        return new PagedResult<DiscussionIssueListResponse>(items, totalCount, pageIndex, pageSize);
+        return new PagedResult<DiscussionIssueListResponse>(responses, totalCount, pageIndex, pageSize);
     }
 
     public async Task<int> GetCountByClassroomIdAsync(string classroomId)
@@ -72,6 +73,26 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
         var detail = _discussionIssueMapper.ToDetailResponse(issue);
         await EnrichDetailWithAuthorsAsync(detail);
         return detail;
+    }
+
+    public async Task<PagedResult<DiscussionIssueListResponse>> GetAllDiscussionIssuesAsync(
+        string? search = null,
+        int pageIndex = 1,
+        int pageSize = 10)
+    {
+        if (pageIndex < 1) pageIndex = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100;
+
+        var (items, totalCount) = await _discussionIssueRepository.FindPagedAsync(search, pageIndex, pageSize);
+
+        var responses = items
+            .Select(_discussionIssueMapper.ToListResponse)
+            .ToList();
+
+        await EnrichListWithAuthorsAsync(responses);
+
+        return new PagedResult<DiscussionIssueListResponse>(responses, totalCount, pageIndex, pageSize);
     }
 
     private async Task EnrichListWithAuthorsAsync(List<DiscussionIssueListResponse> items)
@@ -130,7 +151,8 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
                 result[user.Id] = new AuthorDisplayResponse
                 {
                     FullName = user.Fullname ?? string.Empty,
-                    AvatarUrl = user.AvatarUrl ?? string.Empty
+                    AvatarUrl = user.AvatarUrl ?? string.Empty,
+                    Email = user.Email ?? string.Empty
                 };
         }
         return result;

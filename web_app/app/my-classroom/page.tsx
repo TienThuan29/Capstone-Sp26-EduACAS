@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Card,
-  Spinner,
   TextInput,
   Select,
   Button,
@@ -18,6 +17,7 @@ import {
   CalendarIcon,
   MagnifyingGlassIcon,
   BookOpenIcon,
+  DocumentIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "@/contexts/AuthContext";
 import HomeNavbar from "@/components/navbar";
@@ -26,6 +26,8 @@ import { useClassroom } from "@/hooks/classroom/useClassroom";
 import type { Classroom } from "@/types/classroom";
 import { formatDateOnly } from "@/utils/datetime-utils";
 import Link from "next/link";
+import { FileIcon } from "lucide-react";
+import { ClassroomListSkeleton } from "@/components/ui/skeletons";
 
 export default function ListClassroomPage() {
   const { getStudentClassrooms, getAllClassrooms, enrollClassroom } =
@@ -156,7 +158,7 @@ export default function ListClassroomPage() {
       });
       closeEnrollModal();
       if (activeTab === "all") {
-        const result = await getAllClassrooms(studentId, 1, 500);
+        const result = await getAllClassrooms(studentId);
         setClassrooms(result.items ?? []);
       } else {
         const data = await getStudentClassrooms(studentId);
@@ -180,7 +182,7 @@ export default function ListClassroomPage() {
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <HomeNavbar />
 
-      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
+      <main className="container mx-auto max-w-7xl grow px-4 pt-24 pb-12">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -269,25 +271,11 @@ export default function ListClassroomPage() {
         </div>
 
         {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Spinner size="xl" color="info" />
-          </div>
+          <ClassroomListSkeleton />
         ) : filteredClassrooms.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-white py-12 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <div className="mb-4 text-gray-400">
-              <svg
-                className="mx-auto h-16 w-16"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
-                />
-              </svg>
+              <FileIcon className="mx-auto h-16 w-16" />
             </div>
             <p className="text-lg text-gray-500 dark:text-gray-400">
               {classrooms.length === 0

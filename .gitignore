@@ -1,5 +1,9 @@
-*./.vscode
+.env
+.env.production
+.env.local
+.env.*.local
+
 .vscode/
 .vscode/*
 
-mobile
+mobile.idea/

@@ -78,4 +78,23 @@ public class DiscussionIssueQueryController : ControllerBase
             return ResponseUtil.Error<DiscussionIssueDetailResponse>("Internal Server Error", 500);
         }
     }
+
+    [HttpGet("admin")]
+    [Authorize(Roles = "ADMIN")]
+    public async Task<ActionResult<ApiResponse<PagedResult<DiscussionIssueListResponse>>>> GetAdminDiscussionIssues(
+        [FromQuery] string? search = null,
+        [FromQuery] int pageIndex = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        try
+        {
+            var result = await _discussionIssueQuery.GetAllDiscussionIssuesAsync(search, pageIndex, pageSize);
+            return ResponseUtil.Success(result, "Get discussion issues for admin successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error fetching all discussion issues for admin");
+            return ResponseUtil.Error<PagedResult<DiscussionIssueListResponse>>("Internal Server Error", 500);
+        }
+    }
 }

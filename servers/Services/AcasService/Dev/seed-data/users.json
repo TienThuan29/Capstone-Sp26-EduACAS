@@ -3,9 +3,8 @@
 
   { "id": "usr-lec-001", "roleNumber": "LE000001", "email": "lecturer1@edu-acas.com", "password": "123456", "fullname": "Dr. Nguyen Van An", "role": "LECTURER" },
   { "id": "usr-lec-002", "roleNumber": "LE000002", "email": "lecturer2@edu-acas.com", "password": "123456", "fullname": "Dr. Tran Thi Binh", "role": "LECTURER" },
-  { "id": "usr-lec-003", "roleNumber": "LE000003", "email": "lecturer3@edu-acas.com", "password": "123456", "fullname": "Dr. Le Van Cuong", "role": "LECTURER" },
-  { "id": "usr-lec-004", "roleNumber": "LE000004", "email": "lecturer4@edu-acas.com", "password": "123456", "fullname": "Dr. Pham Thi Dung", "role": "LECTURER" },
-  { "id": "usr-lec-005", "roleNumber": "LE000005", "email": "lecturer5@edu-acas.com", "password": "123456", "fullname": "Dr. Hoang Van Em", "role": "LECTURER" },
+  { "id": "usr-lec-003", "roleNumber": "LE000003", "email": "lecturer3@edu-acas.com", "password": "123456", "fullname": "Dr. Pham Van Cuong", "role": "LECTURER" },
+  { "id": "usr-lec-004", "roleNumber": "LE000004", "email": "lecturer4@edu-acas.com", "password": "123456", "fullname": "Dr. Hoang Thi Mai", "role": "LECTURER" },
 
   { "id": "usr-stu-001", "roleNumber": "SE000001", "email": "student1@edu-acas.com", "password": "123456", "fullname": "Vo Minh Khoi", "role": "STUDENT" },
   { "id": "usr-stu-002", "roleNumber": "SE000002", "email": "student2@edu-acas.com", "password": "123456", "fullname": "Nguyen Thi Lan", "role": "STUDENT" },
@@ -26,5 +25,10 @@
   { "id": "usr-stu-017", "roleNumber": "SE000017", "email": "student17@edu-acas.com", "password": "123456", "fullname": "Ta Van Phong", "role": "STUDENT" },
   { "id": "usr-stu-018", "roleNumber": "SE000018", "email": "student18@edu-acas.com", "password": "123456", "fullname": "Trinh Thi Quanh", "role": "STUDENT" },
   { "id": "usr-stu-019", "roleNumber": "SE000019", "email": "student19@edu-acas.com", "password": "123456", "fullname": "Duong Van Ren", "role": "STUDENT" },
-  { "id": "usr-stu-020", "roleNumber": "SE000020", "email": "student20@edu-acas.com", "password": "123456", "fullname": "Ha Thi Son", "role": "STUDENT" }
+  { "id": "usr-stu-020", "roleNumber": "SE000020", "email": "student20@edu-acas.com", "password": "123456", "fullname": "Ha Thi Son", "role": "STUDENT" },
+  { "id": "usr-stu-021", "roleNumber": "SE000021", "email": "student21@edu-acas.com", "password": "123456", "fullname": "Nguyen Van Thanh", "role": "STUDENT" },
+  { "id": "usr-stu-022", "roleNumber": "SE000022", "email": "student22@edu-acas.com", "password": "123456", "fullname": "Tran Thi Mai", "role": "STUDENT" },
+  { "id": "usr-stu-023", "roleNumber": "SE000023", "email": "student23@edu-acas.com", "password": "123456", "fullname": "Le Van Duc", "role": "STUDENT" },
+  { "id": "usr-stu-024", "roleNumber": "SE000024", "email": "student24@edu-acas.com", "password": "123456", "fullname": "Pham Thi Lan", "role": "STUDENT" },
+  { "id": "usr-stu-025", "roleNumber": "SE000025", "email": "student25@edu-acas.com", "password": "123456", "fullname": "Hoang Van Hung", "role": "STUDENT" }
 ]

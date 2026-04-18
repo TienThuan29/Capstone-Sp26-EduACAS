@@ -37,10 +37,16 @@ export const useClassroom = () => {
   const axiosInstance = useAxios();
 
   const getAllClassrooms = useCallback(
-    async (userId?: string, pageIndex: number = 1, pageSize: number = 10) => {
+    async (userId?: string, search?: string, status?: string, pageIndex: number = 1, pageSize: number = 10) => {
       let url = `${Api.Classroom.GET_ALL_CLASSROOMS}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
       if (userId) {
-        url += `&userId=${userId}`;
+        url += `&userId=${encodeURIComponent(userId)}`;
+      }
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+      if (status) {
+        url += `&status=${encodeURIComponent(status)}`;
       }
       const response = await axiosInstance.get(url);
       console.log(response.data);
@@ -65,6 +71,26 @@ export const useClassroom = () => {
         `${Api.Classroom.GET_STUDENT_CLASSROOMS}/${studentId}`,
       );
       return response.data?.dataResponse || [];
+    },
+    [axiosInstance],
+  );
+
+  const getRecentClassroomIds = useCallback(
+    async (userId: string, limit: number = 5) => {
+      const response = await axiosInstance.get(
+        Api.Classroom.GET_STUDENT_RECENT(userId),
+        { params: { limit } },
+      );
+      return (response.data?.dataResponse ?? []) as string[];
+    },
+    [axiosInstance],
+  );
+
+  const recordClassroomAccess = useCallback(
+    async (userId: string, classroomId: string) => {
+      await axiosInstance.post(Api.Classroom.RECORD_RECENT_ACCESS(userId), {
+        classroomId,
+      });
     },
     [axiosInstance],
   );
@@ -140,7 +166,18 @@ export const useClassroom = () => {
         Api.Classroom.UPDATE_CLASSROOM(classroomId),
         payload,
       );
-      return response.data;
+      return response.data?.dataResponse;
+    },
+    [axiosInstance],
+  );
+
+  const createClassroom = useCallback(
+    async (payload: any) => {
+      const response = await axiosInstance.post(
+        Api.Classroom.CREATE_CLASSROOM,
+        payload,
+      );
+      return response.data?.dataResponse;
     },
     [axiosInstance],
   );
@@ -150,6 +187,16 @@ export const useClassroom = () => {
       const response = await axiosInstance.patch(
         Api.Classroom.SOFT_DELETE_CLASSROOM(classroomId),
       );
+      return response.data?.dataResponse;
+    },
+    [axiosInstance],
+  );
+
+  const regenerateEnrolKey = useCallback(
+    async (classroomId: string) => {
+      const response = await axiosInstance.post(
+        Api.Classroom.REGENERATE_ENROL_KEY(classroomId),
+      );
       return response.data;
     },
     [axiosInstance],
@@ -158,12 +205,16 @@ export const useClassroom = () => {
   return {
     getAllClassrooms,
     getStudentClassrooms,
+    getRecentClassroomIds,
+    recordClassroomAccess,
     getClassroomById,
     enrollClassroom,
     leaveClassroom,
     getLecturerClassrooms,
     getSubjects,
     updateClassroom,
+    createClassroom,
     softDeleteClassroom,
+    regenerateEnrolKey,
   };
 };

@@ -13,7 +13,7 @@ namespace AcasService.Application.Queries.Classroom
     public interface IClassroomQuery
     {
         Task<ClassroomResponse> GetClassroomByIdAsync(string id);
-        Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, int pageIndex, int pageSize);
+        Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, string? search, string? status, int pageIndex, int pageSize);
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
 
 
@@ -78,13 +78,35 @@ namespace AcasService.Application.Queries.Classroom
             }
         }
 
-        public async Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, int pageIndex, int pageSize)
+        public async Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, string? search, string? status, int pageIndex, int pageSize)
         {
             try
             {
-                var allClassrooms = await _classroomRepository.FindAllAsync();
-                
+                var allClassrooms = (await _classroomRepository.FindAllAsync()).ToList();
+
                 allClassrooms.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
+
+                var now = DateTime.UtcNow;
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var lowerSearch = search.ToLowerInvariant();
+                    allClassrooms = allClassrooms.Where(c =>
+                        c.ClassName.ToLowerInvariant().Contains(lowerSearch) ||
+                        c.ClassCode.ToLowerInvariant().Contains(lowerSearch)
+                    ).ToList();
+                }
+
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    allClassrooms = status.ToLowerInvariant() switch
+                    {
+                        "active" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate >= now).ToList(),
+                        "completed" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate < now).ToList(),
+                        "deleted" => allClassrooms.Where(c => c.IsDeleted).ToList(),
+                        _ => allClassrooms
+                    };
+                }
 
                 var totalCount = allClassrooms.Count;
                 var itemsOnPage = allClassrooms
@@ -109,12 +131,16 @@ namespace AcasService.Application.Queries.Classroom
                     enrollmentByClassId = await _classroomEnrollmentRepository.FindByClassIdsAndStudentIdAsync(classIds, userId);
                 }
 
+                var classIdList = itemsOnPage.Select(c => c.Id).ToList();
+                var studentCountByClassId = await _classroomEnrollmentRepository.GetStudentCountByClassIdsAsync(classIdList);
+
                 var responses = itemsOnPage
                     .Select(classroom => _classroomMapper.ToClassroomResponse(
                         classroom,
                         subjectById.GetValueOrDefault(classroom.SubjectId),
                         userById.GetValueOrDefault(classroom.LecturerId),
-                        enrollmentByClassId.GetValueOrDefault(classroom.Id)))
+                        enrollmentByClassId.GetValueOrDefault(classroom.Id),
+                        studentCountByClassId.GetValueOrDefault(classroom.Id, 0)))
                     .ToList();
 
                 return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);

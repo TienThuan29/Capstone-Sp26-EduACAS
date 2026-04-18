@@ -75,7 +75,17 @@ public class DynamoDbHostedService : IHostedService
             configuration["DynamoDB:SubjectTableName"] ?? "acas-subjects",
             configuration["DynamoDB:SubmissionTableName"] ?? "acas-submissions",
             configuration["DynamoDB:NotificationTableName"] ?? "acas-notifications",
+            configuration["DynamoDB:ExamLogTableName"] ?? "acas-exam-logs",
             configuration["DynamoDB:SlotTableName"] ?? "acas-slots",
+            configuration["DynamoDB:KeystrokeLogsTableName"] ?? "keystrokelogs",
+            configuration["DynamoDB:QuizTableName"] ?? "acas-quizzes",
+            configuration["DynamoDB:QuestionTableName"] ?? "acas-questions",
+            configuration["DynamoDB:AnswerOptionTableName"] ?? "acas-answer-options",
+            configuration["DynamoDB:ClassroomQuizTableName"] ?? "acas-classroom-quizzes",
+            configuration["DynamoDB:QuizAttemptTableName"] ?? "acas-quiz-attempts",
+            configuration["DynamoDB:StudentAnswerTableName"] ?? "acas-student-answers",
+            configuration["DynamoDB:ErrorGroupTableName"] ?? "acas-error-groups",
+            configuration["DynamoDB:StudentExamSessionTableName"] ?? "acas-student-exam-sessions",
         };
 
         return tables

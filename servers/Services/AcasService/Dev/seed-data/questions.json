@@ -1,0 +1,52 @@
+[
+  {
+    "id": "qzq-001",
+    "content": "Which keyword is used to define a function in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-002",
+    "content": "Which of the following are Python collection data types?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-003",
+    "content": "Explain the difference between list and tuple in Python.",
+    "type": "ESSAY",
+    "textAnswer": "List is mutable while tuple is immutable.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-004",
+    "content": "What is the time complexity of binary search on a sorted array?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-005",
+    "content": "Which data structures are linear?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-006",
+    "content": "In OOP, which principle allows using one interface for many implementations?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-007",
+    "content": "Describe encapsulation in object-oriented programming.",
+    "type": "ESSAY",
+    "textAnswer": "Encapsulation wraps data and methods together and hides internal state.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-008",
+    "content": "Which SQL command is used to remove rows from a table?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  }
+]

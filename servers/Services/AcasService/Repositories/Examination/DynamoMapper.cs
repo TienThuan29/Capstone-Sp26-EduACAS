@@ -1,6 +1,7 @@
 using System.Linq;
 using Amazon.DynamoDBv2.Model;
 using AcasService.Models;
+using AcasService.Repositories.DynamoDb;
 
 namespace AcasService.Repositories.Examination;
 
@@ -15,15 +16,17 @@ namespace AcasService.Repositories.Examination;
                 ["examName"] = new AttributeValue { S = exam.ExamName },
                 ["programmingLanguageId"] = new AttributeValue { S = exam.ProgrammingLanguageId },
                 ["classroomId"] = new AttributeValue { S = exam.ClassroomId },
-                ["startDatetime"] = new AttributeValue { S = exam.StartDatetime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
-                ["endDatetime"] = new AttributeValue { S = exam.EndDatetime.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
+                ["startDatetime"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.StartDatetime) },
+                ["endDatetime"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.EndDatetime) },
                 ["isPublicResult"] = new AttributeValue { BOOL = exam.IsPublicResult },
                 ["totalMark"] = new AttributeValue { N = exam.TotalMark.ToString() },
                 ["status"] = new AttributeValue { S = exam.Status.ToString() },
                 ["mode"] = new AttributeValue { S = exam.Mode.ToString() },
+                ["useStrict"] = new AttributeValue { BOOL = exam.UseStrict },
+                ["minScoreThreshold"] = new AttributeValue { N = exam.MinScoreThreshold.ToString() },
                 ["isDeleted"] = new AttributeValue { BOOL = exam.IsDeleted },
-                ["createdDate"] = new AttributeValue { S = exam.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
-                ["updatedDate"] = new AttributeValue { S = exam.UpdatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") },
+                ["createdDate"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.CreatedDate) },
+                ["updatedDate"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.UpdatedDate) },
                 ["description"] = new AttributeValue { S = exam.Description ?? string.Empty }
             };
 
@@ -53,15 +56,17 @@ namespace AcasService.Repositories.Examination;
                 ExamName = item["examName"].S,
                 ProgrammingLanguageId = item["programmingLanguageId"].S,
                 ClassroomId = item["classroomId"].S,
-                StartDatetime = DateTime.Parse(item["startDatetime"].S),
-                EndDatetime = DateTime.Parse(item["endDatetime"].S),
+                StartDatetime = DynamoDbDateTime.FromUtcString(item["startDatetime"].S),
+                EndDatetime = DynamoDbDateTime.FromUtcString(item["endDatetime"].S),
                 IsPublicResult = item["isPublicResult"].BOOL,
                 TotalMark = float.Parse(item["totalMark"].N),
                 Status = Enum.Parse<Status>(item["status"].S),
                 Mode = Enum.Parse<Mode>(item["mode"].S),
+                UseStrict = item.ContainsKey("useStrict") ? item["useStrict"].BOOL : false,
+                MinScoreThreshold = item.ContainsKey("minScoreThreshold") ? float.Parse(item["minScoreThreshold"].N) : 0f,
                 IsDeleted = item["isDeleted"].BOOL,
-                CreatedDate = DateTime.Parse(item["createdDate"].S),
-                UpdatedDate = DateTime.Parse(item["updatedDate"].S),
+                CreatedDate = DynamoDbDateTime.FromUtcString(item["createdDate"].S),
+                UpdatedDate = DynamoDbDateTime.FromUtcString(item["updatedDate"].S),
                 Description = item.ContainsKey("description") ? item["description"].S : string.Empty
             };
 

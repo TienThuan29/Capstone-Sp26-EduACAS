@@ -67,13 +67,22 @@ public class GeminiClient : IGeminiClient
             GenerationConfig = generationConfig
         };
 
-        var url = $"{BaseUrl}/models/{_modelName}:generateContent?key={Uri.EscapeDataString(_apiKey)}";
+        var url = $"{BaseUrl}/models/{_modelName}:generateContent";
         var json = JsonSerializer.Serialize(request, _jsonOptions);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
 
-        _logger.LogDebug("Calling Gemini API: Model={Model}, PromptLength={Length}", _modelName, prompt.Length);
+        // Use header approach (primary) + query param (fallback) per Gemini spec
+        httpRequest.Headers.Add("x-goog-api-key", _apiKey);
+        _logger.LogInformation(
+            "Gemini API request: Url={Url}, Headers={Headers}, BodyLength={BodyLength}",
+            url,
+            string.Join("; ", httpRequest.Headers.Select(h => $"{h.Key}={string.Join(",", h.Value)}")),
+            json.Length);
 
-        var response = await _httpClient.PostAsync(url, content, cancellationToken);
+        var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
         var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
 
         if (!response.IsSuccessStatusCode)

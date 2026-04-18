@@ -104,6 +104,30 @@ public class ClassroomEnrollmentRepository : DynamoRepository, IClassroomEnrollm
         }
     }
 
+    public async Task<int> GetStudentCountByClassIdAsync(string classId)
+    {
+        try
+        {
+            var scanRequest = new ScanRequest
+            {
+                TableName = _classroomEnrollmentTableName,
+                FilterExpression = "classId = :classId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":classId"] = new AttributeValue { S = classId }
+                },
+                Select = Select.COUNT
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(scanRequest);
+            return response.Count;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error counting enrollments for class {ClassId}", classId);
+            return 0;
+        }
+    }
 
     public async Task<List<Models.ClassEnrollment>> FindByStudentIdAsync(string studentId)
     {
@@ -196,6 +220,63 @@ public class ClassroomEnrollmentRepository : DynamoRepository, IClassroomEnrollm
         var chunkResults = await Task.WhenAll(chunkTasks);
         foreach (var enrollment in chunkResults.SelectMany(e => e))
             result[enrollment.ClassId] = enrollment;
+
+        return result;
+    }
+
+    public async Task<Dictionary<string, int>> GetStudentCountByClassIdsAsync(IEnumerable<string> classIds)
+    {
+        var idList = classIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
+        var result = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var id in idList)
+            result[id] = 0;
+
+        if (idList.Count == 0)
+            return result;
+
+        const int pageSize = 100;
+        var chunks = idList.Chunk(pageSize).ToList();
+
+        var chunkTasks = chunks.Select(async chunk =>
+        {
+            Dictionary<string, AttributeValue>? lastKey = null;
+            var chunkCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            foreach (var id in chunk)
+                chunkCounts[id] = 0;
+
+            do
+            {
+                var inValues = new Dictionary<string, AttributeValue>(StringComparer.OrdinalIgnoreCase);
+                for (var i = 0; i < chunk.Length; i++)
+                    inValues[":c" + i] = new AttributeValue { S = chunk[i] };
+
+                var inExpr = string.Join(", ", chunk.Select((_, i) => ":c" + i));
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _classroomEnrollmentTableName,
+                    FilterExpression = "classId IN (" + inExpr + ")",
+                    ExpressionAttributeValues = inValues,
+                    ExclusiveStartKey = lastKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+                foreach (var item in response.Items)
+                {
+                    var classId = item.GetValueOrDefault("classId")?.S;
+                    if (!string.IsNullOrWhiteSpace(classId))
+                        chunkCounts[classId]++;
+                }
+
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return chunkCounts;
+        });
+
+        var chunkResults = await Task.WhenAll(chunkTasks);
+        foreach (var chunkCount in chunkResults)
+            foreach (var kvp in chunkCount)
+                result[kvp.Key] = kvp.Value;
 
         return result;
     }

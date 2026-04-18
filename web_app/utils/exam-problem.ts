@@ -38,6 +38,7 @@ export function toExamProblem(
     difficulty,
     codeTemplate,
     testCases,
+    tags: resp.tags,
     createdDate: resp.createdDate,
     updatedDate: resp.updatedDate,
   };
