@@ -98,12 +98,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// controllers
+// CORS — read from config (CorsOrigin from appsettings.json)
+var corsOrigin = builder.Configuration["Cors:CorsOrigin"] ?? "http://localhost:3000";
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8080")
+        policy.WithOrigins(corsOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

@@ -7,12 +7,12 @@ services:
     container_name: acas-redis
     hostname: redis
     ports:
-      - "6379:6379"
+      - "127.0.0.1:6379:6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-redis_secure_pass}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-redis_secure_pass}", "ping"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -26,8 +26,8 @@ services:
     container_name: acas-rabbitmq
     hostname: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
@@ -51,11 +51,11 @@ services:
       context: ./servers
       dockerfile: ApiGateway/Dockerfile
     container_name: acas-api-gateway
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     environment:
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
-      ASPNETCORE_URLS: ${ASPNETCORE_URLS}
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
       Services__AuthService__BaseUrl: http://auth-service:8081
       Services__AcasService__BaseUrl: http://acas-service:8002
     depends_on:
@@ -72,19 +72,19 @@ services:
       context: ./servers
       dockerfile: Services/AuthService/Dockerfile
     container_name: acas-auth-service
-    ports:
-      - "8081:8081"
+    expose:
+      - "8081"
     environment:
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8081
-      Cors__CorsOrigin: ${FRONTEND_URL}
-      Cors__GatewayOrigin: http://acas-api-gateway:8080
-      Redis__ConnectionString: ${REDIS_CONNECTION_STRING}
-      RabbitMQ__HostName: ${RABBITMQ_HOST}
+      Redis__ConnectionString: redis:${REDIS_PORT:-6379},password=${REDIS_PASSWORD:-redis_secure_pass}
+      RabbitMQ__HostName: rabbitmq
       RabbitMQ__Port: ${RABBITMQ_PORT}
       RabbitMQ__UserName: ${RABBITMQ_USERNAME}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
       RabbitMQ__VirtualHost: ${RABBITMQ_VIRTUAL_HOST}
+      Cors__CorsOrigin: ${FRONTEND_URL}
+      Cors__GatewayOrigin: http://acas-api-gateway:8080
       Jwt__JwtSecret: ${JWT_SECRET}
       Jwt__JwtAccessTokenExpiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
       Jwt__JwtRefreshTokenExpiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
@@ -126,15 +126,15 @@ services:
       context: ./servers
       dockerfile: Services/AcasService/Dockerfile
     container_name: acas-service
-    ports:
-      - "8002:8002"
+    expose:
+      - "8002"
     environment:
-      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
+      ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8002
       Cors__CorsOrigin: ${FRONTEND_URL}
       Cors__GatewayOrigin: http://acas-api-gateway:8080
-      Redis__ConnectionString: ${REDIS_CONNECTION_STRING}
-      RabbitMQ__HostName: ${RABBITMQ_HOST}
+      Redis__ConnectionString: redis:${REDIS_PORT:-6379},password=${REDIS_PASSWORD:-redis_secure_pass}
+      RabbitMQ__HostName: rabbitmq
       RabbitMQ__Port: ${RABBITMQ_PORT}
       RabbitMQ__UserName: ${RABBITMQ_USERNAME}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
@@ -175,7 +175,7 @@ services:
       Jwt__Audience: ${JWT_AUDIENCE}
       Dev__UserTableName: ${DYNAMODB_USER_TABLE}
       Dev__HashingSecretKey: ${HASHING_SECRET_KEY}
-      CodeRunner__BaseUrl: ${CODERUNNER_BASE_URL}
+      CodeRunner__BaseUrl: http://code-runner:5000
       Gemini__ModelName: ${GEMINI_MODEL_NAME}
       Gemini__ApiKey: ${GEMINI_API_KEY}
       AzureFormRecognizer__Endpoint: ${AZURE_FORM_RECOGNIZER_ENDPOINT}
@@ -200,10 +200,10 @@ services:
   # ─── Code Runner (Node.js) ──────────────────────────────────────
 
   code-runner:
-    image: tienthuan29/code-runner-nestjs:latest
+    image: ${CODERUNNER_IMAGE:-tienthuan29/code-runner-nestjs:latest}
     container_name: acas-code-runner
-    ports:
-      - "5000:5000"
+    expose:
+      - "5000"
     environment:
       NODE_ENV: production
       PORT: 5000
@@ -217,40 +217,39 @@ services:
     build:
       context: .
       dockerfile: web_app/Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_BASE_URL: ${BACKEND_BASE_URL}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     container_name: acas-web-app
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_BACKEND_BASE_URL: http://localhost:8080
+      NEXT_PUBLIC_BACKEND_BASE_URL: ${BACKEND_BASE_URL}
       NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
-      NEXT_PUBLIC_GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
-    depends_on:
-      - api-gateway
-      - auth-service
-      - acas-service
     networks:
       - acas-network
     restart: unless-stopped
 
-  # ─── Mobile App (Flutter web) ──────────────────────────────────
-  # NOTE: Build Flutter web first: cd mobile_app && flutter build web
-  # Then run with: docker compose --profile mobile up -d
+  # ─── Nginx Reverse Proxy ─────────────────────────────────────────
 
-  mobile-app:
-    image: nginx:alpine
-    container_name: acas-mobile-app
+  nginx:
+    build:
+      context: ./deploy/nginx
+      dockerfile: Dockerfile
+    container_name: acas-nginx
     ports:
-      - "8082:80"
+      - "80:80"
+      - "443:443"
     volumes:
-      - ./mobile_app/build/web:/usr/share/nginx/html:ro
+      - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./deploy/certs:/etc/nginx/certs:ro
     depends_on:
       - api-gateway
+      - web-app
     networks:
       - acas-network
     restart: unless-stopped
-    profiles:
-      - mobile
 
 # ─── Volumes & Networks ───────────────────────────────────────────
 

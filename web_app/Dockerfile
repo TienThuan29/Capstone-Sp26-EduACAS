@@ -1,3 +1,7 @@
+# Accept build args before any FROM so they propagate through all stages
+ARG NEXT_PUBLIC_BACKEND_BASE_URL
+ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
+
 # ---- Dependencies stage ----
 FROM node:20-alpine AS deps
 WORKDIR /app
@@ -13,6 +17,8 @@ WORKDIR /app
 COPY web_app/. .
 
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_PUBLIC_BACKEND_BASE_URL=${NEXT_PUBLIC_BACKEND_BASE_URL}
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
 
 RUN npx next build
 
@@ -22,6 +28,8 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+ENV NEXT_PUBLIC_BACKEND_BASE_URL=${NEXT_PUBLIC_BACKEND_BASE_URL}
+ENV NEXT_PUBLIC_GOOGLE_CLIENT_ID=${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
 
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
