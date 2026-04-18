@@ -29,6 +29,12 @@ import type { Examination } from "@/types/examination";
 import type { ProblemSubmissionsResponse, SubmissionResponse, TestResultResponse } from "@/types/submission";
 import type { RegradingRequest } from "@/types/regrading-request";
 import { CustomPagination } from "@/components/custom-pagination";
+import {
+  ExamDetailPanelSkeleton,
+  SubmissionsTabSkeleton,
+  SubmissionDetailModalSkeleton,
+  RegradingModalSkeleton,
+} from "@/components/ui/skeletons";
 
 // ============================================================================
 // Types & Interfaces
@@ -1078,10 +1084,7 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
           {isViewMode ? (
             // VIEW MODE: Display existing request
             loadingExisting ? (
-              <div className="flex items-center justify-center py-8">
-                <Spinner size="md" />
-                <span className="ml-2 text-sm text-gray-500">Loading request details...</span>
-              </div>
+              <RegradingModalSkeleton />
             ) : displayRequest ? (
               <div className="space-y-4">
                 {/* Status Badge */}
@@ -1368,11 +1371,7 @@ export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-16">
-        <Spinner size="lg" color="info" />
-      </div>
-    );
+    return <ExamDetailPanelSkeleton />;
   }
 
   if (error || !exam) {

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  Spinner,
   Button,
   Select,
   TextInput,
@@ -24,6 +23,7 @@ import { CustomPagination } from "@/components/custom-pagination";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { formatDateOnly } from "@/utils/datetime-utils";
+import { ManageClassroomPageSkeleton } from "@/components/ui/skeletons";
 
 interface LecturerLite {
   lecturerId: string;
@@ -317,15 +317,7 @@ export default function ManageClassroomPage() {
   }, [classrooms]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <HomeNavbar />
-        <div className="flex flex-grow items-center justify-center">
-          <Spinner size="xl" color="info" />
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ManageClassroomPageSkeleton />;
   }
 
   return (

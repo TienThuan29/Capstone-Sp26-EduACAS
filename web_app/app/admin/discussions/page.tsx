@@ -40,6 +40,7 @@ import { useThemeContext } from "@/components/theme-provider";
 import { useAdminDiscussionIssue } from "@/hooks/discussion/useAdminDiscussionIssue";
 import type { DiscussionIssueListItem, PagedDiscussionIssues, DiscussionIssue, Comment as DiscussionComment } from "@/types/discussion";
 import Sidebar from "@/components/sidebar";
+import { AdminDiscussionsSkeleton } from "@/components/ui/skeletons";
 
 const PAGE_SIZE = 10;
 
@@ -127,22 +128,26 @@ export default function AdminDiscussionsPage() {
     <div className={`min-h-screen flex ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>
       <Sidebar />
       <main className="flex-1 ml-64 p-8 space-y-4">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className={`text-4xl font-bold mb-2 tracking-tight ${isDark ? "text-white" : "text-gray-900"}`}>
-              Discussion Management
-            </h1>
-            <p className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg`}>
-              Monitor and moderate all discussion issues across classrooms
-            </p>
-          </div>
-          <Button color="gray" onClick={() => fetchDiscussions()} disabled={loading}>
-            <ArrowPathIcon className={`h-5 w-5 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-        </div>
+        {loading ? (
+          <AdminDiscussionsSkeleton />
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h1 className={`text-4xl font-bold mb-2 tracking-tight ${isDark ? "text-white" : "text-gray-900"}`}>
+                  Discussion Management
+                </h1>
+                <p className={`${isDark ? "text-gray-400" : "text-gray-600"} text-lg`}>
+                  Monitor and moderate all discussion issues across classrooms
+                </p>
+              </div>
+              <Button color="gray" onClick={() => fetchDiscussions()} disabled={loading}>
+                <ArrowPathIcon className={`h-5 w-5 mr-2 ${loading ? "animate-spin" : ""}`} />
+                Refresh
+              </Button>
+            </div>
 
-        <Card className={isDark ? "bg-gray-800 border-gray-700" : "bg-white"}>
+            <Card className={isDark ? "bg-gray-800 border-gray-700" : "bg-white"}>
           <div className="flex flex-col gap-4">
             <form onSubmit={handleSearch} className="flex gap-2">
               <div className="relative flex-1 max-w-md">
@@ -303,6 +308,8 @@ export default function AdminDiscussionsPage() {
             )}
           </div>
         </Card>
+          </>
+        )}
       </main>
 
       <Modal

@@ -2,7 +2,7 @@
 
 import { useEffect, useState, Suspense, useRef } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Spinner, Button } from "flowbite-react";
+import { Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClassroom } from "@/hooks/classroom/useClassroom";
 import type { Classroom as ClassroomDetail } from "@/types/classroom";
@@ -23,6 +23,7 @@ import {
   StudentDashboardTab,
   QuizzesTab,
 } from "@/app/my-classroom/tabs";
+import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
 
 function ClassroomContent() {
   const params = useParams();
@@ -113,14 +114,7 @@ function ClassroomContent() {
   }, [getExaminationsByClassId, activeTab, classId]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="ml-20 flex flex-grow items-center justify-center bg-gray-50 lg:ml-64 dark:bg-gray-900">
-          <Spinner size="xl" color="info" />
-        </div>
-      </div>
-    );
+    return <ClassroomDetailPageSkeleton />;
   }
 
   if (!classroom) {
@@ -239,11 +233,7 @@ function ClassroomContent() {
 export default function ClassroomDetailPage() {
   return (
     <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <Spinner size="xl" />
-        </div>
-      }
+      fallback={<ClassroomDetailPageSkeleton />}
     >
       <ClassroomContent />
     </Suspense>

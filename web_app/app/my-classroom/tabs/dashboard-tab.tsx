@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { Spinner } from "flowbite-react";
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -16,6 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { useStudentDashboard } from "@/hooks/dashboard/useStudentDashboard";
 import { ExamDetailPanel } from "@/app/my-classroom/components/exam-detail-panel";
+import { StudentDashboardSkeleton } from "@/components/ui/skeletons";
 import type {
   StudentDashboardOverview,
   StudentExamScore,
@@ -130,11 +130,7 @@ export function StudentDashboardTab({
   }, [classroomId, studentId]);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="xl" color="info" />
-      </div>
-    );
+    return <StudentDashboardSkeleton />;
   }
 
   if (error) {

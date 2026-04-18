@@ -4,7 +4,6 @@ import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import {
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -18,6 +17,7 @@ import { ChevronDownIcon, ChevronRightIcon } from "@heroicons/react/24/outline";
 import { useSlot, SlotResponse } from "@/hooks/classroom/useSlot";
 import type { ExaminationStatus, ExaminationMode } from "@/types/examination";
 import { formatDate } from "@/utils/datetime-utils";
+import { SlotsTabSkeleton } from "@/components/ui/skeletons";
 
 const STATUS_LABELS: Record<ExaminationStatus, string> = {
   PENDING: "PENDING",
@@ -83,9 +83,7 @@ export function SlotTab() {
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="xl" color="info" />
-        </div>
+        <SlotsTabSkeleton />
       ) : slots.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
           <p className="text-gray-500 dark:text-gray-400">

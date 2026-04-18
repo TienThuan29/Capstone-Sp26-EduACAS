@@ -39,6 +39,7 @@ import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDate, toLocalDatetimeString, toUtcIsoString, toLocalNowString } from "@/utils/datetime-utils";
 import { ExaminationDetailView } from "./exam-detail-tab";
+import { ExamsTabSkeleton } from "@/components/ui/skeletons";
 
 const STATUS_LABELS: Record<ExaminationStatus, string> = {
   PENDING: "PENDING",
@@ -354,9 +355,7 @@ export function ExamsTab({
       </div>
 
       {loading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="xl" />
-        </div>
+        <ExamsTabSkeleton />
       ) : examinations.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
           <p className="text-gray-500 dark:text-gray-400">

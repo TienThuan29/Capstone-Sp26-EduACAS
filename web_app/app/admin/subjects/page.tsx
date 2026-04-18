@@ -35,6 +35,7 @@ import { useToast } from "@/hooks/useToast"
 import { useSubject } from "@/hooks/subject/useSubject"
 import type { Subject } from "@/types/subject"
 import { useAuth } from "@/contexts/AuthContext"
+import { SubjectsManagementSkeleton } from "@/components/ui/skeletons"
 
 type SubjectFormData = {
   subjectCode: string
@@ -115,6 +116,10 @@ export default function SubjectsManagement() {
   }
 
   if (!mounted) return null
+
+  if (loading) {
+    return <SubjectsManagementSkeleton />
+  }
 
   const filteredSubjects = subjects.filter(subject => {
     const matchesSearch = subject.subjectName.toLowerCase().includes(searchTerm.toLowerCase()) ||

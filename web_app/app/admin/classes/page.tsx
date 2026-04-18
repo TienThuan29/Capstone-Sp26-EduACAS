@@ -37,6 +37,7 @@ import type { Classroom } from "@/types/classroom"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { formatDate, toLocalDatetimeString, toUtcIsoString } from "@/utils/datetime-utils"
 import { useToast } from "@/hooks/useToast"
+import { ClassesManagementSkeleton } from "@/components/ui/skeletons"
 
 interface ClassData {
   id: string
@@ -351,6 +352,10 @@ export default function ClassesManagement() {
     label: `${s.subjectCode} - ${s.subjectName}`,
     value: s.id
   }))
+
+  if (loading) {
+    return <ClassesManagementSkeleton />
+  }
 
   return (
     <div className={`min-h-screen flex ${isDark ? "bg-gray-900" : "bg-gray-50"}`}>

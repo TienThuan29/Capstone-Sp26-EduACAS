@@ -18,6 +18,7 @@ import {
   ArrowRightIcon,
 } from "@heroicons/react/24/solid"
 import { PageUrl } from "@/configs/page.url"
+import { AdminDashboardSkeleton } from "@/components/ui/skeletons";
 
 type AccentKey = "blue" | "purple" | "green" | "orange" | "pink" | "gray"
 
@@ -147,34 +148,45 @@ export default function AdminDashboard() {
 
   if (!mounted) return null
 
+  if (loading) {
+    return (
+      <div className={`min-h-screen flex ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+        <Sidebar />
+        <main className="flex-1 ml-64 p-8">
+          <AdminDashboardSkeleton />
+        </main>
+      </div>
+    )
+  }
+
   const statsData = [
     {
       title: "Tổng số lớp học",
-      value: loading ? "..." : stats.classrooms.toString(),
+      value: stats.classrooms.toString(),
       icon: <AcademicCapIcon className="h-6 w-6" />,
       accent: "blue" as const,
     },
     {
       title: "Tổng số môn học",
-      value: loading ? "..." : stats.subjects.toString(),
+      value: stats.subjects.toString(),
       icon: <BookOpenIcon className="h-6 w-6" />,
       accent: "purple" as const,
     },
     {
       title: "Ngôn ngữ lập trình",
-      value: loading ? "..." : stats.programmingLanguages.toString(),
+      value: stats.programmingLanguages.toString(),
       icon: <CodeBracketIcon className="h-6 w-6" />,
       accent: "green" as const,
     },
     {
       title: "Tổng số sinh viên",
-      value: loading ? "..." : stats.students.toLocaleString("vi-VN"),
+      value: stats.students.toLocaleString("vi-VN"),
       icon: <UserGroupIcon className="h-6 w-6" />,
       accent: "orange" as const,
     },
     {
       title: "Tổng số giảng viên",
-      value: loading ? "..." : stats.teachers.toLocaleString("vi-VN"),
+      value: stats.teachers.toLocaleString("vi-VN"),
       icon: <UserPlusIcon className="h-6 w-6" />,
       accent: "pink" as const,
     },

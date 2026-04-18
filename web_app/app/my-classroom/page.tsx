@@ -3,7 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Card,
-  Spinner,
   TextInput,
   Select,
   Button,
@@ -28,6 +27,7 @@ import type { Classroom } from "@/types/classroom";
 import { formatDateOnly } from "@/utils/datetime-utils";
 import Link from "next/link";
 import { FileIcon } from "lucide-react";
+import { ClassroomListSkeleton } from "@/components/ui/skeletons";
 
 export default function ListClassroomPage() {
   const { getStudentClassrooms, getAllClassrooms, enrollClassroom } =
@@ -182,7 +182,7 @@ export default function ListClassroomPage() {
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <HomeNavbar />
 
-      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
+      <main className="container mx-auto max-w-7xl grow px-4 pt-24 pb-12">
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
@@ -271,9 +271,7 @@ export default function ListClassroomPage() {
         </div>
 
         {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <Spinner size="xl" color="info" />
-          </div>
+          <ClassroomListSkeleton />
         ) : filteredClassrooms.length === 0 ? (
           <div className="rounded-lg border border-gray-200 bg-white py-12 text-center shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <div className="mb-4 text-gray-400">

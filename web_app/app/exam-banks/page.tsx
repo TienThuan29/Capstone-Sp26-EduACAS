@@ -11,7 +11,6 @@ import {
   Badge,
   Button,
   Select,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -37,6 +36,7 @@ import type { ExamFormProblem, ExamFormState, ProblemPickerState } from "./compo
 import { ExamFormModal } from "./components/exam-form-modal";
 import { ProblemPickerModal } from "./components/problem-picker-modal";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
+import { ExamBanksSkeleton } from "@/components/ui/skeletons";
 
 const DEFAULT_PROBLEM_MARK = 10;
 
@@ -318,10 +318,7 @@ export default function ExamBanksPage() {
         }`}
       >
         {loading ? (
-          <div className="flex items-center justify-center p-12">
-            <Spinner size="xl" />
-            <span className="ml-3">Loading examination templates...</span>
-          </div>
+          <ExamBanksSkeleton />
         ) : (
           <Table>
             <TableHead>

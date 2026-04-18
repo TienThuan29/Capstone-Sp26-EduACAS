@@ -8,6 +8,7 @@ import { useSubmission } from '@/hooks/submission/useSubmission';
 import { useErrorGroup } from '@/hooks/error-group/useErrorGroup';
 import type { ErrorGroupDetail, JPlagMatchDetailGroup } from '@/types/error-group';
 import type { ProgrammingLanguage } from '@/types/language';
+import { SimilarityDiffModalSkeleton } from '@/components/ui/skeletons';
 
 type SimilarityDiffModalProps = {
   pair: {
@@ -257,12 +258,7 @@ export function SimilarityDiffModal({ pair, onClose }: SimilarityDiffModalProps)
       </ModalHeader>
       <ModalBody className="p-0 h-[80vh] flex overflow-hidden">
         {loading ? (
-          <div className="flex h-full w-full items-center justify-center bg-gray-50/50">
-            <div className="flex flex-col items-center gap-4">
-              <Spinner size="xl" color="info" />
-              <p className="text-sm font-medium text-gray-500">Retrieving code highlights...</p>
-            </div>
-          </div>
+          <SimilarityDiffModalSkeleton />
         ) : (
           <>
             <div className="flex-1 flex flex-col md:flex-row border-r border-gray-200 overflow-hidden" style={{ height: '80vh' }}>

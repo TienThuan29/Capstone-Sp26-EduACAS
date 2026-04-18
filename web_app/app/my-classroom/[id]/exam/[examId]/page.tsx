@@ -124,11 +124,6 @@ function ExamDetailContent() {
   useEffect(() => {
     if (!examId || !studentId) return;
     if (examination === null) return;
-    if (examination.mode !== "EXAMINATION" || !examination.useStrict) {
-      setServerSession(null);
-      setSessionLoading(false);
-      return;
-    }
     let cancelled = false;
     setSessionLoading(true);
     void (async () => {
@@ -153,7 +148,7 @@ function ExamDetailContent() {
     return () => {
       cancelled = true;
     };
-  }, [classId, examId, studentId, examination?.id, examination?.mode, getByExam, sessionKeys]);
+  }, [classId, examId, studentId, examination?.id, getByExam, sessionKeys]);
 
   useEffect(() => {
     const fetchProblems = async () => {
@@ -199,12 +194,26 @@ function ExamDetailContent() {
   }, [examination?.id, examination?.examProblems, examination?.programmingLanguage?.id, getProblemsByIds]);
 
   const finalizeSession = useCallback(async (targetPhase: "locked" | "completed") => {
-    if (!sessionKeys || isFinishing) return;
+    if (isFinishing) return;
     setIsFinishing(true);
     try {
       if (targetPhase === "completed") {
         const updated = await complete(examId);
-        setServerSession(updated ?? null);
+        setServerSession(
+          updated ?? {
+            id: "",
+            studentId,
+            studentName: "",
+            studentRoleNumber: "",
+            examId,
+            classroomId: "",
+            phase: "COMPLETED" as const,
+            activeProblemId: null,
+            lockReason: null,
+            createdDate: new Date().toISOString(),
+            updatedDate: new Date().toISOString(),
+          },
+        );
       }
       const latest = await getLatestSubmissionsByExam(examId);
       const byProblem = new Map(latest.map((p) => [p.problemId, p.submissions]));
@@ -236,13 +245,13 @@ function ExamDetailContent() {
       setShowFinishModal(false);
     }
   }, [
+    classId,
     complete,
     examId,
     flushCachedExamLogs,
     getByExam,
     getLatestSubmissionsByExam,
     isFinishing,
-    sessionKeys,
     studentId,
   ]);
 
@@ -384,7 +393,7 @@ function ExamDetailContent() {
 
           {examination.mode === "EXAMINATION" && (
             <div className="mt-4 flex items-center justify-end gap-3">
-              {isSessionActive ? (
+              {isSessionActive || (!sessionLoading && isActive && !isSessionEnded) ? (
                 <Button color="red" className="cursor-pointer" onClick={() => setShowFinishModal(true)}>
                   Finish exam
                 </Button>

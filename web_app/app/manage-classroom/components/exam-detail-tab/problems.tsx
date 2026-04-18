@@ -20,6 +20,7 @@ import { normalizeDifficulty } from "@/types/problem";
 import { toExamProblem } from "@/utils/exam-problem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { formatDate } from "@/utils/datetime-utils";
+import { ProblemsTabSkeleton } from "@/components/ui/skeletons";
 
 function DetailRow({
   label,
@@ -357,14 +358,7 @@ export function ProblemsTabContent({
 
   // Show loading state while fetching exam problem details
   if (loadingExamProblems) {
-    return (
-      <div className="flex items-center justify-center py-8">
-        <Spinner size="lg" />
-        <span className="ml-3 text-gray-500 dark:text-gray-400">
-          Loading exam problems...
-        </span>
-      </div>
-    );
+    return <ProblemsTabSkeleton />;
   }
 
   return (
