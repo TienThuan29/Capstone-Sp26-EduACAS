@@ -28,6 +28,7 @@ import { useSubmission } from "@/hooks/submission/useSubmission";
 import { useExamLog } from "@/hooks/examination/useExamLog";
 import { formatDate, formatGradedDate } from "@/utils/datetime-utils";
 import { deriveExamViolationFlag } from "@/utils/exam-log-flag";
+import { SubmissionDetailTabSkeleton } from "@/components/ui/skeletons";
 
 export type SubmissionDetailProps = {
   submissionId: string;
@@ -312,9 +313,7 @@ export function SubmissionDetail({
       </div>
       <div className="p-4 [&_button[role=tab]]:cursor-pointer">
         {loading && (
-          <div className="flex justify-center py-12">
-            <Spinner size="xl" />
-          </div>
+          <SubmissionDetailTabSkeleton />
         )}
         {error && !loading && (
           <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">

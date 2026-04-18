@@ -25,6 +25,7 @@ import { useExamSessionManagement } from "@/hooks/examination/useExamSessionMana
 import { useToast } from "@/hooks/useToast";
 import { formatDate } from "@/utils/datetime-utils";
 import { CheckCircle } from "lucide-react";
+import { ExamSessionTabSkeleton } from "@/components/ui/skeletons";
 
 const PHASE_LABELS: Record<
   StudentExamSessionPhase,
@@ -106,11 +107,7 @@ export function ExamSessionTabContent({
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <Spinner size="xl" />
-      </div>
-    );
+    return <ExamSessionTabSkeleton />;
   }
 
   return (

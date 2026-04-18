@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
 import { TextInput, Button } from "flowbite-react"
+import { Skeleton } from "@/components/ui/skeletons"
 import {
   IconAssignment,
   IconDue,
@@ -16,6 +17,7 @@ import { useClassroom } from "@/hooks/classroom/useClassroom"
 import { useNotification } from "@/hooks/notification/useNotification"
 import { PageUrl } from "@/configs/page.url"
 import { useRouter } from "next/navigation"
+import { NotificationsSectionSkeleton, ClassroomListSkeleton } from "@/components/ui/skeletons"
 
 export default function HomePage() {
   const router = useRouter()
@@ -146,7 +148,7 @@ export default function HomePage() {
           <div className="lg:col-span-1">
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">New notifications</h2>
             {loadingNotifications ? (
-              <div className="text-gray-500 dark:text-gray-400">Loading notifications...</div>
+              <NotificationsSectionSkeleton />
             ) : notificationError ? (
               <div className="text-red-600 dark:text-red-400">{notificationError}</div>
             ) : notifications.length === 0 ? (
@@ -210,8 +212,10 @@ export default function HomePage() {
                   Recently accessed
                 </h3>
                 {loadingRecent ? (
-                  <div className="text-gray-500 dark:text-gray-400 text-sm">
-                    Loading recently accessed classrooms…
+                  <div className="flex flex-wrap gap-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <Skeleton key={i} className="h-10 w-40 rounded-lg" />
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-wrap gap-3">
@@ -246,7 +250,7 @@ export default function HomePage() {
             </div>
 
             {loadingClassrooms ? (
-              <div className="text-gray-500 dark:text-gray-400">Loading classes...</div>
+              <ClassroomListSkeleton />
             ) : classroomsError ? (
               <div className="text-red-600 dark:text-red-400">{classroomsError}</div>
             ) : filteredClassrooms.length > 0 ? (

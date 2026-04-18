@@ -52,6 +52,7 @@ import { WarningModal } from "@/app/code-editor/components/warning-modal";
 import { deriveExamViolationFlag, type ExamViolationFlag } from "@/utils/exam-log-flag";
 import { useExamLog } from "@/hooks/examination/useExamLog";
 import { useAcademicWarning } from "@/hooks/academic-warning/useAcademicWarning";
+import { ExamSubmissionsTabSkeleton } from "@/components/ui/skeletons";
 
 export type SubmissionsTabContentProps = {
   examination: Examination;
@@ -430,11 +431,7 @@ export function SubmissionsTabContent({
   }, [classId, examId, sendBatchAcademicWarnings]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner size="xl" />
-      </div>
-    );
+    return <ExamSubmissionsTabSkeleton />;
   }
 
   if (error) {
