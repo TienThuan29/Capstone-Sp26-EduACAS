@@ -218,15 +218,15 @@ services:
       context: .
       dockerfile: web_app/Dockerfile
       args:
-        NEXT_PUBLIC_BACKEND_BASE_URL: ${BACKEND_BASE_URL}
-        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+        NEXT_PUBLIC_BACKEND_BASE_URL: ${NEXT_PUBLIC_BACKEND_BASE_URL}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     container_name: acas-web-app
     expose:
       - "3000"
     environment:
       NODE_ENV: production
-      NEXT_PUBLIC_BACKEND_BASE_URL: ${BACKEND_BASE_URL}
-      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      NEXT_PUBLIC_BACKEND_BASE_URL: ${NEXT_PUBLIC_BACKEND_BASE_URL}
+      NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
     networks:
       - acas-network
     restart: unless-stopped
@@ -244,6 +244,7 @@ services:
     volumes:
       - ./deploy/nginx/conf.d:/etc/nginx/conf.d:ro
       - ./deploy/certs:/etc/nginx/certs:ro
+      - ./deploy/certbot:/var/www/certbot:ro
     depends_on:
       - api-gateway
       - web-app
