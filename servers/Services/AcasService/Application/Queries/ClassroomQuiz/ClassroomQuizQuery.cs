@@ -7,7 +7,7 @@ namespace AcasService.Application.Queries.ClassroomQuiz
     public interface IClassroomQuizQuery
     {
         Task<ClassroomQuizResponse?> GetClassroomQuizByIdAsync(string id);
-        Task<List<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdAsync(string classroomId);
+        Task<List<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdAsync(string classroomId, bool includeDrafts = false);
         Task<PagedResult<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdPagedAsync(string classroomId, int pageIndex, int pageSize, bool includeDrafts = false);
     }
 
@@ -46,11 +46,11 @@ namespace AcasService.Application.Queries.ClassroomQuiz
             }
         }
 
-        public async Task<List<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdAsync(string classroomId)
+        public async Task<List<ClassroomQuizResponse>> GetClassroomQuizzesByClassroomIdAsync(string classroomId, bool includeDrafts = false)
         {
             try
             {
-                var list = await _repository.FindByClassroomIdAsync(classroomId);
+                var list = await _repository.FindByClassroomIdAsync(classroomId, includeDrafts);
                 return list.Select(_mapper.ToClassroomQuizResponse).ToList();
             }
             catch (Exception ex)

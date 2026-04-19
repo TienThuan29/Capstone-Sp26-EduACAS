@@ -100,4 +100,29 @@ public class QuizAttemptCommandController : ControllerBase
             return ResponseUtil.Error<QuizAttemptResponse>("Failed to submit quiz attempt", 500);
         }
     }
+
+    [HttpPost("{id}/abandon")]
+    public async Task<ActionResult<ApiResponse<QuizAttemptResponse>>> Abandon(string id)
+    {
+        try
+        {
+            var result = await _quizAttemptCommand.AbandonAttemptAsync(id);
+            return ResponseUtil.Success(result, "Quiz attempt abandoned/banned successfully", 200);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            _logger.LogWarning(ex, $"Quiz attempt {id} not found for abandonment");
+            return ResponseUtil.Error<QuizAttemptResponse>("Quiz attempt not found", 404);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogWarning(ex, $"Invalid abandonment for attempt {id}");
+            return ResponseUtil.Error<QuizAttemptResponse>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"Error abandoning quiz attempt {id}");
+            return ResponseUtil.Error<QuizAttemptResponse>("Failed to ban/abandon quiz attempt", 500);
+        }
+    }
 }

@@ -36,7 +36,7 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>(initialAnswers);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { updateAnswer, submitAttempt } = useQuizAttempt();
+  const { updateAnswer, submitAttempt, getAttemptById } = useQuizAttempt();
   const { showSuccess, showError } = useToast();
 
   const questions = attempt?.questions || [];
@@ -60,35 +60,40 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
   }, [attempt, isSubmitting, submitAttempt, showSuccess, showError, onSubmitted, readOnly]);
 
   useEffect(() => {
-    if (!attempt || !attempt.endTime || readOnly || attempt.status !== 'INPROGRESS') return;
+    if (!attempt || readOnly || attempt.status !== 'INPROGRESS') return;
 
-    const endTime = new Date(attempt.endTime).getTime();
+    let timer: NodeJS.Timeout;
+    if (attempt.endTime) {
+      const endTime = new Date(attempt.endTime).getTime();
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const diff = endTime - now;
+        if (diff <= 0) {
+          setTimeLeft(0);
+          handleAutoSubmit();
+          return true;
+        }
+        setTimeLeft(diff);
+        return false;
+      };
 
-    const updateTimer = () => {
-      const now = new Date().getTime();
-      const diff = endTime - now;
-      if (diff <= 0) {
-        setTimeLeft(0);
-        return true;
-      }
-      setTimeLeft(diff);
-      return false;
-    };
-
-    if (updateTimer()) {
-      handleAutoSubmit();
-      return;
+      updateTimer();
+      timer = setInterval(updateTimer, 1000);
     }
 
-    const timer = setInterval(() => {
-      if (updateTimer()) {
-        clearInterval(timer);
-        handleAutoSubmit();
+    const pollTimer = setInterval(async () => {
+      const currentAttempt = await getAttemptById(attempt.id);
+      if (currentAttempt && currentAttempt.status === 'ABANDONED') {
+        showError("Your quiz attempt has been suspended by the lecturer.");
+        onSubmitted();
       }
-    }, 1000);
+    }, 10000);
 
-    return () => clearInterval(timer);
-  }, [attempt, handleAutoSubmit, readOnly]);
+    return () => {
+      if (timer) clearInterval(timer);
+      if (pollTimer) clearInterval(pollTimer);
+    };
+  }, [attempt, handleAutoSubmit, readOnly, getAttemptById, onSubmitted, showError]);
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);

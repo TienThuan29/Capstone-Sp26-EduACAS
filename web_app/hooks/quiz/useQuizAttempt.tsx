@@ -13,6 +13,16 @@ export const useQuizAttempt = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const getAttemptById = useCallback(async (attemptId: string): Promise<QuizAttemptResponse | null> => {
+    try {
+      const response = await axiosInstance.get<{ dataResponse: QuizAttemptResponse }>(Api.QuizAttempt.GET_BY_ID(attemptId));
+      return response.data.dataResponse;
+    } catch (err) {
+      console.error('Failed to get attempt:', err);
+      return null;
+    }
+  }, [axiosInstance]);
+
   const startAttempt = useCallback(async (request: StartQuizAttemptRequest): Promise<QuizAttemptResponse | null> => {
     try {
       setLoading(true);
@@ -48,6 +58,21 @@ export const useQuizAttempt = () => {
     } catch (err) {
       console.error('Failed to submit quiz attempt:', err);
       setError('Failed to submit quiz attempt');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [axiosInstance]);
+
+  const abandonAttempt = useCallback(async (attemptId: string): Promise<boolean> => {
+    try {
+      setLoading(true);
+      setError(null);
+      await axiosInstance.post(Api.QuizAttempt.ABANDON(attemptId));
+      return true;
+    } catch (err) {
+      console.error('Failed to abandon quiz attempt:', err);
+      setError('Failed to abandon quiz attempt');
       return false;
     } finally {
       setLoading(false);
@@ -91,7 +116,6 @@ export const useQuizAttempt = () => {
     }
   }, [axiosInstance]);
 
-  // ---------------
   const getAttemptsByStudent = useCallback(async (studentId: string): Promise<QuizAttempt[]> => {
     try {
       setError(null);
@@ -108,14 +132,15 @@ export const useQuizAttempt = () => {
       return [];
     }
   }, [axiosInstance]);
-  // ---------------
 
   return {
     loading,
     error,
+    getAttemptById,
     startAttempt,
     updateAnswer,
     submitAttempt,
+    abandonAttempt,
     getHistory,
     getSubmissionsPaged,
     getAttemptsByStudent,
