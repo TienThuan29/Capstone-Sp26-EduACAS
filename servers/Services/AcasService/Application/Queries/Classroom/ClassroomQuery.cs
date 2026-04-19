@@ -17,10 +17,9 @@ namespace AcasService.Application.Queries.Classroom
         Task<IEnumerable<ClassroomResponse>> GetClassroomsByKeywordAsync(SearchClassroomRequest request);
 
 
-        Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId);
+        Task<PagedResult<ClassroomResponse>> FindByStudentIdAsync(string studentId, string? status, string? search, int pageIndex, int pageSize);
 
-        // Task<ClassroomResponse>FindByStudentIdAndClassIdAsync(string studentId, string classId);
-        Task<PagedResult<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId, int pageIndex, int pageSize);
+        Task<PagedResult<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId, string? search, int pageIndex, int pageSize);
     }
 
     public class ClassroomQuery : IClassroomQuery
@@ -187,18 +186,56 @@ namespace AcasService.Application.Queries.Classroom
             }
         }
 
-        public async Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId)
+        public async Task<PagedResult<ClassroomResponse>> FindByStudentIdAsync(string studentId, string? status, string? search, int pageIndex, int pageSize)
         {
             var enrollments = await _classroomEnrollmentRepository.FindByStudentIdAsync(studentId);
             if (enrollments.Count == 0)
-                return new List<ClassroomResponse>();
+                return new PagedResult<ClassroomResponse>(new List<ClassroomResponse>(), 0, pageIndex, pageSize);
 
             var classIds = enrollments.Select(e => e.ClassId).Distinct().ToList();
             var classrooms = await _classroomRepository.FindByIdsAsync(classIds);
             var classroomById = classrooms.ToDictionary(c => c.Id);
 
-            var subjectIds = classrooms.Select(c => c.SubjectId).Distinct().ToList();
-            var lecturerIds = classrooms.Select(c => c.LecturerId).Distinct().ToList();
+            var now = DateTime.UtcNow;
+
+            var filtered = enrollments
+                .Select(e => (Enrollment: e, Classroom: classroomById.GetValueOrDefault(e.ClassId)))
+                .Where(x => x.Classroom != null)
+                .ToList();
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                filtered = status.ToLowerInvariant() switch
+                {
+                    "joining" => filtered.Where(x => x.Enrollment.IsJoining && !x.Classroom!.IsDeleted && x.Classroom.EndDate >= now).ToList(),
+                    "movedout" => filtered.Where(x => !x.Enrollment.IsJoining && x.Enrollment.JoinedDate != null).ToList(),
+                    _ => filtered.Where(x => !x.Classroom!.IsDeleted).ToList()
+                };
+            }
+            else
+            {
+                filtered = filtered.Where(x => !x.Classroom!.IsDeleted).ToList();
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var lowerSearch = search.ToLowerInvariant();
+                filtered = filtered.Where(x =>
+                    x.Classroom!.ClassName.ToLowerInvariant().Contains(lowerSearch) ||
+                    x.Classroom!.ClassCode.ToLowerInvariant().Contains(lowerSearch))
+                    .ToList();
+            }
+
+            filtered.Sort((a, b) => b.Classroom!.CreatedDate.CompareTo(a.Classroom!.CreatedDate));
+
+            var totalCount = filtered.Count;
+            var itemsOnPage = filtered
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var subjectIds = itemsOnPage.Select(x => x.Classroom!.SubjectId).Distinct().ToList();
+            var lecturerIds = itemsOnPage.Select(x => x.Classroom!.LecturerId).Distinct().ToList();
 
             var subjects = await _subjectRepository.FindByIdsAsync(subjectIds);
             var subjectById = subjects.ToDictionary(s => s.Id);
@@ -206,15 +243,15 @@ namespace AcasService.Application.Queries.Classroom
             var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
             var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
 
-            return enrollments
-                .Select(e => (Enrollment: e, Classroom: classroomById.GetValueOrDefault(e.ClassId)))
-                .Where(x => x.Classroom != null)
+            var responses = itemsOnPage
                 .Select(x => _classroomMapper.ToClassroomResponse(
                     x.Classroom!,
                     subjectById.GetValueOrDefault(x.Classroom!.SubjectId),
                     userById.GetValueOrDefault(x.Classroom!.LecturerId),
                     x.Enrollment))
                 .ToList();
+
+            return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);
         }
 
         // public async Task<ClassroomResponse> FindByStudentIdAndClassIdAsync(string studentId, string classId)
@@ -242,14 +279,23 @@ namespace AcasService.Application.Queries.Classroom
         //     throw new KeyNotFoundException($"Classroom with ID {classId} not found for student {studentId}.");
         // }
 
-        public async Task<PagedResult<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId, int pageIndex, int pageSize)
+        public async Task<PagedResult<ClassroomResponse>> GetClassroomsByLecturerIdAsync(string lecturerId, string? search, int pageIndex, int pageSize)
         {
             try
             {
                 var classroomsEnumerable = await _classroomRepository.GetClassroomsByLecturerIdAsync(lecturerId);
                 var classrooms = classroomsEnumerable.ToList();
-                
+
                 classrooms.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    var lowerSearch = search.ToLowerInvariant();
+                    classrooms = classrooms.Where(c =>
+                        c.ClassName.ToLowerInvariant().Contains(lowerSearch) ||
+                        c.ClassCode.ToLowerInvariant().Contains(lowerSearch))
+                        .ToList();
+                }
 
                 var totalCount = classrooms.Count;
                 var itemsOnPage = classrooms

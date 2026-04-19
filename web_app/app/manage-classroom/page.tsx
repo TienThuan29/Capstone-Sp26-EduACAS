@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   Button,
   Select,
@@ -84,8 +84,10 @@ export default function ManageClassroomPage() {
   const { getActiveSubjects } = useSubject();
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
+  const isInitialLoad = useRef(true);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedSemesterFilter, setSelectedSemesterFilter] = useState("All");
   const [sortBy, setSortBy] = useState("newest");
 
@@ -145,9 +147,13 @@ export default function ManageClassroomPage() {
     if (!currentUserId) return;
 
     try {
-      setLoading(true);
+      if (isInitialLoad.current) {
+        setLoading(true);
+        isInitialLoad.current = false;
+      }
       const data = await getLecturerClassrooms(
         currentUserId,
+        searchQuery,
         currentPage,
         PAGE_SIZE,
       );
@@ -160,13 +166,18 @@ export default function ManageClassroomPage() {
     }
   };
 
-  useEffect(() => {
-    fetchClassrooms();
-  }, [user?.id, currentPage]);
-
   const onPageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchTerm);
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    fetchClassrooms();
+  }, [user?.id, currentPage, searchQuery]);
 
   useEffect(() => {
     if (openModal) {
@@ -275,15 +286,6 @@ export default function ManageClassroomPage() {
   const filteredClassrooms = useMemo(() => {
     let result = [...classrooms];
 
-    if (searchTerm) {
-      const lowerTerm = searchTerm.toLowerCase();
-      result = result.filter(
-        (c) =>
-          c.className.toLowerCase().includes(lowerTerm) ||
-          c.classCode.toLowerCase().includes(lowerTerm),
-      );
-    }
-
     if (selectedSemesterFilter !== "All") {
       result = result.filter((c) => c.semesterName === selectedSemesterFilter);
     }
@@ -309,7 +311,7 @@ export default function ManageClassroomPage() {
     });
 
     return result;
-  }, [classrooms, searchTerm, selectedSemesterFilter, sortBy]);
+  }, [classrooms, selectedSemesterFilter, sortBy]);
 
   const semestersForFilter = useMemo(() => {
     const unique = new Set(classrooms.map((c) => c.semesterName));
@@ -324,7 +326,7 @@ export default function ManageClassroomPage() {
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <HomeNavbar />
 
-      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
+      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12 min-h-[600px]">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -343,7 +345,7 @@ export default function ManageClassroomPage() {
 
         <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="md:col-span-2">
+            <div className="flex gap-2 md:col-span-2">
               <TextInput
                 id="search"
                 type="text"
@@ -351,10 +353,18 @@ export default function ManageClassroomPage() {
                 required
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
                 icon={() => (
                   <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
                 )}
+                className="flex-1"
               />
+              <button
+                onClick={handleSearchSubmit}
+                className="flex items-center gap-1.5 rounded-lg border border-transparent bg-[#1F4E79] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90 cursor-pointer"
+              >
+                Search
+              </button>
             </div>
 
             <div>

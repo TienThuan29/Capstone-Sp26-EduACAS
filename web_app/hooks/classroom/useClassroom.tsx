@@ -66,11 +66,32 @@ export const useClassroom = () => {
   );
 
   const getStudentClassrooms = useCallback(
-    async (studentId: string) => {
-      const response = await axiosInstance.get(
-        `${Api.Classroom.GET_STUDENT_CLASSROOMS}/${studentId}`,
+    async (
+      studentId: string,
+      status?: string,
+      search?: string,
+      pageIndex: number = 1,
+      pageSize: number = 10,
+    ) => {
+      let url = `${Api.Classroom.GET_STUDENT_CLASSROOMS}/${studentId}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+      if (status) {
+        url += `&status=${encodeURIComponent(status)}`;
+      }
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+      const response = await axiosInstance.get(url);
+      return (
+        response.data?.dataResponse || {
+          items: [],
+          totalCount: 0,
+          pageIndex: 1,
+          pageSize: 10,
+          totalPages: 0,
+          hasPreviousPage: false,
+          hasNextPage: false,
+        }
       );
-      return response.data?.dataResponse || [];
     },
     [axiosInstance],
   );
@@ -133,12 +154,15 @@ export const useClassroom = () => {
   const getLecturerClassrooms = useCallback(
     async (
       lecturerId: string,
+      search?: string,
       pageIndex: number = 1,
       pageSize: number = 10,
     ) => {
-      const response = await axiosInstance.get(
-        `${Api.Classroom.GET_LECTURER_CLASSROOMS}/${lecturerId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
-      );
+      let url = `${Api.Classroom.GET_LECTURER_CLASSROOMS}/${lecturerId}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+      const response = await axiosInstance.get(url);
       return (
         response.data?.dataResponse || {
           items: [],
