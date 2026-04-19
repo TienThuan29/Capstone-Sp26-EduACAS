@@ -3,6 +3,7 @@ using AuthService.Application.ResponseDTOs;
 using AuthService.Application.Utils;
 using AuthService.Web.Requests;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace AuthService.Web.Controllers.Auth;
 
@@ -82,6 +83,27 @@ public class AuthQueryController : ControllerBase
         {
             _logger.LogError(ex, "Error getting paged users");
             return ResponseUtil.Error<PagedResult<UserProfileResponse>>("Internal Server Error", 500);
+        }
+    }
+
+    [HttpGet("check-email")]
+    [EnableRateLimiting("AuthPolicy")]
+    public async Task<ActionResult<ApiResponse<CheckEmailExistsResponse>>> CheckEmailExists([FromQuery] string email)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                return ResponseUtil.Error<CheckEmailExistsResponse>("Email is required", 400);
+            }
+
+            var result = await _userQuery.CheckEmailExistsAsync(email);
+            return ResponseUtil.Success(result, "Email check completed", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking email existence");
+            return ResponseUtil.Error<CheckEmailExistsResponse>("Internal Server Error", 500);
         }
     }
 }

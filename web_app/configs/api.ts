@@ -10,6 +10,7 @@ export const Api = {
     REGISTER_VERIFICATION: "/api/auth/v1/register-verification",
     VERIFY_EMAIL: "/api/auth/v1/verify-email",
     FORGOT_PASSWORD: "/api/auth/v1/forgot-password",
+    CHECK_EMAIL: "/api/auth/v1/check-email",
     RESET_PASSWORD: "/api/auth/v1/reset-password",
     RESET_FIRST_LOGIN_PASSWORD: "/api/auth/v1/reset-first-login-password",
     GET_PROFILE: "/api/auth/v1/profile",
