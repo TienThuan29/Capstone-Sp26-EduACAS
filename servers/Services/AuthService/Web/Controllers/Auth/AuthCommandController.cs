@@ -314,6 +314,54 @@ public class AuthCommandController : ControllerBase
         }
     }
 
+    [HttpPut("change-password")]
+    [Authorize]
+    public async Task<ActionResult<ApiResponse<object>>> ChangePassword([FromBody] ChangePasswordRequest changePasswordRequest)
+    {
+        try
+        {
+            var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrEmpty(authorizationHeader) || !authorizationHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+            {
+                return ResponseUtil.Error<object>("Authorization token is required", 401);
+            }
+
+            var accessToken = authorizationHeader.Substring("Bearer ".Length).Trim();
+            if (string.IsNullOrEmpty(accessToken))
+            {
+                return ResponseUtil.Error<object>("User not authenticated", 401);
+            }
+
+            var isChanged = await _userCommand.ChangePasswordAsync(accessToken, changePasswordRequest);
+            return ResponseUtil.Success(new { }, "Password changed successfully", 200);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("User not found"))
+        {
+            return ResponseUtil.Error<object>(ex.Message, 404);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("Current password is incorrect"))
+        {
+            return ResponseUtil.Error<object>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("do not match"))
+        {
+            return ResponseUtil.Error<object>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("between 5 and 64"))
+        {
+            return ResponseUtil.Error<object>(ex.Message, 400);
+        }
+        catch (InvalidOperationException ex)
+        {
+            return ResponseUtil.Error<object>(ex.Message, 400);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Change password error");
+            return ResponseUtil.Error<object>("Internal Server Error", 500);
+        }
+    }
+
     [HttpPut("users/{userId}")]
     public async Task<ActionResult<ApiResponse<UserProfileResponse>>> UpdateUser(string userId, [FromBody] UpdateUserRequest updateUserRequest)
     {

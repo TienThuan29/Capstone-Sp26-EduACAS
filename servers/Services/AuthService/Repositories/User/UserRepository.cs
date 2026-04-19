@@ -239,7 +239,7 @@ public class UserRepository : DynamoRepository, IUserRepository
         {
             var hashedPassword = HashingUtil.HashString(user.Password, _configuration);
             var updatedDate = DateTime.UtcNow;
-            
+
             var updates = new Dictionary<string, AttributeValueUpdate>
             {
                 ["password"] = new AttributeValueUpdate
@@ -253,7 +253,7 @@ public class UserRepository : DynamoRepository, IUserRepository
                     Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
                 }
             };
-            
+
             var response = await UpdateItemAsync(
                 DynamoMapper.CreateKey(user.Id), updates, _userTableName);
             if (response.HttpStatusCode == HttpStatusCode.OK)
@@ -265,6 +265,42 @@ public class UserRepository : DynamoRepository, IUserRepository
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating user password");
+            throw;
+        }
+    }
+
+    public async Task<Models.User?> UpdatePasswordByIdAsync(string userId, string newPassword)
+    {
+        try
+        {
+            var hashedPassword = HashingUtil.HashString(newPassword, _configuration);
+            var updatedDate = DateTime.UtcNow;
+
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                ["password"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = hashedPassword }
+                },
+                ["updatedDate"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.PUT,
+                    Value = new AttributeValue { S = updatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
+                }
+            };
+
+            var response = await UpdateItemAsync(
+                DynamoMapper.CreateKey(userId), updates, _userTableName);
+            if (response.HttpStatusCode == HttpStatusCode.OK)
+            {
+                return await FindByIdAsync(userId);
+            }
+            return null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user password by id: {UserId}", userId);
             throw;
         }
     }

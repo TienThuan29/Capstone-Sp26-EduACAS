@@ -15,9 +15,10 @@ export const PageUrl = {
     DASHBOARD_PAGE: '/dashboard',
     MY_CLASSROOM_PAGE: '/my-classroom',
     ASSIGNMENTS_PAGE: '/assignments',
-    ANNOUNCEMENTS_PAGE: '/announcements',
+    // ANNOUNCEMENTS_PAGE: '/announcements',
     PROFILE_PAGE: '/profile',
     NOTIFICATIONS_PAGE: '/notifications',
+    SETTINGS_PAGE: '/settings',
 
     // Lecturer routes
     MANAGE_CLASSROOM_PAGE: '/manage-classroom',

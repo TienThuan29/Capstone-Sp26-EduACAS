@@ -84,11 +84,11 @@ const Sidebar = () => {
       href: PageUrl.MY_CLASSROOM_PAGE,
     },
     // { icon: DocumentTextIcon, label: "Assignments", href: PageUrl.ASSIGNMENTS_PAGE },
-    {
-      icon: MegaphoneIcon,
-      label: "Announcements",
-      href: PageUrl.ANNOUNCEMENTS_PAGE,
-    },
+    // {
+    //   icon: MegaphoneIcon,
+    //   label: "Announcements",
+    //   href: PageUrl.ANNOUNCEMENTS_PAGE,
+    // },
   ];
 
   const lecturerMenuItems = [
@@ -247,7 +247,7 @@ const Sidebar = () => {
   const settingsItems = [
     { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
     { icon: BellIcon, label: "Notifications", href: PageUrl.NOTIFICATIONS_PAGE },
-    { icon: Cog6ToothIcon, label: "Settings", href: "#" },
+    { icon: Cog6ToothIcon, label: "Settings", href: PageUrl.SETTINGS_PAGE },
   ];
 
   // justify sidebar options
