@@ -37,12 +37,12 @@ const getPasswordStrength = (
   if (/[^A-Za-z0-9]/.test(password)) score++;
 
   if (score <= 2)
-    return { score, text: "Yếu", color: "bg-red-500" };
+    return { score, text: "Weak", color: "bg-red-500" };
   if (score === 3)
-    return { score, text: "Trung bình", color: "bg-yellow-500" };
+    return { score, text: "Medium", color: "bg-yellow-500" };
   if (score === 4)
-    return { score, text: "Mạnh", color: "bg-blue-500" };
-  return { score, text: "Rất mạnh", color: "bg-green-500" };
+    return { score, text: "Strong", color: "bg-blue-500" };
+  return { score, text: "Very Strong", color: "bg-green-500" };
 };
 
 type PasswordInputProps = {

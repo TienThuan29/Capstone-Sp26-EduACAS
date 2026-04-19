@@ -15,7 +15,7 @@ import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import {
   ExamsTab,
   MaterialsTab,
-  AssignmentsTab,
+  // AssignmentsTab,
   PractiseTab,
   OverviewTab,
   SlotTab,
@@ -61,7 +61,7 @@ function ClassroomContent() {
       router.push("/my-classroom");
     } catch (error) {
       console.error("Failed to leave class:", error);
-      alert("Rời lớp học thất bại. Vui lòng thử lại sau.");
+      alert("Failed to leave class. Please try again later.");
     } finally {
       setLeaveLoading(false);
     }
@@ -157,8 +157,8 @@ function ClassroomContent() {
         );
       case "materials":
         return <MaterialsTab classId={classId} />;
-      case "assignments":
-        return <AssignmentsTab />;
+      // case "assignments":
+      //   return <AssignmentsTab />;
       case "practise":
         return (
           <PractiseTab
