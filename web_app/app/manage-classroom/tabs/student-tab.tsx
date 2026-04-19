@@ -18,7 +18,9 @@ import {
   ModalBody,
   Select,
   Label,
+  TextInput,
 } from "flowbite-react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { useStudentClassroom } from "@/hooks/classroom/useStudentClassroom";
 import type { ClassroomStudentResponse } from "@/types/classroom";
 import { formatDateOnly } from "@/utils/datetime-utils";
@@ -43,6 +45,7 @@ export function StudentTab({ classId }: StudentTabProps) {
   const [removingStudentId, setRemovingStudentId] = useState<string | null>(null);
   const [studentToRemove, setStudentToRemove] = useState<ClassroomStudentResponse | null>(null);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("enrolling");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchStudents = useCallback(async () => {
     if (!classId) return;
@@ -68,10 +71,21 @@ export function StudentTab({ classId }: StudentTabProps) {
   );
 
   const filteredStudents = useMemo(() => {
-    if (statusFilter === "enrolling") return students.filter((s) => s.isJoining);
-    if (statusFilter === "left") return students.filter((s) => !s.isJoining);
-    return students;
-  }, [students, statusFilter]);
+    let result = students;
+    if (statusFilter === "enrolling") result = result.filter((s) => s.isJoining);
+    else if (statusFilter === "left") result = result.filter((s) => !s.isJoining);
+    const term = (searchTerm ?? "").trim();
+    if (term) {
+      const q = term.toLowerCase();
+      result = result.filter(
+        (s) =>
+          (s.fullname && s.fullname.toLowerCase().includes(q)) ||
+          (s.email && s.email.toLowerCase().includes(q)) ||
+          (s.roleNumber && s.roleNumber.toLowerCase().includes(q)),
+      );
+    }
+    return result;
+  }, [students, statusFilter, searchTerm]);
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(filteredStudents.length / PAGE_SIZE)),
@@ -85,7 +99,7 @@ export function StudentTab({ classId }: StudentTabProps) {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter]);
+  }, [statusFilter, searchTerm]);
 
   const onPageChange = (page: number) => setCurrentPage(page);
 
@@ -127,6 +141,13 @@ export function StudentTab({ classId }: StudentTabProps) {
           Manage Students
         </h2>
         <div className="flex flex-wrap items-center gap-3">
+          <TextInput
+            placeholder="Search by name, email, or role number..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={() => <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />}
+            className="max-w-72"
+          />
           <div className="flex items-center gap-2">
             <Label htmlFor="status-filter" className="sr-only">
               Filter by status
@@ -152,11 +173,13 @@ export function StudentTab({ classId }: StudentTabProps) {
         {filteredStudents.length === 0 ? (
           <div className="py-16 text-center">
             <p className="text-gray-500 dark:text-gray-400">
-              {statusFilter === "enrolling"
-                ? "No students enrolled in this classroom yet."
-                : statusFilter === "left"
-                  ? "No students have left this class."
-                  : "No students in this classroom."}
+              {searchTerm
+                ? `No students found matching "${searchTerm}".`
+                : statusFilter === "enrolling"
+                  ? "No students enrolled in this classroom yet."
+                  : statusFilter === "left"
+                    ? "No students have left this class."
+                    : "No students in this classroom."}
             </p>
           </div>
         ) : (
