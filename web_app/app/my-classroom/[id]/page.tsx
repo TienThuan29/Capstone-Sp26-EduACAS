@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,15 +30,17 @@ function ClassroomContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getClassroomById, leaveClassroom, recordClassroomAccess } = useClassroom();
-  const { getExaminationsByClassId } = useExamination();
+  const { getExaminationsByClassIdAndMode } = useExamination();
   const { user } = useAuth();
 
   const activeTab = searchParams.get("tab") || "overview";
 
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
+  const [practiseExaminations, setPractiseExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
   const [examsLoading, setExamsLoading] = useState(false);
+  const [practiseLoading, setPractiseLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(null);
@@ -95,23 +97,33 @@ function ClassroomContent() {
 
   useEffect(() => {
     const fetchExaminations = async () => {
-      if ((activeTab === "exams" || activeTab === "slots") && classId) {
+      if (activeTab === "exams" && classId) {
         try {
-          if (activeTab === "exams") {
-            setExamsLoading(true);
-            const data = await getExaminationsByClassId(classId);
-            setExaminations(data);
-          }
+          setExamsLoading(true);
+          const data = await getExaminationsByClassIdAndMode(classId, "EXAMINATION");
+          setExaminations(data);
         } catch (error) {
-          console.error("Failed to fetch data:", error);
+          console.error("Failed to fetch examinations:", error);
         } finally {
           setExamsLoading(false);
+        }
+      }
+
+      if (activeTab === "practise" && classId) {
+        try {
+          setPractiseLoading(true);
+          const data = await getExaminationsByClassIdAndMode(classId, "PRACTICAL");
+          setPractiseExaminations(data);
+        } catch (error) {
+          console.error("Failed to fetch practise examinations:", error);
+        } finally {
+          setPractiseLoading(false);
         }
       }
     };
 
     fetchExaminations();
-  }, [getExaminationsByClassId, activeTab, classId]);
+  }, [getExaminationsByClassIdAndMode, activeTab, classId]);
 
   if (loading) {
     return <ClassroomDetailPageSkeleton />;
@@ -148,7 +160,13 @@ function ClassroomContent() {
       case "assignments":
         return <AssignmentsTab />;
       case "practise":
-        return <PractiseTab />;
+        return (
+          <PractiseTab
+            examinations={practiseExaminations}
+            practiseLoading={practiseLoading}
+            classId={classId}
+          />
+        );
       case "slots":
         return <SlotTab />;
       case "quizzes":

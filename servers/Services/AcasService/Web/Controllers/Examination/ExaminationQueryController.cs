@@ -75,6 +75,22 @@ public class ExaminationQueryController : ControllerBase
     }
 
 
+    [HttpGet("by-class/{classId}/mode/{mode}")]
+    public async Task<ActionResult<ApiResponse<List<ExaminationResponse?>>>> GetByClassIdAndMode(string classId, string mode)
+    {
+        try
+        {
+            var exams = await _examinationQuery.GetByClassIdAndModeAsync(classId, mode);
+            return ResponseUtil.Success(exams, "Examinations retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving examinations by class id and mode");
+            return ResponseUtil.Error<List<ExaminationResponse?>>("Internal Server Error", 500);
+        }
+    }
+
+
     [HttpGet("{examId}/with-problem/{problemId}")]
     public async Task<ActionResult<ApiResponse<ExaminationSpecProblemResponse>>> GetExaminationWithSpecificProblems(
         string examId,
