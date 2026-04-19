@@ -97,16 +97,20 @@ namespace AcasService.Application.Queries.Classroom
                     ).ToList();
                 }
 
-                if (!string.IsNullOrWhiteSpace(status))
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                allClassrooms = status.ToLowerInvariant() switch
                 {
-                    allClassrooms = status.ToLowerInvariant() switch
-                    {
-                        "active" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate >= now).ToList(),
-                        "completed" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate < now).ToList(),
-                        "deleted" => allClassrooms.Where(c => c.IsDeleted).ToList(),
-                        _ => allClassrooms
-                    };
-                }
+                    "active"    => allClassrooms.Where(c => !c.IsDeleted && c.EndDate >= now).ToList(),
+                    "completed" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate < now).ToList(),
+                    "deleted"   => allClassrooms.Where(c => c.IsDeleted).ToList(),
+                    _           => allClassrooms.Where(c => !c.IsDeleted).ToList()
+                };
+            }
+            else
+            {
+                allClassrooms = allClassrooms.Where(c => !c.IsDeleted).ToList();
+            }
 
                 var totalCount = allClassrooms.Count;
                 var itemsOnPage = allClassrooms
