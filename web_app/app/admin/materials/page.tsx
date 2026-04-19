@@ -16,6 +16,9 @@ import {
   Pagination,
   Button,
   Tooltip,
+  Modal,
+  ModalHeader,
+  ModalBody,
 } from "flowbite-react";
 import {
   MagnifyingGlassIcon,
@@ -24,6 +27,7 @@ import {
   InformationCircleIcon,
   ArrowPathIcon,
   DocumentDuplicateIcon,
+  ArrowUturnLeftIcon,
 } from "@heroicons/react/24/outline";
 import { useAdminMaterial } from "@/hooks/material/useAdminMaterial";
 import { Material, PagedMaterials } from "@/types/material";
@@ -36,12 +40,14 @@ const PAGE_SIZE = 10;
 export default function AdminMaterialsPage() {
   const { isDark } = useThemeContext();
   const toast = useToast();
-  const { getAdminMaterials, softDeleteMaterial, loading } = useAdminMaterial();
+  const { getAdminMaterials, softDeleteMaterial, restoreMaterial, loading } = useAdminMaterial();
 
   const [materialsData, setMaterialsData] = useState<PagedMaterials | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [tempSearch, setTempSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedMaterial, setSelectedMaterial] = useState<Material | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchMaterials = useCallback(async () => {
     const data = await getAdminMaterials(searchTerm, currentPage, PAGE_SIZE);
@@ -64,18 +70,39 @@ export default function AdminMaterialsPage() {
     setCurrentPage(page);
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this material? (Soft Delete)")) return;
+  const openDeleteModal = (material: Material) => {
+    setSelectedMaterial(material);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedMaterial) return;
     try {
-      const success = await softDeleteMaterial(id);
+      const success = await softDeleteMaterial(selectedMaterial.id);
       if (success) {
         toast.showSuccess("Material deleted successfully");
+        setIsDeleteModalOpen(false);
+        setSelectedMaterial(null);
         fetchMaterials();
       } else {
         toast.showError("Failed to delete material");
       }
     } catch (error: any) {
       toast.showError(error.response?.data?.message || "Cannot delete material!");
+    }
+  };
+
+  const handleRestore = async (material: Material) => {
+    try {
+      const success = await restoreMaterial(material.id);
+      if (success) {
+        toast.showSuccess("Material restored successfully");
+        fetchMaterials();
+      } else {
+        toast.showError("Failed to restore material");
+      }
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || "Cannot restore material!");
     }
   };
 
@@ -100,7 +127,7 @@ export default function AdminMaterialsPage() {
 
             <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <form className="flex-grow max-w-md flex gap-3" onSubmit={handleSearch}>
+            <form className="grow max-w-md flex gap-3" onSubmit={handleSearch}>
               <div className="flex-1">
                 <TextInput
                   type="text"
@@ -197,15 +224,25 @@ export default function AdminMaterialsPage() {
                             <ArrowDownTrayIcon className="h-4 w-4" />
                           </Button>
 
-                          <Button
-                            size="xs"
-                            color="failure"
-                            onClick={() => handleDelete(item.id)}
-                            disabled={item.isDeleted}
-                            title="Soft delete material"
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
+                          {!item.isDeleted ? (
+                            <Button
+                              size="xs"
+                              color="failure"
+                              onClick={() => openDeleteModal(item)}
+                              title="Soft delete material"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                          ) : (
+                            <Button
+                              size="xs"
+                              color="success"
+                              onClick={() => handleRestore(item)}
+                              title="Restore material"
+                            >
+                              <ArrowUturnLeftIcon className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -237,6 +274,57 @@ export default function AdminMaterialsPage() {
           </>
         )}
       </main>
+
+      <Modal
+        show={isDeleteModalOpen}
+        size="md"
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedMaterial(null);
+        }}
+        popup
+        theme={{
+          root: {
+            base: "fixed inset-x-0 bottom-0 z-[200] h-modal w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0 md:h-full",
+          },
+        }}
+      >
+        <ModalHeader />
+        <ModalBody className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl`}>
+          <div>
+            <h3 className={`mb-4 text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+              Confirm delete
+            </h3>
+            <p className={`mb-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Are you sure you want to delete this material{" "}
+              <span className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                &quot;{selectedMaterial?.filename}&quot;
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleConfirmDelete}
+                className="cursor-pointer px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center"
+              >
+                Delete material
+              </button>
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setSelectedMaterial(null);
+                }}
+                className={`cursor-pointer px-6 py-2.5 font-bold rounded-xl transition-colors ${isDark
+                  ? "bg-gray-700 text-white hover:bg-gray-600"
+                  : "bg-[#374151] text-white hover:bg-gray-600"
+                  }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 }

@@ -53,9 +53,25 @@ export const useAdminMaterial = () => {
     }
   }, [axiosInstance]);
 
+  const restoreMaterial = useCallback(async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      await axiosInstance.patch(Api.Material.RESTORE(id));
+      return true;
+    } catch (err: any) {
+      const msg = err.response?.data?.message || "Failed to restore material";
+      setError(msg);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [axiosInstance]);
+
   return {
     getAdminMaterials,
     softDeleteMaterial,
+    restoreMaterial,
     loading,
     error,
   };
