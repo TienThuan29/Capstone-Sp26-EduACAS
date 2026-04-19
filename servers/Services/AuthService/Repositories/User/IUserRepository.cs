@@ -11,6 +11,7 @@ public interface IUserRepository
     Task<(List<Models.User> items, int totalCount)> FindPagedAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null);
 
     Task<Models.User?> UpdatePasswordAsync(Models.User user);
+    Task<Models.User?> UpdatePasswordByIdAsync(string userId, string newPassword);
     Task<Models.User?> UpdateGoogleIdAsync(string userId, string googleId);
     Task<Models.User?> UpdatePasswordAndFirstLoginAsync(string userId, string newPassword, bool firstLogin);
     Task<Models.User?> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Models.Role? role, bool? isEnable);
