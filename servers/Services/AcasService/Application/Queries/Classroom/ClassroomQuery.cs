@@ -5,7 +5,6 @@ using AcasService.Models;
 using AcasService.Repositories.Classroom;
 using AcasService.Repositories.Subject;
 using AcasService.Web.Requests;
-using System.Collections;
 using AcasService.Repositories.ClassroomEnrollment;
 
 namespace AcasService.Application.Queries.Classroom
@@ -85,31 +84,36 @@ namespace AcasService.Application.Queries.Classroom
 
                 allClassrooms.Sort((a, b) => b.CreatedDate.CompareTo(a.CreatedDate));
 
-                var now = DateTime.UtcNow;
+                // Load all lecturer profiles upfront so lecturer-name search can resolve IDs to names
+                var allLecturerIds = allClassrooms.Select(c => c.LecturerId).Distinct().ToList();
+                var allUserProfiles = await _userRequestProducer.GetUsersByIdsAsync(allLecturerIds);
+                var lecturerNameById = allUserProfiles.ToDictionary(u => u.Id, u => u.Fullname.ToLowerInvariant());
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
                     var lowerSearch = search.ToLowerInvariant();
                     allClassrooms = allClassrooms.Where(c =>
                         c.ClassName.ToLowerInvariant().Contains(lowerSearch) ||
-                        c.ClassCode.ToLowerInvariant().Contains(lowerSearch)
+                        c.ClassCode.ToLowerInvariant().Contains(lowerSearch) ||
+                        (lecturerNameById.TryGetValue(c.LecturerId, out var name) && name.Contains(lowerSearch))
                     ).ToList();
                 }
 
-            if (!string.IsNullOrWhiteSpace(status))
-            {
-                allClassrooms = status.ToLowerInvariant() switch
+                var now = DateTime.UtcNow;
+                if (!string.IsNullOrWhiteSpace(status))
                 {
-                    "active"    => allClassrooms.Where(c => !c.IsDeleted && c.EndDate >= now).ToList(),
-                    "completed" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate < now).ToList(),
-                    "deleted"   => allClassrooms.Where(c => c.IsDeleted).ToList(),
-                    _           => allClassrooms.Where(c => !c.IsDeleted).ToList()
-                };
-            }
-            else
-            {
-                allClassrooms = allClassrooms.Where(c => !c.IsDeleted).ToList();
-            }
+                    allClassrooms = status.ToLowerInvariant() switch
+                    {
+                        "active"    => allClassrooms.Where(c => !c.IsDeleted && c.EndDate >= now).ToList(),
+                        "completed" => allClassrooms.Where(c => !c.IsDeleted && c.EndDate < now).ToList(),
+                        "deleted"   => allClassrooms.Where(c => c.IsDeleted).ToList(),
+                        _           => allClassrooms.Where(c => !c.IsDeleted).ToList()
+                    };
+                }
+                else
+                {
+                    allClassrooms = allClassrooms.Where(c => !c.IsDeleted).ToList();
+                }
 
                 var totalCount = allClassrooms.Count;
                 var itemsOnPage = allClassrooms
@@ -147,7 +151,6 @@ namespace AcasService.Application.Queries.Classroom
                     .ToList();
 
                 return new PagedResult<ClassroomResponse>(responses, totalCount, pageIndex, pageSize);
-
             }
             catch (Exception ex)
             {
@@ -217,13 +220,25 @@ namespace AcasService.Application.Queries.Classroom
                 filtered = filtered.Where(x => !x.Classroom!.IsDeleted).ToList();
             }
 
+            // Load subjects and lecturers for all classrooms (needed for filtering by lecturer name and response mapping)
+            var allSubjectIds = filtered.Select(x => x.Classroom!.SubjectId).Distinct().ToList();
+            var allLecturerIds = filtered.Select(x => x.Classroom!.LecturerId).Distinct().ToList();
+            var subjects = await _subjectRepository.FindByIdsAsync(allSubjectIds);
+            var subjectById = subjects.ToDictionary(s => s.Id);
+            var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(allLecturerIds);
+            var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 var lowerSearch = search.ToLowerInvariant();
                 filtered = filtered.Where(x =>
-                    x.Classroom!.ClassName.ToLowerInvariant().Contains(lowerSearch) ||
-                    x.Classroom!.ClassCode.ToLowerInvariant().Contains(lowerSearch))
-                    .ToList();
+                {
+                    var lecturer = userById.GetValueOrDefault(x.Classroom!.LecturerId);
+                    var lecturerName = lecturer?.Fullname ?? string.Empty;
+                    return x.Classroom!.ClassName.ToLowerInvariant().Contains(lowerSearch) ||
+                           x.Classroom!.ClassCode.ToLowerInvariant().Contains(lowerSearch) ||
+                           lecturerName.ToLowerInvariant().Contains(lowerSearch);
+                }).ToList();
             }
 
             filtered.Sort((a, b) => b.Classroom!.CreatedDate.CompareTo(a.Classroom!.CreatedDate));
@@ -233,15 +248,6 @@ namespace AcasService.Application.Queries.Classroom
                 .Skip((pageIndex - 1) * pageSize)
                 .Take(pageSize)
                 .ToList();
-
-            var subjectIds = itemsOnPage.Select(x => x.Classroom!.SubjectId).Distinct().ToList();
-            var lecturerIds = itemsOnPage.Select(x => x.Classroom!.LecturerId).Distinct().ToList();
-
-            var subjects = await _subjectRepository.FindByIdsAsync(subjectIds);
-            var subjectById = subjects.ToDictionary(s => s.Id);
-
-            var userProfiles = await _userRequestProducer.GetUsersByIdsAsync(lecturerIds);
-            var userById = userProfiles.ToDictionary(u => u.Id, u => (UserProfileResponse?)u);
 
             var responses = itemsOnPage
                 .Select(x => _classroomMapper.ToClassroomResponse(

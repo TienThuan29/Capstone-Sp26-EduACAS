@@ -49,7 +49,6 @@ export const useClassroom = () => {
         url += `&status=${encodeURIComponent(status)}`;
       }
       const response = await axiosInstance.get(url);
-      console.log(response.data);
       return (
         response.data?.dataResponse || {
           items: [],

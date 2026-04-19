@@ -4,7 +4,6 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import {
   Card,
   TextInput,
-  Select,
   Button,
   Badge,
   Modal,
@@ -41,8 +40,6 @@ export default function ListClassroomPage() {
   const [activeTab, setActiveTab] = useState<"all" | "joining" | "left">("joining");
   const [searchTerm, setSearchTerm] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedSemester, setSelectedSemester] = useState("All");
-  const [sortBy, setSortBy] = useState("newest");
 
   const [joiningPage, setJoiningPage] = useState(1);
   const [leftPage, setLeftPage] = useState(1);
@@ -126,42 +123,11 @@ export default function ListClassroomPage() {
           ? allClassrooms.filter(isJoining)
           : allClassrooms.filter(isMovedOut);
 
-    if (selectedSemester !== "All") {
-      result = result.filter((c) => c.semesterName === selectedSemester);
-    }
-
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return (
-            new Date(b.createdDate).getTime() -
-            new Date(a.createdDate).getTime()
-          );
-        case "oldest":
-          return (
-            new Date(a.createdDate).getTime() -
-            new Date(b.createdDate).getTime()
-          );
-        case "name_asc":
-          return a.className.localeCompare(b.className);
-        case "name_desc":
-          return b.className.localeCompare(a.className);
-        default:
-          return 0;
-      }
-    });
     return result;
-  }, [allClassrooms, selectedSemester, sortBy, activeTab]);
-
-  const semesters = useMemo(() => {
-    const unique = new Set(allClassrooms.map((c) => c.semesterName));
-    return ["All", ...Array.from(unique)];
-  }, [allClassrooms]);
+  }, [allClassrooms, activeTab]);
 
   const handleTabChange = (tab: "all" | "joining" | "left") => {
     setActiveTab(tab);
-    setSelectedSemester("All");
-    setSortBy("newest");
     if (tab === "joining") setJoiningPage(1);
     else if (tab === "left") setLeftPage(1);
     else if (tab === "all") setAllPage(1);
@@ -422,7 +388,7 @@ export default function ListClassroomPage() {
               <TextInput
                 id="search"
                 type="text"
-                placeholder="Search by class name or code..."
+                placeholder="Search by class name, code, or lecturer..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
@@ -437,31 +403,6 @@ export default function ListClassroomPage() {
               >
                 Search
               </Button>
-            </div>
-
-            <div>
-              <Select
-                value={selectedSemester}
-                onChange={(e) => setSelectedSemester(e.target.value)}
-              >
-                {semesters.map((sem) => (
-                  <option key={sem} value={sem}>
-                    {sem === "All" ? "All semesters" : sem}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <Select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="name_asc">Name (A-Z)</option>
-                <option value="name_desc">Name (Z-A)</option>
-              </Select>
             </div>
           </div>
         </div>
