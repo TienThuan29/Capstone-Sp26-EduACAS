@@ -34,7 +34,7 @@ function ResetPasswordContent() {
     if (emailParam) {
       setEmail(emailParam);
     } else {
-      showToast("Không tìm thấy thông tin email. Vui lòng thử lại.", "error");
+      showToast("Email information not found. Please try again.", "error");
       router.push("/login");
     }
   }, [searchParams, router, showToast]);
@@ -57,16 +57,16 @@ function ResetPasswordContent() {
     let color = "";
     
     if (score <= 2) {
-      text = "Yếu";
+      text = "Weak";
       color = "bg-red-500";
     } else if (score === 3) {
-      text = "Trung bình";
+      text = "Medium";
       color = "bg-yellow-500";
     } else if (score === 4) {
-      text = "Mạnh";
+      text = "Strong";
       color = "bg-blue-500";
     } else {
-      text = "Rất mạnh";
+      text = "Very Strong";
       color = "bg-green-500";
     }
 
@@ -78,17 +78,17 @@ function ResetPasswordContent() {
 
     // Validation
     if (newPassword.length < 5) {
-      showToast("Mật khẩu phải có ít nhất 5 ký tự", "error");
+      showToast("Password must be at least 5 characters", "error");
       return;
     }
 
     if (newPassword.length > 64) {
-      showToast("Mật khẩu không được vượt quá 64 ký tự", "error");
+      showToast("Password must not exceed 64 characters", "error");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      showToast("Mật khẩu xác nhận không khớp", "error");
+      showToast("Confirm password does not match", "error");
       return;
     }
 
@@ -97,7 +97,7 @@ function ResetPasswordContent() {
       // Get token from localStorage
       const token = localStorage.getItem("accessToken");
       if (!token) {
-        showToast("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", "error");
+        showToast("Login session has expired. Please login again.", "error");
         router.push("/login");
         return;
       }
@@ -113,7 +113,7 @@ function ResetPasswordContent() {
         }
       );
 
-      showToast("Đặt lại mật khẩu thành công! Vui lòng đăng nhập lại.", "success");
+      showToast("Password reset successful! Please login again.", "success");
       
       // Clear token and redirect to login
       localStorage.removeItem("accessToken");
@@ -126,7 +126,7 @@ function ResetPasswordContent() {
     } catch (error: any) {
       console.error("Reset password error:", error);
       showToast(
-        error?.response?.data?.message || error?.message || "Đặt lại mật khẩu thất bại",
+        error?.response?.data?.message || error?.message || "Password reset failed",
         "error"
       );
     } finally {
@@ -164,7 +164,7 @@ function ResetPasswordContent() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="text-sm font-medium">Quay lại đăng nhập</span>
+            <span className="text-sm font-medium">Back to Sign In</span>
           </Link>
           {/* Dark theme toggle */}
           <DarkThemeToggle />
@@ -190,10 +190,10 @@ function ResetPasswordContent() {
               </div>
             </div>
             <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
-              Đặt lại mật khẩu
+              Reset Password
             </h1>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              Đây là lần đăng nhập đầu tiên. Vui lòng đặt mật khẩu mới để tiếp tục.
+              This is your first login. Please set a new password to continue.
             </p>
           </div>
 
@@ -202,13 +202,13 @@ function ResetPasswordContent() {
               {/* New Password */}
               <div>
                 <Label htmlFor="newPassword" className="text-[#1E1E1E] dark:text-gray-300">
-                  Mật khẩu mới <span className="text-red-500">*</span>
+                  New Password <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative mt-1">
                   <TextInput
                     id="newPassword"
                     type={showPassword ? "text" : "password"}
-                    placeholder="Nhập mật khẩu mới (5-64 ký tự)"
+                    placeholder="Enter new password (5-64 characters)"
                     required
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
@@ -238,7 +238,7 @@ function ResetPasswordContent() {
                   <div className="mt-2">
                     <div className="flex items-center justify-between mb-1">
                       <span className="text-xs text-gray-600 dark:text-gray-400">
-                        Độ mạnh mật khẩu:
+                        Password strength:
                       </span>
                       <span className={`text-xs font-medium ${
                         passwordStrength.score <= 2 ? 'text-red-500' :
@@ -258,20 +258,20 @@ function ResetPasswordContent() {
                 )}
 
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                  Mật khẩu nên có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt.
+                  Password should be at least 8 characters, including uppercase, lowercase, numbers, and special characters.
                 </p>
               </div>
 
               {/* Confirm Password */}
               <div>
                 <Label htmlFor="confirmPassword" className="text-[#1E1E1E] dark:text-gray-300">
-                  Xác nhận mật khẩu <span className="text-red-500">*</span>
+                  Confirm Password <span className="text-red-500">*</span>
                 </Label>
                 <div className="relative mt-1">
                   <TextInput
                     id="confirmPassword"
                     type={showConfirmPassword ? "text" : "password"}
-                    placeholder="Nhập lại mật khẩu mới"
+                    placeholder="Re-enter new password"
                     required
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
@@ -297,7 +297,7 @@ function ResetPasswordContent() {
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
                   <p className="mt-1 text-xs text-red-500">
-                    Mật khẩu xác nhận không khớp
+                    Confirm password does not match
                   </p>
                 )}
                 {confirmPassword && newPassword === confirmPassword && (
@@ -305,7 +305,7 @@ function ResetPasswordContent() {
                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
-                    Mật khẩu khớp
+                    Passwords match
                   </p>
                 )}
               </div>
@@ -319,7 +319,7 @@ function ResetPasswordContent() {
                 className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
-                {isLoading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
+                {isLoading ? "Processing..." : "Reset Password"}
               </Button>
             </div>
 
@@ -330,11 +330,11 @@ function ResetPasswordContent() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <div className="text-sm text-blue-700 dark:text-blue-300">
-                  <p className="font-medium mb-1">Lưu ý quan trọng:</p>
+                  <p className="font-medium mb-1">Important Notes:</p>
                   <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li>Sau khi đặt lại mật khẩu, bạn sẽ cần đăng nhập lại</li>
-                    <li>Hãy ghi nhớ mật khẩu mới của bạn</li>
-                    <li>Không chia sẻ mật khẩu với bất kỳ ai</li>
+                    <li>After resetting your password, you will need to login again</li>
+                    <li>Please remember your new password</li>
+                    <li>Do not share your password with anyone</li>
                   </ul>
                 </div>
               </div>
@@ -352,7 +352,7 @@ export default function ResetPasswordPage() {
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1F4E79] mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải...</p>
+          <p className="mt-4 text-gray-600">Loading...</p>
         </div>
       </div>
     }>
