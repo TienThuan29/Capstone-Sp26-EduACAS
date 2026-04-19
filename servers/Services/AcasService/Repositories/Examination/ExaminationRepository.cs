@@ -174,7 +174,7 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
             var result = response.Items
                 .Where(item =>
                     item.ContainsKey("classroomId") &&
-        item["classroomId"].S == classId
+                    item["classroomId"].S == classId
                 )
                 .Select(DynamoMapper.DynamoItemToExamination)
                 .ToList();
@@ -184,6 +184,31 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
         catch (Exception ex)
         {
             _logger.LogError(ex,"Error occurred while getting examinations by class Id: {ClassId}",classId);
+            throw;
+        }
+    }
+
+    public async Task<List<Models.Examination>> GetByClassIdAndModeAsync(string classId, string mode)
+    {
+        try
+        {
+            var request = new ScanRequest { TableName = _examinationTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var result = response.Items
+                .Where(item =>
+                    item.ContainsKey("classroomId") &&
+                    item["classroomId"].S == classId &&
+                    item.ContainsKey("mode") &&
+                    item["mode"].S == mode
+                )
+                .Select(DynamoMapper.DynamoItemToExamination)
+                .ToList();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while getting examinations by class Id: {ClassId} and mode: {Mode}", classId, mode);
             throw;
         }
     }

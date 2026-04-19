@@ -68,3 +68,19 @@ public class GoogleLoginRequest
     [Required]
     public string IdToken { get; set; } = string.Empty;
 }
+
+public class ChangePasswordRequest
+{
+    [Required]
+    public string CurrentPassword { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(5)]
+    [MaxLength(64)]
+    public string NewPassword { get; set; } = string.Empty;
+
+    [Required]
+    [MinLength(5)]
+    [MaxLength(64)]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}

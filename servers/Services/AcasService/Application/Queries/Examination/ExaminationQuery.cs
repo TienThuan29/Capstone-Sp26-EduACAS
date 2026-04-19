@@ -18,6 +18,7 @@ public interface IExaminationQuery
     Task<ExaminationResponse?> GetByIdAsync(string id);
     Task<List<ExaminationResponse?>> GetAllAsync();
     Task<List<ExaminationResponse?>> GetByClassIdAsync(string classId);
+    Task<List<ExaminationResponse?>> GetByClassIdAndModeAsync(string classId, string mode);
     Task<ExaminationSpecProblemResponse> GetExaminationProblemResponseAsync(string examId, string problemId);
 }
 
@@ -138,6 +139,44 @@ public class ExaminationQuery : IExaminationQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred while getting examinations by class Id");
+            throw;
+        }
+    }
+
+    public async Task<List<ExaminationResponse?>> GetByClassIdAndModeAsync(string classId, string mode)
+    {
+        try
+        {
+            var exams = (await _examinationRepository.GetByClassIdAndModeAsync(classId, mode)).ToList();
+            if (exams == null || exams.Count == 0)
+            {
+                _logger.LogInformation(
+                    "No examinations found for classId {ClassId} and mode {Mode}",
+                    classId,
+                    mode
+                );
+                return new List<ExaminationResponse?>();
+            }
+
+            var programmingLanguageIds = exams.Select(e => e.ProgrammingLanguageId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+            var classroomIds = exams.Select(e => e.ClassroomId).Where(id => !string.IsNullOrEmpty(id)).Distinct().ToList();
+
+            var languages = await _programmingLanguageRepository.GetByIdsAsync(programmingLanguageIds);
+            var classrooms = await _classroomRepository.FindByIdsAsync(classroomIds);
+
+            var programmingLanguageById = languages.ToDictionary(l => l.Id, l => (Models.ProgrammingLanguage?)l);
+            var classroomById = classrooms.ToDictionary(c => c.Id, c => (Models.Classroom?)c);
+
+            return exams
+                .Select(exam => (ExaminationResponse?)_examinationMapper.ToExaminationResponse(
+                    exam,
+                    classroomById.GetValueOrDefault(exam.ClassroomId),
+                    programmingLanguageById.GetValueOrDefault(exam.ProgrammingLanguageId)))
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while getting examinations by class Id and mode");
             throw;
         }
     }

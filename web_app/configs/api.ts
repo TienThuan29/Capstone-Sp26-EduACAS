@@ -1,7 +1,7 @@
 import { config } from "./config";
 
 export const Api = {
-  BASE_API: config.API_GATEWAY_BASE_URL || "http://localhost:8080",
+  BASE_API: config.API_GATEWAY_BASE_URL || "",
 
   Auth: {
     LOGIN: "/api/auth/v1/authenticate",
@@ -14,6 +14,7 @@ export const Api = {
     RESET_FIRST_LOGIN_PASSWORD: "/api/auth/v1/reset-first-login-password",
     GET_PROFILE: "/api/auth/v1/profile",
     UPDATE_PROFILE: "/api/auth/v1/profile",
+    CHANGE_PASSWORD: "/api/auth/v1/change-password",
     GOOGLE_LOGIN: "/api/auth/v1/google-login",
     GRANT_ACCOUNT: "/api/auth/v1/grant-account",
   },
@@ -93,6 +94,7 @@ export const Api = {
 
   Examination: {
     GET_BY_CLASS: "/api/acas/v1/examinations/by-class",
+    GET_BY_CLASS_AND_MODE: (classId: string, mode: string) => `/api/acas/v1/examinations/by-class/${classId}/mode/${mode}`,
     GET_BY_ID: (id: string) => `/api/acas/v1/examinations/${id}`,
     CREATE: "/api/acas/v1/examinations",
     UPDATE: (id: string) => `/api/acas/v1/examinations/${id}`,

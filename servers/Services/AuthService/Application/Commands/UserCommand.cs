@@ -23,7 +23,9 @@ public interface IUserCommand
     public Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest);
 
     public Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest);
-    
+
+    public Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest changePasswordRequest);
+
     public Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable);
 
     public Task<UserProfileResponse> UpdateProfileAsync(string accessToken, string? fullname, DateTime? birthday, string? avatarUrl);
@@ -298,6 +300,54 @@ public class UserCommand : IUserCommand
         }
 
         return true;
+    }
+
+    public async Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest changePasswordRequest)
+    {
+        try
+        {
+            var decoded = await _jwtUtil.VerifyAsync(accessToken);
+            var userId = decoded.Id;
+
+            var user = await _userRepository.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new InvalidOperationException("User not found");
+            }
+
+            if (!HashingUtil.VerifyHash(changePasswordRequest.CurrentPassword, user.Password, _configuration))
+            {
+                throw new InvalidOperationException("Current password is incorrect");
+            }
+
+            if (changePasswordRequest.NewPassword != changePasswordRequest.ConfirmPassword)
+            {
+                throw new InvalidOperationException("New password and confirm password do not match");
+            }
+
+            if (changePasswordRequest.NewPassword.Length < 5 || changePasswordRequest.NewPassword.Length > 64)
+            {
+                throw new InvalidOperationException("New password must be between 5 and 64 characters");
+            }
+
+            var updatedUser = await _userRepository.UpdatePasswordByIdAsync(userId, changePasswordRequest.NewPassword);
+            if (updatedUser == null)
+            {
+                throw new InvalidOperationException("Failed to update password");
+            }
+
+            _logger.LogInformation("User {UserId} changed their password successfully", userId);
+            return true;
+        }
+        catch (InvalidOperationException)
+        {
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error changing password");
+            throw;
+        }
     }
 
     /// <summary>

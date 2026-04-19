@@ -412,11 +412,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// CORS — read from config; allow both frontend and gateway origins
+var corsOrigin = builder.Configuration["Cors:CorsOrigin"] ?? "http://localhost:3000";
+var gatewayOrigin = builder.Configuration["Cors:GatewayOrigin"] ?? "http://localhost:8080";
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8080", "http://localhost:3000")
+        policy.WithOrigins(corsOrigin, gatewayOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

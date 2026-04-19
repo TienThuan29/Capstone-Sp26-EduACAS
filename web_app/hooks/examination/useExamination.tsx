@@ -18,6 +18,16 @@ export const useExamination = () => {
     [axiosInstance],
   );
 
+  const getExaminationsByClassIdAndMode = useCallback(
+    async (classId: string, mode: string): Promise<Examination[]> => {
+      const response = await axiosInstance.get(
+        Api.Examination.GET_BY_CLASS_AND_MODE(classId, mode),
+      );
+      return response.data?.dataResponse || [];
+    },
+    [axiosInstance],
+  );
+
   const getExaminationById = useCallback(
     async (id: string): Promise<Examination | null> => {
       const response = await axiosInstance.get(Api.Examination.GET_BY_ID(id));
@@ -78,6 +88,7 @@ export const useExamination = () => {
 
   return {
     getExaminationsByClassId,
+    getExaminationsByClassIdAndMode,
     getExaminationById,
     createExamination,
     updateExamination,

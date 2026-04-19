@@ -161,31 +161,31 @@ export default function AdminDashboard() {
 
   const statsData = [
     {
-      title: "Tổng số lớp học",
+      title: "Total Classrooms",
       value: stats.classrooms.toString(),
       icon: <AcademicCapIcon className="h-6 w-6" />,
       accent: "blue" as const,
     },
     {
-      title: "Tổng số môn học",
+      title: "Total Subjects",
       value: stats.subjects.toString(),
       icon: <BookOpenIcon className="h-6 w-6" />,
       accent: "purple" as const,
     },
     {
-      title: "Ngôn ngữ lập trình",
+      title: "Programming Languages",
       value: stats.programmingLanguages.toString(),
       icon: <CodeBracketIcon className="h-6 w-6" />,
       accent: "green" as const,
     },
     {
-      title: "Tổng số sinh viên",
+      title: "Total Students",
       value: stats.students.toLocaleString("vi-VN"),
       icon: <UserGroupIcon className="h-6 w-6" />,
       accent: "orange" as const,
     },
     {
-      title: "Tổng số giảng viên",
+      title: "Total Lecturers",
       value: stats.teachers.toLocaleString("vi-VN"),
       icon: <UserPlusIcon className="h-6 w-6" />,
       accent: "pink" as const,

@@ -4,3 +4,16 @@
 .vscode/
 .vscode/*
 .cursor/
+.env
+.env.production
+.env.local
+.env.*.local
+
+.vscode/
+.vscode/*
+
+mobile.idea/
+
+# Ignore SSL Certificates
+deploy/certs/
+*.pem

@@ -243,7 +243,7 @@ function ClassroomContent() {
 
     const slotVal = Number(formData.maxSlot);
     if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
-      showError("Số lượng chỗ (Max Slot) phải từ 2 trở lên.");
+      showError("Max Slot must be at least 2.");
       return;
     }
 

@@ -15,7 +15,7 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      console.log("Gửi yêu cầu reset password cho:", email);
+      console.log("Sending password reset request for:", email);
       // TODO: Implement forgot password logic
       
       // Simulate API call
@@ -59,7 +59,7 @@ export default function ForgotPasswordPage() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="text-sm font-medium">Quay lại trang chủ</span>
+            <span className="text-sm font-medium">Back to Home</span>
           </Link>
           {/* Dark theme toggle */}
           <DarkThemeToggle />
@@ -87,10 +87,10 @@ export default function ForgotPasswordPage() {
                   </div>
                 </div>
                 <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
-                  Quên mật khẩu?
+                  Forgot Password?
                 </h1>
                 <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-                  Không sao! Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn để đặt lại mật khẩu.
+                  No worries! Enter your email and we&apos;ll send you instructions to reset your password.
                 </p>
               </div>
 
@@ -155,21 +155,21 @@ export default function ForgotPasswordPage() {
                             d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                           />
                         </svg>
-                        Đang gửi...
+                        Sending...
                       </div>
                     ) : (
-                      "Gửi yêu cầu đặt lại mật khẩu"
+                      "Send Password Reset Request"
                     )}
                   </Button>
                 </div>
 
                 <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-                  Nhớ mật khẩu rồi?{" "}
+                  Already have an account?{" "}
                   <Link
                     href="/login"
                     className="font-medium text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors"
                   >
-                    Đăng nhập
+                    Sign In
                   </Link>
                 </div>
               </form>
@@ -195,23 +195,23 @@ export default function ForgotPasswordPage() {
                   </div>
                 </div>
                 <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
-                  Kiểm tra email của bạn
+                  Check Your Email
                 </h1>
                 <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                  Chúng tôi đã gửi hướng dẫn đặt lại mật khẩu đến:
+                  We&apos;ve sent password reset instructions to:
                 </p>
                 <p className="mt-2 text-center text-base font-semibold text-[#1F4E79] dark:text-[#C9A24D]">
                   {email}
                 </p>
                 <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-                  Vui lòng kiểm tra hộp thư đến (và cả thư rác) của bạn và làm theo hướng dẫn để đặt lại mật khẩu.
+                  Please check your inbox (and spam) and follow the instructions to reset your password.
                 </p>
               </div>
 
               <div className="space-y-4">
                 <div className="bg-[#F5F7FA] dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700">
                   <p className="text-sm text-gray-600 dark:text-gray-400 text-center">
-                    Không nhận được email?
+                    Did not receive the email?
                   </p>
                   <button
                     onClick={() => {
@@ -220,7 +220,7 @@ export default function ForgotPasswordPage() {
                     }}
                     className="mt-2 text-sm font-medium text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors w-full"
                   >
-                    Thử lại với email khác
+                    Try with a different email
                   </button>
                 </div>
 
@@ -242,7 +242,7 @@ export default function ForgotPasswordPage() {
                         d="M10 19l-7-7m0 0l7-7m-7 7h18"
                       />
                     </svg>
-                    Quay lại đăng nhập
+                    Back to Sign In
                   </Link>
                 </div>
               </div>
