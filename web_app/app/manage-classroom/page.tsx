@@ -180,26 +180,31 @@ export default function ManageClassroomPage() {
   }, [user?.id, currentPage, searchQuery]);
 
   useEffect(() => {
-    if (openModal) {
-      const fetchData = async () => {
-        try {
-          const activeSubjects = await getActiveSubjects();
-          setSubjects(activeSubjects);
+    const loadSubjects = async () => {
+      try {
+        const activeSubjects = await getActiveSubjects();
+        setSubjects(activeSubjects);
+      } catch (error) {
+        console.error("Failed to load subjects", error);
+      }
+    };
+    loadSubjects();
+  }, [getActiveSubjects]);
 
-          if (activeSubjects.length > 0) {
-            setFormData((prev: CreateClassroomFormData) => ({
-              ...prev,
-              subjectId: activeSubjects[0].id,
-            }));
-          }
-        } catch (error) {
-          console.error("Failed to fetch form data", error);
-          showError("Failed to load subjects list.");
-        }
-      };
-      fetchData();
+  useEffect(() => {
+    if (openModal) {
+      setFormData((prev) => ({
+        ...prev,
+        classCode: "",
+        className: "",
+        enrolKey: "",
+        dateEnd: "",
+        maxSlot: "",
+        avgScoreThreshold: 0,
+        minExamCount: 2,
+      }));
     }
-  }, [openModal, getActiveSubjects, showError]);
+  }, [openModal]);
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -226,6 +231,11 @@ export default function ManageClassroomPage() {
         return;
       }
 
+      if (!formData.className.trim()) {
+        showError("Class name is required.");
+        setModalLoading(false);
+        return;
+      }
       if (formData.className.length > 100) {
         showError("Class name cannot exceed 100 characters.");
         setModalLoading(false);
@@ -240,6 +250,12 @@ export default function ManageClassroomPage() {
       const slotVal = Number(formData.maxSlot);
       if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
         showError("Max Slot must be at least 2.");
+        setModalLoading(false);
+        return;
+      }
+
+      if (!formData.subjectId) {
+        showError("Please select a subject.");
         setModalLoading(false);
         return;
       }
@@ -267,7 +283,7 @@ export default function ManageClassroomPage() {
       setFormData({
         classCode: "",
         className: "",
-        subjectId: subjects[0]?.id || "",
+        subjectId: "",
         semesterName: semesters[0].semesterName,
         enrolKey: "",
         dateEnd: "",
@@ -559,6 +575,7 @@ function CreateClassroomModal({
                 setFormData({ ...formData, subjectId: e.target.value })
               }
             >
+              <option value="">Select subject</option>
               {subjects.map((sub) => (
                 <option key={sub.id} value={sub.id}>
                   {sub.subjectCode} - {sub.subjectName}
