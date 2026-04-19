@@ -42,6 +42,7 @@ import { useSubmission } from '@/hooks/submission/useSubmission';
 import { formatDate } from '@/utils/datetime-utils';
 import { SimilarityDiffModal } from './similarity-diff-modal';
 import { useToast } from '@/hooks/useToast';
+import { SimilarityTabSkeleton } from '@/components/ui/skeletons';
 
 export type SimilarityTabContentProps = {
   examination: Examination;
@@ -249,11 +250,7 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
   };
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-12">
-        <Spinner size="xl" />
-      </div>
-    );
+    return <SimilarityTabSkeleton />;
   }
 
   return (

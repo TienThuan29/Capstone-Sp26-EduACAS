@@ -25,9 +25,10 @@ import type {
 } from "@/types/submission";
 // import type {  SubmissionResponse, TestResultResponse } from "@/types/submission";
 import { useSubmission } from "@/hooks/submission/useSubmission";
-import { useExamLog } from "@/hooks/exam/useExamLog";
+import { useExamLog } from "@/hooks/examination/useExamLog";
 import { formatDate, formatGradedDate } from "@/utils/datetime-utils";
 import { deriveExamViolationFlag } from "@/utils/exam-log-flag";
+import { SubmissionDetailTabSkeleton } from "@/components/ui/skeletons";
 
 export type SubmissionDetailProps = {
   submissionId: string;
@@ -155,7 +156,7 @@ export function SubmissionDetail({
   studentName,
   onBack,
 }: SubmissionDetailProps) {
-  const { getSubmissionById } = useSubmission();
+  const { getSubmissionById, getSubmissionVersions } = useSubmission();
   const { getExamLogsBySubmission } = useExamLog();
   const [submission, setSubmission] = useState<SubmissionResponse | null>(null);
   const [examLogs, setExamLogs] = useState<ExamLogResponse[]>([]);
@@ -164,6 +165,8 @@ export function SubmissionDetail({
   const [error, setError] = useState<string | null>(null);
   const [severityFilter, setSeverityFilter] = useState<"all" | "info" | "warning" | "critical">("all");
   const [violationFilter, setViolationFilter] = useState<"all" | "only_violation" | "only_non_violation">("all");
+  const [versions, setVersions] = useState<SubmissionResponse[]>([]);
+  const [loadingVersions, setLoadingVersions] = useState(false);
 
   const fetchSubmission = useCallback(async () => {
     setLoading(true);
@@ -181,16 +184,33 @@ export function SubmissionDetail({
     }
   }, [submissionId, getSubmissionById]);
 
+  const fetchVersions = useCallback(async () => {
+    setLoadingVersions(true);
+    try {
+      const versionList = await getSubmissionVersions(submissionId);
+      setVersions(versionList);
+    } catch (err) {
+      console.error("Failed to load versions", err);
+      setVersions([]);
+    } finally {
+      setLoadingVersions(false);
+    }
+  }, [submissionId, getSubmissionVersions]);
+
   useEffect(() => {
     fetchSubmission();
   }, [fetchSubmission]);
+
+  useEffect(() => {
+    fetchVersions();
+  }, [fetchVersions]);
 
   useEffect(() => {
     let cancelled = false;
     setLogsLoading(true);
     void (async () => {
       try {
-        const logs = await getExamLogsBySubmission(submissionId);
+        const logs = await getExamLogsBySubmission(submission?.id || submissionId);
         if (!cancelled) {
           setExamLogs(logs);
         }
@@ -208,7 +228,7 @@ export function SubmissionDetail({
     return () => {
       cancelled = true;
     };
-  }, [getExamLogsBySubmission, submissionId]);
+  }, [getExamLogsBySubmission, submissionId, submission?.id]);
 
   const results = submission?.testResults ?? [];
 
@@ -233,6 +253,16 @@ export function SubmissionDetail({
       : violationFlag === "WARNING"
         ? "warning"
         : "success";
+
+  const handleVersionChange = (version: number) => {
+    const selectedVersion = versions.find(v => v.version === version);
+    if (selectedVersion) {
+      setSubmission(selectedVersion);
+    }
+  };
+  // ------------
+
+  const sortedVersions = [...versions].sort((a, b) => b.version - a.version);
   // ------------
 
   return (
@@ -247,23 +277,43 @@ export function SubmissionDetail({
           <ArrowLeftIcon className="h-5 w-5" />
           Back to submissions
         </Button>
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Submission detail
-          {submission && (
-            <span className="ml-2 font-normal text-gray-500 dark:text-gray-400">
-              · {submission.problem?.title ?? submission.problemId} · v{submission.version}
-            </span>
+        <div className="flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Submission detail
+            {submission && (
+              <span className="ml-2 font-normal text-gray-500 dark:text-gray-400">
+                · {submission.problem?.title ?? submission.problemId}
+              </span>
+            )}
+          </h3>
+          {submission && versions.length > 1 && (
+            <div className="flex items-center gap-2">
+              <Label htmlFor="version-select" className="font-normal text-gray-500 dark:text-gray-400">
+                Version:
+              </Label>
+              <Select
+                id="version-select"
+                value={submission.version}
+                onChange={(e) => handleVersionChange(Number(e.target.value))}
+                className="w-auto"
+              >
+                {sortedVersions.map((v) => (
+                  <option key={v.id} value={v.version}>
+                    v{v.version}
+                    {v.id === submissionId ? " (current)" : ""}
+                  </option>
+                ))}
+              </Select>
+            </div>
           )}
-        </h3>
+        </div>
         <Badge color={flagColor} size="sm">
           {violationFlag === "CLEAN" ? "Clean" : violationFlag === "WARNING" ? "Warning" : "Critical"}
         </Badge>
       </div>
       <div className="p-4 [&_button[role=tab]]:cursor-pointer">
         {loading && (
-          <div className="flex justify-center py-12">
-            <Spinner size="xl" />
-          </div>
+          <SubmissionDetailTabSkeleton />
         )}
         {error && !loading && (
           <p className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700 dark:border-red-800 dark:bg-red-900/20 dark:text-red-400">

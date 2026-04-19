@@ -18,6 +18,16 @@ export const useExamination = () => {
     [axiosInstance],
   );
 
+  const getExaminationsByClassIdAndMode = useCallback(
+    async (classId: string, mode: string): Promise<Examination[]> => {
+      const response = await axiosInstance.get(
+        Api.Examination.GET_BY_CLASS_AND_MODE(classId, mode),
+      );
+      return response.data?.dataResponse || [];
+    },
+    [axiosInstance],
+  );
+
   const getExaminationById = useCallback(
     async (id: string): Promise<Examination | null> => {
       const response = await axiosInstance.get(Api.Examination.GET_BY_ID(id));
@@ -64,6 +74,7 @@ export const useExamination = () => {
         const response = await axiosInstance.get(
           Api.Examination.GET_WITH_SPECIFIC_PROBLEM(examId, problemId)
         );
+        console.log("Response data:", JSON.stringify(response.data, null, 2));
         return {
           data: response.data?.dataResponse ?? null,
           serverDate: response.headers['date'] || null
@@ -77,6 +88,7 @@ export const useExamination = () => {
 
   return {
     getExaminationsByClassId,
+    getExaminationsByClassIdAndMode,
     getExaminationById,
     createExamination,
     updateExamination,

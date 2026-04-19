@@ -150,23 +150,23 @@ namespace AcasService.Application.Queries.QuizAttempt
 
             if (isInProgress || isSubmitted)
             {
-                int addedCount = 0;
+                var questionIds = quiz.Questions.Select(qq => qq.QuestionId).ToList();
+                var questionsDict = await _questionRepository.FindByIdsAsync(questionIds);
+                var answerOptionsDict = await _answerOptionRepository.FindByQuestionIdsAsync(questionIds);
+
                 foreach (var qq in quiz.Questions)
                 {
-                    var qDetails = await _questionRepository.FindByIdAsync(qq.QuestionId);
-                    if (qDetails != null)
+                    if (questionsDict.TryGetValue(qq.QuestionId, out var qDetails))
                     {
-                        qDetails.AnswerOptions = await _answerOptionRepository.FindByQuestionIdAsync(qq.QuestionId);
-                        
+                        qDetails.AnswerOptions = answerOptionsDict.GetValueOrDefault(qq.QuestionId) ?? new List<Models.AnswerOption>();
                         response.Questions.Add(_mapper.ToStudentQuizQuestionResponse(qq, qDetails, isSubmitted));
-                        addedCount++;
                     }
                     else
                     {
                         _logger.LogWarning($"Question detail for ID {qq.QuestionId} not found in database!");
                     }
                 }
-                _logger.LogInformation($"Successfully added {addedCount} out of {quiz.Questions.Count} questions to response.");
+                _logger.LogInformation($"Successfully added {response.Questions.Count} out of {quiz.Questions.Count} questions to response.");
             }
 
             if (attempt.Status == Models.QuizAttemptStatus.SUBMITTED)

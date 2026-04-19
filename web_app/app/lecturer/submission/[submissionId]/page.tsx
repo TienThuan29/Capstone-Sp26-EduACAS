@@ -6,7 +6,7 @@ import type { SubmissionResponse } from '@/types/submission';
 import type { Problem, TestCase } from '@/types/examination';
 import { useSubmission } from '@/hooks/submission/useSubmission';
 import { useProblem } from '@/hooks/problem/useProblem';
-import { useExamination } from '@/hooks/exam/useExamination';
+import { useExamination } from '@/hooks/examination/useExamination';
 import { useProgrammingLanguage } from '@/hooks/programming-language/useProgrammingLanguage';
 import { useEditorContext } from '@/contexts/EditorContext';
 import { FullPageLoader } from '@/components/loading-effect';

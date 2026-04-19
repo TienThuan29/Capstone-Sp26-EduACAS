@@ -42,7 +42,7 @@ export default function HomeNavbar() {
 
   const handleLogout = () => {
     logout()
-    showSuccess("Đăng xuất thành công")
+    showSuccess("Logout successfully")
   }
 
   const navLinks = [
@@ -224,7 +224,7 @@ export default function HomeNavbar() {
                     </DropdownItem>
                   )
                 }
-                <DropdownItem as={Link} href="/profile">
+                <DropdownItem as={Link} href={PageUrl.PROFILE_PAGE}>
                   <span className="flex items-center gap-2">
                     <UserCircleIcon className="h-4 w-4" />
                     User profile
@@ -244,20 +244,27 @@ export default function HomeNavbar() {
               </>
             ) : (
               <>
-                <Button
+                {/* <Button
                   className="hidden cursor-pointer rounded-full border-0 bg-transparent text-[#1F4E79] hover:bg-gray-100 dark:text-white dark:hover:bg-gray-800 sm:flex"
                   as={Link}
-                  href="/login"
+                  href={PageUrl.LOGIN_PAGE}
+                >
+                  Sign in
+                </Button> */}
+                <Button
+                  className="hidden cursor-pointer rounded-full border-0 bg-linear-to-r from-[#1F4E79] to-[#C9A24D] text-white shadow-[#1F4E79]/30 hover:from-[#1F4E79]/90 hover:to-[#C9A24D]/90 sm:flex dark:shadow-[#1F4E79]/20"
+                  as={Link}
+                  href={PageUrl.LOGIN_PAGE}
                 >
                   Sign in
                 </Button>
-                <Button
+                {/* <Button
                   className="hidden cursor-pointer rounded-full border-0 bg-linear-to-r from-[#1F4E79] to-[#C9A24D] text-white shadow-[#1F4E79]/30 hover:from-[#1F4E79]/90 hover:to-[#C9A24D]/90 sm:flex dark:shadow-[#1F4E79]/20"
                   as={Link}
                   href={PageUrl.REGISTER_PAGE}
                 >
                   Register
-                </Button>
+                </Button> */}
               </>
             )}
           </div>

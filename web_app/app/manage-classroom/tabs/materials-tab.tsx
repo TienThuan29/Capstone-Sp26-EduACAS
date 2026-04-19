@@ -25,13 +25,16 @@ import {
   TrashIcon,
   DocumentArrowDownIcon,
   DocumentIcon,
+  EyeIcon,
 } from "@heroicons/react/24/outline";
+import MaterialPreviewDrawer from "@/components/ui/MaterialPreviewDrawer";
 import type { Material } from "@/types/material";
 import { useMaterial } from "@/hooks/material/useMaterial";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatDate } from "@/utils/datetime-utils";
+import { MaterialsTabSkeleton } from "@/components/ui/skeletons";
 
 type MaterialsTabProps = {
   classId: string;
@@ -50,6 +53,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
   const [materialToDelete, setMaterialToDelete] = useState<Material | null>(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [previewMaterial, setPreviewMaterial] = useState<Material | null>(null);
 
   const [uploadData, setUploadData] = useState({
     file: null as File | null,
@@ -164,11 +168,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Spinner size="xl" color="info" />
-      </div>
-    );
+    return <MaterialsTabSkeleton />;
   }
 
   return (
@@ -222,8 +222,14 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
                 >
                   <TableCell className="max-w-xs whitespace-nowrap font-medium text-gray-900 dark:text-white">
                     <div className="flex items-center gap-2">
-                      <DocumentIcon className="h-5 w-5 text-gray-400" />
-                      <span className="truncate">{material.filename}</span>
+                      <DocumentIcon className="h-5 w-5 shrink-0 text-gray-400" />
+                      <button
+                        onClick={() => setPreviewMaterial(material)}
+                        className="truncate text-left hover:underline text-blue-600 dark:text-blue-400"
+                        title="Preview file"
+                      >
+                        {material.filename}
+                      </button>
                     </div>
                   </TableCell>
                   <TableCell className="max-w-md">
@@ -241,6 +247,15 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">
+                      <Tooltip content="Preview">
+                        <Button
+                          color="gray"
+                          size="sm"
+                          onClick={() => setPreviewMaterial(material)}
+                        >
+                          <EyeIcon className="h-4 w-4" />
+                        </Button>
+                      </Tooltip>
                       <Tooltip content="Download">
                         <Button
                           color="gray"
@@ -356,6 +371,12 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
           </Button>
         </ModalFooter>
       </Modal>
+
+      <MaterialPreviewDrawer
+        material={previewMaterial}
+        isOpen={previewMaterial !== null}
+        onClose={() => setPreviewMaterial(null)}
+      />
     </div>
   );
 }

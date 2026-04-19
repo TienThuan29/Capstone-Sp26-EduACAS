@@ -8,6 +8,7 @@ import { DiscussionList } from "@/components/discussion-list";
 import { useDiscussionIssue } from "@/hooks/discussion/useDiscussionIssue";
 import { useComment } from "@/hooks/discussion/useComment";
 import { useAuth } from "@/contexts/AuthContext";
+import { DiscussionTabSkeleton } from "@/components/ui/skeletons";
 
 type DiscussionTabProps = {
   classId: string;
@@ -96,11 +97,7 @@ export function DiscussionTab({ classId, hideBackButton }: DiscussionTabProps) {
 
   if (issueIdFromUrl && loadingDetail) {
     return (
-      <div className="rounded-xl border border-gray-200 bg-white py-16 text-center dark:border-gray-700 dark:bg-gray-800">
-        <p className="font-medium text-gray-500 dark:text-gray-400">
-          Loading discussion…
-        </p>
-      </div>
+      <DiscussionTabSkeleton />
     );
   }
 

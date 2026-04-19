@@ -1,0 +1,217 @@
+[
+  {
+    "id": "warn-001",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-005",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-001": 2.75,
+        "exam-002": 2.83
+      },
+      "averageScore": 2.79
+    },
+    "llmAnalysis": {
+      "exam-001": {
+        "submissionId": "subm-009",
+        "analysis": "Student scored 2.75/10 on the first exam. Failed both problems with multiple compilation errors.",
+        "recomendation": "Recommend intensive tutoring sessions and assignment review."
+      },
+      "exam-002": {
+        "submissionId": "subm-063",
+        "analysis": "Student scored 2.83/10 on the second exam. Continued poor performance shows lack of understanding of basic concepts.",
+        "recomendation": "Schedule one-on-one meeting with academic advisor."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-18T10:30:00",
+    "isRead": false,
+    "createdDate": "2026-02-18T10:30:00",
+    "updatedDate": "2026-02-18T10:30:00"
+  },
+  {
+    "id": "warn-002",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-014",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 1.75,
+        "exam-cs101-02": 1.83
+      },
+      "averageScore": 1.79
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-090",
+        "analysis": "Critical: Student scored only 1.75/10. Multiple failed test cases indicate fundamental misunderstanding of problem requirements.",
+        "recomendation": "Urgent intervention required. Consider mandatory study sessions."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-16T14:00:00",
+    "isRead": false,
+    "createdDate": "2026-02-16T14:00:00",
+    "updatedDate": "2026-02-16T14:00:00"
+  },
+  {
+    "id": "warn-003",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-009",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 4.5
+      },
+      "averageScore": 4.5
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-068",
+        "analysis": "Student scored below passing threshold but shows some understanding of basic concepts.",
+        "recomendation": "Recommend study group participation and office hours attendance."
+      }
+    },
+    "lecturerAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-068",
+        "analysis": "Declining trend observed. Student was passing in first few weeks.",
+        "recomendation": "Schedule consultation to discuss study strategies."
+      }
+    },
+    "sentDate": "2026-01-25T09:00:00",
+    "isRead": true,
+    "createdDate": "2026-01-25T09:00:00",
+    "updatedDate": "2026-01-25T09:00:00"
+  },
+  {
+    "id": "warn-004",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-004",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-001": 4.75
+      },
+      "averageScore": 4.75
+    },
+    "llmAnalysis": {
+      "exam-001": {
+        "submissionId": "subm-007",
+        "analysis": "Student performed below average but above critical threshold. Some concepts need reinforcement.",
+        "recomendation": "Encourage participation in practice quizzes and study sessions."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-22T16:30:00",
+    "isRead": false,
+    "createdDate": "2026-02-22T16:30:00",
+    "updatedDate": "2026-02-22T16:30:00"
+  },
+  {
+    "id": "warn-005",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-019",
+    "warningLevel": 1,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 4.67,
+        "exam-cs101-02": 4.0
+      },
+      "averageScore": 4.33
+    },
+    "llmAnalysis": {
+      "exam-cs101-02": {
+        "submissionId": "subm-161",
+        "analysis": "Consistent below-average performance across multiple exams.",
+        "recomendation": "Recommend tutoring and additional practice assignments."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-08T11:00:00",
+    "isRead": true,
+    "createdDate": "2026-02-08T11:00:00",
+    "updatedDate": "2026-02-08T11:00:00"
+  },
+  {
+    "id": "warn-006",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-024",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 2.33,
+        "exam-cs101-02": 2.67
+      },
+      "averageScore": 2.5
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-110",
+        "analysis": "Critical: Very low scores across both exams. Student may need foundational course support.",
+        "recomendation": "Strongly recommend academic counseling and remedial classes."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-01-28T08:30:00",
+    "isRead": false,
+    "createdDate": "2026-01-28T08:30:00",
+    "updatedDate": "2026-01-28T08:30:00"
+  },
+  {
+    "id": "warn-007",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-022",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-02": 4.67
+      },
+      "averageScore": 4.67
+    },
+    "llmAnalysis": {
+      "exam-cs101-02": {
+        "submissionId": "subm-170",
+        "analysis": "Borderline performance. Student shows potential but needs more practice.",
+        "recomendation": "Suggest joining study groups and utilizing available resources."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-10T13:00:00",
+    "isRead": true,
+    "createdDate": "2026-02-10T13:00:00",
+    "updatedDate": "2026-02-10T13:00:00"
+  },
+  {
+    "id": "warn-008",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-015",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-001": 1.75
+      },
+      "averageScore": 1.75
+    },
+    "llmAnalysis": {
+      "exam-001": {
+        "submissionId": "subm-027",
+        "analysis": "Critical low score. Multiple failed test cases on basic problems.",
+        "recomendation": "Immediate academic intervention recommended."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-03-01T10:00:00",
+    "isRead": false,
+    "createdDate": "2026-03-01T10:00:00",
+    "updatedDate": "2026-03-01T10:00:00"
+  }
+]

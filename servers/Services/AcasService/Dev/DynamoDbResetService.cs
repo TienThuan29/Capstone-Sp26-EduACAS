@@ -410,6 +410,35 @@ public class DynamoDbResetService : IDynamoDbResetService
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(DiscussionIssue)),
             discussions, Repositories.DiscussionIssue.DynamoMapper.DiscussionIssueToDynamoItem, ct);
 
+        // 11) Academic Warnings
+        var warningDtos = LoadJson<AcademicWarningDto>("academic-warnings.json");
+        var warnings = warningDtos.Select(w =>
+        {
+            var triggerType = Enum.TryParse<AcademicWarningTriggerType>(w.TriggerType, true, out var t)
+                ? t : AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE;
+            return new AcademicWarning
+            {
+                Id = AllocateSeedId(seedIdMap, w.Id),
+                ClassroomId = RemapSeedId(seedIdMap, w.ClassroomId, "warning.classroomId"),
+                StudentId = RemapSeedId(seedIdMap, w.StudentId, "warning.studentId"),
+                WarningLevel = w.WarningLevel,
+                TriggerType = triggerType,
+                SentDate = w.SentDate,
+                IsRead = w.IsRead,
+                CreatedDate = now,
+                UpdatedDate = now,
+                InvolvedExams = new InvolvedExamsInfo(),
+                LlmAnalysis = new Dictionary<string, AcademicWarningAnalysisEntry>(),
+                LecturerAnalysis = new Dictionary<string, AcademicWarningAnalysisEntry>()
+            };
+        }).ToList();
+        var academicWarningTable = tables.FirstOrDefault(t => t.EntityType == typeof(AcademicWarning)).TableName;
+        if (!string.IsNullOrEmpty(academicWarningTable))
+        {
+            seeded += await PutAllAsync(academicWarningTable,
+                warnings, Repositories.AcademicWarning.DynamoMapper.AcademicWarningToDynamoItem, ct);
+        }
+
         return seeded;
     }
 
@@ -645,12 +674,14 @@ public class DynamoDbResetService : IDynamoDbResetService
     {
         if (string.IsNullOrEmpty(seedKey))
             return Guid.NewGuid().ToString();
-        if (!seedIdMap.TryGetValue(seedKey, out var newId))
+
+        // Keep original seed ID from JSON to ensure consistency across resets
+        // This allows frontend and backend to use the same predictable IDs
+        if (!seedIdMap.ContainsKey(seedKey))
         {
-            newId = Guid.NewGuid().ToString();
-            seedIdMap[seedKey] = newId;
+            seedIdMap[seedKey] = seedKey;
         }
-        return newId;
+        return seedIdMap[seedKey];
     }
 
     private string RemapSeedId(Dictionary<string, string> seedIdMap, string? refKey, string context)
@@ -957,6 +988,17 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string? Status { get; set; }
         public int ViewCount { get; set; }
         public List<CommentDto>? Comments { get; set; }
+    }
+
+    private sealed class AcademicWarningDto
+    {
+        public string Id { get; set; } = "";
+        public string ClassroomId { get; set; } = "";
+        public string StudentId { get; set; } = "";
+        public int WarningLevel { get; set; }
+        public string TriggerType { get; set; } = "";
+        public bool IsRead { get; set; }
+        public DateTime SentDate { get; set; }
     }
 
     private sealed class CommentDto

@@ -105,6 +105,10 @@ public class QuizCommandController : ControllerBase
         {
             return ResponseUtil.Error<QuizResponse>("Quiz not found", 404);
         }
+        catch (ArgumentException ex)
+        {
+            return ResponseUtil.Error<QuizResponse>(ex.Message, 400);
+        }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error assigning questions to quiz {Id}", id);

@@ -13,15 +13,15 @@ public interface IExaminationTemplateQuery
 
 public class ExaminationTemplateQuery : IExaminationTemplateQuery
 {
-    private readonly IExaminationTemplateRepository _repository;
+    private readonly IExaminationTemplateRepository _examinationTemplateRepository;
     private readonly ExaminationTemplateMapper _mapper;
     private readonly ILogger<ExaminationTemplateQuery> _logger;
 
     public ExaminationTemplateQuery(
-        IExaminationTemplateRepository repository,
+        IExaminationTemplateRepository examinationTemplateRepository,
         ILogger<ExaminationTemplateQuery> logger)
     {
-        _repository = repository;
+        _examinationTemplateRepository = examinationTemplateRepository;
         _mapper = new ExaminationTemplateMapper();
         _logger = logger;
     }
@@ -30,7 +30,7 @@ public class ExaminationTemplateQuery : IExaminationTemplateQuery
     {
         try
         {
-            var template = await _repository.FindByIdAsync(id);
+            var template = await _examinationTemplateRepository.FindByIdAsync(id);
             if (template == null)
             {
                 _logger.LogWarning("Examination template not found: {Id}", id);
@@ -53,7 +53,7 @@ public class ExaminationTemplateQuery : IExaminationTemplateQuery
 
         try
         {
-            var templates = await _repository.FindAllAsync();
+            var templates = await _examinationTemplateRepository.FindAllAsync();
             var totalCount = templates.Count;
             var items = templates
                 .OrderByDescending(t => t.UpdatedDate ?? t.CreatedDate)
@@ -79,7 +79,7 @@ public class ExaminationTemplateQuery : IExaminationTemplateQuery
 
         try
         {
-            var templates = await _repository.GetByLecturerIdAsync(lecturerId);
+            var templates = await _examinationTemplateRepository.GetByLecturerIdAsync(lecturerId);
             var totalCount = templates.Count;
             var items = templates
                 .OrderByDescending(t => t.UpdatedDate ?? t.CreatedDate)

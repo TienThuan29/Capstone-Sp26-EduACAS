@@ -2,17 +2,33 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Badge, Spinner } from "flowbite-react";
-import { ChartBarIcon, AcademicCapIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { ChartBarIcon, AcademicCapIcon, UserGroupIcon, DocumentArrowDownIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import { useStudentClassroom } from "@/hooks/classroom/useStudentClassroom";
 import { useClassroomQuiz } from "@/hooks/quiz/useClassroomQuiz";
 import { useQuiz } from "@/hooks/quiz/useQuiz";
 import { useQuizAttempt } from "@/hooks/quiz/useQuizAttempt";
+import { useClassroomDashboard } from "@/hooks/dashboard/useClassroomDashboard";
+import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
+import { StatsCard } from "@/components/classroom-dashboard/cards/StatsCard";
+import { ScoreDistributionChart, ExamMode } from "@/components/classroom-dashboard/charts/ScoreDistributionChart";
+import { ExamScoreStatisticsChart } from "@/components/classroom-dashboard/charts/ExamScoreStatisticsChart";
+import { AtRiskStudentsList } from "@/components/classroom-dashboard/lists/AtRiskStudentsList";
+import { RecentWarningsList } from "@/components/classroom-dashboard/lists/RecentWarningsList";
+import { StudentDashboardSkeleton, DashboardTabSkeleton } from "@/components/ui/skeletons";
 import type { ClassroomStudentResponse } from "@/types/classroom";
 import type { ClassroomQuiz } from "@/types/quiz";
 import type { QuizAttempt } from "@/types/quiz-attempt";
+import type {
+  ScoreDistribution,
+  AtRiskStudent,
+  RecentWarning,
+  ClassStats,
+  ExamScoreStatistics,
+} from "@/types/dashboard/DashboardStats";
 
 type DashboardTabProps = {
   classId: string;
+  classroomName?: string;
 };
 
 type StudentScoreSeries = {
@@ -23,11 +39,21 @@ type StudentScoreSeries = {
   averageScore: number;
 };
 
-export function DashboardTab({ classId }: DashboardTabProps) {
+export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const { getStudentsByClassId } = useStudentClassroom();
   const { getClassroomQuizzesByClassroom } = useClassroomQuiz();
   const { getAllQuizzes } = useQuiz();
   const { getAttemptsByStudent } = useQuizAttempt();
+
+  const {
+    loading: legacyLoading,
+    error: legacyError,
+    getScoreDistribution,
+    getAtRiskStudents,
+    getRecentWarnings,
+    getClassStats,
+    getExamStatistics,
+  } = useClassroomDashboard(classId);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,6 +61,46 @@ export function DashboardTab({ classId }: DashboardTabProps) {
   const [classroomQuizzes, setClassroomQuizzes] = useState<ClassroomQuiz[]>([]);
   const [quizNameMap, setQuizNameMap] = useState<Record<string, string>>({});
   const [attemptsByStudent, setAttemptsByStudent] = useState<Record<string, QuizAttempt[]>>({});
+
+  // Legacy dashboard state (incoming HEAD version)
+  const [scoreDistribution, setScoreDistribution] = useState<ScoreDistribution[]>([]);
+  const [selectedMode, setSelectedMode] = useState<ExamMode | "ALL">("ALL");
+  const [scoreDistLoading, setScoreDistLoading] = useState(false);
+  const [atRiskStudents, setAtRiskStudents] = useState<AtRiskStudent[]>([]);
+  const [recentWarnings, setRecentWarnings] = useState<RecentWarning[]>([]);
+  const [classStats, setClassStats] = useState<ClassStats[]>([]);
+  const [examStatistics, setExamStatistics] = useState<ExamScoreStatistics[]>([]);
+  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+  const [examStatsLoading, setExamStatsLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
+  // Calculate overview stats from classStats
+  const totalStudents = classStats.reduce((sum, cls) => sum + cls.totalStudents, 0);
+  const classAverage =
+    classStats.length > 0
+      ? classStats.reduce((sum, cls) => sum + cls.classAverage, 0) / classStats.length
+      : 0;
+  const totalAtRisk = classStats.reduce((sum, cls) => sum + cls.atRiskCount, 0);
+  const atRiskPercentage = totalStudents > 0 ? (totalAtRisk / totalStudents) * 100 : 0;
+  const totalWarnings = recentWarnings.length;
+
+  // Load score distribution when mode changes
+  const loadScoreDistribution = async (mode: ExamMode | "ALL") => {
+    setScoreDistLoading(true);
+    try {
+      const modeParam = mode === "ALL" ? undefined : mode;
+      const data = await getScoreDistribution(classId, modeParam);
+      setScoreDistribution(data);
+    } finally {
+      setScoreDistLoading(false);
+    }
+  };
+
+  // Handle mode change
+  const handleModeChange = (mode: ExamMode | "ALL") => {
+    setSelectedMode(mode);
+    loadScoreDistribution(mode);
+  };
 
   useEffect(() => {
     let active = true;
@@ -51,11 +117,26 @@ export function DashboardTab({ classId }: DashboardTabProps) {
       try {
         setLoading(true);
         setError(null);
+        setHasLoadedOnce(true);
 
-        const [studentList, classroomQuizList, allQuizzes] = await Promise.all([
+        const [
+          studentList,
+          classroomQuizList,
+          allQuizzes,
+          distData,
+          riskData,
+          warningsData,
+          statsData,
+          examStatsData,
+        ] = await Promise.all([
           getStudentsByClassId(classId),
           getClassroomQuizzesByClassroom(classId),
           getAllQuizzes(true),
+          getScoreDistribution(),
+          getAtRiskStudents(5),
+          getRecentWarnings(5),
+          getClassStats(classId),
+          getExamStatistics(classId),
         ]);
 
         if (!active) {
@@ -68,11 +149,11 @@ export function DashboardTab({ classId }: DashboardTabProps) {
 
         const attemptsEntries = await Promise.all(
           studentList
-              .filter((student) => student.isJoining)
-              .map(async (student) => {
-                const attempts = await getAttemptsByStudent(student.studentId);
-                return [student.studentId, attempts] as const;
-              }),
+            .filter((student) => student.isJoining)
+            .map(async (student) => {
+              const attempts = await getAttemptsByStudent(student.studentId);
+              return [student.studentId, attempts] as const;
+            }),
         );
 
         if (!active) {
@@ -84,6 +165,17 @@ export function DashboardTab({ classId }: DashboardTabProps) {
           return acc;
         }, {});
 
+        // Set legacy dashboard data (incoming HEAD version)
+        setScoreDistribution(distData);
+        setAtRiskStudents(riskData);
+        setRecentWarnings(warningsData);
+        setClassStats(statsData);
+        setExamStatistics(examStatsData);
+        if (examStatsData.length > 0 && !selectedExamId) {
+          setSelectedExamId(examStatsData[0].examId);
+        }
+
+        // Set current version data
         setStudents(studentList.filter((student) => student.isJoining));
         setClassroomQuizzes(sortedClassroomQuizzes);
         setAttemptsByStudent(Object.fromEntries(attemptsEntries));
@@ -111,7 +203,19 @@ export function DashboardTab({ classId }: DashboardTabProps) {
     return () => {
       active = false;
     };
-  }, [classId, getAllQuizzes, getAttemptsByStudent, getClassroomQuizzesByClassroom, getStudentsByClassId]);
+  }, [
+    classId,
+    getAllQuizzes,
+    getAttemptsByStudent,
+    getAtRiskStudents,
+    getClassStats,
+    getClassroomQuizzesByClassroom,
+    getExamStatistics,
+    getRecentWarnings,
+    getScoreDistribution,
+    getStudentsByClassId,
+    selectedExamId,
+  ]);
 
   const filteredClassroomQuizzes = useMemo(() => classroomQuizzes, [classroomQuizzes]);
 
@@ -183,27 +287,86 @@ export function DashboardTab({ classId }: DashboardTabProps) {
     });
   }, [filteredClassroomQuizzes, studentSeries]);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Spinner size="xl" color="info" />
-      </div>
-    );
+  // Show initial loading spinner only before first load attempt
+  if (!hasLoadedOnce && (loading || legacyLoading)) {
+    return <DashboardTabSkeleton />;
   }
 
-  if (error) {
+  if (error || legacyError) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-900/20">
         <h3 className="mb-2 text-lg font-semibold text-red-700 dark:text-red-300">
           Dashboard Error
         </h3>
-        <p className="text-sm text-red-600 dark:text-red-200">{error}</p>
+        <p className="text-sm text-red-600 dark:text-red-200">{error || legacyError}</p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-1">
+      {/* Header */}
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {classroomName ? `${classroomName} Dashboard` : "Classroom Dashboard"}
+          </h1>
+          <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+            Overview of student performance and academic warnings
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <DefaultOutlineCustomButton
+            label="Export Report"
+            icon={<DocumentArrowDownIcon className="h-4 w-4" />}
+          />
+          <DefaultOutlineCustomButton
+            label="Settings"
+            icon={<Cog6ToothIcon className="h-4 w-4" />}
+          />
+        </div>
+      </div>
+
+      {/* Stats Cards (incoming HEAD version) */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsCard
+          title="Total Students"
+          value={totalStudents || students.length}
+          changeLabel="in this class"
+          trend="stable"
+          className="bg-white dark:bg-gray-800"
+        />
+        <StatsCard
+          title="Class Average"
+          value={`${classAverage.toFixed(1)}/10`}
+          changeLabel="overall"
+          trend={
+            classAverage >= 7
+              ? "up"
+              : classAverage >= 5
+                ? "stable"
+                : "down"
+          }
+          className="bg-white dark:bg-gray-800"
+        />
+        <StatsCard
+          title="At Risk"
+          value={`${totalAtRisk} (${atRiskPercentage.toFixed(0)}%)`}
+          changeLabel="in this class"
+          trend={totalAtRisk > 0 ? "down" : "stable"}
+          variant={totalAtRisk > 0 ? "warning" : "default"}
+          className="bg-white dark:bg-gray-800"
+        />
+        <StatsCard
+          title="Warnings"
+          value={totalWarnings}
+          changeLabel="recent"
+          trend="stable"
+          className="bg-white dark:bg-gray-800"
+        />
+      </div>
+
+      {/* Additional Metric Cards (current version) */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         <MetricCard
           icon={<UserGroupIcon className="h-5 w-5" />}
@@ -219,12 +382,11 @@ export function DashboardTab({ classId }: DashboardTabProps) {
         />
         <MetricCard
           icon={<ChartBarIcon className="h-5 w-5" />}
-          label="Class Average"
+          label="Class Average (Attempts)"
           value={
             classAverageSeries.filter((x): x is number => x != null).length > 0
-              ? (classAverageSeries
-                  .filter((x): x is number => x != null)
-                  .reduce((sum, score) => sum + score, 0) /
+              ? (
+                  classAverageSeries.filter((x): x is number => x != null).reduce((sum, score) => sum + score, 0) /
                   classAverageSeries.filter((x): x is number => x != null).length
                 ).toFixed(2)
               : "N/A"
@@ -233,6 +395,31 @@ export function DashboardTab({ classId }: DashboardTabProps) {
         />
       </div>
 
+      {/* Score Distribution Chart (incoming HEAD version) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
+        <ScoreDistributionChart
+          data={scoreDistribution}
+          selectedMode={selectedMode}
+          onModeChange={handleModeChange}
+          loading={scoreDistLoading}
+        />
+      </div>
+
+      {/* At Risk Students and Recent Warnings (incoming HEAD version) */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <AtRiskStudentsList students={atRiskStudents} />
+        <RecentWarningsList warnings={recentWarnings} />
+      </div>
+
+      {/* Exams statistics (incoming HEAD version) */}
+      <ExamScoreStatisticsChart
+        data={examStatistics}
+        selectedExamId={selectedExamId}
+        onExamChange={setSelectedExamId}
+        loading={examStatsLoading}
+      />
+
+      {/* Class Average Trend Chart (current version) */}
       <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
         <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
           <h3 className="text-lg font-bold text-gray-900 dark:text-white">
@@ -248,6 +435,7 @@ export function DashboardTab({ classId }: DashboardTabProps) {
         />
       </div>
 
+      {/* Student Series Charts (current version) */}
       <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
         {studentSeries.map((series) => (
           <div

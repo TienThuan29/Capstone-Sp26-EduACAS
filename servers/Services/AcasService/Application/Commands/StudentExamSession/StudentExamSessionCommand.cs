@@ -15,6 +15,7 @@ public interface IStudentExamSessionCommand
     Task<StudentExamSessionResponse?> CompleteAsync(string studentId, string examId);
     Task<StudentExamSessionResponse?> LockAsync(string studentId, string examId, string? lockReason);
     Task<StudentExamSessionResponse?> SetActiveProblemAsync(string studentId, string examId, string? problemId);
+    Task<bool> HardDeleteAsync(string studentId, string examId);
 }
 
 public class StudentExamSessionCommand : IStudentExamSessionCommand
@@ -112,13 +113,39 @@ public class StudentExamSessionCommand : IStudentExamSessionCommand
     public async Task<StudentExamSessionResponse?> CompleteAsync(string studentId, string examId)
     {
         var existing = await _sessionRepository.GetByStudentAndExamAsync(studentId, examId);
-        if (existing == null || existing.Phase != StudentExamSessionPhase.Active)
+
+        if (existing == null)
+        {
+            var exam = await _examinationRepository.GetByIdAsync(examId);
+            if (exam == null)
+                return null;
+
+            var enrollment = await _enrollmentRepository.FindByClassAndStudentIdAsync(exam.ClassroomId, studentId);
+            if (enrollment == null || !enrollment.IsJoining)
+                return null;
+
+            var now = DateTime.UtcNow;
+            existing = new Models.StudentExamSession
+            {
+                Id = Models.StudentExamSession.ComposeId(studentId, examId),
+                StudentId = studentId,
+                ExamId = examId,
+                ClassroomId = exam.ClassroomId,
+                Phase = StudentExamSessionPhase.Completed,
+                CreatedDate = now,
+                UpdatedDate = now,
+            };
+            var saved = await _sessionRepository.UpsertAsync(existing);
+            return saved == null ? null : ToResponse(saved);
+        }
+
+        if (existing.Phase != StudentExamSessionPhase.Active)
             return null;
 
         existing.Phase = StudentExamSessionPhase.Completed;
         existing.LockReason = null;
-        var saved = await _sessionRepository.UpsertAsync(existing);
-        return saved == null ? null : ToResponse(saved);
+        var updated = await _sessionRepository.UpsertAsync(existing);
+        return updated == null ? null : ToResponse(updated);
     }
 
     public async Task<StudentExamSessionResponse?> LockAsync(string studentId, string examId, string? lockReason)
@@ -142,5 +169,11 @@ public class StudentExamSessionCommand : IStudentExamSessionCommand
         existing.ActiveProblemId = problemId;
         var saved = await _sessionRepository.UpsertAsync(existing);
         return saved == null ? null : ToResponse(saved);
+    }
+
+    public async Task<bool> HardDeleteAsync(string studentId, string examId)
+    {
+        var id = Models.StudentExamSession.ComposeId(studentId, examId);
+        return await _sessionRepository.DeleteAsync(id);
     }
 }

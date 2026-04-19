@@ -129,6 +129,48 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         }
     }
 
+    public async Task<(List<Models.DiscussionIssue> Items, int TotalCount)> FindPagedByClassroomIdAsync(string classroomId, int pageIndex, int pageSize)
+    {
+        try
+        {
+            var allItems = new List<Models.DiscussionIssue>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _discussionIssueTableName,
+                    FilterExpression = "classroomId = :classroomId AND (attribute_not_exists(isDeleted) OR isDeleted = :false)",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":classroomId"] = new AttributeValue { S = classroomId },
+                        [":false"] = new AttributeValue { BOOL = false }
+                    },
+                    ExclusiveStartKey = lastKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+                allItems.AddRange(response.Items.Select(item => DynamoMapper.DynamoItemToDiscussionIssue(item)));
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            var ordered = allItems.OrderByDescending(x => x.CreatedDate).ToList();
+            var totalCount = ordered.Count;
+            var paged = ordered
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (paged, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding paged discussion issues for classroom {ClassroomId}", classroomId);
+            throw;
+        }
+    }
+
     public async Task<Models.DiscussionIssue?> UpdateAsync(Models.DiscussionIssue issue)
     {
         try
@@ -196,18 +238,17 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
             {
                 var scanRequest = new ScanRequest
                 {
-                    TableName = _discussionIssueTableName
+                    TableName = _discussionIssueTableName,
+                    FilterExpression = "attribute_not_exists(isDeleted) OR isDeleted = :false",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":false"] = new AttributeValue { BOOL = false }
+                    },
+                    ExclusiveStartKey = lastKey
                 };
-                if (lastKey != null && lastKey.Count > 0)
-                    scanRequest.ExclusiveStartKey = lastKey;
 
                 var response = await _dynamoDBClient.ScanAsync(scanRequest);
-
-                foreach (var item in response.Items)
-                {
-                    issues.Add(DynamoMapper.DynamoItemToDiscussionIssue(item));
-                }
-
+                issues.AddRange(response.Items.Select(item => DynamoMapper.DynamoItemToDiscussionIssue(item)));
                 lastKey = response.LastEvaluatedKey;
             } while (lastKey != null && lastKey.Count > 0);
 
@@ -216,6 +257,54 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error finding all discussion issues");
+            throw;
+        }
+    }
+
+    public async Task<(List<Models.DiscussionIssue> Items, int TotalCount)> FindPagedAsync(string? search, int pageIndex, int pageSize)
+    {
+        try
+        {
+            var allItems = new List<Models.DiscussionIssue>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var scanRequest = new ScanRequest
+                {
+                    TableName = _discussionIssueTableName,
+                    FilterExpression = "(attribute_not_exists(isDeleted) OR isDeleted = :false)" +
+                        (string.IsNullOrWhiteSpace(search) ? "" : " AND contains(#title, :search)"),
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":false"] = new AttributeValue { BOOL = false }
+                    },
+                    ExclusiveStartKey = lastKey
+                };
+
+                if (!string.IsNullOrWhiteSpace(search))
+                {
+                    scanRequest.ExpressionAttributeNames = new Dictionary<string, string> { ["#title"] = "title" };
+                    scanRequest.ExpressionAttributeValues[":search"] = new AttributeValue { S = search };
+                }
+
+                var response = await _dynamoDBClient.ScanAsync(scanRequest);
+                allItems.AddRange(response.Items.Select(item => DynamoMapper.DynamoItemToDiscussionIssue(item)));
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            var ordered = allItems.OrderByDescending(x => x.CreatedDate).ToList();
+            var totalCount = ordered.Count;
+            var paged = ordered
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return (paged, totalCount);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding paged discussion issues with search {Search}", search);
             throw;
         }
     }

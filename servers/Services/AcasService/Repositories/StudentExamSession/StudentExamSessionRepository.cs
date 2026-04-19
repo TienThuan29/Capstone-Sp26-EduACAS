@@ -72,4 +72,39 @@ public class StudentExamSessionRepository : DynamoRepository, IStudentExamSessio
 
         return null;
     }
+
+    public async Task<List<Models.StudentExamSession>> GetByExamIdAsync(string examId)
+    {
+        var sessions = new List<Models.StudentExamSession>();
+        var request = new ScanRequest
+        {
+            TableName = _sessionTableName,
+            FilterExpression = "examId = :eid",
+            ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+            {
+                [":eid"] = new AttributeValue { S = examId },
+            },
+        };
+
+        ScanResponse response;
+        do
+        {
+            response = await _dynamoDBClient.ScanAsync(request);
+            foreach (var it in response.Items)
+            {
+                var s = DynamoMapper.FromDynamoItem(it);
+                sessions.Add(s);
+            }
+            request.ExclusiveStartKey = response.LastEvaluatedKey;
+        } while (response.LastEvaluatedKey != null && response.LastEvaluatedKey.Count > 0);
+
+        return sessions;
+    }
+
+    public async Task<bool> DeleteAsync(string sessionId)
+    {
+        var key = DynamoMapper.CreateKey(sessionId);
+        var response = await DeleteItemAsync(key, _sessionTableName);
+        return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
+    }
 }

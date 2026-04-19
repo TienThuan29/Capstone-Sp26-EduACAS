@@ -37,10 +37,16 @@ export const useClassroom = () => {
   const axiosInstance = useAxios();
 
   const getAllClassrooms = useCallback(
-    async (userId?: string, pageIndex: number = 1, pageSize: number = 10) => {
+    async (userId?: string, search?: string, status?: string, pageIndex: number = 1, pageSize: number = 10) => {
       let url = `${Api.Classroom.GET_ALL_CLASSROOMS}?pageIndex=${pageIndex}&pageSize=${pageSize}`;
       if (userId) {
-        url += `&userId=${userId}`;
+        url += `&userId=${encodeURIComponent(userId)}`;
+      }
+      if (search) {
+        url += `&search=${encodeURIComponent(search)}`;
+      }
+      if (status) {
+        url += `&status=${encodeURIComponent(status)}`;
       }
       const response = await axiosInstance.get(url);
       console.log(response.data);

@@ -13,6 +13,7 @@ using AcasService.Application.Queries.ProgrammingLanguage;
 using AcasService.Application.Queries.S3;
 using AcasService.Application.Queries.Subject;
 using AcasService.Application.Queries.DiscussionIssue;
+using AcasService.Application.Queries.StudentExamSession;
 using AcasService.Application.Utils;
 using AcasService.Messaging;
 using AcasService.Messaging.User;
@@ -92,6 +93,8 @@ using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 using AcasService.Application.Commands.Formatters;
+using AcasService.Application.Thirdparty;
+using AcasService.Repositories.AcademicWarning;
 using AcasService.Repositories.ExaminationTemplate;
 using AcasService.Application.Commands.ExaminationTemplate;
 using AcasService.Application.Queries.ExaminationTemplate;
@@ -100,6 +103,10 @@ using AcasService.Application.Jobs;
 using Hangfire;
 using Hangfire.Dashboard;
 using Hangfire.Redis.StackExchange;
+using AcasService.Application.Queries.ClassroomDashboard;
+using AcasService.Repositories.RegradingRequest;
+using AcasService.Application.Commands.RegradingRequests;
+using AcasService.Application.Queries.RegradingRequests;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -202,6 +209,33 @@ builder.Services.AddScoped<IStudentAnswerRepository, StudentAnswerRepository>();
 builder.Services.AddScoped<IErrorGroupRepository, ErrorGroupRepository>();
 builder.Services.AddScoped<IExaminationTemplateRepository, ExaminationTemplateRepository>();
 
+// Email Service
+builder.Services.AddSingleton(new SmtpEmailConfig
+{
+    Host = builder.Configuration["Smtp:Host"] ?? "smtp.gmail.com",
+    Port = builder.Configuration.GetValue<int>("Smtp:Port", 587),
+    Username = builder.Configuration["Smtp:Username"] ?? "",
+    Password = builder.Configuration["Smtp:Password"] ?? "",
+    FromAddress = builder.Configuration["Smtp:FromAddress"] ?? "noreply@eduacas.com",
+    FromName = builder.Configuration["Smtp:FromName"] ?? "EduACAS",
+    EnableSsl = builder.Configuration.GetValue<bool>("Smtp:EnableSsl", true),
+    UseDefaultCredentials = builder.Configuration.GetValue<bool>("Smtp:UseDefaultCredentials", false)
+});
+builder.Services.AddSingleton<IEmailService, EmailService>();
+
+// Academic Warning
+builder.Services.AddScoped<IAcademicWarningCommand, AcademicWarningCommand>();
+builder.Services.AddScoped<IAcademicWarningRepository, AcademicWarningRepository>();
+
+// Classroom Dashboard
+builder.Services.AddScoped<IClassroomDashboardQuery, ClassroomDashboardQuery>();
+builder.Services.AddScoped<IStudentDashboardQuery, StudentDashboardQuery>();
+
+// Regrading Request
+builder.Services.AddScoped<IRegradingRequestRepository, RegradingRequestRepository>();
+builder.Services.AddScoped<IRegradingRequestCommand, RegradingRequestCommand>();
+builder.Services.AddScoped<IRegradingRequestQuery, RegradingRequestQuery>();
+
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
 builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
@@ -245,6 +279,7 @@ builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<ISubmissionQuery, SubmissionQuery>();
 builder.Services.AddScoped<IExamLogCommand, ExamLogCommand>();
 builder.Services.AddScoped<IStudentExamSessionCommand, StudentExamSessionCommand>();
+builder.Services.AddScoped<IStudentExamSessionQuery, StudentExamSessionQuery>();
 builder.Services.AddScoped<IExamLogQuery, ExamLogQuery>();
 builder.Services.AddScoped<ISubmissionCommand, SubmissionCommand>();
 builder.Services.AddScoped<IQuizCommand, QuizCommand>();
@@ -377,11 +412,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// CORS — read from config; allow both frontend and gateway origins
+var corsOrigin = builder.Configuration["Cors:CorsOrigin"] ?? "http://localhost:3000";
+var gatewayOrigin = builder.Configuration["Cors:GatewayOrigin"] ?? "http://localhost:8080";
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8080", "http://localhost:3000")
+        policy.WithOrigins(corsOrigin, gatewayOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();

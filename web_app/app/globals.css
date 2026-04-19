@@ -1,8 +1,8 @@
 @import "tailwindcss";
-@import "flowbite-react/plugin/tailwindcss";
-
+@plugin "@tailwindcss/typography";
+/* @import "flowbite-react/plugin/tailwindcss"; */
 /* Flowbite: Tailwind v4 + Turbopack cannot resolve flowbite-react/plugin/tailwindcss
-   (package exports / CSS import pipeline). Use @source with the CLI-generated class list. */
+   Use @source with the CLI-generated class list. */
 @source "../.flowbite-react/class-list.json";
 
 @custom-variant dark (&:where(.dark, .dark *));

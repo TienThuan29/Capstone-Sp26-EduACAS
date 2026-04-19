@@ -9,11 +9,12 @@ public class RegradingRequest
     [Key]
     public string Id { get; set; } = string.Empty;
     
-    private string ExaminationId { get; set; } = string.Empty;
+    [Required]
+    public string ExaminationId { get; set; } = string.Empty;
     
-    // private string ProblemId { get; set; } = string.Empty;
+    public List<string> ImageUrls { get; set; } = new List<string>();
     
-    private string SubmissionId { get; set; } = string.Empty;
+    public string SubmissionId { get; set; } = string.Empty;
     
     [Required]
     public string StudentId { get; set; } = string.Empty;

@@ -19,6 +19,8 @@ public interface ISubmissionQuery
       Task<List<Models.Submission>> GetTheLatestVersionSubmissionsByExamAndProblemAsync(string examId, string problemId);
 
       Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId);
+
+      Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId);
 }
 
 public class SubmissionQuery : ISubmissionQuery
@@ -89,11 +91,14 @@ public class SubmissionQuery : ISubmissionQuery
                     ProblemId = kv.Key,
                     Submissions = kv.Value
                         .Select(s => _submissionMapper.ToResponse(
-                            s, 
+                            s,
                             problemLiteById.GetValueOrDefault(kv.Key),
                             studentById.GetValueOrDefault(s.StudentId)))
                         .ToList()
                 })
                 .ToList();
       }
+
+      public Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId) =>
+            _submissionRepository.GetVersionsBySubmissionKey(studentId, examId, problemId);
 }

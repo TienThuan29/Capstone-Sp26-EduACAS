@@ -49,18 +49,15 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        var all = await _discussionIssueRepository.FindByClassroomIdAsync(classroomId);
-        var ordered = all.OrderByDescending(x => x.CreatedDate).ToList();
-        var totalCount = ordered.Count;
-        var items = ordered
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
+        var (items, totalCount) = await _discussionIssueRepository.FindPagedByClassroomIdAsync(classroomId, pageIndex, pageSize);
+
+        var responses = items
             .Select(_discussionIssueMapper.ToListResponse)
             .ToList();
 
-        await EnrichListWithAuthorsAsync(items);
+        await EnrichListWithAuthorsAsync(responses);
 
-        return new PagedResult<DiscussionIssueListResponse>(items, totalCount, pageIndex, pageSize);
+        return new PagedResult<DiscussionIssueListResponse>(responses, totalCount, pageIndex, pageSize);
     }
 
     public async Task<int> GetCountByClassroomIdAsync(string classroomId)
@@ -87,26 +84,15 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
         if (pageSize < 1) pageSize = 10;
         if (pageSize > 100) pageSize = 100;
 
-        var all = await _discussionIssueRepository.FindAllAsync();
-        
-        // Filter by title if search is provided
-        if (!string.IsNullOrWhiteSpace(search))
-        {
-            all = all.Where(x => x.Title.Contains(search, StringComparison.OrdinalIgnoreCase)).ToList();
-        }
+        var (items, totalCount) = await _discussionIssueRepository.FindPagedAsync(search, pageIndex, pageSize);
 
-        var ordered = all.OrderByDescending(x => x.CreatedDate).ToList();
-        var totalCount = ordered.Count;
-        
-        var items = ordered
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
+        var responses = items
             .Select(_discussionIssueMapper.ToListResponse)
             .ToList();
 
-        await EnrichListWithAuthorsAsync(items);
+        await EnrichListWithAuthorsAsync(responses);
 
-        return new PagedResult<DiscussionIssueListResponse>(items, totalCount, pageIndex, pageSize);
+        return new PagedResult<DiscussionIssueListResponse>(responses, totalCount, pageIndex, pageSize);
     }
 
     private async Task EnrichListWithAuthorsAsync(List<DiscussionIssueListResponse> items)

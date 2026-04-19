@@ -91,6 +91,25 @@ export const useQuizAttempt = () => {
     }
   }, [axiosInstance]);
 
+  // ---------------
+  const getAttemptsByStudent = useCallback(async (studentId: string): Promise<QuizAttempt[]> => {
+    try {
+      setError(null);
+      const response = await axiosInstance.get<{ dataResponse: QuizAttempt[] }>(
+        Api.QuizAttempt.GET_BY_STUDENT(studentId)
+      );
+      return response.data.dataResponse ?? [];
+    } catch (err: unknown) {
+      const status = (err as { response?: { status?: number } })?.response?.status;
+      if (status === 404) {
+        return [];
+      }
+      console.error('Failed to fetch quiz attempts by student:', err);
+      return [];
+    }
+  }, [axiosInstance]);
+  // ---------------
+
   return {
     loading,
     error,
@@ -99,5 +118,6 @@ export const useQuizAttempt = () => {
     submitAttempt,
     getHistory,
     getSubmissionsPaged,
+    getAttemptsByStudent,
   };
 };

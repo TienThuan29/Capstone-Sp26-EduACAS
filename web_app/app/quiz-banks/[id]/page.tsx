@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
@@ -10,6 +10,8 @@ import {
   ChevronUpIcon,
   ClipboardDocumentListIcon,
   MagnifyingGlassIcon,
+  SparklesIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import {
   Badge,
@@ -37,6 +39,7 @@ import {
 } from "@/hooks/quiz/useQuiz";
 import { useQuestion } from "@/hooks/question/useQuestion";
 import { PageUrl } from "@/configs/page.url";
+import { QuizDetailPageSkeleton } from "@/components/ui/skeletons";
 import type { Quiz } from "@/types/quiz";
 import type { Question } from "@/types/question";
 import { CustomPagination } from "@/components/custom-pagination";
@@ -64,6 +67,7 @@ export default function QuizDetailPage() {
 
   const [selectedQuestions, setSelectedQuestions] =
     useState<SelectedQuestionMap>({});
+  const selectedQuestionsRef = useRef(selectedQuestions);
   const [reviewQuestions, setReviewQuestions] = useState<Question[]>([]);
   const [loadingReviewQuestions, setLoadingReviewQuestions] = useState(false);
 
@@ -88,10 +92,41 @@ export default function QuizDetailPage() {
   const [loadingQuestionBank, setLoadingQuestionBank] = useState(false);
   const questionBankPageSize = 10;
 
+  useEffect(() => {
+    selectedQuestionsRef.current = selectedQuestions;
+  }, [selectedQuestions]);
+
   const selectedCount = useMemo(
     () => Object.keys(selectedQuestions).length,
     [selectedQuestions],
   );
+
+  const TOTAL_MARKS = 10;
+
+  const totalMarks = useMemo(
+    () =>
+      Object.values(selectedQuestions).reduce((sum, q) => sum + q.marks, 0),
+    [selectedQuestions],
+  );
+
+  const autoDistributeMarks = useCallback(() => {
+    if (selectedCount === 0) return;
+    const base = Math.floor(TOTAL_MARKS / selectedCount);
+    const remainder = TOTAL_MARKS % selectedCount;
+
+    setSelectedQuestions((prev) => {
+      const next = { ...prev };
+      let extra = remainder;
+      Object.keys(next).forEach((qId) => {
+        next[qId] = {
+          ...next[qId],
+          marks: extra > 0 ? base + 1 : base,
+        };
+        if (extra > 0) extra -= 1;
+      });
+      return next;
+    });
+  }, [selectedCount]);
 
   const selectedQuestionIdSet = useMemo(
     () => new Set(Object.keys(selectedQuestions)),
@@ -207,7 +242,7 @@ export default function QuizDetailPage() {
   }, []);
 
   const refreshReviewQuestions = useCallback(async () => {
-    const selectedIds = Object.keys(selectedQuestions);
+    const selectedIds = Object.keys(selectedQuestionsRef.current);
     if (selectedIds.length === 0) {
       setReviewQuestions([]);
       return;
@@ -234,12 +269,27 @@ export default function QuizDetailPage() {
     } finally {
       setLoadingReviewQuestions(false);
     }
-  }, [getQuestionById, selectedQuestions, toast]);
+  }, [getQuestionById, toast]);
 
   useEffect(() => {
     if (!mounted || !user?.id) return;
     refreshReviewQuestions();
   }, [mounted, user?.id, refreshReviewQuestions]);
+
+  const prevSelectedIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    const currentIds = new Set(Object.keys(selectedQuestions));
+    const prevIds = prevSelectedIdsRef.current;
+    const changed =
+      currentIds.size !== prevIds.size ||
+      [...currentIds].some((id) => !prevIds.has(id));
+
+    if (changed) {
+      prevSelectedIdsRef.current = currentIds;
+      refreshReviewQuestions();
+    }
+  }, [selectedQuestions, refreshReviewQuestions]);
 
   const loadQuizBankQuestions = useCallback(
     async (sourceQuizId: string): Promise<QuizQuestionView[]> => {
@@ -387,6 +437,18 @@ export default function QuizDetailPage() {
   const handleSave = async () => {
     if (!quizId) return;
 
+    const zeroMarksQuestions = Object.entries(selectedQuestions)
+      .filter(([, meta]) => meta.marks <= 0);
+    if (zeroMarksQuestions.length > 0) {
+      toast.showError(`All questions must have marks greater than 0. Please check the marks for each question.`);
+      return;
+    }
+
+    if (selectedCount > 0 && Math.abs(totalMarks - TOTAL_MARKS) > 0.001) {
+      toast.showError(`Total marks must equal ${TOTAL_MARKS}. Current total: ${totalMarks}`);
+      return;
+    }
+
     const payload: AssignQuizQuestionPayload[] = Object.entries(selectedQuestions)
       .map(([questionId, meta]) => ({
         questionId,
@@ -436,21 +498,65 @@ export default function QuizDetailPage() {
           </p>
         </div>
 
-        <Button color="blue" onClick={handleSave} disabled={saving || loading}>
+        <Button className="cursor-pointer" color="blue" onClick={handleSave} disabled={saving || loading}>
           <CheckIcon className="mr-2 h-5 w-5" />
           {saving ? "Saving..." : "Save Assignment"}
         </Button>
       </div>
 
-      <div className="mb-4 flex flex-wrap gap-3">
-        <Button color="light" onClick={openQuizBankModal}>
+      <div className="mb-4 flex flex-wrap items-center gap-3">
+        <Button color="light" onClick={openQuizBankModal} className="cursor-pointer">
           <BookOpenIcon className="mr-2 h-5 w-5" />
           Quiz Bank
         </Button>
-        <Button color="light" onClick={openQuestionBankModal}>
+        <Button color="light" onClick={openQuestionBankModal} className="cursor-pointer">
           <ClipboardDocumentListIcon className="mr-2 h-5 w-5" />
           Question Bank
         </Button>
+        <div className="ml-auto flex items-center gap-3">
+          {selectedCount > 0 && (
+            <>
+              <div className="flex items-center gap-2">
+                <span className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+                  Total Marks:
+                </span>
+                <div className="flex items-center gap-2">
+                  <div className={`h-2.5 w-32 overflow-hidden rounded-full bg-gray-200 ${isDark ? "bg-gray-700" : ""}`}>
+                    <div
+                      className={`h-full rounded-full transition-all ${
+                        Math.abs(totalMarks - TOTAL_MARKS) < 0.001
+                          ? "bg-green-500"
+                          : totalMarks > TOTAL_MARKS
+                            ? "bg-red-500"
+                            : "bg-blue-500"
+                      }`}
+                      style={{ width: `${Math.min((totalMarks / TOTAL_MARKS) * 100, 100)}%` }}
+                    />
+                  </div>
+                  <span
+                    className={`text-sm font-semibold ${
+                      Math.abs(totalMarks - TOTAL_MARKS) < 0.001
+                        ? "text-green-600"
+                        : "text-red-500"
+                    }`}
+                  >
+                    {totalMarks} / {TOTAL_MARKS}
+                  </span>
+                </div>
+                <Button
+                  size="xs"
+                  color="purple"
+                  className="cursor-pointer"
+                  onClick={autoDistributeMarks}
+                  title={`Distribute ${TOTAL_MARKS} points evenly across all questions`}
+                >
+                  <SparklesIcon className="mr-1 h-4 w-4" />
+                  Auto Distribute
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       <div
@@ -459,10 +565,7 @@ export default function QuizDetailPage() {
         }`}
       >
         {loading || loadingReviewQuestions ? (
-          <div className="flex items-center justify-center p-12">
-            <Spinner size="xl" />
-            <span className="ml-3">Loading review...</span>
-          </div>
+          <QuizDetailPageSkeleton />
         ) : (
           <Table>
             <TableHead>
@@ -490,12 +593,13 @@ export default function QuizDetailPage() {
                       <TableCell>
                         <Button
                           size="xs"
-                          color="failure"
+                          color="red"
+                          className="cursor-pointer"
                           onClick={() =>
                             removeQuestionsFromSelection([question.id])
                           }
                         >
-                          Remove
+                          <TrashIcon className="h-4 w-4" />
                         </Button>
                       </TableCell>
                       <TableCell className="max-w-xl">
@@ -538,7 +642,8 @@ export default function QuizDetailPage() {
                         <TextInput
                           id={`marks-${question.id}`}
                           type="number"
-                          min={0}
+                          min={0.5}
+                          max={TOTAL_MARKS}
                           step={0.5}
                           value={String(selected?.marks ?? 0)}
                           disabled={!selected}
@@ -546,7 +651,7 @@ export default function QuizDetailPage() {
                             updateSelectedMeta(
                               question.id,
                               "marks",
-                              Number(e.target.value || 0),
+                              Math.max(0.5, Math.min(Number(e.target.value || 0), TOTAL_MARKS)),
                             )
                           }
                         />
@@ -625,6 +730,7 @@ export default function QuizDetailPage() {
                         <Button
                           size="xs"
                           color={importedAll ? "gray" : "blue"}
+                          className="cursor-pointer"
                           onClick={() =>
                             importedAll
                               ? handleRemoveWholeQuiz(sourceQuiz.id)
@@ -641,6 +747,7 @@ export default function QuizDetailPage() {
                         <Button
                           size="xs"
                           color="light"
+                          className="cursor-pointer"
                           onClick={() => toggleQuizExpand(sourceQuiz.id)}
                         >
                           {expanded ? (
@@ -682,16 +789,18 @@ export default function QuizDetailPage() {
                                 {selectedQuestionIdSet.has(item.questionId) ? (
                                   <Button
                                     size="xs"
-                                    color="failure"
+                                    color="red"
                                     onClick={() => removeQuestionsFromSelection([item.questionId])}
+                                    className="cursor-pointer"
                                   >
-                                    Remove
+                                    <TrashIcon className="h-4 w-4" />
                                   </Button>
                                 ) : (
                                   <Button
                                     size="xs"
                                     color="blue"
                                     onClick={() => appendQuestionsToSelection([item])}
+                                    className="cursor-pointer"
                                   >
                                     Add
                                   </Button>
@@ -710,7 +819,7 @@ export default function QuizDetailPage() {
           )}
         </ModalBody>
         <ModalFooter>
-          <Button color="gray" onClick={() => setIsQuizBankModalOpen(false)}>
+          <Button className="cursor-pointer" color="gray" onClick={() => setIsQuizBankModalOpen(false)}>
             Close
           </Button>
         </ModalFooter>
@@ -778,10 +887,10 @@ export default function QuizDetailPage() {
                             {isAdded ? (
                               <Button
                                 size="xs"
-                                color="failure"
+                                color="red"
                                 onClick={() => removeQuestionsFromSelection([question.id])}
                               >
-                                Remove
+                                <TrashIcon className="h-4 w-4" />
                               </Button>
                             ) : (
                               <Button

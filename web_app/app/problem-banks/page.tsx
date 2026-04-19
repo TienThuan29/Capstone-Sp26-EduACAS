@@ -13,7 +13,6 @@ import {
   TextInput,
   Textarea,
   Select,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -22,6 +21,7 @@ import {
   TableRow,
   Label,
   Tooltip,
+  Spinner,
 } from "flowbite-react";
 import {
   PlusIcon,
@@ -41,6 +41,7 @@ import type {
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { CustomPagination } from "@/components/custom-pagination";
 import { formatDateOnly } from "@/utils/datetime-utils";
+import { ProblemBanksSkeleton } from "@/components/ui/skeletons";
 
 type ProblemFormData = {
   lecturerId: string;
@@ -252,14 +253,7 @@ export default function ProblemBanksPage() {
         className={`overflow-x-auto rounded-lg ${isDark ? "bg-gray-800" : "bg-white"} border ${isDark ? "border-gray-700" : "border-gray-200"}`}
       >
         {loading ? (
-          <div className="flex items-center justify-center p-12">
-            <Spinner size="xl" />
-            <span
-              className={`ml-3 ${isDark ? "text-gray-300" : "text-gray-700"}`}
-            >
-              Loading...
-            </span>
-          </div>
+          <ProblemBanksSkeleton />
         ) : (
           <Table>
             <TableHead>

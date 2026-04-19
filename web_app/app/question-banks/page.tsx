@@ -10,7 +10,6 @@ import {
   ModalFooter,
   ModalHeader,
   Select,
-  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -39,6 +38,7 @@ import {
 import type { Question, QuestionType } from "@/types/question";
 import { formatDateOnly } from "@/utils/datetime-utils";
 import { CustomPagination } from "@/components/custom-pagination";
+import { QuestionBanksSkeleton } from "@/components/ui/skeletons";
 
 type QuestionFormState = {
   content: string;
@@ -457,10 +457,7 @@ export default function QuestionBanksPage() {
         }`}
       >
         {loading ? (
-          <div className="flex items-center justify-center p-12">
-            <Spinner size="xl" />
-            <span className="ml-3">Loading questions...</span>
-          </div>
+          <QuestionBanksSkeleton />
         ) : (
           <Table>
             <TableHead>

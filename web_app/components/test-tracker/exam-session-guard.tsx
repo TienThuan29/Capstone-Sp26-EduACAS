@@ -3,9 +3,9 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
-import { useExamViolationGuard, type LogEntry, type ViolationOverlay } from '@/hooks/exam/useExamViolationGuard';
-import { useStudentExamSession } from '@/hooks/exam/useStudentExamSession';
-import { useExamLog } from '@/hooks/exam/useExamLog';
+import { useExamViolationGuard, type LogEntry, type ViolationOverlay } from '@/hooks/examination/useExamViolationGuard';
+import { useStudentExamSession } from '@/hooks/examination/useStudentExamSession';
+import { useExamLog } from '@/hooks/examination/useExamLog';
 import { buildExamSessionStorageKeys } from '@/utils/test-tracker/examSessionKeys';
 import { buildExamTrackerStorageKeys } from '@/utils/test-tracker/storageKeys';
 import {
@@ -36,13 +36,17 @@ export function ExamSessionGuard({
 }: Props) {
   const router = useRouter();
   const { user } = useAuth();
-  const { lock } = useStudentExamSession();
+  const { getByExam, lock } = useStudentExamSession();
   const { cacheExamLogs } = useExamLog();
   const studentId = user?.id ?? '';
 
   const sessionKeys = useMemo(
     () => (examId && studentId ? buildExamSessionStorageKeys(examId, studentId) : null),
     [examId, studentId]
+  );
+  const guardStartStorageKey = useMemo(
+    () => (sessionKeys ? `${sessionKeys.sessionKey}:guard-started-at` : ''),
+    [sessionKeys]
   );
 
   const [resolvedProblemId, setResolvedProblemId] = useState<string | null>(null);
@@ -117,12 +121,30 @@ export function ExamSessionGuard({
     setScreen(active ? 'exam' : 'intro');
     if (active) {
       if (examStartTimeRef.current === 0) {
-        examStartTimeRef.current = Date.now();
+        const now = Date.now();
+        let guardStartedAt = now;
+        if (guardStartStorageKey) {
+          try {
+            const raw = localStorage.getItem(guardStartStorageKey);
+            const parsed = Number.parseInt(raw ?? '', 10);
+            if (Number.isFinite(parsed) && parsed > 0) {
+              guardStartedAt = parsed;
+            } else {
+              localStorage.setItem(guardStartStorageKey, String(now));
+            }
+          } catch {
+            guardStartedAt = now;
+          }
+        }
+        examStartTimeRef.current = guardStartedAt;
       }
     } else {
       examStartTimeRef.current = 0;
+      if (guardStartStorageKey) {
+        localStorage.removeItem(guardStartStorageKey);
+      }
     }
-  }, [sessionKeys, serverPhase]);
+  }, [guardStartStorageKey, sessionKeys, serverPhase]);
 
   const handleAppendLog = useCallback(
     (
@@ -177,24 +199,42 @@ export function ExamSessionGuard({
         setLogs((prev) => [...prev, entry]);
       }
 
-      void cacheExamLogs(payload);
+      // Avoid unhandled rejections (network/offline/401 redirect/etc.)
+      void cacheExamLogs(payload).catch(() => {});
     },
     [cacheExamLogs, sessionKeys, trackerKeys],
   );
 
   const handleForceSubmitFromExamPage = useCallback(async () => {
+    let lockedOnServer = false;
     try {
-      await lock(examId, 'Violation threshold exceeded');
-    } catch {
-      // session may already be locked
+      const lockSession = await lock(examId, 'Violation threshold exceeded');
+      lockedOnServer = lockSession?.phase === 'LOCKED';
+    } catch (err) {
+      console.error('Lock request failed from exam session guard:', err);
     }
-    if (studentId) {
+
+    if (!lockedOnServer) {
+      try {
+        const latestSession = await getByExam(examId);
+        lockedOnServer = latestSession?.phase === 'LOCKED';
+      } catch (err) {
+        console.error('Failed to verify lock state in exam session guard:', err);
+      }
+    }
+
+    if (lockedOnServer && studentId) {
       clearExamSessionClientStorage(examId, studentId);
+    } else if (!lockedOnServer) {
+      console.warn('Lock state not confirmed on server. Preserving local exam session state.');
     }
+
     if (classroomId) {
       router.replace(`/my-classroom/${classroomId}/exam/${examId}`);
+      return;
     }
-  }, [classroomId, examId, lock, router, studentId]);
+    router.back();
+  }, [classroomId, examId, getByExam, lock, router, studentId]);
 
   useExamViolationGuard({
     examStatusStorageKey: sessionKeys?.phaseStorageKey ?? '',
@@ -214,9 +254,15 @@ export function ExamSessionGuard({
     setOverlay,
     onLog: handleAppendLog,
     onForceSubmit: handleForceSubmitFromExamPage,
+    enableDevtoolsInDevelopment: true,
   });
 
   const handleCloseOverlay = useCallback(async () => {
+    if (overlay?.alertType === 'lock') {
+      setOverlay(null);
+      return;
+    }
+
     if (sessionKeys) {
       const isActive =
         serverPhase != null
@@ -232,7 +278,7 @@ export function ExamSessionGuard({
     }
     window.dispatchEvent(new CustomEvent('exam:reset-clipboard'));
     setOverlay(null);
-  }, [sessionKeys, serverPhase]);
+  }, [overlay?.alertType, sessionKeys, serverPhase]);
 
   return (
     <>

@@ -23,6 +23,7 @@ import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
 import { useSubmissionStudent } from "@/hooks/submission/useSubmissionStudent";
 import { DIFFICULTY } from "@/types/problem";
 import type { SubmissionResponse } from "@/types/submission";
+import { SubmissionsTabSkeleton } from "@/components/ui/skeletons";
 
 type ProblemTab = "problem" | "submissions" ;
 
@@ -378,12 +379,7 @@ function SubmissionsTab() {
   }
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12 text-gray-400">
-        <Spinner size="lg" />
-        <p className="mt-3 text-sm">Loading submissions...</p>
-      </div>
-    );
+    return <SubmissionsTabSkeleton />;
   }
 
   if (loadError) {

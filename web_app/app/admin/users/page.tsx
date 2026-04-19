@@ -18,6 +18,7 @@ import { useToast } from "@/hooks/useToast"
 import { UserProfile } from "@/types/user"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { formatDateOnly, formatTime } from "@/utils/datetime-utils"
+import { UserManagementSkeleton } from "@/components/ui/skeletons"
 
 const userStatsAccentStyles: Record<string, { border: string; iconBg: string; iconColor: string }> = {
   purple: { border: 'border-l-purple-500', iconBg: 'bg-purple-50 dark:bg-purple-500/10', iconColor: 'text-purple-600 dark:text-purple-400' },
@@ -200,6 +201,10 @@ export default function UsersManagement() {
   }
 
   if (!mounted) return null
+
+  if (loading) {
+    return <UserManagementSkeleton />
+  }
 
   const statsCardsData = [
     { title: 'Total', value: overallRoleStats.total, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },

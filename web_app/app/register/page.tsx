@@ -5,6 +5,7 @@ import { Button, DarkThemeToggle, Label, TextInput, Select } from "flowbite-reac
 import Link from "next/link";
 import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
+import { GoogleIcon } from "@/components/svg-icons";
 
 export default function RegisterPage() {
   const [fullname, setFullname] = useState("");
@@ -19,18 +20,18 @@ export default function RegisterPage() {
     e.preventDefault();
     
     if (password !== confirmPassword) {
-      alert("Mật khẩu xác nhận không khớp!");
+      alert("Confirm password does not match!");
       return;
     }
     
     if (!agreeTerms) {
-      alert("Vui lòng đồng ý với điều khoản dịch vụ!");
+      alert("Please agree to the terms of service!");
       return;
     }
     
     setIsLoading(true);
     try {
-      console.log("Đăng ký bằng email...");
+      console.log("Registering with email...");
       // TODO: Implement registration logic
     } catch (error) {
       console.error("Registration error:", error);
@@ -40,7 +41,7 @@ export default function RegisterPage() {
   };
 
   const handleGoogleRegister = async () => {
-    console.log("Đăng ký bằng Google...");
+    console.log("Registering with Google...");
     // TODO: Implement Google OAuth
   };
 
@@ -74,7 +75,7 @@ export default function RegisterPage() {
                 d="M10 19l-7-7m0 0l7-7m-7 7h18"
               />
             </svg>
-            <span className="text-sm font-medium">Quay lại trang chủ</span>
+            <span className="text-sm font-medium">Back to Home</span>
           </Link>
           {/* Dark theme toggle */}
           <DarkThemeToggle />
@@ -83,10 +84,10 @@ export default function RegisterPage() {
         <div className="relative z-10 w-full max-w-lg space-y-8 py-8">
           <div>
             <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
-              Tạo tài khoản mới
+              Create New Account
             </h1>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              Đăng ký để bắt đầu hành trình học tập
+              Register to start your learning journey
             </p>
           </div>
 
@@ -94,12 +95,12 @@ export default function RegisterPage() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="fullname" className="text-[#1E1E1E] dark:text-gray-300">
-                  Họ và tên
+                  Full Name
                 </Label>
                 <TextInput
                   id="fullname"
                   type="text"
-                  placeholder="Nguyễn Văn A"
+                  placeholder="John Doe"
                   required
                   value={fullname}
                   onChange={(e) => setFullname(e.target.value)}
@@ -124,7 +125,7 @@ export default function RegisterPage() {
 
               <div>
                 <Label htmlFor="role" className="text-[#1E1E1E] dark:text-gray-300">
-                  Vai trò
+                  Role
                 </Label>
                 <Select
                   id="role"
@@ -133,15 +134,15 @@ export default function RegisterPage() {
                   onChange={(e) => setRole(e.target.value)}
                   className="mt-1"
                 >
-                  <option value="">Chọn vai trò</option>
-                  <option value="student">Sinh viên</option>
-                  <option value="teacher">Giảng viên</option>
+                  <option value="">Select role</option>
+                  <option value="student">Student</option>
+                  <option value="teacher">Lecturer</option>
                 </Select>
               </div>
 
               <div>
                 <Label htmlFor="password" className="text-[#1E1E1E] dark:text-gray-300">
-                  Mật khẩu
+                  Password
                 </Label>
                 <TextInput
                   id="password"
@@ -153,13 +154,13 @@ export default function RegisterPage() {
                   className="mt-1"
                 />
                 <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  Tối thiểu 8 ký tự
+                  Minimum 8 characters
                 </p>
               </div>
 
               <div>
                 <Label htmlFor="confirm-password" className="text-[#1E1E1E] dark:text-gray-300">
-                  Xác nhận mật khẩu
+                  Confirm Password
                 </Label>
                 <TextInput
                   id="confirm-password"
@@ -182,19 +183,19 @@ export default function RegisterPage() {
                 onChange={(e) => setAgreeTerms(e.target.checked)}
               />
               <Label htmlFor="terms" className="text-sm text-gray-900 dark:text-gray-300">
-                Tôi đồng ý với{" "}
+                I agree with the{" "}
                 <Link
                   href="#"
                   className="text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors"
                 >
-                  Điều khoản dịch vụ
+                  Terms of Service
                 </Link>{" "}
                 và{" "}
                 <Link
                   href="#"
                   className="text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors"
                 >
-                  Chính sách bảo mật
+                  Privacy Policy
                 </Link>
               </Label>
             </div>
@@ -206,17 +207,17 @@ export default function RegisterPage() {
                 className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
-                {isLoading ? "Đang đăng ký..." : "Đăng ký"}
+                {isLoading ? "Registering..." : "Register"}
               </Button>
             </div>
 
             <div className="text-center text-sm text-gray-600 dark:text-gray-400">
-              Đã có tài khoản?{" "}
+              Already have an account?{" "}
               <Link
                 href="/login"
                 className="font-medium text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors"
               >
-                Đăng nhập
+                Sign In
               </Link>
             </div>
 
@@ -227,7 +228,7 @@ export default function RegisterPage() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="bg-white px-2 text-gray-500 dark:bg-gray-900 dark:text-gray-400">
-                  Hoặc đăng ký với
+                  Or register with
                 </span>
               </div>
             </div>
@@ -239,30 +240,8 @@ export default function RegisterPage() {
                 onClick={handleGoogleRegister}
                 className="w-full border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
               >
-                <svg
-                  className="mr-2 h-5 w-5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                    fill="#4285F4"
-                  />
-                  <path
-                    d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                    fill="#34A853"
-                  />
-                  <path
-                    d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
-                    fill="#FBBC05"
-                  />
-                  <path
-                    d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
-                    fill="#EA4335"
-                  />
-                </svg>
-                Đăng ký bằng Google
+                <GoogleIcon />
+                Register with Google
               </Button>
             </div>
           </form>

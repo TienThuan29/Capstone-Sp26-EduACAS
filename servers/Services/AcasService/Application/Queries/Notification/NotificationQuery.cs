@@ -98,27 +98,7 @@ public class NotificationQuery : INotificationQuery
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            var all = await _notificationRepository.FindAllAsync();
-            
-            // Filter by search term if provided
-            var filtered = all.AsEnumerable();
-            if (!string.IsNullOrWhiteSpace(searchTerm))
-            {
-                var lowerSearch = searchTerm.ToLower();
-                filtered = filtered.Where(n => 
-                    (n.Title != null && n.Title.ToLower().Contains(lowerSearch)) || 
-                    (n.Body != null && n.Body.ToLower().Contains(lowerSearch)) ||
-                    (n.TargetUserId != null && n.TargetUserId.ToLower().Contains(lowerSearch)) ||
-                    (n.Type != null && n.Type.ToString().ToLower().Contains(lowerSearch))
-                );
-            }
-
-            var list = filtered.ToList();
-            var totalCount = list.Count;
-            var itemsOnPage = list
-                .Skip((pageIndex - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var (itemsOnPage, totalCount) = await _notificationRepository.SearchAsync(searchTerm, pageIndex, pageSize);
 
             var responses = itemsOnPage
                 .Select(n => _notificationMapper.ToNotificationResponse(n))

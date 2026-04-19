@@ -26,6 +26,7 @@ import {
   TableHeadCell,
   TableRow,
   TextInput,
+  Tooltip,
 } from "flowbite-react";
 import { useRouter } from "next/navigation";
 import { useThemeContext } from "@/components/theme-provider";
@@ -379,39 +380,51 @@ export default function QuizBanksPage() {
                     <TableCell>{formatDateOnly(quiz.createdAt)}</TableCell>
                     <TableCell>
                       <div className="flex gap-2">
-                        <Button
-                          size="xs"
-                          color="info"
-                          onClick={() =>
-                            router.push(PageUrl.QUIZ_BANK_DETAIL_PAGE(quiz.id))
-                          }
-                        >
-                          <ClipboardDocumentListIcon className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="xs"
-                          color="light"
-                          onClick={() => openEditModal(quiz)}
-                          disabled={quiz.isDeleted}
-                        >
-                          <PencilSquareIcon className="h-4 w-4" />
-                        </Button>
+                        <Tooltip content="View" placement="top">
+                          <Button
+                            size="xs"
+                            color="info"
+                            onClick={() =>
+                              router.push(PageUrl.QUIZ_BANK_DETAIL_PAGE(quiz.id))
+                            }
+                            className="cursor-pointer"
+                          >
+                            <ClipboardDocumentListIcon className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
+                        <Tooltip content="Edit" placement="top">
+                          <Button
+                            size="xs"
+                            color="light"
+                            onClick={() => openEditModal(quiz)}
+                            disabled={quiz.isDeleted}
+                            className="cursor-pointer"
+                          >
+                            <PencilSquareIcon className="h-4 w-4" />
+                          </Button>
+                        </Tooltip>
                         {quiz.isDeleted ? (
-                          <Button
-                            size="xs"
-                            color="success"
-                            onClick={() => handleRestore(quiz.id)}
-                          >
-                            <ArrowPathIcon className="h-4 w-4" />
-                          </Button>
+                          <Tooltip content="Restore" placement="top">
+                            <Button
+                              size="xs"
+                              color="success"
+                              onClick={() => handleRestore(quiz.id)}
+                              className="cursor-pointer"
+                            >
+                              <ArrowPathIcon className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
                         ) : (
-                          <Button
-                            size="xs"
-                            color="failure"
-                            onClick={() => handleSoftDelete(quiz.id)}
-                          >
-                            <TrashIcon className="h-4 w-4" />
-                          </Button>
+                          <Tooltip content="Delete" placement="top">
+                            <Button
+                              size="xs"
+                              color="red"
+                              onClick={() => handleSoftDelete(quiz.id)}
+                              className="cursor-pointer"
+                            >
+                              <TrashIcon className="h-4 w-4" />
+                            </Button>
+                          </Tooltip>
                         )}
                       </div>
                     </TableCell>

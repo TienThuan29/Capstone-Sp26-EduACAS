@@ -12,7 +12,7 @@ import {
 } from "flowbite-react";
 import type { SlotResponse } from "@/hooks/classroom/useSlot";
 import { useSlot } from "@/hooks/classroom/useSlot";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import type { Examination } from "@/types/examination";
 import { useToast } from "@/hooks/useToast";
 

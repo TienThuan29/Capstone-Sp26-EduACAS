@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import {
-  Spinner,
   Button,
   Select,
   TextInput,
@@ -24,6 +23,7 @@ import { CustomPagination } from "@/components/custom-pagination";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { formatDateOnly } from "@/utils/datetime-utils";
+import { ManageClassroomPageSkeleton } from "@/components/ui/skeletons";
 
 interface LecturerLite {
   lecturerId: string;
@@ -72,8 +72,11 @@ type CreateClassroomFormData = {
   enrolKey: string;
   dateEnd: string;
   maxSlot: number | "";
+  avgScoreThreshold: number;
+  minExamCount: number;
 };
 
+// --- Page Component ---
 export default function ManageClassroomPage() {
   const { showSuccess, showError } = useToast();
   const { user } = useAuth();
@@ -118,6 +121,8 @@ export default function ManageClassroomPage() {
     enrolKey: "",
     dateEnd: "",
     maxSlot: "",
+    avgScoreThreshold: 0,
+    minExamCount: 2,
   });
 
   const { getLecturerClassrooms } = useClassroom();
@@ -178,7 +183,7 @@ export default function ManageClassroomPage() {
           }
         } catch (error) {
           console.error("Failed to fetch form data", error);
-          showError("Không thể tải danh sách môn học");
+          showError("Failed to load subjects list.");
         }
       };
       fetchData();
@@ -204,26 +209,26 @@ export default function ManageClassroomPage() {
 
       if (!currentUserId) {
         showError(
-          "Không tìm thấy thông tin giảng viên. Vui lòng đăng nhập lại.",
+          "Cannot find lecturer information. Please log in again.",
         );
         setModalLoading(false);
         return;
       }
 
       if (formData.className.length > 100) {
-        showError("Tên lớp học không được quá 100 ký tự.");
+        showError("Class name cannot exceed 100 characters.");
         setModalLoading(false);
         return;
       }
       if (new Date(formData.dateEnd) <= new Date()) {
-        showError("Ngày kết thúc phải là ngày trong tương lai.");
+        showError("End date must be a future date.");
         setModalLoading(false);
         return;
       }
 
       const slotVal = Number(formData.maxSlot);
       if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
-        showError("Số lượng chỗ (Max Slot) phải từ 2 trở lên.");
+        showError("Max Slot must be at least 2.");
         setModalLoading(false);
         return;
       }
@@ -237,10 +242,14 @@ export default function ManageClassroomPage() {
         enrolKey: formData.enrolKey,
         endDate: formData.dateEnd,
         maxSlot: slotVal,
+        gradingSettings: {
+          avgScoreThreshold: Number(formData.avgScoreThreshold) || 0,
+          minExamCount: Number(formData.minExamCount) || 0,
+        },
       };
 
       await axiosInstance.post(Api.Classroom.CREATE_CLASSROOM, payload);
-      showSuccess("Tạo lớp học thành công!");
+      showSuccess("Classroom created successfully!");
       setOpenModal(false);
       fetchClassrooms();
 
@@ -252,10 +261,12 @@ export default function ManageClassroomPage() {
         enrolKey: "",
         dateEnd: "",
         maxSlot: "",
+        avgScoreThreshold: 0,
+        minExamCount: 0,
       });
     } catch (error) {
       console.error("Create classroom failed", error);
-      showError("Tạo lớp học thất bại. Vui lòng thử lại.");
+      showError("Failed to create classroom. Please try again.");
     } finally {
       setModalLoading(false);
     }
@@ -306,15 +317,7 @@ export default function ManageClassroomPage() {
   }, [classrooms]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen flex-col">
-        <HomeNavbar />
-        <div className="flex flex-grow items-center justify-center">
-          <Spinner size="xl" color="info" />
-        </div>
-        <Footer />
-      </div>
-    );
+    return <ManageClassroomPageSkeleton />;
   }
 
   return (
@@ -452,173 +455,261 @@ export default function ManageClassroomPage() {
 
       <Footer />
 
-      <Modal show={openModal} onClose={() => setOpenModal(false)}>
-        <ModalHeader>Create new classroom</ModalHeader>
-        <ModalBody>
-          <form onSubmit={handleCreateSubmit} className="space-y-4">
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="classCode">
-                  Classroom code <span className="text-red-500">*</span>
-                </Label>
-              </div>
-              <TextInput
-                id="classCode"
-                placeholder="Enter classroom code (e.g. SE123)"
-                required
-                value={formData.classCode}
-                onChange={(e) =>
-                  setFormData({ ...formData, classCode: e.target.value })
-                }
-              />
-            </div>
+      <CreateClassroomModal
+        show={openModal}
+        onClose={() => setOpenModal(false)}
+        formData={formData}
+        setFormData={setFormData}
+        onSubmit={handleCreateSubmit}
+        modalLoading={modalLoading}
+        subjects={subjects}
+        semesters={semesters}
+      />
+    </div>
+  );
+}
 
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="className">
-                  Classroom name <span className="text-red-500">*</span>
-                </Label>
-              </div>
-              <TextInput
-                id="className"
-                placeholder="Enter classroom name (e.g. Software Engineering)"
-                required
-                value={formData.className}
-                onChange={(e) =>
-                  setFormData({ ...formData, className: e.target.value })
-                }
-                maxLength={100}
-              />
-              <p className="mt-1 text-xs text-gray-500">
-                Maximum 100 characters.
-              </p>
-            </div>
 
+// --- Create Classroom Modal Component ---
+interface CreateClassroomModalProps {
+  show: boolean;
+  onClose: () => void;
+  formData: CreateClassroomFormData;
+  setFormData: React.Dispatch<React.SetStateAction<CreateClassroomFormData>>;
+  onSubmit: (e: React.FormEvent) => void;
+  modalLoading: boolean;
+  subjects: Subject[];
+  semesters: { id: string; semesterName: string }[];
+}
+
+function CreateClassroomModal({
+  show,
+  onClose,
+  formData,
+  setFormData,
+  onSubmit,
+  modalLoading,
+  subjects,
+  semesters,
+}: CreateClassroomModalProps) {
+  return (
+    <Modal show={show} onClose={onClose}>
+      <ModalHeader>Create new classroom</ModalHeader>
+      <ModalBody>
+        <form onSubmit={onSubmit} className="space-y-4">
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="classCode">
+                Classroom code <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              id="classCode"
+              placeholder="Enter classroom code (e.g. SE123)"
+              required
+              value={formData.classCode}
+              onChange={(e) =>
+                setFormData({ ...formData, classCode: e.target.value })
+              }
+            />
+          </div>
+
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="className">
+                Classroom name <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              id="className"
+              placeholder="Enter classroom name (e.g. Software Engineering)"
+              required
+              value={formData.className}
+              onChange={(e) =>
+                setFormData({ ...formData, className: e.target.value })
+              }
+              maxLength={100}
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              Maximum 100 characters.
+            </p>
+          </div>
+
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="subject">
+                Subject <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <Select
+              id="subject"
+              required
+              value={formData.subjectId}
+              onChange={(e) =>
+                setFormData({ ...formData, subjectId: e.target.value })
+              }
+            >
+              {subjects.map((sub) => (
+                <option key={sub.id} value={sub.id}>
+                  {sub.subjectCode} - {sub.subjectName}
+                </option>
+              ))}
+            </Select>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <div className="mb-2 block">
-                <Label htmlFor="subject">
-                  Subject <span className="text-red-500">*</span>
+                <Label htmlFor="semester">
+                  Semester <span className="text-red-500">*</span>
                 </Label>
               </div>
               <Select
-                id="subject"
+                id="semester"
                 required
-                value={formData.subjectId}
+                value={formData.semesterName}
                 onChange={(e) =>
-                  setFormData({ ...formData, subjectId: e.target.value })
+                  setFormData({ ...formData, semesterName: e.target.value })
                 }
               >
-                {subjects.map((sub) => (
-                  <option key={sub.id} value={sub.id}>
-                    {sub.subjectCode} - {sub.subjectName}
+                {semesters.map((sem) => (
+                  <option key={sem.id} value={sem.semesterName}>
+                    {sem.semesterName}
                   </option>
                 ))}
               </Select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="semester">
-                    Semester <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-                <Select
-                  id="semester"
-                  required
-                  value={formData.semesterName}
-                  onChange={(e) =>
-                    setFormData({ ...formData, semesterName: e.target.value })
-                  }
-                >
-                  {semesters.map((sem) => (
-                    <option key={sem.id} value={sem.semesterName}>
-                      {sem.semesterName}
-                    </option>
-                  ))}
-                </Select>
-              </div>
-
-              <div>
-                <div className="mb-2 block">
-                  <Label htmlFor="maxSlot">
-                    Max Slot <span className="text-red-500">*</span>
-                  </Label>
-                </div>
-                <TextInput
-                  id="maxSlot"
-                  type="number"
-                  placeholder="Enter max slot (e.g. 30)"
-                  required
-                  value={formData.maxSlot}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      maxSlot:
-                        e.target.value === "" ? "" : Number(e.target.value),
-                    })
-                  }
-                  min={2}
-                />
-              </div>
-            </div>
-
             <div>
               <div className="mb-2 block">
-                <Label htmlFor="enrolKey">Enrol key</Label>
-              </div>
-              <TextInput
-                id="enrolKey"
-                placeholder=""
-                type="password"
-                value={formData.enrolKey}
-                onChange={(e) =>
-                  setFormData({ ...formData, enrolKey: e.target.value })
-                }
-                pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
-                title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
-              />
-              <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs text-gray-500">
-                <li>
-                  6-20 characters, must contain at least one special character,
-                  and must not contain spaces.
-                </li>
-                <li>
-                  If you don&apos;t want to set an enrol key, it is
-                  automatically generated.
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="dateEnd">
-                  Ngày kết thúc <span className="text-red-500">*</span>
+                <Label htmlFor="maxSlot">
+                  Max Slot <span className="text-red-500">*</span>
                 </Label>
               </div>
               <TextInput
-                id="dateEnd"
-                type="date"
+                id="maxSlot"
+                type="number"
+                placeholder="Enter max slot (e.g. 30)"
                 required
-                value={formData.dateEnd}
+                value={formData.maxSlot}
                 onChange={(e) =>
-                  setFormData({ ...formData, dateEnd: e.target.value })
+                  setFormData({
+                    ...formData,
+                    maxSlot:
+                      e.target.value === "" ? "" : Number(e.target.value),
+                  })
                 }
+                min={2}
               />
             </div>
-            <div className="mt-6 flex justify-end gap-2">
-              <Button color="gray" onClick={() => setOpenModal(false)}>
-                Cancel
-              </Button>
-              <DefaultCustomButton
-                label={modalLoading ? "Creating..." : "Create classroom"}
-                type="submit"
-                disabled={modalLoading}
-              />
+          </div>
+
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="enrolKey">Enrol key</Label>
             </div>
-          </form>
-        </ModalBody>
-      </Modal>
-    </div>
+            <TextInput
+              id="enrolKey"
+              placeholder=""
+              type="password"
+              value={formData.enrolKey}
+              onChange={(e) =>
+                setFormData({ ...formData, enrolKey: e.target.value })
+              }
+              pattern="^(?=.*[^a-zA-Z0-9])\S{6,20}$"
+              title="EnrolKey must be 6-20 characters long, contain at least one special character, and must not contain spaces"
+            />
+            <ul className="mt-1 list-inside list-disc space-y-0.5 text-xs text-gray-500">
+              <li>
+                6-20 characters, must contain at least one special character,
+                and must not contain spaces.
+              </li>
+              <li>
+                If you don&apos;t want to set an enrol key, it is
+                automatically generated.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="dateEnd">
+                End date of classroom <span className="text-red-500">*</span>
+              </Label>
+            </div>
+            <TextInput
+              id="dateEnd"
+              type="date"
+              required
+              value={formData.dateEnd}
+              onChange={(e) =>
+                setFormData({ ...formData, dateEnd: e.target.value })
+              }
+            />
+          </div>
+
+          {/* <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+            <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Grading Settings
+            </p>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="avgScoreThreshold">
+                  Avg score threshold
+                </Label>
+                <TextInput
+                  id="avgScoreThreshold"
+                  type="number"
+                  step={0.5}
+                  min={0}
+                  max={10}
+                  value={formData.avgScoreThreshold || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      avgScoreThreshold:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 5.0"
+                />
+              </div>
+              <div>
+                <Label htmlFor="minExamCount">
+                  Min exam count
+                </Label>
+                <TextInput
+                  id="minExamCount"
+                  type="number"
+                  min={2}
+                  value={formData.minExamCount || ""}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minExamCount:
+                        e.target.value === "" ? 0 : Number(e.target.value),
+                    })
+                  }
+                  className="mt-1"
+                  placeholder="e.g. 3"
+                />
+              </div>
+            </div>
+          </div> */}
+
+          <div className="mt-6 flex justify-end gap-2">
+            <Button color="gray" onClick={onClose}>
+              Cancel
+            </Button>
+            <DefaultCustomButton
+              label={modalLoading ? "Creating..." : "Create classroom"}
+              type="submit"
+              disabled={modalLoading}
+            />
+          </div>
+        </form>
+      </ModalBody>
+    </Modal>
   );
 }

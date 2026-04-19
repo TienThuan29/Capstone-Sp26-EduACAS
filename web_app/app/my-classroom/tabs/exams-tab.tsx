@@ -1,9 +1,10 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Button, Card, Spinner, Badge } from "flowbite-react";
+import { Button, Card, Badge } from "flowbite-react";
 import type { Examination, ExaminationMode } from "@/types/examination";
 import { formatDate } from "@/utils/datetime-utils";
+import { ExamsSkeleton } from "@/components/ui/skeletons";
 
 const MODE_LABELS: Record<ExaminationMode, string> = {
   PRACTICAL: "PRACTICAL",
@@ -31,9 +32,7 @@ export function ExamsTab({
       </div>
 
       {examsLoading ? (
-        <div className="flex justify-center py-20">
-          <Spinner size="xl" />
-        </div>
+        <ExamsSkeleton variant="cards" />
       ) : examinations.length === 0 ? (
         <div className="rounded-4xl border-2 border-dashed border-gray-200 bg-white py-20 text-center dark:border-gray-700 dark:bg-gray-800">
           <p className="cursor-default font-medium text-gray-500">

@@ -8,28 +8,47 @@
     "refProblemId": "prob-001",
     "status": "OPEN",
     "viewCount": 12,
+    "createdDate": "2026-02-01T10:30:00",
+    "updatedDate": "2026-02-01T14:20:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-001-01",
         "issueId": "disc-001",
         "authorId": "usr-stu-002",
+        "authorName": "Alice Johnson",
         "content": "I had the same issue! Try using `input()` on separate lines for each integer.",
         "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-02-01T11:00:00",
+        "updatedDate": "2026-02-01T11:00:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-001-01-r1",
             "issueId": "disc-001",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "That's correct. Use `a = int(input())` on one line, then `b = int(input())` on the next. Each call to `input()` reads one line from stdin.",
             "upVoteCount": 5,
+            "isDeleted": false,
+            "createdDate": "2026-02-01T12:00:00",
+            "updatedDate": "2026-02-01T12:00:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-001-01-r2",
             "issueId": "disc-001",
             "authorId": "usr-stu-001",
+            "authorName": "Bob Wilson",
             "content": "Thanks! That worked perfectly. I was trying to read both on the same line with `split()`.",
             "upVoteCount": 1,
+            "isDeleted": false,
+            "createdDate": "2026-02-01T13:00:00",
+            "updatedDate": "2026-02-01T13:00:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -38,8 +57,13 @@
         "id": "cmt-001-02",
         "issueId": "disc-001",
         "authorId": "usr-stu-004",
+        "authorName": "Carol Davis",
         "content": "For competitive programming, you can also use `sys.stdin` for faster input reading, but `input()` is fine for most problems here.",
         "upVoteCount": 2,
+        "isDeleted": false,
+        "createdDate": "2026-02-01T14:00:00",
+        "updatedDate": "2026-02-01T14:00:00",
+        "attachments": [],
         "replies": []
       }
     ]
@@ -53,28 +77,47 @@
     "refProblemId": "prob-002",
     "status": "CLOSED",
     "viewCount": 25,
+    "createdDate": "2026-02-05T09:00:00",
+    "updatedDate": "2026-02-10T16:00:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-002-01",
         "issueId": "disc-002",
         "authorId": "usr-stu-003",
+        "authorName": "David Lee",
         "content": "When N=1, it should just print `1` since 1 is not divisible by 3 or 5.",
         "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-02-05T09:30:00",
+        "updatedDate": "2026-02-05T09:30:00",
+        "attachments": [],
         "replies": []
       },
       {
         "id": "cmt-002-02",
         "issueId": "disc-002",
         "authorId": "usr-stu-005",
+        "authorName": "Emma Brown",
         "content": "What about N=15? That should print `FizzBuzz` right?",
         "upVoteCount": 2,
+        "isDeleted": false,
+        "createdDate": "2026-02-05T10:00:00",
+        "updatedDate": "2026-02-05T10:00:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-002-02-r1",
             "issueId": "disc-002",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "Exactly! The key is checking divisibility by 15 first (or equivalently both 3 and 5), then 3, then 5. If you check 3 first you'll print `Fizz` and miss the `FizzBuzz` case.",
             "upVoteCount": 7,
+            "isDeleted": false,
+            "createdDate": "2026-02-05T10:30:00",
+            "updatedDate": "2026-02-05T10:30:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -83,8 +126,13 @@
         "id": "cmt-002-03",
         "issueId": "disc-002",
         "authorId": "usr-stu-002",
+        "authorName": "Alice Johnson",
         "content": "I got confused about the order of checks. Thanks for clarifying professor!",
         "upVoteCount": 1,
+        "isDeleted": false,
+        "createdDate": "2026-02-05T11:00:00",
+        "updatedDate": "2026-02-05T11:00:00",
+        "attachments": [],
         "replies": []
       }
     ]
@@ -98,28 +146,47 @@
     "refProblemId": "prob-010",
     "status": "OPEN",
     "viewCount": 18,
+    "createdDate": "2026-02-20T14:00:00",
+    "updatedDate": "2026-02-20T16:30:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-003-01",
         "issueId": "disc-003",
         "authorId": "usr-lec-001",
+        "authorName": "Prof. Smith",
         "content": "Floating point arithmetic in computers is inherently imprecise due to IEEE 754 representation. Numbers like 0.1 cannot be represented exactly in binary.",
         "upVoteCount": 6,
+        "isDeleted": false,
+        "createdDate": "2026-02-20T14:30:00",
+        "updatedDate": "2026-02-20T14:30:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-003-01-r1",
             "issueId": "disc-003",
             "authorId": "usr-stu-005",
+            "authorName": "Emma Brown",
             "content": "So how does the grading system handle this?",
             "upVoteCount": 3,
+            "isDeleted": false,
+            "createdDate": "2026-02-20T15:00:00",
+            "updatedDate": "2026-02-20T15:00:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-003-01-r2",
             "issueId": "disc-003",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "We use a tolerance-based comparison. Your answer just needs to be within a small epsilon (e.g., 0.0001) of the expected value. So don't worry about the last few decimal places.",
             "upVoteCount": 8,
+            "isDeleted": false,
+            "createdDate": "2026-02-20T15:30:00",
+            "updatedDate": "2026-02-20T15:30:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -128,15 +195,25 @@
         "id": "cmt-003-02",
         "issueId": "disc-003",
         "authorId": "usr-stu-007",
+        "authorName": "Frank Miller",
         "content": "I recommend using `math.pi` instead of hardcoding `3.14159`. It gives you the best precision available in your language.",
         "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-02-20T16:00:00",
+        "updatedDate": "2026-02-20T16:00:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-003-02-r1",
             "issueId": "disc-003",
             "authorId": "usr-stu-005",
+            "authorName": "Emma Brown",
             "content": "Good tip! I was indeed hardcoding it. Switched to `math.pi` and now the output matches.",
             "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-02-20T16:30:00",
+            "updatedDate": "2026-02-20T16:30:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -152,20 +229,34 @@
     "refProblemId": "prob-014",
     "status": "OPEN",
     "viewCount": 30,
+    "createdDate": "2026-02-25T10:00:00",
+    "updatedDate": "2026-02-25T12:00:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-004-01",
         "issueId": "disc-004",
         "authorId": "usr-stu-008",
+        "authorName": "Grace Chen",
         "content": "In Python, use f-strings: `print(f'{value:.2f}')`. This will always print exactly 2 decimal places, even for whole numbers.",
         "upVoteCount": 9,
+        "isDeleted": false,
+        "createdDate": "2026-02-25T10:30:00",
+        "updatedDate": "2026-02-25T10:30:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-004-01-r1",
             "issueId": "disc-004",
             "authorId": "usr-stu-006",
+            "authorName": "Henry Taylor",
             "content": "That works great! Thanks! I was using `round()` but it doesn't pad trailing zeros.",
             "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-02-25T11:00:00",
+            "updatedDate": "2026-02-25T11:00:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -174,31 +265,51 @@
         "id": "cmt-004-02",
         "issueId": "disc-004",
         "authorId": "usr-lec-001",
+        "authorName": "Prof. Smith",
         "content": "You can also use `format(value, '.2f')` or the old-style `'%.2f' % value`. All three approaches produce the same result.",
         "upVoteCount": 5,
+        "isDeleted": false,
+        "createdDate": "2026-02-25T11:30:00",
+        "updatedDate": "2026-02-25T11:30:00",
+        "attachments": [],
         "replies": []
       },
       {
         "id": "cmt-004-03",
         "issueId": "disc-004",
         "authorId": "usr-stu-009",
+        "authorName": "Ivy Wang",
         "content": "What about in Java? I'm using `System.out.printf(\"%.2f\", value)` — is that correct?",
         "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-02-25T11:45:00",
+        "updatedDate": "2026-02-25T11:45:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-004-03-r1",
             "issueId": "disc-004",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "Yes, `printf` or `String.format(\"%.2f\", value)` are both correct in Java. In C++ you'd use `cout << fixed << setprecision(2) << value`.",
             "upVoteCount": 6,
+            "isDeleted": false,
+            "createdDate": "2026-02-25T12:00:00",
+            "updatedDate": "2026-02-25T12:00:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-004-03-r2",
             "issueId": "disc-004",
             "authorId": "usr-stu-009",
+            "authorName": "Ivy Wang",
             "content": "Perfect, thanks for the cross-language comparison!",
             "upVoteCount": 1,
+            "isDeleted": false,
+            "createdDate": "2026-02-25T12:15:00",
+            "updatedDate": "2026-02-25T12:15:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -214,28 +325,47 @@
     "refProblemId": "prob-018",
     "status": "OPEN",
     "viewCount": 22,
+    "createdDate": "2026-03-01T09:00:00",
+    "updatedDate": "2026-03-01T11:30:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-005-01",
         "issueId": "disc-005",
         "authorId": "usr-stu-010",
+        "authorName": "Jack Rodriguez",
         "content": "The idea is to precompute cumulative sums so you can get any range sum in O(1) time instead of O(n).",
         "upVoteCount": 5,
+        "isDeleted": false,
+        "createdDate": "2026-03-01T09:30:00",
+        "updatedDate": "2026-03-01T09:30:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-005-01-r1",
             "issueId": "disc-005",
             "authorId": "usr-stu-009",
+            "authorName": "Ivy Wang",
             "content": "Can you give a concrete example with `[1, 2, 3, 4]`?",
             "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-03-01T10:00:00",
+            "updatedDate": "2026-03-01T10:00:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-005-01-r2",
             "issueId": "disc-005",
             "authorId": "usr-stu-010",
+            "authorName": "Jack Rodriguez",
             "content": "Sure! For `[1, 2, 3, 4]`, prefix sums are `[1, 3, 6, 10]`. Each element is the running total. To get the sum from index 1 to 3: `prefix[3] - prefix[0] = 10 - 1 = 9`.",
             "upVoteCount": 7,
+            "isDeleted": false,
+            "createdDate": "2026-03-01T10:30:00",
+            "updatedDate": "2026-03-01T10:30:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -244,23 +374,38 @@
         "id": "cmt-005-02",
         "issueId": "disc-005",
         "authorId": "usr-lec-001",
+        "authorName": "Prof. Smith",
         "content": "Great explanation! This technique is fundamental in competitive programming. You'll see it used in problems involving subarray sums, 2D matrix queries, and difference arrays.",
         "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-03-01T11:00:00",
+        "updatedDate": "2026-03-01T11:00:00",
+        "attachments": [],
         "replies": []
       },
       {
         "id": "cmt-005-03",
         "issueId": "disc-005",
         "authorId": "usr-stu-012",
+        "authorName": "Kate Anderson",
         "content": "For this specific problem, you just need to output the running sum at each step. You don't even need an array — just accumulate and print.",
         "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-03-01T11:15:00",
+        "updatedDate": "2026-03-01T11:15:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-005-03-r1",
             "issueId": "disc-005",
             "authorId": "usr-stu-009",
+            "authorName": "Ivy Wang",
             "content": "Oh that simplifies things a lot. Thanks everyone!",
             "upVoteCount": 1,
+            "isDeleted": false,
+            "createdDate": "2026-03-01T11:30:00",
+            "updatedDate": "2026-03-01T11:30:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -276,28 +421,47 @@
     "refProblemId": "prob-022",
     "status": "CLOSED",
     "viewCount": 15,
+    "createdDate": "2026-03-05T10:00:00",
+    "updatedDate": "2026-03-10T14:00:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-006-01",
         "issueId": "disc-006",
         "authorId": "usr-lec-001",
+        "authorName": "Prof. Smith",
         "content": "Yes, the system uses **token-unordered comparison** for this problem. It splits both your output and the expected output into tokens and checks if they form the same set.",
         "upVoteCount": 8,
+        "isDeleted": false,
+        "createdDate": "2026-03-05T10:30:00",
+        "updatedDate": "2026-03-05T10:30:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-006-01-r1",
             "issueId": "disc-006",
             "authorId": "usr-stu-011",
+            "authorName": "Leo Martinez",
             "content": "That makes sense. So `2 3 5` and `5 3 2` would both be accepted?",
             "upVoteCount": 3,
+            "isDeleted": false,
+            "createdDate": "2026-03-05T11:00:00",
+            "updatedDate": "2026-03-05T11:00:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-006-01-r2",
             "issueId": "disc-006",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "Correct! As long as all the prime factors are present, the order doesn't matter.",
             "upVoteCount": 5,
+            "isDeleted": false,
+            "createdDate": "2026-03-05T11:30:00",
+            "updatedDate": "2026-03-05T11:30:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -306,23 +470,38 @@
         "id": "cmt-006-02",
         "issueId": "disc-006",
         "authorId": "usr-stu-012",
+        "authorName": "Kate Anderson",
         "content": "Just make sure to separate factors with spaces and don't include duplicate factors. For example, `12 = 2 * 2 * 3` should output `2 3`, not `2 2 3`.",
         "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-03-05T12:00:00",
+        "updatedDate": "2026-03-05T12:00:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-006-02-r1",
             "issueId": "disc-006",
             "authorId": "usr-stu-013",
+            "authorName": "Mia Thompson",
             "content": "Wait, is it distinct prime factors or all prime factors? The problem says distinct right?",
             "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-03-05T12:30:00",
+            "updatedDate": "2026-03-05T12:30:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-006-02-r2",
             "issueId": "disc-006",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "Yes, the problem asks for **distinct** prime factors only. So for 12, output `2 3`.",
             "upVoteCount": 6,
+            "isDeleted": false,
+            "createdDate": "2026-03-05T13:00:00",
+            "updatedDate": "2026-03-05T13:00:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -338,36 +517,60 @@
     "refProblemId": "prob-003",
     "status": "OPEN",
     "viewCount": 8,
+    "createdDate": "2026-03-10T15:00:00",
+    "updatedDate": "2026-03-10T17:00:00",
+    "isDeleted": false,
+    "attachments": [],
     "comments": [
       {
         "id": "cmt-007-01",
         "issueId": "disc-007",
         "authorId": "usr-stu-001",
+        "authorName": "Bob Wilson",
         "content": "The easiest and most Pythonic way is slicing: `s[::-1]`. It creates a reversed copy in one expression.",
         "upVoteCount": 6,
+        "isDeleted": false,
+        "createdDate": "2026-03-10T15:30:00",
+        "updatedDate": "2026-03-10T15:30:00",
+        "attachments": [],
         "replies": []
       },
       {
         "id": "cmt-007-02",
         "issueId": "disc-007",
         "authorId": "usr-stu-013",
+        "authorName": "Mia Thompson",
         "content": "You can also use `''.join(reversed(s))`. The `reversed()` function returns an iterator, so you need to join it back into a string.",
         "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-03-10T16:00:00",
+        "updatedDate": "2026-03-10T16:00:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-007-02-r1",
             "issueId": "disc-007",
             "authorId": "usr-stu-017",
+            "authorName": "Nathan Scott",
             "content": "Nice! I didn't know about the `reversed()` function. Which one is faster?",
             "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-03-10T16:30:00",
+            "updatedDate": "2026-03-10T16:30:00",
+            "attachments": [],
             "replies": []
           },
           {
             "id": "cmt-007-02-r2",
             "issueId": "disc-007",
             "authorId": "usr-lec-001",
+            "authorName": "Prof. Smith",
             "content": "Slicing `[::-1]` is generally faster because it's implemented in C under the hood. `reversed()` + `join()` has more Python overhead. For this problem either works fine though.",
             "upVoteCount": 5,
+            "isDeleted": false,
+            "createdDate": "2026-03-10T17:00:00",
+            "updatedDate": "2026-03-10T17:00:00",
+            "attachments": [],
             "replies": []
           }
         ]
@@ -376,19 +579,59 @@
         "id": "cmt-007-03",
         "issueId": "disc-007",
         "authorId": "usr-stu-005",
+        "authorName": "Emma Brown",
         "content": "In Java or C++, you'd typically use a `StringBuilder.reverse()` or `std::reverse()`. For a manual approach, you can swap characters from both ends moving inward.",
         "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-03-10T17:30:00",
+        "updatedDate": "2026-03-10T17:30:00",
+        "attachments": [],
         "replies": [
           {
             "id": "cmt-007-03-r1",
             "issueId": "disc-007",
             "authorId": "usr-stu-017",
+            "authorName": "Nathan Scott",
             "content": "Good to know for when we switch languages. Thanks for all the tips!",
             "upVoteCount": 1,
+            "isDeleted": false,
+            "createdDate": "2026-03-10T18:00:00",
+            "updatedDate": "2026-03-10T18:00:00",
+            "attachments": [],
             "replies": []
           }
         ]
       }
     ]
+  },
+  {
+    "id": "disc-008",
+    "classroomId": "cls-001",
+    "title": "Need help understanding the Fibonacci problem",
+    "authorId": "usr-stu-014",
+    "content": "I'm confused about how to start the Fibonacci sequence. What are the first two numbers?",
+    "refProblemId": "prob-019",
+    "status": "PENDING",
+    "viewCount": 5,
+    "createdDate": "2026-04-10T09:00:00",
+    "updatedDate": "2026-04-10T09:00:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": []
+  },
+  {
+    "id": "disc-009",
+    "classroomId": "cls-002",
+    "title": "Matrix row sums approach",
+    "authorId": "usr-stu-010",
+    "content": "What's the best way to compute row sums in a matrix?",
+    "refProblemId": "prob-021",
+    "status": "PENDING",
+    "viewCount": 3,
+    "createdDate": "2026-04-12T10:00:00",
+    "updatedDate": "2026-04-12T10:00:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": []
   }
 ]

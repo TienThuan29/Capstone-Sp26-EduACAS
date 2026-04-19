@@ -55,7 +55,7 @@ interface EditorContextType {
   // Editor State
   editorState: EditorState;
   setCode: (code: string) => void;
-  setLanguage: (language: ProgrammingLanguage) => void;
+  setLanguage: (language: ProgrammingLanguage, codeTemplate?: string) => void;
   selectedCompiler: Compiler | null;
   setSelectedCompiler: (compiler: Compiler | null) => void;
   setFontSize: (size: number) => void;
@@ -296,12 +296,12 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setEditorState((prev) => ({ ...prev, code }));
   }, []);
 
-  const setLanguage = useCallback((language: ProgrammingLanguage) => {
-    const boilerplate = getBoilerplateCode(problem) || (FALLBACK_BOILERPLATE[language?.id] ?? FALLBACK_BOILERPLATE['java'] ?? '');
+  const setLanguage = useCallback((language: ProgrammingLanguage, codeTemplate?: string) => {
+    const template = codeTemplate ?? getBoilerplateCode(problem) ?? FALLBACK_BOILERPLATE[language?.id] ?? '';
     setEditorState((prev) => ({
       ...prev,
       language,
-      code: boilerplate,
+      code: template,
     }));
     setSelectedCompiler(language?.compilers?.[0] ?? null);
   }, [problem]);
@@ -352,7 +352,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   const resetCode = useCallback(() => {
     setEditorState((prev) => {
-      const boilerplate = getBoilerplateCode(problem) || (FALLBACK_BOILERPLATE[prev.language?.id] ?? FALLBACK_BOILERPLATE['java'] ?? '');
+      const boilerplate = getBoilerplateCode(problem) ?? (FALLBACK_BOILERPLATE[prev.language?.id] ?? '');
       return { ...prev, code: boilerplate };
     });
   }, [problem]);

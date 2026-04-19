@@ -40,6 +40,9 @@ public enum NotificationType
       NEW_DISCUSSION_ISSUE, //Giảng viên hoặc sinh viên tạo chủ đề thảo luận mới
       GRADE_RESULT, //Giảng viên đăng điểm mới
       REPLY_COMMENT, //Giảng viên hoặc sinh viên trả lời bình luận của sinh viên
+      NEW_REGRADING_REQUEST, //Sinh viên yêu cầu regrading
+      REGRADING_APPROVED, //Giảng viên phê duyệt yêu cầu regrading
+      REGRADING_REJECTED, //Giảng viên từ chối yêu cầu regrading
 
       // academic type
       ACADEMIC_WARNING_LEVEL_1, // Cảnh báo học vụ cấp độ 1

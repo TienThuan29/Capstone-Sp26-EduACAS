@@ -54,7 +54,12 @@ public class ClassroomMapper
             MaxSlot = classroom.MaxSlot,
             EndDate = classroom.EndDate,
             IsDeleted = classroom.IsDeleted,
-            StudentCount = studentCount
+            StudentCount = studentCount,
+            GradingSettings = new GradingSettingsResponse
+            {
+                AvgScoreThreshold = classroom.GradingSettings?.AvgScoreThreshold ?? 0f,
+                MinExamCount = classroom.GradingSettings?.MinExamCount ?? 0
+            }
         };
     }
 

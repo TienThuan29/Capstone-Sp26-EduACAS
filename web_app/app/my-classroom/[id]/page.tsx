@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { Spinner, Button } from "flowbite-react";
+import { Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useClassroom } from "@/hooks/classroom/useClassroom";
 import type { Classroom as ClassroomDetail } from "@/types/classroom";
-import { useExamination } from "@/hooks/exam/useExamination";
+import { useExamination } from "@/hooks/examination/useExamination";
 import type { Examination } from "@/types/examination";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
@@ -15,28 +15,32 @@ import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import {
   ExamsTab,
   MaterialsTab,
-  AssignmentsTab,
+  // AssignmentsTab,
   PractiseTab,
   OverviewTab,
   SlotTab,
   DiscussionTab,
+  StudentDashboardTab,
   QuizzesTab,
 } from "@/app/my-classroom/tabs";
+import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
 
 function ClassroomContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getClassroomById, leaveClassroom, recordClassroomAccess } = useClassroom();
-  const { getExaminationsByClassId } = useExamination();
+  const { getExaminationsByClassIdAndMode } = useExamination();
   const { user } = useAuth();
 
   const activeTab = searchParams.get("tab") || "overview";
 
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
+  const [practiseExaminations, setPractiseExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
   const [examsLoading, setExamsLoading] = useState(false);
+  const [practiseLoading, setPractiseLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(null);
@@ -57,7 +61,7 @@ function ClassroomContent() {
       router.push("/my-classroom");
     } catch (error) {
       console.error("Failed to leave class:", error);
-      alert("Rời lớp học thất bại. Vui lòng thử lại sau.");
+      alert("Failed to leave class. Please try again later.");
     } finally {
       setLeaveLoading(false);
     }
@@ -93,61 +97,36 @@ function ClassroomContent() {
 
   useEffect(() => {
     const fetchExaminations = async () => {
-      if ((activeTab === "exams" || activeTab === "slots") && classId) {
+      if (activeTab === "exams" && classId) {
         try {
-          if (activeTab === "exams") {
-            setExamsLoading(true);
-            const data = await getExaminationsByClassId(classId);
-            setExaminations(data);
-          }
+          setExamsLoading(true);
+          const data = await getExaminationsByClassIdAndMode(classId, "EXAMINATION");
+          setExaminations(data);
         } catch (error) {
-          console.error("Failed to fetch data:", error);
+          console.error("Failed to fetch examinations:", error);
         } finally {
           setExamsLoading(false);
+        }
+      }
+
+      if (activeTab === "practise" && classId) {
+        try {
+          setPractiseLoading(true);
+          const data = await getExaminationsByClassIdAndMode(classId, "PRACTICAL");
+          setPractiseExaminations(data);
+        } catch (error) {
+          console.error("Failed to fetch practise examinations:", error);
+        } finally {
+          setPractiseLoading(false);
         }
       }
     };
 
     fetchExaminations();
-  }, [getExaminationsByClassId, activeTab, classId]);
-
-  // Poll exam statuses every 30 seconds so background job transitions are reflected for students.
-  const examsPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  useEffect(() => {
-    if (activeTab === "exams" && classId) {
-      examsPollRef.current = setInterval(() => {
-        void (async () => {
-          try {
-            const data = await getExaminationsByClassId(classId);
-            setExaminations(data);
-          } catch {
-            // non-blocking — stale data is better than a broken UI
-          }
-        })();
-      }, 30_000);
-    } else {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    }
-    return () => {
-      if (examsPollRef.current !== null) {
-        clearInterval(examsPollRef.current);
-        examsPollRef.current = null;
-      }
-    };
-  }, [activeTab, classId, getExaminationsByClassId]);
+  }, [getExaminationsByClassIdAndMode, activeTab, classId]);
 
   if (loading) {
-    return (
-      <div className="flex min-h-screen">
-        <Sidebar />
-        <div className="ml-20 flex flex-grow items-center justify-center bg-gray-50 lg:ml-64 dark:bg-gray-900">
-          <Spinner size="xl" color="info" />
-        </div>
-      </div>
-    );
+    return <ClassroomDetailPageSkeleton />;
   }
 
   if (!classroom) {
@@ -178,10 +157,16 @@ function ClassroomContent() {
         );
       case "materials":
         return <MaterialsTab classId={classId} />;
-      case "assignments":
-        return <AssignmentsTab />;
+      // case "assignments":
+      //   return <AssignmentsTab />;
       case "practise":
-        return <PractiseTab />;
+        return (
+          <PractiseTab
+            examinations={practiseExaminations}
+            practiseLoading={practiseLoading}
+            classId={classId}
+          />
+        );
       case "slots":
         return <SlotTab />;
       case "quizzes":
@@ -196,6 +181,14 @@ function ClassroomContent() {
           <DiscussionTab
             classId={classId}
             hideBackButton={!!searchParams.get("issue")}
+          />
+        );
+      case "dashboard":
+        return (
+          <StudentDashboardTab
+            classroomId={classId}
+            classroomName={classroom.className}
+            studentId={studentId}
           />
         );
       default:
@@ -258,11 +251,7 @@ function ClassroomContent() {
 export default function ClassroomDetailPage() {
   return (
     <Suspense
-      fallback={
-        <div className="flex min-h-screen items-center justify-center">
-          <Spinner size="xl" />
-        </div>
-      }
+      fallback={<ClassroomDetailPageSkeleton />}
     >
       <ClassroomContent />
     </Suspense>

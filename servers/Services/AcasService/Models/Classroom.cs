@@ -28,6 +28,8 @@ public class Classroom
     public string EnrolKey { get; set; } = string.Empty;
 
     public int MaxSlot {get; set; } 
+
+    public GradingSettings GradingSettings { get; set; } = new GradingSettings();
     
     public DateTime CreatedDate { get; set; }
     
@@ -36,4 +38,12 @@ public class Classroom
     public DateTime EndDate { get; set; }
     
     public bool IsDeleted { get; set; }
+}
+
+public class GradingSettings
+{
+    public float AvgScoreThreshold { get; set; }
+
+    public int MinExamCount { get; set; }
+
 }

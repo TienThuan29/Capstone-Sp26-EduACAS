@@ -1,2 +1,232 @@
 [
+  {
+    "id": "mat-001",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lecture_01_Introduction_to_Programming.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lecture-01-intro.pdf",
+    "description": "Introduction to programming concepts, variables, and data types.",
+    "createdDate": "2026-01-15T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-002",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lecture_02_Input_Output.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lecture-02-io.pdf",
+    "description": "Reading input and printing output in Python. Standard input/output streams.",
+    "createdDate": "2026-01-20T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-003",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lecture_03_Conditional_Statements.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lecture-03-conditionals.pdf",
+    "description": "If-else statements, nested conditionals, and logical operators.",
+    "createdDate": "2026-01-25T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-004",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lecture_04_Loops.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lecture-04-loops.pdf",
+    "description": "For loops, while loops, and loop control statements (break, continue).",
+    "createdDate": "2026-02-01T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-005",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lecture_05_Functions.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lecture-05-functions.pdf",
+    "description": "Defining and calling functions, parameters, return values, and scope.",
+    "createdDate": "2026-02-10T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-006",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lab_01_Basic_IO.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lab-01-basicio.pdf",
+    "description": "Lab exercise 1: Practice basic input/output operations.",
+    "createdDate": "2026-01-18T10:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-007",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Lab_02_FizzBuzz.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/lab-02-fizzbuzz.pdf",
+    "description": "Lab exercise 2: Implement FizzBuzz and conditional logic.",
+    "createdDate": "2026-01-25T10:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-008",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-002",
+    "filename": "DSA_Lecture_01_Arrays.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-002/dsa-lecture-01-arrays.pdf",
+    "description": "Introduction to arrays, array operations, and time complexity.",
+    "createdDate": "2026-01-16T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-009",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-002",
+    "filename": "DSA_Lecture_02_Linked_Lists.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-002/dsa-lecture-02-linkedlists.pdf",
+    "description": "Singly and doubly linked lists, operations and use cases.",
+    "createdDate": "2026-01-23T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-010",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-002",
+    "filename": "DSA_Lecture_03_Stacks_Queues.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-002/dsa-lecture-03-stacks-queues.pdf",
+    "description": "Stack and queue data structures, implementation and applications.",
+    "createdDate": "2026-01-30T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-011",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-002",
+    "filename": "DSA_Lab_01_Array_Operations.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-002/dsa-lab-01-arrays.pdf",
+    "description": "Lab exercise 1: Array manipulation and prefix sum algorithms.",
+    "createdDate": "2026-01-20T10:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-012",
+    "lecturerId": "usr-lec-002",
+    "classroomId": "cls-003",
+    "filename": "OOP_Lecture_01_Classes_and_Objects.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-003/oop-lecture-01-classes.pdf",
+    "description": "Introduction to object-oriented programming, classes and objects.",
+    "createdDate": "2026-01-17T09:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-013",
+    "lecturerId": "usr-lec-002",
+    "classroomId": "cls-003",
+    "filename": "OOP_Lecture_02_Inheritance.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-003/oop-lecture-02-inheritance.pdf",
+    "description": "Class inheritance, overriding methods, and polymorphism.",
+    "createdDate": "2026-01-24T09:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-014",
+    "lecturerId": "usr-lec-002",
+    "classroomId": "cls-003",
+    "filename": "OOP_Lecture_03_Encapsulation.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-003/oop-lecture-03-encapsulation.pdf",
+    "description": "Encapsulation, access modifiers, and data hiding.",
+    "createdDate": "2026-01-31T09:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-015",
+    "lecturerId": "usr-lec-002",
+    "classroomId": "cls-004",
+    "filename": "DB_Lecture_01_Introduction.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-004/db-lecture-01-intro.pdf",
+    "description": "Introduction to database systems, relational model, and SQL basics.",
+    "createdDate": "2026-01-18T10:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-016",
+    "lecturerId": "usr-lec-002",
+    "classroomId": "cls-004",
+    "filename": "DB_Lecture_02_SQL_Queries.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-004/db-lecture-02-sql.pdf",
+    "description": "Advanced SQL queries, joins, and subqueries.",
+    "createdDate": "2026-01-25T10:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-017",
+    "lecturerId": "usr-lec-003",
+    "classroomId": "cls-005",
+    "filename": "SE_Lecture_01_SDLC.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-005/se-lecture-01-sdlc.pdf",
+    "description": "Software Development Life Cycle, waterfall and iterative models.",
+    "createdDate": "2026-01-19T11:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-018",
+    "lecturerId": "usr-lec-003",
+    "classroomId": "cls-005",
+    "filename": "SE_Lecture_02_Agile.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-005/se-lecture-02-agile.pdf",
+    "description": "Agile methodologies, Scrum, and Kanban frameworks.",
+    "createdDate": "2026-01-26T11:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-019",
+    "lecturerId": "usr-lec-003",
+    "classroomId": "cls-006",
+    "filename": "Lecture_01_Programming_Basics.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-006/lecture-01-basics.pdf",
+    "description": "Basic programming concepts for Group 2 students.",
+    "createdDate": "2026-01-20T13:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-020",
+    "lecturerId": "usr-lec-003",
+    "classroomId": "cls-006",
+    "filename": "Lecture_02_Python_Fundamentals.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-006/lecture-02-python.pdf",
+    "description": "Python fundamentals: syntax, data types, and control structures.",
+    "createdDate": "2026-01-27T13:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-021",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Midterm_Study_Guide.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/midterm-study-guide.pdf",
+    "description": "Study guide covering all topics for the midterm exam.",
+    "createdDate": "2026-02-05T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-022",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-002",
+    "filename": "Midterm_Study_Guide_DSA.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-002/midterm-study-guide.pdf",
+    "description": "Study guide for Data Structures and Algorithms midterm.",
+    "createdDate": "2026-02-20T08:00:00",
+    "isDeleted": false
+  },
+  {
+    "id": "mat-023",
+    "lecturerId": "usr-lec-001",
+    "classroomId": "cls-001",
+    "filename": "Code_Style_Guide.pdf",
+    "fileUrl": "https://storage.example.com/materials/cls-001/code-style-guide.pdf",
+    "description": "Coding style guidelines and best practices for Python.",
+    "createdDate": "2026-01-15T08:00:00",
+    "isDeleted": false
+  }
 ]
