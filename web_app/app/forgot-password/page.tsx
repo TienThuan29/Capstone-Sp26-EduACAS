@@ -1,29 +1,122 @@
 "use client";
 
+import axios from "axios";
 import React, { useState } from "react";
 import { Button, DarkThemeToggle, Label, TextInput } from "flowbite-react";
 import Link from "next/link";
+import {
+  ArrowLeftIcon,
+  ArrowPathIcon,
+  LockClosedIcon,
+  EnvelopeIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 import AuthWallpaper from "@/components/auth-wallpaper";
 import FlyingObjectsBackground from "@/components/flying-objects-background";
+import { PageUrl } from "@/configs/page.url";
+import { Api } from "@/configs/api";
+
+type EmailValidationState = "idle" | "checking" | "exists" | "not_found" | "error";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [emailValidation, setEmailValidation] = useState<EmailValidationState>("idle");
+  const [validationMessage, setValidationMessage] = useState("");
+
+  const validateEmail = async (emailToCheck: string) => {
+    if (!emailToCheck || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailToCheck)) {
+      setEmailValidation("idle");
+      setValidationMessage("");
+      return;
+    }
+
+    setEmailValidation("checking");
+    try {
+      const response = await axios.get(
+        `${Api.BASE_API}${Api.Auth.CHECK_EMAIL}`,
+        { params: { email: emailToCheck } }
+      );
+
+      if (response.data.success) {
+        if (response.data.dataResponse?.exists) {
+          setEmailValidation("exists");
+          setValidationMessage("");
+        } else {
+          setEmailValidation("not_found");
+          setValidationMessage("No account found with this email address.");
+        }
+      } else {
+        setEmailValidation("error");
+        setValidationMessage("Could not verify email. Please try again.");
+      }
+    } catch {
+      setEmailValidation("error");
+      setValidationMessage("Could not verify email. Please try again.");
+    }
+  };
+
+  const handleEmailBlur = () => {
+    if (email) {
+      validateEmail(email);
+    }
+  };
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setEmail(value);
+    if (emailValidation !== "idle") {
+      setEmailValidation("idle");
+      setValidationMessage("");
+    }
+  };
+
+  const getEmailIcon = () => {
+    if (emailValidation === "checking") {
+      return <ArrowPathIcon className="w-5 h-5 text-gray-500 animate-spin" />;
+    }
+    if (emailValidation === "exists") {
+      return <CheckCircleIcon className="w-5 h-5 text-green-500" />;
+    }
+    if (emailValidation === "not_found" || emailValidation === "error") {
+      return <XCircleIcon className="w-5 h-5 text-red-500" />;
+    }
+    return <EnvelopeIcon className="w-5 h-5 text-gray-500" />;
+  };
+
+  const isSubmitDisabled = () => {
+    return (
+      isLoading ||
+      !email ||
+      emailValidation === "checking" ||
+      emailValidation === "not_found" ||
+      emailValidation === "error"
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      console.log("Sending password reset request for:", email);
-      // TODO: Implement forgot password logic
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      console.log(`${Api.BASE_API}${Api.Auth.FORGOT_PASSWORD}`);
       
-      setIsSubmitted(true);
-    } catch (error) {
-      console.error("Forgot password error:", error);
+      const response = await axios.post(
+        `${Api.BASE_API}${Api.Auth.FORGOT_PASSWORD}`,
+        { email }
+      );
+
+      if (response.data.success) {
+        setIsSubmitted(true);
+      } else {
+        setEmailValidation("error");
+        setValidationMessage(response.data.message || "Something went wrong. Please try again.");
+      }
+    } catch {
+      setEmailValidation("error");
+      setValidationMessage("Could not send reset request. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -46,19 +139,7 @@ export default function ForgotPasswordPage() {
             href="/"
             className="flex items-center text-gray-700 transition-colors hover:text-[#1F4E79] dark:text-gray-300 dark:hover:text-[#C9A24D]"
           >
-            <svg
-              className="mr-2 h-5 w-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M10 19l-7-7m0 0l7-7m-7 7h18"
-              />
-            </svg>
+            <ArrowLeftIcon className="mr-2 h-5 w-5" />
             <span className="text-sm font-medium">Back to Home</span>
           </Link>
           {/* Dark theme toggle */}
@@ -71,19 +152,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <div className="flex justify-center mb-4">
                   <div className="p-4 rounded-full bg-[#1F4E79]/10 dark:bg-[#C9A24D]/10">
-                    <svg
-                      className="w-12 h-12 text-[#1F4E79] dark:text-[#C9A24D]"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-                      />
-                    </svg>
+                    <LockClosedIcon className="w-12 h-12 text-[#1F4E79] dark:text-[#C9A24D]" />
                   </div>
                 </div>
                 <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
@@ -106,55 +175,30 @@ export default function ForgotPasswordPage() {
                       placeholder="example@edu-acas.com"
                       required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
+                      onChange={handleEmailChange}
+                      onBlur={handleEmailBlur}
                       className="mt-1"
-                      icon={() => (
-                        <svg
-                          className="w-5 h-5 text-gray-500"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-                          />
-                        </svg>
-                      )}
+                      icon={getEmailIcon}
+                      color={emailValidation === "not_found" || emailValidation === "error" ? "failure" : emailValidation === "exists" ? "success" : "gray"}
                     />
+                    {validationMessage && (
+                      <p className={`mt-2 text-sm ${emailValidation === "not_found" ? "text-red-500" : "text-red-500"}`}>
+                        {validationMessage}
+                      </p>
+                    )}
                   </div>
                 </div>
 
                 <div>
                   <Button
                     type="submit"
-                    disabled={isLoading}
-                    className="w-full text-white hover:shadow-xl transition-all duration-300"
+                    disabled={isSubmitDisabled()}
+                    className="w-full text-white hover:shadow-xl transition-all duration-300 disabled:opacity-50"
                     style={{ backgroundColor: "#1F4E79" }}
                   >
                     {isLoading ? (
                       <div className="flex items-center justify-center">
-                        <svg
-                          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          />
-                        </svg>
+                        <ArrowPathIcon className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" />
                         Sending...
                       </div>
                     ) : (
@@ -166,7 +210,7 @@ export default function ForgotPasswordPage() {
                 <div className="text-center text-sm text-gray-600 dark:text-gray-400">
                   Already have an account?{" "}
                   <Link
-                    href="/login"
+                    href={PageUrl.LOGIN_PAGE}
                     className="font-medium text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors"
                   >
                     Sign In
@@ -179,19 +223,7 @@ export default function ForgotPasswordPage() {
               <div>
                 <div className="flex justify-center mb-4">
                   <div className="p-4 rounded-full bg-green-100 dark:bg-green-900/30">
-                    <svg
-                      className="w-12 h-12 text-green-600 dark:text-green-400"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M3 19v-8.93a2 2 0 01.89-1.664l7-4.666a2 2 0 012.22 0l7 4.666A2 2 0 0121 10.07V19M3 19a2 2 0 002 2h14a2 2 0 002-2M3 19l6.75-4.5M21 19l-6.75-4.5M3 10l6.75 4.5M21 10l-6.75 4.5m0 0l-1.14.76a2 2 0 01-2.22 0l-1.14-.76"
-                      />
-                    </svg>
+                    <EnvelopeIcon className="w-12 h-12 text-green-600 dark:text-green-400" />
                   </div>
                 </div>
                 <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
@@ -217,6 +249,8 @@ export default function ForgotPasswordPage() {
                     onClick={() => {
                       setIsSubmitted(false);
                       setEmail("");
+                      setEmailValidation("idle");
+                      setValidationMessage("");
                     }}
                     className="mt-2 text-sm font-medium text-[#C9A24D] hover:text-[#1F4E79] dark:hover:text-white transition-colors w-full"
                   >
@@ -226,22 +260,10 @@ export default function ForgotPasswordPage() {
 
                 <div className="text-center">
                   <Link
-                    href="/login"
+                    href={PageUrl.LOGIN_PAGE}
                     className="inline-flex items-center text-sm font-medium text-[#1F4E79] dark:text-[#C9A24D] hover:underline transition-colors"
                   >
-                    <svg
-                      className="mr-2 h-4 w-4"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M10 19l-7-7m0 0l7-7m-7 7h18"
-                      />
-                    </svg>
+                    <ArrowLeftIcon className="mr-2 h-4 w-4" />
                     Back to Sign In
                   </Link>
                 </div>
