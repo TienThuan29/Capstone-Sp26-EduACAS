@@ -9,7 +9,7 @@ namespace AcasService.Web.Controllers.ClassroomQuiz;
 
 [ApiController]
 [Route("api/v1/classroom-quizzes")]
-[Authorize]
+[Authorize(Roles = "LECTURER, ADMIN")]
 public class ClassroomQuizCommandController : ControllerBase
 {
     private readonly IClassroomQuizCommand _classroomQuizCommand;

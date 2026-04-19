@@ -277,15 +277,11 @@ export function QuizzesTab({
     const onPasscodeConfirm = async (passcode: string) => {
         if (!selectedQuiz || !user) return;
 
-        if (selectedQuiz.passcode && passcode !== selectedQuiz.passcode) {
-            showError("Incorrect passcode");
-            return;
-        }
-
         try {
             const attempt = await startAttempt({
                 classroomQuizId: selectedQuiz.id,
-                studentId: user.id
+                studentId: user.id,
+                passcode: passcode
             });
             if (attempt) {
                 setActiveAttempt(attempt);

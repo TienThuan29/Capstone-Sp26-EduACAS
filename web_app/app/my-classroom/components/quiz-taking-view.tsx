@@ -317,7 +317,7 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
               <div className="space-y-4">
                 {readOnly ? (
                   <div className={`p-5 rounded-xl border-2 min-h-[150px] whitespace-pre-wrap text-base transition-all duration-300 ${selectedAnswers[currentQuestion.id.toLowerCase()]
-                    ? (questions[currentQuestionIndex].id === currentQuestion.id && (selectedAnswers[currentQuestion.id.toLowerCase()]?.trim().toLowerCase() === currentQuestion.textAnswer?.trim().toLowerCase())
+                    ? (attempt.questionResults[currentQuestion.id.toLowerCase()]
                       ? 'bg-green-50 border-green-200 text-green-900 dark:bg-green-900/10 dark:border-green-800 dark:text-green-100'
                       : 'bg-red-50 border-red-200 text-red-900 dark:bg-red-900/10 dark:border-red-800 dark:text-red-100')
                     : 'bg-gray-50 border-gray-200 text-gray-500 italic dark:bg-gray-800 dark:border-gray-700'
