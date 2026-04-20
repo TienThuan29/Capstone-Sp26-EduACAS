@@ -24,6 +24,7 @@ import {
   QuizzesTab,
 } from "@/app/my-classroom/tabs";
 import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
+import { ClassroomInfoBar } from "@/app/manage-classroom/components/ClassroomInfoBar";
 
 function ClassroomContent() {
   const params = useParams();
@@ -241,6 +242,10 @@ function ClassroomContent() {
             />
           )}
         </div>
+
+        {activeTab !== "overview" && classroom && (
+          <ClassroomInfoBar classroom={classroom} />
+        )}
 
         {renderTabContent()}
       </div>
