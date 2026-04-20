@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import {
   Button,
   Select,
@@ -57,13 +57,6 @@ interface Subject {
   isDeleted: boolean;
 }
 
-interface Semester {
-  id: string;
-  semesterName: string;
-  startDate: string;
-  endDate: string;
-}
-
 type CreateClassroomFormData = {
   classCode: string;
   className: string;
@@ -84,27 +77,10 @@ export default function ManageClassroomPage() {
   const { getActiveSubjects } = useSubject();
   const [classrooms, setClassrooms] = useState<Classroom[]>([]);
   const [loading, setLoading] = useState(true);
+  const isInitialLoad = useRef(true);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedSemesterFilter, setSelectedSemesterFilter] = useState("All");
-  const [sortBy, setSortBy] = useState("newest");
-
-  const semesters = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    const years = [currentYear, currentYear + 1];
-    const seasons = ["Spring", "Summer", "Fall"];
-
-    const result: { id: string; semesterName: string }[] = [];
-    years.forEach((year) => {
-      seasons.forEach((season) => {
-        result.push({
-          id: `${season.toLowerCase()}-${year}`,
-          semesterName: `${season} ${year}`,
-        });
-      });
-    });
-    return result;
-  }, []);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -117,7 +93,7 @@ export default function ManageClassroomPage() {
     classCode: "",
     className: "",
     subjectId: "",
-    semesterName: semesters[0].semesterName,
+    semesterName: "",
     enrolKey: "",
     dateEnd: "",
     maxSlot: "",
@@ -145,9 +121,13 @@ export default function ManageClassroomPage() {
     if (!currentUserId) return;
 
     try {
-      setLoading(true);
+      if (isInitialLoad.current) {
+        setLoading(true);
+        isInitialLoad.current = false;
+      }
       const data = await getLecturerClassrooms(
         currentUserId,
+        searchQuery,
         currentPage,
         PAGE_SIZE,
       );
@@ -160,35 +140,45 @@ export default function ManageClassroomPage() {
     }
   };
 
-  useEffect(() => {
-    fetchClassrooms();
-  }, [user?.id, currentPage]);
-
   const onPageChange = (page: number) => {
     setCurrentPage(page);
   };
 
+  const handleSearchSubmit = () => {
+    setSearchQuery(searchTerm);
+    setCurrentPage(1);
+  };
+
+  useEffect(() => {
+    fetchClassrooms();
+  }, [user?.id, currentPage, searchQuery]);
+
+  useEffect(() => {
+    const loadSubjects = async () => {
+      try {
+        const activeSubjects = await getActiveSubjects();
+        setSubjects(activeSubjects);
+      } catch (error) {
+        console.error("Failed to load subjects", error);
+      }
+    };
+    loadSubjects();
+  }, [getActiveSubjects]);
+
   useEffect(() => {
     if (openModal) {
-      const fetchData = async () => {
-        try {
-          const activeSubjects = await getActiveSubjects();
-          setSubjects(activeSubjects);
-
-          if (activeSubjects.length > 0) {
-            setFormData((prev: CreateClassroomFormData) => ({
-              ...prev,
-              subjectId: activeSubjects[0].id,
-            }));
-          }
-        } catch (error) {
-          console.error("Failed to fetch form data", error);
-          showError("Failed to load subjects list.");
-        }
-      };
-      fetchData();
+      setFormData((prev) => ({
+        ...prev,
+        classCode: "",
+        className: "",
+        enrolKey: "",
+        dateEnd: "",
+        maxSlot: "",
+        avgScoreThreshold: 0,
+        minExamCount: 2,
+      }));
     }
-  }, [openModal, getActiveSubjects, showError]);
+  }, [openModal]);
 
   const handleCreateSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,6 +205,11 @@ export default function ManageClassroomPage() {
         return;
       }
 
+      if (!formData.className.trim()) {
+        showError("Class name is required.");
+        setModalLoading(false);
+        return;
+      }
       if (formData.className.length > 100) {
         showError("Class name cannot exceed 100 characters.");
         setModalLoading(false);
@@ -229,6 +224,12 @@ export default function ManageClassroomPage() {
       const slotVal = Number(formData.maxSlot);
       if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
         showError("Max Slot must be at least 2.");
+        setModalLoading(false);
+        return;
+      }
+
+      if (!formData.subjectId) {
+        showError("Please select a subject.");
         setModalLoading(false);
         return;
       }
@@ -256,13 +257,13 @@ export default function ManageClassroomPage() {
       setFormData({
         classCode: "",
         className: "",
-        subjectId: subjects[0]?.id || "",
-        semesterName: semesters[0].semesterName,
+        subjectId: "",
+        semesterName: "",
         enrolKey: "",
         dateEnd: "",
         maxSlot: "",
         avgScoreThreshold: 0,
-        minExamCount: 0,
+        minExamCount: 2,
       });
     } catch (error) {
       console.error("Create classroom failed", error);
@@ -273,47 +274,7 @@ export default function ManageClassroomPage() {
   };
 
   const filteredClassrooms = useMemo(() => {
-    let result = [...classrooms];
-
-    if (searchTerm) {
-      const lowerTerm = searchTerm.toLowerCase();
-      result = result.filter(
-        (c) =>
-          c.className.toLowerCase().includes(lowerTerm) ||
-          c.classCode.toLowerCase().includes(lowerTerm),
-      );
-    }
-
-    if (selectedSemesterFilter !== "All") {
-      result = result.filter((c) => c.semesterName === selectedSemesterFilter);
-    }
-    result.sort((a, b) => {
-      switch (sortBy) {
-        case "newest":
-          return (
-            new Date(b.createdDate).getTime() -
-            new Date(a.createdDate).getTime()
-          );
-        case "oldest":
-          return (
-            new Date(a.createdDate).getTime() -
-            new Date(b.createdDate).getTime()
-          );
-        case "name_asc":
-          return a.className.localeCompare(b.className);
-        case "name_desc":
-          return b.className.localeCompare(a.className);
-        default:
-          return 0;
-      }
-    });
-
-    return result;
-  }, [classrooms, searchTerm, selectedSemesterFilter, sortBy]);
-
-  const semestersForFilter = useMemo(() => {
-    const unique = new Set(classrooms.map((c) => c.semesterName));
-    return ["All", ...Array.from(unique)];
+    return [...classrooms];
   }, [classrooms]);
 
   if (loading) {
@@ -324,7 +285,7 @@ export default function ManageClassroomPage() {
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-gray-900">
       <HomeNavbar />
 
-      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12">
+      <main className="container mx-auto max-w-7xl flex-grow px-4 pt-24 pb-12 min-h-[600px]">
         {/* Header */}
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -342,45 +303,26 @@ export default function ManageClassroomPage() {
         </div>
 
         <div className="sticky top-20 z-10 mb-6 rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-            <div className="md:col-span-2">
-              <TextInput
-                id="search"
-                type="text"
-                placeholder="Search by classroom name or code..."
-                required
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                icon={() => (
-                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
-                )}
-              />
-            </div>
-
-            <div>
-              <Select
-                value={selectedSemesterFilter}
-                onChange={(e) => setSelectedSemesterFilter(e.target.value)}
-              >
-                {semestersForFilter.map((sem) => (
-                  <option key={sem} value={sem}>
-                    {sem === "All" ? "All semesters" : sem}
-                  </option>
-                ))}
-              </Select>
-            </div>
-
-            <div>
-              <Select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-              >
-                <option value="newest">Newest</option>
-                <option value="oldest">Oldest</option>
-                <option value="name_asc">Name (A-Z)</option>
-                <option value="name_desc">Name (Z-A)</option>
-              </Select>
-            </div>
+          <div className="flex gap-2 max-w-md">
+            <TextInput
+              id="search"
+              type="text"
+              placeholder="Search by classroom name or code..."
+              required
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearchSubmit()}
+              icon={() => (
+                <MagnifyingGlassIcon className="h-5 w-5 text-gray-500" />
+              )}
+              className="flex-1"
+            />
+            <button
+              onClick={handleSearchSubmit}
+              className="flex items-center gap-1.5 rounded-lg border border-transparent bg-[#1F4E79] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90 cursor-pointer"
+            >
+              Search
+            </button>
           </div>
         </div>
 
@@ -463,7 +405,6 @@ export default function ManageClassroomPage() {
         onSubmit={handleCreateSubmit}
         modalLoading={modalLoading}
         subjects={subjects}
-        semesters={semesters}
       />
     </div>
   );
@@ -479,7 +420,6 @@ interface CreateClassroomModalProps {
   onSubmit: (e: React.FormEvent) => void;
   modalLoading: boolean;
   subjects: Subject[];
-  semesters: { id: string; semesterName: string }[];
 }
 
 function CreateClassroomModal({
@@ -490,7 +430,6 @@ function CreateClassroomModal({
   onSubmit,
   modalLoading,
   subjects,
-  semesters,
 }: CreateClassroomModalProps) {
   return (
     <Modal show={show} onClose={onClose}>
@@ -549,6 +488,7 @@ function CreateClassroomModal({
                 setFormData({ ...formData, subjectId: e.target.value })
               }
             >
+              <option value="">Select subject</option>
               {subjects.map((sub) => (
                 <option key={sub.id} value={sub.id}>
                   {sub.subjectCode} - {sub.subjectName}
@@ -557,51 +497,44 @@ function CreateClassroomModal({
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="semester">
-                  Semester <span className="text-red-500">*</span>
-                </Label>
-              </div>
-              <Select
-                id="semester"
-                required
-                value={formData.semesterName}
-                onChange={(e) =>
-                  setFormData({ ...formData, semesterName: e.target.value })
-                }
-              >
-                {semesters.map((sem) => (
-                  <option key={sem.id} value={sem.semesterName}>
-                    {sem.semesterName}
-                  </option>
-                ))}
-              </Select>
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="semester">
+                Semester <span className="text-red-500">*</span>
+              </Label>
             </div>
+            <TextInput
+              id="semester"
+              placeholder="e.g. Spring 2025"
+              required
+              value={formData.semesterName}
+              onChange={(e) =>
+                setFormData({ ...formData, semesterName: e.target.value })
+              }
+            />
+          </div>
 
-            <div>
-              <div className="mb-2 block">
-                <Label htmlFor="maxSlot">
-                  Max Slot <span className="text-red-500">*</span>
-                </Label>
-              </div>
-              <TextInput
-                id="maxSlot"
-                type="number"
-                placeholder="Enter max slot (e.g. 30)"
-                required
-                value={formData.maxSlot}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    maxSlot:
-                      e.target.value === "" ? "" : Number(e.target.value),
-                  })
-                }
-                min={2}
-              />
+          <div>
+            <div className="mb-2 block">
+              <Label htmlFor="maxSlot">
+                Max Slot <span className="text-red-500">*</span>
+              </Label>
             </div>
+            <TextInput
+              id="maxSlot"
+              type="number"
+              placeholder="Enter max slot (e.g. 30)"
+              required
+              value={formData.maxSlot}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  maxSlot:
+                    e.target.value === "" ? "" : Number(e.target.value),
+                })
+              }
+              min={2}
+            />
           </div>
 
           <div>
