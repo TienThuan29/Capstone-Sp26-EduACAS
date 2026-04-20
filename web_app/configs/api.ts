@@ -168,6 +168,7 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/materials/${id}/restore`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
     GET_ADMIN: '/api/acas/v1/materials/admin',
   },

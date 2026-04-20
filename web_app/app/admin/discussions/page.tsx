@@ -55,6 +55,8 @@ export default function AdminDiscussionsPage() {
 
   const [selectedIssue, setSelectedIssue] = useState<DiscussionIssue | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedDeleteIssue, setSelectedDeleteIssue] = useState<DiscussionIssue | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
   const fetchDiscussions = useCallback(async () => {
@@ -102,11 +104,18 @@ export default function AdminDiscussionsPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!window.confirm("Are you sure you want to delete this discussion?")) return;
+  const openDeleteModal = (issue: DiscussionIssue) => {
+    setSelectedDeleteIssue(issue);
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedDeleteIssue) return;
     try {
-      await softDeleteIssue(id);
+      await softDeleteIssue(selectedDeleteIssue.id);
       showSuccess("Discussion deleted successfully");
+      setShowDeleteModal(false);
+      setSelectedDeleteIssue(null);
       fetchDiscussions();
     } catch (err) {
       showError("Failed to delete discussion");
@@ -259,7 +268,7 @@ export default function AdminDiscussionsPage() {
                                 <Button
                                   size="xs"
                                   color="failure"
-                                  onClick={() => handleDelete(item.id)}
+                                  onClick={() => openDeleteModal(item)}
                                   disabled={item.isDeleted}
                                 >
                                   <TrashIcon className="h-4 w-4" />
@@ -377,6 +386,57 @@ export default function AdminDiscussionsPage() {
               Select a discussion to view details.
             </div>
           )}
+        </ModalBody>
+      </Modal>
+
+      <Modal
+        show={showDeleteModal}
+        size="md"
+        onClose={() => {
+          setShowDeleteModal(false);
+          setSelectedDeleteIssue(null);
+        }}
+        popup
+        theme={{
+          root: {
+            base: "fixed inset-x-0 bottom-0 z-[200] h-modal w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0 md:h-full",
+          },
+        }}
+      >
+        <ModalHeader />
+        <ModalBody className={isDark ? "bg-gray-800 rounded-2xl" : "bg-white rounded-2xl"}>
+          <div>
+            <h3 className={`mb-4 text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+              Confirm delete
+            </h3>
+            <p className={`mb-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Are you sure you want to delete the discussion{" "}
+              <span className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                &quot;{selectedDeleteIssue?.title}&quot;
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleConfirmDelete}
+                className="cursor-pointer px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center"
+              >
+                Delete discussion
+              </button>
+              <button
+                onClick={() => {
+                  setShowDeleteModal(false);
+                  setSelectedDeleteIssue(null);
+                }}
+                className={`cursor-pointer px-6 py-2.5 font-bold rounded-xl transition-colors ${isDark
+                  ? "bg-gray-700 text-white hover:bg-gray-600"
+                  : "bg-[#374151] text-white hover:bg-gray-600"
+                  }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </ModalBody>
       </Modal>
     </div>

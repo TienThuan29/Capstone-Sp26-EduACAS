@@ -136,6 +136,30 @@ public class MaterialRepository : DynamoRepository, IMaterialRepository
         }
     }
 
+    public async Task RestoreAsync(string materialId)
+    {
+        try
+        {
+            var key = DynamoMapper.CreateKey(materialId);
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                {
+                    "isDeleted", new AttributeValueUpdate
+                    {
+                        Action = AttributeAction.PUT,
+                        Value = new AttributeValue { BOOL = false }
+                    }
+                }
+            };
+            await UpdateItemAsync(key, updates, _materialTableName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error restoring material {Id}", materialId);
+            throw;
+        }
+    }
+
     public async Task DeleteAsync(string materialId)
     {
         try
