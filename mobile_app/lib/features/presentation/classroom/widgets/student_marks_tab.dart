@@ -190,9 +190,11 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
         }).toList()
           ..sort((a, b) => a.problemTitle.toLowerCase().compareTo(b.problemTitle.toLowerCase()));
 
+        final canShowScore = exam.mode == ExaminationMode.practical || exam.isPublicResult;
+
         return _ExamMarkItem(
           examName: exam.examName,
-          score: scoredByProblem.isEmpty ? null : aggregatedScore,
+          score: (scoredByProblem.isEmpty || !canShowScore) ? null : aggregatedScore,
           maxScore: exam.totalMark,
           latestSubmissionAt: _latestSubmissionDate(submissionsOfExam),
           problemScores: problemScores,
