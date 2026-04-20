@@ -55,7 +55,7 @@ export default function AdminDiscussionsPage() {
 
   const [selectedIssue, setSelectedIssue] = useState<DiscussionIssue | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedDeleteIssue, setSelectedDeleteIssue] = useState<DiscussionIssue | null>(null);
+  const [selectedDeleteIssue, setSelectedDeleteIssue] = useState<DiscussionIssueListItem | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
@@ -104,7 +104,7 @@ export default function AdminDiscussionsPage() {
     }
   };
 
-  const openDeleteModal = (issue: DiscussionIssue) => {
+  const openDeleteModal = (issue: DiscussionIssueListItem) => {
     setSelectedDeleteIssue(issue);
     setShowDeleteModal(true);
   };

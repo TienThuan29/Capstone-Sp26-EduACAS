@@ -353,4 +353,8 @@ export const Api = {
     SEND_BATCH: "/api/v1/academic-warnings/batch",
     SEND_SINGLE: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
   },
+
+  PublicStatistics: {
+    GET: "/api/acas/v1/public-statistics",
+  },
 };

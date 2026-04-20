@@ -5,12 +5,14 @@ import {
   FileCodeIcon,
   CheckCircleIcon,
   BarChartIcon,
+  ChatBubbleLeftIcon,
 } from "@/components/svg-icons"
 import {
   PYTHON_CODE_IMG,
   JAVASCRIPT_CODE_IMG,
   JAVA_CODE_IMG,
   SQL_CODE_IMG,
+  // C_CODE_IMG,
 } from "@/assets/images"
 
 export const heroStats = [
@@ -24,7 +26,7 @@ export const features = [
     icon: UsersIcon,
     title: "Classroom management",
     description:
-      "Instructors can easily create and manage classrooms and add students to classes. Detailed content will be added later.",
+      "Lecturers can easily create and manage classrooms and add students to classes. Detailed content will be added later.",
   },
   {
     icon: BookOpenIcon,
@@ -33,10 +35,10 @@ export const features = [
       "Share documents, lecture slides, and learning resources with students. Detailed content will be added later.",
   },
   {
-    icon: ClipboardIcon,
-    title: "Assignments",
+    icon: ChatBubbleLeftIcon,
+    title: "Discussion forum",
     description:
-      "Instructors create and assign programming exercises to students. Detailed content will be added later.",
+      "Students and lecturers can discuss and ask questions about the course. Detailed content will be added later.",
   },
   {
     icon: FileCodeIcon,
@@ -54,14 +56,14 @@ export const features = [
     icon: BarChartIcon,
     title: "Progress tracking",
     description:
-      "Instructors track each student's learning progress. Detailed content will be added later.",
+      "Lecturers track each student's learning progress. Detailed content will be added later.",
   },
 ]
 
 export const communityStats = [
-  { number: "0", label: "Active students", sublabel: "No users yet" },
-  { number: "0", label: "Instructors", sublabel: "No users yet" },
-  { number: "0", label: "Classrooms", sublabel: "No users yet" },
+  { number: "0", label: "Active students", sublabel: "Loading..." },
+  { number: "0", label: "Lecturers", sublabel: "Loading..." },
+  { number: "0", label: "Classrooms", sublabel: "Loading..." },
 ]
 
 export const programmingLanguages = [
@@ -79,14 +81,32 @@ export const programmingLanguages = [
   },
   {
     img: JAVA_CODE_IMG,
-    title: "Java development",
+    title: "Java programming",
     desc: "Learn Java with exercises on OOP, data structures, and enterprise application development. Detailed content will be added later.",
     badge: "Java",
   },
+  // {
+  //   img: SQL_CODE_IMG,
+  //   title: "SQL & Databases",
+  //   desc: "Practice SQL queries, database design, and work effectively with relational databases. Detailed content will be added later.",
+  //   badge: "SQL",
+  // },
   {
     img: SQL_CODE_IMG,
-    title: "SQL & Databases",
-    desc: "Practice SQL queries, database design, and work effectively with relational databases. Detailed content will be added later.",
-    badge: "SQL",
+    title: "C/C++ programming",
+    desc: "Learn C/C++ with exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
+    badge: "C/C++",
   },
+  {
+    img: SQL_CODE_IMG,
+    title: "TypeScript programming",
+    desc: "Learn TypeScript with exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
+    badge: "TypeScript",
+  },
+  {
+    img: SQL_CODE_IMG,
+    title: "C# programming",
+    desc: "Learn C# with exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
+    badge: "C#",
+  }
 ]

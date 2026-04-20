@@ -59,7 +59,7 @@ export default function HomePage() {
           const result = await getStudentClassrooms(user.id)
           setClassrooms((result ?? []) as Classroom[])
         } else if (isLecturer) {
-          const paged = await getLecturerClassrooms(user.id, 1, 100)
+          const paged = await getLecturerClassrooms(user.id, undefined, 1, 100)
           setClassrooms((paged?.items ?? []) as Classroom[])
         } else {
           setClassrooms([])
