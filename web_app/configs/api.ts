@@ -352,6 +352,9 @@ export const Api = {
   AcademicWarning: {
     SEND_BATCH: "/api/v1/academic-warnings/batch",
     SEND_SINGLE: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/v1/academic-warnings/classroom/${classroomId}`,
+    GET_BY_ID: (id: string) => `/api/v1/academic-warnings/${id}`,
   },
 
   PublicStatistics: {

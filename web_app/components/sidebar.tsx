@@ -242,6 +242,11 @@ const Sidebar = () => {
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
+    {
+      icon: AcademicCapIcon,
+      label: "Academic Warning",
+      href: `${pathname}?tab=academic-warning`,
+    }
   ];
 
   const settingsItems = [

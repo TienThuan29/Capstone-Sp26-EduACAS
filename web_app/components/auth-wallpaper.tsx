@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { LOGO_EDU_ACAS } from "@/assets/images";
+import { LOGO_EDU_ACAS, LOGO_EDU_ACAS_2_TRANS, LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
 
 export default function AuthWallpaper() {
   return (
@@ -27,14 +27,15 @@ export default function AuthWallpaper() {
       
       {/* Content */}
       <div className="relative z-10 text-center px-12 max-w-2xl">
-        <div className="mb-8">
+        <div className="mb-2">
           <div className="inline-block p-6 rounded-2xl bg-white/90 backdrop-blur-sm border border-white/30 mb-6">
             <Image 
-              src={LOGO_EDU_ACAS} 
+              src={LOGO_EDU_ACAS_SINGLE} 
               alt="Edu-ACAS Logo" 
               width={240}
               height={96}
               className="h-24 w-auto object-contain"
+              unoptimized
             />
           </div>
         </div>

@@ -176,7 +176,8 @@ public class UserCommand : IUserCommand
         }
         var frontendUrl = _configuration["FrontendUrl"];
         var resetPasswordUrl = $"{frontendUrl}/forgot-password/reset?token={uuidToken}";
-        await _emailService.SendEmailAsync(user.Email, "Reset Password", resetPasswordUrl, EmailService.EmailPasswordResetTemplate);
+        var expiryTime = "5 minutes";
+        await _emailService.SendEmailAsync(user.Email, "Reset Password", resetPasswordUrl, expiryTime, EmailService.EmailPasswordResetTemplate);
         return true;
     }
 

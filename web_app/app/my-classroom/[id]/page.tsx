@@ -22,9 +22,10 @@ import {
   DiscussionTab,
   StudentDashboardTab,
   QuizzesTab,
+  AcademicWarningsTab,
 } from "@/app/my-classroom/tabs";
 import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
-import { ClassroomInfoBar } from "@/app/manage-classroom/components/ClassroomInfoBar";
+import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 
 function ClassroomContent() {
   const params = useParams();
@@ -192,6 +193,14 @@ function ClassroomContent() {
             studentId={studentId}
           />
         );
+      case "academic-warning":
+        return (
+          <AcademicWarningsTab
+            classroomId={classId}
+            studentId={studentId}
+            classroomName={classroom?.className}
+          />
+        );
       default:
         return (
           <OverviewTab
@@ -241,11 +250,12 @@ function ClassroomContent() {
               className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
             />
           )}
+          {activeTab !== "overview" && classroom && (
+            <div className="ml-auto">
+              <ClassroomInfoBar classroom={classroom} compact />
+            </div>
+          )}
         </div>
-
-        {activeTab !== "overview" && classroom && (
-          <ClassroomInfoBar classroom={classroom} />
-        )}
 
         {renderTabContent()}
       </div>

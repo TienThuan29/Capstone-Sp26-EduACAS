@@ -35,7 +35,7 @@ import {
   StudentTab,
   QuizzesTab,
 } from "@/app/manage-classroom/tabs";
-import { ClassroomInfoBar } from "../components/ClassroomInfoBar";
+import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
 import { DiscussionTab } from "../tabs/discussion-tab";
@@ -426,11 +426,12 @@ function ClassroomContent() {
               }}
             />
           )}
+          {activeTab !== "overview" && classroom && (
+            <div className="ml-auto">
+              <ClassroomInfoBar classroom={classroom} compact />
+            </div>
+          )}
         </div>
-
-        {activeTab !== "overview" && classroom && (
-          <ClassroomInfoBar classroom={classroom} />
-        )}
 
         {renderTabContent()}
       </main>

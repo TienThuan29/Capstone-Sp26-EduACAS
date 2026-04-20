@@ -6,6 +6,7 @@ using AcasService.Application.Commands.ProgrammingLanguage;
 using AcasService.Application.Commands.S3;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.AcademicWarning;
 using AcasService.Application.Queries.Classroom;
 using AcasService.Application.Queries.Examination;
 using AcasService.Application.Queries.Problem;
@@ -302,6 +303,7 @@ builder.Services.AddScoped<IFirebaseCloudMessageService, FirebaseCloudMessageSer
 builder.Services.AddScoped<INotificationCommand, NotificationCommand>();
 builder.Services.AddScoped<IBusinessNotificationService, BusinessNotificationService>();
 builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<IAcademicWarningQuery, AcademicWarningQuery>();
 builder.Services.AddScoped<IUserDeviceCommand, UserDeviceCommand>();
 builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
