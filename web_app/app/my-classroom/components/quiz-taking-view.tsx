@@ -81,17 +81,10 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
       timer = setInterval(updateTimer, 1000);
     }
 
-    const pollTimer = setInterval(async () => {
-      const currentAttempt = await getAttemptById(attempt.id);
-      if (currentAttempt && currentAttempt.status === 'ABANDONED') {
-        showError("Your quiz attempt has been suspended by the lecturer.");
-        onSubmitted();
-      }
-    }, 10000);
+
 
     return () => {
       if (timer) clearInterval(timer);
-      if (pollTimer) clearInterval(pollTimer);
     };
   }, [attempt, handleAutoSubmit, readOnly, getAttemptById, onSubmitted, showError]);
 
@@ -240,7 +233,20 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
               })}
             </div>
 
-            <div className="pt-1">
+            <div className="pt-1 flex flex-col gap-3">
+              {!readOnly && (
+                <div className={`
+                  flex justify-center items-center gap-2 px-3 py-2.5 rounded-xl font-mono text-xl font-black shadow-sm border-2 transition-all duration-300
+                  ${isTimeCritical
+                    ? 'text-white bg-red-600 border-red-400 animate-pulse'
+                    : timeLeft < 300000
+                      ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40'
+                      : 'text-[#1F4E79] bg-gray-50 dark:bg-gray-900/60 border-gray-100 dark:border-gray-800 dark:text-blue-400'}
+                `}>
+                  <ClockIcon className={`h-5 w-5 stroke-2 ${isTimeCritical ? 'text-white' : 'text-[#1F4E79] dark:text-blue-400'}`} />
+                  {formatTime(timeLeft)}
+                </div>
+              )}
               {!readOnly ? (
                 <Button
                   color="info"
@@ -267,22 +273,6 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
 
       <div className="flex-1 flex flex-col gap-4">
         <Card className="flex-1 border-none shadow-lg bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 overflow-hidden relative">
-          {!readOnly && (
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <div className={`
-                flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-lg font-black shadow-sm border-2 pointer-events-auto transition-all duration-300
-                ${isTimeCritical
-                  ? 'text-white bg-red-600 border-red-400 animate-pulse'
-                  : timeLeft < 300000
-                    ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40'
-                    : 'text-[#1F4E79] bg-gray-50 dark:bg-gray-900/60 border-gray-100 dark:border-gray-800 dark:text-blue-400'}
-              `}>
-                <ClockIcon className={`h-4 w-4 ${isTimeCritical ? 'text-white' : 'text-[#1F4E79] dark:text-blue-400'}`} />
-                {formatTime(timeLeft)}
-              </div>
-            </div>
-          )}
-
           <div className="space-y-6 pt-2">
             <div className="relative group">
               <style>{`
@@ -306,6 +296,15 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
                     </Badge>
                   </div>
                   <div className="question-content text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-100 prose prose-slate dark:prose-invert max-w-none font-medium">
+                    {currentQuestion.imageUrl && (
+                      <div className="flex justify-center mb-5">
+                        <img 
+                          src={currentQuestion.imageUrl} 
+                          alt="Question Attachment" 
+                          className="max-w-full max-h-[250px] w-auto h-auto object-contain rounded-lg shadow-sm border border-gray-100 dark:border-gray-600" 
+                        />
+                      </div>
+                    )}
                     <ReactMarkdown>{currentQuestion.content}</ReactMarkdown>
                   </div>
                 </div>

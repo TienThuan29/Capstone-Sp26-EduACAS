@@ -75,8 +75,8 @@ function QuizAttemptHistoryCard({
                         {attempts.map((attempt) => (
                             <TableRow 
                                 key={attempt.id} 
-                                className={`border-b border-gray-50 dark:border-gray-700 last:border-0 transition-colors ${attempt.status === 'ABANDONED' ? 'opacity-60 cursor-not-allowed bg-red-50/10' : 'hover:bg-gray-50/80 dark:hover:bg-gray-700/30 cursor-pointer group'}`}
-                                onClick={() => attempt.status !== 'ABANDONED' && onViewAttempt(attempt)}
+                                className="border-b border-gray-50 dark:border-gray-700 last:border-0 transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/30 cursor-pointer group"
+                                onClick={() => onViewAttempt(attempt)}
                             >
                                 <TableCell className="text-center font-bold text-gray-900 dark:text-white">{attempt.attemptNumber}</TableCell>
                                 <TableCell className="text-center text-gray-600 dark:text-gray-400 text-sm whitespace-nowrap">
@@ -86,15 +86,15 @@ function QuizAttemptHistoryCard({
                                     {attempt.endTime ? formatDate(attempt.endTime) : '-'}
                                 </TableCell>
                                 <TableCell className="text-center font-medium">
-                                    {(attempt.status === 'SUBMITTED' || attempt.status === 'ABANDONED') ? (
-                                        <span className={attempt.status === 'SUBMITTED' ? "text-[#1F4E79] dark:text-blue-400" : "text-red-500"}>
-                                            {attempt.status === 'SUBMITTED' ? attempt.correctAnswers : 0} / {attempt.totalQuestions}
+                                    {attempt.status === 'SUBMITTED' ? (
+                                        <span className="text-[#1F4E79] dark:text-blue-400">
+                                            {attempt.correctAnswers} / {attempt.totalQuestions}
                                         </span>
                                     ) : '-'}
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    {(attempt.status === 'SUBMITTED' || attempt.status === 'ABANDONED') && attempt.score !== undefined ? (
-                                        <Badge color={attempt.status === 'SUBMITTED' ? "info" : "failure"} className="px-3 font-bold mx-auto w-fit">
+                                    {attempt.status === 'SUBMITTED' && attempt.score !== undefined ? (
+                                        <Badge color="info" className="px-3 font-bold mx-auto w-fit">
                                             {attempt.score.toFixed(1)} / {maxScore.toFixed(1)}
                                         </Badge>
                                     ) : '-'}
