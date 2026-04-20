@@ -3,7 +3,7 @@ export interface ErrorGroupSummary {
   problemId: string;
   examId: string;
   errorSignature: string;
-  jPlagStatus: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED' | 'ERROR';
+  jPlagStatus: 'PENDING' | 'RUNNING' | 'COMPLETED' | 'FAILED';
   submissionIds: string[];
   jPlagResults: JPlagMatchSummary[];
   createdDate: string;

@@ -12,6 +12,7 @@ import {
   MagnifyingGlassIcon,
   SparklesIcon,
   TrashIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import {
   Badge,
@@ -29,6 +30,7 @@ import {
   TableHeadCell,
   TableRow,
   TextInput,
+  Tooltip,
 } from "flowbite-react";
 import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
@@ -317,6 +319,7 @@ export default function QuizDetailPage() {
               type: detail?.type,
               marks: item.marks,
               displayOrder: item.displayOrder || index + 1,
+              imageUrl: detail?.imageUrl ?? undefined,
             } satisfies QuizQuestionView;
           }),
         );
@@ -603,7 +606,18 @@ export default function QuizDetailPage() {
                         </Button>
                       </TableCell>
                       <TableCell className="max-w-xl">
-                        <div className="line-clamp-2 text-sm">{question.content}</div>
+                        <div className="flex items-start gap-2">
+                          <div className="line-clamp-2 text-sm max-w-[90%]">{question.content}</div>
+                          {question.imageUrl && (
+                            <Tooltip 
+                              content={<img src={question.imageUrl} alt="preview" className="max-h-48 rounded object-contain" />} 
+                              placement="right" 
+                              className="z-50 bg-white"
+                            >
+                              <PhotoIcon className="h-5 w-5 text-blue-500 shrink-0 cursor-help" />
+                            </Tooltip>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell>
                         <Badge color="info">{question.type}</Badge>
@@ -779,7 +793,18 @@ export default function QuizDetailPage() {
                             >
                               <div className="flex items-start gap-2">
                                 <div>
-                                  <p className="text-sm font-medium">{item.content}</p>
+                                  <div className="flex items-start gap-2">
+                                    <p className="text-sm font-medium line-clamp-2 max-w-[90%]">{item.content}</p>
+                                    {item.imageUrl && (
+                                      <Tooltip 
+                                        content={<img src={item.imageUrl} alt="preview" className="max-h-48 rounded object-contain" />} 
+                                        placement="right" 
+                                        className="z-50 bg-white"
+                                      >
+                                        <PhotoIcon className="h-4 w-4 text-blue-500 shrink-0 cursor-help" />
+                                      </Tooltip>
+                                    )}
+                                  </div>
                                   <p className="text-xs text-gray-500">
                                     Marks: {item.marks} | Order: {item.displayOrder}
                                   </p>
@@ -878,7 +903,18 @@ export default function QuizDetailPage() {
                       return (
                         <TableRow key={question.id}>
                           <TableCell className="max-w-xl">
-                            <div className="line-clamp-2 text-sm">{question.content}</div>
+                            <div className="flex items-start gap-2">
+                              <div className="line-clamp-2 text-sm max-w-[90%]">{question.content}</div>
+                              {question.imageUrl && (
+                                <Tooltip 
+                                  content={<img src={question.imageUrl} alt="preview" className="max-h-48 rounded object-contain" />} 
+                                  placement="right" 
+                                  className="z-50 bg-white"
+                                >
+                                  <PhotoIcon className="h-5 w-5 text-blue-500 shrink-0 cursor-help" />
+                                </Tooltip>
+                              )}
+                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge color="info">{question.type}</Badge>
@@ -943,4 +979,5 @@ type QuizQuestionView = {
   type?: Question["type"];
   marks: number;
   displayOrder: number;
+  imageUrl?: string;
 };

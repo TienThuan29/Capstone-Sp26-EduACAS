@@ -75,7 +75,7 @@ function QuizAttemptHistoryCard({
                         {attempts.map((attempt) => (
                             <TableRow 
                                 key={attempt.id} 
-                                className="border-b border-gray-50 dark:border-gray-700 last:border-0 hover:bg-gray-50/80 dark:hover:bg-gray-700/30 transition-colors cursor-pointer group"
+                                className="border-b border-gray-50 dark:border-gray-700 last:border-0 transition-colors hover:bg-gray-50/80 dark:hover:bg-gray-700/30 cursor-pointer group"
                                 onClick={() => onViewAttempt(attempt)}
                             >
                                 <TableCell className="text-center font-bold text-gray-900 dark:text-white">{attempt.attemptNumber}</TableCell>
@@ -87,7 +87,9 @@ function QuizAttemptHistoryCard({
                                 </TableCell>
                                 <TableCell className="text-center font-medium">
                                     {attempt.status === 'SUBMITTED' ? (
-                                        <span className="text-[#1F4E79] dark:text-blue-400">{attempt.correctAnswers} / {attempt.totalQuestions}</span>
+                                        <span className="text-[#1F4E79] dark:text-blue-400">
+                                            {attempt.correctAnswers} / {attempt.totalQuestions}
+                                        </span>
                                     ) : '-'}
                                 </TableCell>
                                 <TableCell className="text-center">
@@ -99,7 +101,7 @@ function QuizAttemptHistoryCard({
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <div className="flex justify-center">
-                                        <Badge color={attempt.status === 'SUBMITTED' ? 'success' : attempt.status === 'INPROGRESS' ? 'warning' : 'failure'}>
+                                        <Badge color={attempt.status === 'SUBMITTED' ? 'success' : attempt.status === 'INPROGRESS' ? 'info' : 'failure'}>
                                             {attempt.status}
                                         </Badge>
                                     </div>
@@ -199,7 +201,7 @@ export function QuizzesTab({
     const fetchQuizzes = useCallback(async () => {
         try {
             setLoading(true);
-            const dataPaged = await getClassroomQuizzesByClassroomPaged(classId, currentPage, pageSize, true);
+            const dataPaged = await getClassroomQuizzesByClassroomPaged(classId, currentPage, pageSize, false);
             const quizzes = dataPaged.items;
             setClassroomQuizzes(quizzes);
             setTotalPages(dataPaged.totalPages);
@@ -275,15 +277,11 @@ export function QuizzesTab({
     const onPasscodeConfirm = async (passcode: string) => {
         if (!selectedQuiz || !user) return;
 
-        if (selectedQuiz.passcode && passcode !== selectedQuiz.passcode) {
-            showError("Incorrect passcode");
-            return;
-        }
-
         try {
             const attempt = await startAttempt({
                 classroomQuizId: selectedQuiz.id,
-                studentId: user.id
+                studentId: user.id,
+                passcode: passcode
             });
             if (attempt) {
                 setActiveAttempt(attempt);
@@ -358,7 +356,9 @@ export function QuizzesTab({
                                                         className="bg-[#1F4E79] hover:bg-[#2A6BA3] shadow-md disabled:opacity-50 disabled:grayscale transition-all rounded-lg px-16 py-1"
                                                     >
                                                         <span className="text-[15px] font-extrabold tracking-widest uppercase whitespace-nowrap">
-                                                            {selectedQuiz.status === 'PUBLISHED' ? 'Upcoming' : selectedQuiz.status === 'CLOSED' ? 'Closed' : selectedQuiz.status === 'DRAFT' ? 'Internal' : 'START QUIZ'}
+                                                            {attemptsHistory.some(a => a.status === 'INPROGRESS') 
+                                                                ? 'RESUME QUIZ' 
+                                                                : (selectedQuiz.status === 'PUBLISHED' ? 'Upcoming' : selectedQuiz.status === 'CLOSED' ? 'Closed' : selectedQuiz.status === 'DRAFT' ? 'Internal' : 'START QUIZ')}
                                                         </span>
                                                     </Button>
                                                 </div>

@@ -18,6 +18,7 @@ import {
   TableRow,
   TextInput,
   Textarea,
+  Tooltip,
 } from "flowbite-react";
 import {
   ArrowPathIcon,
@@ -25,6 +26,7 @@ import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
@@ -481,7 +483,18 @@ export default function QuestionBanksPage() {
                 questions.map((question) => (
                   <TableRow key={question.id}>
                     <TableCell className="max-w-xl">
-                      <div className="line-clamp-2 text-sm">{question.content}</div>
+                      <div className="flex items-start gap-2">
+                        <div className="line-clamp-2 text-sm max-w-[90%]">{question.content}</div>
+                        {question.imageUrl && (
+                          <Tooltip 
+                            content={<img src={question.imageUrl} alt="preview" className="max-h-48 rounded object-contain" />} 
+                            placement="right" 
+                            className="z-50 bg-white"
+                          >
+                            <PhotoIcon className="h-5 w-5 text-blue-500 shrink-0 cursor-help" />
+                          </Tooltip>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge color={getQuestionTypeBadgeColor(question.type)}>

@@ -8,7 +8,7 @@ namespace AcasService.Web.Controllers.ClassroomQuiz;
 
 [ApiController]
 [Route("api/v1/classroom-quizzes")]
-[Authorize]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class ClassroomQuizQueryController : ControllerBase
 {
     private readonly IClassroomQuizQuery _classroomQuizQuery;
@@ -41,11 +41,11 @@ public class ClassroomQuizQueryController : ControllerBase
     }
 
     [HttpGet("classroom/{classroomId}")]
-    public async Task<ActionResult<ApiResponse<List<ClassroomQuizResponse>>>> GetClassroomQuizzesByClassroom(string classroomId)
+    public async Task<ActionResult<ApiResponse<List<ClassroomQuizResponse>>>> GetClassroomQuizzesByClassroom(string classroomId, [FromQuery] bool includeDrafts = false)
     {
         try
         {
-            var result = await _classroomQuizQuery.GetClassroomQuizzesByClassroomIdAsync(classroomId);
+            var result = await _classroomQuizQuery.GetClassroomQuizzesByClassroomIdAsync(classroomId, includeDrafts);
             return ResponseUtil.Success(result, "Get classroom quizzes for classroom successfully", 200);
         }
         catch (Exception ex)

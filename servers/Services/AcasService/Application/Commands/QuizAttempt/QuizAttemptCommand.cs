@@ -1,3 +1,4 @@
+using System.Text.RegularExpressions;
 using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Repositories.Caching.Redis.Quiz;
@@ -11,6 +12,7 @@ using AcasService.Models;
 using AcasService.Web.Requests;
 using AcasService.Messaging.User;
 using AcasService.Application.Queries.QuizAttempt;
+using AcasService.Repositories.ClassroomEnrollment;
 
 namespace AcasService.Application.Commands.QuizAttempt
 {
@@ -18,8 +20,7 @@ namespace AcasService.Application.Commands.QuizAttempt
     {
         Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request);
         Task UpdateAnswerAsync(string attemptId, UpdateQuizAnswerRequest request);
-        Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId);
-        
+        Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId);        
     }
 
     public class QuizAttemptCommand : IQuizAttemptCommand
@@ -35,8 +36,8 @@ namespace AcasService.Application.Commands.QuizAttempt
         private readonly QuizAttemptMapper _mapper;
         private readonly ILogger<QuizAttemptCommand> _logger;
         private readonly IQuizAttemptQuery _quizAttemptQuery;
+        private readonly IClassroomEnrollmentRepository _enrollmentRepository;
         
-
         public QuizAttemptCommand(
             IQuizAttemptRepository repository,
             IClassroomQuizRepository classroomQuizRepository,
@@ -48,7 +49,8 @@ namespace AcasService.Application.Commands.QuizAttempt
             IQuizCache quizCache,
             QuizAttemptMapper mapper,
             ILogger<QuizAttemptCommand> logger,
-            IQuizAttemptQuery quizAttemptQuery)
+            IQuizAttemptQuery quizAttemptQuery,
+            IClassroomEnrollmentRepository enrollmentRepository)
         {
             _repository = repository;
             _classroomQuizRepository = classroomQuizRepository;
@@ -61,6 +63,7 @@ namespace AcasService.Application.Commands.QuizAttempt
             _mapper = mapper;
             _logger = logger;
             _quizAttemptQuery = quizAttemptQuery;
+            _enrollmentRepository = enrollmentRepository;
         }
 
         public async Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request)
@@ -89,6 +92,18 @@ namespace AcasService.Application.Commands.QuizAttempt
                 if (now < classroomQuiz.StartTime || now > classroomQuiz.EndTime)
                 {
                     throw new InvalidOperationException("The quiz is not within its valid time window.");
+                }
+
+                var enrollment = await _enrollmentRepository.FindByClassAndStudentIdAsync(classroomQuiz.ClassroomId, request.StudentId);
+                if (enrollment == null)
+                    throw new InvalidOperationException("You are not enrolled in the classroom associated with this quiz.");
+
+                if (!string.IsNullOrEmpty(classroomQuiz.Passcode))
+                {
+                    if (string.IsNullOrEmpty(request.Passcode) || !classroomQuiz.Passcode.Equals(request.Passcode))
+                    {
+                        throw new ArgumentException("Incorrect or missing quiz passcode.");
+                    }
                 }
 
                 int currentMax = await _repository.GetMaxAttemptNumberAsync(request.ClassroomQuizId, request.StudentId);
@@ -134,7 +149,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                 if (attempt == null) throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
 
                 if (attempt.Status != Models.QuizAttemptStatus.INPROGRESS)
-                    throw new InvalidOperationException("Cannot update answers for a submitted or abandoned quiz.");
+                    throw new InvalidOperationException("Cannot update answers for a submitted quiz");
 
                 var key = _quizCache.GetQuizAttemptKey(attemptId);
                 var answers = await _quizCache.GetAsync<Dictionary<string, string>>(key) ?? new Dictionary<string, string>();
@@ -198,8 +213,8 @@ namespace AcasService.Application.Commands.QuizAttempt
                     {
                         if (!string.IsNullOrWhiteSpace(question.TextAnswer) && !string.IsNullOrWhiteSpace(studentValue))
                         {
-                            var normalizedExpected = question.TextAnswer.Replace("\r", "").Trim();
-                            var normalizedActual = studentValue.Replace("\r", "").Trim();
+                            var normalizedExpected = Regex.Replace(question.TextAnswer.Replace("\r", ""), @"\s+", " ").Trim();
+                            var normalizedActual = Regex.Replace(studentValue.Replace("\r", ""), @"\s+", " ").Trim();
                             isCorrect = normalizedExpected.Equals(normalizedActual, StringComparison.OrdinalIgnoreCase);
                             if (isCorrect) totalScore += quizQuestion.Marks;
                         }
@@ -274,8 +289,5 @@ namespace AcasService.Application.Commands.QuizAttempt
                 throw;
             }
         }
-
-       
-        
     }
 }
