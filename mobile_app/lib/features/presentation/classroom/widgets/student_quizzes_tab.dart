@@ -5,6 +5,7 @@ import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/quiz_practice.dart';
 import 'package:mobile/features/presentation/quiz/quiz_attempt_page.dart';
 import 'package:mobile/features/presentation/quiz/quiz_review_page.dart';
+import 'package:mobile/features/presentation/quiz/widgets/quiz_passcode_dialog.dart';
 import 'package:mobile/features/services/quiz_practice_service.dart';
 
 class StudentQuizzesTab extends StatefulWidget {
@@ -144,6 +145,9 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
               onStart: quizDetail == null
                   ? null
                   : () async {
+                      final hasAccess = await showQuizPasscodeDialog(context, classroomQuiz);
+                      if (!hasAccess || !mounted) return;
+
                       await Navigator.push(
                         context,
                         MaterialPageRoute(

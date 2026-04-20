@@ -93,7 +93,14 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
 
       if (missingProblemIds.isNotEmpty) {
         final missingProblems = await Future.wait(
-          missingProblemIds.map((id) async => MapEntry(id, await ProblemService.getById(id))),
+          missingProblemIds.map((id) async {
+            try {
+              final prob = await ProblemService.getById(id);
+              return MapEntry(id, prob);
+            } catch (e) {
+              return MapEntry(id, null);
+            }
+          }),
         );
         for (final entry in missingProblems) {
           putProblemTitle(entry.key, entry.value?.title);
@@ -102,8 +109,12 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
 
       final quizDetailEntries = await Future.wait(
         classroomQuizzes.map((item) async {
-          final detail = await QuizPracticeService.getQuizById(item.quizId);
-          return MapEntry(item.id, detail);
+          try {
+            final detail = await QuizPracticeService.getQuizById(item.quizId);
+            return MapEntry(item.id, detail);
+          } catch (e) {
+             return MapEntry(item.id, null);
+          }
         }),
       );
       final quizDetailsByClassroomQuizId = <String, QuizDetail>{
@@ -111,28 +122,26 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
           if (entry.value != null) entry.key: entry.value!,
       };
 
-      final latestScoredAttemptByQuizId = <String, QuizAttemptInfo>{};
+      final scoredAttemptsByQuizId = <String, List<QuizAttemptInfo>>{};
       for (final attempt in attempts.where((a) => a.finalScore != null)) {
-        final current = latestScoredAttemptByQuizId[attempt.classroomQuizId];
-        if (current == null || attempt.startTime.isAfter(current.startTime)) {
-          latestScoredAttemptByQuizId[attempt.classroomQuizId] = attempt;
-        }
+        scoredAttemptsByQuizId.putIfAbsent(attempt.classroomQuizId, () => []).add(attempt);
       }
 
       final quizMarks = classroomQuizzes
-          .where((classroomQuiz) {
-            final latestAttempt = latestScoredAttemptByQuizId[classroomQuiz.id];
-            return latestAttempt != null && latestAttempt.finalScore != null;
-          })
+          .where((classroomQuiz) => scoredAttemptsByQuizId.containsKey(classroomQuiz.id))
           .map((classroomQuiz) {
-            final latestAttempt = latestScoredAttemptByQuizId[classroomQuiz.id]!;
+            final quizAttempts = scoredAttemptsByQuizId[classroomQuiz.id]!
+                ..sort((a, b) => b.startTime.compareTo(a.startTime));
+            final latestAttempt = quizAttempts.first;
             final quizDetail = quizDetailsByClassroomQuizId[classroomQuiz.id];
+            
             return _QuizMarkItem(
               title: quizDetail?.title ?? 'Quiz',
               score: latestAttempt.finalScore,
               maxScore: _quizMaxScore(quizDetail),
               attemptNumber: latestAttempt.attemptNumber,
               submittedAt: latestAttempt.endTime ?? latestAttempt.startTime,
+              allAttempts: quizAttempts,
             );
           })
           .toList()
@@ -380,6 +389,7 @@ class _QuizMarkItem {
   final double? maxScore;
   final int? attemptNumber;
   final DateTime? submittedAt;
+  final List<QuizAttemptInfo> allAttempts;
 
   const _QuizMarkItem({
     required this.title,
@@ -387,6 +397,7 @@ class _QuizMarkItem {
     required this.maxScore,
     required this.attemptNumber,
     required this.submittedAt,
+    this.allAttempts = const [],
   });
 
   DateTime get sortDate => submittedAt ?? DateTime.fromMillisecondsSinceEpoch(0);
@@ -432,7 +443,6 @@ class _QuizMarkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
@@ -447,40 +457,114 @@ class _QuizMarkCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            item.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    _scorePill(
+                      label: item.maxScore == null
+                          ? _formatScore(item.score)
+                          : '${_formatScore(item.score)} / ${_formatScore(item.maxScore)}',
+                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                      textColor: AppColors.primary,
+                    ),
+                    const SizedBox(width: 8),
+                    if (item.attemptNumber != null)
+                      _scorePill(
+                        label: 'Latest Attempt #${item.attemptNumber}',
+                        backgroundColor: Colors.grey.withValues(alpha: 0.15),
+                        textColor: AppColors.textSecondary,
+                      ),
+                  ],
+                ),
+                if (item.submittedAt != null) ...[
+                  const SizedBox(height: 8),
+                  Text(
+                    'Submitted: ${_fmt(item.submittedAt!)}',
+                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                  ),
+                ],
+              ],
             ),
           ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              _scorePill(
-                label: item.maxScore == null
-                    ? _formatScore(item.score)
-                    : '${_formatScore(item.score)} / ${_formatScore(item.maxScore)}',
-                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                textColor: AppColors.primary,
-              ),
-              const SizedBox(width: 8),
-              if (item.attemptNumber != null)
-                _scorePill(
-                  label: 'Attempt #${item.attemptNumber}',
-                  backgroundColor: Colors.grey.withValues(alpha: 0.15),
-                  textColor: AppColors.textSecondary,
+          if (item.allAttempts.length > 1) ...[
+            const Divider(height: 1),
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                backgroundColor: Colors.transparent,
+                collapsedBackgroundColor: Colors.transparent,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
+                childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
+                title: Text(
+                  'Previous attempts (${item.allAttempts.length - 1})',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
-            ],
-          ),
-          if (item.submittedAt != null) ...[
-            const SizedBox(height: 8),
-            Text(
-              'Submitted: ${_fmt(item.submittedAt!)}',
-              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                children: item.allAttempts.skip(1).map((attempt) {
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 8),
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                'Attempt #${attempt.attemptNumber}',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                            ),
+                            Text(
+                              item.maxScore == null 
+                                  ? _formatScore(attempt.finalScore) 
+                                  : '${_formatScore(attempt.finalScore)} / ${_formatScore(item.maxScore)}',
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w800,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (attempt.endTime != null) ...[
+                          const SizedBox(height: 6),
+                          Text(
+                            'Submitted: ${_fmt(attempt.endTime!)}',
+                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                          ),
+                        ]
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
             ),
           ],
         ],
@@ -531,8 +615,8 @@ class _ExamMarkCard extends StatelessWidget {
                 const SizedBox(height: 8),
                 _scorePill(
                   label: scoreLabel,
-                  backgroundColor: Colors.green.withValues(alpha: 0.1),
-                  textColor: Colors.green.shade700,
+                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                  textColor: AppColors.primary,
                 ),
                 if (item.latestSubmissionAt != null) ...[
                   const SizedBox(height: 8),
@@ -548,6 +632,8 @@ class _ExamMarkCard extends StatelessWidget {
           Theme(
             data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
             child: ExpansionTile(
+              backgroundColor: Colors.transparent,
+              collapsedBackgroundColor: Colors.transparent,
               tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
               childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
               title: Text(
