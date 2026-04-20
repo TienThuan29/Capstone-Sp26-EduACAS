@@ -30,6 +30,7 @@ public class StudentQuizQuestionResponse
     public string Content { get; set; } = string.Empty;
     public QuestionType Type { get; set; }
     public string? TextAnswer { get; set; }
+    public string? ImageUrl { get; set; }
     public int CorrectCount { get; set; }
     public double Marks { get; set; }
     public int DisplayOrder { get; set; }

@@ -8,5 +8,6 @@ public interface IMaterialRepository
     Task<List<Models.Material>> FindByClassroomIdAsync(string classroomId);
     Task<Models.Material?> UpdateAsync(Models.Material material);
     Task SoftDeleteAsync(string materialId);
+    Task RestoreAsync(string materialId);
     Task DeleteAsync(string materialId);
 }

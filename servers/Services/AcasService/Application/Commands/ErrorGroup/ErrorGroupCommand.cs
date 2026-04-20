@@ -7,8 +7,6 @@ namespace AcasService.Application.Commands.ErrorGroup;
 public interface IErrorGroupCommand
 {
     Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId);
-    Task<Models.ErrorGroup?> GetByIdAsync(string id);
-    Task<List<Models.ErrorGroup>> GetByProblemIdAsync(string examId, string problemId);
     Task CheckSimilarityForProblemAsync(string examId, string problemId);
     Task CheckSimilarityForGroupsAsync(List<string> groupIds);
 }
@@ -30,13 +28,6 @@ public class ErrorGroupCommand : IErrorGroupCommand
         _errorGroupRepository = errorGroupRepository;
         _jplagCommand = jplagCommand;
         _logger = logger;
-    }
-
-    public Task<Models.ErrorGroup?> GetByIdAsync(string id) => _errorGroupRepository.GetByIdAsync(id);
-
-    public async Task<List<Models.ErrorGroup>> GetByProblemIdAsync(string examId, string problemId)
-    {
-        return await _errorGroupRepository.GetByProblemIdAsync(examId, problemId);
     }
 
     public async Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId)

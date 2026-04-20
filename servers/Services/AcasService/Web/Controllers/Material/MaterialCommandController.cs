@@ -9,7 +9,7 @@ namespace AcasService.Web.Controllers.Material
 {
     [ApiController]
     [Route("api/v1/materials")]
-    [Authorize(Roles = "LECTURER")]
+    [Authorize(Roles = "LECTURER, ADMIN")]
     public class MaterialCommandController : ControllerBase
     {
         private readonly ILogger<MaterialCommandController> _logger;
@@ -82,6 +82,26 @@ namespace AcasService.Web.Controllers.Material
             {
                 _logger.LogError(ex, "Error soft deleting material");
                 return ResponseUtil.Error<bool>("Failed to soft delete material", 500);
+            }
+        }
+
+        [HttpPatch("{id}/restore")]
+        public async Task<ActionResult<ApiResponse<bool>>> RestoreMaterial(string id)
+        {
+            try
+            {
+                var result = await _materialCommand.RestoreMaterialAsync(id);
+                return ResponseUtil.Success(result != null, "Material restored successfully", 200);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Material not found for restore");
+                return ResponseUtil.Error<bool>("Material not found", 404);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error restoring material");
+                return ResponseUtil.Error<bool>("Failed to restore material", 500);
             }
         }
 

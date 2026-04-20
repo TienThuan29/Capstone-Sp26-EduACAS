@@ -36,7 +36,7 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>(initialAnswers);
   const [timeLeft, setTimeLeft] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { updateAnswer, submitAttempt } = useQuizAttempt();
+  const { updateAnswer, submitAttempt, getAttemptById } = useQuizAttempt();
   const { showSuccess, showError } = useToast();
 
   const questions = attempt?.questions || [];
@@ -60,35 +60,33 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
   }, [attempt, isSubmitting, submitAttempt, showSuccess, showError, onSubmitted, readOnly]);
 
   useEffect(() => {
-    if (!attempt || !attempt.endTime || readOnly || attempt.status !== 'INPROGRESS') return;
+    if (!attempt || readOnly || attempt.status !== 'INPROGRESS') return;
 
-    const endTime = new Date(attempt.endTime).getTime();
+    let timer: NodeJS.Timeout;
+    if (attempt.endTime) {
+      const endTime = new Date(attempt.endTime).getTime();
+      const updateTimer = () => {
+        const now = new Date().getTime();
+        const diff = endTime - now;
+        if (diff <= 0) {
+          setTimeLeft(0);
+          handleAutoSubmit();
+          return true;
+        }
+        setTimeLeft(diff);
+        return false;
+      };
 
-    const updateTimer = () => {
-      const now = new Date().getTime();
-      const diff = endTime - now;
-      if (diff <= 0) {
-        setTimeLeft(0);
-        return true;
-      }
-      setTimeLeft(diff);
-      return false;
-    };
-
-    if (updateTimer()) {
-      handleAutoSubmit();
-      return;
+      updateTimer();
+      timer = setInterval(updateTimer, 1000);
     }
 
-    const timer = setInterval(() => {
-      if (updateTimer()) {
-        clearInterval(timer);
-        handleAutoSubmit();
-      }
-    }, 1000);
 
-    return () => clearInterval(timer);
-  }, [attempt, handleAutoSubmit, readOnly]);
+
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [attempt, handleAutoSubmit, readOnly, getAttemptById, onSubmitted, showError]);
 
   const formatTime = (ms: number) => {
     const totalSeconds = Math.floor(ms / 1000);
@@ -235,7 +233,20 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
               })}
             </div>
 
-            <div className="pt-1">
+            <div className="pt-1 flex flex-col gap-3">
+              {!readOnly && (
+                <div className={`
+                  flex justify-center items-center gap-2 px-3 py-2.5 rounded-xl font-mono text-xl font-black shadow-sm border-2 transition-all duration-300
+                  ${isTimeCritical
+                    ? 'text-white bg-red-600 border-red-400 animate-pulse'
+                    : timeLeft < 300000
+                      ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40'
+                      : 'text-[#1F4E79] bg-gray-50 dark:bg-gray-900/60 border-gray-100 dark:border-gray-800 dark:text-blue-400'}
+                `}>
+                  <ClockIcon className={`h-5 w-5 stroke-2 ${isTimeCritical ? 'text-white' : 'text-[#1F4E79] dark:text-blue-400'}`} />
+                  {formatTime(timeLeft)}
+                </div>
+              )}
               {!readOnly ? (
                 <Button
                   color="info"
@@ -262,22 +273,6 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
 
       <div className="flex-1 flex flex-col gap-4">
         <Card className="flex-1 border-none shadow-lg bg-white dark:bg-gray-800 ring-1 ring-gray-100 dark:ring-gray-700 overflow-hidden relative">
-          {!readOnly && (
-            <div className="absolute top-4 right-4 z-20 pointer-events-none">
-              <div className={`
-                flex items-center gap-2 px-3 py-1.5 rounded-xl font-mono text-lg font-black shadow-sm border-2 pointer-events-auto transition-all duration-300
-                ${isTimeCritical
-                  ? 'text-white bg-red-600 border-red-400 animate-pulse'
-                  : timeLeft < 300000
-                    ? 'text-red-600 bg-red-50 dark:bg-red-950/20 border-red-100 dark:border-red-900/40'
-                    : 'text-[#1F4E79] bg-gray-50 dark:bg-gray-900/60 border-gray-100 dark:border-gray-800 dark:text-blue-400'}
-              `}>
-                <ClockIcon className={`h-4 w-4 ${isTimeCritical ? 'text-white' : 'text-[#1F4E79] dark:text-blue-400'}`} />
-                {formatTime(timeLeft)}
-              </div>
-            </div>
-          )}
-
           <div className="space-y-6 pt-2">
             <div className="relative group">
               <style>{`
@@ -301,6 +296,15 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
                     </Badge>
                   </div>
                   <div className="question-content text-base sm:text-lg leading-relaxed text-gray-800 dark:text-gray-100 prose prose-slate dark:prose-invert max-w-none font-medium">
+                    {currentQuestion.imageUrl && (
+                      <div className="flex justify-center mb-5">
+                        <img 
+                          src={currentQuestion.imageUrl} 
+                          alt="Question Attachment" 
+                          className="max-w-full max-h-[250px] w-auto h-auto object-contain rounded-lg shadow-sm border border-gray-100 dark:border-gray-600" 
+                        />
+                      </div>
+                    )}
                     <ReactMarkdown>{currentQuestion.content}</ReactMarkdown>
                   </div>
                 </div>
@@ -312,7 +316,7 @@ export const QuizTakingView: React.FC<QuizTakingViewProps> = ({ attempt, onSubmi
               <div className="space-y-4">
                 {readOnly ? (
                   <div className={`p-5 rounded-xl border-2 min-h-[150px] whitespace-pre-wrap text-base transition-all duration-300 ${selectedAnswers[currentQuestion.id.toLowerCase()]
-                    ? (questions[currentQuestionIndex].id === currentQuestion.id && (selectedAnswers[currentQuestion.id.toLowerCase()]?.trim().toLowerCase() === currentQuestion.textAnswer?.trim().toLowerCase())
+                    ? (attempt.questionResults[currentQuestion.id.toLowerCase()]
                       ? 'bg-green-50 border-green-200 text-green-900 dark:bg-green-900/10 dark:border-green-800 dark:text-green-100'
                       : 'bg-red-50 border-red-200 text-red-900 dark:bg-red-900/10 dark:border-red-800 dark:text-red-100')
                     : 'bg-gray-50 border-gray-200 text-gray-500 italic dark:bg-gray-800 dark:border-gray-700'

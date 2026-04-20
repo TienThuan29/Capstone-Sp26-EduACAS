@@ -68,6 +68,12 @@ export default function UsersManagement() {
   const [pageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [overallRoleStats, setOverallRoleStats] = useState({
+    total: 0,
+    student: 0,
+    lecturer: 0,
+    admin: 0,
+  })
 
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -103,6 +109,20 @@ export default function UsersManagement() {
     }
   }, [getPagedUsers, currentPage, pageSize, searchTerm, filterRole, filterStatus])
 
+  const fetchOverallRoleStats = useCallback(async () => {
+    try {
+      const allUsers = await getAllUsers()
+      setOverallRoleStats({
+        total: allUsers.length,
+        student: allUsers.filter((u) => u.role === 'STUDENT').length,
+        lecturer: allUsers.filter((u) => u.role === 'LECTURER').length,
+        admin: allUsers.filter((u) => u.role === 'ADMIN').length,
+      })
+    } catch {
+      // Keep current stats if this request fails to avoid breaking the page.
+    }
+  }, [getAllUsers])
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -110,8 +130,9 @@ export default function UsersManagement() {
   useEffect(() => {
     if (mounted) {
       fetchUsers()
+      fetchOverallRoleStats()
     }
-  }, [mounted, fetchUsers])
+  }, [mounted, fetchUsers, fetchOverallRoleStats])
 
   const onPageChange = (page: number) => {
     setCurrentPage(page)
@@ -138,6 +159,7 @@ export default function UsersManagement() {
         role: "STUDENT"
       })
       fetchUsers()
+      fetchOverallRoleStats()
     } catch (error: unknown) {
       console.log(error)
       const err = error as { response?: { data?: { message?: string } } }
@@ -169,6 +191,7 @@ export default function UsersManagement() {
       setShowEditModal(false)
       setEditingUser(null)
       fetchUsers()
+      fetchOverallRoleStats()
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       toast.showError(err.response?.data?.message || 'Something went wrong when updating user!')
@@ -184,10 +207,10 @@ export default function UsersManagement() {
   }
 
   const statsCardsData = [
-    { title: 'Total', value: totalCount, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
-    { title: 'Student', value: users.filter(u => u.role === 'STUDENT').length, icon: <UserCircleIcon className="h-6 w-6" />, accent: 'green' },
-    { title: 'Lecturer', value: users.filter(u => u.role === 'LECTURER').length, icon: <AcademicCapIcon className="h-6 w-6" />, accent: 'blue' },
-    { title: 'Admin', value: users.filter(u => u.role === 'ADMIN').length, icon: <ShieldCheckIcon className="h-6 w-6" />, accent: 'red' },
+    { title: 'Total', value: overallRoleStats.total, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
+    { title: 'Student', value: overallRoleStats.student, icon: <UserCircleIcon className="h-6 w-6" />, accent: 'green' },
+    { title: 'Lecturer', value: overallRoleStats.lecturer, icon: <AcademicCapIcon className="h-6 w-6" />, accent: 'blue' },
+    { title: 'Admin', value: overallRoleStats.admin, icon: <ShieldCheckIcon className="h-6 w-6" />, accent: 'red' },
   ]
 
   const getRoleIcon = (role: string) => {
@@ -284,7 +307,7 @@ export default function UsersManagement() {
 
         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-            <form className="flex-grow max-w-md flex gap-3" onSubmit={(e) => { e.preventDefault(); fetchUsers(); }}>
+            <form className="grow max-w-md flex gap-3" onSubmit={(e) => { e.preventDefault(); fetchUsers(); }}>
               <div className="flex-1">
                 <TextInput
                   type="text"

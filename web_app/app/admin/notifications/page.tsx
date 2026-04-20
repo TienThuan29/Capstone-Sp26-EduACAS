@@ -15,6 +15,9 @@ import {
   TableHeadCell,
   TableRow,
   Pagination,
+  Modal,
+  ModalHeader,
+  ModalBody,
 } from "flowbite-react";
 import {
   TrashIcon,
@@ -46,6 +49,8 @@ export default function NotificationsManagement() {
   const [pageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -94,17 +99,23 @@ export default function NotificationsManagement() {
     setPageIndex(page);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this notification?")) {
-      try {
-        const ok = await softDelete(id);
-        if (ok) {
-          toast.showSuccess("Delete notification successfully");
-          fetchNotifications();
-        }
-      } catch (error: any) {
-        toast.showError(error.response?.data?.message || "Cannot delete notification!");
+  const openDeleteModal = (notification: Notification) => {
+    setSelectedNotification(notification);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!selectedNotification) return;
+    try {
+      const ok = await softDelete(selectedNotification.id);
+      if (ok) {
+        toast.showSuccess("Delete notification successfully");
+        setIsDeleteModalOpen(false);
+        setSelectedNotification(null);
+        fetchNotifications();
       }
+    } catch (error: any) {
+      toast.showError(error.response?.data?.message || "Cannot delete notification!");
     }
   };
 
@@ -140,7 +151,7 @@ export default function NotificationsManagement() {
 
             <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-            <form className="flex-grow max-w-md flex gap-3" onSubmit={handleSearch}>
+            <form className="grow max-w-md flex gap-3" onSubmit={handleSearch}>
               <div className="flex-1">
                 <TextInput
                   type="text"
@@ -202,7 +213,7 @@ export default function NotificationsManagement() {
                           </Badge>
                         </div>
                       </TableCell>
-                      <TableCell className={`max-w-[180px] ${isDark ? "text-gray-300" : "text-gray-700"}`}>
+                      <TableCell className={`max-w-45 ${isDark ? "text-gray-300" : "text-gray-700"}`}>
                         {userMap[n.targetUserId] ? (
                           <div className="flex flex-col">
                             <span className="font-bold text-sm truncate" title={userMap[n.targetUserId].fullname}>
@@ -240,7 +251,7 @@ export default function NotificationsManagement() {
                           <Button
                             size="xs"
                             color="failure"
-                            onClick={() => handleDelete(n.id)}
+                            onClick={() => openDeleteModal(n)}
                             title="Delete notification"
                           >
                             <TrashIcon className="w-4 h-4" />
@@ -274,6 +285,57 @@ export default function NotificationsManagement() {
           </>
         )}
       </main>
+
+      <Modal
+        show={isDeleteModalOpen}
+        size="md"
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedNotification(null);
+        }}
+        popup
+        theme={{
+          root: {
+            base: "fixed inset-x-0 bottom-0 z-[200] h-modal w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0 md:h-full",
+          },
+        }}
+      >
+        <ModalHeader />
+        <ModalBody className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl`}>
+          <div>
+            <h3 className={`mb-4 text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+              Confirm delete
+            </h3>
+            <p className={`mb-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Are you sure you want to delete the notification{" "}
+              <span className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                &quot;{selectedNotification?.title}&quot;
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleConfirmDelete}
+                className="cursor-pointer px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center"
+              >
+                Delete notification
+              </button>
+              <button
+                onClick={() => {
+                  setIsDeleteModalOpen(false);
+                  setSelectedNotification(null);
+                }}
+                className={`cursor-pointer px-6 py-2.5 font-bold rounded-xl transition-colors ${isDark
+                  ? "bg-gray-700 text-white hover:bg-gray-600"
+                  : "bg-[#374151] text-white hover:bg-gray-600"
+                  }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </ModalBody>
+      </Modal>
     </div>
   );
 }

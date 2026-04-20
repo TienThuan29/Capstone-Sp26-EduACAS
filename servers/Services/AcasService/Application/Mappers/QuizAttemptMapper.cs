@@ -29,6 +29,7 @@ public class QuizAttemptMapper
             Content = question.Content,
             Type = question.Type,
             TextAnswer = question.TextAnswer,
+            ImageUrl = question.ImageUrl,
             CorrectCount = question.AnswerOptions?.Count(o => o.IsCorrect) ?? 0,
             Marks = quizQuestion.Marks,
             DisplayOrder = quizQuestion.DisplayOrder
