@@ -5,9 +5,7 @@ import { Badge, Button, Spinner, Tabs, TabItem, Tooltip, Pagination, Card, Table
 import {
   ArrowLeftIcon,
   PencilIcon,
-  TrashIcon,
-  NoSymbolIcon,
-  ExclamationTriangleIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
 import { useQuiz } from "@/hooks/quiz/useQuiz";
 import { useSubject } from "@/hooks/subject/useSubject";
@@ -17,70 +15,7 @@ import type { ClassroomQuiz, Quiz, QuizQuestion, QuizAttemptResponse } from "@/t
 import { SharedQuizOverview } from "@/components/quiz/shared-quiz-overview";
 import { formatDate } from "@/utils/datetime-utils";
 
-function BanConfirmModal({
-  show,
-  onClose,
-  onConfirm,
-  studentName,
-  isBanning,
-}: {
-  show: boolean;
-  onClose: () => void;
-  onConfirm: () => void;
-  studentName: string;
-  isBanning: boolean;
-}) {
-  return (
-    <Modal show={show} size="md" popup onClose={onClose}>
-      <ModalHeader />
-      <ModalBody>
-        <div className="text-center p-4">
-          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-red-50 text-red-600 dark:bg-red-900/20 dark:text-red-500">
-            <NoSymbolIcon className="h-10 w-10" />
-          </div>
 
-          <h3 className="mb-2 text-xl font-bold text-gray-900 dark:text-white">
-            Ban Student
-          </h3>
-
-          <p className="mb-6 text-gray-500 dark:text-gray-400">
-            Are you sure you want to ban <span className="font-semibold text-gray-900 dark:text-white">"{studentName}"</span> from this quiz?
-          </p>
-
-          <div className="mb-6 rounded-lg bg-orange-50 p-4 text-xs text-orange-700 dark:bg-orange-900/20 dark:text-orange-300">
-            <p className="font-bold flex items-center justify-center gap-2">
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              This action is IRREVERSIBLE
-            </p>
-            <p className="mt-1">
-              Banning will immediately end the student's attempt, set their final score to <strong>0</strong>, and they will not be able to continue this attempt.
-            </p>
-          </div>
-
-          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-            <Button
-              color="failure"
-              onClick={onConfirm}
-              disabled={isBanning}
-              className="bg-red-600 hover:bg-red-700 dark:bg-red-600 cursor-pointer"
-            >
-              {isBanning ? <Spinner size="sm" className="mr-2" /> : null}
-              Confirm Ban
-            </Button>
-            <Button
-              color="gray"
-              onClick={onClose}
-              disabled={isBanning}
-              className="cursor-pointer"
-            >
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </ModalBody>
-    </Modal>
-  );
-}
 
 function SubmissionsContent({
   classroomQuizId,
@@ -89,22 +24,14 @@ function SubmissionsContent({
   classroomQuizId: string;
   quizDetail: Quiz | null;
 }) {
-  const { getSubmissionsPaged, abandonAttempt, loading } = useQuizAttempt();
+  const { getSubmissionsPaged, loading } = useQuizAttempt();
   const { showSuccess, showError } = useToast();
   const [submissions, setSubmissions] = useState<QuizAttemptResponse[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
 
-  const [banModalState, setBanModalState] = useState<{
-    show: boolean;
-    attempt: QuizAttemptResponse | null;
-    isBanning: boolean;
-  }>({
-    show: false,
-    attempt: null,
-    isBanning: false,
-  });
+
 
   const fetchSubmissions = useCallback(async () => {
     const data = await getSubmissionsPaged(classroomQuizId, currentPage, pageSize);
@@ -118,25 +45,7 @@ function SubmissionsContent({
     fetchSubmissions();
   }, [fetchSubmissions]);
 
-  const handleBanConfirm = async () => {
-    if (!banModalState.attempt) return;
-    
-    setBanModalState(prev => ({ ...prev, isBanning: true }));
-    try {
-      const success = await abandonAttempt(banModalState.attempt.id);
-      if (success) {
-        showSuccess(`Banned ${banModalState.attempt.studentName} successfully`);
-        setBanModalState({ show: false, attempt: null, isBanning: false });
-        fetchSubmissions();
-      } else {
-        showError("Failed to ban student");
-      }
-    } catch (err) {
-      showError("An error occurred while banning");
-    } finally {
-      setBanModalState(prev => ({ ...prev, isBanning: false }));
-    }
-  };
+
 
   if (loading && submissions.length === 0) {
     return (
@@ -172,7 +81,7 @@ function SubmissionsContent({
                 <TableHeadCell className="text-center">Correct Answers</TableHeadCell>
                 <TableHeadCell className="text-center">Score</TableHeadCell>
                 <TableHeadCell className="text-center">Status</TableHeadCell>
-                <TableHeadCell className="text-center">Actions</TableHeadCell>
+
               </TableRow>
             </TableHead>
             <TableBody>
@@ -196,13 +105,11 @@ function SubmissionsContent({
                   <TableCell className="text-center font-medium">
                     {attempt.status === 'SUBMITTED' ? (
                       <span className="text-[#1F4E79] dark:text-blue-400">{attempt.correctAnswers} / {attempt.totalQuestions}</span>
-                    ) : attempt.status === 'ABANDONED' ? (
-                      <span className="text-red-500">0 / {attempt.totalQuestions}</span>
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-center">
-                    {(attempt.status === 'SUBMITTED' || attempt.status === 'ABANDONED') && attempt.score !== undefined ? (
-                      <Badge color={attempt.status === 'SUBMITTED' ? "success" : "failure"} className="px-3 font-bold mx-auto w-fit">
+                    {attempt.status === 'SUBMITTED' && attempt.score !== undefined ? (
+                      <Badge color="success" className="px-3 font-bold mx-auto w-fit">
                         {attempt.score.toFixed(1)} / {maxScore.toFixed(1)}
                       </Badge>
                     ) : '-'}
@@ -216,23 +123,7 @@ function SubmissionsContent({
                       </Badge>
                     </div>
                   </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center">
-                      <Tooltip content={attempt.status === 'ABANDONED' ? "Student is banned" : attempt.status === 'SUBMITTED' ? "Already submitted" : "Ban student"} placement="top">
-                        <Button 
-                          size="xs" 
-                          color="failure" 
-                          pill 
-                          outline
-                          disabled={attempt.status !== 'INPROGRESS'}
-                          onClick={() => setBanModalState({ show: true, attempt, isBanning: false })}
-                          className={`border-none bg-transparent shadow-none focus:ring-0 ${attempt.status === 'INPROGRESS' ? 'hover:bg-red-50' : 'opacity-30 cursor-not-allowed'}`}
-                        >
-                          <NoSymbolIcon className="h-5 w-5" />
-                        </Button>
-                      </Tooltip>
-                    </div>
-                  </TableCell>
+
                 </TableRow>
               ))}
             </TableBody>
@@ -251,13 +142,7 @@ function SubmissionsContent({
         </div>
       )}
 
-      <BanConfirmModal
-        show={banModalState.show}
-        onClose={() => setBanModalState({ show: false, attempt: null, isBanning: false })}
-        onConfirm={handleBanConfirm}
-        studentName={banModalState.attempt?.studentName || ""}
-        isBanning={banModalState.isBanning}
-      />
+
     </div>
   );
 }

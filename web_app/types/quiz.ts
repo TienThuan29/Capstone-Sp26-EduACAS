@@ -79,7 +79,7 @@ export interface PagedClassroomQuizResult {
   hasNextPage: boolean;
 }
 
-export type QuizAttemptStatus = 'INPROGRESS' | 'SUBMITTED' | 'ABANDONED';
+export type QuizAttemptStatus = 'INPROGRESS' | 'SUBMITTED';
 
 export interface QuizAttempt {
   id: string;

@@ -20,9 +20,7 @@ namespace AcasService.Application.Commands.QuizAttempt
     {
         Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request);
         Task UpdateAnswerAsync(string attemptId, UpdateQuizAnswerRequest request);
-        Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId);
-        Task<QuizAttemptResponse> AbandonAttemptAsync(string attemptId);
-        
+        Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId);        
     }
 
     public class QuizAttemptCommand : IQuizAttemptCommand
@@ -151,7 +149,7 @@ namespace AcasService.Application.Commands.QuizAttempt
                 if (attempt == null) throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
 
                 if (attempt.Status != Models.QuizAttemptStatus.INPROGRESS)
-                    throw new InvalidOperationException("Cannot update answers for a submitted or abandoned quiz.");
+                    throw new InvalidOperationException("Cannot update answers for a submitted quiz");
 
                 var key = _quizCache.GetQuizAttemptKey(attemptId);
                 var answers = await _quizCache.GetAsync<Dictionary<string, string>>(key) ?? new Dictionary<string, string>();
@@ -291,43 +289,5 @@ namespace AcasService.Application.Commands.QuizAttempt
                 throw;
             }
         }
-
-        public async Task<QuizAttemptResponse> AbandonAttemptAsync(string attemptId)
-        {
-            try
-            {
-                var attempt = await _repository.FindByIdAsync(attemptId);
-                if (attempt == null) throw new KeyNotFoundException($"QuizAttempt with ID {attemptId} not found.");
-
-                if (attempt.Status != Models.QuizAttemptStatus.INPROGRESS)
-                    throw new InvalidOperationException("Can only ban/abandon attempts that are currently in progress.");
-
-                var cacheKey = _quizCache.GetQuizAttemptKey(attemptId);
-
-                attempt.EndTime = DateTime.UtcNow;
-                attempt.FinalScore = 0; 
-                attempt.Status = Models.QuizAttemptStatus.ABANDONED;
-                await _repository.UpdateAsync(attempt);
-
-                await _quizCache.RemoveAsync(cacheKey);
-
-                var response = await _quizAttemptQuery.BuildEnrichedResponse(attempt);
-                if (response.Answers == null || !response.Answers.Any())
-                {
-                    response.Answers = new Dictionary<string, string>();
-                    response.QuestionResults = new Dictionary<string, bool>();
-                }
-                
-                return response;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error abandoning quiz attempt {attemptId}");
-                throw;
-            }
-        }
-
-       
-        
     }
 }

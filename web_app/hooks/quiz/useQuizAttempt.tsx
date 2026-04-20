@@ -64,20 +64,7 @@ export const useQuizAttempt = () => {
     }
   }, [axiosInstance]);
 
-  const abandonAttempt = useCallback(async (attemptId: string): Promise<boolean> => {
-    try {
-      setLoading(true);
-      setError(null);
-      await axiosInstance.post(Api.QuizAttempt.ABANDON(attemptId));
-      return true;
-    } catch (err) {
-      console.error('Failed to abandon quiz attempt:', err);
-      setError('Failed to abandon quiz attempt');
-      return false;
-    } finally {
-      setLoading(false);
-    }
-  }, [axiosInstance]);
+
 
   const getHistory = useCallback(async (classroomQuizId: string, studentId: string): Promise<QuizAttemptResponse[]> => {
     try {
@@ -140,7 +127,7 @@ export const useQuizAttempt = () => {
     startAttempt,
     updateAnswer,
     submitAttempt,
-    abandonAttempt,
+
     getHistory,
     getSubmissionsPaged,
     getAttemptsByStudent,
