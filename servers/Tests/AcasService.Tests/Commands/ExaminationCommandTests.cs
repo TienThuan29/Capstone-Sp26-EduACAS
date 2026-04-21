@@ -397,6 +397,34 @@ public class ExaminationCommandTests
     }
 
     // ========================================================================
+    // EXM-18: Delete exam when has ongoing submissions
+    // ========================================================================
+
+    [Fact]
+    public async Task DeleteAsync_WhenExamExists_DeletesEvenIfSubmissionsExist()
+    {
+        // Arrange — the current implementation does not block deletion on active submissions
+        var examId = "exam-with-submissions";
+        var existingExam = CreateExistingExam(examId,
+            DateTime.UtcNow.AddHours(-1), DateTime.UtcNow.AddHours(1));
+
+        _mockRepository
+            .Setup(x => x.GetByIdAsync(examId))
+            .ReturnsAsync(existingExam);
+
+        _mockRepository
+            .Setup(x => x.DeleteAsync(examId))
+            .Returns(Task.CompletedTask);
+
+        // Act
+        await _sut.DeleteAsync(examId);
+
+        // Assert — deletion proceeds regardless of submission state
+        _mockJobScheduling.Verify(x => x.CancelJobs(examId), Times.Once);
+        _mockRepository.Verify(x => x.DeleteAsync(examId), Times.Once);
+    }
+
+    // ========================================================================
     // Test data helpers
     // ========================================================================
 
