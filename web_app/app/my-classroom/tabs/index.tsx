@@ -7,3 +7,5 @@ export { SlotTab } from "./slot-tab";
 export { DiscussionTab } from "./discussion-tab";
 export { StudentDashboardTab } from "./dashboard-tab";
 export { QuizzesTab } from "./quizzes-tab";
+export { AcademicWarningsTab } from "./academic-warnings";
+export { CompletedExamsTab } from "./completed-exams-tab";

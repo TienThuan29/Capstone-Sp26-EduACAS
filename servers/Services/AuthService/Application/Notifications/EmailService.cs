@@ -9,6 +9,7 @@ namespace AuthService.Application.Notifications;
 public interface IEmailService
 {
       Task SendEmailAsync(string toEmail, string subject, string body, string template);
+      Task SendEmailAsync(string toEmail, string subject, string url, string expiry, string template);
 }
 
 public class EmailService : IEmailService
@@ -47,6 +48,30 @@ public class EmailService : IEmailService
             }
       }
 
+      public async Task SendEmailAsync(string toEmail, string subject, string url, string expiry, string template)
+      {
+            var message = this.BuildPasswordResetMessage(toEmail, subject, url, expiry, template);
+
+            using var client = new SmtpClient();
+            try
+            {
+                  await client.ConnectAsync(_emailSettings.SmtpHost, _emailSettings.SmtpPort, _emailSettings.UseSsl ? SecureSocketOptions.StartTls : SecureSocketOptions.None);
+                  if (!string.IsNullOrEmpty(_emailSettings.User))
+                        await client.AuthenticateAsync(_emailSettings.User, _emailSettings.Password);
+
+                  await client.SendAsync(message);
+            }
+            catch (Exception ex)
+            {
+                  _logger.LogError(ex, "Failed to send email to {Email}", toEmail);
+                  throw;
+            }
+            finally
+            {
+                  await client.DisconnectAsync(true);
+            }
+      }
+
       private MimeMessage BuildMessage(string toEmail, string subject, string body, string template)
       {
             var msg = new MimeMessage();
@@ -55,6 +80,18 @@ public class EmailService : IEmailService
             msg.Subject = subject;
 
             var htmlBody = string.Format(template, subject, body);
+            msg.Body = new TextPart(TextFormat.Html) { Text = htmlBody };
+            return msg;
+      }
+
+      private MimeMessage BuildPasswordResetMessage(string toEmail, string subject, string url, string expiry, string template)
+      {
+            var msg = new MimeMessage();
+            msg.From.Add(MailboxAddress.Parse(string.IsNullOrWhiteSpace(_emailSettings.From) ? _emailSettings.User : _emailSettings.From));
+            msg.To.Add(MailboxAddress.Parse(toEmail));
+            msg.Subject = subject;
+
+            var htmlBody = string.Format(template, url, expiry);
             msg.Body = new TextPart(TextFormat.Html) { Text = htmlBody };
             return msg;
       }

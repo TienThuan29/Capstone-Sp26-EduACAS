@@ -12,6 +12,8 @@ public interface IRedisCacheBaseRepository<T> where T : class
 
       Task SetAsync<TValue>(string key, TValue data) where TValue : class;
 
+      Task SetAsync<TValue>(string key, TValue data, TimeSpan expireTime) where TValue : class;
+
       Task RemoveAsync(string key);
 
       Task<TValue?> GetOrSetAsync<TValue>(string key, Func<Task<TValue?>> factory, TimeSpan? expireTime = null) where TValue : class;
@@ -66,15 +68,17 @@ public abstract class RedisCacheBaseRepository<T> : IRedisCacheBaseRepository<T>
 
       public async Task SetAsync<TValue>(string key, TValue data) where TValue : class
       {
+            await SetAsync(key, data, TimeSpan.FromMinutes(5));
+      }
+
+      public async Task SetAsync<TValue>(string key, TValue data, TimeSpan expireTime) where TValue : class
+      {
             try
             {
-                  var options = new DistributedCacheEntryOptions();
-
-                  if (_absoluteExpireTime.HasValue)
-                        options.AbsoluteExpirationRelativeToNow = _absoluteExpireTime;
-
-                  if (_slidingExpireTime.HasValue)
-                        options.SlidingExpiration = _slidingExpireTime;
+                  var options = new DistributedCacheEntryOptions
+                  {
+                        AbsoluteExpirationRelativeToNow = expireTime
+                  };
 
                   var serializedData = JsonSerializer.Serialize(data, _jsonOptions);
                   await _cache.SetStringAsync(key, serializedData, options);
@@ -109,7 +113,7 @@ public abstract class RedisCacheBaseRepository<T> : IRedisCacheBaseRepository<T>
 
             if (data != null)
             {
-                  await SetAsync(key, data);
+                  await SetAsync(key, data, expireTime ?? TimeSpan.FromMinutes(5));
             }
 
             return data;

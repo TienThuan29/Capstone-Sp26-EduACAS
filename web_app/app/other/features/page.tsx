@@ -6,6 +6,7 @@ import HomeNavbar from "@/components/navbar"
 import Footer from "@/components/footer"
 import { SparklesIcon } from "@/components/svg-icons"
 import { features } from "@/MockData/landingPageData"
+import { PageUrl } from "@/configs/page.url"
 
 export default function FeaturesPage() {
   return (
@@ -110,7 +111,7 @@ export default function FeaturesPage() {
               <Card className="p-8 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#1F4E79" }}>
                 <div className="space-y-4">
                   <div className="inline-block px-4 py-2 rounded-full bg-[#1F4E79] text-white text-sm font-semibold">
-                    FOR INSTRUCTORS
+                    FOR LECTURERS
                   </div>
                   <h3 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D]">
                     Effective management
@@ -180,14 +181,14 @@ export default function FeaturesPage() {
             Start learning programming today with Edu-ACAS
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              href="/register"
+            {/* <Link
+              href={PageUrl.REGISTER_PAGE}
               className="px-8 py-4 bg-white text-[#1F4E79] rounded-lg font-bold text-lg hover:scale-105 transition-all"
             >
               Sign up now
-            </Link>
+            </Link> */}
             <Link
-              href="/"
+              href={PageUrl.HOME_PAGE}
               className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-lg font-bold text-lg hover:scale-105 transition-all"
             >
               Learn more

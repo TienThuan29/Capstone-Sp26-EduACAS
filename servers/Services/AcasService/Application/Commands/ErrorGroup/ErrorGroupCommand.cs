@@ -1,5 +1,6 @@
 using AcasService.Repositories.Submission;
 using AcasService.Repositories.ErrorGroup;
+using AcasService.Repositories.Problem;
 using AcasService.Models;
 
 namespace AcasService.Application.Commands.ErrorGroup;
@@ -9,23 +10,28 @@ public interface IErrorGroupCommand
     Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId);
     Task CheckSimilarityForProblemAsync(string examId, string problemId);
     Task CheckSimilarityForGroupsAsync(List<string> groupIds);
+
+    Task CheckSimilarityForGroupsWithExcludeCodeBaseAsync(List<string> groupIds);
 }
 
 public class ErrorGroupCommand : IErrorGroupCommand
 {
     private readonly ISubmissionRepository _submissionRepository;
     private readonly IErrorGroupRepository _errorGroupRepository;
+    private readonly IProblemRepository _problemRepository;
     private readonly IJPlagCommand _jplagCommand;
     private readonly ILogger<ErrorGroupCommand> _logger;
 
     public ErrorGroupCommand(
         ISubmissionRepository submissionRepository,
         IErrorGroupRepository errorGroupRepository,
+        IProblemRepository problemRepository,
         IJPlagCommand jplagCommand,
         ILogger<ErrorGroupCommand> logger)
     {
         _submissionRepository = submissionRepository;
         _errorGroupRepository = errorGroupRepository;
+        _problemRepository = problemRepository;
         _jplagCommand = jplagCommand;
         _logger = logger;
     }
@@ -99,6 +105,83 @@ public class ErrorGroupCommand : IErrorGroupCommand
         await ProcessCheckSimilarityForGroups(groups);
     }
 
+    public async Task CheckSimilarityForGroupsWithExcludeCodeBaseAsync(List<string> groupIds)
+    {
+        if (groupIds == null || groupIds.Count == 0) return;
+
+        var groups = new List<Models.ErrorGroup>();
+        foreach (var id in groupIds)
+        {
+            var group = await _errorGroupRepository.GetByIdAsync(id);
+            if (group != null) groups.Add(group);
+        }
+
+        if (groups.Count == 0) return;
+        await ProcessCheckSimilarityForGroups(groups);
+    }
+
+    private async Task ProcessCheckSimilarityForGroupsWithExcludeCodeBase(List<Models.ErrorGroup> groups)
+    {
+        foreach (var group in groups)
+        {
+            if (group.SubmissionIds == null || group.SubmissionIds.Count < 2) continue;
+
+            _logger.LogInformation("Starting similarity check with base-code exclusion for group {GroupId}", group.Id);
+
+            var submissions = new List<Models.Submission>();
+            foreach (var sid in group.SubmissionIds)
+            {
+                var sub = await _submissionRepository.GetByIdAsync(sid);
+                if (sub != null) submissions.Add(sub);
+            }
+
+            if (submissions.Count < 2) continue;
+
+            var language = submissions[0].LanguageId;
+            string? baseCode = null;
+            string? baseCodeFileName = null;
+
+            if (!string.IsNullOrEmpty(group.ProblemId))
+            {
+                var problem = await _problemRepository.GetByIdAsync(group.ProblemId);
+                if (problem?.CodeTemplates != null && problem.CodeTemplates.TryGetValue(language, out var template))
+                {
+                    baseCode = template;
+                    baseCodeFileName = $"basecode.{GetExtensionForLanguage(language)}";
+                    _logger.LogInformation("Found base-code template for problem {ProblemId}, language {Lang} (length: {Len})",
+                        group.ProblemId, language, template.Length);
+                }
+                else
+                {
+                    _logger.LogInformation("No base-code template found for problem {ProblemId}, language {Lang}",
+                        group.ProblemId, language);
+                }
+            }
+
+            group.JPlagStatus = JPlagStatus.RUNNING;
+            await _errorGroupRepository.UpdateAsync(group);
+
+            try
+            {
+                var results = await _jplagCommand.RunSimilarityCheckWithExcludeCodeBaseAsync(
+                    language,
+                    submissions,
+                    baseCode,
+                    baseCodeFileName);
+
+                group.JPlagResults = results;
+                group.JPlagStatus = JPlagStatus.COMPLETED;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error running JPlag with base-code exclusion for group {GroupId}", group.Id);
+                group.JPlagStatus = JPlagStatus.FAILED;
+            }
+
+            await _errorGroupRepository.UpdateAsync(group);
+        }
+    }
+
     private async Task ProcessCheckSimilarityForGroups(List<Models.ErrorGroup> groups)
     {
         foreach (var group in groups)
@@ -148,4 +231,19 @@ public class ErrorGroupCommand : IErrorGroupCommand
         if (failedResults.Count == 0) return string.Empty;
         return string.Join("_", failedResults);
     }
+
+    private static string GetExtensionForLanguage(string lang) => lang.ToLower() switch
+    {
+        "csharp" or "c#" => "cs",
+        "java" => "java",
+        "python" or "python3" => "py",
+        "cpp" or "c++" or "c" => "cpp",
+        "go" or "golang" => "go",
+        "javascript" => "js",
+        "typescript" => "ts",
+        "kotlin" => "kt",
+        "rust" => "rs",
+        "swift" => "swift",
+        _ => "txt"
+    };
 }

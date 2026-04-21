@@ -246,7 +246,7 @@ export default function ContactPage() {
                 How do I register an account?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                You can register an account by clicking the &quot;Register&quot; button in the top right corner and filling in the required information.
+                You can register an account by clicking the &quot;Register&quot; button in the top right corner and filling in the required information. You may also sign in using your Google account for a faster registration process.
               </p>
             </Card>
 
@@ -255,7 +255,7 @@ export default function ContactPage() {
                 What programming languages does Edu-ACAS support?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Currently we support Python, Java, C++, JavaScript, and many other languages. Full list can be found on the Features page.
+                Edu-ACAS supports a wide range of languages including Python, Java, JavaScript, C/C++, TypeScript, and C#. Our automatic grading system evaluates submissions in all supported languages. Full details can be found on the Features page.
               </p>
             </Card>
 
@@ -263,6 +263,27 @@ export default function ContactPage() {
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
                 Is there a fee for using the platform?
               </h4>
+              <p className="text-gray-700 dark:text-gray-300">
+                Edu-ACAS is a free educational platform provided by FPT University. Students and lecturers can access all features including assignments, automatic grading, discussion forums, and progress tracking at no cost.
+              </p>
+            </Card>
+
+            <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
+              <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
+                How does automatic grading work?
+              </h4>
+              <p className="text-gray-700 dark:text-gray-300">
+                When you submit your code, the system automatically evaluates it against predefined test cases covering syntax, logic, and performance. You receive detailed feedback instantly, helping you identify and fix issues without waiting for manual review.
+              </p>
+            </Card>
+
+            <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
+              <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
+                How can I ask questions about an assignment?
+              </h4>
+              <p className="text-gray-700 dark:text-gray-300">
+                Each classroom has a dedicated discussion forum where you can post questions and engage in conversations with both your lecturer and classmates. This keeps all course-related discussions organized and accessible.
+              </p>
             </Card>
 
             <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
@@ -270,7 +291,7 @@ export default function ContactPage() {
                 I forgot my password, what should I do?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                You can click &quot;Forgot Password&quot; on the login page and follow the instructions to recover your password.
+                You can click &quot;Forgot Password&quot; on the login page and follow the instructions sent to your registered email to reset your password.
               </p>
             </Card>
           </div>
