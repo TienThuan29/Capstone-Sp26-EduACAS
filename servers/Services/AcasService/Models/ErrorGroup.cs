@@ -47,6 +47,5 @@ public enum JPlagStatus
     PENDING,
     RUNNING,
     COMPLETED,
-    FAILED,
-    ERROR
+    FAILED
 }

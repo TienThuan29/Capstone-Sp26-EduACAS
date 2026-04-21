@@ -266,6 +266,16 @@ export function ExamsTab({
       showError("Total mark must be between 0 and 10");
       return;
     }
+    if (!formData.startDatetime || !formData.endDatetime) {
+      showError("Start time and end time are required");
+      return;
+    }
+    const startTime = new Date(formData.startDatetime);
+    const endTime = new Date(formData.endDatetime);
+    if (endTime <= startTime) {
+      showError("End time must be after start time");
+      return;
+    }
     // Convert datetime-local strings (Vietnam local) to UTC ISO for the API.
     const payload = {
       ...formData,

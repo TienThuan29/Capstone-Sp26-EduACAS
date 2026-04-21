@@ -57,13 +57,20 @@ namespace AcasService.Application.Commands.ClassroomQuiz
             }
 
             var quiz = await _quizRepository.FindByIdAsync(request.QuizId);
-            if (quiz != null)
+            if (quiz == null)
             {
-                var windowMinutes = (request.EndTime - request.StartTime).TotalMinutes;
-                if (windowMinutes < quiz.Duration)
-                {
-                    throw new ArgumentException($"The time window ({Math.Round(windowMinutes)} min) must be at least equal to the quiz duration ({quiz.Duration} min)");
-                }
+                throw new KeyNotFoundException($"Quiz with ID {request.QuizId} not found.");
+            }
+
+            if (quiz.Questions == null || quiz.Questions.Count == 0)
+            {
+                throw new ArgumentException("Cannot assign a quiz that has no questions.");
+            }
+
+            var windowMinutes = (request.EndTime - request.StartTime).TotalMinutes;
+            if (windowMinutes < quiz.Duration)
+            {
+                throw new ArgumentException($"The time window ({Math.Round(windowMinutes)} min) must be at least equal to the quiz duration ({quiz.Duration} min)");
             }
 
             var cq = new Models.ClassroomQuiz

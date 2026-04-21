@@ -6,6 +6,7 @@ using AcasService.Application.Commands.ProgrammingLanguage;
 using AcasService.Application.Commands.S3;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.AcademicWarning;
 using AcasService.Application.Queries.Classroom;
 using AcasService.Application.Queries.Examination;
 using AcasService.Application.Queries.Problem;
@@ -51,6 +52,8 @@ using System.Threading.RateLimiting;
 using AcasService.Application.CodeRunner;
 using AcasService.Application.Commands.ClassEnrollments;
 using AcasService.Application.Commands.SlotCommand;
+using AcasService.Application.Queries.PublicStatistics;
+using AcasService.Repositories.PublicStatistics;
 using AcasService.Repositories.Slot;
 using AcasService.Application.Queries.ClassEnrollments;
 using AcasService.Application.Queries.Slot;
@@ -67,6 +70,7 @@ using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
 using AcasService.Application.Queries.KeystrokeLogs;
+using AcasService.Repositories.Caching.Redis;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Repositories.Caching.Redis.KeystrokeLogs;
 using AcasService.Repositories.KeystrokeLogs;
@@ -93,12 +97,10 @@ using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 using AcasService.Application.Commands.Formatters;
-using AcasService.Application.Thirdparty;
 using AcasService.Repositories.AcademicWarning;
 using AcasService.Repositories.ExaminationTemplate;
 using AcasService.Application.Commands.ExaminationTemplate;
 using AcasService.Application.Queries.ExaminationTemplate;
-using AcasService.Application.Mappers;
 using AcasService.Application.Jobs;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -236,11 +238,16 @@ builder.Services.AddScoped<IRegradingRequestRepository, RegradingRequestReposito
 builder.Services.AddScoped<IRegradingRequestCommand, RegradingRequestCommand>();
 builder.Services.AddScoped<IRegradingRequestQuery, RegradingRequestQuery>();
 
+// Public Statistics
+builder.Services.AddScoped<IPublicStatisticsRepository, PublicStatisticsRepository>();
+builder.Services.AddScoped<IPublicStatisticsQuery, PublicStatisticsQuery>();
+
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
 builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
 builder.Services.AddScoped<IQuizCache, QuizCache>();
 builder.Services.AddScoped<IExamLogCache, ExamLogCache>();
+builder.Services.AddScoped<IPublicStatisticsCache, PublicStatisticsCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -296,6 +303,7 @@ builder.Services.AddScoped<IFirebaseCloudMessageService, FirebaseCloudMessageSer
 builder.Services.AddScoped<INotificationCommand, NotificationCommand>();
 builder.Services.AddScoped<IBusinessNotificationService, BusinessNotificationService>();
 builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<IAcademicWarningQuery, AcademicWarningQuery>();
 builder.Services.AddScoped<IUserDeviceCommand, UserDeviceCommand>();
 builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();

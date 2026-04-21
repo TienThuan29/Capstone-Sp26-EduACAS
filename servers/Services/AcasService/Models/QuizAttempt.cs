@@ -30,6 +30,5 @@ public class QuizAttempt
 public enum QuizAttemptStatus
 {
     INPROGRESS,
-    SUBMITTED,
-    ABANDONED
+    SUBMITTED
 }

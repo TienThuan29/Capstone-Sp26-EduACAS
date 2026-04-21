@@ -168,6 +168,7 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/materials/${id}/restore`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
     GET_ADMIN: '/api/acas/v1/materials/admin',
   },
@@ -322,6 +323,7 @@ export const Api = {
     START: "/api/acas/v1/quiz-attempts/start",
     UPDATE_ANSWER: (id: string) => `/api/acas/v1/quiz-attempts/${id}/answers`,
     SUBMIT: (id: string) => `/api/acas/v1/quiz-attempts/${id}/submit`,
+
     GET_HISTORY_BY_CLASSROOM_QUIZ_STUDENT: (classroomQuizId: string, studentId: string) => `/api/acas/v1/quiz-attempts/history/classroom-quiz/${classroomQuizId}/student/${studentId}`,
     GET_SUBMISSIONS_PAGED: (classroomQuizId: string, pageIndex: number, pageSize: number) => `/api/acas/v1/quiz-attempts/submissions/classroom-quiz/${classroomQuizId}?pageIndex=${pageIndex}&pageSize=${pageSize}`,
   },
@@ -350,5 +352,12 @@ export const Api = {
   AcademicWarning: {
     SEND_BATCH: "/api/v1/academic-warnings/batch",
     SEND_SINGLE: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/v1/academic-warnings/classroom/${classroomId}`,
+    GET_BY_ID: (id: string) => `/api/v1/academic-warnings/${id}`,
+  },
+
+  PublicStatistics: {
+    GET: "/api/acas/v1/public-statistics",
   },
 };

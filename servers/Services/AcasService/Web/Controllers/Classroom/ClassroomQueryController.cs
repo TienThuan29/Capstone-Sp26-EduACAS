@@ -101,23 +101,28 @@ namespace AcasService.Web.Controllers.Classroom
         }
 
         [HttpGet("student/{studentId}")]
-        public async Task<ActionResult<ApiResponse<List<ClassroomResponse>>>> GetClassroomsByStudentId(string studentId)
+        public async Task<ActionResult<ApiResponse<PagedResult<ClassroomResponse>>>> GetClassroomsByStudentId(
+            string studentId,
+            [FromQuery] string? status = null,
+            [FromQuery] string? search = null,
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
         {
             try
             {
                 _logger.LogInformation("Fetching classrooms for student id: {StudentId}", studentId);
-                var classrooms = await _classroomQuery.FindByStudentIdAsync(studentId);
+                var classrooms = await _classroomQuery.FindByStudentIdAsync(studentId, status, search, pageIndex, pageSize);
                 return ResponseUtil.Success(classrooms, "Get classrooms for student successfully", 200);
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "No classrooms found for student id: {StudentId}", studentId);
-                return ResponseUtil.Error<List<ClassroomResponse>>("No classrooms found for the student", 404);
+                return ResponseUtil.Error<PagedResult<ClassroomResponse>>("No classrooms found for the student", 404);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred while fetching classrooms for student.");
-                return ResponseUtil.Error<List<ClassroomResponse>>("Internal Server Error", 500);
+                return ResponseUtil.Error<PagedResult<ClassroomResponse>>("Internal Server Error", 500);
             }
         }
 
@@ -146,12 +151,13 @@ namespace AcasService.Web.Controllers.Classroom
         [HttpGet("lecturer/{lecturerId}")]
         public async Task<ActionResult<ApiResponse<PagedResult<ClassroomResponse>>>> GetClassroomsByLecturerId(
             string lecturerId,
+            [FromQuery] string? search = null,
             [FromQuery] int pageIndex = 1,
             [FromQuery] int pageSize = 10)
         {
             try
             {
-                var classrooms = await _classroomQuery.GetClassroomsByLecturerIdAsync(lecturerId, pageIndex, pageSize);
+                var classrooms = await _classroomQuery.GetClassroomsByLecturerIdAsync(lecturerId, search, pageIndex, pageSize);
                 return ResponseUtil.Success(classrooms, "Get classrooms by lecturerId successfully", 200);
             }
             catch (Exception ex)

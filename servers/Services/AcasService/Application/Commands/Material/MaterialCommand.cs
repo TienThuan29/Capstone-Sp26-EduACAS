@@ -16,6 +16,7 @@ namespace AcasService.Application.Commands.Material
         Task<MaterialResponse> UpdateMaterialAsync(string materialId, UpdateMaterialRequest request);
         Task<MaterialResponse> DeleteMaterialAsync(string materialId);
         Task<MaterialResponse> SoftDeleteMaterialAsync(string materialId);
+        Task<MaterialResponse> RestoreMaterialAsync(string materialId);
     }
 
     public class MaterialCommand : IMaterialCommand
@@ -150,6 +151,21 @@ namespace AcasService.Application.Commands.Material
             await _materialRepository.SoftDeleteAsync(materialId);
             
             existingMaterial.IsDeleted = true;
+            return _materialMapper.ToMaterialResponse(existingMaterial);
+        }
+
+        public async Task<MaterialResponse> RestoreMaterialAsync(string materialId)
+        {
+            var existingMaterial = await _materialRepository.FindByIdAsync(materialId);
+            if (existingMaterial == null)
+            {
+                _logger.LogError("Material not found with ID: {MaterialId}", materialId);
+                throw new KeyNotFoundException("Material not found");
+            }
+
+            await _materialRepository.RestoreAsync(materialId);
+
+            existingMaterial.IsDeleted = false;
             return _materialMapper.ToMaterialResponse(existingMaterial);
         }
 

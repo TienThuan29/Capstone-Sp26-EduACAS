@@ -9,7 +9,7 @@ namespace AcasService.Web.Controllers.QuizAttempt;
 
 [ApiController]
 [Route("api/v1/quiz-attempts")]
-[Authorize]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class QuizAttemptCommandController : ControllerBase
 {
     private readonly IQuizAttemptCommand _quizAttemptCommand;
@@ -21,6 +21,7 @@ public class QuizAttemptCommandController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize(Roles = "STUDENT")]
     [HttpPost("start")]
     public async Task<ActionResult<ApiResponse<QuizAttemptResponse>>> StartAttempt([FromBody] StartQuizAttemptRequest request)
     {
@@ -51,6 +52,7 @@ public class QuizAttemptCommandController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "STUDENT")]
     [HttpPost("{id}/answers")]
     public async Task<ActionResult<ApiResponse<bool>>> UpdateAnswer(string id, [FromBody] UpdateQuizAnswerRequest request)
     {
@@ -76,6 +78,7 @@ public class QuizAttemptCommandController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "STUDENT")]
     [HttpPost("{id}/submit")]
     public async Task<ActionResult<ApiResponse<QuizAttemptResponse>>> Submit(string id)
     {

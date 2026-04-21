@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Badge, Button, Spinner, Tabs, TabItem, Tooltip, Pagination, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow } from "flowbite-react";
+import { Badge, Button, Spinner, Tabs, TabItem, Tooltip, Pagination, Card, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Modal, ModalHeader, ModalBody } from "flowbite-react";
 import {
   ArrowLeftIcon,
   PencilIcon,
-  TrashIcon,
+  TrashIcon
 } from "@heroicons/react/24/outline";
 import { useQuiz } from "@/hooks/quiz/useQuiz";
 import { useSubject } from "@/hooks/subject/useSubject";
@@ -15,6 +15,8 @@ import type { ClassroomQuiz, Quiz, QuizQuestion, QuizAttemptResponse } from "@/t
 import { SharedQuizOverview } from "@/components/quiz/shared-quiz-overview";
 import { formatDate } from "@/utils/datetime-utils";
 
+
+
 function SubmissionsContent({
   classroomQuizId,
   quizDetail,
@@ -23,10 +25,13 @@ function SubmissionsContent({
   quizDetail: Quiz | null;
 }) {
   const { getSubmissionsPaged, loading } = useQuizAttempt();
+  const { showSuccess, showError } = useToast();
   const [submissions, setSubmissions] = useState<QuizAttemptResponse[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 10;
+
+
 
   const fetchSubmissions = useCallback(async () => {
     const data = await getSubmissionsPaged(classroomQuizId, currentPage, pageSize);
@@ -39,6 +44,8 @@ function SubmissionsContent({
   useEffect(() => {
     fetchSubmissions();
   }, [fetchSubmissions]);
+
+
 
   if (loading && submissions.length === 0) {
     return (
@@ -74,6 +81,7 @@ function SubmissionsContent({
                 <TableHeadCell className="text-center">Correct Answers</TableHeadCell>
                 <TableHeadCell className="text-center">Score</TableHeadCell>
                 <TableHeadCell className="text-center">Status</TableHeadCell>
+
               </TableRow>
             </TableHead>
             <TableBody>
@@ -101,7 +109,7 @@ function SubmissionsContent({
                   </TableCell>
                   <TableCell className="text-center">
                     {attempt.status === 'SUBMITTED' && attempt.score !== undefined ? (
-                      <Badge color="info" className="px-3 font-bold mx-auto w-fit">
+                      <Badge color="success" className="px-3 font-bold mx-auto w-fit">
                         {attempt.score.toFixed(1)} / {maxScore.toFixed(1)}
                       </Badge>
                     ) : '-'}
@@ -109,12 +117,13 @@ function SubmissionsContent({
                   <TableCell className="text-center">
                     <div className="flex justify-center">
                       <Badge
-                        color={attempt.status === 'SUBMITTED' ? 'success' : attempt.status === 'INPROGRESS' ? 'warning' : 'failure'}
+                        color={attempt.status === 'SUBMITTED' ? 'success' : attempt.status === 'INPROGRESS' ? 'info' : 'failure'}
                       >
                         {attempt.status}
                       </Badge>
                     </div>
                   </TableCell>
+
                 </TableRow>
               ))}
             </TableBody>
@@ -132,6 +141,8 @@ function SubmissionsContent({
           />
         </div>
       )}
+
+
     </div>
   );
 }

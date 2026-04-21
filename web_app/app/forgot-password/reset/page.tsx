@@ -29,13 +29,11 @@ function ResetPasswordContent() {
   }>({ score: 0, text: "", color: "" });
 
   useEffect(() => {
-    // Get email from URL parameters
-    const emailParam = searchParams.get("email");
-    if (emailParam) {
-      setEmail(emailParam);
-    } else {
-      showToast("Email information not found. Please try again.", "error");
-      router.push("/login");
+    // Get token from URL parameters (set by the forgot-password email link)
+    const tokenParam = searchParams.get("token");
+    if (!tokenParam) {
+      showToast("Invalid reset link. Please request a new password reset email.", "error");
+      router.push("/forgot-password");
     }
   }, [searchParams, router, showToast]);
 
@@ -94,31 +92,22 @@ function ResetPasswordContent() {
 
     setIsLoading(true);
     try {
-      // Get token from localStorage
-      const token = localStorage.getItem("accessToken");
+      // Get token from URL query string (set by the forgot-password email)
+      const token = searchParams.get("token");
       if (!token) {
-        showToast("Login session has expired. Please login again.", "error");
-        router.push("/login");
+        showToast("Invalid reset link. Please request a new password reset email.", "error");
+        router.push("/forgot-password");
         return;
       }
 
-      await axiosInstance.post(Api.Auth.RESET_FIRST_LOGIN_PASSWORD, {
-          email,
+      await axiosInstance.post(Api.Auth.RESET_PASSWORD, {
+          token,
           newPassword,
-          confirmPassword,},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 
-      showToast("Password reset successful! Please login again.", "success");
-      
-      // Clear token and redirect to login
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("refreshToken");
-      
+      showToast("Password reset successful! Please login with your new password.", "success");
+
       setTimeout(() => {
         router.push("/login");
       }, 2000);
@@ -193,7 +182,7 @@ function ResetPasswordContent() {
               Reset Password
             </h1>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              This is your first login. Please set a new password to continue.
+              Enter your new password below to regain access to your account.
             </p>
           </div>
 
@@ -332,7 +321,7 @@ function ResetPasswordContent() {
                 <div className="text-sm text-blue-700 dark:text-blue-300">
                   <p className="font-medium mb-1">Important Notes:</p>
                   <ul className="list-disc list-inside space-y-1 text-xs">
-                    <li>After resetting your password, you will need to login again</li>
+                    <li>After resetting your password, you can login with your new password</li>
                     <li>Please remember your new password</li>
                     <li>Do not share your password with anyone</li>
                   </ul>

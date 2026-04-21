@@ -11,8 +11,11 @@ import { useToast } from "@/hooks/useToast"
 import { Card, Badge } from "flowbite-react"
 import {
   AcademicCapIcon,
+  BellIcon,
   BookOpenIcon,
+  ChatBubbleLeftRightIcon,
   CodeBracketIcon,
+  UsersIcon,
   UserGroupIcon,
   UserPlusIcon,
   ArrowRightIcon,
@@ -214,6 +217,34 @@ export default function AdminDashboard() {
       href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
       accent: "gray" as const,
     },
+    {
+      title: "Manage Users",
+      description: "View and manage user accounts",
+      icon: <UsersIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_USERS_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Notifications",
+      description: "Create and manage notifications",
+      icon: <BellIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_NOTIFICATIONS_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Discussions",
+      description: "Review and moderate discussions",
+      icon: <ChatBubbleLeftRightIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_DISCUSSIONS_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Materials",
+      description: "Manage learning materials",
+      icon: <BookOpenIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_MATERIALS_PAGE,
+      accent: "gray" as const,
+    },
   ]
 
   const recentActivities = [
@@ -254,7 +285,7 @@ export default function AdminDashboard() {
           <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
             {quickActions.map((action, index) => {
               const style = accentStyles[action.accent] ?? accentStyles.gray
               return (

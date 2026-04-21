@@ -23,3 +23,29 @@ export interface SendAcademicWarningResponse {
   failedCount: number;
   results: StudentAcademicWarningResult[];
 }
+
+export interface AnalysisEntry {
+  submissionId: string;
+  analysis: string;
+  recommendation: string;
+}
+
+export interface InvolvedExamsInfo {
+  examScores: Record<string, number>;
+  averageScore: number;
+}
+
+export interface AcademicWarningResponse {
+  id: string;
+  classroomId: string;
+  studentId: string;
+  warningLevel: number;
+  triggerType: string;
+  sentDate: string;
+  isRead: boolean;
+  createdDate: string;
+  updatedDate: string;
+  involvedExams: InvolvedExamsInfo | null;
+  llmAnalysis: Record<string, AnalysisEntry>;
+  lecturerAnalysis: Record<string, AnalysisEntry>;
+}

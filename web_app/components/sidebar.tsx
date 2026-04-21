@@ -34,6 +34,7 @@ import {
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
   ChartBarIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -241,6 +242,16 @@ const Sidebar = () => {
       icon: ChatBubbleLeftRightIcon,
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
+    },
+    {
+      icon: AcademicCapIcon,
+      label: "Academic Warning",
+      href: `${pathname}?tab=academic-warning`,
+    },
+    {
+      icon: ClipboardDocumentCheckIcon,
+      label: "Completed Exams",
+      href: `${pathname}?tab=completed-exams`,
     },
   ];
 

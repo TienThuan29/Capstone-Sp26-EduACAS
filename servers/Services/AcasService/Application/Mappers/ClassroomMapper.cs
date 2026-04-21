@@ -90,9 +90,7 @@ public class ClassroomMapper
         if (classEnrollment != null)
         {
             enrollmentInfo.IsJoining = classEnrollment.IsJoining;
-            enrollmentInfo.JoinedDate = classEnrollment.IsJoining
-                ? classEnrollment.JoinedDate
-                : null;
+            enrollmentInfo.JoinedDate = classEnrollment.JoinedDate;
             enrollmentInfo.MovedOutDate = classEnrollment.IsJoining
                 ? null
                 : classEnrollment.MovedOutDate;

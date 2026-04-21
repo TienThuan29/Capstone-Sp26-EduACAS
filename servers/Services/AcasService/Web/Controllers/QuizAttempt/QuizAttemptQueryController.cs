@@ -9,7 +9,7 @@ namespace AcasService.Web.Controllers.QuizAttempt;
 
 [ApiController]
 [Route("api/v1/quiz-attempts")]
-[Authorize]
+[Authorize(Roles = "STUDENT, LECTURER, ADMIN")]
 public class QuizAttemptQueryController : ControllerBase
 {
     private readonly IQuizAttemptQuery _quizAttemptQuery;
@@ -40,6 +40,7 @@ public class QuizAttemptQueryController : ControllerBase
         }
     }
 
+    [Authorize(Roles = "LECTURER, ADMIN")]
     [HttpGet("submissions/classroom-quiz/{classroomQuizId}")]
     public async Task<ActionResult<ApiResponse<PagedResult<QuizAttemptResponse>>>> GetSubmissions(
         string classroomQuizId, 

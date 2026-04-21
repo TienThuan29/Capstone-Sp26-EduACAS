@@ -12,13 +12,44 @@ import type { Classroom } from "@/types/classroom";
 
 type ClassroomInfoBarProps = {
   classroom: Classroom;
+  compact?: boolean;
 };
 
-export function ClassroomInfoBar({ classroom }: ClassroomInfoBarProps) {
+export function ClassroomInfoBar({ classroom, compact }: ClassroomInfoBarProps) {
+  if (compact) {
+    return (
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 dark:border-gray-700 dark:bg-gray-800">
+        <h2 className="text-lg font-bold text-gray-900 dark:text-white">
+          {classroom.className}
+        </h2>
+        <Badge
+          color="info"
+          className="px-2 py-0.5 text-xs font-bold"
+        >
+          {classroom.classCode}
+        </Badge>
+        <Badge
+          color="warning"
+          className="border border-[#C9A24D]/40 px-2 py-0.5 text-xs font-semibold text-[#B8860B] dark:border-[#C9A24D]/50 dark:text-[#C9A24D]"
+        >
+          {classroom.semesterName}
+        </Badge>
+        <span className="ml-1 flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <BookOpenIcon className="h-3.5 w-3.5" />
+          {classroom.subject.subjectName}
+        </span>
+        <span className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400">
+          <UserCircleIcon className="h-3.5 w-3.5" />
+          {classroom.lecturer.fullname}
+        </span>
+      </div>
+    );
+  }
+
   return (
-    <div className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-gradient-to-r from-white to-slate-50 shadow-sm dark:border-gray-700 dark:from-gray-800 dark:to-gray-800/80">
+    <div className="mb-6 overflow-hidden rounded-2xl border border-gray-200 bg-linear-to-r from-white to-slate-50 shadow-sm dark:border-gray-700 dark:from-gray-800 dark:to-gray-800/80">
       {/* Top accent line */}
-      <div className="h-1 w-full bg-gradient-to-r from-[#1F4E79] to-[#C9A24D]" />
+      <div className="h-1 w-full bg-linear-to-r from-[#1F4E79] to-[#C9A24D]" />
 
       <div className="px-6 py-5">
         {/* Row 1: Class name + badges */}

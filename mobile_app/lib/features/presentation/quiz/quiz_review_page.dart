@@ -3,6 +3,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/quiz_practice.dart';
 import 'package:mobile/features/presentation/quiz/quiz_attempt_page.dart';
+import 'package:mobile/features/presentation/quiz/widgets/quiz_passcode_dialog.dart';
 import 'package:mobile/features/services/quiz_practice_service.dart';
 
 class QuizReviewPage extends StatefulWidget {
@@ -60,15 +61,7 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
       final attempt = await QuizPracticeService.getAttemptById(widget.attemptId);
       final answers = await QuizPracticeService.getStudentAnswersByAttempt(widget.attemptId);
 
-      final sortedRefs = [...widget.quizDetail.questions]
-        ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
-
-      final questionFutures = sortedRefs
-          .map((ref) => QuizPracticeService.getQuestionById(ref.questionId))
-          .toList();
-
-      final loadedQuestions = await Future.wait(questionFutures);
-      final questions = loadedQuestions.whereType<QuestionDetail>().toList();
+      final questions = attempt?.questions ?? [];
 
       if (!mounted) return;
 
@@ -205,6 +198,9 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
       durationText = '${min}m ${sec}s';
     }
 
+    final maxScore = widget.quizDetail.questions.fold<double>(0, (sum, ref) => sum + ref.marks);
+    final maxScoreText = maxScore.truncateToDouble() == maxScore ? maxScore.toInt().toString() : maxScore.toStringAsFixed(1);
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -226,6 +222,8 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
           ),
           const SizedBox(height: 12),
+          if (_attempt?.finalScore != null)
+            _summaryRow(Icons.star_rounded, 'Score', '${_attempt!.finalScore} / $maxScoreText'),
           _summaryRow(Icons.timer_outlined, 'Duration', durationText),
           _summaryRow(Icons.flag_circle_outlined, 'Status', _attempt?.status ?? '-'),
           _summaryRow(Icons.format_list_numbered_outlined, 'Attempt #', '${_attempt?.attemptNumber ?? '-'}'),
@@ -304,7 +302,10 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
             width: double.infinity,
             child: ElevatedButton.icon(
               onPressed: canRetake
-                  ? () {
+                  ? () async {
+                      final hasAccess = await showQuizPasscodeDialog(context, widget.classroomQuiz);
+                      if (!hasAccess || !mounted) return;
+
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
@@ -380,6 +381,25 @@ class _QuizReviewPageState extends State<QuizReviewPage> {
             style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 6),
+          if (question.imageUrl != null && question.imageUrl!.isNotEmpty) ...[
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                question.imageUrl!,
+                fit: BoxFit.contain,
+                height: 150,
+                width: double.infinity,
+                alignment: Alignment.centerLeft,
+                errorBuilder: (context, error, stackTrace) =>
+                    const SizedBox(height: 100, child: Center(child: Icon(Icons.broken_image, color: Colors.grey))),
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
           Text(
             question.content,
             style: const TextStyle(fontSize: 15, color: AppColors.textPrimary, fontWeight: FontWeight.w700),
