@@ -1,1170 +1,1524 @@
 # BÁO CÁO YÊU CẦU UNIT TEST — DỰ ÁN EDUACAS
 
-> Phiên bản: 1.0
-> Ngày: 17/04/2026
-> Mục đích: Tài liệu mô tả toàn bộ case cần test cho các module backend (C#/.NET) và frontend (Next.js/Flutter)
+> Phiên bản: 2.0
+> Ngày: 19/04/2026
+> Mục đích: Tài liệu mô tả toàn bộ unit test (test từng HÀM) cho backend .NET
+> Quy tắc: Mỗi hàm có nhiều test case bao quát preconditions, expected outputs, exceptions, và log messages
 
 ---
 
 ## MỤC LỤC
 
-1. [Tổng quan hệ thống](#1-tổng-quan-hệ-thống)
-2. [AcasService — Utils](#2-acaservice--utils)
-3. [AcasService — Jobs](#3-acaservice--jobs)
-4. [AcasService — Commands](#4-acaservice--commands)
-5. [AcasService — Queries](#5-acaservice--queries)
-6. [AcasService — Mappers](#6-acaservice--mappers)
-7. [AcasService — Controllers](#7-acaservice--controllers)
-8. [AuthService — Utils](#8-authservice--utils)
-9. [AuthService — Commands](#9-authservice--commands)
-10. [AuthService — Queries](#10-authservice--queries)
-11. [AuthService — Controllers](#11-authservice--controllers)
-12. [Web App — Utils](#12-web-app--utils)
-13. [Web App — Hooks](#13-web-app--hooks)
-14. [Mobile App](#14-mobile-app)
+1. [Quy tắc viết Unit Test](#quy-tắc-viết-unit-test)
+2. [AuthService — Utils](#2-authservice--utils)
+3. [AuthService — Commands](#3-authservice--commands)
+4. [AuthService — Queries](#4-authservice--queries)
+5. [AcasService — Utils](#5-acaservice--utils)
+6. [AcasService — Jobs](#6-acaservice--jobs)
+7. [AcasService — Commands](#7-acaservice--commands)
+8. [AcasService — Queries](#8-acaservice--queries)
+9. [AcasService — CodeRunner](#9-acaservice--coderunner)
 
 ---
 
-## 1. TỔNG QUAN HỆ THỐNG
+## QUY TẮC VIẾT UNIT TEST
 
-| Module | Công nghệ | Test framework |
-|--------|-----------|----------------|
-| AcasService (.NET Backend) | .NET 9, C# | xUnit + Moq + FluentAssertions |
-| AuthService (.NET Backend) | .NET 9, C# | xUnit + Moq + FluentAssertions |
-| ApiGateway | .NET 9 | Không cần unit test |
-| Web App (Next.js) | Next.js 16, React 19, TypeScript | Vitest + React Testing Library |
-| Mobile App (Flutter) | Flutter, Dart | flutter_test |
+### Cấu trúc test case
 
----
+Mỗi test case bao gồm:
 
-## 2. ACASSERVICE — UTILS
+| Trường | Mô tả |
+|--------|--------|
+| **Precondition** | Điều kiện đầu vào cụ thể cho hàm |
+| **Input Data** | Dữ liệu đầu vào thực tế |
+| **Expected Output** | Kết quả mong đợi (return value) |
+| **Expected Exception** | Exception cụ thể + message |
+| **Log Messages** | Các log được ghi ra |
+| **Status** | Pending / Done |
 
-### 2.1. ResultComparator
+### Format test case
 
-**Mục đích:** So sánh kết quả chạy code (output) với kết quả mong đợi (expected output) với nhiều chế độ so sánh khác nhau.
+```csharp
+// Happy path: input hợp lệ → return đúng
+[Fact]
+public void MethodName_ValidInput_ReturnsExpectedResult()
+{
+    // Arrange: mock dependencies, setup input
+    // Act: gọi hàm
+    // Assert: kiểm tra return value và mocks
+}
 
-**Các hàm cần test:**
-
-#### `Compare(string expectedOutput, string actualOutput, CompareMode mode)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R (Yes/No)|
-|----|----------|---------------|-------------------|--------|--------|---|
-| RC-01 | Exact match | expectedOutput = "Hello World", actualOutput = "Hello World", mode = Exact | Trả về `true` | `ResultComparator.Compare()` — Exact mode logic | Pending | Y |
-| RC-02 | Exact mismatch | expectedOutput = "Hello World", actualOutput = "Hello World!", mode = Exact | Trả về `false` | `ResultComparator.Compare()` — Exact mode logic | Pending | Y |
-| RC-03 | Case insensitive match | expectedOutput = "HELLO", actualOutput = "hello", mode = CaseInsensitive | Trả về `true` | `ResultComparator.Compare()` — CaseInsensitive mode | Pending | Y |
-| RC-04 | Case insensitive mismatch | expectedOutput = "HELLO", actualOutput = "world", mode = CaseInsensitive | Trả về `false` | `ResultComparator.Compare()` — CaseInsensitive mode | Pending | Y |
-| RC-05 | Floating point within tolerance | expectedOutput = "3.14159", actualOutput = "3.14160", mode = FloatingPoint(tolerance = 0.0001) | Trả về `true` | `ResultComparator.Compare()` — FloatingPoint mode | Pending | Y |
-| RC-06 | Floating point outside tolerance | expectedOutput = "3.14", actualOutput = "3.20", mode = FloatingPoint(tolerance = 0.01) | Trả về `false` | `ResultComparator.Compare()` — FloatingPoint mode | Pending | Y |
-| RC-07 | Floating point exact | expectedOutput = "3.14", actualOutput = "3.14", mode = FloatingPoint(tolerance = 0.01) | Trả về `true` | `ResultComparator.Compare()` — FloatingPoint mode | Pending | Y |
-| RC-08 | Token comparison exact | expectedOutput = "foo bar baz", actualOutput = "foo bar baz", mode = Token | Trả về `true` | `ResultComparator.Compare()` — Token mode | Pending | Y |
-| RC-09 | Token comparison different order | expectedOutput = "foo bar baz", actualOutput = "foo baz bar", mode = Token | Trả về `false` | `ResultComparator.Compare()` — Token mode | Pending | Y |
-| RC-10 | Token comparison extra token | expectedOutput = "foo bar", actualOutput = "foo bar baz", mode = Token | Trả về `false` | `ResultComparator.Compare()` — Token mode | Pending | Y |
-| RC-11 | Unordered comparison exact | expectedOutput = "cat dog bird", actualOutput = "dog bird cat", mode = UnorderedToken | Trả về `true` | `ResultComparator.Compare()` — UnorderedToken mode | Pending | Y |
-| RC-12 | Unordered comparison missing token | expectedOutput = "cat dog bird", actualOutput = "cat dog", mode = UnorderedToken | Trả về `false` | `ResultComparator.Compare()` — UnorderedToken mode | Pending | Y |
-| RC-13 | Empty expected, empty actual | expectedOutput = "", actualOutput = "", mode = Exact | Trả về `true` | `ResultComparator.Compare()` — boundary null/empty check | Pending | Y |
-| RC-14 | Empty expected, non-empty actual | expectedOutput = "", actualOutput = "result", mode = Exact | Trả về `false` | `ResultComparator.Compare()` — boundary null/empty check | Pending | Y |
-| RC-15 | Whitespace handling | expectedOutput = "Hello   World", actualOutput = "Hello World", mode = Exact | Tùy spec — trả về `false` (hoặc `true` nếu normalize) | `ResultComparator.Compare()` — whitespace normalization | Pending | Y |
-| RC-16 | Null expected | expectedOutput = null, actualOutput = "result", mode = Exact | Ném exception hoặc trả về `false` | `ResultComparator.Compare()` — null guard | Pending | Y |
-| RC-17 | Null actual | expectedOutput = "expected", actualOutput = null, mode = Exact | Ném exception hoặc trả về `false` | `ResultComparator.Compare()` — null guard | Pending | Y |
+// Error case: input không hợp lệ → throw exception
+[Fact]
+public void MethodName_InvalidInput_ThrowsSpecificException()
+{
+    // Arrange
+    // Act & Assert
+    await Assert.ThrowsAsync<SpecificException>(() => sut.Method(params));
+}
+```
 
 ---
 
-### 2.2. TestcaseGenerator
-
-**Mục đích:** Tự động sinh test case từ input của người dùng hoặc template.
-
-**Các hàm cần test:**
-
-#### `GenerateTestcases(Problem problem, GenerationStrategy strategy)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| TCG-01 | Generate normal cases | Sinh test case từ sample input/output | Danh sách TestCase được tạo đúng số lượng | `TestcaseGenerator.GenerateTestcases()` | Pending | Y |
-| TCG-02 | Generate boundary cases | Sinh test case với giá trị biên (min, max, zero, negative) | Tạo đúng test case cho các trường hợp biên | `TestcaseGenerator.GenerateTestcases()` — boundary logic | Pending | Y |
-| TCG-03 | Generate edge cases | Input rỗng, input đặc biệt (ký tự Unicode, ký tự đặc biệt) | Xử lý đúng không crash | `TestcaseGenerator.GenerateTestcases()` — edge case handling | Pending | Y |
-| TCG-04 | Invalid problem id | problem.Id = null hoặc rỗng | Ném exception `ArgumentException` | `TestcaseGenerator.GenerateTestcases()` — null guard | Pending | Y |
-| TCG-05 | Strategy = AllCombinations | strategy = AllCombinations, mỗi tham số có 3 giá trị | Sinh đúng số lượng tổ hợp = 3^n | `TestcaseGenerator.GenerateTestcases()` — AllCombinations logic | Pending | Y |
-| TCG-06 | Strategy = Pairwise | strategy = Pairwise | Sinh đúng số lượng test case theo thuật toán pairwise | `TestcaseGenerator.GenerateTestcases()` — Pairwise logic | Pending | Y |
-| TCG-07 | Strategy = BoundaryOnly | strategy = BoundaryOnly | Chỉ sinh test case giá trị biên | `TestcaseGenerator.GenerateTestcases()` — BoundaryOnly logic | Pending | Y |
-| TCG-08 | Duplicate testcases | Sinh ra test case trùng lặp | Loại bỏ duplicate, không trùng lặp | `TestcaseGenerator.GenerateTestcases()` — deduplication | Pending | Y |
-| TCG-09 | Zero input range | Min = Max = 0 | Sinh đúng 1 test case với giá trị 0 | `TestcaseGenerator.GenerateTestcases()` — zero range handling | Pending | Y |
+## 2. AUTHSERVICE — UTILS
 
 ---
 
-## 3. ACASSERVICE — JOBS
+### 2.1. JwtUtil
 
-### 3.1. ExaminationJobScheduling
+**File:** `Application/Utils/JwtUtil.cs`
 
-**Mục đích:** Quản lý lịch job cho việc tự động mở/kết thúc ca thi.
+#### `string GenerateAccessToken(JwtPayload payload)`
 
-**Các hàm cần test:**
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| JWT-GAT-01 | Valid payload returns non-empty token | Valid JwtPayload với Id, Email, Role | payload = { Id="u1", Email="a@b.com", Role="User" } | Returns non-empty string, split('.') == 3 | - | - | Pending |
+| JWT-GAT-02 | Different payloads produce different tokens | 2 JwtPayload khác nhau | payload1={Id:"1"}, payload2={Id:"2"} | token1 != token2 | - | - | Pending |
+| JWT-GAT-03 | Token with 7h expiration | JwtPayload valid | accessExpiration="7h" | token.ValidTo ~ now+7h | - | - | Pending |
+| JWT-GAT-04 | Token with 30m expiration | JwtPayload valid | accessExpiration="30m" | token.ValidTo ~ now+30min | - | - | Pending |
+| JWT-GAT-05 | Token with invalid expiration format defaults to 1d | JwtPayload valid | accessExpiration="invalid" | token.ValidTo ~ now+1d | - | - | Pending |
+| JWT-GAT-06 | Token contains correct claims | JwtPayload valid | payload={Id:"u1",Email:"a@b.com",Role:"Admin"} | token.Claims chứa "id"=u1, "email"=a@b.com, "role"=Admin | - | - | Pending |
+| JWT-GAT-07 | Token with special characters in payload | JwtPayload với unicode/special chars | payload={Id:"u-1_2",Email:"üser@example.com",Role:"Super-Admin"} | Returns valid token | - | - | Pending |
 
-#### `ScheduleJobs(string examId, DateTime startDatetime, DateTime endDatetime)`
+#### `string GenerateRefreshToken(JwtPayload payload)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EJS-01 | Both dates in future | start > now, end > now | 2 job được schedule: MarkExamAsOpenAsync + MarkExamAsCompletedAsync | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
-| EJS-02 | End datetime in past | end < now | 0 job được schedule | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
-| EJS-03 | Start datetime in past, end in future | start < now < end | 2 job được schedule, MarkExamAsOpenAsync fires immediately | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
-| EJS-04 | Start datetime just before now | start ≈ now (50ms) | 2 job được schedule (race condition) | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
-| EJS-05 | Start equals end | start = end | Chỉ 1 job được schedule (MarkExamAsCompletedAsync) | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
-| EJS-06 | Exam id null | examId = null | Ném exception `ArgumentNullException` | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
-| EJS-07 | Start after end | start > end | Ném exception `ArgumentException` | `ExaminationJobScheduling.ScheduleJobs()` | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| JWT-GRT-01 | Valid payload returns non-empty token | Valid JwtPayload | payload={Id:"u1"} | Returns non-empty string, 3 parts | - | - | Pending |
+| JWT-GRT-02 | Refresh token expires later than access token | Valid JwtPayload | payload={Id:"u1"} | refreshToken.ValidTo > accessToken.ValidTo | - | - | Pending |
+| JWT-GRT-03 | Token contains correct claims | Valid JwtPayload | payload={Id:"u1",Email:"a@b.com",Role:"User"} | token.Claims chứa id, email, role | - | - | Pending |
 
-#### `CancelJobs(string examId)`
+#### `Task<JwtPayload> VerifyAsync(string token)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EJS-08 | Exam with scheduled jobs | exam có cả job mở và đóng | Xóa đúng 2 job ID: exam-open:{id} + exam-complete:{id} | `ExaminationJobScheduling.CancelJobs()` | Pending | Y |
-| EJS-09 | Non-existent exam | exam không có job nào | Không ném exception, không có job nào bị xóa | `ExaminationJobScheduling.CancelJobs()` | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| JWT-V-01 | Valid token returns correct payload | Token được tạo bởi GenerateAccessToken | token = validJWT | Returns JwtPayload với Id, Email, Role đúng | - | - | Pending |
+| JWT-V-02 | Invalid token throws SecurityTokenException | Token không phải JWT hợp lệ | token = "invalid.token.here" | - | SecurityTokenException, message chứa "Invalid token" | - | Pending |
+| JWT-V-03 | Tampered token throws SecurityTokenException | Valid token bị sửa signature | token = validToken + "tampered" | - | SecurityTokenException | - | Pending |
+| JWT-V-04 | Expired token throws SecurityTokenException | Token có expiration=0s | token = expiredToken | - | SecurityTokenException | - | Pending |
+| JWT-V-05 | Token signed with different secret throws | Token tạo bởi secret A, verify bằng secret B | token = tokenFromSecretA | - | SecurityTokenException | - | Pending |
+| JWT-V-06 | Empty token throws SecurityTokenException | Token rỗng | token = "" | - | SecurityTokenException | - | Pending |
+| JWT-V-07 | Null token throws SecurityTokenException | Token null | token = null | - | SecurityTokenException | - | Pending |
 
-#### `RescheduleJobs(string examId, DateTime newStart, DateTime newEnd)`
+#### `Constructor`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EJS-10 | Both dates changed | Thay đổi cả start và end | Đúng 2 job cũ bị xóa + 2 job mới được schedule | `ExaminationJobScheduling.RescheduleJobs()` | Pending | Y |
-| EJS-11 | Only start changed | Chỉ thay đổi start | Hủy 2 job cũ, schedule 2 job mới | `ExaminationJobScheduling.RescheduleJobs()` | Pending | Y |
-| EJS-12 | Only end changed | Chỉ thay đổi end | Hủy 2 job cũ, schedule 2 job mới | `ExaminationJobScheduling.RescheduleJobs()` | Pending | Y |
-| EJS-13 | Dates unchanged | start = oldStart, end = oldEnd | Không schedule job mới (có thể xóa rồi tạo lại hoặc giữ nguyên) | `ExaminationJobScheduling.RescheduleJobs()` | Pending | Y |
-
-#### `MarkExamAsOpenAsync(string examId)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EJS-14 | Exam is PENDING | Exam đang ở trạng thái PENDING | Status chuyển sang ONGOING, UpdatedDate được cập nhật | `ExaminationJobScheduling.MarkExamAsOpenAsync()` | Pending | Y |
-| EJS-15 | Exam is ONGOING | Exam đã ở ONGOING | Không cập nhật gì (idempotent) | `ExaminationJobScheduling.MarkExamAsOpenAsync()` | Pending | Y |
-| EJS-16 | Exam is COMPLETED | Exam đã COMPLETED | Không cập nhật gì | `ExaminationJobScheduling.MarkExamAsOpenAsync()` | Pending | Y |
-| EJS-17 | Exam not found | examId không tồn tại | Không ném exception, không cập nhật | `ExaminationJobScheduling.MarkExamAsOpenAsync()` | Pending | Y |
-| EJS-18 | Repository throws | GetByIdAsync ném exception | Exception được propagate | `ExaminationJobScheduling.MarkExamAsOpenAsync()` | Pending | Y |
-
-#### `MarkExamAsCompletedAsync(string examId)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EJS-19 | Exam is ONGOING | Exam đang ONGOING | Status chuyển sang COMPLETED, UpdatedDate được cập nhật | `ExaminationJobScheduling.MarkExamAsCompletedAsync()` | Pending | Y |
-| EJS-20 | Exam is COMPLETED | Exam đã COMPLETED | Không cập nhật gì (idempotent) | `ExaminationJobScheduling.MarkExamAsCompletedAsync()` | Pending | Y |
-| EJS-21 | Exam is PENDING | Exam chưa bao giờ mở (PENDING) | Vẫn chuyển sang COMPLETED | `ExaminationJobScheduling.MarkExamAsCompletedAsync()` | Pending | Y |
-| EJS-22 | Exam not found | examId không tồn tại | Không ném exception | `ExaminationJobScheduling.MarkExamAsCompletedAsync()` | Pending | Y |
-| EJS-23 | Repository throws | UpdateAsync ném exception | Exception được propagate | `ExaminationJobScheduling.MarkExamAsCompletedAsync()` | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| JWT-CTOR-01 | Null secret throws InvalidOperationException | IConfiguration không có JwtSecret | config["Jwt:JwtSecret"] = null | - | InvalidOperationException, "JWT_SECRET is not configured" | - | Pending |
+| JWT-CTOR-02 | Empty secret throws InvalidOperationException | IConfiguration có JwtSecret = "" | config["Jwt:JwtSecret"] = "" | - | InvalidOperationException, "JWT_SECRET is not configured" | - | Pending |
 
 ---
 
-## 4. ACASSERVICE — COMMANDS
+### 2.2. HashingUtil (Static)
 
-### 4.1. SubmissionCommand
+**File:** `Application/Utils/HashingUtil.cs`
 
-**Mục đích:** Xử lý việc nộp bài, chấm điểm tự động, chấm lại và ghi đè điểm.
+#### `string HashString(string input, IConfiguration configuration)`
 
-#### `SubmitProblemAsync(SubmitProblemRequest request)`
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| HASH-HS-01 | Valid input returns non-empty 64-char hash | Input string, valid config | input="test-password" | Returns 64-char lowercase hex string | - | - | Pending |
+| HASH-HS-02 | Same input produces same hash (deterministic) | Input string, valid config | input="consistent" | hash1 == hash2 == hash3 | - | - | Pending |
+| HASH-HS-03 | Different inputs produce different hashes | Input strings | input1="one", input2="two" | hash1 != hash2 | - | - | Pending |
+| HASH-HS-04 | Hash is lowercase hex | Input string | input="test" | hash matches ^[0-9a-f]{64}$ | - | - | Pending |
+| HASH-HS-05 | Hash differs from input | Input string | input="mypassword123" | hash != input | - | - | Pending |
+| HASH-HS-06 | Unicode input returns valid hash | Input với unicode | input="中文测试 français" | Returns 64-char hash | - | - | Pending |
+| HASH-HS-07 | Empty string input returns valid hash | Input = "" | input="" | Returns 64-char hash (khác hash của "a") | - | - | Pending |
+| HASH-HS-08 | Whitespace-only input returns valid hash | Input chỉ có khoảng trắng | input="   " | Returns 64-char hash | - | - | Pending |
+| HASH-HS-09 | Null secret key config throws | config["HashingSecretKey"] = null | input="test" | - | InvalidOperationException, "HASHING_SECRET_KEY is not configured" | - | Pending |
+| HASH-HS-10 | Empty secret key config throws | config["HashingSecretKey"] = "" | input="test" | - | InvalidOperationException, "HASHING_SECRET_KEY is not configured" | - | Pending |
+| HASH-HS-11 | Different secrets produce different hashes for same input | 2 config với secret khác nhau | input="same" | hash1 != hash2 | - | - | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SUB-01 | Submit in PRACTICAL mode | examination.Mode = PRACTICAL, không có StudentExamSession | Tạo submission thành công, Version = 1 | `SubmissionCommand.SubmitProblemAsync()` — PRACTICAL mode branch | Pending | Y |
-| SUB-02 | Submit in EXAMINATION mode, active session | examination.Mode = EXAMINATION, session.Phase = Active | Tạo submission thành công, Version = 1 | `SubmissionCommand.SubmitProblemAsync()` — EXAMINATION mode with active session | Pending | Y |
-| SUB-03 | Submit in EXAMINATION mode, no session | examination.Mode = EXAMINATION, session = null | Ném `InvalidOperationException` "Exam session is not active..." | `SubmissionCommand.SubmitProblemAsync()` — session null check | Pending | Y |
-| SUB-04 | Submit in EXAMINATION mode, session not active | examination.Mode = EXAMINATION, session.Phase = Submitted | Ném `InvalidOperationException` "Exam session is not active..." | `SubmissionCommand.SubmitProblemAsync()` — Phase validation | Pending | Y |
-| SUB-05 | Re-submit same problem | Đã có submission cho cùng exam+problem | Version tăng lên 2, submission mới được tạo | `SubmissionCommand.SubmitProblemAsync()` — versioning logic | Pending | Y |
-| SUB-06 | Multiple re-submit | Đã có 3 submission | Version = 4 | `SubmissionCommand.SubmitProblemAsync()` — version increment | Pending | Y |
-| SUB-07 | Submission cached | submission đã có trong cache | Đọc từ cache thay vì DB | `SubmissionCommand.SubmitProblemAsync()` — cache lookup | Pending | Y |
-| SUB-08 | Cache miss | Không có trong cache | Truy vấn DB, cập nhật cache | `SubmissionCommand.SubmitProblemAsync()` — cache miss handling | Pending | Y |
-| SUB-09 | Repository returns null | CreateAsync trả về null | Trả về `null`, không ném exception | `SubmissionCommand.SubmitProblemAsync()` — null return | Pending | Y |
-| SUB-10 | Exam not found | examination = null | Tạo submission bình thường (không kiểm tra session) | `SubmissionCommand.SubmitProblemAsync()` — exam null handling | Pending | Y |
-| SUB-11 | Submission to non-existent exam | request.ExamId không tồn tại | Tạo submission bình thường (exam check trả về null) | `SubmissionCommand.SubmitProblemAsync()` — non-existent exam | Pending | Y |
-| SUB-12 | StudentId null/empty | request.StudentId rỗng | Ném `ArgumentException` | `SubmissionCommand.SubmitProblemAsync()` — StudentId validation | Pending | Y |
+#### `bool VerifyHash(string input, string hash, IConfiguration configuration)`
 
-#### `AutoGradeAllSubmissionsOfProblemAsync(BulkSubmissionGradingRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SUB-13 | Problem not found | problem = null | Trả về AutoGradeProblemResponse với TotalSubmissions = 0 | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — problem null check | Pending | Y |
-| SUB-14 | Problem has no hidden testcases | hiddenTestCases.Count = 0 | Trả về response, không chấm bài nào | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — empty testcase list | Pending | Y |
-| SUB-15 | All submissions pass all tests | Tất cả test case đều SUCCESS | FinalScore = problemMark, Status = GRADED | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — all pass branch | Pending | Y |
-| SUB-16 | Partial pass | 3/5 test case passed | FinalScore = (3/5) * problemMark | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — score calculation | Pending | Y |
-| SUB-17 | No test cases pass | 0/5 passed | FinalScore = 0, Status = GRADED | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — all fail branch | Pending | Y |
-| SUB-18 | TestcaseEvaluator throws | ExecuteTestcasesAsync ném exception | ErrorMessage được ghi nhận, Submission không bị cập nhật | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — exception handling | Pending | Y |
-| SUB-19 | Multiple submissions | 10 submissions | Tất cả đều được chấm, response đúng TotalSubmissions | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — bulk loop | Pending | Y |
-| SUB-20 | Notification sent after grading | Chấm thành công | Gọi NotifyUsersAsync với NotificationType.GRADE_RESULT | `SubmissionCommand.AutoGradeAllSubmissionsOfProblemAsync()` — notification call | Pending | Y |
-
-#### `RegradeSingleSubmissionAsync(string submissionId, SingleSubmissionRegradeRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SUB-21 | Submission not found | submission = null | Trả về AutoGradeSubmissionResult với ErrorMessage = "Submission not found" | `SubmissionCommand.RegradeSingleSubmissionAsync()` — submission null check | Pending | Y |
-| SUB-22 | Problem not found | problem = null | Trả về ErrorMessage = "Problem not found" | `SubmissionCommand.RegradeSingleSubmissionAsync()` — problem null check | Pending | Y |
-| SUB-23 | No hidden testcases | hiddenTestCases.Count = 0 | Trả về TotalTestCases = 0, ErrorMessage = "No hidden test cases" | `SubmissionCommand.RegradeSingleSubmissionAsync()` — empty testcases | Pending | Y |
-| SUB-24 | Regrade success | Tất cả điều kiện hợp lệ | FinalScore được cập nhật, Status = GRADED, GradedDate cập nhật | `SubmissionCommand.RegradeSingleSubmissionAsync()` — success path | Pending | Y |
-| SUB-25 | Regrade exception | ExecuteTestcasesAsync throws | Trả về ErrorMessage = exception.Message | `SubmissionCommand.RegradeSingleSubmissionAsync()` — exception handling | Pending | Y |
-| SUB-26 | Notification sent | Regrade thành công | NotifyUsersAsync được gọi | `SubmissionCommand.RegradeSingleSubmissionAsync()` — notification | Pending | Y |
-
-#### `OverrideSubmissionScoreAsync(string submissionId, float newScore, float maxMark)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SUB-27 | Submission not found | submission = null | Trả về `false` | `SubmissionCommand.OverrideSubmissionScoreAsync()` — submission null check | Pending | Y |
-| SUB-28 | Score exceeds max mark | newScore > maxMark | Ném `InvalidOperationException` "Score cannot exceed max mark" | `SubmissionCommand.OverrideSubmissionScoreAsync()` — score validation | Pending | Y |
-| SUB-29 | Score equals max mark | newScore = maxMark | Trả về `true`, FinalScore = maxMark | `SubmissionCommand.OverrideSubmissionScoreAsync()` — boundary value | Pending | Y |
-| SUB-30 | Override previously ungraded | submission.Status = PENDING | Status chuyển sang GRADED | `SubmissionCommand.OverrideSubmissionScoreAsync()` — status transition | Pending | Y |
-| SUB-31 | Override already graded | submission.Status = GRADED | Chỉ cập nhật FinalScore, giữ nguyên Status | `SubmissionCommand.OverrideSubmissionScoreAsync()` — already graded path | Pending | Y |
-| SUB-32 | Update success | Tất cả điều kiện hợp lệ | Trả về `true`, UpdatedDate được cập nhật | `SubmissionCommand.OverrideSubmissionScoreAsync()` — success path | Pending | Y |
-| SUB-33 | Notification sent | Override thành công | NotifyUsersAsync được gọi | `SubmissionCommand.OverrideSubmissionScoreAsync()` — notification | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| HASH-VH-01 | Correct input and hash returns true | Input đúng, hash đúng | input="password", hash=HashString("password") | true | - | - | Pending |
+| HASH-VH-02 | Wrong input returns false | Input sai, hash đúng | input="wrong", hash=HashString("correct") | false | - | - | Pending |
+| HASH-VH-03 | Tampered hash returns false | Input đúng, hash bị sửa | input="test", hash=tamperedHash | false | - | - | Pending |
+| HASH-VH-04 | Different secret returns false | Hash tạo bằng secret A, verify bằng secret B | input="test", hash=hashA | false | - | - | Pending |
+| HASH-VH-05 | Case sensitive - uppercase fails | Hash của lowercase | input="PASSWORD", hash=HashString("password") | false | - | - | Pending |
+| HASH-VH-06 | Empty hash returns false | Hash = "" | input="test", hash="" | false | - | - | Pending |
+| HASH-VH-07 | Malformed hash returns false | Hash không phải hex | input="test", hash="not-a-valid-hex-hash" | false | - | - | Pending |
+| HASH-VH-08 | Whitespace difference returns false | Input có/không có trailing space | input="pass ", hash=HashString("pass") | false | - | - | Pending |
 
 ---
 
-### 4.2. ProblemCommand
+### 2.3. OptGenerator (Static)
 
-**Mục đích:** CRUD cho đề bài lập trình.
+**File:** `Application/Utils/OptGenerator.cs`
 
-#### `CreateProblemAsync(CreateProblemRequest request)`
+#### `string GenerateOpt(int length = 6)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PRO-01 | Create successfully | Request hợp lệ, không trùng tên | Problem được tạo, trả về response | `ProblemCommand.CreateProblemAsync()` — success path | Pending | Y |
-| PRO-02 | Duplicate problem name | Tên đã tồn tại trong cùng subject | Ném `InvalidOperationException` "Problem with this name already exists" | `ProblemCommand.CreateProblemAsync()` — duplicate name check | Pending | Y |
-| PRO-03 | Invalid difficulty | request.Difficulty = "INVALID" | Ném `ArgumentException` | `ProblemCommand.CreateProblemAsync()` — difficulty enum validation | Pending | Y |
-| PRO-04 | Empty title | request.Title = "" hoặc null | Ném `ArgumentException` | `ProblemCommand.CreateProblemAsync()` — title validation | Pending | Y |
-| PRO-05 | Null testcases | request.TestCases = null | Tạo problem với danh sách rỗng | `ProblemCommand.CreateProblemAsync()` — null testcases handling | Pending | Y |
-| PRO-06 | Invalid time limit | request.TimeLimit < 0 | Ném `ArgumentException` | `ProblemCommand.CreateProblemAsync()` — TimeLimit validation | Pending | Y |
-| PRO-07 | Invalid memory limit | request.MemoryLimit < 0 | Ném `ArgumentException` | `ProblemCommand.CreateProblemAsync()` — MemoryLimit validation | Pending | Y |
-
-#### `UpdateProblemAsync(string problemId, UpdateProblemRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PRO-08 | Update successfully | Request hợp lệ | Problem được cập nhật, UpdatedDate thay đổi | `ProblemCommand.UpdateProblemAsync()` — success path | Pending | Y |
-| PRO-09 | Problem not found | problemId không tồn tại | Ném `InvalidOperationException` | `ProblemCommand.UpdateProblemAsync()` — not found check | Pending | Y |
-| PRO-10 | Rename to existing name | Đổi tên trùng với problem khác | Ném `InvalidOperationException` | `ProblemCommand.UpdateProblemAsync()` — duplicate name check | Pending | Y |
-| PRO-11 | Partial update | Chỉ cập nhật description, giữ nguyên title | Title giữ nguyên, description được cập nhật | `ProblemCommand.UpdateProblemAsync()` — partial update | Pending | Y |
-| PRO-12 | Soft delete related exams | Exam chứa problem này bị xóa mềm | Các Exam liên quan được đánh dấu IsDeleted = true | `ProblemCommand.UpdateProblemAsync()` — cascade soft delete | Pending | Y |
-
-#### `DeleteProblemAsync(string problemId)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PRO-13 | Delete successfully | Problem tồn tại, không có submission | Problem.IsDeleted = true | `ProblemCommand.DeleteProblemAsync()` — success path | Pending | Y |
-| PRO-14 | Has existing submissions | Problem có Submission liên quan | Ném `InvalidOperationException` hoặc soft delete + cảnh báo | `ProblemCommand.DeleteProblemAsync()` — submission check | Pending | Y |
-| PRO-15 | Problem not found | problemId không tồn tại | Ném `InvalidOperationException` | `ProblemCommand.DeleteProblemAsync()` — not found check | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| OTP-G-01 | Default length 6 returns 6-digit string | length=6 (default) | (gọi không tham số) | Returns string length=6 | - | - | Pending |
+| OTP-G-02 | Length 4 returns 4-digit string | length=4 | length=4 | Returns string length=4 | - | - | Pending |
+| OTP-G-03 | Length 10 returns 10-digit string | length=10 | length=10 | Returns string length=10 | - | - | Pending |
+| OTP-G-04 | Length 1 returns 1-digit string | length=1 | length=1 | Returns string length=1 | - | - | Pending |
+| OTP-G-05 | Length 0 returns empty string | length=0 | length=0 | Returns "" | - | - | Pending |
+| OTP-G-06 | Length 100 returns 100-digit string | length=100 | length=100 | Returns string length=100 | - | - | Pending |
+| OTP-G-07 | Result contains only digits | any length | length=6, gọi nhiều lần | result.All(char.IsDigit) == true | - | - | Pending |
+| OTP-G-08 | Multiple calls produce different results (randomness) | gọi nhiều lần | length=6, gọi 100 lần | Có ít nhất 90 kết quả khác nhau | - | - | Pending |
+| OTP-G-09 | All digits 0-9 are possible | gọi đủ nhiều lần | length=6, gọi 10000 lần | Mỗi digit 0-9 xuất hiện ít nhất 1 lần | - | - | Pending |
 
 ---
 
-### 4.3. ExaminationCommand
+### 2.4. GoogleTokenVerifier
 
-**Mục đích:** CRUD cho ca thi, quản lý lịch thi tự động.
+**File:** `Application/Utils/GoogleTokenVerifier.cs`
 
-#### `CreateAsync(ExaminationRequestDTO request)`
+#### `Task<GoogleTokenPayload> VerifyTokenAsync(string idToken)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EXM-01 | Create successfully | Request hợp lệ | Examination được tạo, Status = PENDING, ScheduleJobs được gọi | `ExaminationCommand.CreateAsync()` — success path | Pending | Y |
-| EXM-02 | Classroom not found | classroom = null | Ném exception | `ExaminationCommand.CreateAsync()` — classroom validation | Pending | Y |
-| EXM-03 | Start datetime in past | startDatetime < now | Tạo được nhưng ScheduleJobs xử lý đúng (job fire immediately) | `ExaminationCommand.CreateAsync()` — past datetime handling | Pending | Y |
-| EXM-04 | End datetime before start | endDatetime < startDatetime | Ném `ArgumentException` | `ExaminationCommand.CreateAsync()` — datetime validation | Pending | Y |
-| EXM-05 | Empty problem list | Problems = [] | Tạo được exam không có đề bài | `ExaminationCommand.CreateAsync()` — empty problem list | Pending | Y |
-| EXM-06 | Mode = EXAMINATION | mode = EXAMINATION | Exam được tạo với mode chính xác | `ExaminationCommand.CreateAsync()` — EXAMINATION mode | Pending | Y |
-| EXM-07 | Mode = PRACTICAL | mode = PRACTICAL | Exam được tạo với mode chính xác | `ExaminationCommand.CreateAsync()` — PRACTICAL mode | Pending | Y |
-| EXM-08 | Invalid status value | request.Status = "INVALID" | Ném `ArgumentException` "Invalid status" | `ExaminationCommand.CreateAsync()` — status enum validation | Pending | Y |
-| EXM-09 | Notification failure | NotifyClassroomAsync throws | Ném exception (đã được test ở test hiện tại) | `ExaminationCommand.CreateAsync()` — notification error handling | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| GTV-V-01 | Valid Google ID token returns payload with Email | Valid token từ Google OAuth | idToken = validGoogleToken | Returns GoogleTokenPayload với Email != null | - | - | Pending |
+| GTV-V-02 | Valid token returns payload with GoogleId | Valid token | idToken = validGoogleToken | Returns payload.GoogleId != null | - | - | Pending |
+| GTV-V-03 | Valid token returns payload with Name and Picture | Valid token | idToken = validGoogleToken | Returns payload.Name != null, payload.Picture != null | - | - | Pending |
+| GTV-V-04 | Null token throws InvalidOperationException | token = null | idToken = null | - | InvalidOperationException, message chứa "Google token" | - | Pending |
+| GTV-V-05 | Empty token throws InvalidOperationException | token = "" | idToken = "" | - | InvalidOperationException | - | Pending |
+| GTV-V-06 | Whitespace-only token throws | token = "   " | idToken = "   " | - | InvalidOperationException | - | Pending |
+| GTV-V-07 | Malformed token throws | token không đúng format | idToken = "not.a.valid.jwt" | - | InvalidOperationException | - | Pending |
+| GTV-V-08 | Token with wrong audience throws | Token tạo cho client ID khác | idToken = tokenForDifferentClientId | - | InvalidOperationException | - | Pending |
+| GTV-V-09 | Expired token throws | Token đã hết hạn | idToken = expiredToken | - | InvalidOperationException | - | Pending |
+| GTV-V-10 | Token missing parts throws | Token chỉ có 2 phần | idToken = "only.two.parts" | - | InvalidOperationException | - | Pending |
 
-#### `UpdateAsync(string examId, ExaminationRequestDTO request)`
+#### `Constructor`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EXM-10 | Change only start datetime | startDatetime khác | RescheduleJobs được gọi với ngày mới | `ExaminationCommand.UpdateAsync()` — date change detection | Pending | Y |
-| EXM-11 | Change only end datetime | endDatetime khác | RescheduleJobs được gọi | `ExaminationCommand.UpdateAsync()` — date change detection | Pending | Y |
-| EXM-12 | Change both dates | Cả start và end đều khác | RescheduleJobs được gọi đúng 1 lần | `ExaminationCommand.UpdateAsync()` — both dates changed | Pending | Y |
-| EXM-13 | No date changes | start = oldStart, end = oldEnd | RescheduleJobs không được gọi | `ExaminationCommand.UpdateAsync()` — no date change | Pending | Y |
-| EXM-14 | Exam not found | examId không tồn tại | Ném exception "Examination with given Id does not exist" | `ExaminationCommand.UpdateAsync()` — not found check | Pending | Y |
-| EXM-15 | Update status to CANCELLED | status = CANCELLED | Trạng thái được cập nhật | `ExaminationCommand.UpdateAsync()` — status update | Pending | Y |
-
-#### `DeleteAsync(string examId)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EXM-16 | Delete successfully | Exam tồn tại | CancelJobs được gọi, exam được xóa khỏi DB | `ExaminationCommand.DeleteAsync()` — success path | Pending | Y |
-| EXM-17 | Exam not found | examId không tồn tại | Ném exception "Examination with given Id does not exist" | `ExaminationCommand.DeleteAsync()` — not found check | Pending | Y |
-| EXM-18 | Has ongoing submissions | Có submission đang chạy | Cân nhắc: ném exception hoặc cho xóa + cảnh báo | `ExaminationCommand.DeleteAsync()` — submission check | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| GTV-CTOR-01 | Missing ClientId throws | config["Google:ClientId"] = null | IConfiguration mock | - | InvalidOperationException, "Google:ClientId is not configured" | - | Pending |
+| GTV-CTOR-02 | Empty ClientId throws | config["Google:ClientId"] = "" | IConfiguration mock | - | InvalidOperationException, "Google:ClientId is not configured" | - | Pending |
 
 ---
 
-**Mục đích:** Quản lý lớp học.
+### 2.5. ResponseUtil (Static)
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| CLA-01 | Create classroom successfully | Request hợp lệ | Classroom được tạo | `ClassroomCommand.CreateAsync()` — success path | Pending | Y |
-| CLA-02 | Duplicate classroom name | Tên trùng trong cùng subject | Ném exception | `ClassroomCommand.CreateAsync()` — duplicate name check | Pending | Y |
-| CLA-03 | Add student to classroom | Student tồn tại, chưa trong lớp | Thêm thành công vào ClassEnrollment | `ClassroomCommand.AddStudentAsync()` — success | Pending | Y |
-| CLA-04 | Add duplicate student | Student đã trong lớp | Ném exception hoặc bỏ qua không lỗi | `ClassroomCommand.AddStudentAsync()` — duplicate check | Pending | Y |
-| CLA-05 | Remove student | Student đang trong lớp | Xóa khỏi ClassEnrollment | `ClassroomCommand.RemoveStudentAsync()` — success | Pending | Y |
-| CLA-06 | Remove non-existent student | Student không trong lớp | Không lỗi, bỏ qua | `ClassroomCommand.RemoveStudentAsync()` — not found | Pending | Y |
-| CLA-07 | Delete classroom with students | Lớp có sinh viên đang học | Xóa mềm, thông báo | `ClassroomCommand.DeleteAsync()` — cascade soft delete | Pending | Y |
-| CLA-08 | Assign lecturer | lecturerId hợp lệ | Classroom.OwnerId được gán | `ClassroomCommand.UpdateAsync()` — owner assignment | Pending | Y |
+**File:** `Application/Utils/ResponseUtil.cs`
 
----
+#### `ActionResult Success<T>(T dataResponse, string message = "Success", int statusCode = 200)`
 
-### 4.5. StudentExamSessionCommand
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RU-S-01 | With data returns 200 status | T = object | data={Id:1,Name:"Test"} | result.StatusCode==200 | - | - | Pending |
+| RU-S-02 | With data returns ApiResponse with Success=true | T = string | data="test" | response.Success==true, response.DataResponse=="test" | - | - | Pending |
+| RU-S-03 | With default message returns "Success" | T = object | (không truyền message) | response.Message=="Success" | - | - | Pending |
+| RU-S-04 | With custom message returns custom message | T = string | data="ok", message="Created successfully" | response.Message=="Created successfully" | - | - | Pending |
+| RU-S-05 | With custom status code returns 201 | T = object | data={Id:1}, statusCode=201 | result.StatusCode==201 | - | - | Pending |
+| RU-S-06 | With null data returns null in response | T = string | data=null | response.DataResponse==null | - | - | Pending |
+| RU-S-07 | With complex object returns correct data | T = nested object | data={Nested:{Value:"x"},List:[1,2,3]} | response.DataResponse != null | - | - | Pending |
 
-**Mục đích:** Quản lý phiên thi của sinh viên.
+#### `ActionResult<ApiResponse<T>> Error<T>(string message = "Internal Server Error", int statusCode = 500, string? error = null, string? stack = null)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SES-01 | Start exam session | Exam đang ONGOING, chưa có session | Session được tạo, Phase = Active | `StudentExamSessionCommand.StartAsync()` — success path | Pending | Y |
-| SES-02 | Start already started session | Session đã Active | Trả về session hiện tại, không tạo mới | `StudentExamSessionCommand.StartAsync()` — duplicate session | Pending | Y |
-| SES-03 | Start COMPLETED exam | Exam đã COMPLETED | Ném `InvalidOperationException` | `StudentExamSessionCommand.StartAsync()` — status check | Pending | Y |
-| SES-04 | Start PENDING exam | Exam chưa bắt đầu | Ném `InvalidOperationException` "Exam has not started yet" | `StudentExamSessionCommand.StartAsync()` — status check | Pending | Y |
-| SES-05 | Submit exam | Session đang Active | Phase chuyển sang Submitted, SubmittedDate được ghi | `StudentExamSessionCommand.SubmitAsync()` — success path | Pending | Y |
-| SES-06 | Submit already submitted | Session đã Submitted | Ném `InvalidOperationException` hoặc idempotent | `StudentExamSessionCommand.SubmitAsync()` — duplicate submit | Pending | Y |
-| SES-07 | Force submit | Lecturer yêu cầu ép nộp | Phase = Submitted, SubmittedDate = now, các submission bị hủy/dừng | `StudentExamSessionCommand.ForceSubmitAsync()` — force submit | Pending | Y |
-| SES-08 | Session not found | studentId/examId không tồn tại | Ném exception | `StudentExamSessionCommand.StartAsync()` — not found | Pending | Y |
-
----
-
-### 4.6. QuizCommand / ClassroomQuizCommand
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| QZ-01 | Create quiz successfully | Quiz hợp lệ | Quiz được tạo, Questions được liên kết | `QuizCommand.CreateAsync()` — success path | Pending | Y |
-| QZ-02 | Add question to quiz | Question tồn tại, chưa trong quiz | Thêm thành công | `QuizCommand.AddQuestionAsync()` — success path | Pending | Y |
-| QZ-03 | Remove question from quiz | Question đang trong quiz | Xóa khỏi quiz, không xóa question | `QuizCommand.RemoveQuestionAsync()` — success path | Pending | Y |
-| QZ-04 | Shuffle questions | Shuffle = true | Questions được random thứ tự | `QuizCommand.CreateAsync()` — shuffle logic | Pending | Y |
-| QZ-05 | Quiz with time limit | Quiz có thời gian làm bài | TimeLimit được lưu | `QuizCommand.CreateAsync()` — time limit field | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RU-E-01 | Default returns 500 status | T = string | (gọi không tham số) | result.StatusCode==500 | - | - | Pending |
+| RU-E-02 | Default message is "Internal Server Error" | T = string | (không truyền message) | response.Message=="Internal Server Error" | - | - | Pending |
+| RU-E-03 | With custom message returns custom message | T = int | message="Not Found" | response.Message=="Not Found" | - | - | Pending |
+| RU-E-04 | With custom status code returns correct code | T = object | statusCode=400 | result.StatusCode==400 | - | - | Pending |
+| RU-E-05 | With 404 returns NotFound response | T = string | message="Resource not found", statusCode=404 | result.StatusCode==404, response.Success==false | - | - | Pending |
+| RU-E-06 | With error detail includes error in response | T = string | error="Detailed error info" | response.Error=="Detailed error info" | - | - | Pending |
+| RU-E-07 | Without error detail has null error | T = string | (không truyền error) | response.Error==null | - | - | Pending |
+| RU-E-08 | With stack trace includes stack in response | T = string | stack="at SomeMethod() in File.cs:line 42" | response.Stack=="at SomeMethod()..." | - | - | Pending |
+| RU-E-09 | Generic type returns correct response type | T = List<int> | T=List<int> | result.Value is ApiResponse<List<int>> | - | - | Pending |
 
 ---
 
-### 4.7. DiscussionIssueCommand
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| DI-01 | Create discussion successfully | Request hợp lệ | DiscussionIssue được tạo | `DiscussionIssueCommand.CreateAsync()` — success path | Pending | Y |
-| DI-02 | Reply to discussion | Parent issue tồn tại | Reply được tạo với ParentId đúng | `DiscussionIssueCommand.CreateReplyAsync()` — reply path | Pending | Y |
-| DI-03 | Mark as resolved | Issue chưa resolved | IsResolved = true | `DiscussionIssueCommand.MarkResolvedAsync()` — success path | Pending | Y |
-| DI-04 | Delete own discussion | User là chủ sở hữu | Issue.IsDeleted = true | `DiscussionIssueCommand.DeleteAsync()` — own issue | Pending | Y |
-| DI-05 | Delete others' discussion | User không phải chủ sở hữu | Ném `UnauthorizedAccessException` | `DiscussionIssueCommand.DeleteAsync()` — authorization | Pending | Y |
+## 3. AUTHSERVICE — COMMANDS
 
 ---
 
-### 4.8. MaterialCommand
+### 3.1. UserCommand
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| MAT-01 | Upload material | File hợp lệ, upload lên S3 | Material được tạo, S3 URL được lưu | `MaterialCommand.UploadAsync()` — success + S3 upload | Pending | Y |
-| MAT-02 | Delete material | Material tồn tại | Xóa khỏi DB và S3 | `MaterialCommand.DeleteAsync()` — DB + S3 delete | Pending | Y |
-| MAT-03 | Get materials by subject | Subject có nhiều material | Trả về danh sách đã sắp xếp theo ngày | `MaterialQuery.GetBySubjectId()` — ordering | Pending | Y |
-| MAT-04 | Upload unsupported file type | File extension không được hỗ trợ | Ném exception | `MaterialCommand.UploadAsync()` — file type validation | Pending | Y |
+**File:** `Application/Commands/UserCommand.cs`
+**Dependencies:** IUserRepository, IUserOptCacheRepository, IUserCacheRepository, JwtUtil, UserMapper, IEmailService, IConfiguration
 
----
+#### `Task<AuthResponse> CreateUserAsync(RegisterData registerData)`
 
-### 4.9. NotificationCommand
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-CU-01 | New user creates successfully and returns AuthResponse | User chưa tồn tại | RegisterData {Email:"new@test.com",Password:"pass123",Fullname:"New User",Role:STUDENT} | Returns AuthResponse với AccessToken != null, RefreshToken != null, UserProfile.Email=="new@test.com" | - | LogInformation("User created: {Email}", email) | Pending |
+| UC-CU-02 | Duplicate email throws InvalidOperationException | User đã tồn tại | RegisterData {Email:"existing@test.com"} | - | InvalidOperationException, "User with this email already exists." | - | Pending |
+| UC-CU-03 | Repository returns null throws | Repo.CreateAsync returns null | RegisterData valid | - | InvalidOperationException, "An error occurred while creating the account" | LogError | Pending |
+| UC-CU-04 | Email sending failure is logged but doesn't throw | EmailService.SendEmailAsync throws | RegisterData valid, email fails | Returns AuthResponse (email error is non-critical) | - | LogWarning("Failed to send welcome email") | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| NTF-01 | Send notification to single user | userId hợp lệ | Notification được tạo, gửi qua SignalR | `NotificationCommand.SendAsync()` — single user + SignalR | Pending | Y |
-| NTF-02 | Send notification to multiple users | Nhiều userId | Notification được tạo cho từng user | `NotificationCommand.SendBulkAsync()` — bulk send | Pending | Y |
-| NTF-03 | Mark notification as read | notification tồn tại, chưa đọc | IsRead = true, ReadDate = now | `NotificationCommand.MarkAsReadAsync()` — success | Pending | Y |
-| NTF-04 | Mark non-existent notification | notificationId không tồn tại | Ném exception | `NotificationCommand.MarkAsReadAsync()` — not found | Pending | Y |
+#### `Task<string> RegisterWithEmailVerificationAsync(RegisterData registerData)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-RE-01 | New email saves to cache and returns session string | User chưa tồn tại | RegisterData {Email:"new@test.com"} | Returns non-empty string (registerSession) | - | - | Pending |
+| UC-RE-02 | Duplicate email throws | User đã tồn tại | RegisterData {Email:"existing@test.com"} | - | InvalidOperationException, "User with this email already exists." | - | Pending |
+| UC-RE-03 | Cache save failure throws | Cache.SaveAsync returns false | RegisterData valid | - | InvalidOperationException, "Failed to save user to cache" | LogError | Pending |
 
-### 4.10. KeystrokeLogCommand
+#### `Task<bool> VerifyEmailAsync(VerifyEmailRequest verifyEmailRequest)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| KSL-01 | Save single keystroke | Log hợp lệ | KeystrokeLog được tạo | `KeystrokeLogCommand.SaveAsync()` — single insert | Pending | Y |
-| KSL-02 | Batch save keystrokes | 100 keystroke logs | Tất cả được batch insert thành công | `KeystrokeLogCommand.SaveBatchAsync()` — batch insert | Pending | Y |
-| KSL-03 | Save with null metadata | Metadata = null | Xử lý không crash, lưu null | `KeystrokeLogCommand.SaveAsync()` — null metadata | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-VE-01 | Valid session + correct OTP saves user to DB and returns true | Session tồn tại trong cache với OTP đúng | VerifyEmailRequest {RegisterSession:"valid-session", Opt:"123456"} | Returns true, User tạo trong DB | - | LogInformation("Email verified") | Pending |
+| UC-VE-02 | Invalid register session throws | Session không tồn tại trong cache | VerifyEmailRequest {RegisterSession:"invalid-session", Opt:"123456"} | - | InvalidOperationException, "Invalid register session" | - | Pending |
+| UC-VE-03 | Wrong OTP throws | Session tồn tại nhưng OTP sai | VerifyEmailRequest {RegisterSession:"valid-session", Opt:"999999"} | - | InvalidOperationException, "Invalid register session" | - | Pending |
+| UC-VE-04 | Save to DB fails throws | Repo.CreateAsync returns null | VerifyEmailRequest valid | - | InvalidOperationException, "Failed to save user to database" | LogError | Pending |
 
----
+#### `Task<bool> SendForgotPasswordLinkAsync(ForgotPasswordRequest forgotPasswordRequest)`
 
-### 4.11. OCRCommand
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-FP-01 | Existing user saves to cache and sends email returns true | User tồn tại | ForgotPasswordRequest {Email:"user@test.com"} | Returns true | - | LogInformation | Pending |
+| UC-FP-02 | User not found throws | User không tồn tại | ForgotPasswordRequest {Email:"nonexistent@test.com"} | - | InvalidOperationException, "User not found" | - | Pending |
+| UC-FP-03 | Cache save fails throws | Cache.SaveAsync returns false | ForgotPasswordRequest {Email:"user@test.com"} | - | InvalidOperationException, "Failed to save user to cache" | LogError | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| OCR-01 | OCR with clear image | Ảnh rõ ràng | Trả về text chính xác | `OcrService.RecognizeTextAsync()` — clean image | Pending | Y |
-| OCR-02 | OCR with noisy image | Ảnh có nhiễu | Trả về text đã được làm sạch | `OcrService.RecognizeTextAsync()` — noise handling | Pending | Y |
-| OCR-03 | OCR empty image | Ảnh trắng | Trả về chuỗi rỗng | `OcrService.RecognizeTextAsync()` — empty image | Pending | Y |
-| OCR-04 | Unsupported image format | Format = BMP | Ném exception | `OcrService.RecognizeTextAsync()` — format validation | Pending | Y |
-| OCR-05 | Large image | Kích thước > 10MB | Ném exception hoặc tự resize | `OcrService.RecognizeTextAsync()` — size check | Pending | Y |
+#### `Task<bool> ResetPasswordAsync(ResetPasswordRequest resetPasswordRequest)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-RP-01 | Valid token updates password returns true | Token tồn tại trong cache | ResetPasswordRequest {Token:"valid-token",NewPassword:"newpass123"} | Returns true | - | LogInformation | Pending |
+| UC-RP-02 | Invalid token throws | Token không tồn tại trong cache | ResetPasswordRequest {Token:"invalid-token"} | - | InvalidOperationException, "Invalid token" | - | Pending |
+| UC-RP-03 | Update fails throws | Repo.UpdatePasswordAsync returns null | ResetPasswordRequest valid | - | InvalidOperationException, "Failed to update user password" | LogError | Pending |
 
-### 4.12. ExamLogCommand
+#### `Task<GrantAccountResponse> GrantAccountAsync(GrantAccountRequest grantAccountRequest)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EL-01 | Log suspicious activity | Hành vi đáng ngờ (copy-paste nhiều) | ExamLog được tạo, Suspicious = true | `ExamLogCommand.CreateAsync()` — suspicious flag | Pending | Y |
-| EL-02 | Log normal activity | Hành vi bình thường | ExamLog được tạo, Suspicious = false | `ExamLogCommand.CreateAsync()` — normal activity | Pending | Y |
-| EL-03 | Log tab switch | studentId = "std1", event = "TabSwitch" | ExamLog được ghi | `ExamLogCommand.CreateAsync()` — tab switch event | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-GA-01 | Valid LECTURER creates with temp password | Role=LECTURER, email chưa tồn tại | GrantAccountRequest {Email:"lec@test.com",Role:"LECTURER"} | Returns GrantAccountResponse với TempPassword != null | - | LogInformation | Pending |
+| UC-GA-02 | Valid STUDENT creates with temp password | Role=STUDENT, email chưa tồn tại | GrantAccountRequest {Email:"stu@test.com",Role:"STUDENT"} | Returns GrantAccountResponse với TempPassword != null | - | LogInformation | Pending |
+| UC-GA-03 | ADMIN role throws | Role=ADMIN | GrantAccountRequest {Role:"ADMIN"} | - | InvalidOperationException, "Admin can only grant accounts to Lecturer or Student" | - | Pending |
+| UC-GA-04 | Duplicate email throws | Email đã tồn tại | GrantAccountRequest {Email:"existing@test.com"} | - | InvalidOperationException, "User with this email already exists" | - | Pending |
+| UC-GA-05 | Create fails throws | Repo.CreateAsync returns null | GrantAccountRequest valid | - | InvalidOperationException, "Failed to create user account" | LogError | Pending |
 
----
+#### `Task<bool> ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest resetFirstLoginRequest)`
 
-### 4.13. QuizAttemptCommand
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-RFL-01 | First login user resets password successfully | User.FirstLogin=true, user tồn tại | ResetFirstLoginPasswordRequest {Email:"user@test.com",NewPassword:"newpass"} | Returns true | - | LogInformation | Pending |
+| UC-RFL-02 | User not found throws | User không tồn tại | ResetFirstLoginPasswordRequest {Email:"nonexistent@test.com"} | - | InvalidOperationException, "User not found" | - | Pending |
+| UC-RFL-03 | Not first login user throws | User.FirstLogin=false | ResetFirstLoginPasswordRequest {Email:"user@test.com"} | - | InvalidOperationException, "This endpoint is only for users on first login" | - | Pending |
+| UC-RFL-04 | Update fails throws | Repo returns null | ResetFirstLoginPasswordRequest valid | - | InvalidOperationException, "Failed to reset password" | LogError | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| QA-01 | Start quiz attempt | Quiz tồn tại, chưa có attempt | QuizAttempt được tạo, StartDate = now | `QuizAttemptCommand.StartAsync()` — success path | Pending | Y |
-| QA-02 | Submit quiz with all answers | Tất cả câu hỏi đã trả lời | SubmittedDate = now, auto-grade được tính | `QuizAttemptCommand.SubmitAsync()` — full submit | Pending | Y |
-| QA-03 | Submit quiz with missing answers | Một số câu chưa trả lời | SubmittedDate = now, câu chưa trả = null/0 điểm | `QuizAttemptCommand.SubmitAsync()` — partial submit | Pending | Y |
-| QA-04 | Auto grade correct answer | Answer đúng | Score = điểm của câu đó | `QuizAttemptCommand.AutoGradeAsync()` — correct answer | Pending | Y |
-| QA-05 | Auto grade wrong answer | Answer sai | Score = 0 | `QuizAttemptCommand.AutoGradeAsync()` — wrong answer | Pending | Y |
-| QA-06 | Multiple attempts allowed | Quiz.allowMultipleAttempts = true | Tạo attempt mới | `QuizAttemptCommand.StartAsync()` — multiple attempts | Pending | Y |
-| QA-07 | Multiple attempts not allowed | Quiz.allowMultipleAttempts = false, đã có attempt | Ném exception | `QuizAttemptCommand.StartAsync()` — attempt limit | Pending | Y |
+#### `Task<bool> ChangePasswordAsync(string accessToken, ChangePasswordRequest changePasswordRequest)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-CP-01 | Correct current password updates successfully | CurrentPassword đúng, user tồn tại | accessToken=valid, ChangePasswordRequest {CurrentPassword:"old",NewPassword:"new",ConfirmPassword:"new"} | Returns true | - | LogInformation | Pending |
+| UC-CP-02 | User not found (invalid token) throws | Token không decode được hoặc user không tồn tại | accessToken=invalid | - | InvalidOperationException, "User not found" | - | Pending |
+| UC-CP-03 | Wrong current password throws | CurrentPassword sai | accessToken=valid, ChangePasswordRequest {CurrentPassword:"wrong"} | - | InvalidOperationException, "Current password is incorrect" | - | Pending |
+| UC-CP-04 | New password != confirm password throws | NewPassword != ConfirmPassword | accessToken=valid, ChangePasswordRequest {NewPassword:"new1",ConfirmPassword:"new2"} | - | InvalidOperationException, "New password and confirm password do not match" | - | Pending |
+| UC-CP-05 | New password too short (< 5 chars) throws | NewPassword.Length < 5 | accessToken=valid, ChangePasswordRequest {NewPassword:"1234"} | - | InvalidOperationException, "New password must be between 5 and 64 characters" | - | Pending |
+| UC-CP-06 | New password too long (> 64 chars) throws | NewPassword.Length > 64 | accessToken=valid, NewPassword=65-char string | - | InvalidOperationException, "New password must be between 5 and 64 characters" | - | Pending |
+| UC-CP-07 | Update fails throws | Repo.UpdatePasswordAsync returns null | accessToken=valid, valid request | - | InvalidOperationException, "Failed to update password" | LogError | Pending |
 
-### 4.14. StudentAnswerCommand
+#### `Task<UserProfileResponse> UpdateUserAsync(string userId, string? fullname, string? roleNumber, Role? role, bool? isEnable)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SA-01 | Save answer auto-save | isAutoSave = true | StudentAnswer được cập nhật, không trigger grade | `StudentAnswerCommand.SaveAsync()` — auto-save path | Pending | Y |
-| SA-02 | Save answer manual | isAutoSave = false, QuizAttempt.SubmittedDate = null | StudentAnswer được cập nhật | `StudentAnswerCommand.SaveAsync()` — manual save | Pending | Y |
-| SA-03 | Save after submission | QuizAttempt đã submit | Ném `InvalidOperationException` | `StudentAnswerCommand.SaveAsync()` — post-submit check | Pending | Y |
-| SA-04 | Update existing answer | StudentAnswer đã tồn tại | Cập nhật nội dung answer | `StudentAnswerCommand.SaveAsync()` — update path | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-UU-01 | Valid userId updates fields returns UserProfileResponse | User tồn tại | userId="u1", fullname="Updated", role=LECTURER | Returns UserProfileResponse với fullname="Updated" | - | LogInformation | Pending |
+| UC-UU-02 | FindByIdAsync returns null throws | User không tồn tại | userId="nonexistent" | - | InvalidOperationException, "Failed to update user" | LogError | Pending |
+| UC-UU-03 | Update fails throws | Repo.UpdateUserAsync returns null | userId="u1", valid params | - | InvalidOperationException, "Failed to update user" | LogError | Pending |
 
----
+#### `Task<UserProfileResponse> UpdateProfileAsync(string accessToken, string? fullname, DateTime? birthday, string? avatarUrl)`
 
-### 4.15. ExaminationTemplateCommand
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| ET-01 | Create template | Request hợp lệ | ExaminationTemplate được tạo | `ExaminationTemplateCommand.CreateAsync()` — success | Pending | Y |
-| ET-02 | Copy template to new exam | Template có problem list | Tạo exam mới với problem list giống template | `ExaminationTemplateCommand.CopyToExamAsync()` — copy | Pending | Y |
-| ET-03 | Update template | Template tồn tại | Cập nhật thành công | `ExaminationTemplateCommand.UpdateAsync()` — success | Pending | Y |
-| ET-04 | Delete template | Template tồn tại | Xóa template, không ảnh hưởng exam đã tạo | `ExaminationTemplateCommand.DeleteAsync()` — delete | Pending | Y |
-
----
-
-### 4.16. ProgrammingLanguageCommand
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PL-01 | Add supported language | Language hợp lệ | ProgrammingLanguage được tạo | `ProgrammingLanguageCommand.CreateAsync()` — success | Pending | Y |
-| PL-02 | Duplicate language | Language đã tồn tại | Ném exception | `ProgrammingLanguageCommand.CreateAsync()` — duplicate check | Pending | Y |
-| PL-03 | Delete language | Language đang được sử dụng bởi exam | Ném exception hoặc cảnh báo | `ProgrammingLanguageCommand.DeleteAsync()` — usage check | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UC-UP-01 | Valid token updates own profile returns UserProfileResponse | Token hợp lệ, user tồn tại | accessToken=valid, fullname="New Name" | Returns UserProfileResponse với fullname="New Name" | - | LogInformation | Pending |
+| UC-UP-02 | User not found (invalid token) throws | Token decode fails | accessToken=invalid | - | SecurityTokenException -> wrapped as InvalidOperationException | - | Pending |
+| UC-UP-03 | Update fails throws | Repo.UpdateProfileAsync returns null | accessToken=valid, valid params | - | InvalidOperationException, "Failed to update profile" | LogError | Pending |
 
 ---
 
-### 4.17. SlotCommand
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SL-01 | Create slot | Slot hợp lệ | Slot được tạo | `SlotCommand.CreateAsync()` — success | Pending | Y |
-| SL-02 | Assign classroom | Classroom khả dụng | Slot.ClassroomId được gán | `SlotCommand.UpdateAsync()` — classroom assignment | Pending | Y |
-| SL-03 | Overlap slot | 2 slot cùng phòng, cùng giờ | Ném exception | `SlotCommand.CreateAsync()` — overlap validation | Pending | Y |
-| SL-04 | Delete slot | Slot đang được exam sử dụng | Ném exception hoặc cảnh báo | `SlotCommand.DeleteAsync()` — usage check | Pending | Y |
+## 4. AUTHSERVICE — QUERIES
 
 ---
 
-### 4.18. ErrorGroupCommand
+### 4.1. UserQuery
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EG-01 | Create error group | Group hợp lệ | ErrorGroup được tạo | `ErrorGroupCommand.CreateAsync()` — success | Pending | Y |
-| EG-02 | Link compilation error | Error tồn tại, group tồn tại | Compilation được liên kết | `ErrorGroupCommand.LinkCompilationErrorAsync()` — link | Pending | Y |
-| EG-03 | Get errors by language | languageId hợp lệ | Trả về danh sách ErrorGroup cho ngôn ngữ đó | `ErrorGroupQuery.GetByLanguageId()` — filter | Pending | Y |
+**File:** `Application/Queries/UserQuery.cs`
+**Dependencies:** IUserRepository, IConfiguration, JwtUtil, UserMapper, GoogleTokenVerifier
 
----
+#### `Task<AuthResponse> AuthenticateAsync(LoginCredentials credentials)`
 
-### 4.19. UserDeviceCommand
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UQ-A-01 | Valid email/password returns AuthResponse with tokens | credentials hợp lệ, user.IsEnable=true | LoginCredentials {Email:"user@test.com",Password:"correctpass"} | Returns AuthResponse với AccessToken != null, RefreshToken != null | - | - | Pending |
+| UQ-A-02 | Wrong password throws | User tồn tại, password sai | LoginCredentials {Password:"wrongpass"} | - | InvalidOperationException, "Invalid email or password" | - | Pending |
+| UQ-A-03 | User not found throws | Email không tồn tại | LoginCredentials {Email:"nonexistent@test.com"} | - | InvalidOperationException, "Invalid email or password" | - | Pending |
+| UQ-A-04 | Disabled user throws | User.IsEnable=false | LoginCredentials valid, user.IsEnable=false | - | InvalidOperationException, "User is forbidden" | - | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UD-01 | Register device | Device hợp lệ | UserDevice được tạo, DeviceToken được lưu | `UserDeviceCommand.RegisterAsync()` — success | Pending | Y |
-| UD-02 | Register duplicate device | Cùng deviceId, userId | Cập nhật DeviceToken | `UserDeviceCommand.RegisterAsync()` — duplicate device | Pending | Y |
-| UD-03 | Unregister device | Device tồn tại | UserDevice.IsActive = false | `UserDeviceCommand.UnregisterAsync()` — deactivate | Pending | Y |
-| UD-04 | Send push notification | Device đang active | Push được gửi thành công | `UserDeviceCommand.SendPushAsync()` — push send | Pending | Y |
+#### `Task<AuthResponse> AuthenticateWithGoogleAsync(string idToken)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UQ-AG-01 | Valid token + existing user with GoogleId returns AuthResponse | Token valid, user tồn tại với đúng GoogleId | idToken="valid-google-token" | Returns AuthResponse với tokens | - | - | Pending |
+| UQ-AG-02 | Valid token + existing user without GoogleId links account | Token valid, user tồn tại nhưng GoogleId empty | idToken="valid-google-token" | Calls UpdateGoogleIdAsync, returns AuthResponse | - | LogInformation("Google ID linked") | Pending |
+| UQ-AG-03 | Valid token + new user creates and returns AuthResponse | Token valid, user không tồn tại | idToken="valid-google-token" | Calls CreateAsync, returns AuthResponse | - | LogInformation | Pending |
+| UQ-AG-04 | Invalid Google token throws | Token không hợp lệ | idToken="invalid-token" | - | InvalidOperationException, "Invalid Google token" | - | Pending |
+| UQ-AG-05 | Existing user with different GoogleId throws | User tồn tại nhưng GoogleId khác | idToken="valid-google-token", user.GoogleId="different-id" | - | InvalidOperationException, "Google ID does not match this account" | - | Pending |
+| UQ-AG-06 | Disabled user throws | User tồn tại nhưng IsEnable=false | idToken="valid-google-token", user.IsEnable=false | - | InvalidOperationException, "User is forbidden" | - | Pending |
+| UQ-AG-07 | User not found and can't create throws | Token valid nhưng user not found và CreateAsync fails | idToken="valid-google-token" | - | InvalidOperationException, "User not found with this email" | LogError | Pending |
 
-### 4.20. ClassEnrollmentCommand
+#### `Task<UserProfileResponse> GetProfileAsync(string accessToken)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| CE-01 | Enroll student | Student và Classroom tồn tại | ClassEnrollment được tạo | `ClassEnrollmentCommand.EnrollAsync()` — success | Pending | Y |
-| CE-02 | Enroll duplicate | Student đã trong lớp | Ném exception | `ClassEnrollmentCommand.EnrollAsync()` — duplicate check | Pending | Y |
-| CE-03 | Withdraw student | Student đang trong lớp | Enrollment.IsActive = false | `ClassEnrollmentCommand.WithdrawAsync()` — withdraw | Pending | Y |
-| CE-04 | Enroll with role | Role = STUDENT/TEACHING_ASSISTANT | Role được lưu đúng | `ClassEnrollmentCommand.EnrollAsync()` — role assignment | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UQ-GP-01 | Valid token returns correct UserProfileResponse | Token hợp lệ, user tồn tại, IsEnable=true | accessToken=validJWT | Returns UserProfileResponse với đúng Id, Email, Role | - | - | Pending |
+| UQ-GP-02 | Invalid token throws SecurityTokenException | Token không hợp lệ | accessToken="invalid.jwt.token" | - | SecurityTokenException | - | Pending |
+| UQ-GP-03 | User not found throws | Token hợp lệ nhưng user không tồn tại | accessToken=validJWT, userId không tồn tại | - | InvalidOperationException, "User not found or inactive" | - | Pending |
+| UQ-GP-04 | Disabled user throws | User tồn tại nhưng IsEnable=false | accessToken=validJWT, user.IsEnable=false | - | InvalidOperationException, "User not found or inactive" | - | Pending |
 
----
+#### `Task<List<UserProfileResponse>> GetAllUsersAsync()`
 
-## 5. ACASSERVICE — QUERIES
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UQ-GAU-01 | Users exist returns list with correct count | Repo trả về list | (không có input) | Returns list với đúng số lượng và emails | - | - | Pending |
+| UQ-GAU-02 | No users returns empty list | Repo trả về empty list | (không có input) | Returns empty list | - | - | Pending |
+| UQ-GAU-03 | Repository throws exception re-thrown | Repo throws | (không có input) | - | Exception("Database error") được rethrow | LogError | Pending |
 
-### 5.1. ExaminationQuery
+#### `Task<PagedResult<UserProfileResponse>> GetPagedUsersAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null)`
 
-**Các hàm cần test:**
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UQ-GPU-01 | Valid params returns correct PagedResult | Repo trả về items + totalCount | pageIndex=0, pageSize=10 | Returns PagedResult với Items.Count, TotalCount, TotalPages đúng | - | - | Pending |
+| UQ-GPU-02 | Empty results returns empty PagedResult | Repo trả về empty | pageIndex=0, pageSize=10 | Items empty, TotalCount=0, TotalPages=0 | - | - | Pending |
+| UQ-GPU-03 | With searchTerm delegates to repository | searchTerm được truyền | searchTerm="john" | Repo.FindPagedAsync được gọi với searchTerm | - | - | Pending |
+| UQ-GPU-04 | With role filter delegates to repository | role được truyền | role="STUDENT" | Repo.FindPagedAsync được gọi với role | - | - | Pending |
+| UQ-GPU-05 | With isEnable filter delegates to repository | isEnable được truyền | isEnable=true | Repo.FindPagedAsync được gọi với isEnable | - | - | Pending |
+| UQ-GPU-06 | Combined filters delegates with all params | tất cả filters | searchTerm="j", role="LECTURER", isEnable=true | Repo.FindPagedAsync được gọi với tất cả params | - | - | Pending |
+| UQ-GPU-07 | PagedResult has correct pagination metadata | pageIndex=0, pageSize=10, total=25 | pageIndex=0, pageSize=10 | TotalPages=3, HasNextPage=true, HasPreviousPage=false | - | - | Pending |
+| UQ-GPU-08 | Last page has correct metadata | pageIndex=2, pageSize=10, total=25 | pageIndex=2, pageSize=10 | HasNextPage=false, HasPreviousPage=true | - | - | Pending |
+| UQ-GPU-09 | Repository throws exception re-thrown | Repo throws | pageIndex=0, pageSize=10 | - | Exception re-thrown | LogError | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EQ-01 | GetById exists | examId tồn tại | Trả về Examination đầy đủ | `ExaminationQuery.GetByIdAsync()` — success | Pending | Y |
-| EQ-02 | GetById not exists | examId không tồn tại | Trả về `null` | `ExaminationQuery.GetByIdAsync()` — not found | Pending | Y |
-| EQ-03 | GetByClassroomId | classroomId có nhiều exam | Trả về danh sách exam, sắp xếp theo ngày | `ExaminationQuery.GetByClassroomIdAsync()` — list | Pending | Y |
-| EQ-04 | GetByDateRange | Lọc exam trong khoảng thời gian | Chỉ trả về exam trong range | `ExaminationQuery.GetByDateRangeAsync()` — filter | Pending | Y |
-| EQ-05 | GetAvailableForStudent | Sinh viên chưa thi, exam ONGOING | Trả về exam sinh viên có thể tham gia | `ExaminationQuery.GetAvailableForStudentAsync()` — filter | Pending | Y |
-| EQ-06 | GetAvailableForStudent, exam ended | exam đã COMPLETED | Không trả về exam đó | `ExaminationQuery.GetAvailableForStudentAsync()` — status filter | Pending | Y |
-| EQ-07 | GetWithProblems | Include đầy đủ Problems | Problems được eager load | `ExaminationQuery.GetWithProblemsAsync()` — include | Pending | Y |
-| EQ-08 | Pagination | PageSize = 10, Page = 2 | Đúng 10 exam, đúng offset | `ExaminationQuery.GetPaginatedAsync()` — pagination | Pending | Y |
+#### `Task<CheckEmailExistsResponse> CheckEmailExistsAsync(string email)`
 
----
-
-### 5.2. ProblemQuery
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PQ-01 | GetById exists | problemId tồn tại | Trả về Problem với TestCases | `ProblemQuery.GetByIdAsync()` — success | Pending | Y |
-| PQ-02 | GetById not exists | problemId không tồn tại | Trả về `null` | `ProblemQuery.GetByIdAsync()` — not found | Pending | Y |
-| PQ-03 | Get paginated list | 50 problems, pageSize = 10 | Đúng 10 items, có pagination metadata | `ProblemQuery.GetPaginatedAsync()` — pagination | Pending | Y |
-| PQ-04 | Filter by subject | SubjectId hợp lệ | Chỉ trả về problem thuộc subject đó | `ProblemQuery.GetPaginatedAsync()` — subject filter | Pending | Y |
-| PQ-05 | Filter by difficulty | Difficulty = "HARD" | Chỉ trả về HARD problem | `ProblemQuery.GetPaginatedAsync()` — difficulty filter | Pending | Y |
-| PQ-06 | Filter by multiple criteria | SubjectId + Difficulty + isPublic | Đúng kết quả lọc | `ProblemQuery.GetPaginatedAsync()` — combined filter | Pending | Y |
-| PQ-07 | Include hidden testcases | Lấy problem cho lecturer | Hidden testcases được include | `ProblemQuery.GetByIdAsync()` — hidden testcase include | Pending | Y |
-| PQ-08 | Exclude hidden testcases | Lấy problem cho student | Hidden testcases không được trả về | `ProblemQuery.GetByIdAsync()` — exclude hidden | Pending | Y |
-| PQ-09 | Search by title | keyword = "sort" | Trả về problem có "sort" trong title | `ProblemQuery.SearchAsync()` — title search | Pending | Y |
-
----
-
-### 5.3. SubmissionQuery
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SQ-01 | GetByStudentId | studentId tồn tại | Trả về tất cả submission của student | `SubmissionQuery.GetByStudentIdAsync()` — list | Pending | Y |
-| SQ-02 | GetByStudentAndExam | studentId + examId | Trả về submission của student trong exam đó | `SubmissionQuery.GetByStudentAndExamAsync()` — filter | Pending | Y |
-| SQ-03 | GetLatestVersion | student + exam + problem có 3 submission | Trả về submission có Version = 3 | `SubmissionQuery.GetLatestVersionAsync()` — latest version | Pending | Y |
-| SQ-04 | GetByProblemId | problemId tồn tại | Trả về tất cả submission cho problem đó | `SubmissionQuery.GetByProblemIdAsync()` — list | Pending | Y |
-| SQ-05 | Get with test results | Submission có test results | TestResults được include | `SubmissionQuery.GetByIdAsync()` — include test results | Pending | Y |
-| SQ-06 | Get paginated | Nhiều submission | Đúng pagination | `SubmissionQuery.GetPaginatedAsync()` — pagination | Pending | Y |
-| SQ-07 | GetByStudentAndExamAndProblem | Đầy đủ tham số | Trả về đúng submission | `SubmissionQuery.GetByStudentExamProblemAsync()` — exact match | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UQ-CE-01 | Email exists returns Exists=true | User tồn tại | email="existing@test.com" | CheckEmailExistsResponse {Exists=true} | - | - | Pending |
+| UQ-CE-02 | Email does not exist returns Exists=false | User không tồn tại | email="nonexistent@test.com" | CheckEmailExistsResponse {Exists=false, Message="Email not found in the system"} | - | - | Pending |
+| UQ-CE-03 | Repository throws exception re-thrown | Repo throws | email="test@test.com" | - | Exception re-thrown | LogError | Pending |
 
 ---
 
-### 5.4. ClassroomQuery
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| CQ-01 | GetClassroomDetails | classroomId tồn tại | Trả về Classroom với danh sách StudentEnrollment | `ClassroomQuery.GetByIdAsync()` — with enrollments | Pending | Y |
-| CQ-02 | GetStudentsByClassroom | classroomId có 30 sinh viên | Trả về đúng 30 sinh viên | `ClassroomQuery.GetStudentsByClassroomIdAsync()` — list | Pending | Y |
-| CQ-03 | GetClassroomsByLecturer | lecturerId sở hữu 5 lớp | Trả về đúng 5 lớp | `ClassroomQuery.GetByOwnerIdAsync()` — filter | Pending | Y |
-| CQ-04 | GetClassroomsByStudent | studentId đang học 3 lớp | Trả về đúng 3 lớp | `ClassroomQuery.GetByStudentIdAsync()` — filter | Pending | Y |
-| CQ-05 | Classroom not found | classroomId không tồn tại | Trả về `null` | `ClassroomQuery.GetByIdAsync()` — not found | Pending | Y |
+## 5. ACASSERVICE — UTILS
 
 ---
 
-### 5.5. StudentExamSessionQuery
+### 5.1. ResultComparator
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SEQ-01 | GetActiveSession | Có session Active | Trả về session với Phase = Active | `StudentExamSessionQuery.GetActiveSessionAsync()` — active | Pending | Y |
-| SEQ-02 | GetSessionByStudentAndExam | studentId + examId hợp lệ | Trả về session đúng | `StudentExamSessionQuery.GetByStudentAndExamAsync()` — exact match | Pending | Y |
-| SEQ-03 | GetSession not found | Không có session | Trả về `null` | `StudentExamSessionQuery.GetByStudentAndExamAsync()` — not found | Pending | Y |
-| SEQ-04 | GetAllSessionsByExam | examId có nhiều session | Trả về danh sách đầy đủ | `StudentExamSessionQuery.GetByExamIdAsync()` — list | Pending | Y |
-| SEQ-05 | ValidateSessionForSubmission | session.Active, exam.Ongoing | Validation trả về `true` | `StudentExamSessionQuery.ValidateForSubmissionAsync()` — valid | Pending | Y |
-| SEQ-06 | ValidateSession expired | session đã Submitted | Validation trả về `false` | `StudentExamSessionQuery.ValidateForSubmissionAsync()` — expired | Pending | Y |
+**File:** `Application/Commands/Submission/ResultComparator.cs`
 
----
+#### `TestcaseStatus Compare(string expectedOutput, string output, TestcaseOption option)`
 
-### 5.6. DiscussionIssueQuery
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| DQ-01 | GetByClassroomId | Lấy discussion trong lớp | Trả về danh sách discussion | `DiscussionIssueQuery.GetByClassroomIdAsync()` — list | Pending | Y |
-| DQ-02 | GetByProblemId | Lấy discussion về problem cụ thể | Chỉ trả về discussion liên quan | `DiscussionIssueQuery.GetByProblemIdAsync()` — filter | Pending | Y |
-| DQ-03 | Get with replies | Include replies | Replies được eager load | `DiscussionIssueQuery.GetByIdAsync()` — include replies | Pending | Y |
-| DQ-04 | GetResolved vs Unresolved | Lọc theo trạng thái | Đúng kết quả | `DiscussionIssueQuery.GetByClassroomIdAsync()` — status filter | Pending | Y |
-
----
-
-### 5.7. NotificationQuery
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| NQ-01 | GetByUserId | userId tồn tại | Trả về tất cả notification của user, mới nhất trước | `NotificationQuery.GetByUserIdAsync()` — list ordered | Pending | Y |
-| NQ-02 | GetUnreadCount | 5 notification chưa đọc | Trả về count = 5 | `NotificationQuery.GetUnreadCountAsync()` — count | Pending | Y |
-| NQ-03 | Get unread only | isRead = false | Chỉ trả về notification chưa đọc | `NotificationQuery.GetByUserIdAsync()` — unread filter | Pending | Y |
-| NQ-04 | Pagination | Nhiều notification | Đúng pagination | `NotificationQuery.GetPaginatedAsync()` — pagination | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RC-C-01 | Exact match returns SUCCESS | expected="Hello World", actual="Hello World", exact mode | expectedOutput="Hello World", actual="Hello World", option={exact} | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-02 | Exact mismatch returns FAIL | expected="Hello", actual="World", exact mode | expectedOutput="Hello", actual="World" | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-03 | Case insensitive match returns SUCCESS | expected="HELLO", actual="hello", case-insensitive | expectedOutput="HELLO", actual="hello", option.IsCaseInsensitive=true | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-04 | Case insensitive mismatch returns FAIL | expected="HELLO", actual="WORLD", case-insensitive | expectedOutput="HELLO", actual="WORLD", option.IsCaseInsensitive=true | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-05 | Floating point within tolerance returns SUCCESS | tolerance=0.0001, diff<0.0001 | expected="3.14159", actual="3.14160", option.IsFloatingPoint=true, FloatingPointTolerance=0.0001 | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-06 | Floating point outside tolerance returns FAIL | tolerance=0.01, diff=0.06 > 0.01 | expected="3.14", actual="3.20", option.IsFloatingPoint=true, FloatingPointTolerance=0.01 | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-07 | Floating point exact match returns SUCCESS | exact match với floating mode | expected="3.14", actual="3.14", option.IsFloatingPoint=true, FloatingPointTolerance=0.01 | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-08 | Token comparison exact returns SUCCESS | tokens identical | expected="foo bar baz", actual="foo bar baz", option.IsTokenComparision=true | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-09 | Token comparison different order returns FAIL | tokens cùng nhưng thứ tự khác, ordered mode | expected="foo bar baz", actual="foo baz bar", option.IsTokenComparision=true, IsNotOrderedComparision=false | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-10 | Token comparison extra token returns FAIL | token count khác nhau | expected="foo bar", actual="foo bar baz", option.IsTokenComparision=true | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-11 | Unordered token comparison exact returns SUCCESS | tokens giống nhưng khác thứ tự | expected="cat dog bird", actual="dog bird cat", option.IsTokenComparision=true, IsNotOrderedComparision=true | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-12 | Unordered token comparison missing token returns FAIL | token count khác nhau trong unordered mode | expected="cat dog bird", actual="cat dog", option.IsTokenComparision=true, IsNotOrderedComparision=true | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-13 | Empty expected, empty actual returns SUCCESS | boundary null/empty | expectedOutput="", actual="" | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-14 | Empty expected, non-empty actual returns FAIL | | expectedOutput="", actual="result" | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-15 | Whitespace normalization returns SUCCESS | whitespace collapsed to single space | expected="Hello   World", actual="Hello World", option.IsTokenComparision=true | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-16 | Floating point with decimal places rounding | decimalPlaces=2 | expected="3.14", actual="3.14159", option.IsFloatingPoint=true, DecimalPlaces=2 | TestcaseStatus.SUCCESS | - | - | Pending |
+| RC-C-17 | Floating point NaN comparison returns FAIL | actual output is NaN | expected="0.0", actual="NaN", option.IsFloatingPoint=true | TestcaseStatus.FAIL | - | - | Pending |
+| RC-C-18 | Token comparison with special characters | special chars preserved | expected="a@b#c$d", actual="a@b#c$d", option.IsTokenComparision=true | TestcaseStatus.SUCCESS | - | - | Pending |
 
 ---
 
-### 5.8. ErrorGroupQuery
+### 5.2. TextAnswerComparer (Static)
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| ERG-01 | GetByLanguage | languageId hợp lệ | Trả về error group cho ngôn ngữ đó | `ErrorGroupQuery.GetByLanguageIdAsync()` — filter | Pending | Y |
-| ERG-02 | GetByCompilerId | compilerId hợp lệ | Trả về error group cho compiler đó | `ErrorGroupQuery.GetByCompilerIdAsync()` — filter | Pending | Y |
-| ERG-03 | Search by keyword | keyword = "null pointer" | Trả về error group có keyword đó | `ErrorGroupQuery.SearchAsync()` — keyword search | Pending | Y |
+**File:** `Application/Utils/TextAnswerComparer.cs`
 
----
+#### `string NormalizeSingleChoice(string? answer)`
 
-### 5.9. MaterialQuery
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TAC-NS-01 | Null input returns empty string | answer=null | NormalizeSingleChoice(null) | Returns "" | - | - | Pending |
+| TAC-NS-02 | Empty input returns empty string | answer="" | NormalizeSingleChoice("") | Returns "" | - | - | Pending |
+| TAC-NS-03 | Valid input returns ToUpperInvariant | answer="a" | NormalizeSingleChoice("a") | Returns "A" | - | - | Pending |
+| TAC-NS-04 | Mixed case returns uppercase | answer="AbC" | NormalizeSingleChoice("AbC") | Returns "ABC" | - | - | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| MQ-01 | GetBySubjectId | Subject có 10 file | Trả về đúng 10 file, sắp xếp theo UploadDate | `MaterialQuery.GetBySubjectIdAsync()` — list ordered | Pending | Y |
-| MQ-02 | GetByClassroomId | Lấy tài liệu theo lớp | Chỉ trả về tài liệu của lớp đó | `MaterialQuery.GetByClassroomIdAsync()` — filter | Pending | Y |
-| MQ-03 | GetPublic vs Private | Lọc public/private | Đúng kết quả | `MaterialQuery.GetBySubjectIdAsync()` — visibility filter | Pending | Y |
+#### `string NormalizeMultipleChoice(string? answer)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TAC-NM-01 | Null input returns empty string | answer=null | NormalizeMultipleChoice(null) | Returns "" | - | - | Pending |
+| TAC-NM-02 | Empty input returns empty string | answer="" | NormalizeMultipleChoice("") | Returns "" | - | - | Pending |
+| TAC-NM-03 | Valid input returns ToUpperInvariant | answer="a" | NormalizeMultipleChoice("a") | Returns "A" | - | - | Pending |
+| TAC-NM-04 | Multiple letters separated by space returns uppercase | answer="a b c" | NormalizeMultipleChoice("a b c") | Returns "A B C" | - | - | Pending |
 
-### 5.10. KeystrokeLogQuery
+#### `bool CompareSingleChoice(string? expectedAnswer, string? submittedAnswer)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| KSLQ-01 | GetBySessionId | Session có 500 keystroke | Trả về danh sách keystroke, đúng thứ tự thời gian | `KeystrokeLogQuery.GetBySessionIdAsync()` — ordered list | Pending | Y |
-| KSLQ-02 | GetByTimeRange | Lọc theo khoảng thời gian | Đúng kết quả | `KeystrokeLogQuery.GetByTimeRangeAsync()` — time filter | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TAC-CS-01 | Both null returns true | expected=null, submitted=null | CompareSingleChoice(null, null) | true | - | - | Pending |
+| TAC-CS-02 | Both empty returns true | expected="", submitted="" | CompareSingleChoice("", "") | true | - | - | Pending |
+| TAC-CS-03 | Exact match returns true | normalized giống nhau | CompareSingleChoice("A", "A") | true | - | - | Pending |
+| TAC-CS-04 | Case difference returns true | normalized giống nhau | CompareSingleChoice("A", "a") | true | - | - | Pending |
+| TAC-CS-05 | Mismatch returns false | normalized khác nhau | CompareSingleChoice("A", "B") | false | - | - | Pending |
+| TAC-CS-06 | One null, one empty returns true | | CompareSingleChoice(null, "") | true | - | - | Pending |
 
----
+#### `bool CompareMultipleChoice(string? expectedAnswer, string? submittedAnswer)`
 
-### 5.11. SlotQuery
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TAC-CM-01 | Both null returns true | | CompareMultipleChoice(null, null) | true | - | - | Pending |
+| TAC-CM-02 | Exact match returns true | | CompareMultipleChoice("A B C", "A B C") | true | - | - | Pending |
+| TAC-CM-03 | Case difference returns true | | CompareMultipleChoice("a b", "A B") | true | - | - | Pending |
+| TAC-CM-04 | Order difference returns true | | CompareMultipleChoice("A B", "B A") | true | - | - | Pending |
+| TAC-CM-05 | Missing option returns false | | CompareMultipleChoice("A B C", "A B") | false | - | - | Pending |
+| TAC-CM-06 | Extra option returns false | | CompareMultipleChoice("A B", "A B C") | false | - | - | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SLQ-01 | GetAllSlots | Lấy tất cả slot | Trả về danh sách slot | `SlotQuery.GetAllAsync()` — list | Pending | Y |
-| SLQ-02 | GetByDateRange | Lọc theo ngày | Chỉ trả về slot trong range | `SlotQuery.GetByDateRangeAsync()` — date filter | Pending | Y |
-| SLQ-03 | GetAvailableSlots | Slot chưa được gán exam | Chỉ trả về slot trống | `SlotQuery.GetAvailableAsync()` — availability filter | Pending | Y |
+#### `bool CompareByQuestionType(QuestionType questionType, string? expectedAnswer, string? submittedAnswer)`
 
----
-
-## 6. ACASSERVICE — MAPPERS
-
-### 6.1. SubmissionMapper
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SM-01 | ToEntity with all fields | Map request đầy đủ | Entity có đúng giá trị tất cả fields | `SubmissionMapper.ToEntity()` — all fields | Pending | Y |
-| SM-02 | ToEntity with null fields | Request có null values | Null được giữ nguyên | `SubmissionMapper.ToEntity()` — null handling | Pending | Y |
-| SM-03 | ToResponse from entity | Entity hợp lệ | Response có đúng giá trị | `SubmissionMapper.ToResponse()` — all fields | Pending | Y |
-| SM-04 | ToResponse with null testResults | TestResults = null | Response không crash, testResults = null | `SubmissionMapper.ToResponse()` — null test results | Pending | Y |
-| SM-05 | ToAutoGradeSubmissionResult success | Tất cả fields hợp lệ | Result có đầy đủ thông tin | `SubmissionMapper.ToAutoGradeSubmissionResult()` — success | Pending | Y |
-| SM-06 | Map compiler options | CompileOptions khác nhau | Options được map đúng | `SubmissionMapper.ToEntity()` — compiler options | Pending | Y |
-
----
-
-### 6.2. ExaminationMapper
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EM-01 | ToEntity from request | Map request → Entity | Tất cả fields được map đúng | `ExaminationMapper.ToEntity()` — all fields | Pending | Y |
-| EM-02 | ToResponse from entity | Map Entity → Response | Tất cả fields được map đúng | `ExaminationMapper.ToResponse()` — all fields | Pending | Y |
-| EM-03 | Map enum status | Status là enum | Enum được convert đúng | `ExaminationMapper.ToResponse()` — enum conversion | Pending | Y |
-| EM-04 | Null handling | Entity = null | Trả về `null` không crash | `ExaminationMapper.ToResponse()` — null guard | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TAC-CQ-01 | SINGLE_CHOICE calls CompareSingleChoice | questionType=SINGLE_CHOICE | expected="A", submitted="a" | true | - | - | Pending |
+| TAC-CQ-02 | MULTIPLE_CHOICE calls CompareMultipleChoice | questionType=MULTIPLE_CHOICE | expected="A B", submitted="a b" | true | - | - | Pending |
+| TAC-CQ-03 | ESSAY always returns true | questionType=ESSAY | expected="any", submitted="different" | true | - | - | Pending |
+| TAC-CQ-04 | ESSAY with both null returns true | questionType=ESSAY | expected=null, submitted=null | true | - | - | Pending |
 
 ---
 
-### 6.3. ProblemMapper
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PM-01 | ToDetailResponse | Entity đầy đủ | Response có Problems + TestCases | `ProblemMapper.ToDetailResponse()` — with testcases | Pending | Y |
-| PM-02 | ToListResponse | Map sang list response | Không include hidden testcases | `ProblemMapper.ToListResponse()` — exclude hidden | Pending | Y |
-| PM-03 | Map difficulty enum | Difficulty là enum | Enum được convert đúng | `ProblemMapper.ToListResponse()` — enum conversion | Pending | Y |
+## 6. ACASSERVICE — JOBS
 
 ---
 
-## 7. ACASSERVICE — CONTROLLERS
+### 6.1. ExaminationJobScheduling
 
-### 7.1. TestAuthController
+**File:** `Application/Jobs/ExaminationJobScheduling.cs`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| TAC-01 | Valid JWT token | Token hợp lệ, chưa hết hạn | Trả về 200 OK với user info | `TestAuthController.TestAuth()` — valid token path | Pending | Y |
-| TAC-02 | Invalid token format | Token không đúng format | Trả về 401 Unauthorized | `TestAuthController.TestAuth()` — invalid format | Pending | Y |
-| TAC-03 | Expired token | Token đã hết hạn | Trả về 401 Unauthorized | `TestAuthController.TestAuth()` — expired token | Pending | Y |
-| TAC-04 | Missing Authorization header | Header không có | Trả về 401 Unauthorized | `TestAuthController.TestAuth()` — missing header | Pending | Y |
-| TAC-05 | Malformed Bearer token | "Bearer " không có token | Trả về 401 Unauthorized | `TestAuthController.TestAuth()` — malformed bearer | Pending | Y |
+#### `void MarkExamAsOpenAsync(string examId)` (private method - test via public interface)
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EJS-01 | Exam exists updates status to ONGOING | Examination tồn tại | examId="exam-1" | Exam.Status == ONGOING | - | LogInformation("Exam {Id} marked as open") | Pending |
+| EJS-02 | Exam not found logs warning and returns | Examination không tồn tại | examId="nonexistent" | Không throw, logged warning | - | LogWarning("Exam not found") | Pending |
 
-### 7.2. ExaminationController
+#### `void MarkExamAsCompletedAsync(string examId)` (private method)
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| EC-01 | GET /examinations | Lấy danh sách exam | 200 OK, danh sách exam | `ExaminationController.GetAll()` — 200 OK | Pending | Y |
-| EC-02 | GET /examinations/{id} | Exam tồn tại | 200 OK, exam details | `ExaminationController.GetById()` — 200 OK | Pending | Y |
-| EC-03 | GET /examinations/{id} not found | Exam không tồn tại | 404 Not Found | `ExaminationController.GetById()` — 404 | Pending | Y |
-| EC-04 | POST /examinations valid | Request hợp lệ | 201 Created, exam response | `ExaminationController.Create()` — 201 Created | Pending | Y |
-| EC-05 | POST /examinations invalid | Request không hợp lệ | 400 Bad Request, validation errors | `ExaminationController.Create()` — 400 validation | Pending | Y |
-| EC-06 | PUT /examinations/{id} | Update thành công | 200 OK | `ExaminationController.Update()` — 200 OK | Pending | Y |
-| EC-07 | DELETE /examinations/{id} | Delete thành công | 204 No Content | `ExaminationController.Delete()` — 204 | Pending | Y |
-| EC-08 | DELETE /examinations/{id} not found | Exam không tồn tại | 404 Not Found | `ExaminationController.Delete()` — 404 | Pending | Y |
-| EC-09 | Unauthorized access | Không có token | 401 Unauthorized | `ExaminationController` — [Authorize] attribute | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EJS-03 | Exam exists updates status to COMPLETED | Examination tồn tại | examId="exam-1" | Exam.Status == COMPLETED | - | LogInformation("Exam {Id} marked as completed") | Pending |
+| EJS-04 | Exam not found logs warning | Examination không tồn tại | examId="nonexistent" | Không throw | - | LogWarning("Exam not found") | Pending |
 
 ---
 
-### 7.3. SubmissionController
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| SC-01 | POST /submissions valid | Submit code hợp lệ | 201 Created, submission response | `SubmissionController.Submit()` — 201 Created | Pending | Y |
-| SC-02 | POST /submissions invalid exam session | Exam session không active | 400 Bad Request | `SubmissionController.Submit()` — session validation | Pending | Y |
-| SC-03 | POST /submissions empty source | Source = "" | 400 Bad Request | `SubmissionController.Submit()` — source validation | Pending | Y |
-| SC-04 | GET /submissions/{id} | Submission tồn tại | 200 OK | `SubmissionController.GetById()` — 200 OK | Pending | Y |
-| SC-05 | POST /submissions/bulk-grade | Bulk grading request | 200 OK, grading results | `SubmissionController.BulkGrade()` — 200 OK | Pending | Y |
-| SC-06 | POST /submissions/{id}/regrade | Regrade request | 200 OK, new result | `SubmissionController.Regrade()` — 200 OK | Pending | Y |
-| SC-07 | PUT /submissions/{id}/score override | Override score hợp lệ | 200 OK | `SubmissionController.OverrideScore()` — 200 OK | Pending | Y |
-| SC-08 | PUT /submissions/{id}/score invalid | Score > maxMark | 400 Bad Request | `SubmissionController.OverrideScore()` — validation | Pending | Y |
+## 7. ACASSERVICE — COMMANDS
 
 ---
 
-### 7.4. ProblemController
+### 7.1. ExaminationCommand
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| PC-01 | GET /problems | Lấy danh sách problem | 200 OK, paginated list | `ProblemController.GetAll()` — 200 OK | Pending | Y |
-| PC-02 | GET /problems/{id} as lecturer | Lecturer lấy problem | 200 OK, có hidden testcases | `ProblemController.GetById()` — lecturer include hidden | Pending | Y |
-| PC-03 | GET /problems/{id} as student | Student lấy problem | 200 OK, không có hidden testcases | `ProblemController.GetById()` — student exclude hidden | Pending | Y |
-| PC-04 | POST /problems | Tạo problem hợp lệ | 201 Created | `ProblemController.Create()` — 201 Created | Pending | Y |
-| PC-05 | POST /problems with duplicate name | Trùng tên | 400 Bad Request | `ProblemController.Create()` — duplicate name | Pending | Y |
-| PC-06 | PUT /problems/{id} | Update thành công | 200 OK | `ProblemController.Update()` — 200 OK | Pending | Y |
-| PC-07 | DELETE /problems/{id} | Delete thành công | 204 No Content | `ProblemController.Delete()` — 204 | Pending | Y |
-| PC-08 | POST /problems/{id}/generate-testcases | Generate testcases | 200 OK, generated testcases | `ProblemController.GenerateTestcases()` — 200 OK | Pending | Y |
-| PC-09 | POST /problems/import | Import file đúng format | 201 Created, problems được tạo | `ProblemController.Import()` — 201 Created | Pending | Y |
-| PC-10 | POST /problems/import invalid format | File không đúng format | 400 Bad Request | `ProblemController.Import()` — 400 validation | Pending | Y |
+**File:** `Application/Commands/Examination/ExaminationCommand.cs`
+**Dependencies:** IExaminationRepository, ExaminationMapper
 
----
+#### `Task<ExaminationResponse?> CreateAsync(ExaminationRequestDTO exam)`
 
-### 7.5. ClassroomController
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EXM-C-01 | Valid request creates examination | DTO hợp lệ | ExaminationRequestDTO {ExamName:"Midterm",Mode:"PRACTICAL"} | Returns ExaminationResponse != null, ExamName="Midterm" | - | LogInformation("Created examination") | Pending |
+| EXM-C-02 | Repository returns null returns null | Repo.CreateAsync returns null | Valid DTO | Returns null | - | LogError | Pending |
+| EXM-C-03 | ExamName empty string throws | ExamName="" | ExaminationRequestDTO {ExamName:""} | - | ArgumentException (model validation) | - | Pending |
+| EXM-C-04 | Invalid mode throws | mode không phải PRACTICAL/EXAMINATION | ExaminationRequestDTO {Mode:"INVALID"} | - | ArgumentException, "Invalid mode: INVALID. Must be PRACTICAL or EXAMINATION" | - | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| CC-01 | GET /classrooms | Lấy danh sách | 200 OK | `ClassroomController.GetAll()` — 200 OK | Pending | Y |
-| CC-02 | GET /classrooms/{id} | Classroom tồn tại | 200 OK, có student list | `ClassroomController.GetById()` — 200 OK | Pending | Y |
-| CC-03 | POST /classrooms | Tạo classroom | 201 Created | `ClassroomController.Create()` — 201 Created | Pending | Y |
-| CC-04 | POST /classrooms/{id}/students | Thêm sinh viên | 200 OK | `ClassroomController.AddStudent()` — 200 OK | Pending | Y |
-| CC-05 | DELETE /classrooms/{id}/students/{studentId} | Xóa sinh viên | 204 No Content | `ClassroomController.RemoveStudent()` — 204 | Pending | Y |
-| CC-06 | POST /classrooms/{id}/materials | Upload tài liệu | 200 OK | `ClassroomController.UploadMaterial()` — 200 OK | Pending | Y |
+#### `Task<ExaminationResponse?> UpdateAsync(string id, ExaminationRequestDTO exam)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EXM-U-01 | Exam exists updates successfully | Exam tồn tại | id="exam-1", valid DTO | Returns updated ExaminationResponse | - | LogInformation("Updated examination") | Pending |
+| EXM-U-02 | Exam not found returns null | Exam không tồn tại | id="nonexistent" | Returns null | - | LogWarning | Pending |
+| EXM-U-03 | Invalid mode throws | mode không hợp lệ | DTO {Mode:"BAD"} | - | ArgumentException, "Invalid mode" | - | Pending |
+| EXM-U-04 | StartDatetime > EndDatetime throws | Start > End | DTO {StartDatetime:t+2h,EndDatetime:t+1h} | - | ArgumentException | - | Pending |
 
-## 8. AUTHSERVICE — UTILS
+#### `Task DeleteAsync(string id)`
 
-### 8.1. JwtUtil
-
-**Mục đích:** Tạo và xác thực JWT token.
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| JWT-01 | Generate token | Input userId, email, role hợp lệ | Token được tạo, chứa đúng claims | `JwtUtil.GenerateToken()` — success | Pending | Y |
-| JWT-02 | Validate valid token | Token hợp lệ, chưa hết hạn | Trả về claims, không ném exception | `JwtUtil.ValidateToken()` — valid token | Pending | Y |
-| JWT-03 | Validate expired token | Token đã hết hạn | Ném `SecurityTokenExpiredException` hoặc trả về claims với expired flag | `JwtUtil.ValidateToken()` — expired token | Pending | Y |
-| JWT-04 | Validate invalid signature | Token bị sửa signature | Ném `SecurityTokenSignatureKeyNotFoundException` | `JwtUtil.ValidateToken()` — invalid signature | Pending | Y |
-| JWT-05 | Validate malformed token | Token không đúng format | Ném exception | `JwtUtil.ValidateToken()` — malformed token | Pending | Y |
-| JWT-06 | Extract userId from token | Token hợp lệ | userId được trích xuất đúng | `JwtUtil.ExtractUserId()` — extract claim | Pending | Y |
-| JWT-07 | Extract role from token | Token hợp lệ | Role được trích xuất đúng | `JwtUtil.ExtractRole()` — extract role | Pending | Y |
-| JWT-08 | Generate token with different roles | Role = STUDENT/LECTURER/ADMIN | Token chứa đúng role tương ứng | `JwtUtil.GenerateToken()` — role variation | Pending | Y |
-| JWT-09 | Generate token null userId | userId = null | Ném `ArgumentNullException` | `JwtUtil.GenerateToken()` — null guard | Pending | Y |
-| JWT-10 | Refresh token | Token gần hết hạn | Trả về token mới với expiry kéo dài | `JwtUtil.RefreshToken()` — refresh | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EXM-D-01 | Exam exists deletes successfully | Exam tồn tại | id="exam-1" | Returns void, no exception | - | LogInformation("Deleted examination") | Pending |
+| EXM-D-02 | Repository throws exception propagated | Repo throws | id="exam-1" | - | Exception propagated | LogError | Pending |
 
 ---
 
-### 8.2. HashingUtil
+### 7.2. SubmissionCommand
 
-**Mục đích:** Hash và xác thực mật khẩu.
+**File:** `Application/Commands/Submission/SubmissionCommand.cs`
+**Dependencies:** ISubmissionRepository, ISubmissionCache, IProblemRepository, ITestcaseEvaluator, IExaminationRepository, TestResultMapper, IBusinessNotificationService, IStudentExamSessionRepository
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| HH-01 | Hash password | Password hợp lệ | Hash được tạo, khác với plaintext | `HashingUtil.HashPassword()` — success | Pending | Y |
-| HH-02 | Hash same password twice | Hash cùng password | 2 hash khác nhau (do salt) | `HashingUtil.HashPassword()` — salt uniqueness | Pending | Y |
-| HH-03 | Verify correct password | Plaintext đúng | Trả về `true` | `HashingUtil.VerifyPassword()` — correct | Pending | Y |
-| HH-04 | Verify wrong password | Plaintext sai | Trả về `false` | `HashingUtil.VerifyPassword()` — wrong | Pending | Y |
-| HH-05 | Verify with wrong hash format | Hash không đúng format | Trả về `false` hoặc ném exception | `HashingUtil.VerifyPassword()` — wrong format | Pending | Y |
-| HH-06 | Hash empty password | Password = "" | Hash được tạo, không crash | `HashingUtil.HashPassword()` — empty password | Pending | Y |
-| HH-07 | Hash null password | Password = null | Ném `ArgumentNullException` | `HashingUtil.HashPassword()` — null guard | Pending | Y |
-| HH-08 | Hash with special characters | Password = "P@$$w0rd!#$%" | Hash + verify đều hoạt động đúng | `HashingUtil` — special char handling | Pending | Y |
-| HH-09 | Hash long password | Password > 100 ký tự | Hash + verify hoạt động đúng | `HashingUtil` — long password | Pending | Y |
+#### `Task<SubmissionResponse?> SubmitProblemAsync(SubmitProblemRequest request)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUB-01 | PRACTICAL mode creates submission successfully | Mode=PRACTICAL, no session check | request={ExamId:"e1",ProblemId:"p1",StudentId:"s1",Source:"code",LanguageId:"java"} | Returns SubmissionResponse != null, Version=1 | - | LogInformation | Pending |
+| SUB-02 | EXAMINATION mode with active session creates submission | Mode=EXAMINATION, session.Phase=Active | request={ExamId:"e1",ProblemId:"p1",StudentId:"s1"} | Returns SubmissionResponse != null | - | LogInformation | Pending |
+| SUB-03 | EXAMINATION mode with no session throws | Mode=EXAMINATION, session=null | request={ExamId:"e1",ProblemId:"p1",StudentId:"s1"} | - | InvalidOperationException, "Exam session is not active. Start the exam from the exam page before submitting." | - | Pending |
+| SUB-04 | EXAMINATION mode with session.Phase!=Active throws | Mode=EXAMINATION, session.Phase=Completed | request={ExamId:"e1",ProblemId:"p1",StudentId:"s1"} | - | InvalidOperationException, "Exam session is not active" | - | Pending |
+| SUB-05 | Second submission increments version | submission đã tồn tại trong cache | request={ExamId:"e1",ProblemId:"p1",StudentId:"s1"} | Returns SubmissionResponse với Version=2 | - | LogInformation | Pending |
+| SUB-06 | Cache miss falls back to repository | Redis cache miss | request={ExamId:"e1",ProblemId:"p1",StudentId:"s1"} | Calls GetByStudentIdAsync fallback | - | - | Pending |
+| SUB-07 | Repository returns null for CreateAsync returns null | Repo.CreateAsync returns null | request valid | Returns null | - | LogWarning | Pending |
+| SUB-08 | New submission appended to cache | submission mới tạo | request valid | Cache chứa submission mới | - | LogInformation | Pending |
 
-### 8.3. GoogleTokenVerifier
+#### `Task<AutoGradeProblemResponse> AutoGradeAllSubmissionsOfProblemAysnc(BulkSubmissionGradingRequest request)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| GTV-01 | Valid Google ID token | Token từ Google hợp lệ | Trả về Google user info (email, name, picture) | `GoogleTokenVerifier.VerifyAsync()` — valid token | Pending | Y |
-| GTV-02 | Invalid token | Token không phải từ Google | Ném `InvalidTokenException` | `GoogleTokenVerifier.VerifyAsync()` — invalid token | Pending | Y |
-| GTV-03 | Expired token | Token đã hết hạn | Ném `TokenExpiredException` | `GoogleTokenVerifier.VerifyAsync()` — expired | Pending | Y |
-| GTV-04 | Token missing email claim | Token không có email | Ném exception hoặc trả về user info không có email | `GoogleTokenVerifier.VerifyAsync()` — missing email | Pending | Y |
-| GTV-05 | Null token | token = null | Ném `ArgumentNullException` | `GoogleTokenVerifier.VerifyAsync()` — null guard | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUB-09 | Problem not found returns empty response | Problem không tồn tại | request={ProblemId:"nonexistent"} | Returns AutoGradeProblemResponse với Results=empty | - | LogWarning | Pending |
+| SUB-10 | No hidden testcases returns empty response | Problem.TestCases toàn public | request={ProblemId:"p1"} | Returns empty Results, TotalSubmissions=0 | - | LogInformation | Pending |
+| SUB-11 | All submissions graded correctly | submissions với test cases | request={ProblemId:"p1",Submissions:[{Id:"s1",Source:"code"}]} | Results.Count>0, GradedCount incremented | - | LogInformation | Pending |
+| SUB-12 | Execution error caught and added to results | TestcaseEvaluator throws | request valid | ErrorMessage populated in result | - | LogError | Pending |
+| SUB-13 | Notification failure logged but not thrown | NotifyUsersAsync throws | request valid | Continues processing, doesn't fail test | - | LogWarning | Pending |
+| SUB-14 | Score calculation: all SUCCESS → full mark | all test results SUCCESS | testResults=[SUCCESS,SUCCESS,SUCCESS], problemMark=10 | FinalScore=10 | - | - | Pending |
+| SUB-15 | Score calculation: 2/3 SUCCESS → 6.67 | 2 SUCCESS, 1 FAIL | testResults=[SUCCESS,SUCCESS,FAIL], problemMark=10 | FinalScore≈6.67 | - | - | Pending |
+| SUB-16 | Score calculation: 0 SUCCESS → 0 | all test results FAIL | testResults=[FAIL,FAIL,FAIL], problemMark=10 | FinalScore=0 | - | - | Pending |
+| SUB-17 | Score calculation: empty test results → 0 | no test results | testResults=[] | FinalScore=0 | - | - | Pending |
+| SUB-18 | Score calculation: problemMark=0 → 0 | mark=0 | problemMark=0 | FinalScore=0 | - | - | Pending |
+| SUB-19 | Submission not found skips to next | submission null | request với submission Id không tồn tại | Continues to next submission | - | LogWarning | Pending |
+| SUB-20 | Existing submissions not modified after grading | previous submissions | submissions exist | Status updated to GRADED, GradedDate set | - | LogInformation | Pending |
 
----
+#### `Task<AutoGradeSubmissionResult> RegradeSingleSubmissionAsync(string submissionId, SingleSubmissionRegradeRequest request)`
 
-### 8.4. OtpUtil (Cần tạo mới)
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUB-21 | Submission not found returns error result | submission=null | submissionId="nonexistent" | ErrorMessage="Submission not found" | - | LogWarning | Pending |
+| SUB-22 | Problem not found returns error result | problem=null | submissionId="s1", problem deleted | ErrorMessage="Problem not found" | - | LogWarning | Pending |
+| SUB-23 | No hidden testcases returns error result | hiddenCount=0 | request valid | ErrorMessage="No hidden test cases", TotalTestCases=0 | - | LogInformation | Pending |
+| SUB-24 | Successful regrade updates submission and returns result | all valid | submissionId="s1", request valid | Returns AutoGradeSubmissionResult với Status="GRADED" | - | LogInformation | Pending |
+| SUB-25 | Execution exception returns error result | TestcaseEvaluator throws | request valid | ErrorMessage=ex.Message | - | LogError | Pending |
+| SUB-26 | Notification failure logged but not thrown | NotifyUsersAsync throws | request valid | Continues, returns result | - | LogWarning | Pending |
 
-**Mục đích:** Tạo và xác thực OTP 6 chữ số cho email verification.
+#### `Task<bool> OverrideSubmissionScoreAsync(string submissionId, float newScore, float maxMark)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| OTP-01 | Generate OTP | Tạo OTP mới | Trả về chuỗi 6 chữ số (000000-999999) | `OtpUtil.Generate()` — 6 digits | Pending | Y |
-| OTP-02 | Generate multiple OTPs | Tạo 100 OTP | Tất cả đều 6 chữ số, có thể trùng (xác suất thấp) | `OtpUtil.Generate()` — uniqueness | Pending | Y |
-| OTP-03 | Verify correct OTP | OTP đúng, chưa hết hạn | Trả về `true` | `OtpUtil.Verify()` — correct OTP | Pending | Y |
-| OTP-04 | Verify wrong OTP | OTP sai | Trả về `false` | `OtpUtil.Verify()` — wrong OTP | Pending | Y |
-| OTP-05 | Verify expired OTP | OTP đã quá thời gian hiệu lực | Trả về `false` | `OtpUtil.Verify()` — expired OTP | Pending | Y |
-| OTP-06 | Verify after max attempts | Retry > 3 lần | Trả về `false`, OTP bị vô hiệu hóa | `OtpUtil.Verify()` — max attempts | Pending | Y |
-| OTP-07 | Resend OTP | Gửi lại OTP mới | OTP cũ bị vô hiệu, OTP mới được tạo | `OtpUtil.Resend()` — resend | Pending | Y |
-| OTP-08 | Verify null OTP | otp = null | Ném exception | `OtpUtil.Verify()` — null guard | Pending | Y |
-| OTP-09 | OTP length check | Kiểm tra độ dài | Luôn đúng 6 ký tự số | `OtpUtil.Generate()` — length validation | Pending | Y |
-
----
-
-## 9. AUTHSERVICE — COMMANDS
-
-### 9.1. UserCommand
-
-#### `CreateUserAsync(RegisterData registerData)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-01 | Create successfully | Email chưa tồn tại, dữ liệu hợp lệ | User được tạo, trả về AuthResponse | `UserCommand.CreateUserAsync()` — success path | Pending | Y |
-| UC-02 | Email already exists | Email đã tồn tại | Ném `InvalidOperationException` "User with this email already exists" | `UserCommand.CreateUserAsync()` — duplicate check | Pending | Y |
-| UC-03 | Invalid role | registerData.Role = "INVALID_ROLE" | Ném `ArgumentException` | `UserCommand.CreateUserAsync()` — role validation | Pending | Y |
-| UC-04 | Empty email | email = "" | Ném `ArgumentException` | `UserCommand.CreateUserAsync()` — email validation | Pending | Y |
-| UC-05 | Empty password | password = "" | Ném `ArgumentException` | `UserCommand.CreateUserAsync()` — password validation | Pending | Y |
-| UC-06 | Weak password | password = "123" | Tùy policy — ném exception nếu không đủ mạnh | `UserCommand.CreateUserAsync()` — password strength | Pending | Y |
-
-#### `RegisterWithEmailVerificationAsync(RegisterData registerData)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-07 | Register and send email | Email hợp lệ, chưa tồn tại | OTP được tạo, email được gửi, trả về message | `UserCommand.RegisterWithEmailVerificationAsync()` — success | Pending | Y |
-| UC-08 | Email already exists | Email đã tồn tại | Ném exception | `UserCommand.RegisterWithEmailVerificationAsync()` — duplicate check | Pending | Y |
-| UC-09 | Email service failure | Email gửi thất bại | User vẫn được tạo, OTP vẫn lưu, cảnh báo được ghi | `UserCommand.RegisterWithEmailVerificationAsync()` — email failure | Pending | Y |
-| UC-10 | OTP stored in cache | OTP được lưu đúng key (email) | Có thể retrieve để verify | `UserCommand.RegisterWithEmailVerificationAsync()` — OTP cache | Pending | Y |
-
-#### `VerifyEmailAsync(VerifyEmailRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-11 | Correct OTP | OTP đúng, chưa hết hạn, chưa verified | IsEmailVerified = true | `UserCommand.VerifyEmailAsync()` — correct OTP | Pending | Y |
-| UC-12 | Wrong OTP | OTP sai | Trả về `false` | `UserCommand.VerifyEmailAsync()` — wrong OTP | Pending | Y |
-| UC-13 | Expired OTP | OTP đã hết hạn (> 5 phút) | Trả về `false` | `UserCommand.VerifyEmailAsync()` — expired OTP | Pending | Y |
-| UC-14 | Already verified | User đã verify trước đó | Trả về `false` hoặc idempotent | `UserCommand.VerifyEmailAsync()` — already verified | Pending | Y |
-| UC-15 | Max retry exceeded | Thử sai OTP > 5 lần | OTP bị vô hiệu, cần resend | `UserCommand.VerifyEmailAsync()` — max retry | Pending | Y |
-| UC-16 | Email not found | Email không tồn tại trong OTP cache | Trả về `false` | `UserCommand.VerifyEmailAsync()` — not found | Pending | Y |
-
-#### `SendForgotPasswordLinkAsync(ForgotPasswordRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-17 | User exists, email sent | User tồn tại | Email reset được gửi, trả về `true` | `UserCommand.SendForgotPasswordLinkAsync()` — user found | Pending | Y |
-| UC-18 | User not found | Email không tồn tại | Trả về `true` (không tiết lộ user có tồn tại hay không — security) | `UserCommand.SendForgotPasswordLinkAsync()` — user not found | Pending | Y |
-| UC-19 | Email service failure | Gửi email thất bại | Ghi log, vẫn trả về `true` (không leak thông tin) | `UserCommand.SendForgotPasswordLinkAsync()` — email failure | Pending | Y |
-
-#### `ResetPasswordAsync(ResetPasswordRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-20 | Valid token, valid password | Token hợp lệ, password đủ mạnh | Password được cập nhật, token bị vô hiệu | `UserCommand.ResetPasswordAsync()` — success | Pending | Y |
-| UC-21 | Invalid token | Token không hợp lệ | Ném exception "Invalid or expired token" | `UserCommand.ResetPasswordAsync()` — invalid token | Pending | Y |
-| UC-22 | Expired token | Token đã hết hạn | Ném exception | `UserCommand.ResetPasswordAsync()` — expired token | Pending | Y |
-| UC-23 | Weak password format | Password không đủ mạnh | Ném exception với thông báo yêu cầu | `UserCommand.ResetPasswordAsync()` — weak password | Pending | Y |
-| UC-24 | Token already used | Token đã được sử dụng | Ném exception "Token already used" | `UserCommand.ResetPasswordAsync()` — token used | Pending | Y |
-| UC-25 | Password same as old | Password mới = password cũ | Ném exception "New password cannot be same as old password" | `UserCommand.ResetPasswordAsync()` — same password | Pending | Y |
-
-#### `GrantAccountAsync(GrantAccountRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-26 | Grant successfully | Admin cấp quyền hợp lệ | User được cấp quyền, trả về response | `UserCommand.GrantAccountAsync()` — success | Pending | Y |
-| UC-27 | User not found | userId không tồn tại | Ném exception | `UserCommand.GrantAccountAsync()` — user not found | Pending | Y |
-| UC-28 | Role conflict | Gán role không hợp lệ với email | Ném exception | `UserCommand.GrantAccountAsync()` — role conflict | Pending | Y |
-
-#### `ResetFirstLoginPasswordAsync(ResetFirstLoginPasswordRequest request)`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-29 | First login reset | User.IsFirstLogin = true | Password được reset, IsFirstLogin = false | `UserCommand.ResetFirstLoginPasswordAsync()` — first login | Pending | Y |
-| UC-30 | Not first login | User.IsFirstLogin = false | Ném `InvalidOperationException` | `UserCommand.ResetFirstLoginPasswordAsync()` — not first login | Pending | Y |
-| UC-31 | Wrong current password | CurrentPassword sai | Ném exception | `UserCommand.ResetFirstLoginPasswordAsync()` — wrong password | Pending | Y |
-| UC-32 | Weak new password | NewPassword không đủ mạnh | Ném exception | `UserCommand.ResetFirstLoginPasswordAsync()` — weak password | Pending | Y |
-
-#### `UpdateUserAsync`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-33 | Update successfully | userId tồn tại, dữ liệu hợp lệ | User được cập nhật, trả về UserProfileResponse | `UserCommand.UpdateUserAsync()` — success | Pending | Y |
-| UC-34 | Update non-existent user | userId không tồn tại | Ném exception | `UserCommand.UpdateUserAsync()` — not found | Pending | Y |
-| UC-35 | Update role to invalid | role = "INVALID" | Ném `ArgumentException` | `UserCommand.UpdateUserAsync()` — role validation | Pending | Y |
-| UC-36 | Disable user | isEnable = false | User.IsEnable = false | `UserCommand.UpdateUserAsync()` — disable user | Pending | Y |
-
-#### `UpdateProfileAsync`
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UC-37 | Update profile successfully | Token hợp lệ | Profile được cập nhật | `UserCommand.UpdateProfileAsync()` — success | Pending | Y |
-| UC-38 | Invalid token | Token không hợp lệ | Ném exception | `UserCommand.UpdateProfileAsync()` — invalid token | Pending | Y |
-| UC-39 | Update avatar URL | avatarUrl hợp lệ | AvatarUrl được cập nhật | `UserCommand.UpdateProfileAsync()` — avatar update | Pending | Y |
-| UC-40 | Update birthday | birthday hợp lệ | Birthday được cập nhật | `UserCommand.UpdateProfileAsync()` — birthday update | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUB-27 | Submission not found returns false | submission=null | submissionId="nonexistent", newScore=8, maxMark=10 | Returns false | - | LogWarning | Pending |
+| SUB-28 | newScore equals maxMark succeeds | submission tồn tại | newScore=10, maxMark=10 | Returns true, FinalScore=10 | - | LogInformation | Pending |
+| SUB-29 | newScore < maxMark succeeds | submission tồn tại | newScore=5, maxMark=10 | Returns true, FinalScore=5 | - | LogInformation | Pending |
+| SUB-30 | newScore > maxMark throws | | newScore=11, maxMark=10 | - | InvalidOperationException, "Score (11) cannot exceed max mark (10)." | - | Pending |
+| SUB-31 | newScore = 0 succeeds | | newScore=0, maxMark=10 | Returns true, FinalScore=0 | - | LogInformation | Pending |
+| SUB-32 | newScore = -1 throws | | newScore=-1, maxMark=10 | - | InvalidOperationException | - | Pending |
+| SUB-33 | Update returns null returns false | Repo.UpdateAsync returns null | submissionId valid | Returns false | - | LogError | Pending |
 
 ---
 
-## 10. AUTHSERVICE — QUERIES
+### 7.3. ProblemCommand
 
-### 10.1. UserQuery
+**File:** `Application/Commands/Problem/ProblemCommand.cs`
+**Dependencies:** IProblemRepository, ProblemMapper
 
-#### `AuthenticateAsync(LoginCredentials credentials)`
+#### `Task<ProblemResponse> CreateProblemAsync(CreateProblemRequest request)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UQ-01 | Valid credentials | Email và password đúng | Trả về AuthResponse với JWT token | `UserQuery.AuthenticateAsync()` — success | Pending | Y |
-| UQ-02 | User not found | Email không tồn tại | Ném `InvalidOperationException` "Invalid email or password" | `UserQuery.AuthenticateAsync()` — user not found | Pending | Y |
-| UQ-03 | Wrong password | Password sai | Ném `InvalidOperationException` "Invalid email or password" | `UserQuery.AuthenticateAsync()` — wrong password | Pending | Y |
-| UQ-04 | User disabled | IsEnable = false | Ném `InvalidOperationException` "User is forbidden" | `UserQuery.AuthenticateAsync()` — disabled user | Pending | Y |
-| UQ-05 | Email not verified | IsEmailVerified = false | Tùy business rule — ném exception hoặc cho đăng nhập với cảnh báo | `UserQuery.AuthenticateAsync()` — email not verified | Pending | Y |
-| UQ-06 | Empty email | email = "" | Ném `ArgumentException` | `UserQuery.AuthenticateAsync()` — email validation | Pending | Y |
-| UQ-07 | Empty password | password = "" | Ném `ArgumentException` | `UserQuery.AuthenticateAsync()` — password validation | Pending | Y |
-| UQ-08 | Case sensitivity email | Email = "USER@EMAIL.COM" | Tìm thấy user với email "user@email.com" (case-insensitive) | `UserQuery.AuthenticateAsync()` — case insensitive email | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-01 | MANUAL mode with valid Content creates problem | Mode=MANUAL, Content length 10-50000 | request={Mode:"MANUAL",Content:"valid content here"} | Returns ProblemResponse != null | - | LogInformation("Creating problem in MANUAL mode") | Pending |
+| PRO-02 | MANUAL mode with Content < 10 chars throws | Mode=MANUAL, Content="short" | request={Mode:"MANUAL",Content:"short"} | - | ValidationException, "Content must be between 10 and 50000 characters" | - | Pending |
+| PRO-03 | MANUAL mode with Content > 50000 chars throws | Mode=MANUAL, Content too long | request={Mode:"MANUAL",Content:50001-char string} | - | ValidationException | - | Pending |
+| PRO-04 | FROM_FILE mode with WantsToEdit=true validates Content | Mode=FROM_FILE, WantsToEdit=true | request={Mode:"FROM_FILE",WantsToEdit:true,Content:"short"} | - | ValidationException | - | Pending |
+| PRO-05 | FROM_FILE mode without edit validates FileName | Mode=FROM_FILE, WantsToEdit=false | request={Mode:"FROM_FILE",WantsToEdit:false,FileName:"valid_name.c"} | Returns ProblemResponse != null | - | LogInformation | Pending |
+| PRO-06 | FROM_FILE mode with FileName > 255 chars throws | FileName too long | request={FileName:256-char string} | - | ValidationException, "FileName must be between 1 and 255 characters" | - | Pending |
+| PRO-07 | FROM_FILE mode with invalid FileName regex throws | FileName có ký tự đặc biệt | request={FileName:"file with spaces.c"} | - | ValidationException, "FileName can only contain letters, numbers, underscores, hyphens, and dots" | - | Pending |
+| PRO-08 | FROM_FILE mode with FileName containing spaces throws | FileName="bad file.c" | request={FileName:"bad file.c"} | - | ValidationException | - | Pending |
+| PRO-09 | Invalid mode throws ArgumentException | mode không hợp lệ | request={Mode:"INVALID"} | - | ArgumentException, "Invalid mode: INVALID. Must be MANUAL or FROM_FILE" | - | Pending |
+| PRO-10 | Valid mode with TestCases creates problem with test cases | TestCases provided | request={TestCases:[{InputData:"1",ExpectedOutput:"2"}]} | ProblemResponse.TestCases.Count=1 | - | LogInformation | Pending |
+| PRO-11 | Repository throws exception propagated | Repo throws | valid request | - | Exception propagated | LogError | Pending |
 
-#### `AuthenticateWithGoogleAsync(string idToken)`
+#### `Task UpdateProblemAsync(string problemId, UpdateProblemRequest request)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UQ-09 | New Google user | Google user chưa có trong hệ thống | Tạo user mới, trả về AuthResponse | `UserQuery.AuthenticateWithGoogleAsync()` — new user | Pending | Y |
-| UQ-10 | Existing Google user | Google user đã có | Đăng nhập thành công | `UserQuery.AuthenticateWithGoogleAsync()` — existing user | Pending | Y |
-| UQ-11 | Invalid Google token | Token không hợp lệ | Ném exception | `UserQuery.AuthenticateWithGoogleAsync()` — invalid token | Pending | Y |
-| UQ-12 | Google token expired | Token đã hết hạn | Ném exception | `UserQuery.AuthenticateWithGoogleAsync()` — expired token | Pending | Y |
-| UQ-13 | Null token | token = null | Ném `ArgumentNullException` | `UserQuery.AuthenticateWithGoogleAsync()` — null guard | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-12 | Problem not found throws KeyNotFoundException | problem=null | problemId="nonexistent" | - | KeyNotFoundException, "Problem nonexistent not found" | - | Pending |
+| PRO-13 | With FileName validates regex | FileName provided | request={FileName:"valid.c"} | No exception | - | LogInformation | Pending |
+| PRO-14 | With FileName invalid regex throws | FileName="bad file.c" | request={FileName:"bad file.c"} | - | ValidationException | - | Pending |
+| PRO-15 | Without FileName validates Content length | Content provided, FileName=null | request={Content:"short"} | - | ValidationException, "Content must be between 10 and 50000 characters" | - | Pending |
 
-#### `GetProfileAsync(string accessToken)`
+#### `Task DeleteProblemAsync(string problemId)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UQ-14 | Valid token | Token hợp lệ | Trả về UserProfileResponse đầy đủ | `UserQuery.GetProfileAsync()` — success | Pending | Y |
-| UQ-15 | Invalid token | Token không hợp lệ | Ném exception | `UserQuery.GetProfileAsync()` — invalid token | Pending | Y |
-| UQ-16 | Expired token | Token đã hết hạn | Ném exception | `UserQuery.GetProfileAsync()` — expired token | Pending | Y |
-| UQ-17 | Token missing userId claim | Token không có userId | Ném exception | `UserQuery.GetProfileAsync()` — missing claim | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-16 | Problem exists deletes successfully | problem tồn tại | problemId="p1" | Returns void | - | LogInformation | Pending |
+| PRO-17 | Repository throws exception propagated | Repo throws | problemId="p1" | - | Exception | LogError | Pending |
 
-#### `GetAllUsersAsync()`
+#### `Task AddTestCaseAsync(string problemId, CreateTestCaseRequest request)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| UQ-18 | Get all users | Lấy tất cả user | Trả về danh sách đầy đủ | `UserQuery.GetAllUsersAsync()` — all users | Pending | Y |
-| UQ-19 | Pagination | PageSize = 20, Page = 1 | Đúng 20 users, có pagination metadata | `UserQuery.GetAllUsersAsync()` — pagination | Pending | Y |
-| UQ-20 | Filter by role | Role = STUDENT | Chỉ trả về student | `UserQuery.GetAllUsersAsync()` — role filter | Pending | Y |
-| UQ-21 | Filter by isEnable | isEnable = false | Chỉ trả về user bị vô hiệu | `UserQuery.GetAllUsersAsync()` — isEnable filter | Pending | Y |
-| UQ-22 | Search by name | keyword = "John" | Trả về user có "John" trong fullname | `UserQuery.GetAllUsersAsync()` — name search | Pending | Y |
-| UQ-23 | Search by email | keyword = "@fpt.edu.vn" | Trả về user có email chứa domain đó | `UserQuery.GetAllUsersAsync()` — email search | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-18 | Problem exists adds test case | problemExists=true | problemId="p1", request valid | Returns void | - | LogInformation | Pending |
+| PRO-19 | Problem not found throws KeyNotFoundException | problemExists=false | problemId="nonexistent" | - | KeyNotFoundException, "Problem nonexistent not found" | - | Pending |
 
----
+#### `Task AddBulkTestCasesAsync(string problemId, List<CreateTestCaseRequest> requests)`
 
-## 11. AUTHSERVICE — CONTROLLERS
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-20 | Problem exists adds all test cases | problemExists=true, count=3 | problemId="p1", requests=[3 items] | Returns void, AddTestCaseAsync called 3 times | - | LogInformation | Pending |
+| PRO-21 | Problem not found throws on first call | problemExists=false | problemId="nonexistent" | - | KeyNotFoundException | - | Pending |
 
-### 11.1. AuthCommandController
+#### `Task UpdateTestCaseAsync(string problemId, string testCaseId, UpdateTestCaseRequest request)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| ACC-01 | POST /register valid | Request hợp lệ | 201 Created, user info | `AuthCommandController.Register()` — 201 | Pending | Y |
-| ACC-02 | POST /register email exists | Email đã tồn tại | 409 Conflict | `AuthCommandController.Register()` — 409 Conflict | Pending | Y |
-| ACC-03 | POST /register missing fields | Thiếu email/password | 400 Bad Request, validation errors | `AuthCommandController.Register()` — 400 validation | Pending | Y |
-| ACC-04 | POST /login valid | Credentials hợp lệ | 200 OK, JWT token | `AuthCommandController.Login()` — 200 OK | Pending | Y |
-| ACC-05 | POST /login wrong password | Password sai | 401 Unauthorized | `AuthCommandController.Login()` — 401 | Pending | Y |
-| ACC-06 | POST /login user disabled | IsEnable = false | 403 Forbidden | `AuthCommandController.Login()` — 403 | Pending | Y |
-| ACC-07 | POST /login user not found | Email không tồn tại | 401 Unauthorized | `AuthCommandController.Login()` — 401 | Pending | Y |
-| ACC-08 | POST /verify-email valid | OTP đúng | 200 OK, email verified | `AuthCommandController.VerifyEmail()` — 200 OK | Pending | Y |
-| ACC-09 | POST /verify-email wrong OTP | OTP sai | 400 Bad Request | `AuthCommandController.VerifyEmail()` — 400 | Pending | Y |
-| ACC-10 | POST /forgot-password | Email hợp lệ | 200 OK, email sent | `AuthCommandController.ForgotPassword()` — 200 OK | Pending | Y |
-| ACC-11 | POST /forgot-password email not found | Email không tồn tại | 200 OK (không leak thông tin) | `AuthCommandController.ForgotPassword()` — no leak | Pending | Y |
-| ACC-12 | POST /reset-password valid | Token + password hợp lệ | 200 OK | `AuthCommandController.ResetPassword()` — 200 OK | Pending | Y |
-| ACC-13 | POST /reset-password invalid token | Token không hợp lệ | 400 Bad Request | `AuthCommandController.ResetPassword()` — 400 | Pending | Y |
-| ACC-14 | POST /grant-account | Admin cấp quyền hợp lệ | 200 OK | `AuthCommandController.GrantAccount()` — 200 OK | Pending | Y |
-| ACC-15 | POST /grant-account unauthorized | Không phải admin | 403 Forbidden | `AuthCommandController.GrantAccount()` — 403 | Pending | Y |
-| ACC-16 | POST /google-auth | Google token hợp lệ | 200 OK, JWT token | `AuthCommandController.GoogleAuth()` — 200 OK | Pending | Y |
-| ACC-17 | GET /profile | Token hợp lệ | 200 OK, profile info | `AuthCommandController.GetProfile()` — 200 OK | Pending | Y |
-| ACC-18 | PUT /profile | Update profile hợp lệ | 200 OK | `AuthCommandController.UpdateProfile()` — 200 OK | Pending | Y |
-| ACC-19 | GET /users | Admin lấy danh sách | 200 OK | `AuthCommandController.GetAllUsers()` — 200 OK | Pending | Y |
-| ACC-20 | GET /users unauthorized | Không có quyền | 403 Forbidden | `AuthCommandController.GetAllUsers()` — 403 | Pending | Y |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-22 | Test case exists updates successfully | testCase tồn tại | testCaseId="tc1", request valid | Returns void | - | LogInformation | Pending |
+| PRO-23 | Test case not found throws KeyNotFoundException | testCase=null | testCaseId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task DeleteTestCaseAsync(string problemId, string testCaseId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PRO-24 | Deletes successfully | testCase tồn tại | testCaseId="tc1" | Returns void | - | LogInformation | Pending |
+| PRO-25 | Repository throws exception propagated | Repo throws | testCaseId="tc1" | - | Exception | LogError | Pending |
 
 ---
 
-## 12. WEB APP — UTILS
+### 7.4. ClassroomCommand
 
-### 12.1. datetime-utils.ts
+**File:** `Application/Commands/Classroom/ClassroomCommand.cs`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi | Confirm | Status | R |
-|----|----------|---------------|-------------------|--------|--------|---|
-| DTU-01 | Format date to string | Input Date object hợp lệ | Trả về string theo format quy định | `datetime-utils.ts` — formatDate() | Pending | Y |
-| DTU-02 | Format with locale | Locale = "vi-VN" | Định dạng đúng theo locale Việt Nam | `datetime-utils.ts` — formatDate() locale | Pending | Y |
-| DTU-03 | Parse date string | Input string hợp lệ | Trả về Date object đúng | `datetime-utils.ts` — parseDate() | Pending | Y |
-| DTU-04 | Parse invalid date string | Input = "invalid" | Trả về `null` hoặc throw | `datetime-utils.ts` — parseDate() invalid | Pending | Y |
-| DTU-05 | Calculate time remaining | Input exam end time > now | Trả về số giây/phút còn lại | `datetime-utils.ts` — getTimeRemaining() | Pending | Y |
-| DTU-06 | Time remaining expired | Input exam đã kết thúc | Trả về 0 hoặc số âm | `datetime-utils.ts` — getTimeRemaining() expired | Pending | Y |
-| DTU-07 | Format duration | Input = 3661 giây | Trả về "1h 1m 1s" | `datetime-utils.ts` — formatDuration() | Pending | Y |
-| DTU-08 | Format countdown | Input = 60000ms | Trả về "00:01:00" | `datetime-utils.ts` — formatCountdown() | Pending | Y |
-| DTU-09 | Convert timezone | UTC → local time | Giờ được convert đúng | `datetime-utils.ts` — convertTimezone() | Pending | Y |
-| DTU-10 | Null/undefined date | Input = null | Xử lý không crash, trả về giá trị mặc định | `datetime-utils.ts` — null guard | Pending | Y |
+#### `Task<ClassroomResponse> CreateClassroomAsync(CreateClassroomRequest request)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CLA-C-01 | Valid request creates classroom | DTO hợp lệ | request={ClassCode:"SE1701",ClassName:"SE17.01",LecturerId:"l1"} | Returns ClassroomResponse != null, ClassCode="SE1701" | - | LogInformation | Pending |
+| CLA-C-02 | ClassCode empty throws | ClassCode="" | request={ClassCode:""} | - | ValidationException, "ClassCode is required" | - | Pending |
+| CLA-C-03 | ClassCode too long throws | ClassCode.Length > 50 | request={ClassCode:51-char string} | - | ValidationException, "ClassCode must be between 1 and 50" | - | Pending |
+| CLA-C-04 | ClassName empty throws | ClassName="" | request={ClassName:""} | - | ValidationException, "ClassName is required" | - | Pending |
+| CLA-C-05 | ClassName too long throws | ClassName.Length > 200 | request={ClassName:201-char string} | - | ValidationException | - | Pending |
+| CLA-C-06 | EnrolKey empty generates random key | EnrolKey not provided | request={} | Returns response với EnrolKey != null, length=8 | - | LogInformation | Pending |
+| CLA-C-07 | EnrolKey provided uses provided key | EnrolKey provided | request={EnrolKey:"MYKEY123"} | Returns response.EnrolKey="MYKEY123" | - | LogInformation | Pending |
+| CLA-C-08 | MaxSlot = 0 defaults to 40 | MaxSlot not provided | request={} | response.MaxSlot=40 | - | - | Pending |
+| CLA-C-09 | MaxSlot > 40 throws | MaxSlot=50 | request={MaxSlot:50} | - | ValidationException, "MaxSlot cannot exceed 40" | - | Pending |
+| CLA-C-10 | MaxSlot < 1 throws | MaxSlot=0 | request={MaxSlot:0} | - | ValidationException, "MaxSlot must be at least 1" | - | Pending |
 
-### 12.2. student-exam-session.ts
+#### `Task<ClassroomResponse> UpdateClassroomAsync(string classroomId, UpdateClassroomRequest request)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| SES-01 | Get session from localStorage | Session đã lưu | Trả về session đúng |
-| SES-02 | Get session, none stored | localStorage rỗng | Trả về `null` |
-| SES-03 | Save session to localStorage | Session object hợp lệ | Session được lưu, có thể đọc lại |
-| SES-04 | Clear session | Gọi hàm clear | localStorage được xóa session |
-| SES-05 | Check session expired | Session hết hạn | Trả về `true` |
-| SES-06 | Check session valid | Session còn hiệu lực | Trả về `false` |
-| SES-07 | Calculate remaining time | Session start + duration | Trả về số giây còn lại |
-| SES-08 | Sync session with server | Có session cũ, server có session mới | Cập nhật localStorage với server session |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CLA-U-01 | Classroom exists updates successfully | classroom tồn tại | classroomId="c1", request valid | Returns updated ClassroomResponse | - | LogInformation | Pending |
+| CLA-U-02 | Classroom not found throws | classroom=null | classroomId="nonexistent" | - | KeyNotFoundException | - | Pending |
+| CLA-U-03 | Invalid ClassCode format throws | ClassCode="bad code!" | request={ClassCode:"bad code!"} | - | ValidationException | - | Pending |
+| CLA-U-04 | EnrolKey regeneration succeeds | EnrolKey regeneration requested | request={RegenerateEnrolKey:true} | Returns new EnrolKey != old key | - | LogInformation | Pending |
+| CLA-U-05 | Update fails throws | Repo returns null | classroomId="c1" | - | Exception, "Failed to update classroom" | LogError | Pending |
 
----
+#### `Task<ClassroomResponse> DeleteClassroomAsync(string classroomId)`
 
-### 12.3. markdown-converter.ts
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CLA-D-01 | Classroom with no enrolled students deletes | enrolledCount=0 | classroomId="c1" | Returns ClassroomResponse | - | LogInformation | Pending |
+| CLA-D-02 | Classroom with enrolled students throws | enrolledCount>0 | classroomId="c1" | - | InvalidOperationException, "Cannot delete classroom with enrolled students" | - | Pending |
+| CLA-D-03 | Classroom not found throws | classroom=null | classroomId="nonexistent" | - | KeyNotFoundException | - | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| MDC-01 | Convert basic markdown | Input = "**bold** *italic*" | Output chứa `<strong>` và `<em>` |
-| MDC-02 | Convert code block | Input = "```python\nprint('hi')\n```" | Output có `<pre><code class="language-python">` |
-| MDC-03 | Convert inline code | Input = "`code`" | Output có `<code>` |
-| MDC-04 | Convert link | Input = "[Google](https://google.com)" | Output có `<a href="...">` |
-| MDC-05 | Convert table | Input = markdown table | Output có `<table>` đúng cấu trúc |
-| MDC-06 | Convert empty string | Input = "" | Output = "" |
-| MDC-07 | XSS prevention | Input = `<script>alert('xss')</script>` | Script bị loại bỏ hoặc escaped |
-| MDC-08 | Convert with GFM | GFM tables, strikethrough | Render đúng GFM |
+#### `Task<ClassroomResponse> SoftDeleteClassroomAsync(string classroomId)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CLA-SD-01 | Soft deletes successfully | classroom tồn tại | classroomId="c1" | Returns ClassroomResponse.IsDeleted=true | - | LogInformation | Pending |
+| CLA-SD-02 | Classroom not found throws | classroom=null | classroomId="nonexistent" | - | KeyNotFoundException | - | Pending |
 
-### 12.4. markdown-formatter.ts
+#### `Task<ClassroomResponse> RegenerateEnrolKeyAsync(string classroomId)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| MDF-01 | Format plain text | Input = "plain text" | Output = "plain text" |
-| MDF-02 | Insert bold | Chọn text, gọi format bold | Markdown `**text**` được chèn đúng |
-| MDF-03 | Insert italic | Chọn text, gọi format italic | Markdown `*text*` được chèn đúng |
-| MDF-04 | Insert code block | Chọn text, gọi format code | Markdown ```` ``` ```` được chèn |
-| MDF-05 | Insert link | Chọn text, gọi format link | Markdown `[text](url)` được chèn |
-| MDF-06 | Insert list | Gọi format list | Markdown list được chèn đúng |
-| MDF-07 | No selection for inline format | Không chọn text | Không chèn gì hoặc chèn placeholder |
-| MDF-08 | Wrap selected text | Text được chọn | Text được wrap đúng |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CLA-RK-01 | Generates new 8-char alphanumeric key | classroom tồn tại | classroomId="c1" | Returns ClassroomResponse với EnrolKey length=8, alphanumeric | - | LogInformation | Pending |
+| CLA-RK-02 | New key different from old key | | classroomId="c1" | newKey != oldKey | - | - | Pending |
+| CLA-RK-03 | Classroom not found throws | classroom=null | classroomId="nonexistent" | - | KeyNotFoundException | - | Pending |
 
 ---
 
-### 12.5. test-tracker/storageKeys.ts
+### 7.5. SlotCommand
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| TTS-01 | Generate storage key | examId + studentId | Key đúng format |
-| TTS-02 | Key uniqueness | 2 examId khác nhau | 2 key khác nhau |
-| TTS-03 | Empty examId | examId = "" | Key được tạo với empty part |
+**File:** `Application/Commands/Slot/SlotCommand.cs`
 
----
+#### `Task<SlotResponse?> CreateAnsync(SlotRequest slotRequest)`
 
-### 12.6. exam-log-flag.ts
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SL-C-01 | Valid request creates slot | Classroom tồn tại, slot count < 8 | slotRequest={ClassroomId:"c1",SlotNumber:1} | Returns SlotResponse != null | - | LogInformation | Pending |
+| SL-C-02 | Classroom not found returns null | classroom=null | slotRequest={ClassroomId:"nonexistent"} | Returns null | - | LogWarning | Pending |
+| SL-C-03 | Slot number > 8 returns null | slotNumber=9 | slotRequest={SlotNumber:9} | Returns null | - | LogWarning | Pending |
+| SL-C-04 | Slot number < 1 returns null | slotNumber=0 | slotRequest={SlotNumber:0} | Returns null | - | LogWarning | Pending |
+| SL-C-05 | Duplicate slot number returns null | slot đã tồn tại | slotRequest={SlotNumber:1} | Returns null | - | LogWarning | Pending |
+| SL-C-06 | Slot with same day/slot combination returns null | combination tồn tại | slotRequest={DayOfWeek:1,SlotNumber:1} | Returns null | - | LogWarning | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| ELF-01 | Flag copy-paste | Nhiều paste trong thời gian ngắn | Suspicious flag = true |
-| ELF-02 | Normal copy-paste | Ít paste bình thường | Suspicious flag = false |
-| ELF-03 | Flag tab switch | Nhiều lần chuyển tab | Suspicious flag = true |
-| ELF-04 | Flag right-click | Nhiều lần right-click | Suspicious flag = true |
-| ELF-05 | Combined flags | Copy + tab switch + paste | Flag count tăng đúng |
-| ELF-06 | Reset flags | Gọi reset | Flag count = 0 |
+#### `Task<SlotResponse?> UpdateAnsync(SlotRequest slotRequest, string slotId)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SL-U-01 | Slot exists updates successfully | slot tồn tại | slotId="sl1", valid request | Returns updated SlotResponse | - | LogInformation | Pending |
+| SL-U-02 | Slot not found returns null | slot=null | slotId="nonexistent" | Returns null | - | LogWarning | Pending |
+| SL-U-03 | Duplicate on update returns null | slot combination conflict | slotId="sl1", slotRequest valid | Returns null | - | LogWarning | Pending |
 
-### 12.7. exam-problem.ts
+#### `Task<List<SlotResponse>?> CreateMultiAnsync(string classroomId)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| EP-01 | Parse problem data | Raw problem JSON | Parsed object đúng structure |
-| EP-02 | Validate problem structure | Missing required fields | Trả về validation error |
-| EP-03 | Calculate problem score | problem.mark, testCases passed | Điểm được tính đúng |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SL-CM-01 | Creates 8 slots (1-8) for classroom | classroom tồn tại, no existing slots | classroomId="c1" | Returns list of 8 SlotResponse | - | LogInformation | Pending |
+| SL-CM-02 | Classroom not found returns null | classroom=null | classroomId="nonexistent" | Returns null | - | LogWarning | Pending |
 
----
+#### `Task DeleteAsync(string slotId)`
 
-## 13. WEB APP — HOOKS
-
-### 13.1. hooks/exam/
-
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| EXH-01 | Start exam successfully | Gọi API bắt đầu thi | Session được tạo, state = "active" |
-| EXH-02 | Start already started exam | Thi đã bắt đầu | Trả về session hiện tại |
-| EXH-03 | Start completed exam | Exam đã kết thúc | Ném error, state = "expired" |
-| EXH-04 | Auto-save answer | Gọi auto-save | Answer được lưu lên server |
-| EXH-05 | Submit exam | Gọi submit | State = "submitted", không submit lại được |
-| EXH-06 | Handle time warning | Còn 5 phút | Warning được trigger |
-| EXH-07 | Handle time expired | Hết giờ | Tự động submit |
-| EXH-08 | Handle API error | API trả về lỗi | Error state được set, retry logic |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SL-D-01 | Deletes successfully | slot tồn tại | slotId="sl1" | Returns void | - | LogInformation | Pending |
+| SL-D-02 | Repository throws exception propagated | Repo throws | slotId="sl1" | - | Exception | LogError | Pending |
 
 ---
 
-### 13.2. hooks/submission/
+### 7.6. StudentExamSessionCommand
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| SUBH-01 | Submit code successfully | Code hợp lệ | Submission được tạo, state = "submitted" |
-| SUBH-02 | Submit with compilation error | Code lỗi compile | Error được trả về, state = "error" |
-| SUBH-03 | Submit during exam inactive | Exam không active | Ném error |
-| SUBH-04 | Get submission history | Lấy lịch sử nộp | Danh sách submission được trả về |
-| SUBH-05 | Re-submit code | Nộp lại bài | Version tăng, submission mới được tạo |
+**File:** `Application/Commands/StudentExamSession/StudentExamSessionCommand.cs`
 
----
+#### `Task<StudentExamSessionResponse?> StartAsync(string studentId, string examId)`
 
-### 13.3. hooks/coding/
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SES-ST-01 | Exam not found returns null | exam=null | studentId="s1", examId="nonexistent" | Returns null | - | LogWarning | Pending |
+| SES-ST-02 | Exam not started (Pending) returns null | exam.Status=PENDING | studentId="s1", examId="e1" | Returns null | - | LogWarning | Pending |
+| SES-ST-03 | Exam completed returns null | exam.Status=COMPLETED | studentId="s1", examId="e1" | Returns null | - | LogWarning | Pending |
+| SES-ST-04 | Valid start creates session with Phase=Active | exam.Status=ONGOING | studentId="s1", examId="e1" | Returns StudentExamSessionResponse với Phase=Active | - | LogInformation | Pending |
+| SES-ST-05 | Session already exists returns null | session đã tồn tại | studentId="s1", examId="e1" | Returns null | - | LogWarning | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| CDH-01 | Initialize editor | Mở code editor | Monaco editor được khởi tạo với đúng language |
-| CDH-02 | Change language | Chọn Python | Editor language = python, template code thay đổi |
-| CDH-03 | Auto-save code | Gõ code | Code được auto-save vào localStorage |
-| CDH-04 | Load saved code | Có code trong localStorage | Code được load vào editor |
-| CDH-05 | Format code | Gọi format | Code được format theo clang-format |
-| CDH-06 | Reset code | Gọi reset | Code quay về template ban đầu |
+#### `Task<StudentExamSessionResponse?> CompleteAsync(string studentId, string examId)`
 
----
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SES-CO-01 | Session exists completes successfully | session tồn tại, Phase=Active | studentId="s1", examId="e1" | Returns response với Phase=Completed | - | LogInformation | Pending |
+| SES-CO-02 | Session not found returns null | session=null | studentId="s1", examId="nonexistent" | Returns null | - | LogWarning | Pending |
 
-### 13.4. hooks/problem/
+#### `Task<StudentExamSessionResponse?> LockAsync(string studentId, string examId, string? lockReason)`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| PH-01 | Fetch problem list | Gọi API lấy danh sách | Problems được set vào state |
-| PH-02 | Filter by subject | Chọn subject filter | Chỉ hiển thị problem thuộc subject đó |
-| PH-03 | Filter by difficulty | Chọn difficulty filter | Kết quả đúng filter |
-| PH-04 | Search problems | Nhập keyword | Problems phù hợp được trả về |
-| PH-05 | Pagination | Page change | Đúng page data |
-| PH-06 | Empty result | Filter không có kết quả | Empty state được hiển thị |
-| PH-07 | API error | API trả về 500 | Error state được set |
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SES-LK-01 | Session exists locks with reason | session tồn tại | studentId="s1", examId="e1", lockReason="cheating" | Returns response với Phase=Locked, LockReason="cheating" | - | LogInformation | Pending |
+| SES-LK-02 | Session exists locks without reason | session tồn tại | studentId="s1", examId="e1", lockReason=null | Returns response với Phase=Locked | - | LogInformation | Pending |
+| SES-LK-03 | Session not found returns null | session=null | studentId="s1", examId="nonexistent" | Returns null | - | LogWarning | Pending |
 
 ---
 
-## 14. MOBILE APP
+### 7.7. QuizAttemptCommand
 
-### 14.1. Unit Tests (core/utils/)
+**File:** `Application/Commands/QuizAttempt/QuizAttemptCommand.cs`
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| MA-01 | Date formatting | Format date sang "dd/MM/yyyy" | Output đúng format Việt Nam |
-| MA-02 | Countdown timer | Input giây còn lại | Format "HH:mm:ss" đúng |
-| MA-03 | Validate email | Email hợp lệ / không hợp lệ | Trả về true/false đúng |
-| MA-04 | Validate password strength | Password yếu/mạnh | Trả về strength level đúng |
-| MA-05 | API response parsing | JSON response hợp lệ | Object được parse đúng |
-| MA-06 | Null handling | Input null | Xử lý không crash |
+#### `Task<QuizAttemptResponse> StartAttemptAsync(StartQuizAttemptRequest request)`
 
-### 14.2. Widget Tests
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| QA-ST-01 | Within attempt limit creates attempt | attemptCount < MaxOfAttempts | request={ClassroomQuizId:"cq1",StudentId:"s1"} | Returns QuizAttemptResponse với AttemptNumber=1 | - | LogInformation | Pending |
+| QA-ST-02 | At attempt limit returns null | attemptCount == MaxOfAttempts | request={ClassroomQuizId:"cq1",StudentId:"s1"} | Returns null | - | LogWarning | Pending |
+| QA-ST-03 | ClassroomQuiz not found returns null | cq=null | request={ClassroomQuizId:"nonexistent"} | Returns null | - | LogWarning | Pending |
+| QA-ST-04 | Student not enrolled returns null | enrollment=null | request={ClassroomQuizId:"cq1",StudentId:"notenrolled"} | Returns null | - | LogWarning | Pending |
+| QA-ST-05 | Quiz not published returns null | cq.Status=DRAFT | request={ClassroomQuizId:"cq1"} | Returns null | - | LogWarning | Pending |
+| QA-ST-06 | Quiz expired returns null | now > EndTime | request={ClassroomQuizId:"cq1"} | Returns null | - | LogWarning | Pending |
+| QA-ST-07 | Correct attempt number increments | 1 attempt exists | request={ClassroomQuizId:"cq1"} | Returns AttemptNumber=2 | - | LogInformation | Pending |
 
-| ID | Tên case | Mô tả hành vi | Kết quả mong đợi |
-|----|----------|---------------|-------------------|
-| MA-07 | Login page renders | Mở trang login | Email/password fields hiển thị |
-| MA-08 | Login validation | Bỏ trống email | Error message hiển thị |
-| MA-09 | Login success | Credentials đúng | Chuyển sang trang chính |
-| MA-10 | Login failure | Credentials sai | Error message hiển thị |
-| MA-11 | Exam page renders | Mở trang thi | Timer, câu hỏi hiển thị |
-| MA-12 | Answer selection | Tap vào đáp án | Đáp án được chọn, highlight đúng |
-| MA-13 | Submit exam | Tap nộp bài | Confirmation dialog hiển thị |
-| MA-14 | Navigation to detail | Tap vào item | Chuyển trang detail |
-| MA-15 | Pull to refresh | Kéo refresh | Data được reload |
+#### `Task UpdateAnswerAsync(string attemptId, UpdateQuizAnswerRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| QA-UA-01 | Attempt exists updates answers | attempt tồn tại | attemptId="at1", request valid | Returns void | - | LogInformation | Pending |
+| QA-UA-02 | Attempt not found throws | attempt=null | attemptId="nonexistent" | - | KeyNotFoundException | - | Pending |
+| QA-UA-03 | Attempt already submitted throws | attempt.Status=SUBMITTED | attemptId="at1" | - | InvalidOperationException, "Cannot update answers for submitted attempt" | - | Pending |
+
+#### `Task<QuizAttemptResponse> SubmitAttemptAsync(string attemptId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| QA-SU-01 | Attempt exists submits and calculates score | attempt tồn tại, Status=IN_PROGRESS | attemptId="at1" | Returns response với Status=SUBMITTED, Score calculated | - | LogInformation | Pending |
+| QA-SU-02 | Attempt not found throws | attempt=null | attemptId="nonexistent" | - | KeyNotFoundException | - | Pending |
+| QA-SU-03 | Already submitted throws | attempt.Status=SUBMITTED | attemptId="at1" | - | InvalidOperationException, "Attempt already submitted" | - | Pending |
 
 ---
 
-## TỔNG HỢP SỐ LƯỢNG TEST CASE
+### 7.8. DiscussionIssueCommand
 
-| Module | Số lượng test case |
-|--------|-------------------|
-| AcasService — Utils | 17 + 9 = 26 |
-| AcasService — Jobs | 23 |
-| AcasService — Commands | ~100+ |
-| AcasService — Queries | ~60+ |
-| AcasService — Mappers | ~15 |
-| AcasService — Controllers | ~35+ |
-| AuthService — Utils | 10 + 9 + 5 + 9 = 33 |
-| AuthService — Commands | ~40 |
-| AuthService — Queries | ~23 |
-| AuthService — Controllers | ~20 |
-| Web App — Utils | ~30 |
-| Web App — Hooks | ~20 |
-| Mobile App | ~15 |
-| **Tổng cộng** | **~450+ test cases** |
+**File:** `Application/Commands/DiscussionIssue/DiscussionIssueCommand.cs`
+
+#### `Task<DiscussionIssueDetailResponse?> CreateIssueAsync(CreateDiscussionIssueRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| DI-CI-01 | Valid request creates issue | DTO hợp lệ | request={Content:"How to solve this?",ClassroomId:"c1"} | Returns DiscussionIssueDetailResponse != null | - | LogInformation | Pending |
+| DI-CI-02 | Classroom not found returns null | classroom=null | request={ClassroomId:"nonexistent"} | Returns null | - | LogWarning | Pending |
+| DI-CI-03 | Content empty throws | Content="" | request={Content:""} | - | ValidationException, "Content is required" | - | Pending |
+
+#### `Task<DiscussionIssueDetailResponse?> WriteCommentAsync(WriteCommentRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| DI-WC-01 | Valid request writes comment | DTO hợp lệ | request={DiscussionId:"d1",Content:"Great question!"} | Returns response với comment mới | - | LogInformation | Pending |
+| DI-WC-02 | Discussion not found returns null | discussion=null | request={DiscussionId:"nonexistent"} | Returns null | - | LogWarning | Pending |
+| DI-WC-03 | Content empty throws | Content="" | request={Content:""} | - | ValidationException | - | Pending |
+
+#### `Task<DiscussionIssueDetailResponse?> ChangeStatusAsync(ChangeDiscussionStatusRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| DI-CS-01 | Issue exists changes status | issue tồn tại | request={DiscussionId:"d1",Status:RESOLVED} | Returns response với Status=RESOLVED | - | LogInformation | Pending |
+| DI-CS-02 | Issue not found returns null | issue=null | request={DiscussionId:"nonexistent"} | Returns null | - | LogWarning | Pending |
+
+#### `Task<bool> SoftDeleteAsync(string issueId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| DI-SD-01 | Issue exists soft deletes | issue tồn tại | issueId="d1" | Returns true | - | LogInformation | Pending |
+| DI-SD-02 | Issue not found returns false | issue=null | issueId="nonexistent" | Returns false | - | LogWarning | Pending |
+
+---
+
+### 7.9. NotificationCommand
+
+**File:** `Application/Commands/Notification/NotificationCommand.cs`
+
+#### `Task<bool> MarkAsReadAsync(string notificationId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| NTF-MR-01 | Notification exists marks as read | notification tồn tại | notificationId="n1" | Returns true | - | LogInformation | Pending |
+| NTF-MR-02 | Notification not found returns false | notification=null | notificationId="nonexistent" | Returns false | - | LogWarning | Pending |
+| NTF-MR-03 | Empty notificationId throws ArgumentException | notificationId="" | notificationId="" | - | ArgumentException, "notificationId is required" | - | Pending |
+
+#### `Task<bool> SoftDeleteAsync(string notificationId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| NTF-SD-01 | Notification exists soft deletes | notification tồn tại | notificationId="n1" | Returns true | - | LogInformation | Pending |
+| NTF-SD-02 | Notification not found returns false | notification=null | notificationId="nonexistent" | Returns false | - | LogWarning | Pending |
+
+#### `Task<NotificationDispatchResponse> CreateAndSendAsync(CreateNotificationRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| NTF-CS-01 | Valid request creates and sends | request hợp lệ | request={Title:"Test",Body:"Msg",TargetUserIds:["u1"]} | Returns NotificationDispatchResponse != null | - | LogInformation | Pending |
+| NTF-CS-02 | Invalid notification type throws | type không hợp lệ | request={Type:"INVALID"} | - | ArgumentException, "Invalid notification type" | - | Pending |
+| NTF-CS-03 | Create fails returns null | Repo returns null | request valid | Returns null | - | LogError | Pending |
+
+---
+
+### 7.10. ExamLogCommand
+
+**File:** `Application/Commands/ExamLog/ExamLogCommand.cs`
+
+#### `Task<ExamLogResponse?> CreateAsync(CreateExamLogRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EL-C-01 | Valid request without suspicious flag creates log | suspicious=false | request={StudentId:"s1",ExamId:"e1"} | Returns ExamLogResponse với Suspicious=false | - | LogInformation | Pending |
+| EL-C-02 | Valid request with suspicious flag creates log | suspicious=true | request={StudentId:"s1",ExamId:"e1",Suspicious:true} | Returns ExamLogResponse với Suspicious=true | - | LogWarning("Suspicious exam activity") | Pending |
+| EL-C-03 | Repository returns null returns null | Repo returns null | request valid | Returns null | - | LogError | Pending |
+
+#### `Task<int> CacheAsync(CacheExamLogsRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EL-CH-01 | Valid request caches logs | request hợp lệ | request={ExamId:"e1",StudentId:"s1",Logs:[{...}]} | Returns count of cached logs | - | LogInformation | Pending |
+| EL-CH-02 | Empty logs list caches 0 | logs=empty | request={Logs:[]} | Returns 0 | - | LogInformation | Pending |
+
+#### `Task<int> FlushCachedAsync(FlushCachedExamLogsRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EL-FL-01 | Valid request flushes to repository | request hợp lệ | request={ExamId:"e1",StudentId:"s1"} | Returns count of flushed logs | - | LogInformation | Pending |
+| EL-FL-02 | No cached logs flushes 0 | cache empty | request={ExamId:"e1",StudentId:"s1"} | Returns 0 | - | LogInformation | Pending |
+
+---
+
+### 7.11. MaterialCommand
+
+**File:** `Application/Commands/Material/MaterialCommand.cs`
+
+#### `Task<MaterialResponse> CreateMaterialAsync(CreateMaterialRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| MAT-C-01 | Valid request creates material | DTO hợp lệ | request={Title:"Lecture 1",ClassroomId:"c1",FileUrl:"https://..."} | Returns MaterialResponse != null | - | LogInformation | Pending |
+| MAT-C-02 | Classroom not found throws | classroom=null | request={ClassroomId:"nonexistent"} | - | KeyNotFoundException, "Classroom not found" | - | Pending |
+| MAT-C-03 | Title empty throws | Title="" | request={Title:""} | - | ValidationException, "Title is required" | - | Pending |
+| MAT-C-04 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to create material" | LogError | Pending |
+
+#### `Task<MaterialResponse> DeleteMaterialAsync(string materialId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| MAT-D-01 | Material exists deletes | material tồn tại | materialId="m1" | Returns MaterialResponse | - | LogInformation | Pending |
+| MAT-D-02 | Material not found throws | material=null | materialId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task<MaterialResponse> SoftDeleteMaterialAsync(string materialId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| MAT-SD-01 | Soft deletes successfully | material tồn tại | materialId="m1" | Returns MaterialResponse với IsDeleted=true | - | LogInformation | Pending |
+| MAT-SD-02 | Material not found throws | material=null | materialId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+---
+
+### 7.12. KeystrokeLogsCommand
+
+**File:** `Application/Commands/KeystrokeLogs/KeystrokeLogsCommand.cs`
+
+#### `Task<CacheKeystrokeLogsResponse> CacheKeystrokeLogsAsync(CacheKeystrokeLogsRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| KSL-C-01 | Valid request caches keystrokes | request hợp lệ | request={SubmissionId:"s1",KeystrokeData:[...]}| Returns CacheKeystrokeLogsResponse với KeystrokeData.Count>0 | - | LogInformation | Pending |
+| KSL-C-02 | Null keystroke data caches empty | keystrokeData=null | request={KeystrokeData:null} | Returns response với KeystrokeData empty | - | LogInformation | Pending |
+| KSL-C-03 | Null metadata handled gracefully | metadata=null | request={Metadata:null} | Returns response không throw | - | LogInformation | Pending |
+
+#### `Task<FlushKeystrokeLogsResponse> FlushKeystrokeLogsAsync(FlushKeystrokeLogsRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| KSL-F-01 | Submission not found throws | submission=null | request={SubmissionId:"nonexistent"} | - | ArgumentException, "Submission does not exist" | - | Pending |
+| KSL-F-02 | Submission ID mismatch throws | submissionId != request.SubmissionId | request={SubmissionId:"s1",SubmissionId:"different"} | - | ArgumentException, "Submission ID mismatch" | - | Pending |
+| KSL-F-03 | Valid request flushes keystrokes | submission tồn tại | request={SubmissionId:"s1"} | Returns FlushKeystrokeLogsResponse != null | - | LogInformation | Pending |
+| KSL-F-04 | Flush fails throws | Repo throws | request={SubmissionId:"s1"} | - | InvalidOperationException, "Failed to persist keystroke log" | LogError | Pending |
+
+---
+
+### 7.13. ProgrammingLanguageCommand
+
+**File:** `Application/Commands/ProgrammingLanguage/ProgrammingLanguageCommand.cs`
+
+#### `Task<List<ProgrammingLanguageResponse>> SyncProgrammingLanguagesAsync()`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PL-SYNC-01 | Syncs all languages successfully | languages exist | (no params) | Returns list of ProgrammingLanguageResponse | - | LogInformation | Pending |
+| PL-SYNC-02 | CodeRunnerService returns empty returns empty list | CodeRunnerService empty | (no params) | Returns empty list | - | LogWarning | Pending |
+| PL-SYNC-03 | Creates new language in DB | language chưa tồn tại | (no params) | Calls CreateAsync | - | LogInformation | Pending |
+| PL-SYNC-04 | Updates existing language in DB | language đã tồn tại | (no params) | Calls UpdateAsync | - | LogInformation | Pending |
+
+#### `Task<ProgrammingLanguageResponse> UpdateStatusAsync(string id, string status)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PL-US-01 | Language exists updates status | language tồn tại | id="lang-java", status="DISABLED" | Returns response với Status="DISABLED" | - | LogInformation | Pending |
+| PL-US-02 | Language not found returns null | language=null | id="nonexistent" | Returns null | - | LogWarning | Pending |
+
+#### `Task<ProgrammingLanguageResponse> UpdateLogoUrlAsync(string id, string logoFileUrl)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PL-UL-01 | Language exists updates logo | language tồn tại | id="lang-java", logoFileUrl="https://..." | Returns response với LogoUrl updated | - | LogInformation | Pending |
+| PL-UL-02 | Language not found returns null | language=null | id="nonexistent" | Returns null | - | LogWarning | Pending |
+
+#### `Task<ProgrammingLanguageResponse> UpdateCompilerNameAsync(string languageId, string compilerId, string name)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PL-UC-01 | Compiler found updates name | compiler tồn tại | languageId="lang-java", compilerId="javac", name="Java Compiler" | Returns response với Compiler.Name updated | - | LogInformation | Pending |
+| PL-UC-02 | Language not found returns null | language=null | languageId="nonexistent" | Returns null | - | LogWarning | Pending |
+| PL-UC-03 | Compiler not found returns null | compiler không tồn tại | compilerId="nonexistent" | Returns null | - | LogWarning | Pending |
+
+---
+
+### 7.14. UserDeviceCommand
+
+**File:** `Application/Commands/UserDevice/UserDeviceCommand.cs`
+
+#### `Task<UserDeviceTokenResponse> RegisterAsync(string userId, RegisterUserDeviceRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| UD-R-01 | Valid request registers device | DTO hợp lệ | userId="u1", request={DeviceToken:"token123"} | Returns UserDeviceTokenResponse != null | - | LogInformation | Pending |
+| UD-R-02 | Existing device updates token | device đã tồn tại | userId="u1", request={DeviceToken:"new-token"} | Updates existing, returns response | - | LogInformation | Pending |
+| UD-R-03 | Repository returns null throws | Repo returns null | userId="u1", request valid | - | Exception, "Failed to register device" | LogError | Pending |
+
+---
+
+### 7.15. ErrorGroupCommand
+
+**File:** `Application/Commands/ErrorGroup/ErrorGroupCommand.cs`
+
+#### `Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EG-GS-01 | Groups submissions successfully | submissions tồn tại | examId="e1", problemId="p1" | Returns count > 0 | - | LogInformation | Pending |
+| EG-GS-02 | No submissions returns 0 | no submissions | examId="e1", problemId="p1" | Returns 0 | - | LogInformation | Pending |
+| EG-GS-03 | Repository throws exception propagated | Repo throws | examId="e1", problemId="p1" | - | Exception | LogError | Pending |
+
+#### `Task CheckSimilarityForProblemAsync(string examId, string problemId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EG-CS-01 | Exam not found returns | exam=null | examId="nonexistent", problemId="p1" | Returns void | - | LogWarning | Pending |
+| EG-CS-02 | Groups exist runs JPlag check | groups tồn tại, count>=2 | examId="e1", problemId="p1" | Updates groups với JPlagStatus.RUNNING | - | LogInformation | Pending |
+| EG-CS-03 | Groups count < 2 skips JPlag | groups count < 2 | examId="e1", problemId="p1" | Skips, no JPlag call | - | LogInformation | Pending |
+
+#### `Task CheckSimilarityForGroupsAsync(List<string> groupIds)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| EG-CSG-01 | Groups with submissions calls JPlag | groups with submissions | groupIds=["g1","g2"] | Calls RunSimilarityCheckAsync | - | LogInformation | Pending |
+| EG-CSG-02 | Updates first group to RUNNING then COMPLETED | groups valid | groupIds=["g1","g2"] | g1.JPlagStatus=RUNNING, g2.JPlagStatus=COMPLETED | - | LogInformation | Pending |
+| EG-CSG-03 | No groups returns | groupIds empty | groupIds=[] | Returns void | - | LogInformation | Pending |
+| EG-CSG-04 | Group not found skips | group=null | groupIds=["nonexistent"] | Continues to next group | - | LogWarning | Pending |
+
+---
+
+### 7.16. ExaminationTemplateCommand
+
+**File:** `Application/Commands/ExaminationTemplate/ExaminationTemplateCommand.cs`
+
+#### `Task<ExaminationTemplateResponse?> CreateAsync(ExaminationTemplateRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| ET-C-01 | Valid request creates template | DTO hợp lệ | request={TemplateName:"Template A"} | Returns ExaminationTemplateResponse != null | - | LogInformation | Pending |
+| ET-C-02 | TemplateName empty throws | TemplateName="" | request={TemplateName:""} | - | ValidationException | - | Pending |
+| ET-C-03 | Total mark != 10 throws | totalMark=15 | request={TotalMark:15} | - | ArgumentException, "Total mark must be 10" | - | Pending |
+| ET-C-04 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to create examination template" | LogError | Pending |
+
+#### `Task UpdateAsync(string id, UpdateExaminationTemplateRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| ET-U-01 | Template exists updates | template tồn tại | id="t1", request valid | Returns updated response | - | LogInformation | Pending |
+| ET-U-02 | Template not found throws | template=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+| ET-U-03 | Total mark != 10 throws | totalMark=8 | request={TotalMark:8} | - | ArgumentException | - | Pending |
+
+#### `Task DeleteAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| ET-D-01 | Deletes successfully | template tồn tại | id="t1" | Returns void | - | LogInformation | Pending |
+| ET-D-02 | Template not found throws | template=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task<ExaminationTemplateResponse?> SoftDeleteAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| ET-SD-01 | Soft deletes | template tồn tại | id="t1" | Returns response với IsDeleted=true | - | LogInformation | Pending |
+| ET-SD-02 | Not found throws | template=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task<ExaminationTemplateResponse?> RestoreAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| ET-R-01 | Restores successfully | template tồn tại | id="t1" | Returns response với IsDeleted=false | - | LogInformation | Pending |
+| ET-R-02 | Not found throws | template=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+---
+
+### 7.17. RegradingRequestCommand
+
+**File:** `Application/Commands/RegradingRequests/RegradingRequestCommand.cs`
+
+#### `Task<RegradingRequestResponse> CreateAsync(CreateRegradingRequest request, string studentId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RG-C-01 | Valid request creates regrading request | submission tồn tại | request={SubmissionId:"s1"}, studentId="s1" | Returns RegradingRequestResponse != null, Status=PENDING | - | LogInformation | Pending |
+| RG-C-02 | Submission not found throws | submission=null | request={SubmissionId:"nonexistent"} | - | KeyNotFoundException, "Submission with ID nonexistent not found" | - | Pending |
+| RG-C-03 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to create regrading request" | LogError | Pending |
+| RG-C-04 | Submission update fails is logged but continues | UpdateAsync throws | request valid | Still returns response (non-critical) | - | LogWarning | Pending |
+| RG-C-05 | Notification fails is logged but doesn't throw | NotifyUsersAsync throws | request valid | Still returns response (non-critical) | - | LogWarning | Pending |
+
+#### `Task<RegradingRequestResponse> ApproveAsync(string id, string lecturerNote)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RG-A-01 | Request exists approves | request tồn tại | id="r1", lecturerNote="Approved" | Returns response với Status=APPROVED | - | LogInformation | Pending |
+| RG-A-02 | Request not found throws | request=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+| RG-A-03 | Notification fails is logged but doesn't throw | NotifyUsersAsync throws | id="r1" | Still returns response | - | LogWarning | Pending |
+
+#### `Task<RegradingRequestResponse> RejectAsync(string id, string lecturerNote)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RG-RJ-01 | Request exists rejects | request tồn tại | id="r1", lecturerNote="Rejected" | Returns response với Status=REJECTED | - | LogInformation | Pending |
+| RG-RJ-02 | Request not found throws | request=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+| RG-RJ-03 | Notification fails is logged but doesn't throw | NotifyUsersAsync throws | id="r1" | Still returns response | - | LogWarning | Pending |
+
+#### `Task<RegradingRequestResponse> CancelAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| RG-CA-01 | Request exists cancels | request tồn tại | id="r1" | Returns response với Status=CANCELLED | - | LogInformation | Pending |
+| RG-CA-02 | Request not found throws | request=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+---
+
+### 7.18. SubjectCommand
+
+**File:** `Application/Commands/Subject/SubjectCommand.cs`
+
+#### `Task<SubjectResponse> CreateSubjectAsync(CreateSubjectRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-C-01 | Valid request creates subject | SubjectCode unique | request={SubjectCode:"SE1701",SubjectName:"Software Engineering"} | Returns SubjectResponse != null | - | LogInformation | Pending |
+| SUBJ-C-02 | Duplicate SubjectCode throws | SubjectCode đã tồn tại | request={SubjectCode:"SE1701"} | - | InvalidOperationException, "Subject with code 'SE1701' already exists" | - | Pending |
+| SUBJ-C-03 | SubjectCode empty throws | SubjectCode="" | request={SubjectCode:""} | - | ValidationException | - | Pending |
+| SUBJ-C-04 | SubjectCode > 20 chars throws | SubjectCode=21 chars | request={SubjectCode:21-char string} | - | ValidationException, "Subject code must be between 1 and 20" | - | Pending |
+| SUBJ-C-05 | SubjectName empty throws | SubjectName="" | request={SubjectName:""} | - | ValidationException | - | Pending |
+| SUBJ-C-06 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to create subject" | LogError | Pending |
+
+#### `Task<SubjectResponse> UpdateSubjectAsync(string subjectId, UpdateSubjectRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-U-01 | Subject exists updates | subject tồn tại | subjectId="s1", request valid | Returns updated SubjectResponse | - | LogInformation | Pending |
+| SUBJ-U-02 | Subject not found throws | subject=null | subjectId="nonexistent" | - | KeyNotFoundException, "Subject with id nonexistent not found" | - | Pending |
+| SUBJ-U-03 | Duplicate SubjectCode throws | code tồn tại ở subject khác | subjectId="s1", request={SubjectCode:"SE1702"} | - | InvalidOperationException, "Subject with code 'SE1702' already exists" | - | Pending |
+
+#### `Task<SubjectResponse> DeleteSubjectAsync(string subjectId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-D-01 | Deletes successfully | subject tồn tại | subjectId="s1" | Returns SubjectResponse | - | LogInformation | Pending |
+| SUBJ-D-02 | Not found throws | subject=null | subjectId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task<SubjectResponse> SoftDeleteSubjectAsync(string subjectId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-SD-01 | Soft deletes | subject tồn tại | subjectId="s1" | Returns SubjectResponse với IsDeleted=true | - | LogInformation | Pending |
+| SUBJ-SD-02 | Not found throws | subject=null | subjectId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task<SubjectResponse> RestoreSubjectAsync(string subjectId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-R-01 | Restores successfully | subject tồn tại, IsDeleted=true | subjectId="s1" | Returns SubjectResponse với IsDeleted=false | - | LogInformation | Pending |
+| SUBJ-R-02 | Not found throws | subject=null | subjectId="nonexistent" | - | KeyNotFoundException | - | Pending |
+| SUBJ-R-03 | Not deleted (IsDeleted=false) returns same | subject.IsDeleted=false | subjectId="s1" | Returns SubjectResponse, IsDeleted=false | - | LogInformation | Pending |
+
+#### `Task<BulkOperationResult> BulkSoftDeleteAsync(List<string> subjectIds)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-BSD-01 | All subjects deleted | all tồn tại, count=5 | subjectIds=["s1","s2","s3","s4","s5"] | Result.TotalRequested=5, SuccessCount=5, FailedCount=0 | - | LogInformation | Pending |
+| SUBJ-BSD-02 | Some fail | 3 tồn tại, 2 không | subjectIds=["s1","s2","s3","nonexistent1","nonexistent2"] | Result.SuccessCount=3, FailedCount=2 | - | LogInformation | Pending |
+
+#### `Task<BulkOperationResult> BulkRestoreAsync(List<string> subjectIds)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SUBJ-BR-01 | All subjects restored | all tồn tại, count=3 | subjectIds=["s1","s2","s3"] | Result.TotalRequested=3, SuccessCount=3 | - | LogInformation | Pending |
+| SUBJ-BR-02 | Some fail | 2 tồn tại, 1 không | subjectIds=["s1","s2","nonexistent"] | Result.SuccessCount=2, FailedCount=1 | - | LogInformation | Pending |
+
+---
+
+### 7.19. ClassEnrollmentsCommand
+
+**File:** `Application/Commands/ClassEnrollments/ClassEnrollmentsCommand.cs`
+
+#### `Task<ClassEnrollmentsResponse> EnrollClass(ClassEnrollmentsRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CE-E-01 | Valid enrollment creates enrollment | classroom tồn tại, key đúng, chưa enroll | request={ClassId:"c1",StudentId:"s1",EnrolKey:"ABC123"} | Returns ClassEnrollmentsResponse != null, IsJoining=true | - | LogInformation | Pending |
+| CE-E-02 | Classroom not found throws | classroom=null | request={ClassId:"nonexistent"} | - | InvalidOperationException, "Class not found" | - | Pending |
+| CE-E-03 | Wrong enrollment key throws | enrolKey sai | request={EnrolKey:"WRONG"} | - | InvalidOperationException, "Invalid enrollment key" | - | Pending |
+| CE-E-04 | Already enrolled throws | enrollment đã tồn tại | request={ClassId:"c1",StudentId:"s1"} | - | InvalidOperationException, "Student is already enrolled in this class" | - | Pending |
+| CE-E-05 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to enroll in class" | LogError | Pending |
+
+#### `Task<ClassEnrollmentsResponse> LeaveClass(ClassEnrollmentsRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CE-L-01 | Enrolled student leaves | enrollment tồn tại, IsJoining=true | request={ClassId:"c1",StudentId:"s1"} | Returns response với IsJoining=false, MovedOutDate!=null | - | LogInformation | Pending |
+| CE-L-02 | Not enrolled throws | enrollment=null | request={ClassId:"c1",StudentId:"s1"} | - | InvalidOperationException, "Student is not enrolled in this class" | - | Pending |
+| CE-L-03 | Already left throws | IsJoining=false | request={ClassId:"c1",StudentId:"s1"} | - | InvalidOperationException, "Student is not enrolled" | - | Pending |
+| CE-L-04 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to leave class" | LogError | Pending |
+
+#### `Task<ClassEnrollmentsResponse> ForceLeaveClass(string classId, string studentId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CE-FL-01 | Force removes student | enrollment tồn tại | classId="c1", studentId="s1" | Returns response với IsJoining=false | - | LogInformation | Pending |
+| CE-FL-02 | Not enrolled throws | enrollment=null | classId="c1", studentId="s1" | - | InvalidOperationException, "Student is not enrolled in this class" | - | Pending |
+| CE-FL-03 | Repository returns null throws | Repo returns null | classId="c1", studentId="s1" | - | Exception, "Failed to remove student from class" | LogError | Pending |
+
+---
+
+### 7.20. ClassroomQuizCommand
+
+**File:** `Application/Commands/ClassroomQuiz/ClassroomQuizCommand.cs`
+
+#### `Task<ClassroomQuizResponse> CreateClassroomQuizAsync(CreateClassroomQuizRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-C-01 | Valid request creates quiz | request hợp lệ | request={ClassroomId:"c1",QuizId:"q1",StartTime:future,EndTime:future+60m} | Returns ClassroomQuizResponse != null, Status=DRAFT | - | LogInformation | Pending |
+| CQ-C-02 | StartTime in past throws | StartTime < now-1min | request={StartTime:past} | - | ArgumentException, "Start time must be in the future." | - | Pending |
+| CQ-C-03 | EndTime <= StartTime throws | EndTime <= StartTime | request={StartTime:t+1h,EndTime:t+30m} | - | ArgumentException, "End time must be after start time." | - | Pending |
+| CQ-C-04 | Time window < quiz duration throws | windowMinutes < quiz.Duration | request với short window | - | ArgumentException, "time window must be at least equal to quiz duration" | - | Pending |
+| CQ-C-05 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to create classroom quiz assignment" | LogError | Pending |
+
+#### `Task<ClassroomQuizResponse> UpdateClassroomQuizAsync(string id, UpdateClassroomQuizRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-U-01 | Quiz exists updates successfully | cq tồn tại | id="cq1", request valid | Returns updated response | - | LogInformation | Pending |
+| CQ-U-02 | Quiz not found throws | cq=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+| CQ-U-03 | Change start time on ONGOING throws | cq.Status=ONGOING | request={StartTime:newTime} | - | InvalidOperationException, "Cannot change start time once the quiz has started or ended." | - | Pending |
+| CQ-U-04 | Change start time on CLOSED throws | cq.Status=CLOSED | request={StartTime:newTime} | - | InvalidOperationException | - | Pending |
+| CQ-U-05 | Change past start time on DRAFT throws | cq.Status=DRAFT, StartTime < now-5min | request={StartTime:past} | - | ArgumentException, "Start time cannot be in the past." | - | Pending |
+| CQ-U-06 | Reduce end time on ONGOING throws | cq.Status=ONGOING | request={EndTime:earlierTime} | - | InvalidOperationException, "Cannot reduce end time while quiz is ongoing." | - | Pending |
+| CQ-U-07 | DRAFT->PUBLISHED with future start succeeds | cq.Status=DRAFT | request={Status:PUBLISHED} | Status=PUBLISHED | - | LogInformation | Pending |
+| CQ-U-08 | DRAFT->PUBLISHED with past start throws | cq.Status=DRAFT, StartTime <= now | request={Status:PUBLISHED} | - | InvalidOperationException, "Cannot publish to the past." | - | Pending |
+| CQ-U-09 | DRAFT->ONGOING sets StartTime=now | cq.Status=DRAFT | request={Status:ONGOING} | response.StartTime ~ now | - | LogInformation | Pending |
+| CQ-U-10 | PUBLISHED->ONGOING sets StartTime=now | cq.Status=PUBLISHED | request={Status:ONGOING} | response.StartTime ~ now | - | LogInformation | Pending |
+| CQ-U-11 | ONGOING->CLOSED sets EndTime=now | cq.Status=ONGOING | request={Status:CLOSED} | response.EndTime ~ now | - | LogInformation | Pending |
+| CQ-U-12 | PUBLISHED->CLOSED throws | cq.Status=PUBLISHED | request={Status:CLOSED} | - | InvalidOperationException, "Cannot transition PUBLISHED directly to CLOSED" | - | Pending |
+| CQ-U-14 | Change passcode on CLOSED throws | cq.Status=CLOSED | request={Passcode:"newpass"} | - | InvalidOperationException, "Cannot change passcode of a closed quiz." | - | Pending |
+
+#### `Task SoftDeleteClassroomQuizAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-SD-01 | Non-ongoing quiz soft deletes | cq tồn tại, Status!=ONGOING | id="cq1" | Returns void, Jobs cancelled | - | LogInformation | Pending |
+| CQ-SD-02 | ONGOING quiz throws | cq.Status=ONGOING | id="cq1" | - | InvalidOperationException, "Cannot delete an ongoing quiz. Please close it first." | - | Pending |
+| CQ-SD-03 | Quiz not found throws | cq=null | id="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task DeleteClassroomQuizAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-D-01 | Non-ongoing quiz hard deletes | cq tồn tại, Status!=ONGOING | id="cq1" | Returns void | - | LogInformation | Pending |
+| CQ-D-02 | ONGOING quiz throws | cq.Status=ONGOING | id="cq1" | - | InvalidOperationException, "Cannot delete an ongoing quiz." | - | Pending |
+
+---
+
+### 7.21. QuestionCommand
+
+**File:** `Application/Commands/Question/QuestionCommand.cs`
+
+#### `Task<QuestionResponse> CreateQuestionAsync(CreateQuestionRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| Q-C-01 | MULTIPLE_CHOICE with answer options creates | Type=MULTIPLE_CHOICE | request={Content:"Q1",Type:MULTIPLE_CHOICE,AnswerOptions:[{Content:"A",IsCorrect:true}]} | Returns QuestionResponse != null | - | LogInformation | Pending |
+| Q-C-02 | ESSAY type with TextAnswer creates | Type=ESSAY | request={Content:"Essay Q",Type:ESSAY,TextAnswer:"Sample answer"} | Returns QuestionResponse != null, AnswerOptions=empty | - | LogInformation | Pending |
+| Q-C-03 | ESSAY type clears AnswerOptions | Type=ESSAY với AnswerOptions provided | request={Type:ESSAY,AnswerOptions:[...]} | AnswerOptions cleared in model | - | - | Pending |
+| Q-C-04 | Repository returns null throws | Repo returns null | request valid | - | Exception, "Failed to create question" | LogError | Pending |
+
+#### `Task<QuestionResponse> UpdateQuestionAsync(string questionId, UpdateQuestionRequest request)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| Q-U-01 | Question exists updates | question tồn tại | questionId="q1", request valid | Returns updated QuestionResponse | - | LogInformation | Pending |
+| Q-U-02 | Question not found or deleted throws | question=null hoặc IsDeleted=true | questionId="nonexistent" | - | KeyNotFoundException, "Question with id nonexistent not found" | - | Pending |
+| Q-U-03 | Repository returns null throws | Repo returns null | questionId="q1" | - | Exception, "Failed to update question" | LogError | Pending |
+
+#### `Task<QuestionResponse> SoftDeleteQuestionAsync(string questionId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| Q-SD-01 | Soft deletes | question tồn tại | questionId="q1" | Returns QuestionResponse với IsDeleted=true | - | LogInformation | Pending |
+| Q-SD-02 | Not found throws | question=null | questionId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+#### `Task<QuestionResponse> RestoreQuestionAsync(string questionId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| Q-R-01 | Restores successfully | question tồn tại | questionId="q1" | Returns QuestionResponse với IsDeleted=false | - | LogInformation | Pending |
+| Q-R-02 | Not found throws | question=null | questionId="nonexistent" | - | KeyNotFoundException | - | Pending |
+| Q-R-03 | Repository returns null throws | Repo returns null | questionId="q1" | - | Exception, "Failed to restore question" | LogError | Pending |
+
+#### `Task<QuestionResponse> DeleteQuestionAsync(string questionId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| Q-D-01 | Hard deletes | question tồn tại | questionId="q1" | Returns QuestionResponse, calls Delete on repo | - | LogInformation | Pending |
+| Q-D-02 | Not found throws | question=null | questionId="nonexistent" | - | KeyNotFoundException | - | Pending |
+
+---
+
+## 8. ACASSERVICE — QUERIES
+
+---
+
+### 8.1. SubmissionQuery
+
+**File:** `Application/Queries/Submission/SubmissionQuery.cs`
+
+#### `Task<Models.Submission?> GetSubmissionByIdAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SQ-G-01 | Submission exists returns submission | submission tồn tại | id="s1" | Returns Submission != null | - | - | Pending |
+| SQ-G-02 | Submission not found returns null | submission=null | id="nonexistent" | Returns null | - | - | Pending |
+
+#### `Task<(Models.Submission?, ProblemResponse?, UserProfileResponse?)> GetSubmissionDetailByIdAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SQ-GD-01 | All exist returns tuple with all data | submission, problem, student tồn tại | id="s1" | Returns (Submission, Problem, StudentProfile) all non-null | - | - | Pending |
+| SQ-GD-02 | Submission not found returns null for submission | submission=null | id="nonexistent" | Returns (null, null, null) | - | - | Pending |
+| SQ-GD-03 | Problem not found returns null for problem | problem=null | id="s1" | Returns (Submission, null, StudentProfile) | - | - | Pending |
+
+#### `Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| SQ-V-01 | Returns all versions sorted by version | versions tồn tại | studentId="s1", examId="e1", problemId="p1" | Returns list sorted by Version ASC | - | - | Pending |
+| SQ-V-02 | No submissions returns empty list | no submissions | studentId="s1", examId="e1", problemId="p1" | Returns empty list | - | - | Pending |
+
+---
+
+### 8.2. ProblemQuery
+
+**File:** `Application/Queries/Problem/ProblemQuery.cs`
+
+#### `Task<ProblemResponse?> GetProblemByIdAsync(string problemId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PQ-G-01 | Problem exists returns ProblemResponse | problem tồn tại | problemId="p1" | Returns ProblemResponse != null | - | - | Pending |
+| PQ-G-02 | Problem not found returns null | problem=null | problemId="nonexistent" | Returns null | - | - | Pending |
+
+#### `Task<List<ProblemResponse>> GetProblemsByIdsAsync(IEnumerable<string> problemIds)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PQ-GI-01 | All problems exist returns all | 3 problems | problemIds=["p1","p2","p3"] | Returns list of 3 | - | - | Pending |
+| PQ-GI-02 | Some not found returns found only | p1 tồn tại, p2 không | problemIds=["p1","nonexistent"] | Returns list of 1 | - | - | Pending |
+| PQ-GI-03 | Empty input returns empty list | problemIds empty | problemIds=[] | Returns empty list | - | - | Pending |
+
+#### `Task<List<TestCaseResponse>> GetTestCasesByProblemIdAsync(string problemId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| PQ-TC-01 | Returns non-deleted test cases | test cases tồn tại | problemId="p1" | TestCases all have IsDeleted=false | - | - | Pending |
+| PQ-TC-02 | Filters deleted test cases | some deleted | problemId="p1" | Returns only non-deleted | - | - | Pending |
+
+---
+
+### 8.3. ClassroomQuery
+
+**File:** `Application/Queries/Classroom/ClassroomQuery.cs`
+
+#### `Task<ClassroomResponse> GetClassroomByIdAsync(string id)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-G-01 | Classroom exists returns ClassroomResponse | classroom tồn tại | id="c1" | Returns ClassroomResponse != null | - | - | Pending |
+| CQ-G-02 | Classroom not found returns null | classroom=null | id="nonexistent" | Returns null | - | - | Pending |
+
+#### `Task<PagedResult<ClassroomResponse>> GetAllClassroomsAsync(string? userId, string? search, string? status, int pageIndex, int pageSize)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-GA-01 | Returns paginated results | repo returns items | pageIndex=0, pageSize=10 | PagedResult with correct Items and TotalCount | - | - | Pending |
+| CQ-GA-02 | Empty results returns empty PagedResult | repo returns empty | pageIndex=0, pageSize=10 | Items empty, TotalCount=0 | - | - | Pending |
+
+#### `Task<List<ClassroomResponse>> FindByStudentIdAsync(string studentId)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| CQ-FS-01 | Student has enrollments returns classrooms | student đã enroll | studentId="s1" | Returns list of enrolled classrooms | - | - | Pending |
+| CQ-FS-02 | Student has no enrollments returns empty | no enrollments | studentId="s1" | Returns empty list | - | - | Pending |
+
+---
+
+### 8.4. NotificationQuery
+
+**File:** `Application/Queries/Notification/NotificationQuery.cs`
+
+#### `Task<PagedResult<NotificationResponse>> GetNotificationsByUserIdAsync(string userId, int pageIndex = 1, int pageSize = 10)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| NQ-GN-01 | User has notifications returns paginated | notifications tồn tại | userId="u1" | Returns PagedResult với Items | - | - | Pending |
+| NQ-GN-02 | User has no notifications returns empty | no notifications | userId="u1" | Returns empty PagedResult | - | - | Pending |
+| NQ-GN-03 | Pagination works correctly | multiple pages | pageIndex=2, pageSize=5 | Returns correct page | - | - | Pending |
+
+---
+
+## 9. ACASSERVICE — CODERUNNER
+
+---
+
+### 9.1. CompilationApi
+
+**File:** `Application/CodeRunner/CompilationApi.cs`
+
+#### `Task<CompilationResult> CompileAsync(string compilerId, CompileRequest compileRequest, string lang)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| COMP-C-01 | Valid request returns CompilationResult | request hợp lệ | compilerId="java", lang="java" | Returns CompilationResult != null | - | - | Pending |
+| COMP-C-02 | Null language throws ArgumentException | lang=null | lang=null | - | ArgumentException, "Language cannot be null or empty" | - | Pending |
+| COMP-C-03 | Empty language throws ArgumentException | lang="" | lang="" | - | ArgumentException | - | Pending |
+| COMP-C-04 | Deserialization returns null throws InvalidOperationException | result=null | valid request | - | InvalidOperationException, "Failed to deserialize compilation result" | - | Pending |
+| COMP-C-05 | Build succeeded with errors returns result with BuildError | BuildResult.Code != 0 | compileRequest với syntax error | Returns CompilationResult với BuildResult != null | - | - | Pending |
+
+#### `Task<RunBatchResponse> RunBatchAsync(string compilerId, RumBatchRequest runBatchRequest, string lang)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| COMP-R-01 | Valid request returns RunBatchResponse | request hợp lệ | compilerId="java", lang="java" | Returns RunBatchResponse != null | - | - | Pending |
+| COMP-R-02 | Null language throws ArgumentException | lang=null | lang=null | - | ArgumentException | - | Pending |
+| COMP-R-03 | Empty stdinList throws ArgumentException | stdinList empty | runBatchRequest.TestCases=[] | - | ArgumentException, "stdinList cannot be empty" | - | Pending |
+| COMP-R-04 | Deserialization returns null throws InvalidOperationException | result=null | valid request | - | InvalidOperationException | - | Pending |
+
+---
+
+### 9.2. TestcaseEvaluator
+
+**File:** `Application/Commands/Submission/TestcaseEvaluator.cs`
+
+#### `Task<CompilationResult> ExecuteCustomTestcaseAsync(string compilerId, CompileRequest compileRequest, string lang)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TE-E-01 | Compilation succeeds returns result | compile success | compilerId="java", lang="java" | Returns CompilationResult với ExecResult | - | - | Pending |
+| TE-E-02 | Compilation fails returns result with compile error | compile failed | compileRequest với syntax error | Returns CompilationResult với Status=COMPILE_ERROR | - | - | Pending |
+| TE-E-03 | Null compile request throws | compileRequest=null | compilerId="java" | - | ArgumentNullException | - | Pending |
+
+#### `Task<List<TestResultResponse>> ExecuteTestcasesAsync(string compilerId, RumBatchRequest runBatchRequest, string lang)`
+
+| ID | Test Case Name | Precondition | Input Data | Expected Output | Exceptions | Log Messages | Status |
+|----|---------------|-------------|------------|----------------|-----------|-------------|--------|
+| TE-ET-01 | All test cases pass returns SUCCESS results | all pass | runBatchRequest với 3 test cases | Returns list of 3 với Status=SUCCESS | - | - | Pending |
+| TE-ET-02 | Some test cases fail returns FAIL results | 2 pass, 1 fail | runBatchRequest với mixed results | Returns list với correct FAIL count | - | - | Pending |
+| TE-ET-03 | Compilation error returns COMPILE_ERROR for each | compile failed | runBatchRequest với compile error | Returns list với Status=COMPILE_ERROR for each | - | - | Pending |
+| TE-ET-04 | Timeout returns TIMEOUT result | exec timed out | runBatchRequest | Returns result với Status=TIMEOUT | - | - | Pending |
+| TE-ET-05 | Runtime error returns RUNTIME_ERROR | exitCode != 0 | runBatchRequest | Returns result với Status=RUNTIME_ERROR | - | - | Pending |
+| TE-ET-06 | Result count mismatch throws Exception | resultCount != testCaseCount | runBatchRequest với mismatch | - | Exception, "Failed to execute public testcases" | - | Pending |
+
+---
+
+## TỔNG KẾT SỐ LƯỢNG TEST CASES
+
+| Module | File | Số Test Cases |
+|--------|------|--------------|
+| AuthService Utils | JwtUtil, HashingUtil, OptGenerator, GoogleTokenVerifier, ResponseUtil | ~70 |
+| AuthService Commands | UserCommand | ~38 |
+| AuthService Queries | UserQuery | ~27 |
+| AcasService Utils | ResultComparator, TextAnswerComparer | ~30 |
+| AcasService Jobs | ExaminationJobScheduling | ~4 |
+| AcasService Commands | SubmissionCommand | ~33 |
+| AcasService Commands | ProblemCommand | ~25 |
+| AcasService Commands | ClassroomCommand | ~14 |
+| AcasService Commands | SlotCommand | ~11 |
+| AcasService Commands | StudentExamSessionCommand | ~9 |
+| AcasService Commands | QuizAttemptCommand | ~10 |
+| AcasService Commands | DiscussionIssueCommand | ~6 |
+| AcasService Commands | NotificationCommand | ~6 |
+| AcasService Commands | ExamLogCommand | ~5 |
+| AcasService Commands | MaterialCommand | ~6 |
+| AcasService Commands | KeystrokeLogsCommand | ~5 |
+| AcasService Commands | ProgrammingLanguageCommand | ~9 |
+| AcasService Commands | UserDeviceCommand | ~3 |
+| AcasService Commands | ErrorGroupCommand | ~8 |
+| AcasService Commands | ExaminationTemplateCommand | ~10 |
+| AcasService Commands | RegradingRequestCommand | ~11 |
+| AcasService Commands | SubjectCommand | ~16 |
+| AcasService Commands | ClassEnrollmentsCommand | ~9 |
+| AcasService Commands | ClassroomQuizCommand | ~14 |
+| AcasService Commands | QuestionCommand | ~10 |
+| AcasService Commands | ExaminationCommand | ~7 |
+| AcasService Queries | SubmissionQuery, ProblemQuery, ClassroomQuery, NotificationQuery | ~15 |
+| AcasService CodeRunner | CompilationApi, TestcaseEvaluator | ~12 |
+| **TỔNG** | | **~423** |
+
+---
+
+**Ghi chú:**
+- Mỗi hàm được test với: happy path, error cases, edge cases, boundary conditions
+- Exceptions được test với message cụ thể
+- Log messages được verify cho các trường hợp quan trọng
+- Tất cả test cases có Status = Pending, cần implement và đánh dấu Done khi hoàn thành

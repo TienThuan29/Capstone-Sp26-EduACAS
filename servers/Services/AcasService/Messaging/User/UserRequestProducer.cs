@@ -22,7 +22,7 @@ public class UserRequestProducer
         InitializeQueues();
     }
 
-    private void InitializeQueues()
+    protected virtual void InitializeQueues()
     {
         var channel = _rabbitMqService.Channel;
         

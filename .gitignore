@@ -17,3 +17,4 @@ mobile.idea/
 # Ignore SSL Certificates
 deploy/certs/
 *.pem
+documentations/*

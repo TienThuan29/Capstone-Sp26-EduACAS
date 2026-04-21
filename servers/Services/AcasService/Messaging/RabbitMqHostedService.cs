@@ -19,12 +19,12 @@ public class RabbitMqHostedService : IHostedService
         ILogger<RabbitMqHostedService> logger)
     {
         _logger = logger;
-        _hostName = configuration["RabbitMQ:HostName"] ?? 
+        _hostName = configuration["RabbitMQ:HostName"] ??
                    throw new ArgumentNullException("RabbitMQ:HostName is not configured");
         _port = configuration.GetValue<int>("RabbitMQ:Port", 5672);
-        _userName = configuration["RabbitMQ:UserName"] ?? 
+        _userName = configuration["RabbitMQ:UserName"] ??
                    throw new ArgumentNullException("RabbitMQ:UserName is not configured");
-        _password = configuration["RabbitMQ:Password"] ?? 
+        _password = configuration["RabbitMQ:Password"] ??
                    throw new ArgumentNullException("RabbitMQ:Password is not configured");
         _virtualHost = configuration["RabbitMQ:VirtualHost"] ?? "/";
 
@@ -43,8 +43,27 @@ public class RabbitMqHostedService : IHostedService
         _channel = _connection.CreateModel();
     }
 
-    public IConnection Connection => _connection;
-    public IModel Channel => _channel;
+    /// <summary>
+    /// Protected constructor that accepts pre-created connections.
+    /// Used for testing to avoid needing a real RabbitMQ server.
+    /// </summary>
+    protected RabbitMqHostedService(
+        IConnection connection,
+        IModel channel,
+        ILogger<RabbitMqHostedService> logger)
+    {
+        _connection = connection;
+        _channel = channel;
+        _logger = logger;
+        _hostName = string.Empty;
+        _port = 0;
+        _userName = string.Empty;
+        _password = string.Empty;
+        _virtualHost = "/";
+    }
+
+    public virtual IConnection Connection => _connection;
+    public virtual IModel Channel => _channel;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
