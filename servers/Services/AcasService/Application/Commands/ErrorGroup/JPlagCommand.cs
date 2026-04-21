@@ -9,6 +9,12 @@ namespace AcasService.Application.Commands.ErrorGroup;
 public interface IJPlagCommand
 {
     Task<List<JPlagMatch>> RunSimilarityCheckAsync(string language, List<Models.Submission> submissions);
+
+    Task<List<JPlagMatch>> RunSimilarityCheckWithExcludeCodeBaseAsync(
+        string language,
+        List<Models.Submission> submissions,
+        string? baseCode = null,
+        string? baseCodeFileName = null);
 }
 
 public class JPlagCommand : IJPlagCommand
@@ -140,6 +146,160 @@ public class JPlagCommand : IJPlagCommand
         catch (Exception ex)
         {
             _logger.LogError(ex, "Lỗi xảy ra trong quá trình chạy JPlag Similarity Check");
+            throw;
+        }
+        finally
+        {
+            if (Directory.Exists(tempDir))
+            {
+                try
+                {
+                    Directory.Delete(tempDir, true);
+                    _logger.LogWarning("Đã xóa thư mục tạm: {TempDir}", tempDir);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Không thể xóa thư mục tạm: {TempDir}", tempDir);
+                }
+            }
+        }
+    }
+
+    public async Task<List<JPlagMatch>> RunSimilarityCheckWithExcludeCodeBaseAsync(
+        string language,
+        List<Models.Submission> submissions,
+        string? baseCode = null,
+        string? baseCodeFileName = null)
+    {
+        if (submissions == null || submissions.Count < 2)
+        {
+            _logger.LogWarning("Không đủ số lượng bài nộp để so sánh (ít nhất 2 bài).");
+            return new List<JPlagMatch>();
+        }
+
+        string sessionId = Guid.NewGuid().ToString();
+        string tempDir = Path.Combine(Path.GetTempPath(), "AcasJPlag", sessionId);
+        string submissionDir = Path.Combine(tempDir, "submissions");
+        string baseCodeDir = Path.Combine(tempDir, "basecode");
+        string resultBaseName = Path.Combine(tempDir, "results");
+        string resultZipPath = resultBaseName + ".jplag";
+
+        try
+        {
+            _logger.LogWarning("Bắt đầu chuẩn bị dữ liệu cho JPlag với Base-Code (Session: {SessionId}, Language: {Lang})", sessionId, language);
+            string ext = GetExtensionForLanguage(language);
+
+            Directory.CreateDirectory(submissionDir);
+
+            foreach (var sub in submissions)
+            {
+                string studentDir = Path.Combine(submissionDir, sub.Id);
+                Directory.CreateDirectory(studentDir);
+                string filePath = Path.Combine(studentDir, $"solution.{ext}");
+                string source = sub.Source ?? "";
+                if (language.ToLower().Contains("csharp") || language.ToLower().Contains("cs"))
+                {
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"namespace\s+[A-Za-z0-9_.]+", "namespace Unified");
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"(public\s+|partial\s+)*class\s+[A-Za-z0-9_]+", "class Submission");
+                }
+                await File.WriteAllTextAsync(filePath, source);
+                _logger.LogInformation("Đã tạo file: {FilePath} (Size: {Size})", filePath, sub.Source.Length);
+            }
+
+            if (!string.IsNullOrWhiteSpace(baseCode))
+            {
+                Directory.CreateDirectory(baseCodeDir);
+                string baseCodeFile = baseCodeFileName ?? $"basecode.{ext}";
+                string baseCodePath = Path.Combine(baseCodeDir, baseCodeFile);
+                await File.WriteAllTextAsync(baseCodePath, baseCode);
+                _logger.LogWarning("Đã tạo base-code file tại: {BaseCodePath} (Size: {Size})", baseCodePath, baseCode.Length);
+            }
+            else
+            {
+                _logger.LogInformation("Không có base-code được cung cấp, bỏ qua bước tạo base-code directory.");
+            }
+
+            await Task.Delay(500);
+
+            int minTokenMatch = CalculateMinTokenMatch(language, submissions[0].Source);
+            string jplagLang = MapLanguageForJPlag(language);
+
+            if (Directory.Exists(submissionDir))
+            {
+                var subDirs = Directory.GetDirectories(submissionDir);
+                _logger.LogWarning("Cấu trúc thư mục quét: {Dir} chứa {Count} thư mục con.", submissionDir, subDirs.Length);
+                foreach (var d in subDirs)
+                {
+                    var files = Directory.GetFiles(d, "*.*", SearchOption.AllDirectories);
+                    _logger.LogWarning("  - SubDir {Name}: {Count} files ({Files})",
+                        Path.GetFileName(d), files.Length, string.Join(", ", files.Select(Path.GetFileName)));
+                }
+            }
+
+            var processInfo = new ProcessStartInfo
+            {
+                FileName = "java",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            processInfo.ArgumentList.Add("-Djava.awt.headless=true");
+            processInfo.ArgumentList.Add("-jar");
+            processInfo.ArgumentList.Add(_jarPath);
+            processInfo.ArgumentList.Add("--mode");
+            processInfo.ArgumentList.Add("RUN");
+            processInfo.ArgumentList.Add("-l");
+            processInfo.ArgumentList.Add(jplagLang);
+            processInfo.ArgumentList.Add("-r");
+            processInfo.ArgumentList.Add(resultBaseName);
+            processInfo.ArgumentList.Add("-t");
+            processInfo.ArgumentList.Add(minTokenMatch.ToString());
+            processInfo.ArgumentList.Add("-m");
+            processInfo.ArgumentList.Add("0.0");
+            processInfo.ArgumentList.Add("--overwrite");
+
+            if (!string.IsNullOrWhiteSpace(baseCode) && Directory.Exists(baseCodeDir))
+            {
+                processInfo.ArgumentList.Add("-bc");
+                processInfo.ArgumentList.Add(baseCodeDir);
+                _logger.LogWarning("Thêm --base-code argument: {BaseCodeDir}", baseCodeDir);
+            }
+
+            processInfo.ArgumentList.Add(submissionDir);
+
+            _logger.LogWarning("Thực thi JPlag: java {Args}", string.Join(" ", processInfo.ArgumentList));
+
+            using var process = Process.Start(processInfo);
+            if (process == null) throw new Exception("Không thể khởi động tiến trình Java.");
+
+            await process.WaitForExitAsync();
+
+            string output = await process.StandardOutput.ReadToEndAsync();
+            string err = await process.StandardError.ReadToEndAsync();
+
+            if (!string.IsNullOrWhiteSpace(output)) _logger.LogCritical("JPlag STDOUT: {Output}", output);
+            if (!string.IsNullOrWhiteSpace(err)) _logger.LogCritical("JPlag STDERR: {Error}", err);
+
+            if (process.ExitCode != 0)
+            {
+                throw new Exception($"JPlag thất bại với Exit Code {process.ExitCode}. Lỗi: {err} Output: {output}");
+            }
+
+            _logger.LogWarning("JPlag hoàn tất thành công. Đang phân tích kết quả...");
+            var results = await ExtractMatchesFromArchiveAsync(resultZipPath);
+
+            _logger.LogWarning("Đã tìm thấy {Count} cặp tương đồng từ JPlag.", results.Count);
+            foreach (var m in results.Take(10))
+            {
+                _logger.LogWarning("  - Match: {S1} vs {S2} ({Sim}%)", m.Submission1Id, m.Submission2Id, Math.Round(m.SimilarityScore * 100, 2));
+            }
+            return results;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi xảy ra trong quá trình chạy JPlag Similarity Check với Base-Code");
             throw;
         }
         finally

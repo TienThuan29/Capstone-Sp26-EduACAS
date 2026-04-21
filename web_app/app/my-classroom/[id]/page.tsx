@@ -23,6 +23,7 @@ import {
   StudentDashboardTab,
   QuizzesTab,
   AcademicWarningsTab,
+  CompletedExamsTab,
 } from "@/app/my-classroom/tabs";
 import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
 import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
@@ -196,6 +197,14 @@ function ClassroomContent() {
       case "academic-warning":
         return (
           <AcademicWarningsTab
+            classroomId={classId}
+            studentId={studentId}
+            classroomName={classroom?.className}
+          />
+        );
+      case "completed-exams":
+        return (
+          <CompletedExamsTab
             classroomId={classId}
             studentId={studentId}
             classroomName={classroom?.className}
