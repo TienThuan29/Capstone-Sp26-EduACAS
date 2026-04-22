@@ -12,6 +12,8 @@ public interface IErrorGroupCommand
     Task CheckSimilarityForGroupsAsync(List<string> groupIds);
 
     Task CheckSimilarityForGroupsWithExcludeCodeBaseAsync(List<string> groupIds);
+
+    Task CheckSimilarityForProblemWithExcludeCodeBaseAsync(string examId, string problemId);
 }
 
 public class ErrorGroupCommand : IErrorGroupCommand
@@ -82,6 +84,14 @@ public class ErrorGroupCommand : IErrorGroupCommand
         }
     }
 
+    public async Task CheckSimilarityForProblemWithExcludeCodeBaseAsync(string examId, string problemId)
+    {
+        var groups = await _errorGroupRepository.GetByProblemIdPaginatedAsync(examId, problemId);
+        if (groups == null || groups.Count == 0) return;
+
+        await ProcessCheckSimilarityForGroupsWithExcludeCodeBase(groups);
+    }
+
     public async Task CheckSimilarityForProblemAsync(string examId, string problemId)
     {
         var groups = await _errorGroupRepository.GetByProblemIdPaginatedAsync(examId, problemId);
@@ -117,7 +127,8 @@ public class ErrorGroupCommand : IErrorGroupCommand
         }
 
         if (groups.Count == 0) return;
-        await ProcessCheckSimilarityForGroups(groups);
+        // await ProcessCheckSimilarityForGroups(groups);
+        await ProcessCheckSimilarityForGroupsWithExcludeCodeBase(groups);
     }
 
     private async Task ProcessCheckSimilarityForGroupsWithExcludeCodeBase(List<Models.ErrorGroup> groups)

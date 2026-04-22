@@ -18,7 +18,7 @@ public interface ISubmissionQuery
 
       Task<List<Models.Submission>> GetTheLatestVersionSubmissionsByExamAndProblemAsync(string examId, string problemId);
 
-      Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId);
+      Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId, string? studentId = null);
 
       Task<List<Models.Submission>> GetVersionsBySubmissionKey(string studentId, string examId, string problemId);
 }
@@ -71,9 +71,9 @@ public class SubmissionQuery : ISubmissionQuery
       public Task<List<Models.Submission>> GetTheLatestVersionSubmissionsByExamAndProblemAsync(string examId, string problemId) =>
             _submissionRepository.GetLatestVersionSubmissionsOfProblemInExam(examId, problemId);
 
-      public async Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId)
+      public async Task<List<ProblemSubmissionsResponse>> GetLatestSubmissionsByExamAsync(string examId, string? studentId = null)
       {
-            var byProblem = await _submissionRepository.GetLatestVersionSubmissionsByExamAsync(examId).ConfigureAwait(false);
+            var byProblem = await _submissionRepository.GetLatestVersionSubmissionsByExamAsync(examId, studentId).ConfigureAwait(false);
             var problemIds = byProblem.Keys.ToList();
             if (problemIds.Count == 0)
                   return new List<ProblemSubmissionsResponse>();
