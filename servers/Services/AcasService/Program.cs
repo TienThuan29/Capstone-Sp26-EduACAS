@@ -122,17 +122,37 @@ var awsSecretKey = builder.Configuration["AWS:SecretKey"] ??
                    throw new InvalidOperationException("AWS_SECRET_KEY is not configured");
 
 var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
+
+// Cấu hình DynamoDB client với retry policy mạnh hơn
+var dynamoDbConfig = new Amazon.DynamoDBv2.AmazonDynamoDBConfig
+{
+    RegionEndpoint = regionEndpoint,
+    RetryMode = Amazon.Runtime.RequestRetryMode.Adaptive,
+    MaxErrorRetry = 10,
+    Timeout = TimeSpan.FromSeconds(30),
+};
+
+var awsCredentials = !string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey)
+    ? new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey)
+    : null;
+
+// Đăng ký DynamoDB client với Singleton lifetime để reuse connections
+builder.Services.AddSingleton<IAmazonDynamoDB>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Initializing DynamoDB client with Adaptive retry mode, MaxErrorRetry=10");
+    return new Amazon.DynamoDBv2.AmazonDynamoDBClient(awsCredentials, dynamoDbConfig);
+});
+
+// S3 client vẫn dùng cấu hình mặc định
 var awsOptions = new AWSOptions
 {
     Region = regionEndpoint
 };
-
-if (!string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey))
+if (awsCredentials != null)
 {
-    awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey);
+    awsOptions.Credentials = awsCredentials;
 }
-
-builder.Services.AddAWSService<IAmazonDynamoDB>(awsOptions);
 builder.Services.AddAWSService<IAmazonS3>(awsOptions);
 
 // Redis configuration
@@ -344,7 +364,8 @@ builder.Services.AddScoped<ExaminationTemplateMapper>();
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
 builder.Services.AddHttpClient<ICodeFormatterApi, CodeFormatterApi>();
-builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
+builder.Services.AddHttpClient<IGeminiClient, GeminiClient>()
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(120));
 
 // Azure Form Recognizer configuration
 var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??

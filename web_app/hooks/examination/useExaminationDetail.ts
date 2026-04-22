@@ -46,13 +46,14 @@ export const useExaminationDetail = () => {
   );
 
   const fetchSubmissionsByExam = useCallback(
-    async (examId: string): Promise<ProblemSubmissionsResponse[]> => {
+    async (examId: string, studentId?: string): Promise<ProblemSubmissionsResponse[]> => {
       try {
         setLoading(true);
         setError(null);
-        const response = await axiosInstance.get<ApiResponse<ProblemSubmissionsResponse[]>>(
-          Api.Examination.GET_LATEST_BY_EXAM(examId)
-        );
+        const url = studentId
+          ? `${Api.Submission.GET_LATEST_BY_EXAM(examId)}?studentId=${encodeURIComponent(studentId)}`
+          : Api.Submission.GET_LATEST_BY_EXAM(examId);
+        const response = await axiosInstance.get<ApiResponse<ProblemSubmissionsResponse[]>>(url);
         const data = response.data?.dataResponse ?? [];
         setSubmissions(data);
         return data;
@@ -70,8 +71,8 @@ export const useExaminationDetail = () => {
   );
 
   const loadDetail = useCallback(
-    async (examId: string) => {
-      await Promise.all([fetchById(examId), fetchSubmissionsByExam(examId)]);
+    async (examId: string, studentId?: string) => {
+      await Promise.all([fetchById(examId), fetchSubmissionsByExam(examId, studentId)]);
     },
     [fetchById, fetchSubmissionsByExam]
   );

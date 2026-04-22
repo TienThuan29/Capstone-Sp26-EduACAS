@@ -349,9 +349,9 @@ function ExamDetailContent() {
         {!shouldHideNavigationUi && (
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
-            label="Back to Exams"
+            label={examination?.mode === "PRACTICAL" ? "Back to Practise" : "Back to Exams"}
             icon={<ArrowLeftIcon className="h-4 w-4" />}
-            onClick={() => router.push(`/my-classroom/${classId}?tab=exams`)}
+            onClick={() => router.push(`/my-classroom/${classId}?tab=${examination?.mode === "PRACTICAL" ? "practise" : "exams"}`)}
             className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
           />
           {classroom && (

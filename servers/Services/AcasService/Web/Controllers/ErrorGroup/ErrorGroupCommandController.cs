@@ -57,7 +57,7 @@ public class ErrorGroupCommandController : ControllerBase
             }
             else if (!string.IsNullOrEmpty(request.ProblemId))
             {
-                await _errorGroupCommand.CheckSimilarityForProblemAsync(request.ExamId, request.ProblemId);
+                await _errorGroupCommand.CheckSimilarityForProblemWithExcludeCodeBaseAsync(request.ExamId, request.ProblemId);
             }
             else
             {

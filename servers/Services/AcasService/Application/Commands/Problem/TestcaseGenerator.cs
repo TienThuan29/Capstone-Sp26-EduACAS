@@ -48,7 +48,7 @@ public class TestcaseGenerator : ITestcaseGenerator
             var generationConfig = new GeminiGenerationConfig
             {
                   Temperature = 0.4,
-                  MaxOutputTokens = 16384
+                  MaxOutputTokens = 8192
             };
 
             var raw = await _geminiClient.GenerateContentAsync(prompt, generationConfig);
@@ -196,6 +196,12 @@ public class TestcaseGenerator : ITestcaseGenerator
                   return fix;
             }
 
+            // Handle truncation inside a string value (e.g. "InputData": "3\n... truncated)
+            if (IsInsideUnclosedString(trimmed))
+            {
+                  return TryFixTruncatedStringValue(trimmed);
+            }
+
             // Truncation after a trailing comma: trim to last complete object and close with remaining fields + ].
             var commaNewlineIndex = trimmed.LastIndexOf(",\n", StringComparison.Ordinal);
             if (commaNewlineIndex < 0)
@@ -225,6 +231,59 @@ public class TestcaseGenerator : ITestcaseGenerator
             sb.Append(']');
 
             return sb.ToString();
+      }
+
+      private static bool IsInsideUnclosedString(string json)
+      {
+            if (!json.EndsWith("\"", StringComparison.Ordinal))
+                  return false;
+
+            var quoteCount = 0;
+            var inString = false;
+            for (int i = 0; i < json.Length; i++)
+            {
+                  var c = json[i];
+                  if (c == '"' && (i == 0 || json[i - 1] != '\\'))
+                  {
+                        inString = !inString;
+                        quoteCount++;
+                  }
+            }
+            return inString && quoteCount % 2 == 1;
+      }
+
+      private static string? TryFixTruncatedStringValue(string trimmed)
+      {
+            var quoteIndices = new List<int>();
+            for (int i = 0; i < trimmed.Length; i++)
+            {
+                  if (trimmed[i] == '"' && (i == 0 || trimmed[i - 1] != '\\'))
+                  {
+                        quoteIndices.Add(i);
+                  }
+            }
+
+            if (quoteIndices.Count < 2)
+                  return null;
+
+            var lastQuote = quoteIndices[^1];
+            if (lastQuote + 1 < trimmed.Length)
+            {
+                  var afterLastQuote = trimmed[(lastQuote + 1)..].TrimEnd();
+                  if (!string.IsNullOrEmpty(afterLastQuote) &&
+                      !afterLastQuote.StartsWith(",", StringComparison.Ordinal) &&
+                      !afterLastQuote.StartsWith("}", StringComparison.Ordinal) &&
+                      !afterLastQuote.StartsWith("]", StringComparison.Ordinal))
+                  {
+                        return null;
+                  }
+            }
+
+            var prefix = trimmed[..lastQuote] + "\"";
+            if (!prefix.StartsWith("[", StringComparison.Ordinal))
+                  prefix = "[" + prefix;
+
+            return prefix + ", \"ExpectedOutput\": \"\", \"IsPublic\": false, \"IsCaseInsensitive\": false, \"IsFloatingPoint\": false, \"FloatingPointTolerance\": null, \"DecimalPlaces\": null, \"IsTokenComparision\": false, \"IsNotOrderedComparision\": false }\n]";
       }
 
       private static List<TestCaseResponse> TryRecoverTestcases(string json)
