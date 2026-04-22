@@ -25,6 +25,7 @@ import ReactMarkdown from "react-markdown";
 import { useExaminationDetail } from "@/hooks/examination/useExaminationDetail";
 import { useRegradingRequest } from "@/hooks/regrading-request/useRegradingRequest";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
+import { useAuth } from "@/contexts/AuthContext";
 import type { Examination } from "@/types/examination";
 import type { ProblemSubmissionsResponse, SubmissionResponse, TestResultResponse } from "@/types/submission";
 import type { RegradingRequest } from "@/types/regrading-request";
@@ -140,18 +141,26 @@ function SubmissionDetailModal({
   return (
     <Modal show={isOpen} onClose={onClose} size="5xl" popup>
       <ModalHeader>
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
-            <CodeBracketIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+        <div className="flex w-full items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/30">
+              <CodeBracketIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                Submission Details
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-md">
+                {problemTitle}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-              Submission Details
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-md">
-              {problemTitle}
-            </p>
-          </div>
+          <button
+            onClick={onClose}
+            className="ml-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
         </div>
       </ModalHeader>
       <ModalBody>
@@ -1049,18 +1058,26 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
   return (
     <Modal show={isOpen} onClose={onClose} size="lg" popup>
       <ModalHeader>
-        <div className="flex items-center gap-3">
-          <div className="rounded-lg bg-yellow-100 p-2 dark:bg-yellow-900/30">
-            <ChatBubbleLeftRightIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+        <div className="flex w-full items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="rounded-lg bg-yellow-100 p-2 dark:bg-yellow-900/30">
+              <ChatBubbleLeftRightIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            </div>
+            <div>
+              <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                {isViewMode ? "Regrading Request Details" : "Request Regrading"}
+              </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">
+                {problemTitle} - v{submission.version}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-              {isViewMode ? "Regrading Request Details" : "Request Regrading"}
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">
-              {problemTitle} - v{submission.version}
-            </p>
-          </div>
+          <button
+            onClick={onClose}
+            className="ml-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
+          >
+            <XMarkIcon className="h-5 w-5" />
+          </button>
         </div>
       </ModalHeader>
       <ModalBody>
@@ -1174,7 +1191,8 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
                 {displayRequest.status === "PENDING" && (
                   <div className="flex justify-end pt-2">
                     <Button
-                      color="failure"
+                      color="red"
+                      className="cursor-pointer"
                       size="sm"
                       onClick={handleCancel}
                       disabled={canceling}
@@ -1330,7 +1348,9 @@ function RegradingModal({ isOpen, onClose, submission, problemTitle, maxMark, ex
 // Main ExamDetailPanel Component
 // ============================================================================
 
-export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
+export function ExamDetailPanel({ examId, studentId: studentIdProp, onClose }: ExamDetailPanelProps) {
+  const { user } = useAuth();
+  const studentId = studentIdProp ?? user?.id ?? "";
   const { exam, submissions, loading, error, loadDetail } = useExaminationDetail();
   const [activeTab, setActiveTab] = useState<SubTab>("overview");
   const [currentPage, setCurrentPage] = useState(1);
@@ -1345,8 +1365,8 @@ export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
   const { myRequests, refresh } = useRegradingRequest({ enabled: false });
 
   useEffect(() => {
-    void loadDetail(examId);
-  }, [examId, loadDetail]);
+    void loadDetail(examId, studentId);
+  }, [examId, studentId, loadDetail]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -1367,7 +1387,7 @@ export function ExamDetailPanel({ examId, onClose }: ExamDetailPanelProps) {
   const handleRegradingSuccess = () => {
     // Refresh regrading requests and exam detail
     void refresh();
-    void loadDetail(examId);
+    void loadDetail(examId, studentId);
   };
 
   if (loading) {

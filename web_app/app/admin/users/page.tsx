@@ -27,6 +27,27 @@ const userStatsAccentStyles: Record<string, { border: string; iconBg: string; ic
   red: { border: 'border-l-red-500', iconBg: 'bg-red-50 dark:bg-red-500/10', iconColor: 'text-red-600 dark:text-red-400' },
 }
 
+const searchInputTheme = {
+  light: {
+    field: {
+      input: {
+        colors: {
+          gray: 'bg-white border-gray-200 text-gray-900 focus:ring-blue-500'
+        }
+      }
+    }
+  },
+  dark: {
+    field: {
+      input: {
+        colors: {
+          gray: 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500'
+        }
+      }
+    }
+  }
+}
+
 type GrantFormData = {
   email: string
   roleNumber: string
@@ -61,7 +82,9 @@ export default function UsersManagement() {
   const [mounted, setMounted] = useState(false)
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [filterRole, setFilterRole] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
@@ -95,7 +118,7 @@ export default function UsersManagement() {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getPagedUsers(currentPage, pageSize, searchTerm, filterRole, filterStatus)
+      const data = await getPagedUsers(currentPage, pageSize, searchQuery, filterRole, filterStatus)
       if (data) {
         setUsers(data.items)
         setTotalPages(data.totalPages)
@@ -106,8 +129,21 @@ export default function UsersManagement() {
       toastRef.current.showError(err.response?.data?.message || 'Cannot load user list')
     } finally {
       setLoading(false)
+      setIsInitialLoad(false)
     }
-  }, [getPagedUsers, currentPage, pageSize, searchTerm, filterRole, filterStatus])
+  }, [getPagedUsers, currentPage, pageSize, searchQuery, filterRole, filterStatus])
+
+  const handleSearch = useCallback((e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setCurrentPage(1)
+    setSearchQuery(searchInput)
+  }, [searchInput])
+
+  useEffect(() => {
+    setCurrentPage(1)
+    setSearchQuery('')
+    setSearchInput('')
+  }, [filterRole, filterStatus])
 
   const fetchOverallRoleStats = useCallback(async () => {
     try {
@@ -132,7 +168,7 @@ export default function UsersManagement() {
       fetchUsers()
       fetchOverallRoleStats()
     }
-  }, [mounted, fetchUsers, fetchOverallRoleStats])
+  }, [mounted, currentPage, fetchUsers, fetchOverallRoleStats, searchQuery])
 
   const onPageChange = (page: number) => {
     setCurrentPage(page)
@@ -202,7 +238,7 @@ export default function UsersManagement() {
 
   if (!mounted) return null
 
-  if (loading) {
+  if (isInitialLoad) {
     return <UserManagementSkeleton />
   }
 
@@ -307,25 +343,20 @@ export default function UsersManagement() {
 
         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-            <form className="grow max-w-md flex gap-3" onSubmit={(e) => { e.preventDefault(); fetchUsers(); }}>
+            <form className="grow max-w-md flex gap-3" onSubmit={handleSearch}>
               <div className="flex-1">
                 <TextInput
                   type="text"
                   icon={MagnifyingGlassIcon}
                   placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  theme={{
-                    field: {
-                      input: {
-                        colors: {
-                          gray: `${isDark ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500" : "bg-white border-gray-200 text-gray-900 focus:ring-blue-500"}`
-                        }
-                      }
-                    }
-                  }}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  theme={isDark ? searchInputTheme.dark : searchInputTheme.light}
                 />
               </div>
+              <Button type="submit" color="blue" className="cursor-pointer">
+                Search
+              </Button>
             </form>
 
             <div className="flex gap-3">

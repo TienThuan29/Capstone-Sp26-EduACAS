@@ -217,11 +217,11 @@ const Sidebar = () => {
       label: "Dashboard",
       href: `${pathname}?tab=dashboard`,
     },
-    {
-      icon: ClipboardDocumentListIcon,
-      label: "Examinations",
-      href: `${pathname}?tab=exams`,
-    },
+    // {
+    //   icon: ClipboardDocumentListIcon,
+    //   label: "Examinations",
+    //   href: `${pathname}?tab=exams`,
+    // },
     {
       icon: PuzzlePieceIcon,
       label: "Practise Exercises",
