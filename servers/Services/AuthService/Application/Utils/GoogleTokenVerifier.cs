@@ -2,19 +2,32 @@ using Google.Apis.Auth;
 
 namespace AuthService.Application.Utils;
 
-public class GoogleTokenVerifier
+public class GoogleTokenPayload
+{
+    public string Email { get; set; } = string.Empty;
+    public string GoogleId { get; set; } = string.Empty;
+    public string? Name { get; set; }
+    public string? Picture { get; set; }
+}
+
+public interface IGoogleTokenValidator
+{
+    Task<GoogleTokenPayload> VerifyAsync(string idToken);
+}
+
+public class GoogleTokenValidator : IGoogleTokenValidator
 {
     private readonly string _clientId;
     private readonly ILogger<GoogleTokenVerifier> _logger;
 
-    public GoogleTokenVerifier(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
+    public GoogleTokenValidator(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
     {
-        _clientId = configuration["Google:ClientId"] ?? 
+        _clientId = configuration["Google:ClientId"] ??
                    throw new InvalidOperationException("Google:ClientId is not configured");
         _logger = logger;
     }
 
-    public async Task<GoogleTokenPayload> VerifyTokenAsync(string idToken)
+    public async Task<GoogleTokenPayload> VerifyAsync(string idToken)
     {
         try
         {
@@ -46,10 +59,22 @@ public class GoogleTokenVerifier
     }
 }
 
-public class GoogleTokenPayload
+public class GoogleTokenVerifier
 {
-    public string Email { get; set; } = string.Empty;
-    public string GoogleId { get; set; } = string.Empty;
-    public string? Name { get; set; }
-    public string? Picture { get; set; }
+    private readonly IGoogleTokenValidator _validator;
+
+    public GoogleTokenVerifier(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
+    {
+        _validator = new GoogleTokenValidator(configuration, logger);
+    }
+
+    public GoogleTokenVerifier(IGoogleTokenValidator validator)
+    {
+        _validator = validator;
+    }
+
+    public async Task<GoogleTokenPayload> VerifyTokenAsync(string idToken)
+    {
+        return await _validator.VerifyAsync(idToken);
+    }
 }

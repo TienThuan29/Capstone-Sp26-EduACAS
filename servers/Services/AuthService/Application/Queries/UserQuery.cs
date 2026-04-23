@@ -23,7 +23,7 @@ public class UserQuery : IUserQuery
     private readonly IConfiguration _configuration;
     private readonly JwtUtil _jwtUtil;
     private readonly UserMapper _userMapper;
-    private readonly GoogleTokenVerifier _googleTokenVerifier;
+    private readonly IGoogleTokenValidator _googleTokenVerifier;
     private readonly ILogger<UserQuery> _logger;
     
     public UserQuery(
@@ -31,7 +31,7 @@ public class UserQuery : IUserQuery
         IConfiguration configuration,
         UserMapper userMapper,
         JwtUtil jwtUtil,
-        GoogleTokenVerifier googleTokenVerifier,
+        IGoogleTokenValidator googleTokenVerifier,
         ILogger<UserQuery> logger
     ) {
         _userRepository = userRepository;
@@ -94,7 +94,7 @@ public class UserQuery : IUserQuery
     {
         try
         {
-            var googlePayload = await _googleTokenVerifier.VerifyTokenAsync(idToken);
+            var googlePayload = await _googleTokenVerifier.VerifyAsync(idToken);
             var user = await _userRepository.FindByEmailAsync(googlePayload.Email);
 
             if (user == null)

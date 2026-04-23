@@ -1387,6 +1387,12 @@ public class SubmissionCommandTests
             return Task.CompletedTask;
         }
 
+        public Task SetAsync<TValue>(string key, TValue data, TimeSpan expireTime) where TValue : class
+        {
+            _store[key] = data;
+            return Task.CompletedTask;
+        }
+
         public Task RemoveAsync(string key)
         {
             _store.Remove(key);

@@ -1,0 +1,512 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/146.0.0.0 Safari/537.36">
+  <diagram id="2C-QJDgIrpkUoiIKxcUQ" name="Screen Flow Web">
+    <mxGraphModel dx="1400" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="4000" pageHeight="2000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="legend-box" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#f5f5f5;strokeColor=#999999;fontSize=11;" value="" vertex="1">
+          <mxGeometry height="220" width="320" x="20" y="980" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-title" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=14;fontStyle=1" value="Notation" vertex="1">
+          <mxGeometry height="25" width="80" x="140" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-screen" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Screen/Page" vertex="1">
+          <mxGeometry height="30" width="100" x="40" y="1025" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Action" vertex="1">
+          <mxGeometry height="30" width="100" x="40" y="1065" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-cond" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#f8cecc;strokeColor=#b85450;" value="" vertex="1">
+          <mxGeometry height="30" width="100" x="40" y="1105" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-cond-label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=13;" value="Condition" vertex="1">
+          <mxGeometry height="20" width="80" x="150" y="1105" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-entry" parent="1" style="ellipse;fillColor=#d5e8d4;html=1;strokeColor=#82b366;fontFamily=Times New Roman;fontSize=13;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="55" y="1145" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-entry-label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=13;" value="Entry point" vertex="1">
+          <mxGeometry height="20" width="80" x="150" y="1145" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-arrow-solid" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;fontFamily=Times New Roman;fontSize=13;" value="" vertex="1">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="60" y="1185" as="sourcePoint" />
+            <mxPoint x="140" y="1185" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-solid-label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=13;" value="Main navigation" vertex="1">
+          <mxGeometry height="20" width="100" x="150" y="1175" as="geometry" />
+        </mxCell>
+        <mxCell id="legend-arrow-dash" edge="1" parent="1" style="endArrow=classic;html=1;rounded=0;dashed=1;fontFamily=Times New Roman;fontSize=13;" value="" vertex="1">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+          <mxPoint x="60" y="1215" as="sourcePoint" />
+          <mxPoint x="140" y="1215" as="targetPoint" />
+        </mxGeometry>
+        </mxCell>
+        <mxCell id="legend-dash-label" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=left;verticalAlign=middle;rounded=0;fontFamily=Times New Roman;fontSize=13;" value="Sub-stream" vertex="1">
+          <mxGeometry height="20" width="100" x="150" y="1205" as="geometry" />
+        </mxCell>
+        <mxCell id="entry-1" parent="1" style="ellipse;fillColor=#d5e8d4;html=1;strokeColor=#82b366;fontFamily=Times New Roman;fontSize=13;" value="" vertex="1">
+          <mxGeometry height="30" width="30" x="80" y="60" as="geometry" />
+        </mxCell>
+        <mxCell id="home-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Home Page" vertex="1">
+          <mxGeometry height="50" width="110" x="150" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-e0b442e7" edge="1" parent="1" source="entry-1" target="home-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="login-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Login page" vertex="1">
+          <mxGeometry height="50" width="110" x="290" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-d158eff8" edge="1" parent="1" source="home-page" target="login-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="register-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Register page" vertex="1">
+          <mxGeometry height="50" width="110" x="290" y="0" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-a8448157" edge="1" parent="1" source="home-page" target="register-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="forgot-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Forgot password page" vertex="1">
+          <mxGeometry height="50" width="110" x="290" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-69c8fda6" edge="1" parent="1" source="home-page" target="forgot-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="reset-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Reset password page" vertex="1">
+          <mxGeometry height="50" width="110" x="430" y="100" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-aabaf41e" edge="1" parent="1" source="forgot-page" target="reset-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="about-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="About Us page" vertex="1">
+          <mxGeometry height="40" width="100" x="290" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="features-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Features page" vertex="1">
+          <mxGeometry height="40" width="100" x="400" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="contact-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Contact page" vertex="1">
+          <mxGeometry height="40" width="100" x="510" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-cd24f846" edge="1" parent="1" source="home-page" target="about-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry"><mxPoint x="260" y="75" as="targetPoint" /></mxGeometry>
+        </mxCell>
+        <mxCell id="edge-1fe18f8f" edge="1" parent="1" source="about-page" target="features-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-174b664a" edge="1" parent="1" source="features-page" target="contact-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="user-login-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="User login" vertex="1">
+          <mxGeometry height="50" width="110" x="430" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-06ce6bb8" edge="1" parent="1" source="login-page" target="user-login-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="first-login-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="First Login page" vertex="1">
+          <mxGeometry height="50" width="110" x="570" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1142d039" edge="1" parent="1" source="user-login-action" target="first-login-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="role-diamond" parent="1" style="rhombus;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#f8cecc;strokeColor=#b85450;" value="Role?" vertex="1">
+          <mxGeometry height="80" width="110" x="560" y="10" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-f8900262" edge="1" parent="1" source="first-login-page" target="role-diamond" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-e7688c25" edge="1" parent="1" source="user-login-action" target="role-diamond" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="student-home" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Student Dashboard" vertex="1">
+          <mxGeometry height="50" width="120" x="710" y="0" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8ad1da1a" edge="1" parent="1" source="role-diamond" target="student-home" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="560" y="50" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="stu-profile" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Profile page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="0" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8f12675d" edge="1" parent="1" source="student-home" target="stu-profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-settings" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Settings page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="45" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-fccd3eda" edge="1" parent="1" source="student-home" target="stu-settings" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-notifications" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Notifications page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-aab61742" edge="1" parent="1" source="student-home" target="stu-notifications" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="my-classroom-list" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="My Classroom List" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-af39dea9" edge="1" parent="1" source="student-home" target="my-classroom-list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="not-enrolling-list" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Not Enrolling Classroom List" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-d72b82ba" edge="1" parent="1" source="student-home" target="not-enrolling-list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="enroll-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Enroll using key" vertex="1">
+          <mxGeometry height="40" width="110" x="1020" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-11d85071" edge="1" parent="1" source="not-enrolling-list" target="enroll-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-classroom-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Classroom Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1020" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-719a1673" edge="1" parent="1" source="my-classroom-list" target="stu-classroom-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-materials" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Materials Tab" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="20" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-994c7734" edge="1" parent="1" source="stu-classroom-detail" target="stu-materials" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-view-material" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="View, download material" vertex="1">
+          <mxGeometry height="40" width="110" x="1320" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-f0b2fe0d" edge="1" parent="1" source="stu-materials" target="stu-view-material" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-exam-list" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Exercise/Assignment List" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-61695c2f" edge="1" parent="1" source="stu-classroom-detail" target="stu-exam-list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-exam-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Exercise/Assignment Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1320" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6ede83d2" edge="1" parent="1" source="stu-exam-list" target="stu-exam-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="code-editor" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Code Editor Workspace" vertex="1">
+          <mxGeometry height="50" width="120" x="1470" y="85" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4b34f2cf" edge="1" parent="1" source="stu-exam-detail" target="code-editor" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="write-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Write code, run &amp; submit" vertex="1">
+          <mxGeometry height="40" width="110" x="1620" y="90" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-aad7b731" edge="1" parent="1" source="code-editor" target="write-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-exam-result" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Exercise Result" vertex="1">
+          <mxGeometry height="50" width="120" x="1470" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-deec67c3" edge="1" parent="1" source="write-action" target="stu-exam-result" style="endArrow=classic;html=1;rounded=0;dashed=1;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="1620" y="110" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="stu-exam-page" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Exam Detail page" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="145" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-d29d92c7" edge="1" parent="1" source="stu-classroom-detail" target="stu-exam-page" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-discussion-list" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Discussion Issue List" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-b1fb6a93" edge="1" parent="1" source="stu-classroom-detail" target="stu-discussion-list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stu-discussion-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Discussion Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1320" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5cdf95a1" edge="1" parent="1" source="stu-discussion-list" target="stu-discussion-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lecturer-home" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Lecturer Dashboard" vertex="1">
+          <mxGeometry height="50" width="120" x="710" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1202ab7d" edge="1" parent="1" source="role-diamond" target="lecturer-home" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="560" y="90" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="lec-profile" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Profile page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-4afddcd5" edge="1" parent="1" source="lecturer-home" target="lec-profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-settings" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Settings page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="325" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-a209bae6" edge="1" parent="1" source="lecturer-home" target="lec-settings" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-notifications" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Notifications page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3de2089d" edge="1" parent="1" source="lecturer-home" target="lec-notifications" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="manage-classroom-list" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Manage Classroom List" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6c572358" edge="1" parent="1" source="lecturer-home" target="manage-classroom-list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="manage-subject" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Manage Subject page" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-d1dc8cf6" edge="1" parent="1" source="lecturer-home" target="manage-subject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="question-banks" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Question Banks page" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-42e5f4d0" edge="1" parent="1" source="lecturer-home" target="question-banks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="quiz-banks" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Quiz Banks page" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="605" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-8e97feb5" edge="1" parent="1" source="lecturer-home" target="quiz-banks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="quiz-bank-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Quiz Bank Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1020" y="605" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7d7aed13" edge="1" parent="1" source="quiz-banks" target="quiz-bank-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="problem-banks" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Problem Banks page" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-73da239d" edge="1" parent="1" source="lecturer-home" target="problem-banks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="problem-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Problem Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1020" y="665" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-fe44656a" edge="1" parent="1" source="problem-banks" target="problem-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="create-problem" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Create Problem page" vertex="1">
+          <mxGeometry height="50" width="120" x="1020" y="725" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-9d2b4a61" edge="1" parent="1" source="problem-banks" target="create-problem" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="edit-problem" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Edit Problem page" vertex="1">
+          <mxGeometry height="50" width="120" x="1020" y="785" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-c7b90e23" edge="1" parent="1" source="problem-detail" target="edit-problem" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="exam-banks" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Exam Banks page" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="725" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-117353c7" edge="1" parent="1" source="lecturer-home" target="exam-banks" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-classroom-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Classroom Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1020" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-be778c8d" edge="1" parent="1" source="manage-classroom-list" target="lec-classroom-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-class-settings" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Classroom Settings" vertex="1">
+          <mxGeometry height="40" width="110" x="1020" y="545" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-40cdd05d" edge="1" parent="1" source="lec-classroom-detail" target="lec-class-settings" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-material-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Material Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="335" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-fe5a3113" edge="1" parent="1" source="lec-classroom-detail" target="lec-material-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-crud-material" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="CRUD material" vertex="1">
+          <mxGeometry height="40" width="100" height2="40" as="geometry" />
+          <mxGeometry x="1320" y="340" width="100" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-c55147dc" edge="1" parent="1" source="lec-material-mgmt" target="lec-crud-material" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-discussion-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Discussion Issue Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-31c59fbd" edge="1" parent="1" source="lec-classroom-detail" target="lec-discussion-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-comment-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Comment" vertex="1">
+          <mxGeometry height="40" width="100" x="1320" y="400" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-d7c2a282" edge="1" parent="1" source="lec-discussion-mgmt" target="lec-comment-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-delete-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Delete issue, student&#39;s comment" vertex="1">
+          <mxGeometry height="40" width="110" x="1320" y="450" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-50308ef0" edge="1" parent="1" source="lec-discussion-mgmt" target="lec-delete-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-exam-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Exercise/Assignment Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="505" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-f1176258" edge="1" parent="1" source="lec-classroom-detail" target="lec-exam-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-create-exam-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Create/edit exercise/assignment" vertex="1">
+          <mxGeometry height="40" width="110" x="1320" y="475" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-81442851" edge="1" parent="1" source="lec-exam-mgmt" target="lec-create-exam-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-assign-problem-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Assign available problem" vertex="1">
+          <mxGeometry height="40" width="110" x="1320" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-e1c437fe" edge="1" parent="1" source="lec-exam-mgmt" target="lec-assign-problem-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-problem-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Problem Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="570" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5a49c180" edge="1" parent="1" source="lec-classroom-detail" target="lec-problem-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="lec-edit-problem-action" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="Edit problem, Edit test cases" vertex="1">
+          <mxGeometry height="40" width="110" x="1320" y="575" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-a79143ff" edge="1" parent="1" source="lec-problem-mgmt" target="lec-edit-problem-action" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="submission-list" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Submission List" vertex="1">
+          <mxGeometry height="50" width="120" x="1170" y="635" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-04ef43ad" edge="1" parent="1" source="lec-classroom-detail" target="submission-list" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="submission-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Submission Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1320" y="635" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-a836ce75" edge="1" parent="1" source="submission-list" target="submission-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="regrading-request" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Regrading Request" vertex="1">
+          <mxGeometry height="50" width="120" x="1320" y="695" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-e70b89c7" edge="1" parent="1" source="submission-list" target="regrading-request" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="admin-dashboard" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Admin Dashboard" vertex="1">
+          <mxGeometry height="50" width="120" x="710" y="860" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-7ccc650f" edge="1" parent="1" source="role-diamond" target="admin-dashboard" style="endArrow=classic;html=1;rounded=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry height="50" relative="1" width="50" as="geometry">
+            <mxPoint x="560" y="90" as="sourcePoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="adm-profile" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Profile page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="850" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-f2b2477a" edge="1" parent="1" source="admin-dashboard" target="adm-profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-settings" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Settings page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="895" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-534824da" edge="1" parent="1" source="admin-dashboard" target="adm-settings" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-notifications" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Notifications page" vertex="1">
+          <mxGeometry height="40" width="100" x="870" y="940" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-476e906e" edge="1" parent="1" source="admin-dashboard" target="adm-notifications" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-user-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="User Management" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-053ac295" edge="1" parent="1" source="admin-dashboard" target="adm-user-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-crud-user" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="CRUD user" vertex="1">
+          <mxGeometry height="40" width="100" x="1020" y="995" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-6c690cb7" edge="1" parent="1" source="adm-user-mgmt" target="adm-crud-user" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-subject-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Subject Management" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-fa4eda06" edge="1" parent="1" source="admin-dashboard" target="adm-subject-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-crud-subject" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="CRUD subject" vertex="1">
+          <mxGeometry height="40" width="100" x="1020" y="1055" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-96aceb8a" edge="1" parent="1" source="adm-subject-mgmt" target="adm-crud-subject" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-class-mgmt" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Class Management" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-a35b1e25" edge="1" parent="1" source="admin-dashboard" target="adm-class-mgmt" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-crud-class" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#fff2cc;strokeColor=#d6b656;" value="CRUD class" vertex="1">
+          <mxGeometry height="40" width="100" x="1020" y="1115" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3fe62714" edge="1" parent="1" source="adm-class-mgmt" target="adm-crud-class" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-prog-lang" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Programming Languages" vertex="1">
+          <mxGeometry height="50" width="120" x="1140" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-3574687a" edge="1" parent="1" source="admin-dashboard" target="adm-prog-lang" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-lang-detail" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Language Detail" vertex="1">
+          <mxGeometry height="50" width="120" x="1280" y="990" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-dc9f9ff2" edge="1" parent="1" source="adm-prog-lang" target="adm-lang-detail" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-materials" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Materials Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1140" y="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-5b9941e6" edge="1" parent="1" source="admin-dashboard" target="adm-materials" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-discussions" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Discussions Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1140" y="1110" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-83a7231d" edge="1" parent="1" source="admin-dashboard" target="adm-discussions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="adm-admin-notifications" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Notifications Management" vertex="1">
+          <mxGeometry height="50" width="120" x="1140" y="1170" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-dc40fd4a" edge="1" parent="1" source="admin-dashboard" target="adm-admin-notifications" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="stat-charts" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fontFamily=Times New Roman;fontSize=13;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="Statistic Charts" vertex="1">
+          <mxGeometry height="50" width="120" x="870" y="1170" as="geometry" />
+        </mxCell>
+        <mxCell id="edge-1380d8c1" edge="1" parent="1" source="admin-dashboard" target="stat-charts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontFamily=Times New Roman;fontSize=13;" vertex="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
