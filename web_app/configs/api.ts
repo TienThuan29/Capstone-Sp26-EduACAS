@@ -1,7 +1,7 @@
 import { config } from "./config";
 
 export const Api = {
-  BASE_API: config.API_GATEWAY_BASE_URL || "",
+  BASE_API: config.API_GATEWAY_BASE_URL || "http://localhost:8080",
 
   Auth: {
     LOGIN: "/api/auth/v1/authenticate",
