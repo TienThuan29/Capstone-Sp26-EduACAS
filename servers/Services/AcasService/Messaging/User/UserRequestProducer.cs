@@ -13,6 +13,8 @@ public class UserRequestProducer
     private const string BatchRequestQueueName = "user.getbatch.request";
     private const string ResponseQueueName = "user.get.response";
 
+    protected UserRequestProducer() { }
+
     public UserRequestProducer(
         RabbitMqHostedService rabbitMqService,
         ILogger<UserRequestProducer> logger)

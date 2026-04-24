@@ -374,7 +374,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   }
 
   Widget _buildCommentHeader() {
-    final commentCount = _issue?.comments.length ?? 0;
+    final commentCount = _issue?.commentCount ?? 0;
     return Padding(
       padding: const EdgeInsets.only(bottom: 20, left: 4),
       child: Row(

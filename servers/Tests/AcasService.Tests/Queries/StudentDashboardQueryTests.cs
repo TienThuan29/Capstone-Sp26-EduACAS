@@ -47,7 +47,7 @@ namespace AcasService.Tests.Queries
         {
             var classroomId = "c1";
             var studentId = "s1";
-            var classroom = new Classroom { Id = classroomId, ClassName = "Class 1" };
+            var classroom = new Models.Classroom { Id = classroomId, ClassName = "Class 1" };
             var exams = new List<Examination> { new Examination { Id = "e1" } };
             var submissions = new List<Submission> 
             { 
@@ -78,7 +78,7 @@ namespace AcasService.Tests.Queries
             var studentId = "s1";
             var exams = new List<Examination> { new Examination { Id = "e1" } };
             
-            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Classroom { ClassName = "C1" });
+            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Models.Classroom { ClassName = "C1" });
             _examinationRepoMock.Setup(r => r.GetByClassIdAsync(classroomId)).ReturnsAsync(exams);
             _submissionRepoMock.Setup(r => r.GetByExamIdsAsync(It.IsAny<List<string>>())).ReturnsAsync(new List<Submission>());
             _warningRepoMock.Setup(r => r.FindByStudentIdAsync(studentId)).ReturnsAsync(new List<AcademicWarning>());
@@ -106,7 +106,7 @@ namespace AcasService.Tests.Queries
         public async Task GetOverviewAsync_UTC04_Abnormal_ShouldReturnUnknownClassName_WhenClassroomNotFound()
         {
             var classroomId = "nonexistent";
-            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync((Classroom)null);
+            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync((Models.Classroom)null);
             _examinationRepoMock.Setup(r => r.GetByClassIdAsync(classroomId)).ReturnsAsync(new List<Examination>());
 
             var result = await _sut.GetOverviewAsync(classroomId, "s1");
@@ -126,7 +126,7 @@ namespace AcasService.Tests.Queries
                 new AcademicWarning { Id = "w2", ClassroomId = classroomId, StudentId = studentId, IsRead = false }
             };
 
-            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Classroom());
+            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Models.Classroom());
             _examinationRepoMock.Setup(r => r.GetByClassIdAsync(classroomId)).ReturnsAsync(exams);
             _submissionRepoMock.Setup(r => r.GetByExamIdsAsync(It.IsAny<List<string>>())).ReturnsAsync(new List<Submission>());
             _warningRepoMock.Setup(r => r.FindByStudentIdAsync(studentId)).ReturnsAsync(warnings);
@@ -271,7 +271,7 @@ namespace AcasService.Tests.Queries
         public async Task GetSubmissionStatsAsync_UTC01_Boundary_ShouldReturnStats_WhenSubmissionIsOnTime()
         {
             var classroomId = "c1"; var studentId = "s1";
-            var classroom = new Classroom { Id = classroomId, ClassName = "Class 1" };
+            var classroom = new Models.Classroom { Id = classroomId, ClassName = "Class 1" };
             var exams = new List<Examination> { 
                 new Examination { Id = "e1", EndDatetime = DateTime.Now.AddDays(1) }, 
                 new Examination { Id = "e2", EndDatetime = DateTime.Now.AddDays(1) }
@@ -296,7 +296,7 @@ namespace AcasService.Tests.Queries
         public async Task GetSubmissionStatsAsync_UTC02_Boundary_ShouldReturnEmptyStats_WhenNoExamsFound()
         {
             var classroomId = "c1";
-            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Classroom { ClassName = "C1" });
+            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Models.Classroom { ClassName = "C1" });
             _examinationRepoMock.Setup(r => r.GetByClassIdAsync(classroomId)).ReturnsAsync(new List<Examination>());
 
             var result = await _sut.GetSubmissionStatsAsync(classroomId, "s1");
@@ -316,7 +316,7 @@ namespace AcasService.Tests.Queries
                 new Submission { ExamId = "e1", StudentId = studentId, Status = SubStatus.GRADED, SubmittedDate = DateTime.Now, Version = 1 } // Nộp hôm nay -> Trễ
             };
 
-            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Classroom());
+            _classroomRepoMock.Setup(r => r.FindByIdAsync(classroomId)).ReturnsAsync(new Models.Classroom());
             _examinationRepoMock.Setup(r => r.GetByClassIdAsync(classroomId)).ReturnsAsync(exams);
             _submissionRepoMock.Setup(r => r.GetByExamIdsAsync(It.IsAny<List<string>>())).ReturnsAsync(submissions);
 
