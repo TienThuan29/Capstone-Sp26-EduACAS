@@ -10,25 +10,35 @@ public class GoogleTokenPayload
     public string? Picture { get; set; }
 }
 
-public interface IGoogleTokenValidator
+public interface IGoogleTokenVerifier
 {
-    Task<GoogleTokenPayload> VerifyAsync(string idToken);
+    Task<GoogleTokenPayload> VerifyTokenAsync(string idToken);
 }
 
-public class GoogleTokenValidator : IGoogleTokenValidator
+public class GoogleTokenVerifier : IGoogleTokenVerifier
 {
     private readonly string _clientId;
     private readonly ILogger<GoogleTokenVerifier> _logger;
 
-    public GoogleTokenValidator(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
+    public GoogleTokenVerifier(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
     {
-        _clientId = configuration["Google:ClientId"] ??
-                   throw new InvalidOperationException("Google:ClientId is not configured");
+        var clientId = configuration["Google:ClientId"];
+        if (string.IsNullOrEmpty(clientId))
+        {
+            throw new InvalidOperationException("Google:ClientId is not configured");
+        }
+        _clientId = clientId;
         _logger = logger;
     }
 
-    public async Task<GoogleTokenPayload> VerifyAsync(string idToken)
+    public async Task<GoogleTokenPayload> VerifyTokenAsync(string idToken)
     {
+        if (string.IsNullOrWhiteSpace(idToken))
+        {
+            _logger.LogError("Google token is null, empty, or whitespace");
+            throw new InvalidOperationException("Invalid Google token");
+        }
+
         try
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings
@@ -54,27 +64,7 @@ public class GoogleTokenValidator : IGoogleTokenValidator
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error verifying Google token");
-            throw new InvalidOperationException("Error verifying Google token", ex);
+            throw new InvalidOperationException("Invalid Google token", ex);
         }
-    }
-}
-
-public class GoogleTokenVerifier
-{
-    private readonly IGoogleTokenValidator _validator;
-
-    public GoogleTokenVerifier(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
-    {
-        _validator = new GoogleTokenValidator(configuration, logger);
-    }
-
-    public GoogleTokenVerifier(IGoogleTokenValidator validator)
-    {
-        _validator = validator;
-    }
-
-    public async Task<GoogleTokenPayload> VerifyTokenAsync(string idToken)
-    {
-        return await _validator.VerifyAsync(idToken);
     }
 }

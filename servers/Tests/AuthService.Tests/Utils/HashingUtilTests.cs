@@ -3,7 +3,7 @@ using FluentAssertions;
 using Moq;
 using Microsoft.Extensions.Configuration;
 
-namespace AcasService.Tests.AuthServiceTests;
+namespace AuthService.Tests.Utils;
 
 public class HashingUtilTests
 {

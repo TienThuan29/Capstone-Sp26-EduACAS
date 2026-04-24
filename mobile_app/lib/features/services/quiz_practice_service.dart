@@ -205,6 +205,7 @@ class QuizPracticeService {
   static Future<QuizAttemptInfo> startAttempt({
     required String classroomQuizId,
     required String studentId,
+    String? passcode,
   }) async {
     try {
       final token = await _token();
@@ -214,6 +215,7 @@ class QuizPracticeService {
         body: {
           'classroomQuizId': classroomQuizId,
           'studentId': studentId,
+          if (passcode != null) 'passcode': passcode.trim(),
         },
       );
 
