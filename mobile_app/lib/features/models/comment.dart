@@ -30,6 +30,10 @@ class Comment {
   /// Display name: use authorDisplay.fullName if available, fallback to authorId
   String get displayName => authorDisplay?.fullName ?? authorId;
 
+  /// Total count including this comment and all nested replies recursively
+  int get totalRecursiveCount =>
+      1 + replies.fold(0, (sum, r) => sum + r.totalRecursiveCount);
+
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
       id: json['id'] ?? '',

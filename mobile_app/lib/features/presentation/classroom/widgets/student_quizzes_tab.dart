@@ -42,7 +42,15 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
     });
 
     try {
-      final quizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId);
+      final allQuizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId, includeDrafts: false);
+      final userRole = await TokenStorage.getUserRole();
+      
+      final quizzes = allQuizzes.where((q) {
+        // If lecturer is viewing, show all (including drafts)
+        if (userRole?.toUpperCase() == 'LECTURER') return true;
+        // If student is viewing, hide drafts
+        return q.lifecycleStatus != ClassroomQuizLifecycle.draft;
+      }).toList();
 
       final detailFutures = quizzes
           .map((q) async => MapEntry(q.quizId, await QuizPracticeService.getQuizById(q.quizId)))

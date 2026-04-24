@@ -102,28 +102,92 @@ class _QuizQuestionAssignmentPageState extends State<QuizQuestionAssignmentPage>
     });
   }
 
-  void _changeMarks(String questionId, int delta) {
+  double get _totalMarks {
+    final sum = _selectedMap.values.fold(0.0, (sum, item) => sum + item.marks);
+    // Round to 2 decimal places to avoid floating point precision issues in UI
+    return (sum * 100).roundToDouble() / 100.0;
+  }
+
+  void _distributeMarks() {
+    if (_selectedMap.isEmpty) return;
+    final each = 10.0 / _selectedMap.length;
+    setState(() {
+      for (final id in _selectedMap.keys) {
+        _selectedMap[id] = _selectedMap[id]!.copyWith(marks: each);
+      }
+    });
+  }
+
+  void _changeMarks(String questionId, double delta) {
     final current = _selectedMap[questionId];
     if (current == null) return;
 
-    final nextMarks = (current.marks + delta).clamp(1, 100).toDouble();
+    final nextMarks = (current.marks + delta).clamp(0.0, 10.0);
     setState(() {
       _selectedMap[questionId] = current.copyWith(marks: nextMarks);
     });
   }
 
-  void _changeOrder(String questionId, int delta) {
+  void _setMarksExplicitly(String questionId, double value) {
     final current = _selectedMap[questionId];
     if (current == null) return;
 
-    final maxOrder = _selectedMap.length;
-    final nextOrder = (current.displayOrder + delta).clamp(1, maxOrder);
     setState(() {
-      _selectedMap[questionId] = current.copyWith(displayOrder: nextOrder);
+      _selectedMap[questionId] = current.copyWith(marks: value.clamp(0.0, 10.0));
+    });
+  }
+
+  void _changeOrder(String questionId, int delta) {
+    final currentMeta = _selectedMap[questionId];
+    if (currentMeta == null) return;
+
+    final targetOrder = (currentMeta.displayOrder + delta).clamp(1, _selectedMap.length);
+    if (targetOrder == currentMeta.displayOrder) return;
+
+    setState(() {
+      // Find the question that currently has the targetOrder and swap them
+      String? swapId;
+      for (final entry in _selectedMap.entries) {
+        if (entry.key != questionId && entry.value.displayOrder == targetOrder) {
+          swapId = entry.key;
+          break;
+        }
+      }
+
+      if (swapId != null) {
+        _selectedMap[swapId] = _selectedMap[swapId]!.copyWith(displayOrder: currentMeta.displayOrder);
+      }
+      _selectedMap[questionId] = currentMeta.copyWith(displayOrder: targetOrder);
     });
   }
 
   Future<void> _save() async {
+    final total = _totalMarks;
+    if (total != 10.0) {
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Invalid Total Marks'),
+          content: Text('The total marks must be exactly 10. Current total is ${_formatMarks(total)}.\n\nWould you like to auto-distribute 10 points evenly across all selected questions?'),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('No, let me fix it')),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Yes, distribute'),
+              style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+            ),
+          ],
+        ),
+      );
+
+      if (confirmed == true) {
+        _distributeMarks();
+        return; // Don't save yet, let them see the changes
+      } else {
+        return;
+      }
+    }
+
     setState(() => _isSaving = true);
 
     try {
@@ -194,31 +258,66 @@ class _QuizQuestionAssignmentPageState extends State<QuizQuestionAssignmentPage>
   }
 
   Widget _buildTopInfo() {
+    final total = _totalMarks;
+    final isValid = total == 10.0;
+
     return Container(
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.12)),
+        border: Border.all(
+          color: isValid ? AppColors.success.withValues(alpha: 0.3) : Colors.grey.withValues(alpha: 0.12),
+          width: isValid ? 1.5 : 1,
+        ),
       ),
-      child: Row(
+      child: Column(
         children: [
-          const Icon(Icons.playlist_add_check_circle_rounded, color: AppColors.primary),
-          const SizedBox(width: 8),
-          Text(
-            'Selected $_selectedCount question(s)',
-            style: const TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w700,
-            ),
+          Row(
+            children: [
+              Icon(
+                Icons.playlist_add_check_circle_rounded,
+                color: isValid ? AppColors.success : AppColors.primary,
+              ),
+              const SizedBox(width: 8),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    '$_selectedCount question(s) selected',
+                    style: const TextStyle(
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                  Text(
+                    'Total Points: ${_formatMarks(total)} / 10',
+                    style: TextStyle(
+                      color: isValid ? AppColors.success : AppColors.error,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                    ),
+                  ),
+                ],
+              ),
+              const Spacer(),
+              if (_selectedCount > 0)
+                ElevatedButton.icon(
+                  onPressed: _distributeMarks,
+                  icon: const Icon(Icons.balance_rounded, size: 14),
+                  label: const Text('Split 10.0', style: TextStyle(fontSize: 11)),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary.withValues(alpha: 0.1),
+                    foregroundColor: AppColors.primary,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    minimumSize: const Size(0, 32),
+                  ),
+                ),
+            ],
           ),
-          const Spacer(),
-          if (_quiz != null)
-            Text(
-              'Current: ${_quiz!.totalQuestions}',
-              style: const TextStyle(color: AppColors.textLight, fontSize: 12),
-            ),
         ],
       ),
     );
@@ -341,18 +440,22 @@ class _QuizQuestionAssignmentPageState extends State<QuizQuestionAssignmentPage>
                     padding: const EdgeInsets.only(left: 44, top: 10),
                     child: Row(
                       children: [
-                        _buildAdjustButton(
-                          label: 'Marks',
-                          value: selected.marks.toStringAsFixed(0),
-                          onMinus: () => _changeMarks(question.id, -1),
-                          onPlus: () => _changeMarks(question.id, 1),
+                        Expanded(
+                          child: _AdjustableInput(
+                            label: 'Marks',
+                            value: selected.marks,
+                            onChanged: (val) => _setMarksExplicitly(question.id, val),
+                            onStep: (delta) => _changeMarks(question.id, delta),
+                          ),
                         ),
                         const SizedBox(width: 12),
-                        _buildAdjustButton(
-                          label: 'Order',
-                          value: selected.displayOrder.toString(),
-                          onMinus: () => _changeOrder(question.id, -1),
-                          onPlus: () => _changeOrder(question.id, 1),
+                        Expanded(
+                          child: _AdjustableInput(
+                            label: 'Order',
+                            value: selected.displayOrder.toDouble(),
+                            isInteger: true,
+                            onStep: (delta) => _changeOrder(question.id, delta.toInt()),
+                          ),
                         ),
                       ],
                     ),
@@ -365,36 +468,142 @@ class _QuizQuestionAssignmentPageState extends State<QuizQuestionAssignmentPage>
     );
   }
 
-  Widget _buildAdjustButton({
-    required String label,
-    required String value,
-    required VoidCallback onMinus,
-    required VoidCallback onPlus,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Row(
-        children: [
-          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-          IconButton(
-            onPressed: onMinus,
-            icon: const Icon(Icons.remove_rounded, size: 16),
-            constraints: const BoxConstraints(minHeight: 24, minWidth: 24),
-            padding: EdgeInsets.zero,
+  String _formatMarks(double marks) {
+    // If it's effectively an integer
+    if ((marks * 100).round() / 100 == marks.roundToDouble()) {
+      return marks.round().toString();
+    }
+    
+    // Show up to 2 decimal places, but remove trailing zeros
+    String s = marks.toStringAsFixed(2);
+    if (s.contains('.')) {
+      s = s.replaceAll(RegExp(r'0+$'), ''); // Remove trailing zeros
+      s = s.replaceAll(RegExp(r'\.$'), ''); // Remove trailing dot if any
+    }
+    return s;
+  }
+}
+
+class _AdjustableInput extends StatefulWidget {
+  final String label;
+  final double value;
+  final bool isInteger;
+  final ValueChanged<double>? onChanged;
+  final ValueChanged<double> onStep;
+
+  const _AdjustableInput({
+    required this.label,
+    required this.value,
+    this.isInteger = false,
+    this.onChanged,
+    required this.onStep,
+  });
+
+  @override
+  State<_AdjustableInput> createState() => _AdjustableInputState();
+}
+
+class _AdjustableInputState extends State<_AdjustableInput> {
+  late final TextEditingController _controller;
+  late final FocusNode _focusNode;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _formatValue(widget.value));
+    _focusNode = FocusNode();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AdjustableInput oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value && !_focusNode.hasFocus) {
+      _controller.text = _formatValue(widget.value);
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  String _formatValue(double v) {
+    if (widget.isInteger) return v.toInt().toString();
+    
+    // If it's effectively an integer
+    if ((v * 100).round() / 100 == v.roundToDouble()) {
+      return v.round().toString();
+    }
+
+    // Show up to 2 decimal places, but remove trailing zeros
+    String s = v.toStringAsFixed(2);
+    if (s.contains('.')) {
+      s = s.replaceAll(RegExp(r'0+$'), ''); // Remove trailing zeros
+      s = s.replaceAll(RegExp(r'\.$'), ''); // Remove trailing dot if any
+    }
+    return s;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 4),
+          child: Text(
+            widget.label,
+            style: const TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w700),
           ),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w700)),
-          IconButton(
-            onPressed: onPlus,
-            icon: const Icon(Icons.add_rounded, size: 16),
-            constraints: const BoxConstraints(minHeight: 24, minWidth: 24),
-            padding: EdgeInsets.zero,
+        ),
+        Container(
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.background,
+            borderRadius: BorderRadius.circular(8),
           ),
-        ],
-      ),
+          child: Row(
+            children: [
+              IconButton(
+                onPressed: () => widget.onStep(widget.isInteger ? -1 : -0.5),
+                icon: const Icon(Icons.remove_rounded, size: 14),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                visualDensity: VisualDensity.compact,
+              ),
+              Expanded(
+                child: TextField(
+                  controller: _controller,
+                  focusNode: _focusNode,
+                  enabled: widget.onChanged != null,
+                  onChanged: (val) {
+                    final normalized = val.replaceAll(',', '.');
+                    final d = double.tryParse(normalized);
+                    if (d != null) widget.onChanged!(d);
+                  },
+                  keyboardType: TextInputType.numberWithOptions(decimal: !widget.isInteger),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                  ),
+                ),
+              ),
+              IconButton(
+                onPressed: () => widget.onStep(widget.isInteger ? 1 : 0.5),
+                icon: const Icon(Icons.add_rounded, size: 14),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
