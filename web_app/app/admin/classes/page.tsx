@@ -38,6 +38,7 @@ import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { formatDate, toLocalDatetimeString, toUtcIsoString } from "@/utils/datetime-utils"
 import { useToast } from "@/hooks/useToast"
 import { ClassesManagementSkeleton } from "@/components/ui/skeletons"
+import { AdminClassDashboardTab } from "./tabs/dashboard-tab"
 
 interface ClassData {
   id: string
@@ -147,6 +148,7 @@ export default function ClassesManagement() {
   const [selectedClass, setSelectedClass] = useState<ClassData | null>(null)
   const [editData, setEditData] = useState<ClassData | null>(null)
   const [isEditing, setIsEditing] = useState(false)
+  const [activeTab, setActiveTab] = useState<"details" | "dashboard">("details")
   const fetchClasses = useCallback(async () => {
     try {
       setLoading(true)
@@ -308,6 +310,7 @@ export default function ClassesManagement() {
     setEditData(JSON.parse(JSON.stringify(cls)))
     setIsEditing(false)
     setIsDrawerOpen(true)
+    setActiveTab("details")
   }
 
   const handleDeleteClick = () => {
@@ -496,6 +499,8 @@ export default function ClassesManagement() {
           onUpdate={handleUpdate}
           onDelete={handleDeleteClick}
           getStatusBadge={getStatusBadge}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
         />
 
         <CreateClassroomModal
@@ -580,6 +585,8 @@ interface ClassroomDrawerProps {
   onUpdate: () => void
   onDelete: () => void
   getStatusBadge: (status: string) => React.ReactNode
+  activeTab: "details" | "dashboard"
+  setActiveTab: (tab: "details" | "dashboard") => void
 }
 
 function ClassroomDrawer({
@@ -587,6 +594,7 @@ function ClassroomDrawer({
   selectedClass, editData, setEditData, isEditing, setIsEditing,
   subjectOptions,
   onUpdate, onDelete, getStatusBadge,
+  activeTab, setActiveTab,
 }: ClassroomDrawerProps) {
   const { isDark } = useThemeContext()
 
@@ -602,84 +610,121 @@ function ClassroomDrawer({
           <motion.div
             initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className={`fixed right-0 top-0 h-screen w-[550px] shadow-2xl z-50 flex flex-col ${isDark ? "bg-gray-800" : "bg-white"}`}
+            className={`fixed right-0 top-0 h-screen w-[700px] shadow-2xl z-50 flex flex-col ${isDark ? "bg-gray-800" : "bg-white"}`}
           >
             <div className="p-6 border-b dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-gray-900/20">
               <div className="flex flex-col">
                 <span className="text-[10px] text-gray-500 font-bold tracking-widest uppercase">Classroom Overview</span>
-                <h2 className="text-xl font-bold dark:text-white text-gray-900">Details & Management</h2>
+                <h2 className="text-xl font-bold dark:text-white text-gray-900">{selectedClass?.name || "Classroom Details"}</h2>
               </div>
               <Button className="cursor-pointer" color="gray" pill size="xs" onClick={() => setIsDrawerOpen(false)}>
                 <XMarkIcon className="w-3 h-3" />
               </Button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-10">
-              <div className="h-full flex flex-col justify-between gap-y-10 min-h-[500px]">
-                <div className="grid grid-cols-2 gap-x-10">
-                  <DetailItem label="Classroom Name" value={isEditing ? editData?.name : selectedClass?.name}
-                    isEditing={isEditing} onChange={(val) => setEditData(prev => prev ? { ...prev, name: val } : null)} />
-                  <DetailItem label="Class Code" value={isEditing ? editData?.code : selectedClass?.code}
-                    isEditing={isEditing} onChange={(val) => setEditData(prev => prev ? { ...prev, code: val } : null)} />
-                </div>
+            {/* Tab Navigation */}
+            <div className="flex border-b border-gray-200 dark:border-gray-700 px-6">
+              <button
+                onClick={() => setActiveTab("details")}
+                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === "details"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                Details
+              </button>
+              <button
+                onClick={() => setActiveTab("dashboard")}
+                className={`px-4 py-3 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === "dashboard"
+                    ? "border-blue-500 text-blue-600 dark:text-blue-400"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                Dashboard
+              </button>
+            </div>
 
-                <div className="grid grid-cols-2 gap-x-10">
-                  <DetailItem label="Semester" value={isEditing ? editData?.semester : selectedClass?.semester}
-                    isEditing={isEditing}
-                    onChange={(val) => setEditData(prev => prev ? { ...prev, semester: val } : null)} />
-                  <DetailItem label="Subject" value={isEditing ? editData?.subjectId : selectedClass?.subjectId}
-                    labelDisplay={isEditing ? subjectOptions.find(o => o.value === editData?.subjectId)?.label : selectedClass?.subject}
-                    isEditing={isEditing} type="select" options={subjectOptions}
-                    onChange={(val) => setEditData(prev => prev ? { ...prev, subjectId: val } : null)} />
-                </div>
+            {/* Tab Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {activeTab === "details" ? (
+                <div className="h-full flex flex-col justify-between gap-y-6 min-h-[500px]">
+                  <div className="grid grid-cols-2 gap-x-10">
+                    <DetailItem label="Classroom Name" value={isEditing ? editData?.name : selectedClass?.name}
+                      isEditing={isEditing} onChange={(val) => setEditData(prev => prev ? { ...prev, name: val } : null)} />
+                    <DetailItem label="Class Code" value={isEditing ? editData?.code : selectedClass?.code}
+                      isEditing={isEditing} onChange={(val) => setEditData(prev => prev ? { ...prev, code: val } : null)} />
+                  </div>
 
-                <div className="grid grid-cols-2 gap-x-10">
-                  <div className="flex flex-col space-y-2">
-                    <label className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">Lecturer</label>
-                    <div className="flex items-center gap-3">
-                      <Avatar img={selectedClass?.teacherAvatar} size="sm" rounded />
-                      <div className="flex flex-col">
-                        <span className={`text-base font-semibold ${isDark ? "text-white" : "text-gray-900"} leading-none`}>{selectedClass?.teacher}</span>
-                        <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"} mt-1`}>{selectedClass?.teacherEmail}</span>
+                  <div className="grid grid-cols-2 gap-x-10">
+                    <DetailItem label="Semester" value={isEditing ? editData?.semester : selectedClass?.semester}
+                      isEditing={isEditing}
+                      onChange={(val) => setEditData(prev => prev ? { ...prev, semester: val } : null)} />
+                    <DetailItem label="Subject" value={isEditing ? editData?.subjectId : selectedClass?.subjectId}
+                      labelDisplay={isEditing ? subjectOptions.find(o => o.value === editData?.subjectId)?.label : selectedClass?.subject}
+                      isEditing={isEditing} type="select" options={subjectOptions}
+                      onChange={(val) => setEditData(prev => prev ? { ...prev, subjectId: val } : null)} />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-x-10">
+                    <div className="flex flex-col space-y-2">
+                      <label className="text-gray-500 text-[11px] font-bold uppercase tracking-widest">Lecturer</label>
+                      <div className="flex items-center gap-3">
+                        <Avatar img={selectedClass?.teacherAvatar} size="sm" rounded />
+                        <div className="flex flex-col">
+                          <span className={`text-base font-semibold ${isDark ? "text-white" : "text-gray-900"} leading-none`}>{selectedClass?.teacher}</span>
+                          <span className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"} mt-1`}>{selectedClass?.teacherEmail}</span>
+                        </div>
                       </div>
                     </div>
+                    <DetailItem label="Students" value={selectedClass?.students} isEditing={isEditing} type="readonly" />
                   </div>
-                  <DetailItem label="Students" value={selectedClass?.students} isEditing={isEditing} type="readonly" />
-                </div>
 
-                <div className="grid grid-cols-2 gap-x-10">
-                  <DetailItem label="Enrollment Key" value={isEditing ? editData?.enrolKey : selectedClass?.enrolKey}
-                    isEditing={isEditing} onChange={(val) => setEditData(prev => prev ? { ...prev, enrolKey: val } : null)} />
-                  <DetailItem label="Status" value={selectedClass && getStatusBadge(selectedClass.status)} isEditing={isEditing} type="readonly" />
-                </div>
+                  <div className="grid grid-cols-2 gap-x-10">
+                    <DetailItem label="Enrollment Key" value={isEditing ? editData?.enrolKey : selectedClass?.enrolKey}
+                      isEditing={isEditing} onChange={(val) => setEditData(prev => prev ? { ...prev, enrolKey: val } : null)} />
+                    <DetailItem label="Status" value={selectedClass && getStatusBadge(selectedClass.status)} isEditing={isEditing} type="readonly" />
+                  </div>
 
-                <div className="grid grid-cols-2 gap-x-10 pb-6">
-                  <DetailItem label="Created Date" value={formatDate(selectedClass?.createdDate || "")} isEditing={isEditing} type="readonly" />
-                  <DetailItem label="End Date" value={toLocalDatetimeString(isEditing ? editData?.endDate : selectedClass?.endDate)}
-                    labelDisplay={formatDate(isEditing ? editData?.endDate : (selectedClass?.endDate || ""))}
-                    isEditing={isEditing} type="datetime-local"
-                    onChange={(val) => setEditData(prev => prev ? { ...prev, endDate: val } : null)} />
+                  <div className="grid grid-cols-2 gap-x-10 pb-6">
+                    <DetailItem label="Created Date" value={formatDate(selectedClass?.createdDate || "")} isEditing={isEditing} type="readonly" />
+                    <DetailItem label="End Date" value={toLocalDatetimeString(isEditing ? editData?.endDate : selectedClass?.endDate)}
+                      labelDisplay={formatDate(isEditing ? editData?.endDate : (selectedClass?.endDate || ""))}
+                      isEditing={isEditing} type="datetime-local"
+                      onChange={(val) => setEditData(prev => prev ? { ...prev, endDate: val } : null)} />
+                  </div>
                 </div>
-              </div>
-            </div>
-
-            <div className="p-6 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
-              {selectedClass?.status !== 'deleted' && (
-                <>
-                  {isEditing ? (
-                    <>
-                      <Button color="blue" className="cursor-pointer" onClick={onUpdate}>Save Changes</Button>
-                      <Button color="gray" onClick={() => setIsEditing(false)}>Cancel</Button>
-                    </>
-                  ) : (
-                    <>
-                      <Button color="blue" className="cursor-pointer" onClick={() => setIsEditing(true)}>Update</Button>
-                      <Button color="red" outline onClick={onDelete}><TrashIcon className="w-5 h-5" /></Button>
-                    </>
-                  )}
-                </>
+              ) : (
+                selectedClass && (
+                  <AdminClassDashboardTab
+                    classId={selectedClass.id}
+                    classroomName={selectedClass.name}
+                  />
+                )
               )}
             </div>
+
+            {/* Footer — only shown on Details tab */}
+            {activeTab === "details" && (
+              <div className="p-6 bg-gray-50 dark:bg-gray-700/50 flex justify-end gap-3">
+                {selectedClass?.status !== 'deleted' && (
+                  <>
+                    {isEditing ? (
+                      <>
+                        <Button color="blue" className="cursor-pointer" onClick={onUpdate}>Save Changes</Button>
+                        <Button color="gray" onClick={() => setIsEditing(false)}>Cancel</Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button color="blue" className="cursor-pointer" onClick={() => setIsEditing(true)}>Update</Button>
+                        <Button color="red" outline onClick={onDelete}><TrashIcon className="w-5 h-5" /></Button>
+                      </>
+                    )}
+                  </>
+                )}
+              </div>
+            )}
           </motion.div>
         </>
       )}

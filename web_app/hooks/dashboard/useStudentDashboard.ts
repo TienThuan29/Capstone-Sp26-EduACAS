@@ -27,6 +27,7 @@ export const useStudentDashboard = (classroomId?: string, studentId?: string) =>
           Api.Classroom.GET_STUDENT_OVERVIEW(classroomId),
           { params: { studentId } }
         );
+        // console.log(response.data);
         return response.data?.dataResponse || null;
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch overview");
@@ -49,6 +50,7 @@ export const useStudentDashboard = (classroomId?: string, studentId?: string) =>
           Api.Classroom.GET_STUDENT_EXAM_SCORES(classroomId),
           { params: { studentId } }
         );
+        console.log(response.data);
         return response.data?.dataResponse || [];
       } catch (err) {
         setError(

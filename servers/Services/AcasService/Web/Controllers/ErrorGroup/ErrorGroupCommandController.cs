@@ -52,11 +52,12 @@ public class ErrorGroupCommandController : ControllerBase
         {
             if (request.GroupIds != null && request.GroupIds.Count > 0)
             {
-                await _errorGroupCommand.CheckSimilarityForGroupsAsync(request.GroupIds);
+                // await _errorGroupCommand.CheckSimilarityForGroupsAsync(request.GroupIds);
+                await _errorGroupCommand.CheckSimilarityForGroupsWithExcludeCodeBaseAsync(request.GroupIds);
             }
             else if (!string.IsNullOrEmpty(request.ProblemId))
             {
-                await _errorGroupCommand.CheckSimilarityForProblemAsync(request.ExamId, request.ProblemId);
+                await _errorGroupCommand.CheckSimilarityForProblemWithExcludeCodeBaseAsync(request.ExamId, request.ProblemId);
             }
             else
             {

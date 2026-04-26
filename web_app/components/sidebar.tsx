@@ -34,6 +34,7 @@ import {
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
   ChartBarIcon,
+  ClipboardDocumentCheckIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 
@@ -84,11 +85,11 @@ const Sidebar = () => {
       href: PageUrl.MY_CLASSROOM_PAGE,
     },
     // { icon: DocumentTextIcon, label: "Assignments", href: PageUrl.ASSIGNMENTS_PAGE },
-    {
-      icon: MegaphoneIcon,
-      label: "Announcements",
-      href: PageUrl.ANNOUNCEMENTS_PAGE,
-    },
+    // {
+    //   icon: MegaphoneIcon,
+    //   label: "Announcements",
+    //   href: PageUrl.ANNOUNCEMENTS_PAGE,
+    // },
   ];
 
   const lecturerMenuItems = [
@@ -216,11 +217,11 @@ const Sidebar = () => {
       label: "Dashboard",
       href: `${pathname}?tab=dashboard`,
     },
-    {
-      icon: ClipboardDocumentListIcon,
-      label: "Examinations",
-      href: `${pathname}?tab=exams`,
-    },
+    // {
+    //   icon: ClipboardDocumentListIcon,
+    //   label: "Examinations",
+    //   href: `${pathname}?tab=exams`,
+    // },
     {
       icon: PuzzlePieceIcon,
       label: "Practise Exercises",
@@ -242,12 +243,22 @@ const Sidebar = () => {
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
+    {
+      icon: AcademicCapIcon,
+      label: "Academic Warning",
+      href: `${pathname}?tab=academic-warning`,
+    },
+    {
+      icon: ClipboardDocumentCheckIcon,
+      label: "Completed Exams",
+      href: `${pathname}?tab=completed-exams`,
+    },
   ];
 
   const settingsItems = [
     { icon: UsersIcon, label: "Profile", href: PageUrl.PROFILE_PAGE },
     { icon: BellIcon, label: "Notifications", href: PageUrl.NOTIFICATIONS_PAGE },
-    { icon: Cog6ToothIcon, label: "Settings", href: "#" },
+    { icon: Cog6ToothIcon, label: "Settings", href: PageUrl.SETTINGS_PAGE },
   ];
 
   // justify sidebar options

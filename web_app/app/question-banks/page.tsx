@@ -18,6 +18,7 @@ import {
   TableRow,
   TextInput,
   Textarea,
+  Tooltip,
 } from "flowbite-react";
 import {
   ArrowPathIcon,
@@ -25,6 +26,7 @@ import {
   PencilSquareIcon,
   PlusIcon,
   TrashIcon,
+  PhotoIcon,
 } from "@heroicons/react/24/outline";
 import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
@@ -119,6 +121,11 @@ export default function QuestionBanksPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [formState, setFormState] = useState<QuestionFormState>(initialFormState);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [pendingDeleteQuestionId, setPendingDeleteQuestionId] = useState<string | null>(
+    null,
+  );
+  const [deleting, setDeleting] = useState(false);
   const questionFormId = "question-form";
 
   const fetchQuestions = useCallback(async () => {
@@ -362,16 +369,32 @@ export default function QuestionBanksPage() {
     }
   };
 
-  const handleSoftDelete = async (questionId: string) => {
-    if (!window.confirm("Soft delete this question?")) return;
+  const handleOpenDeleteConfirm = (questionId: string) => {
+    setPendingDeleteQuestionId(questionId);
+    setIsDeleteConfirmOpen(true);
+  };
 
+  const handleCloseDeleteConfirm = () => {
+    if (deleting) return;
+    setIsDeleteConfirmOpen(false);
+    setPendingDeleteQuestionId(null);
+  };
+
+  const handleSoftDelete = async () => {
+    if (!pendingDeleteQuestionId) return;
+
+    setDeleting(true);
     try {
-      await softDeleteQuestion(questionId);
+      await softDeleteQuestion(pendingDeleteQuestionId);
       toast.showSuccess("Question soft deleted successfully");
+      setIsDeleteConfirmOpen(false);
+      setPendingDeleteQuestionId(null);
       fetchQuestions();
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
       toast.showError(err.response?.data?.message ?? "Failed to soft delete question");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -385,6 +408,11 @@ export default function QuestionBanksPage() {
       toast.showError(err.response?.data?.message ?? "Failed to restore question");
     }
   };
+
+  const pendingDeleteQuestion = questions.find(
+    (question) => question.id === pendingDeleteQuestionId,
+  );
+  const pendingDeleteQuestionContent = pendingDeleteQuestion?.content?.trim() ?? "this question";
 
   return (
     <div className="p-8">
@@ -481,7 +509,18 @@ export default function QuestionBanksPage() {
                 questions.map((question) => (
                   <TableRow key={question.id}>
                     <TableCell className="max-w-xl">
-                      <div className="line-clamp-2 text-sm">{question.content}</div>
+                      <div className="flex items-start gap-2">
+                        <div className="line-clamp-2 text-sm max-w-[90%]">{question.content}</div>
+                        {question.imageUrl && (
+                          <Tooltip 
+                            content={<img src={question.imageUrl} alt="preview" className="max-h-48 rounded object-contain" />} 
+                            placement="right" 
+                            className="z-50 bg-white"
+                          >
+                            <PhotoIcon className="h-5 w-5 text-blue-500 shrink-0 cursor-help" />
+                          </Tooltip>
+                        )}
+                      </div>
                     </TableCell>
                     <TableCell>
                       <Badge color={getQuestionTypeBadgeColor(question.type)}>
@@ -517,7 +556,7 @@ export default function QuestionBanksPage() {
                           <Button
                             size="xs"
                             color="failure"
-                            onClick={() => handleSoftDelete(question.id)}
+                            onClick={() => handleOpenDeleteConfirm(question.id)}
                           >
                             <TrashIcon className="h-4 w-4" />
                           </Button>
@@ -664,6 +703,54 @@ export default function QuestionBanksPage() {
             {submitting ? "Saving..." : editingQuestion ? "Update" : "Create"}
           </Button>
         </ModalFooter>
+      </Modal>
+
+      <Modal
+        show={isDeleteConfirmOpen}
+        size="md"
+        onClose={handleCloseDeleteConfirm}
+        popup
+        theme={{
+          root: {
+            base: "fixed inset-x-0 bottom-0 z-[200] h-modal w-full overflow-y-auto overflow-x-hidden p-4 md:inset-0 md:h-full",
+          },
+        }}
+      >
+        <ModalHeader />
+        <ModalBody className={`${isDark ? "bg-gray-800" : "bg-white"} rounded-2xl`}>
+          <div>
+            <h3 className={`mb-4 text-xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+              Confirm delete
+            </h3>
+            <p className={`mb-6 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Are you sure you want to delete this question{" "}
+              <span className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                &quot;{pendingDeleteQuestionContent}&quot;
+              </span>
+              ?
+            </p>
+            <div className="flex justify-end gap-4">
+              <button
+                onClick={handleSoftDelete}
+                disabled={deleting}
+                className="cursor-pointer px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors disabled:opacity-50 flex items-center"
+              >
+                {deleting ? "Deleting..." : "Delete question"}
+              </button>
+              <button
+                onClick={handleCloseDeleteConfirm}
+                disabled={deleting}
+                className={`cursor-pointer px-6 py-2.5 font-bold rounded-xl transition-colors disabled:opacity-50 ${
+                  isDark
+                    ? "bg-gray-700 text-white hover:bg-gray-600"
+                    : "bg-[#374151] text-white hover:bg-gray-600"
+                }`}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </ModalBody>
       </Modal>
     </div>
   );

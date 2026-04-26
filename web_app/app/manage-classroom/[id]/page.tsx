@@ -35,6 +35,7 @@ import {
   StudentTab,
   QuizzesTab,
 } from "@/app/manage-classroom/tabs";
+import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 import { DashboardTab } from "../tabs/dashboard-tab";
 import { SlotsTab } from "../tabs/slot-tab";
 import { DiscussionTab } from "../tabs/discussion-tab";
@@ -243,7 +244,7 @@ function ClassroomContent() {
 
     const slotVal = Number(formData.maxSlot);
     if (!formData.maxSlot || isNaN(slotVal) || slotVal <= 1) {
-      showError("Số lượng chỗ (Max Slot) phải từ 2 trở lên.");
+      showError("Max Slot must be at least 2.");
       return;
     }
 
@@ -392,7 +393,7 @@ function ClassroomContent() {
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
-      <main className="ml-20 flex-grow overflow-hidden p-4 transition-all duration-300 lg:ml-64 lg:p-8">
+      <main className="ml-20 flex-grow p-4 transition-all duration-300 lg:ml-64 lg:p-8">
         <div className="mb-5 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="Manage classrooms"
@@ -424,6 +425,11 @@ function ClassroomContent() {
                 router.replace(`${pathname}?${p.toString()}`, { scroll: false });
               }}
             />
+          )}
+          {activeTab !== "overview" && classroom && (
+            <div className="ml-auto">
+              <ClassroomInfoBar classroom={classroom} compact />
+            </div>
           )}
         </div>
 

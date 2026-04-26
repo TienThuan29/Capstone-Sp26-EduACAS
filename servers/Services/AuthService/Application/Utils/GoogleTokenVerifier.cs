@@ -2,20 +2,43 @@ using Google.Apis.Auth;
 
 namespace AuthService.Application.Utils;
 
-public class GoogleTokenVerifier
+public class GoogleTokenPayload
+{
+    public string Email { get; set; } = string.Empty;
+    public string GoogleId { get; set; } = string.Empty;
+    public string? Name { get; set; }
+    public string? Picture { get; set; }
+}
+
+public interface IGoogleTokenVerifier
+{
+    Task<GoogleTokenPayload> VerifyTokenAsync(string idToken);
+}
+
+public class GoogleTokenVerifier : IGoogleTokenVerifier
 {
     private readonly string _clientId;
     private readonly ILogger<GoogleTokenVerifier> _logger;
 
     public GoogleTokenVerifier(IConfiguration configuration, ILogger<GoogleTokenVerifier> logger)
     {
-        _clientId = configuration["Google:ClientId"] ?? 
-                   throw new InvalidOperationException("Google:ClientId is not configured");
+        var clientId = configuration["Google:ClientId"];
+        if (string.IsNullOrEmpty(clientId))
+        {
+            throw new InvalidOperationException("Google:ClientId is not configured");
+        }
+        _clientId = clientId;
         _logger = logger;
     }
 
     public async Task<GoogleTokenPayload> VerifyTokenAsync(string idToken)
     {
+        if (string.IsNullOrWhiteSpace(idToken))
+        {
+            _logger.LogError("Google token is null, empty, or whitespace");
+            throw new InvalidOperationException("Invalid Google token");
+        }
+
         try
         {
             var settings = new GoogleJsonWebSignature.ValidationSettings
@@ -41,15 +64,7 @@ public class GoogleTokenVerifier
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error verifying Google token");
-            throw new InvalidOperationException("Error verifying Google token", ex);
+            throw new InvalidOperationException("Invalid Google token", ex);
         }
     }
-}
-
-public class GoogleTokenPayload
-{
-    public string Email { get; set; } = string.Empty;
-    public string GoogleId { get; set; } = string.Empty;
-    public string? Name { get; set; }
-    public string? Picture { get; set; }
 }

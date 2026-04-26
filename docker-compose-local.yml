@@ -77,13 +77,14 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: http://+:8081
+      Cors__CorsOrigin: ${FRONTEND_URL}
+      Cors__GatewayOrigin: http://acas-api-gateway:8080
       Redis__ConnectionString: ${REDIS_CONNECTION_STRING}
       RabbitMQ__HostName: ${RABBITMQ_HOST}
       RabbitMQ__Port: ${RABBITMQ_PORT}
       RabbitMQ__UserName: ${RABBITMQ_USERNAME}
       RabbitMQ__Password: ${RABBITMQ_PASSWORD}
       RabbitMQ__VirtualHost: ${RABBITMQ_VIRTUAL_HOST}
-      Cors__CorsOrigin: ${FRONTEND_URL}
       Jwt__JwtSecret: ${JWT_SECRET}
       Jwt__JwtAccessTokenExpiration: ${JWT_ACCESS_TOKEN_EXPIRATION}
       Jwt__JwtRefreshTokenExpiration: ${JWT_REFRESH_TOKEN_EXPIRATION}
@@ -130,6 +131,8 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: http://+:8002
+      Cors__CorsOrigin: ${FRONTEND_URL}
+      Cors__GatewayOrigin: http://acas-api-gateway:8080
       Redis__ConnectionString: ${REDIS_CONNECTION_STRING}
       RabbitMQ__HostName: ${RABBITMQ_HOST}
       RabbitMQ__Port: ${RABBITMQ_PORT}

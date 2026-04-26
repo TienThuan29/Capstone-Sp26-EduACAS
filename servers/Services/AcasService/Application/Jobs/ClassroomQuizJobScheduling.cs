@@ -5,7 +5,7 @@ using AcasService.Repositories.QuizAttempt;
 
 public interface IClassroomQuizJobScheduling
 {
-    Task<string> ScheduleCloseJobAsync(string classroomQuizId, DateTime endTime);
+    Task<string> ScheduleCloseJobAsync(string classroomQuizId, DateTime? endTime);
     Task CancelCloseJobAsync(string jobId);
     Task<string> RescheduleCloseJobAsync(string? oldJobId, string classroomQuizId, DateTime newEndTime);
     Task<string> ScheduleStartJobAsync(string classroomQuizId, DateTime startTime);
@@ -33,10 +33,13 @@ public class ClassroomQuizJobScheduling : IClassroomQuizJobScheduling
         _logger = logger;
     }
 
-    public async Task<string> ScheduleCloseJobAsync(string classroomQuizId, DateTime endTime)
+    public async Task<string> ScheduleCloseJobAsync(string classroomQuizId, DateTime? endTime)
     {
+        if (endTime == null)
+            throw new ArgumentNullException(nameof(endTime));
+
         var now = DateTime.UtcNow;
-        var delay = endTime - now;
+        var delay = endTime.Value - now;
 
         if (delay < TimeSpan.Zero) delay = TimeSpan.Zero;
 

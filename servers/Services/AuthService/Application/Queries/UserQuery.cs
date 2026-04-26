@@ -14,6 +14,7 @@ public interface IUserQuery
     public Task<UserProfileResponse> GetProfileAsync(string accessToken);
     public Task<List<UserProfileResponse>> GetAllUsersAsync();
     public Task<PagedResult<UserProfileResponse>> GetPagedUsersAsync(int pageIndex, int pageSize, string? searchTerm = null, string? role = null, bool? isEnable = null);
+    public Task<CheckEmailExistsResponse> CheckEmailExistsAsync(string email);
 }
 
 public class UserQuery : IUserQuery
@@ -22,7 +23,7 @@ public class UserQuery : IUserQuery
     private readonly IConfiguration _configuration;
     private readonly JwtUtil _jwtUtil;
     private readonly UserMapper _userMapper;
-    private readonly GoogleTokenVerifier _googleTokenVerifier;
+    private readonly IGoogleTokenVerifier _googleTokenVerifier;
     private readonly ILogger<UserQuery> _logger;
     
     public UserQuery(
@@ -30,7 +31,7 @@ public class UserQuery : IUserQuery
         IConfiguration configuration,
         UserMapper userMapper,
         JwtUtil jwtUtil,
-        GoogleTokenVerifier googleTokenVerifier,
+        IGoogleTokenVerifier googleTokenVerifier,
         ILogger<UserQuery> logger
     ) {
         _userRepository = userRepository;
@@ -189,6 +190,24 @@ public class UserQuery : IUserQuery
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error getting paged users");
+            throw;
+        }
+    }
+
+    public async Task<CheckEmailExistsResponse> CheckEmailExistsAsync(string email)
+    {
+        try
+        {
+            var user = await _userRepository.FindByEmailAsync(email);
+            return new CheckEmailExistsResponse
+            {
+                Exists = user != null,
+                Message = user != null ? null : "Email not found in the system"
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error checking email existence");
             throw;
         }
     }

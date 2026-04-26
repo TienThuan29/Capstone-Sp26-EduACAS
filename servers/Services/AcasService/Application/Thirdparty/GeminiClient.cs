@@ -55,6 +55,49 @@ public class GeminiClient : IGeminiClient
         GeminiGenerationConfig? generationConfig = null,
         CancellationToken cancellationToken = default)
     {
+        const int maxRetries = 4;
+        Exception? lastException = null;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                var result = await SendRequestAsync(prompt, generationConfig, cancellationToken);
+                if (attempt > 1)
+                {
+                    _logger.LogInformation("Gemini API request succeeded after {Attempt} retries", attempt);
+                }
+                return result;
+            }
+            catch (HttpRequestException ex) when (IsRetryableStatusCode(ex))
+            {
+                lastException = ex;
+
+                if (attempt == maxRetries)
+                {
+                    _logger.LogError(ex,
+                        "Gemini API failed after {MaxRetries} attempts. StatusCode={StatusCode}",
+                        maxRetries, GetStatusCode(ex));
+                    throw;
+                }
+
+                var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
+                _logger.LogWarning(
+                    "Gemini API returned retryable error (attempt {Attempt}/{MaxRetries}): StatusCode={StatusCode}, Delay={Delay}s",
+                    attempt, maxRetries, GetStatusCode(ex), delay.TotalSeconds);
+
+                await Task.Delay(delay, cancellationToken);
+            }
+        }
+
+        throw lastException ?? new InvalidOperationException("Gemini API failed unexpectedly");
+    }
+
+    private async Task<string> SendRequestAsync(
+        string prompt,
+        GeminiGenerationConfig? generationConfig,
+        CancellationToken cancellationToken)
+    {
         var request = new GeminiGenerateContentRequest
         {
             Contents =
@@ -74,7 +117,6 @@ public class GeminiClient : IGeminiClient
             Content = new StringContent(json, Encoding.UTF8, "application/json")
         };
 
-        // Use header approach (primary) + query param (fallback) per Gemini spec
         httpRequest.Headers.Add("x-goog-api-key", _apiKey);
         _logger.LogInformation(
             "Gemini API request: Url={Url}, Headers={Headers}, BodyLength={BodyLength}",
@@ -104,6 +146,25 @@ public class GeminiClient : IGeminiClient
         }
 
         return text;
+    }
+
+    private static bool IsRetryableStatusCode(Exception ex)
+    {
+        if (ex is HttpRequestException httpEx && httpEx.StatusCode.HasValue)
+        {
+            var statusCode = (int)httpEx.StatusCode.Value;
+            return statusCode == 429 || statusCode == 500 || statusCode == 503 || statusCode == 504;
+        }
+        return false;
+    }
+
+    private static int? GetStatusCode(Exception ex)
+    {
+        if (ex is HttpRequestException httpEx && httpEx.StatusCode.HasValue)
+        {
+            return (int)httpEx.StatusCode.Value;
+        }
+        return null;
     }
 }
 

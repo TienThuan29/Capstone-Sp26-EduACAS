@@ -25,12 +25,12 @@ export default function FirstLoginPage() {
     e.preventDefault();
 
     if (password !== confirmPassword) {
-      toast.showError("Mật khẩu xác nhận không khớp");
+      toast.showError("Confirm password does not match");
       return;
     }
 
     if (password.length < 8) {
-      toast.showError("Mật khẩu phải có ít nhất 8 ký tự");
+      toast.showError("Password must be at least 8 characters");
       return;
     }
 
@@ -51,15 +51,15 @@ export default function FirstLoginPage() {
       );
 
       if (response.status === HttpStatusCode.Ok) {
-        toast.showSuccess("Đổi mật khẩu thành công. Vui lòng đăng nhập lại.");
+        toast.showSuccess("Password changed successfully. Please login again.");
         await logout(); // Force logout so they login with new password
       }
     } catch (error) {
       console.error("Reset password error:", error);
       if (axios.isAxiosError(error) && error.response) {
-        toast.showError(error.response.data.message || "Có lỗi xảy ra");
+        toast.showError(error.response.data.message || "An error occurred");
       } else {
-        toast.showError("Đã có lỗi xảy ra");
+        toast.showError("An error occurred");
       }
     } finally {
       setIsSubmitting(false);
@@ -89,10 +89,10 @@ export default function FirstLoginPage() {
         <div className="relative z-10 w-full max-w-lg space-y-8">
           <div>
             <h1 className="text-center text-4xl font-bold text-[#1F4E79] dark:text-white">
-              Lần đầu đăng nhập
+              First Time Login
             </h1>
             <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-              Vui lòng đổi mật khẩu để bảo mật tài khoản của bạn
+              Please change your password to secure your account
             </p>
           </div>
 
@@ -114,7 +114,7 @@ export default function FirstLoginPage() {
 
               <div>
                 <Label htmlFor="password" className="text-[#1E1E1E] dark:text-gray-300">
-                  Mật khẩu mới
+                  New Password
                 </Label>
                 <TextInput
                   id="password"
@@ -129,7 +129,7 @@ export default function FirstLoginPage() {
 
               <div>
                 <Label htmlFor="confirmPassword" className="text-[#1E1E1E] dark:text-gray-300">
-                  Xác nhận mật khẩu
+                  Confirm Password
                 </Label>
                 <TextInput
                   id="confirmPassword"
@@ -150,7 +150,7 @@ export default function FirstLoginPage() {
                 className="w-full text-white hover:shadow-xl transition-all duration-300"
                 style={{ backgroundColor: "#1F4E79" }}
               >
-                {isSubmitting ? "Đang xử lý..." : "Đổi mật khẩu"}
+                {isSubmitting ? "Processing..." : "Change Password"}
               </Button>
             </div>
             
@@ -160,7 +160,7 @@ export default function FirstLoginPage() {
                     onClick={() => logout()}
                     className="text-sm font-medium text-gray-600 hover:text-[#1F4E79] dark:text-gray-400 dark:hover:text-white transition-colors"
                  >
-                    Đăng xuất
+                    Logout
                  </button>
             </div>
 

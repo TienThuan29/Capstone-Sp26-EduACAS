@@ -11,6 +11,7 @@ export interface QuizQuestion {
   content: string;
   type: 'MULTIPLE_CHOICE' | 'SINGLE_CHOICE' | 'ESSAY';
   textAnswer?: string;
+  imageUrl?: string;
   correctCount: number;
   options: QuizAnswerOption[];
   marks: number;
@@ -79,7 +80,7 @@ export interface PagedClassroomQuizResult {
   hasNextPage: boolean;
 }
 
-export type QuizAttemptStatus = 'INPROGRESS' | 'SUBMITTED' | 'ABANDONED';
+export type QuizAttemptStatus = 'INPROGRESS' | 'SUBMITTED';
 
 export interface QuizAttempt {
   id: string;

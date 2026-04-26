@@ -27,6 +27,27 @@ const userStatsAccentStyles: Record<string, { border: string; iconBg: string; ic
   red: { border: 'border-l-red-500', iconBg: 'bg-red-50 dark:bg-red-500/10', iconColor: 'text-red-600 dark:text-red-400' },
 }
 
+const searchInputTheme = {
+  light: {
+    field: {
+      input: {
+        colors: {
+          gray: 'bg-white border-gray-200 text-gray-900 focus:ring-blue-500'
+        }
+      }
+    }
+  },
+  dark: {
+    field: {
+      input: {
+        colors: {
+          gray: 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500'
+        }
+      }
+    }
+  }
+}
+
 type GrantFormData = {
   email: string
   roleNumber: string
@@ -61,13 +82,21 @@ export default function UsersManagement() {
   const [mounted, setMounted] = useState(false)
   const [users, setUsers] = useState<UserProfile[]>([])
   const [loading, setLoading] = useState(true)
-  const [searchTerm, setSearchTerm] = useState('')
+  const [searchInput, setSearchInput] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
   const [filterRole, setFilterRole] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize] = useState(10)
   const [totalPages, setTotalPages] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
+  const [overallRoleStats, setOverallRoleStats] = useState({
+    total: 0,
+    student: 0,
+    lecturer: 0,
+    admin: 0,
+  })
 
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -89,7 +118,7 @@ export default function UsersManagement() {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await getPagedUsers(currentPage, pageSize, searchTerm, filterRole, filterStatus)
+      const data = await getPagedUsers(currentPage, pageSize, searchQuery, filterRole, filterStatus)
       if (data) {
         setUsers(data.items)
         setTotalPages(data.totalPages)
@@ -100,8 +129,35 @@ export default function UsersManagement() {
       toastRef.current.showError(err.response?.data?.message || 'Cannot load user list')
     } finally {
       setLoading(false)
+      setIsInitialLoad(false)
     }
-  }, [getPagedUsers, currentPage, pageSize, searchTerm, filterRole, filterStatus])
+  }, [getPagedUsers, currentPage, pageSize, searchQuery, filterRole, filterStatus])
+
+  const handleSearch = useCallback((e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setCurrentPage(1)
+    setSearchQuery(searchInput)
+  }, [searchInput])
+
+  useEffect(() => {
+    setCurrentPage(1)
+    setSearchQuery('')
+    setSearchInput('')
+  }, [filterRole, filterStatus])
+
+  const fetchOverallRoleStats = useCallback(async () => {
+    try {
+      const allUsers = await getAllUsers()
+      setOverallRoleStats({
+        total: allUsers.length,
+        student: allUsers.filter((u) => u.role === 'STUDENT').length,
+        lecturer: allUsers.filter((u) => u.role === 'LECTURER').length,
+        admin: allUsers.filter((u) => u.role === 'ADMIN').length,
+      })
+    } catch {
+      // Keep current stats if this request fails to avoid breaking the page.
+    }
+  }, [getAllUsers])
 
   useEffect(() => {
     setMounted(true)
@@ -110,8 +166,9 @@ export default function UsersManagement() {
   useEffect(() => {
     if (mounted) {
       fetchUsers()
+      fetchOverallRoleStats()
     }
-  }, [mounted, fetchUsers])
+  }, [mounted, currentPage, fetchUsers, fetchOverallRoleStats, searchQuery])
 
   const onPageChange = (page: number) => {
     setCurrentPage(page)
@@ -138,6 +195,7 @@ export default function UsersManagement() {
         role: "STUDENT"
       })
       fetchUsers()
+      fetchOverallRoleStats()
     } catch (error: unknown) {
       console.log(error)
       const err = error as { response?: { data?: { message?: string } } }
@@ -169,6 +227,7 @@ export default function UsersManagement() {
       setShowEditModal(false)
       setEditingUser(null)
       fetchUsers()
+      fetchOverallRoleStats()
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } }
       toast.showError(err.response?.data?.message || 'Something went wrong when updating user!')
@@ -179,15 +238,15 @@ export default function UsersManagement() {
 
   if (!mounted) return null
 
-  if (loading) {
+  if (isInitialLoad) {
     return <UserManagementSkeleton />
   }
 
   const statsCardsData = [
-    { title: 'Total', value: totalCount, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
-    { title: 'Student', value: users.filter(u => u.role === 'STUDENT').length, icon: <UserCircleIcon className="h-6 w-6" />, accent: 'green' },
-    { title: 'Lecturer', value: users.filter(u => u.role === 'LECTURER').length, icon: <AcademicCapIcon className="h-6 w-6" />, accent: 'blue' },
-    { title: 'Admin', value: users.filter(u => u.role === 'ADMIN').length, icon: <ShieldCheckIcon className="h-6 w-6" />, accent: 'red' },
+    { title: 'Total', value: overallRoleStats.total, icon: <UserIcon className="h-6 w-6" />, accent: 'purple' },
+    { title: 'Student', value: overallRoleStats.student, icon: <UserCircleIcon className="h-6 w-6" />, accent: 'green' },
+    { title: 'Lecturer', value: overallRoleStats.lecturer, icon: <AcademicCapIcon className="h-6 w-6" />, accent: 'blue' },
+    { title: 'Admin', value: overallRoleStats.admin, icon: <ShieldCheckIcon className="h-6 w-6" />, accent: 'red' },
   ]
 
   const getRoleIcon = (role: string) => {
@@ -284,25 +343,20 @@ export default function UsersManagement() {
 
         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
-            <form className="flex-grow max-w-md flex gap-3" onSubmit={(e) => { e.preventDefault(); fetchUsers(); }}>
+            <form className="grow max-w-md flex gap-3" onSubmit={handleSearch}>
               <div className="flex-1">
                 <TextInput
                   type="text"
                   icon={MagnifyingGlassIcon}
                   placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  theme={{
-                    field: {
-                      input: {
-                        colors: {
-                          gray: `${isDark ? "bg-gray-700 border-gray-600 text-white focus:ring-blue-500" : "bg-white border-gray-200 text-gray-900 focus:ring-blue-500"}`
-                        }
-                      }
-                    }
-                  }}
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
+                  theme={isDark ? searchInputTheme.dark : searchInputTheme.light}
                 />
               </div>
+              <Button type="submit" color="blue" className="cursor-pointer">
+                Search
+              </Button>
             </form>
 
             <div className="flex gap-3">

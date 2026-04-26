@@ -38,11 +38,14 @@ class QuizPracticeService {
     return token;
   }
 
-  static Future<List<ClassroomQuiz>> getClassroomQuizzes(String classroomId) async {
+  static Future<List<ClassroomQuiz>> getClassroomQuizzes(String classroomId, {bool includeDrafts = true}) async {
     try {
       final token = await _token();
+      final endpoint = ApiConfig.classroomQuizzesByClassroomEndpoint(classroomId);
+      final url = includeDrafts ? '$endpoint?includeDrafts=true' : endpoint;
+      
       final response = await ApiNetwork.getWithAuth(
-        endpoint: ApiConfig.classroomQuizzesByClassroomEndpoint(classroomId),
+        endpoint: url,
         token: token,
       );
 
@@ -87,6 +90,7 @@ class QuizPracticeService {
     required int maxOfAttempts,
     String? passcode,
     required String createdBy,
+    String? status,
   }) async {
     try {
       final token = await _token();
@@ -101,6 +105,7 @@ class QuizPracticeService {
           'maxOfAttempts': maxOfAttempts,
           if (passcode != null && passcode.trim().isNotEmpty) 'passcode': passcode.trim(),
           'createdBy': createdBy,
+          if (status != null && status.trim().isNotEmpty) 'status': status.trim(),
         },
       );
 
@@ -205,6 +210,7 @@ class QuizPracticeService {
   static Future<QuizAttemptInfo> startAttempt({
     required String classroomQuizId,
     required String studentId,
+    String? passcode,
   }) async {
     try {
       final token = await _token();
@@ -214,6 +220,7 @@ class QuizPracticeService {
         body: {
           'classroomQuizId': classroomQuizId,
           'studentId': studentId,
+          if (passcode != null) 'passcode': passcode.trim(),
         },
       );
 

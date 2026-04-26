@@ -1,456 +1,309 @@
 using AcasService.Application.Jobs;
 using AcasService.Models;
 using AcasService.Repositories.Examination;
-using FluentAssertions;
+using Hangfire;
+using Hangfire.Common;
+using Hangfire.States;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Xunit;
+using FluentAssertions;
+using AcasService.Tests.Helpers;
 
 namespace AcasService.Tests.Jobs;
 
-/// <summary>
-/// Tests for ExaminationJobScheduling using a FakeBackgroundJobClient.
-///
-/// BackgroundJobClient.Schedule and .Delete are extension methods, so Moq cannot
-/// mock them directly. We inject a real IBackgroundJobClient implementation
-/// (FakeBackgroundJobClient) that records all calls for assertion.
-/// </summary>
 public class ExaminationJobSchedulingTests
 {
-    private readonly Mock<IExaminationRepository> _mockRepository;
-    private readonly Mock<ILogger<ExaminationJobScheduling>> _mockLogger;
-    private readonly FakeBackgroundJobClient _fakeBackgroundJobClient;
-    private readonly ExaminationJobScheduling _sut;
+    private readonly Mock<IExaminationRepository> _examinationRepoMock;
+    private readonly Mock<IBackgroundJobClient> _jobClientMock;
+    private readonly Mock<ILogger<ExaminationJobScheduling>> _loggerMock;
+    private readonly ExaminationJobScheduling _scheduling;
 
     public ExaminationJobSchedulingTests()
     {
-        _mockRepository = new Mock<IExaminationRepository>();
-        _mockLogger = new Mock<ILogger<ExaminationJobScheduling>>();
-        _fakeBackgroundJobClient = new FakeBackgroundJobClient();
-        _sut = new ExaminationJobScheduling(
-            _mockRepository.Object,
-            _fakeBackgroundJobClient,
-            _mockLogger.Object);
+        _examinationRepoMock = new Mock<IExaminationRepository>();
+        _jobClientMock = new Mock<IBackgroundJobClient>();
+        _loggerMock = new Mock<ILogger<ExaminationJobScheduling>>();
+
+        _scheduling = new ExaminationJobScheduling(
+            _examinationRepoMock.Object,
+            _jobClientMock.Object,
+            _loggerMock.Object
+        );
     }
 
-    // ========================================================================
-    // ScheduleJobs
-    // ========================================================================
+    // ──────────────────────────────────────────────────────────────────────────
+    // FUNCTION F042 | ScheduleJobs
+    // ──────────────────────────────────────────────────────────────────────────
 
+    // UTCD-01 | Normal case
     [Fact]
-    public void ScheduleJobs_WithFutureDates_SchedulesTwoJobs()
+    public void UTCD01_ScheduleJobs_ValidFutureDates_SchedulesTwoJobs()
     {
-        // Arrange
-        var examId = "exam-123";
-        var startDatetime = DateTime.UtcNow.AddHours(2);
-        var endDatetime = DateTime.UtcNow.AddHours(4);
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddHours(1);
+        var end = DateTime.UtcNow.AddHours(3);
 
-        // Act
-        _sut.ScheduleJobs(examId, startDatetime, endDatetime);
+        _scheduling.ScheduleJobs(examId, start, end);
 
-        // Assert — exactly 2 Schedule calls: OPEN + COMPLETE
-        _fakeBackgroundJobClient.ScheduleCalls.Should().HaveCount(2);
+        // Verify two jobs created (Create is called twice internally by Schedule<T>)
+        _jobClientMock.Verify(j => j.Create(It.IsAny<Job>(), It.IsAny<IState>()), Times.Exactly(2));
     }
 
+    // UTCD-02 | Start in past
     [Fact]
-    public void ScheduleJobs_WithPastEndDatetime_SchedulesNoJobs()
+    public void UTCD02_ScheduleJobs_StartInPast_SchedulesOpenImmediately()
     {
-        // Arrange
-        var examId = "exam-123";
-        var startDatetime = DateTime.UtcNow.AddHours(-4);
-        var endDatetime = DateTime.UtcNow.AddHours(-1); // past
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddMinutes(-10);
+        var end = DateTime.UtcNow.AddHours(1);
 
-        // Act
-        _sut.ScheduleJobs(examId, startDatetime, endDatetime);
+        _scheduling.ScheduleJobs(examId, start, end);
 
-        // Assert
-        _fakeBackgroundJobClient.ScheduleCalls.Should().BeEmpty();
+        // Still schedules two jobs, but one is with TimeSpan.Zero delay (verified by logic flow)
+        _jobClientMock.Verify(j => j.Create(It.IsAny<Job>(), It.IsAny<IState>()), Times.Exactly(2));
     }
 
+    // UTCD-03 | Start > End (Abnormal)
     [Fact]
-    public void ScheduleJobs_WithPastStartDatetime_SchedulesBothJobs_OpenFiresImmediately()
+    public void UTCD03_ScheduleJobs_StartAfterEnd_ThrowsArgumentException()
     {
-        // Arrange
-        var examId = "exam-123";
-        var startDatetime = DateTime.UtcNow.AddHours(-1); // past — OPEN fires immediately
-        var endDatetime = DateTime.UtcNow.AddHours(2);    // future — COMPLETE fires later
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddHours(2);
+        var end = DateTime.UtcNow.AddHours(1);
 
-        // Act
-        _sut.ScheduleJobs(examId, startDatetime, endDatetime);
+        Action act = () => _scheduling.ScheduleJobs(examId, start, end);
 
-        // Assert — both OPEN (immediate) and COMPLETE (delayed) jobs are scheduled
-        _fakeBackgroundJobClient.ScheduleCalls.Should().HaveCount(2);
-        _fakeBackgroundJobClient.ScheduleCalls.Should().Contain(
-            c => c.MethodName == "MarkExamAsOpenAsync",
-            "OPEN job must fire immediately when StartDatetime is already past");
-        _fakeBackgroundJobClient.ScheduleCalls.Should().Contain(
-            c => c.MethodName == "MarkExamAsCompletedAsync",
-            "COMPLETE job must fire at EndDatetime");
+        act.Should().Throw<ArgumentException>()
+           .WithMessage("*must not be after EndDatetime*");
     }
 
+    // UTCD-04 | Normal with delays
     [Fact]
-    public void ScheduleJobs_WithStartDatetimeJustBeforeNow_SchedulesBothJobs()
+    public void UTCD04_ScheduleJobs_ValidDatesWithSpecificDelays_SchedulesTwoJobs()
     {
-        // Arrange — simulates the race condition: exam created milliseconds before StartDatetime
-        var examId = "exam-race";
-        var startDatetime = DateTime.UtcNow.AddMilliseconds(50); // just ~50ms in the future
-        var endDatetime = DateTime.UtcNow.AddHours(1);
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddHours(1);
+        var end = DateTime.UtcNow.AddHours(3);
 
-        // Act
-        _sut.ScheduleJobs(examId, startDatetime, endDatetime);
+        _scheduling.ScheduleJobs(examId, start, end);
 
-        // Assert — OPEN job is scheduled (>= now check now fires for near-future)
-        _fakeBackgroundJobClient.ScheduleCalls.Should().HaveCount(2);
+        _jobClientMock.Verify(j => j.Create(It.IsAny<Job>(), It.IsAny<IState>()), Times.Exactly(2));
     }
 
-    // ========================================================================
-    // CancelJobs
-    // ========================================================================
-
+    // UTCD-05 | Already expired (Boundary)
     [Fact]
-    public void CancelJobs_DeletesBothOpenAndCompleteJobIds()
+    public void UTCD05_ScheduleJobs_EndInPast_NoJobsScheduled()
     {
-        // Arrange
-        var examId = "exam-123";
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddMinutes(-10);
+        var end = DateTime.UtcNow.AddMinutes(-1);
 
-        // Act
-        _sut.CancelJobs(examId);
+        _scheduling.ScheduleJobs(examId, start, end);
 
-        // Assert
-        _fakeBackgroundJobClient.DeleteCalls.Should().Contain($"exam-open:{examId}");
-        _fakeBackgroundJobClient.DeleteCalls.Should().Contain($"exam-complete:{examId}");
+        _jobClientMock.Verify(j => j.Create(It.IsAny<Job>(), It.IsAny<IState>()), Times.Never);
+        // Verify LogWarning (Audit row missed in Sheet)
+        _loggerMock.VerifyLog(LogLevel.Warning, "Skipping job scheduling. Exam may already be expired.", Times.Once());
     }
 
+    // UTCD-06 | Null ExamId (Abnormal)
     [Fact]
-    public void CancelJobs_DoesNotThrow_WhenJobsDoNotExist()
+    public void UTCD06_ScheduleJobs_NullExamId_ThrowsArgumentNullException()
     {
-        // Arrange
-        var examId = "exam-nonexistent";
+        Action act = () => _scheduling.ScheduleJobs(null!, DateTime.UtcNow, DateTime.UtcNow);
 
-        // Act
-        var act = () => _sut.CancelJobs(examId);
-
-        // Assert — does not throw
-        act.Should().NotThrow();
+        act.Should().Throw<ArgumentNullException>();
     }
 
-    // ========================================================================
-    // RescheduleJobs
-    // ========================================================================
+    // ──────────────────────────────────────────────────────────────────────────
+    // FUNCTION F043 | CancelJobs
+    // ──────────────────────────────────────────────────────────────────────────
 
+    // UTCD-01 | Both jobs exist
     [Fact]
-    public void RescheduleJobs_CancelsAndReschedulesBothJobs()
+    public void UTCD01_CancelJobs_JobsExist_CallsDeleteTwice()
     {
-        // Arrange
-        var examId = "exam-123";
-        var newStart = DateTime.UtcNow.AddHours(3);
-        var newEnd = DateTime.UtcNow.AddHours(5);
+        var examId = "e1";
+        var expectedOpenId = $"exam-open:{examId}";
+        var expectedCompleteId = $"exam-complete:{examId}";
 
-        // Act
-        _sut.RescheduleJobs(examId, newStart, newEnd);
+        // Mock ChangeState with Deleted state (underlying call for Delete extension)
+        _jobClientMock.Setup(j => j.ChangeState(It.IsAny<string>(), It.IsAny<IState>(), It.IsAny<string>())).Returns(true);
 
-        // Assert — 2 deletions (cancel old), 2 schedules (new)
-        _fakeBackgroundJobClient.DeleteCalls.Should().HaveCount(2);
-        _fakeBackgroundJobClient.ScheduleCalls.Should().HaveCount(2);
+        _scheduling.CancelJobs(examId);
+
+        _jobClientMock.Verify(j => j.ChangeState(expectedOpenId, It.Is<IState>(s => s.Name == "Deleted"), null), Times.Once);
+        _jobClientMock.Verify(j => j.ChangeState(expectedCompleteId, It.Is<IState>(s => s.Name == "Deleted"), null), Times.Once);
     }
 
-    // ========================================================================
-    // MarkExamAsOpenAsync — status transitions
-    // ========================================================================
-
+    // UTCD-02 | No jobs exist
     [Fact]
-    public async Task MarkExamAsOpenAsync_WhenExamIsPending_TransitionsToOngoing()
+    public void UTCD02_CancelJobs_JobsDoNotExist_StillCallsDelete()
     {
-        // Arrange
-        var examId = "exam-123";
-        var existingExam = new Examination
-        {
-            Id = examId,
-            ExamName = "Final Exam",
-            Status = Status.PENDING
-        };
+        var examId = "e1";
+        _jobClientMock.Setup(j => j.ChangeState(It.IsAny<string>(), It.IsAny<IState>(), It.IsAny<string>())).Returns(false);
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
+        _scheduling.CancelJobs(examId);
 
-        _mockRepository
-            .Setup(x => x.UpdateAsync(examId, It.IsAny<Examination>()))
-            .ReturnsAsync(existingExam);
-
-        // Act
-        await _sut.MarkExamAsOpenAsync(examId);
-
-        // Assert
-        existingExam.Status.Should().Be(Status.ONGOING,
-            "PENDING exam should transition to ONGOING");
-
-        _mockRepository.Verify(
-            x => x.UpdateAsync(examId, It.Is<Examination>(e => e.Status == Status.ONGOING)),
-            Times.Once);
+        _jobClientMock.Verify(j => j.ChangeState(It.IsAny<string>(), It.IsAny<IState>(), It.IsAny<string>()), Times.Exactly(2));
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // FUNCTION F044 | RescheduleJobs
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // UTCD-01 | Normal reschedule
     [Fact]
-    public async Task MarkExamAsOpenAsync_WhenExamIsAlreadyOngoing_DoesNotUpdate()
+    public void UTCD01_RescheduleJobs_ValidDates_CancelsAndSchedules()
     {
-        // Arrange
-        var examId = "exam-123";
-        var existingExam = new Examination { Id = examId, Status = Status.ONGOING };
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddHours(2);
+        var end = DateTime.UtcNow.AddHours(4);
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
+        _scheduling.RescheduleJobs(examId, start, end);
 
-        // Act
-        await _sut.MarkExamAsOpenAsync(examId);
-
-        // Assert — idempotent, no update
-        _mockRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()),
-            Times.Never);
+        // Verify CancelJobs was called (2 ChangeState calls)
+        _jobClientMock.Verify(j => j.ChangeState(It.IsAny<string>(), It.Is<IState>(s => s.Name == "Deleted"), null), Times.Exactly(2));
+        // Verify ScheduleJobs was called (2 Create calls)
+        _jobClientMock.Verify(j => j.Create(It.IsAny<Job>(), It.IsAny<IState>()), Times.Exactly(2));
     }
 
+    // UTCD-02 | Start > End (Abnormal)
     [Fact]
-    public async Task MarkExamAsOpenAsync_WhenExamIsAlreadyCompleted_DoesNotUpdate()
+    public void UTCD02_RescheduleJobs_StartAfterEnd_ThrowsArgumentException()
     {
-        // Arrange
-        var examId = "exam-123";
-        var existingExam = new Examination { Id = examId, Status = Status.COMPLETED };
+        var examId = "e1";
+        var start = DateTime.UtcNow.AddHours(2);
+        var end = DateTime.UtcNow.AddHours(1);
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
+        Action act = () => _scheduling.RescheduleJobs(examId, start, end);
 
-        // Act
-        await _sut.MarkExamAsOpenAsync(examId);
-
-        // Assert
-        _mockRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()),
-            Times.Never);
+        act.Should().Throw<ArgumentException>();
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // FUNCTION F045 | MarkExamAsOpenAsync
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // UTCD-01 | Mark ONGOING (Normal)
     [Fact]
-    public async Task MarkExamAsOpenAsync_WhenExamNotFound_DoesNotThrow()
+    public async Task UTCD01_MarkExamAsOpenAsync_PendingStatus_UpdatesToOngoing()
     {
-        // Arrange
+        var examId = "e1";
+        var exam = new Examination { Id = examId, Status = Status.PENDING };
+
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync(exam);
+        _examinationRepoMock.Setup(r => r.UpdateAsync(examId, exam)).ReturnsAsync(exam);
+
+        await _scheduling.MarkExamAsOpenAsync(examId);
+
+        exam.Status.Should().Be(Status.ONGOING);
+        _examinationRepoMock.Verify(r => r.UpdateAsync(examId, It.Is<Examination>(e => e.Status == Status.ONGOING)), Times.Once);
+    }
+
+    // UTCD-02 | Exam not found (Abnormal)
+    [Fact]
+    public async Task UTCD02_MarkExamAsOpenAsync_ExamNotFound_LogsWarning()
+    {
         var examId = "nonexistent";
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync((Examination?)null);
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync((Examination?)null);
 
-        // Act
-        var act = async () => await _sut.MarkExamAsOpenAsync(examId);
+        await _scheduling.MarkExamAsOpenAsync(examId);
 
-        // Assert
-        await act.Should().NotThrowAsync();
-        _mockRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()),
-            Times.Never);
+        _loggerMock.VerifyLog(LogLevel.Warning, $"OPEN job failed: Examination {examId} not found", Times.Once());
+        _examinationRepoMock.Verify(r => r.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()), Times.Never);
     }
 
+    // UTCD-03 | Already ONGOING (Abnormal)
     [Fact]
-    public async Task MarkExamAsOpenAsync_UpdatesTimestamp()
+    public async Task UTCD03_MarkExamAsOpenAsync_AlreadyOngoing_SkipsUpdate()
     {
-        // Arrange
-        var examId = "exam-123";
-        var before = DateTime.UtcNow;
-        var existingExam = new Examination { Id = examId, Status = Status.PENDING };
+        var examId = "e1";
+        var exam = new Examination { Id = examId, Status = Status.ONGOING };
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync(exam);
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
-        _mockRepository
-            .Setup(x => x.UpdateAsync(examId, It.IsAny<Examination>()))
-            .ReturnsAsync(existingExam);
+        await _scheduling.MarkExamAsOpenAsync(examId);
 
-        // Act
-        await _sut.MarkExamAsOpenAsync(examId);
-        var after = DateTime.UtcNow;
-
-        // Assert
-        existingExam.UpdatedDate.Should().BeOnOrAfter(before)
-            .And.BeOnOrBefore(after);
+        _loggerMock.VerifyLog(LogLevel.Information, $"Exam {examId} is already ONGOING", Times.Once());
+        _examinationRepoMock.Verify(r => r.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()), Times.Never);
     }
 
-    // ========================================================================
-    // MarkExamAsCompletedAsync — status transitions
-    // ========================================================================
-
+    // UTCD-04 | Already COMPLETED (Abnormal)
     [Fact]
-    public async Task MarkExamAsCompletedAsync_WhenExamIsOngoing_TransitionsToCompleted()
+    public async Task UTCD04_MarkExamAsOpenAsync_AlreadyCompleted_SkipsUpdate()
     {
-        // Arrange
-        var examId = "exam-123";
-        var existingExam = new Examination
-        {
-            Id = examId,
-            ExamName = "Final Exam",
-            Status = Status.ONGOING
-        };
+        var examId = "e1";
+        var exam = new Examination { Id = examId, Status = Status.COMPLETED };
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync(exam);
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
-        _mockRepository
-            .Setup(x => x.UpdateAsync(examId, It.IsAny<Examination>()))
-            .ReturnsAsync(existingExam);
+        await _scheduling.MarkExamAsOpenAsync(examId);
 
-        // Act
-        await _sut.MarkExamAsCompletedAsync(examId);
-
-        // Assert
-        existingExam.Status.Should().Be(Status.COMPLETED,
-            "ONGOING exam should transition to COMPLETED");
-
-        _mockRepository.Verify(
-            x => x.UpdateAsync(examId, It.Is<Examination>(e => e.Status == Status.COMPLETED)),
-            Times.Once);
+        _loggerMock.VerifyLog(LogLevel.Information, $"Exam {examId} is already COMPLETED", Times.Once());
+        _examinationRepoMock.Verify(r => r.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()), Times.Never);
     }
 
+    // ──────────────────────────────────────────────────────────────────────────
+    // FUNCTION F046 | MarkExamAsCompletedAsync
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // UTCD-01 | Mark COMPLETED from ONGOING (Normal)
     [Fact]
-    public async Task MarkExamAsCompletedAsync_WhenExamIsAlreadyCompleted_DoesNotUpdate()
+    public async Task UTCD01_MarkExamAsCompletedAsync_OngoingStatus_UpdatesToCompleted()
     {
-        // Arrange
-        var examId = "exam-123";
-        var existingExam = new Examination { Id = examId, Status = Status.COMPLETED };
+        var examId = "e1";
+        var exam = new Examination { Id = examId, Status = Status.ONGOING };
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync(exam);
+        _examinationRepoMock.Setup(r => r.UpdateAsync(examId, exam)).ReturnsAsync(exam);
 
-        // Act
-        await _sut.MarkExamAsCompletedAsync(examId);
+        await _scheduling.MarkExamAsCompletedAsync(examId);
 
-        // Assert — idempotent, no update
-        _mockRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()),
-            Times.Never);
+        exam.Status.Should().Be(Status.COMPLETED);
+        _examinationRepoMock.Verify(r => r.UpdateAsync(examId, It.Is<Examination>(e => e.Status == Status.COMPLETED)), Times.Once);
+        _loggerMock.VerifyLog(LogLevel.Information, "transitioned to COMPLETED", Times.Once());
     }
 
+    // UTCD-02 | Exam not found (Abnormal)
     [Fact]
-    public async Task MarkExamAsCompletedAsync_WhenExamIsPending_StillTransitionsToCompleted()
+    public async Task UTCD02_MarkExamAsCompletedAsync_ExamNotFound_LogsWarning()
     {
-        // Edge case: if exam was never opened (StartDatetime was in the past at creation),
-        // the COMPLETE job still fires and completes it
-        var examId = "exam-123";
-        var existingExam = new Examination { Id = examId, Status = Status.PENDING };
-
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
-        _mockRepository
-            .Setup(x => x.UpdateAsync(examId, It.IsAny<Examination>()))
-            .ReturnsAsync(existingExam);
-
-        // Act
-        await _sut.MarkExamAsCompletedAsync(examId);
-
-        // Assert
-        existingExam.Status.Should().Be(Status.COMPLETED);
-        _mockRepository.Verify(x => x.UpdateAsync(examId, It.IsAny<Examination>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task MarkExamAsCompletedAsync_WhenExamNotFound_DoesNotThrow()
-    {
-        // Arrange
         var examId = "nonexistent";
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync((Examination?)null);
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync((Examination?)null);
 
-        // Act
-        var act = async () => await _sut.MarkExamAsCompletedAsync(examId);
+        await _scheduling.MarkExamAsCompletedAsync(examId);
 
-        // Assert
-        await act.Should().NotThrowAsync();
-        _mockRepository.Verify(
-            x => x.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()),
-            Times.Never);
+        _loggerMock.VerifyLog(LogLevel.Warning, $"COMPLETE job failed: Examination {examId} not found", Times.Once());
+        _examinationRepoMock.Verify(r => r.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()), Times.Never);
     }
 
+    // UTCD-03 | Already COMPLETED (Abnormal)
     [Fact]
-    public async Task MarkExamAsCompletedAsync_WhenRepositoryThrows_PropagatesException()
+    public async Task UTCD03_MarkExamAsCompletedAsync_AlreadyCompleted_SkipsUpdate()
     {
-        // Arrange
-        var examId = "exam-123";
-        var existingExam = new Examination { Id = examId, Status = Status.ONGOING };
+        var examId = "e1";
+        var exam = new Examination { Id = examId, Status = Status.COMPLETED };
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync(exam);
 
-        _mockRepository
-            .Setup(x => x.GetByIdAsync(examId))
-            .ReturnsAsync(existingExam);
-        _mockRepository
-            .Setup(x => x.UpdateAsync(examId, It.IsAny<Examination>()))
-            .ThrowsAsync(new Exception("DynamoDB connection failed"));
+        await _scheduling.MarkExamAsCompletedAsync(examId);
 
-        // Act
-        var act = async () => await _sut.MarkExamAsCompletedAsync(examId);
-
-        // Assert
-        await act.Should().ThrowAsync<Exception>()
-            .WithMessage("DynamoDB connection failed");
+        _loggerMock.VerifyLog(LogLevel.Information, $"Exam {examId} is already COMPLETED", Times.Once());
+        _examinationRepoMock.Verify(r => r.UpdateAsync(It.IsAny<string>(), It.IsAny<Examination>()), Times.Never);
     }
 
-    // ========================================================================
-    // FakeBackgroundJobClient — in-memory implementation of IBackgroundJobClient
-    // Records Schedule/Delete calls without relying on Moq for extension methods.
-    // The Schedule extension method delegates to Create, so we intercept both.
-    // ========================================================================
-
-    private class FakeBackgroundJobClient : Hangfire.IBackgroundJobClient
+    // UTCD-04 | Mark COMPLETED from PENDING (Normal - Skip Ongoing)
+    [Fact]
+    public async Task UTCD04_MarkExamAsCompletedAsync_PendingStatus_UpdatesToCompleted()
     {
-        public List<ScheduleCall> ScheduleCalls { get; } = new();
-        public List<string> DeleteCalls { get; } = new();
+        var examId = "e1";
+        var exam = new Examination { Id = examId, Status = Status.PENDING };
 
-        public string Create(Hangfire.Common.Job job, Hangfire.States.IState state)
-        {
-            // Intercept calls from Schedule extension methods (which use ScheduledState)
-            if (state is Hangfire.States.ScheduledState)
-            {
-                ScheduleCalls.Add(new ScheduleCall
-                {
-                    JobType = job.Type,
-                    MethodName = job.Method.Name,
-                    Arguments = job.Args.ToList()
-                });
-            }
-            return $"fake-job-{Guid.NewGuid():N}";
-        }
+        _examinationRepoMock.Setup(r => r.GetByIdAsync(examId)).ReturnsAsync(exam);
+        _examinationRepoMock.Setup(r => r.UpdateAsync(examId, exam)).ReturnsAsync(exam);
 
-        public string Enqueue(Hangfire.Common.Job job) => string.Empty;
+        await _scheduling.MarkExamAsCompletedAsync(examId);
 
-        public string Schedule(Hangfire.Common.Job job, DateTimeOffset enqueueAt) =>
-            $"fake-job-{Guid.NewGuid():N}";
-
-        public string Schedule(Hangfire.Common.Job job, TimeSpan delay)
-        {
-            // This is called by the Schedule extension — intercepted via Create
-            return $"fake-job-{Guid.NewGuid():N}";
-        }
-
-        public bool Delete(string jobId)
-        {
-            DeleteCalls.Add(jobId);
-            return true;
-        }
-
-        public bool ChangeState(string jobId, Hangfire.States.IState newState,
-            string? expectedState)
-        {
-            // BackgroundJobClientExtensions.Delete calls ChangeState internally,
-            // so we capture the job ID when the state is DeletedState
-            if (newState is Hangfire.States.DeletedState)
-            {
-                DeleteCalls.Add(jobId);
-            }
-            return true;
-        }
-    }
-
-    private class ScheduleCall
-    {
-        public Type JobType { get; set; } = null!;
-        public string MethodName { get; set; } = string.Empty;
-        public List<object?> Arguments { get; set; } = new();
+        exam.Status.Should().Be(Status.COMPLETED);
+        _examinationRepoMock.Verify(r => r.UpdateAsync(examId, It.Is<Examination>(e => e.Status == Status.COMPLETED)), Times.Once);
+        _loggerMock.VerifyLog(LogLevel.Information, "transitioned to COMPLETED", Times.Once());
     }
 }

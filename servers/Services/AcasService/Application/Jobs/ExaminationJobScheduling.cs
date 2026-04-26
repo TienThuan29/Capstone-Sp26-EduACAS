@@ -53,9 +53,17 @@ public class ExaminationJobScheduling : IExaminationJobScheduling
 
     public void ScheduleJobs(string examId, DateTime startDatetime, DateTime endDatetime)
     {
+        if (string.IsNullOrWhiteSpace(examId))
+            throw new ArgumentNullException(nameof(examId));
+
         // Normalize to UTC kind so all comparisons are consistent
         var startUtc = EnsureUtc(startDatetime);
         var endUtc = EnsureUtc(endDatetime);
+
+        if (startUtc > endUtc)
+            throw new ArgumentException(
+                $"StartDatetime ({startUtc}) must not be after EndDatetime ({endUtc}).",
+                nameof(startDatetime));
 
         // Safety guard: do not schedule jobs for past exams
         var now = DateTime.UtcNow;

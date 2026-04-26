@@ -104,12 +104,12 @@ export default function LandingPage() {
 
               <div className="space-y-3">
                 <h2 className="text-3xl font-semibold" style={{ color: "#1F4E79" }}>
-                  Nền tảng E-Learning
+                  E-Learning Platform
                   <br />
-                  <span style={{ color: "#C9A24D" }}>Lập trình chuyên nghiệp</span>
+                  <span style={{ color: "#C9A24D" }}>Professional Programming</span>
                 </h2>
                 <p className="text-lg opacity-80" style={{ color: "#1E1E1E" }}>
-                  Kết nối giảng viên và sinh viên trong việc giảng dạy, học tập và thực hành các ngôn ngữ lập trình
+                  Connecting lecturers and students for teaching, learning, and practicing programming languages
                 </p>
               </div>
 
@@ -118,18 +118,18 @@ export default function LandingPage() {
                   className="px-10 py-4 rounded-lg text-white font-bold text-lg hover:scale-105 transition-transform"
                   style={{ backgroundColor: "#1F4E79" }}
                 >
-                  Bắt đầu →
+                  Get Started →
                 </button>
                 <span className="font-mono text-sm opacity-60" style={{ color: "#1F4E79" }}>
-                  {"// Miễn phí tham gia"}
+                  {"// Free to join"}
                 </span>
               </div>
 
               <div className="grid grid-cols-3 gap-4 pt-6">
                 {[
-                  { number: "4+", label: "Ngôn ngữ" },
-                  { number: "∞", label: "Bài tập" },
-                  { number: "24/7", label: "Hỗ trợ" },
+                  { number: "4+", label: "Languages" },
+                  { number: "∞", label: "Exercises" },
+                  { number: "24/7", label: "Support" },
                 ].map((stat, index) => (
                   <div key={index}>
                     <div className="text-3xl font-bold font-mono" style={{ color: "#C9A24D" }}>
@@ -154,13 +154,13 @@ export default function LandingPage() {
               className="inline-block mb-3 px-5 py-2 rounded-full text-sm font-semibold"
               style={{ backgroundColor: "#F5F7FA", color: "#C9A24D" }}
             >
-              ✨ TÍNH NĂNG NỔI BẬT
+              KEY FEATURES
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#1F4E79" }}>
-              Tính năng nổi bật
+              Featured Features
             </h2>
             <p className="text-lg max-w-2xl mx-auto" style={{ color: "#1E1E1E" }}>
-              Mọi thứ bạn cần cho việc giảng dạy và học tập lập trình
+              Everything you need for teaching and learning programming
             </p>
           </div>
 
@@ -168,39 +168,39 @@ export default function LandingPage() {
             {[
               {
                 icon: <UsersIcon />,
-                title: "Quản lý lớp học",
+                title: "Classroom Management",
                 description:
-                  "Giảng viên dễ dàng tạo và quản lý các lớp học, thêm sinh viên vào lớp. Nội dung chi tiết sẽ được bổ sung sau.",
+                  "Lecturers can easily create and manage classrooms, add students to classes. More details will be added soon.",
               },
               {
                 icon: <BookOpenIcon />,
-                title: "Tài liệu học tập",
+                title: "Learning Materials",
                 description:
-                  "Chia sẻ tài liệu, slide bài giảng và tài nguyên học tập cho sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+                  "Share documents, lecture slides, and learning resources with students. More details will be added soon.",
               },
               {
                 icon: <ClipboardIcon />,
-                title: "Giao bài tập",
+                title: "Assignment Management",
                 description:
-                  "Giảng viên tạo và phân công bài tập lập trình cho sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+                  "Lecturers create and assign programming assignments to students. More details will be added soon.",
               },
               {
                 icon: <FileCodeIcon />,
-                title: "Nộp bài trực tuyến",
+                title: "Online Submission",
                 description:
-                  "Sinh viên nộp bài tập code trực tiếp trên hệ thống. Nội dung chi tiết sẽ được bổ sung sau.",
+                  "Students submit code assignments directly on the platform. More details will be added soon.",
               },
               {
                 icon: <CheckCircleIcon />,
-                title: "Chấm điểm tự động",
+                title: "Auto Grading",
                 description:
-                  "Hệ thống tự động kiểm tra và chấm điểm bài tập của sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+                  "The system automatically checks and grades student assignments. More details will be added soon.",
               },
               {
                 icon: <BarChartIcon />,
-                title: "Theo dõi tiến độ",
+                title: "Progress Tracking",
                 description:
-                  "Giảng viên theo dõi tiến độ học tập của từng sinh viên. Nội dung chi tiết sẽ được bổ sung sau.",
+                  "Lecturers track the learning progress of each student. More details will be added soon.",
               },
             ].map((feature, index) => (
               <Card
@@ -236,21 +236,21 @@ export default function LandingPage() {
               className="inline-block mb-3 px-5 py-2 rounded-full text-sm font-semibold"
               style={{ backgroundColor: "#FFFFFF", color: "#1F4E79" }}
             >
-              📊 THỐNG KÊ
+              STATISTICS
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#1F4E79" }}>
-              Cộng đồng của chúng tôi
+              Our Community
             </h2>
             <p className="text-lg" style={{ color: "#1E1E1E" }}>
-              Tham gia nền tảng đang phát triển
+              Join the growing platform
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
-              { number: "0", label: "Sinh viên hoạt động", sublabel: "Chưa có người dùng" },
-              { number: "0", label: "Giảng viên", sublabel: "Chưa có người dùng" },
-              { number: "0", label: "Lớp học", sublabel: "Chưa có người dùng" },
+              { number: "0", label: "Active Students", sublabel: "No users yet" },
+              { number: "0", label: "Lecturers", sublabel: "No users yet" },
+              { number: "0", label: "Classrooms", sublabel: "No users yet" },
             ].map((stat, index) => (
               <Card
                 key={index}
@@ -280,13 +280,13 @@ export default function LandingPage() {
               className="inline-block mb-3 px-5 py-2 rounded-full text-sm font-semibold"
               style={{ backgroundColor: "#F5F7FA", color: "#C9A24D" }}
             >
-              💻 NGÔN NGỮ LẬP TRÌNH
+              PROGRAMMING LANGUAGES
             </div>
             <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ color: "#1F4E79" }}>
-              Các ngôn ngữ lập trình
+              Programming Languages
             </h2>
             <p className="text-lg max-w-2xl mx-auto" style={{ color: "#1E1E1E" }}>
-              Khám phá các bài tập lập trình và thử thách code
+              Explore programming exercises and code challenges
             </p>
           </div>
 
@@ -294,26 +294,26 @@ export default function LandingPage() {
             {[
               {
                 img: PYTHON_CODE_IMG,
-                title: "Lập trình Python",
-                desc: "Học Python qua các bài tập thực hành về cấu trúc dữ liệu, thuật toán và ứng dụng thực tế. Nội dung chi tiết sẽ được bổ sung sau.",
+                title: "Python Programming",
+                desc: "Learn Python through practical exercises on data structures, algorithms, and real-world applications. More details will be added soon.",
                 badge: "Python",
               },
               {
                 img: JAVASCRIPT_CODE_IMG,
                 title: "JavaScript",
-                desc: "Thành thạo JavaScript với các bài tập tương tác về ES6+, lập trình bất đồng bộ và thao tác DOM. Nội dung chi tiết sẽ được bổ sung sau.",
+                desc: "Master JavaScript with interactive exercises on ES6+, asynchronous programming, and DOM manipulation. More details will be added soon.",
                 badge: "JavaScript",
               },
               {
                 img: JAVA_CODE_IMG,
-                title: "Phát triển Java",
-                desc: "Tìm hiểu Java với các bài tập về OOP, cấu trúc dữ liệu và phát triển ứng dụng doanh nghiệp. Nội dung chi tiết sẽ được bổ sung sau.",
+                title: "Java Development",
+                desc: "Explore Java with exercises on OOP, data structures, and enterprise application development. More details will be added soon.",
                 badge: "Java",
               },
               {
                 img: SQL_CODE_IMG,
-                title: "SQL & Cơ sở dữ liệu",
-                desc: "Thực hành các câu truy vấn SQL, thiết kế cơ sở dữ liệu và làm việc hiệu quả với cơ sở dữ liệu quan hệ. Nội dung chi tiết sẽ được bổ sung sau.",
+                title: "SQL & Databases",
+                desc: "Practice SQL queries, design databases, and work effectively with relational databases. More details will be added soon.",
                 badge: "SQL",
               },
             ].map((item, index) => (
@@ -358,12 +358,12 @@ export default function LandingPage() {
               <h4 className="text-lg font-bold mb-4 text-white font-mono">
                 <span style={{ color: "#C9A24D" }}>{"<"}</span>Edu-ACAS<span style={{ color: "#C9A24D" }}>{"/>"}</span>
               </h4>
-              <p className="text-white opacity-80 text-sm">
-                Nền tảng học lập trình qua các bài tập tương tác và thử thách code.
-              </p>
+                <p className="text-white opacity-80 text-sm">
+                  A platform for learning programming through interactive exercises and code challenges.
+                </p>
             </div>
             <div>
-              <h4 className="text-base font-bold mb-4 text-white">Ngôn ngữ</h4>
+              <h4 className="text-base font-bold mb-4 text-white">Languages</h4>
               <ul className="space-y-2 text-white opacity-80 text-sm">
                 <li>
                   <a href="#" className="hover:opacity-100 transition-opacity">
@@ -388,16 +388,16 @@ export default function LandingPage() {
               </ul>
             </div>
             <div>
-              <h4 className="text-base font-bold mb-4 text-white">Hỗ trợ</h4>
+              <h4 className="text-base font-bold mb-4 text-white">Support</h4>
               <ul className="space-y-2 text-white opacity-80 text-sm">
                 <li>
                   <a href="#" className="hover:opacity-100 transition-opacity">
-                    → Tài liệu
+                    → Documentation
                   </a>
                 </li>
                 <li>
                   <a href="#" className="hover:opacity-100 transition-opacity">
-                    → Hướng dẫn
+                    → Guides
                   </a>
                 </li>
                 <li>
@@ -407,17 +407,17 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <a href="#" className="hover:opacity-100 transition-opacity">
-                    → Liên hệ
+                    → Contact
                   </a>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="text-base font-bold mb-4 text-white">Giới thiệu</h4>
+              <h4 className="text-base font-bold mb-4 text-white">About</h4>
               <ul className="space-y-2 text-white opacity-80 text-sm">
                 <li>
                   <a href="#" className="hover:opacity-100 transition-opacity">
-                    → Về chúng tôi
+                    → About Us
                   </a>
                 </li>
                 <li>
@@ -427,7 +427,7 @@ export default function LandingPage() {
                 </li>
                 <li>
                   <a href="#" className="hover:opacity-100 transition-opacity">
-                    → Cộng đồng
+                    → Community
                   </a>
                 </li>
               </ul>
@@ -435,7 +435,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(201, 162, 77, 0.3)" }}>
-            <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Nền tảng học lập trình chuyên nghiệp.</p>
+            <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Professional Programming Learning Platform.</p>
           </div>
         </div>
       </footer>

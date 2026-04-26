@@ -43,6 +43,12 @@ public static class DynamoMapper
             testResults = JsonSerializer.Deserialize<List<Models.TestResult>>(testResultsVal.S) ?? [];
         }
 
+        var keystrokeLogs = new List<Models.KeystrokeLog>();
+        if (item.TryGetValue("keystrokeLogs", out var keystrokeLogsVal) && !string.IsNullOrEmpty(keystrokeLogsVal.S))
+        {
+            keystrokeLogs = JsonSerializer.Deserialize<List<Models.KeystrokeLog>>(keystrokeLogsVal.S) ?? [];
+        }
+
         return new Models.Submission
         {
             Id = item["id"].S,
@@ -65,7 +71,8 @@ public static class DynamoMapper
             LecturerFeedback = item.ContainsKey("lecturerFeedback") ? item["lecturerFeedback"].S : string.Empty,
             AiFeedback = item.ContainsKey("aiFeedback") ? item["aiFeedback"].S : string.Empty,
             UpdatedDate = DateTime.Parse(item["updatedDate"].S),
-            TestResults = testResults
+            TestResults = testResults,
+            KeystrokeLogs = keystrokeLogs
         };
     }
 

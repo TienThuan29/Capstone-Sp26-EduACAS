@@ -13,6 +13,8 @@ public class UserRequestProducer
     private const string BatchRequestQueueName = "user.getbatch.request";
     private const string ResponseQueueName = "user.get.response";
 
+    protected UserRequestProducer() { }
+
     public UserRequestProducer(
         RabbitMqHostedService rabbitMqService,
         ILogger<UserRequestProducer> logger)
@@ -22,7 +24,7 @@ public class UserRequestProducer
         InitializeQueues();
     }
 
-    private void InitializeQueues()
+    protected virtual void InitializeQueues()
     {
         var channel = _rabbitMqService.Channel;
         
@@ -52,11 +54,19 @@ public class UserRequestProducer
             arguments: null
         );
 
-        _logger.LogInformation("RabbitMQ queues initialized: {RequestQueue}, {ResponseQueue}, {BatchRequestQueue}", 
-            RequestQueueName, ResponseQueueName, BatchRequestQueueName);
+        channel.QueueDeclare(
+            queue: AllUsersRequestQueueName,
+            durable: true,
+            exclusive: false,
+            autoDelete: false,
+            arguments: null
+        );
+
+        _logger.LogInformation("RabbitMQ queues initialized: {RequestQueue}, {ResponseQueue}, {BatchRequestQueue}, {AllUsersRequestQueue}",
+            RequestQueueName, ResponseQueueName, BatchRequestQueueName, AllUsersRequestQueueName);
     }
 
-    public async Task<UserProfileResponse?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    public virtual async Task<UserProfileResponse?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         var channel = _rabbitMqService.Channel;
         var correlationId = Guid.NewGuid().ToString();
@@ -158,7 +168,7 @@ public class UserRequestProducer
         }
     }
 
-    public async Task<List<UserProfileResponse>> GetUsersByIdsAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
+    public virtual async Task<List<UserProfileResponse>> GetUsersByIdsAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
     {
         var idList = userIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
         if (idList.Count == 0)
@@ -241,6 +251,91 @@ public class UserRequestProducer
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error sending user batch request");
+            return new List<UserProfileResponse>();
+        }
+    }
+    private const string AllUsersRequestQueueName = "user.getall.request";
+    private const string AllUsersResponseQueueName = "user.getall.response";
+
+    public virtual async Task<List<UserProfileResponse>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    {
+        var channel = _rabbitMqService.Channel;
+        var correlationId = Guid.NewGuid().ToString();
+        var responseQueueName = $"{AllUsersResponseQueueName}.{correlationId}";
+
+        try
+        {
+            channel.QueueDeclare(
+                queue: responseQueueName,
+                durable: false,
+                exclusive: true,
+                autoDelete: true,
+                arguments: null
+            );
+
+            var responseReceived = new TaskCompletionSource<List<UserProfileResponse>>();
+            var consumer = new EventingBasicConsumer(channel);
+
+            consumer.Received += (model, ea) =>
+            {
+                try
+                {
+                    if (ea.BasicProperties.CorrelationId == correlationId)
+                    {
+                        var body = ea.Body.ToArray();
+                        var message = Encoding.UTF8.GetString(body);
+                        var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                        var list = JsonSerializer.Deserialize<List<UserProfileResponse>>(message, options)
+                            ?? new List<UserProfileResponse>();
+                        responseReceived.SetResult(list);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error processing all users response");
+                    responseReceived.SetResult(new List<UserProfileResponse>());
+                }
+            };
+
+            var consumerTag = channel.BasicConsume(
+                queue: responseQueueName,
+                autoAck: true,
+                consumer: consumer
+            );
+
+            var requestMessage = JsonSerializer.Serialize(new { });
+            var requestBody = Encoding.UTF8.GetBytes(requestMessage);
+
+            var properties = channel.CreateBasicProperties();
+            properties.CorrelationId = correlationId;
+            properties.ReplyTo = responseQueueName;
+            properties.Persistent = true;
+
+            channel.BasicPublish(
+                exchange: "",
+                routingKey: AllUsersRequestQueueName,
+                basicProperties: properties,
+                body: requestBody
+            );
+
+            using var timeoutCts = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeoutCts.Token);
+            try
+            {
+                var response = await responseReceived.Task.WaitAsync(linkedCts.Token);
+                channel.BasicCancel(consumerTag);
+                return response;
+            }
+            catch (OperationCanceledException)
+            {
+                channel.BasicCancel(consumerTag);
+                _logger.LogWarning("Get all users request timed out. CorrelationId={CorrelationId}", correlationId);
+                return new List<UserProfileResponse>();
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error sending get all users request");
             return new List<UserProfileResponse>();
         }
     }

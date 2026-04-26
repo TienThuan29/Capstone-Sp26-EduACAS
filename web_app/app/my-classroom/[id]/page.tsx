@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, Suspense, useRef } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "flowbite-react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -15,30 +15,35 @@ import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import {
   ExamsTab,
   MaterialsTab,
-  AssignmentsTab,
+  // AssignmentsTab,
   PractiseTab,
   OverviewTab,
   SlotTab,
   DiscussionTab,
   StudentDashboardTab,
   QuizzesTab,
+  AcademicWarningsTab,
+  CompletedExamsTab,
 } from "@/app/my-classroom/tabs";
 import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
+import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 
 function ClassroomContent() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { getClassroomById, leaveClassroom, recordClassroomAccess } = useClassroom();
-  const { getExaminationsByClassId } = useExamination();
+  const { getExaminationsByClassIdAndMode } = useExamination();
   const { user } = useAuth();
 
   const activeTab = searchParams.get("tab") || "overview";
 
   const [classroom, setClassroom] = useState<ClassroomDetail | null>(null);
   const [examinations, setExaminations] = useState<Examination[]>([]);
+  const [practiseExaminations, setPractiseExaminations] = useState<Examination[]>([]);
   const [loading, setLoading] = useState(true);
   const [examsLoading, setExamsLoading] = useState(false);
+  const [practiseLoading, setPractiseLoading] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
   const [leaveLoading, setLeaveLoading] = useState(false);
   const [quizDetailBack, setQuizDetailBack] = useState<(() => void) | null>(null);
@@ -59,7 +64,7 @@ function ClassroomContent() {
       router.push("/my-classroom");
     } catch (error) {
       console.error("Failed to leave class:", error);
-      alert("Rời lớp học thất bại. Vui lòng thử lại sau.");
+      alert("Failed to leave class. Please try again later.");
     } finally {
       setLeaveLoading(false);
     }
@@ -95,23 +100,33 @@ function ClassroomContent() {
 
   useEffect(() => {
     const fetchExaminations = async () => {
-      if ((activeTab === "exams" || activeTab === "slots") && classId) {
+      if (activeTab === "exams" && classId) {
         try {
-          if (activeTab === "exams") {
-            setExamsLoading(true);
-            const data = await getExaminationsByClassId(classId);
-            setExaminations(data);
-          }
+          setExamsLoading(true);
+          const data = await getExaminationsByClassIdAndMode(classId, "EXAMINATION");
+          setExaminations(data);
         } catch (error) {
-          console.error("Failed to fetch data:", error);
+          console.error("Failed to fetch examinations:", error);
         } finally {
           setExamsLoading(false);
+        }
+      }
+
+      if (activeTab === "practise" && classId) {
+        try {
+          setPractiseLoading(true);
+          const data = await getExaminationsByClassIdAndMode(classId, "PRACTICAL");
+          setPractiseExaminations(data);
+        } catch (error) {
+          console.error("Failed to fetch practise examinations:", error);
+        } finally {
+          setPractiseLoading(false);
         }
       }
     };
 
     fetchExaminations();
-  }, [getExaminationsByClassId, activeTab, classId]);
+  }, [getExaminationsByClassIdAndMode, activeTab, classId]);
 
   if (loading) {
     return <ClassroomDetailPageSkeleton />;
@@ -145,10 +160,16 @@ function ClassroomContent() {
         );
       case "materials":
         return <MaterialsTab classId={classId} />;
-      case "assignments":
-        return <AssignmentsTab />;
+      // case "assignments":
+      //   return <AssignmentsTab />;
       case "practise":
-        return <PractiseTab />;
+        return (
+          <PractiseTab
+            examinations={practiseExaminations}
+            practiseLoading={practiseLoading}
+            classId={classId}
+          />
+        );
       case "slots":
         return <SlotTab />;
       case "quizzes":
@@ -171,6 +192,22 @@ function ClassroomContent() {
             classroomId={classId}
             classroomName={classroom.className}
             studentId={studentId}
+          />
+        );
+      case "academic-warning":
+        return (
+          <AcademicWarningsTab
+            classroomId={classId}
+            studentId={studentId}
+            classroomName={classroom?.className}
+          />
+        );
+      case "completed-exams":
+        return (
+          <CompletedExamsTab
+            classroomId={classId}
+            studentId={studentId}
+            classroomName={classroom?.className}
           />
         );
       default:
@@ -221,6 +258,11 @@ function ClassroomContent() {
               onClick={quizDetailBack}
               className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
             />
+          )}
+          {activeTab !== "overview" && classroom && (
+            <div className="ml-auto">
+              <ClassroomInfoBar classroom={classroom} compact />
+            </div>
           )}
         </div>
 

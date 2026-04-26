@@ -30,17 +30,27 @@ var awsSecretKey = builder.Configuration["AWS:SecretKey"] ??
                    throw new InvalidOperationException("AWS_SECRET_KEY is not configured");
 
 var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
-var awsOptions = new AWSOptions
+
+// Cấu hình DynamoDB client với retry policy mạnh hơn
+var dynamoDbConfig = new Amazon.DynamoDBv2.AmazonDynamoDBConfig
 {
-    Region = regionEndpoint
+    RegionEndpoint = regionEndpoint,
+    RetryMode = Amazon.Runtime.RequestRetryMode.Adaptive,
+    MaxErrorRetry = 10,
+    Timeout = TimeSpan.FromSeconds(30),
 };
 
-if (!string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey))
-{
-    awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey);
-}
+var awsCredentials = !string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey)
+    ? new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey)
+    : null;
 
-builder.Services.AddAWSService<IAmazonDynamoDB>(awsOptions);
+// Đăng ký DynamoDB client với Singleton lifetime để reuse connections
+builder.Services.AddSingleton<IAmazonDynamoDB>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Initializing DynamoDB client with Adaptive retry mode, MaxErrorRetry=10");
+    return new Amazon.DynamoDBv2.AmazonDynamoDBClient(awsCredentials, dynamoDbConfig);
+});
 
 // Redis configuration
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"] ??
@@ -58,6 +68,7 @@ builder.Services.AddHostedService<RabbitMqHostedService>(sp => sp.GetRequiredSer
 // RabbitMQ Consumer
 builder.Services.AddHostedService<UserRequestConsumer>();
 builder.Services.AddHostedService<UserBatchRequestConsumer>();
+builder.Services.AddHostedService<UserAllRequestConsumer>();
 
 // repo
 builder.Services.AddHostedService<DynamoDbHostedService>();
@@ -72,7 +83,7 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserMapper>();
 builder.Services.AddScoped<JwtUtil>();
-builder.Services.AddScoped<GoogleTokenVerifier>();
+builder.Services.AddScoped<IGoogleTokenVerifier, GoogleTokenVerifier>();
 builder.Services.AddScoped<IUserQuery, UserQuery>();
 builder.Services.AddScoped<IUserCommand, UserCommand>();
 
@@ -98,12 +109,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// controllers
+// CORS — read from config (CorsOrigin from appsettings.json)
+var corsOrigin = builder.Configuration["Cors:CorsOrigin"] ?? "http://localhost:3000";
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:8080")
+        policy.WithOrigins(corsOrigin)
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

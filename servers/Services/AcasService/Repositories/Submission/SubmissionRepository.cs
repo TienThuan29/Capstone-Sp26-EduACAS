@@ -319,19 +319,36 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
         }
     }
 
-    public async Task<Dictionary<string, List<Models.Submission>>> GetLatestVersionSubmissionsByExamAsync(string examId)
+    public async Task<Dictionary<string, List<Models.Submission>>> GetLatestVersionSubmissionsByExamAsync(string examId, string? studentId = null)
     {
         try
         {
-            var request = new ScanRequest
+            ScanRequest request;
+            if (!string.IsNullOrWhiteSpace(studentId))
             {
-                TableName = _submissionTableName,
-                FilterExpression = "examId = :examId",
-                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                request = new ScanRequest
                 {
-                    [":examId"] = new AttributeValue { S = examId }
-                }
-            };
+                    TableName = _submissionTableName,
+                    FilterExpression = "examId = :examId AND studentId = :studentId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":examId"] = new AttributeValue { S = examId },
+                        [":studentId"] = new AttributeValue { S = studentId }
+                    }
+                };
+            }
+            else
+            {
+                request = new ScanRequest
+                {
+                    TableName = _submissionTableName,
+                    FilterExpression = "examId = :examId",
+                    ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                    {
+                        [":examId"] = new AttributeValue { S = examId }
+                    }
+                };
+            }
 
             var response = await _dynamoDBClient.ScanAsync(request);
             var allSubmissions = response.Items.Select(DynamoMapper.DynamoItemToSubmission).ToList();
@@ -346,7 +363,7 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving latest submissions for exam {ExamId}", examId);
+            _logger.LogError(ex, "Error retrieving latest submissions for exam {ExamId}, student {StudentId}", examId, studentId);
             throw;
         }
     }

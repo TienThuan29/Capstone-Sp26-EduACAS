@@ -10,9 +10,12 @@ import {
 } from "flowbite-react";
 import { ArrowLeftIcon, ClockIcon, CheckIcon } from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
+import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 import { useExamination } from "@/hooks/examination/useExamination";
 import { useProblem } from "@/hooks/problem/useProblem";
+import { useClassroom } from "@/hooks/classroom/useClassroom";
 import type { Examination, Problem, ExaminationMode } from "@/types/examination";
+import type { Classroom } from "@/types/classroom";
 import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import { CustomPagination } from "@/components/custom-pagination";
 import { normalizeDifficulty } from "@/types/problem";
@@ -50,6 +53,7 @@ function ExamDetailContent() {
   const { getExaminationById } = useExamination();
   const { getProblemsByIds } = useProblem();
   const { getLatestSubmissionsByExam } = useSubmissionStudent();
+  const { getClassroomById } = useClassroom();
   const { flushCachedExamLogs } = useExamLog();
   const { getByExam, start, complete, setActiveProblem } = useStudentExamSession();
 
@@ -75,6 +79,7 @@ function ExamDetailContent() {
   const [serverSession, setServerSession] = useState<StudentExamSessionDto | null>(null);
   const [sessionLoading, setSessionLoading] = useState(false);
   const [showFullscreenResumeModal, setShowFullscreenResumeModal] = useState(false);
+  const [classroom, setClassroom] = useState<Classroom | null>(null);
 
   const sessionPhase = mapServerPhaseToLocal(serverSession?.phase);
   const isSessionActive = sessionPhase === "active";
@@ -104,6 +109,8 @@ function ExamDetailContent() {
         const data = await getExaminationById(examId);
         if (data) {
           setExamination(data);
+          const classroomData = await getClassroomById(classId);
+          if (classroomData) setClassroom(classroomData);
         }
       } catch (error) {
         console.error("Failed to fetch examination:", error);
@@ -115,7 +122,7 @@ function ExamDetailContent() {
     if (examId) {
       fetchExamination();
     }
-  }, [examId, getExaminationById]);
+  }, [examId, getExaminationById, getClassroomById, classId]);
 
   useEffect(() => {
     setShowFullscreenResumeModal(false);
@@ -338,15 +345,20 @@ function ExamDetailContent() {
       {!shouldHideSidebar && <Sidebar />}
 
       <div className="ml-20 grow p-4 lg:ml-64 lg:p-8">
-        {/* Back button */}
+        {/* Back button + ClassroomInfoBar */}
         {!shouldHideNavigationUi && (
-        <div className="mb-6">
+        <div className="mb-6 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
-            label="Back to Exams"
+            label={examination?.mode === "PRACTICAL" ? "Back to Practise" : "Back to Exams"}
             icon={<ArrowLeftIcon className="h-4 w-4" />}
-            onClick={() => router.push(`/my-classroom/${classId}?tab=exams`)}
+            onClick={() => router.push(`/my-classroom/${classId}?tab=${examination?.mode === "PRACTICAL" ? "practise" : "exams"}`)}
             className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
           />
+          {classroom && (
+            <div className="ml-auto">
+              <ClassroomInfoBar classroom={classroom} compact />
+            </div>
+          )}
         </div>
         )}
         {/* Exam Header */}
