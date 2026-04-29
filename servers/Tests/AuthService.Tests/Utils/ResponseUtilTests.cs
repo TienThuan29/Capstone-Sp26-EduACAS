@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using AuthService.Application.Utils;
 
-namespace AcasService.Tests.AuthServiceTests;
+namespace AuthService.Tests.Utils;
 
 public class ResponseUtilTests
 {

@@ -83,9 +83,7 @@ builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Emai
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<UserMapper>();
 builder.Services.AddScoped<JwtUtil>();
-builder.Services.AddScoped<IGoogleTokenValidator, GoogleTokenValidator>();
-builder.Services.AddScoped<GoogleTokenVerifier>(sp =>
-    new GoogleTokenVerifier(sp.GetRequiredService<IGoogleTokenValidator>()));
+builder.Services.AddScoped<IGoogleTokenVerifier, GoogleTokenVerifier>();
 builder.Services.AddScoped<IUserQuery, UserQuery>();
 builder.Services.AddScoped<IUserCommand, UserCommand>();
 

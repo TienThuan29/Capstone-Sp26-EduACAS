@@ -5,6 +5,7 @@ import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/quiz_practice.dart';
 import 'package:mobile/features/presentation/quiz/quiz_attempt_page.dart';
 import 'package:mobile/features/presentation/quiz/quiz_review_page.dart';
+import 'package:mobile/features/presentation/quiz/widgets/quiz_passcode_dialog.dart';
 import 'package:mobile/features/services/quiz_practice_service.dart';
 
 class StudentQuizzesTab extends StatefulWidget {
@@ -41,7 +42,15 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
     });
 
     try {
-      final quizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId);
+      final allQuizzes = await QuizPracticeService.getClassroomQuizzes(widget.classroomId, includeDrafts: false);
+      final userRole = await TokenStorage.getUserRole();
+      
+      final quizzes = allQuizzes.where((q) {
+        // If lecturer is viewing, show all (including drafts)
+        if (userRole?.toUpperCase() == 'LECTURER') return true;
+        // If student is viewing, hide drafts
+        return q.lifecycleStatus != ClassroomQuizLifecycle.draft;
+      }).toList();
 
       final detailFutures = quizzes
           .map((q) async => MapEntry(q.quizId, await QuizPracticeService.getQuizById(q.quizId)))
@@ -144,6 +153,9 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
               onStart: quizDetail == null
                   ? null
                   : () async {
+                      final hasAccess = await showQuizPasscodeDialog(context, classroomQuiz);
+                      if (!hasAccess || !mounted) return;
+
                       await Navigator.push(
                         context,
                         MaterialPageRoute(

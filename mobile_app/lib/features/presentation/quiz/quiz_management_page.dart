@@ -264,6 +264,7 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
             children: [
               Expanded(
                 child: DropdownButtonFormField<String?>(
+                  isExpanded: true,
                   initialValue: _subjectFilter,
                   decoration: const InputDecoration(
                     labelText: 'Subject',
@@ -273,11 +274,14 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
                     isDense: true,
                   ),
                   items: [
-                    const DropdownMenuItem<String?>(value: null, child: Text('All subjects')),
+                    const DropdownMenuItem<String?>(
+                      value: null, 
+                      child: Text('All subjects', overflow: TextOverflow.ellipsis)
+                    ),
                     ..._subjects.map(
                       (subject) => DropdownMenuItem<String?>(
                         value: subject.id,
-                        child: Text(subject.subjectName),
+                        child: Text('${subject.subjectCode} - ${subject.subjectName}', overflow: TextOverflow.ellipsis),
                       ),
                     ),
                   ],
@@ -293,6 +297,7 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
               const SizedBox(width: 8),
               Expanded(
                 child: DropdownButtonFormField<bool>(
+                  isExpanded: true,
                   initialValue: _includeDeleted,
                   decoration: const InputDecoration(
                     labelText: 'Status',
@@ -302,8 +307,14 @@ class _QuizManagementPageState extends State<QuizManagementPage> {
                     isDense: true,
                   ),
                   items: const [
-                    DropdownMenuItem<bool>(value: false, child: Text('Active only')),
-                    DropdownMenuItem<bool>(value: true, child: Text('Include deleted')),
+                    DropdownMenuItem<bool>(
+                      value: false, 
+                      child: Text('Active only', overflow: TextOverflow.ellipsis)
+                    ),
+                    DropdownMenuItem<bool>(
+                      value: true, 
+                      child: Text('Include deleted', overflow: TextOverflow.ellipsis)
+                    ),
                   ],
                   onChanged: (value) {
                     setState(() {

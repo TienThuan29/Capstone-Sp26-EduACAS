@@ -107,6 +107,7 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
         maxOfAttempts: payload.maxOfAttempts,
         passcode: payload.passcode,
         createdBy: userId,
+        status: payload.status,
       );
 
       if (!mounted) return;
@@ -734,26 +735,6 @@ class _ClassroomQuizFormSheetState extends State<_ClassroomQuizFormSheet> {
                 ),
               ),
               const SizedBox(height: 12),
-              DropdownButtonFormField<String>(
-                initialValue: _status,
-                decoration: const InputDecoration(
-                  labelText: 'Status',
-                  filled: true,
-                  fillColor: AppColors.background,
-                  border: OutlineInputBorder(),
-                ),
-                items: const [
-                  DropdownMenuItem<String>(value: 'DRAFT', child: Text('DRAFT')),
-                  DropdownMenuItem<String>(value: 'PUBLISHED', child: Text('PUBLISHED')),
-                  DropdownMenuItem<String>(value: 'ONGOING', child: Text('ONGOING')),
-                  DropdownMenuItem<String>(value: 'CLOSED', child: Text('CLOSED')),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => _status = value);
-                  }
-                },
-              ),
               const SizedBox(height: 18),
               Row(
                 children: [

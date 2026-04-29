@@ -116,22 +116,32 @@ class QuestionDetail {
   final String id;
   final String content;
   final String type;
+  final String? imageUrl;
+  final String? textAnswer;
+  final int correctCount;
   final List<AnswerOptionDetail> answerOptions;
+  final List<AnswerOptionDetail> options;
 
   QuestionDetail({
     required this.id,
     required this.content,
     required this.type,
+    this.imageUrl,
+    this.textAnswer,
+    this.correctCount = 1,
     required this.answerOptions,
-  });
+  }) : options = answerOptions;
 
   factory QuestionDetail.fromJson(Map<String, dynamic> json) {
     return QuestionDetail(
       id: json['id'] ?? '',
       content: json['content'] ?? '',
       type: (json['type'] ?? '').toString(),
-      answerOptions: (json['answerOptions'] as List<dynamic>? ?? [])
-          .map((e) => AnswerOptionDetail.fromJson(e as Map<String, dynamic>))
+      imageUrl: json['imageUrl']?.toString(),
+      textAnswer: json['textAnswer']?.toString(),
+      correctCount: (json['correctCount'] as num?)?.toInt() ?? 1,
+      answerOptions: (json['answerOptions'] as List<dynamic>? ?? json['options'] as List<dynamic>? ?? [])
+          .map<AnswerOptionDetail>((e) => AnswerOptionDetail.fromJson(e as Map<String, dynamic>))
           .toList(),
     );
   }
@@ -167,6 +177,7 @@ class QuizAttemptInfo {
   final double? finalScore;
   final int attemptNumber;
   final Map<String, String> answers;
+  final List<QuestionDetail> questions;
 
   QuizAttemptInfo({
     required this.id,
@@ -178,6 +189,7 @@ class QuizAttemptInfo {
     required this.finalScore,
     required this.attemptNumber,
     required this.answers,
+    this.questions = const [],
   });
 
   factory QuizAttemptInfo.fromJson(Map<String, dynamic> json) {
@@ -192,6 +204,9 @@ class QuizAttemptInfo {
       attemptNumber: (json['attemptNumber'] as num?)?.toInt() ?? 1,
       answers: ((json['answers'] as Map<String, dynamic>?) ?? const <String, dynamic>{})
           .map((key, value) => MapEntry(key.toString(), (value ?? '').toString())),
+      questions: (json['questions'] as List<dynamic>? ?? [])
+          .map<QuestionDetail>((e) => QuestionDetail.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 

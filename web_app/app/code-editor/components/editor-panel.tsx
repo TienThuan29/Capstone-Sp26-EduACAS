@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { loader } from '@monaco-editor/react';
 import type { OnMount, OnChange } from '@monaco-editor/react';
@@ -8,6 +8,7 @@ import * as monaco from 'monaco-editor';
 import { useEditorContext } from '@/contexts/EditorContext';
 import { useCodeFormatter } from '@/hooks/formatter/useCodeFormatter';
 import { useLspClient, MonacoKind, type LspCompletionItem } from '@/hooks/lsp/useLspClient';
+import { useLocalSyntaxCheck } from '@/hooks/coding/useLocalSyntaxCheck';
 
 // Ensure Monaco loads with correct worker paths so syntax highlighting works (e.g. in Next.js)
 loader.config({
@@ -20,6 +21,8 @@ loader.config({
 const MONACO_ID_FIXES: Record<string, string> = {
   nc: 'c',
   ncpp: 'cpp',
+  'c++': 'cpp',
+  cppp: 'cpp',
 };
 
 /** Monaco built-in language ids; fall back to language.id if backend monaco value is invalid */
@@ -84,6 +87,8 @@ export function EditorPanel() {
   const languageId = editorState.language.id;
   const monacoLanguage = getMonacoLanguageId(editorState.language.monaco, languageId);
 
+  const monacoRef = useRef<typeof monaco | null>(null);
+
   const {
     isSupported,
     openDocument,
@@ -91,12 +96,51 @@ export function EditorPanel() {
     getCompletions,
   } = useLspClient(languageId);
 
-  const handleEditorMount: OnMount = useCallback((editor, monaco) => {
+  const {
+    debouncedCheck,
+    triggerCheck,
+    applyPendingMarkers,
+    setModel,
+    clear,
+  } = useLocalSyntaxCheck(monacoRef, languageId);
+
+  const handleEditorMount: OnMount = useCallback((editor, monacoInstance) => {
+    // Store Monaco instance ref for syntax checking
+    monacoRef.current = monacoInstance;
+
+    // Set up the text model for syntax checking
+    setModel(editor.getModel());
+    applyPendingMarkers();
+
+    // Trigger immediate syntax check on mount (shows errors for initial code)
+    if (languageId) {
+      triggerCheck(editor.getValue());
+    }
+
+    // Enable built-in TypeScript/JavaScript diagnostics for JS/TS (no network needed)
+    const lang = monacoLanguage.toLowerCase();
+    if (lang === 'javascript' || lang === 'typescript') {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const tsDefaults = monacoInstance.languages.typescript as any;
+      if (tsDefaults?.javaScriptDefaults) {
+        tsDefaults.javaScriptDefaults.setDiagnosticsOptions({
+          noSemanticValidation: false,
+          noSyntaxValidation: false,
+        });
+        tsDefaults.javaScriptDefaults.setCompilerOptions({
+          target: monacoInstance.languages.typescript.ScriptTarget.ES2020,
+          allowNonTsExtensions: true,
+          checkJs: lang === 'javascript',
+          allowJs: lang === 'javascript',
+        });
+      }
+    }
+
     // Open document for local identifier completions
     openDocument(editor.getValue());
 
     editor.addCommand(
-      monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS,
+      monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyCode.KeyS,
       () => {
         console.log('Save shortcut captured');
       }
@@ -107,7 +151,7 @@ export function EditorPanel() {
       id: 'format-code-action',
       label: 'Format Code',
       keybindings: [
-        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
+        monacoInstance.KeyMod.CtrlCmd | monacoInstance.KeyMod.Shift | monacoInstance.KeyCode.KeyF,
       ],
       contextMenuGroupId: '9_cutcopypaste',
       contextMenuOrder: 4,
@@ -144,20 +188,33 @@ export function EditorPanel() {
         },
       };
 
-      monaco.languages.registerCompletionItemProvider(monacoLanguage, completionProvider);
+      monacoInstance.languages.registerCompletionItemProvider(monacoLanguage, completionProvider);
     }
-  }, [editorState.language?.id, formatCode, monacoLanguage, isSupported, openDocument, getCompletions]);
+  }, [languageId, formatCode, monacoLanguage, isSupported, openDocument, getCompletions, setModel, triggerCheck, applyPendingMarkers]);
 
-  // Handle code changes — update context and notify LSP
+  // Handle code changes — update context and trigger syntax check
   const handleEditorChange: OnChange = useCallback(
-    (value) => {
+    async (value) => {
       if (value !== undefined) {
         setCode(value);
         changeDocument(value);
+
+        // Debounce syntax check for non-JS/TS languages
+        const lang = monacoLanguage.toLowerCase();
+        if (lang !== 'javascript' && lang !== 'typescript') {
+          debouncedCheck(value);
+        }
       }
     },
-    [setCode, changeDocument]
+    [setCode, changeDocument, monacoLanguage, debouncedCheck]
   );
+
+  // Cleanup syntax check markers on unmount
+  React.useEffect(() => {
+    return () => {
+      clear();
+    };
+  }, [clear]);
 
   return (
     <div className="relative h-full w-full">

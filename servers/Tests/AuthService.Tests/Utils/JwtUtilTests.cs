@@ -7,7 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Moq;
 using Microsoft.Extensions.Configuration;
 
-namespace AcasService.Tests.AuthServiceTests;
+namespace AuthService.Tests.Utils;
 
 using AppJwtPayload = AuthService.Application.Utils.JwtPayload;
 

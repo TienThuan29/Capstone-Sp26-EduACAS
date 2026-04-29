@@ -1,7 +1,7 @@
 using FluentAssertions;
 using AuthService.Application.Utils;
 
-namespace AcasService.Tests.AuthServiceTests;
+namespace AuthService.Tests.Utils;
 
 public class OptGeneratorTests
 {
