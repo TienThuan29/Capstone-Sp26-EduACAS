@@ -91,7 +91,7 @@ export function CodeEditorClient({
   //   return false;
   // }, [examination.mode]);
   const isExamMode = examination.useStrict === true && examination.mode === "EXAMINATION";
-  console.log('strict mode:' , examination.useStrict)
+  // console.log('strict mode:' , examination.useStrict)
 
   const storageKeys = useMemo(
     () => (studentId ? buildExamTrackerStorageKeys(examId, problemId, studentId) : null),
