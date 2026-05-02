@@ -116,6 +116,7 @@ export const Api = {
     GET_BY_ID: (id: string) => `/api/acas/v1/problems/${id}`,
     GET_BY_IDS: "/api/acas/v1/problems/by-ids",
     GET_BY_LECTURER: (lecturerId: string) => `/api/acas/v1/problems/lecturer/${lecturerId}`,
+    GET_FROM_EXAMINATIONS: (classroomId: string) => `/api/acas/v1/problems/from-examinations/classroom/${classroomId}`,
     CREATE: "/api/acas/v1/problems",
     UPDATE: (id: string) => `/api/acas/v1/problems/${id}`,
     DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
@@ -241,6 +242,8 @@ export const Api = {
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
     GET_ADMIN: "/api/acas/v1/discussion-issues/admin",
+    UPDATE_COMMENT: (commentId: string) => `/api/acas/v1/discussion-issues/comments/${commentId}`,
+    SOFT_DELETE_COMMENT: (commentId: string) => `/api/acas/v1/discussion-issues/comments/${commentId}/soft-delete`,
   },
 
   Proctoring: {

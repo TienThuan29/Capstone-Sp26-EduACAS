@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import type { DiscussionIssue } from "@/types/discussion";
+import type { DiscussionIssue, DiscussionIssueStatus } from "@/types/discussion";
 import { DiscussionDetail } from "@/components/discussion-detail";
 import { DiscussionList } from "@/components/discussion-list";
 import { useDiscussionIssue } from "@/hooks/discussion/useDiscussionIssue";
@@ -21,8 +21,8 @@ export function DiscussionTab({ classId, hideBackButton }: DiscussionTabProps) {
   const searchParams = useSearchParams();
   const issueIdFromUrl = searchParams.get("issue");
   const { user } = useAuth();
-  const { getById } = useDiscussionIssue();
-  const { writeComment, replyComment, upvoteComment } = useComment();
+  const { getById, changeStatus } = useDiscussionIssue();
+  const { writeComment, replyComment, upvoteComment, updateComment, softDeleteComment } = useComment();
 
   const [selectedIssue, setSelectedIssue] = useState<DiscussionIssue | null>(null);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -96,6 +96,52 @@ export function DiscussionTab({ classId, hideBackButton }: DiscussionTabProps) {
     [selectedIssue, upvoteComment]
   );
 
+  const handleStatusChange = useCallback(
+    async (status: DiscussionIssueStatus) => {
+      if (!selectedIssue) return;
+      try {
+        const updated = await changeStatus(selectedIssue.id, status);
+        if (updated) setSelectedIssue(updated);
+      } catch {
+        // Error could be shown via toast
+      }
+    },
+    [selectedIssue, changeStatus]
+  );
+
+  const handleEditComment = useCallback(
+    async (commentId: string, content: string) => {
+      if (!selectedIssue) return;
+      try {
+        const updated = await updateComment({
+          issueId: selectedIssue.id,
+          commentId,
+          content,
+        });
+        if (updated) setSelectedIssue(updated);
+      } catch {
+        // Error could be shown via toast
+      }
+    },
+    [selectedIssue, updateComment]
+  );
+
+  const handleDeleteComment = useCallback(
+    async (commentId: string) => {
+      if (!selectedIssue) return;
+      try {
+        const updated = await softDeleteComment({
+          issueId: selectedIssue.id,
+          commentId,
+        });
+        if (updated) setSelectedIssue(updated);
+      } catch {
+        // Error could be shown via toast
+      }
+    },
+    [selectedIssue, softDeleteComment]
+  );
+
   if (issueIdFromUrl && loadingDetail) {
     return <DiscussionTabSkeleton />;
   }
@@ -108,8 +154,10 @@ export function DiscussionTab({ classId, hideBackButton }: DiscussionTabProps) {
         onBack={handleBack}
         hideBackButton={hideBackButton}
         onUpvote={handleUpvote}
-        onStatusChange={() => {}}
+        onStatusChange={handleStatusChange}
         onSubmitComment={handleSubmitComment}
+        onEditComment={handleEditComment}
+        onDeleteComment={handleDeleteComment}
       />
     );
   }

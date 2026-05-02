@@ -65,6 +65,8 @@ public class DiscussionIssueMapper
             CreatedDate = issue.CreatedDate,
             Status = issue.Status,
             Tags = Array.Empty<string>(),
+            RefProblemId = issue.RefProblemId ?? string.Empty,
+            RefProblemTitle = string.Empty,
             IsDeleted = issue.IsDeleted
         };
     }

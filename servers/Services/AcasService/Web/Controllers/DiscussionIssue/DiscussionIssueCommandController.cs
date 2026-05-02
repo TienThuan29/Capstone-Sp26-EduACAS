@@ -175,4 +175,52 @@ public class DiscussionIssueCommandController : ControllerBase
             return ResponseUtil.Error<bool>("Failed to delete discussion issue", 500);
         }
     }
+
+    [HttpPut("comments/{commentId}")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> UpdateComment(
+        string commentId,
+        [FromBody] UpdateCommentRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            request.CommentId = commentId;
+            var result = await _discussionIssueCommand.UpdateCommentAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Issue or comment not found", 404);
+
+            return ResponseUtil.Success(result, "Comment updated successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating comment {CommentId}", commentId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to update comment", 500);
+        }
+    }
+
+    [HttpPatch("comments/{commentId}/soft-delete")]
+    public async Task<ActionResult<ApiResponse<DiscussionIssueDetailResponse>>> SoftDeleteComment(
+        string commentId,
+        [FromBody] SoftDeleteCommentRequest request)
+    {
+        try
+        {
+            if (request == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Request body is required", 400);
+
+            request.CommentId = commentId;
+            var result = await _discussionIssueCommand.SoftDeleteCommentAsync(request);
+            if (result == null)
+                return ResponseUtil.Error<DiscussionIssueDetailResponse>("Issue or comment not found", 404);
+
+            return ResponseUtil.Success(result, "Comment deleted", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error soft deleting comment {CommentId}", commentId);
+            return ResponseUtil.Error<DiscussionIssueDetailResponse>("Failed to delete comment", 500);
+        }
+    }
 }

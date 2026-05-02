@@ -183,6 +183,15 @@ export const useProblem = () => {
     [axiosInstance]
   );
 
+  const getProblemsFromExaminations = useCallback(
+    async (classroomId: string): Promise<ProblemBasicResponse[]> => {
+      const response = await axiosInstance.get(Api.Problem.GET_FROM_EXAMINATIONS(classroomId));
+      const data = response.data?.dataResponse;
+      return Array.isArray(data) ? data : [];
+    },
+    [axiosInstance],
+  );
+
   const reviewProblem = useCallback(
     async (payload: ProblemReviewPayload): Promise<ProblemReviewResponse> => {
       try {
@@ -203,6 +212,7 @@ export const useProblem = () => {
     // getAllProblems,
     getProblemsByLecturerId,
     getProblemsByLecturerIdPaged,
+    getProblemsFromExaminations,
     getProblemById,
     getProblemsByIds,
     createProblem,
