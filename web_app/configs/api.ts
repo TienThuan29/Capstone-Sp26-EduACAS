@@ -185,6 +185,7 @@ export const Api = {
     GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
     GET_LATEST_BY_EXAM: (examId: string) => `/api/v1/submissions/exam/${examId}/latest-all`,
     GET_VERSIONS: (submissionId: string) => `/api/v1/submissions/${submissionId}/versions`,
+    GET_VERSIONS_BY_STUDENT_EXAM_PROBLEM: (examId: string, problemId: string, studentId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/student/${studentId}/versions`,
     AUTO_GRADE: '/api/v1/submissions/auto-grade',
     RE_GRADE: (id: string) => `/api/v1/submissions/${id}/regrade`,
     OVERRIDE_SCORE: (id: string) => `/api/v1/submissions/${id}/score`,

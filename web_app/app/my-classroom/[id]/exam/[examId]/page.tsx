@@ -8,7 +8,13 @@ import {
   HR,
   Button,
 } from "flowbite-react";
-import { ArrowLeftIcon, ClockIcon, CheckIcon } from "@heroicons/react/24/outline";
+import {
+  ArrowLeftIcon,
+  ClockIcon,
+  CheckIcon,
+  ChartBarIcon,
+  ListBulletIcon,
+} from "@heroicons/react/24/outline";
 import Sidebar from "@/components/sidebar";
 import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 import { useExamination } from "@/hooks/examination/useExamination";
@@ -38,6 +44,8 @@ import { ConfirmModal } from "@/app/code-editor/components/confirm-modal";
 import { useSubmissionStudent } from "@/hooks/submission/useSubmissionStudent";
 import { useExamLog } from "@/hooks/examination/useExamLog";
 import { buildExamTrackerStorageKeys } from "@/utils/test-tracker/storageKeys";
+import { ProblemScoreProgressChart } from "@/components/classroom-dashboard/charts/ProblemScoreProgressChart";
+import type { SubmissionResponse } from "@/types/submission";
 
 const PROBLEMS_PER_PAGE = 5;
 
@@ -52,7 +60,7 @@ function ExamDetailContent() {
   const { user } = useAuth();
   const { getExaminationById } = useExamination();
   const { getProblemsByIds } = useProblem();
-  const { getLatestSubmissionsByExam } = useSubmissionStudent();
+  const { getLatestSubmissionsByExam, getVersionsByStudentExamProblem } = useSubmissionStudent();
   const { getClassroomById } = useClassroom();
   const { flushCachedExamLogs } = useExamLog();
   const { getByExam, start, complete, setActiveProblem } = useStudentExamSession();
@@ -80,6 +88,11 @@ function ExamDetailContent() {
   const [sessionLoading, setSessionLoading] = useState(false);
   const [showFullscreenResumeModal, setShowFullscreenResumeModal] = useState(false);
   const [classroom, setClassroom] = useState<Classroom | null>(null);
+  const [activeTab, setActiveTab] = useState<"problems" | "progress">("problems");
+  const [selectedProblemId, setSelectedProblemId] = useState<string | null>(null);
+  const [problemSubmissions, setProblemSubmissions] = useState<SubmissionResponse[]>([]);
+  const [submissionsLoading, setSubmissionsLoading] = useState(false);
+  const [submissionsError, setSubmissionsError] = useState<string | null>(null);
 
   const sessionPhase = mapServerPhaseToLocal(serverSession?.phase);
   const isSessionActive = sessionPhase === "active";
@@ -291,6 +304,37 @@ function ExamDetailContent() {
     }
   }, [examId, isSessionLocked]);
 
+  // Fetch submission versions when a problem is selected in Progress tab
+  useEffect(() => {
+    if (!selectedProblemId || !examId || !studentId || activeTab !== "progress") return;
+
+    let cancelled = false;
+    setSubmissionsLoading(true);
+    setSubmissionsError(null);
+
+    void (async () => {
+      try {
+        const data = await getVersionsByStudentExamProblem(examId, selectedProblemId, studentId);
+        if (!cancelled) setProblemSubmissions(data);
+      } catch (err) {
+        if (!cancelled) setSubmissionsError("Failed to load submission history.");
+      } finally {
+        if (!cancelled) setSubmissionsLoading(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedProblemId, examId, studentId, activeTab, getVersionsByStudentExamProblem]);
+
+  // Auto-select the first problem when switching to progress tab
+  useEffect(() => {
+    if (activeTab === "progress" && !selectedProblemId && problems.length > 0) {
+      setSelectedProblemId(problems[0].id);
+    }
+  }, [activeTab, selectedProblemId, problems]);
+
   // Render ExamSessionGuard early so violation detection runs even during loading.
   const earlyGuard = sessionKeys && isExamMode ? (
     <ExamSessionGuard
@@ -474,107 +518,192 @@ function ExamDetailContent() {
           </div>
         </div>
         <HR className="" />
-        {/* Problems Section */}
-        <div>
-          <h2 className="mb-4 border-l-8 border-[#1F4E79] pl-4 text-2xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
-            Problems ({problems.length})
-          </h2>
-          {problems.length > 0 && problemsTotalPages > 1 && (
-            <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
-              Showing {(currentProblemsPage - 1) * PROBLEMS_PER_PAGE + 1}–
-              {Math.min(currentProblemsPage * PROBLEMS_PER_PAGE, problems.length)} of {problems.length}
-            </p>
-          )}
 
-          {problemsLoading ? (
-            <div className="flex justify-center py-12">
-              <Spinner size="lg" />
-              <span className="ml-3 text-gray-500">Loading problems...</span>
+        {/* Tab Navigation — only for PRACTICAL mode */}
+        {examination.mode === "PRACTICAL" && (
+          <div className="mb-6 mt-2">
+            <div className="flex gap-1 border-b border-gray-200 dark:border-gray-700">
+              <button
+                onClick={() => setActiveTab("problems")}
+                className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  activeTab === "problems"
+                    ? "border-[#1F4E79] text-[#1F4E79] dark:border-[#C9A24D] dark:text-[#C9A24D]"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                <ListBulletIcon className="h-4 w-4" />
+                Problems
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab("progress");
+                  if (!selectedProblemId && problems.length > 0) {
+                    setSelectedProblemId(problems[0].id);
+                  }
+                }}
+                className={`flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-semibold transition-colors ${
+                  activeTab === "progress"
+                    ? "border-[#1F4E79] text-[#1F4E79] dark:border-[#C9A24D] dark:text-[#C9A24D]"
+                    : "border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                }`}
+              >
+                <ChartBarIcon className="h-4 w-4" />
+                Progress
+              </button>
             </div>
-          ) : problems.length === 0 ? (
-            <div className="rounded-xs border-2 border-dashed border-gray-200 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
-              <p className="font-medium text-gray-500">
-                No problems in this examination.
+          </div>
+        )}
+
+        {/* Tab Content */}
+        {activeTab === "problems" || examination.mode !== "PRACTICAL" ? (
+          <div>
+            <h2 className="mb-4 border-l-8 border-[#1F4E79] pl-4 text-2xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
+              Problems ({problems.length})
+            </h2>
+            {problems.length > 0 && problemsTotalPages > 1 && (
+              <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+                Showing {(currentProblemsPage - 1) * PROBLEMS_PER_PAGE + 1}–
+                {Math.min(currentProblemsPage * PROBLEMS_PER_PAGE, problems.length)} of {problems.length}
               </p>
-            </div>
-          ) : (
-            <>
-              <div className="space-y-2">
-                {paginatedProblems.map((problem) => {
-                  const normalized =
-                    typeof problem.difficulty === "number"
-                      ? normalizeDifficulty(problem.difficulty)
-                      : (problem.difficulty as "EASY" | "MEDIUM" | "HARD");
-                  const mark = problem.mark;
+            )}
 
-                  return (
-                    <div
-                      key={problem.id}
-                      className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800"
-                    >
-                      {/* Left side - Problem info */}
-                      <div>
-                        <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                          {problem.title}
-                        </h3>
-                        <p className="mt-1 text-sm text-green-600 dark:text-green-400">
-                          {normalized}, {examination.programmingLanguage?.name ?? "Unknown"}, Max Score: {mark}
-                        </p>
-                        {/* Tags */}
-                        {problem.tags && problem.tags.length > 0 && (
-                          <div className="mt-2 flex flex-wrap gap-1">
-                            {problem.tags.map((tag) => (
-                              <span
-                                key={tag}
-                                className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Right side - Solve button */}
-                      <div className="flex items-center gap-4">
-                        <Button
-                          className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                          disabled={examination.mode === "EXAMINATION" && isSessionEnded}
-                          onClick={() => {
-                            if (examination.mode === "EXAMINATION" && isSessionEnded) return;
-                            if (examination.mode === "EXAMINATION" && !isSessionActive) {
-                              setPendingSolveProblemId(problem.id);
-                              setShowStartModal(true);
-                              return;
-                            }
-                            if (sessionKeys) {
-                              localStorage.setItem(sessionKeys.activeProblemIdStorageKey, problem.id);
-                              dispatchExamActiveProblemChanged();
-                            }
-                            void setActiveProblem(examId, problem.id).catch((err) => {
-                              console.warn('setActiveProblem failed while solving a problem:', err);
-                            });
-                            router.push(`/code-editor/${problem.id}?examId=${examId}`);
-                          }}
-                        >
-                          Solve
-                          <CheckIcon className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  );
-                })}
+            {problemsLoading ? (
+              <div className="flex justify-center py-12">
+                <Spinner size="lg" />
+                <span className="ml-3 text-gray-500">Loading problems...</span>
               </div>
-              {!shouldHideNavigationUi && (
-                <CustomPagination
-                  currentPage={currentProblemsPage}
-                  totalPages={problemsTotalPages}
-                  onPageChange={setProblemsPage}
+            ) : problems.length === 0 ? (
+              <div className="rounded-xs border-2 border-dashed border-gray-200 bg-white py-12 text-center dark:border-gray-700 dark:bg-gray-800">
+                <p className="font-medium text-gray-500">
+                  No problems in this examination.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  {paginatedProblems.map((problem) => {
+                    const normalized =
+                      typeof problem.difficulty === "number"
+                        ? normalizeDifficulty(problem.difficulty)
+                        : (problem.difficulty as "EASY" | "MEDIUM" | "HARD");
+                    const mark = problem.mark;
+
+                    return (
+                      <div
+                        key={problem.id}
+                        className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-6 py-4 dark:border-gray-700 dark:bg-gray-800"
+                      >
+                        <div>
+                          <h3 className="text-base font-semibold text-gray-900 dark:text-white">
+                            {problem.title}
+                          </h3>
+                          <p className="mt-1 text-sm text-green-600 dark:text-green-400">
+                            {normalized}, {examination.programmingLanguage?.name ?? "Unknown"}, Max Score: {mark}
+                          </p>
+                          {problem.tags && problem.tags.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                              {problem.tags.map((tag) => (
+                                <span
+                                  key={tag}
+                                  className="rounded-full bg-blue-100 px-2 py-0.5 text-xs text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"
+                                >
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex items-center gap-4">
+                          <Button
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            disabled={examination.mode === "EXAMINATION" && isSessionEnded}
+                            onClick={() => {
+                              if (examination.mode === "EXAMINATION" && isSessionEnded) return;
+                              if (examination.mode === "EXAMINATION" && !isSessionActive) {
+                                setPendingSolveProblemId(problem.id);
+                                setShowStartModal(true);
+                                return;
+                              }
+                              if (sessionKeys) {
+                                localStorage.setItem(sessionKeys.activeProblemIdStorageKey, problem.id);
+                                dispatchExamActiveProblemChanged();
+                              }
+                              void setActiveProblem(examId, problem.id).catch((err) => {
+                                console.warn('setActiveProblem failed while solving a problem:', err);
+                              });
+                              router.push(`/code-editor/${problem.id}?examId=${examId}`);
+                            }}
+                          >
+                            Solve
+                            <CheckIcon className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                {!shouldHideNavigationUi && (
+                  <CustomPagination
+                    currentPage={currentProblemsPage}
+                    totalPages={problemsTotalPages}
+                    onPageChange={setProblemsPage}
+                  />
+                )}
+              </>
+            )}
+          </div>
+        ) : null}
+
+        {/* Progress Tab Content — only for PRACTICAL mode */}
+        {examination.mode === "PRACTICAL" && activeTab === "progress" && (
+          <div>
+            <h2 className="mb-4 border-l-8 border-[#1F4E79] pl-4 text-2xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
+              Score Progress
+            </h2>
+            <p className="mb-4 text-sm text-gray-500 dark:text-gray-400">
+              View your score progression across all submission attempts per problem.
+            </p>
+
+            {problems.length > 0 && (
+              <div className="mb-6">
+                <label className="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Select Problem
+                </label>
+                <select
+                  value={selectedProblemId ?? ""}
+                  onChange={(e) => setSelectedProblemId(e.target.value)}
+                  className="w-full max-w-md rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white sm:w-auto"
+                >
+                  <option value="" disabled>
+                    Choose a problem...
+                  </option>
+                  {problems.map((p) => (
+                    <option key={p.id} value={p.id}>
+                      {p.title} (Max: {p.mark})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {selectedProblemId && (() => {
+              const selectedProblem = problems.find((p) => p.id === selectedProblemId);
+              return (
+                <ProblemScoreProgressChart
+                  submissions={problemSubmissions}
+                  maxMark={selectedProblem?.mark ?? 0}
+                  problemTitle={selectedProblem?.title ?? ""}
+                  loading={submissionsLoading}
                 />
-              )}
-            </>
-          )}
-        </div>
+              );
+            })()}
+
+            {submissionsError && !submissionsLoading && (
+              <p className="mt-4 text-sm text-red-500">{submissionsError}</p>
+            )}
+          </div>
+        )}
       </div>
 
       {earlyGuard}

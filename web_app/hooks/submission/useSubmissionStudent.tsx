@@ -86,6 +86,16 @@ export const useSubmissionStudent = () => {
     [axiosInstance]
   );
 
+  const getVersionsByStudentExamProblem = useCallback(
+    async (examId: string, problemId: string, studentId: string): Promise<SubmissionResponse[]> => {
+      const response = await axiosInstance.get<ApiResponse<SubmissionResponse[]>>(
+        Api.Submission.GET_VERSIONS_BY_STUDENT_EXAM_PROBLEM(examId, problemId, studentId)
+      );
+      return response.data?.dataResponse ?? [];
+    },
+    [axiosInstance]
+  );
+
   return {
     saveSubmission,
     forceSubmission,
@@ -93,5 +103,6 @@ export const useSubmissionStudent = () => {
     getSubmissionsByStudentId,
     getLatestSubmissionsByExamAndProblem,
     getLatestSubmissionsByExam,
+    getVersionsByStudentExamProblem,
   };
 };

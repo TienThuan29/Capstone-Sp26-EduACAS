@@ -123,6 +123,37 @@ public class SubmissionQueryController : ControllerBase
             }
       }
 
+      [HttpGet("exam/{examId}/problem/{problemId}/student/{studentId}/versions")]
+      public async Task<ActionResult<ApiResponse<List<SubmissionResponse>>>> GetVersionsByExamAndProblemAndStudent(
+            [FromRoute] string examId,
+            [FromRoute] string problemId,
+            [FromRoute] string studentId)
+      {
+            try
+            {
+                  var versions = await _submissionQuery.GetVersionsBySubmissionKey(studentId, examId, problemId);
+                  var problem = await _problemQuery.GetProblemByIdAsync(problemId);
+                  ProblemLiteResponse? problemLite = null;
+                  if (problem != null)
+                  {
+                        problemLite = new ProblemLiteResponse
+                        {
+                              Id = problem.Id,
+                              Title = problem.Title
+                        };
+                  }
+                  var response = versions
+                        .Select(v => _submissionMapper.ToResponse(v, problemLite))
+                        .ToList();
+                  return ResponseUtil.Success(response, "Versions retrieved successfully", 200);
+            }
+            catch (Exception ex)
+            {
+                  _logger.LogError(ex, "Error getting versions for student {StudentId}, exam {ExamId}, problem {ProblemId}", studentId, examId, problemId);
+                  return ResponseUtil.Error<List<SubmissionResponse>>("Failed to get versions", 500);
+            }
+      }
+
       [HttpGet("{submissionId}/versions")]
       public async Task<ActionResult<ApiResponse<List<SubmissionResponse>>>> GetVersionsBySubmissionId([FromRoute] string submissionId)
       {
