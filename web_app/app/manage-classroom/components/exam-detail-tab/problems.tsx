@@ -322,6 +322,7 @@ export function ProblemsTabContent({
         mode: examination.mode,
         useStrict: examination.useStrict,
         minScoreThreshold: examination.minScoreThreshold,
+        maxAttempts: examination.maxAttempts,
       };
 
       // console.log("Updating examination with payload:", JSON.stringify(payload, null, 2));

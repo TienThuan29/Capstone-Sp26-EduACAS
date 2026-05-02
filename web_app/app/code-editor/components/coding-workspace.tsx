@@ -116,7 +116,7 @@ export function CodingWorkspace() {
               </div>
 
               {/* Action Footer */}
-              <ActionFooter />
+              {/* <ActionFooter /> */}
             </div>
           </Panel>
         </Group>

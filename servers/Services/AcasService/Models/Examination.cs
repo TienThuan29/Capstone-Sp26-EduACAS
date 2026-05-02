@@ -36,7 +36,9 @@ public class Examination
     
     [Required]
     public float TotalMark { get; set; }
-    
+
+    public int? MaxAttempts { get; set; }
+
     [Required]
     public Status Status { get; set; }
     

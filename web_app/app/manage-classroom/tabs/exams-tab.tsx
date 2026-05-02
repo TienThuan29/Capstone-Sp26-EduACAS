@@ -77,6 +77,7 @@ const emptyForm: ExaminationRequest = {
   mode: "PRACTICAL",
   useStrict: false,
   minScoreThreshold: 0,
+  maxAttempts: null,
 };
 
 type PractiseTabProps = {
@@ -204,6 +205,7 @@ export function ExamsTab({
       mode: exam.mode,
       useStrict: exam.useStrict,
       minScoreThreshold: exam.minScoreThreshold,
+      maxAttempts: exam.maxAttempts,
     });
     setOpenFormModal(true);
   };
@@ -339,7 +341,7 @@ export function ExamsTab({
 
   // List tab: table of examinations
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 w-full">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="border-l-8 border-[#1F4E79] pl-4 text-3xl font-black text-gray-900 dark:border-[#C9A24D] dark:text-white">
         Examinations
@@ -373,9 +375,8 @@ export function ExamsTab({
           </p>
         </div>
       ) : (
-        <div className="w-full overflow-hidden rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
-          <div className="overflow-x-auto">
-            <Table className="w-full min-w-[900px]">
+        <div className="w-full overflow-x-auto rounded-md border border-gray-200 bg-white shadow dark:border-gray-700 dark:bg-gray-800">
+          <Table className="w-full min-w-[900px]">
               <TableHead className="bg-gray-50 dark:bg-gray-700/50">
                 <TableRow>
                   <TableHeadCell className="w-[200px]">Exam name</TableHeadCell>
@@ -385,6 +386,7 @@ export function ExamsTab({
                   <TableHeadCell className="w-[80px]">Total mark</TableHeadCell>
                   <TableHeadCell className="w-[90px]">Strict</TableHeadCell>
                   <TableHeadCell className="w-[90px]">Threshold</TableHeadCell>
+                  <TableHeadCell className="w-[100px]">Max attempts</TableHeadCell>
                   <TableHeadCell className="w-[100px]">Status</TableHeadCell>
                   <TableHeadCell className="w-[90px]">Mode</TableHeadCell>
                   <TableHeadCell className="w-[130px]">
@@ -427,6 +429,15 @@ export function ExamsTab({
                           </span>
                         ) : (
                           <span className="text-xs text-gray-400">—</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {exam.maxAttempts != null ? (
+                          <span className="rounded bg-blue-100 px-1.5 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-300">
+                            {exam.maxAttempts}
+                          </span>
+                        ) : (
+                          <span className="text-xs text-gray-400">Unlimited</span>
                         )}
                       </TableCell>
                       <TableCell>
@@ -484,7 +495,6 @@ export function ExamsTab({
                 })}
               </TableBody>
             </Table>
-          </div>
         </div>
       )}
 
@@ -740,6 +750,24 @@ function ExaminationFormModal({
               }
             />
             <Label htmlFor="isPublicResult">Public result</Label>
+          </div>
+          <div>
+            <Label htmlFor="maxAttempts">
+              Max attempts <span className="text-xs text-gray-400">(leave empty for unlimited)</span>
+            </Label>
+            <TextInput
+              id="maxAttempts"
+              type="number"
+              min={1}
+              value={formData.maxAttempts ?? ""}
+              onChange={(e) => {
+                const raw = e.target.value;
+                const value = raw === "" ? null : parseInt(raw, 10);
+                setFormData({ ...formData, maxAttempts: value });
+              }}
+              placeholder="e.g. 3"
+              className="mt-1"
+            />
           </div>
         </ModalBody>
         <ModalFooter className="shrink-0 border-t border-gray-200 dark:border-gray-600">

@@ -460,6 +460,17 @@ function ExamDetailContent() {
                 </div>
               </div>
             </div>
+            <div className="flex items-center gap-3">
+              <ClockIcon className="h-5 w-5 text-gray-400" />
+              <div>
+                <div className="text-xs font-medium text-gray-500 uppercase">
+                  Max Attempts
+                </div>
+                <div className="font-semibold text-gray-900 dark:text-white">
+                  {examination.maxAttempts != null ? examination.maxAttempts : "Unlimited"}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
         <HR className="" />

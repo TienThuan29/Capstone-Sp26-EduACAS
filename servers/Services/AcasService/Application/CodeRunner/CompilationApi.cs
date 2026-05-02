@@ -22,6 +22,11 @@ public interface ICompilationApi
 
 public class CompilationApi : ICompilationApi
 {
+    private static readonly HashSet<string> CppLanguages = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "c", "cpp", "c++"
+    };
+
     private readonly HttpClient _httpClient;
     private readonly ILogger<CompilationApi> _logger;
     private readonly string _baseUrl;
@@ -45,6 +50,23 @@ public class CompilationApi : ICompilationApi
         };
     }
 
+    private void EnsureNoColorDiagnosticsFlag(string lang, CompileOptions? options)
+    {
+        if (options == null)
+            return;
+
+        if (!CppLanguages.Contains(lang))
+            return;
+
+        var existing = options.UserArguments ?? "";
+        if (existing.Contains("-fdiagnostics-color", StringComparison.OrdinalIgnoreCase))
+            return;
+
+        options.UserArguments = string.IsNullOrWhiteSpace(existing)
+            ? "-fdiagnostics-color=never"
+            : $"{existing.TrimEnd()} -fdiagnostics-color=never";
+    }
+
     public async Task<CompilationResult> CompileAsync(
         string compilerId,
         CompileRequest compileRequest,
@@ -58,7 +80,8 @@ public class CompilationApi : ICompilationApi
             {
                 throw new ArgumentException("Language is required. Provide it either in the request body or as a query parameter.");
             }
-            // Build URL with optional lang query parameter
+
+            EnsureNoColorDiagnosticsFlag(language, compileRequest.Options);
             var urlBuilder = new StringBuilder($"{_baseUrl}/api/compiler/{compilerId}/compile");
             if (!string.IsNullOrWhiteSpace(lang))
             {
@@ -138,6 +161,8 @@ public class CompilationApi : ICompilationApi
             {
                 throw new ArgumentException("Language is required. Provide it either in the request body or as a query parameter.");
             }
+
+            EnsureNoColorDiagnosticsFlag(language, runBatchRequest.Options);
 
             if (runBatchRequest.StdinList == null || runBatchRequest.StdinList.Count == 0)
             {

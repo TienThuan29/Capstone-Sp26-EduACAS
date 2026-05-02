@@ -177,6 +177,8 @@ export const Api = {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
     SAVE: '/api/v1/submissions',
+    FORCE: '/api/v1/submissions/force',
+    SUBMIT_AND_GRADE: '/api/v1/submissions/submit-and-grade',
     GET_BY_ID: (id: string) => `/api/v1/submissions/${id}`,
     GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
     GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,

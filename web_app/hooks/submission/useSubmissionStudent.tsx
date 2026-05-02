@@ -3,7 +3,12 @@
 import { useCallback } from 'react';
 import useAxios from '@/hooks/useAxios';
 import { Api } from '@/configs/api';
-import type { ProblemSubmissionsResponse, SubmitProblemRequest, SubmissionResponse } from '@/types/submission';
+import type {
+  ProblemSubmissionsResponse,
+  SubmitProblemRequest,
+  SubmissionResponse,
+  AutoGradeSubmissionResult,
+} from '@/types/submission';
 
 interface ApiResponse<T> {
   success?: boolean;
@@ -19,6 +24,17 @@ export const useSubmissionStudent = () => {
     async (payload: SubmitProblemRequest): Promise<SubmissionResponse | null> => {
       const response = await axiosInstance.post<ApiResponse<SubmissionResponse>>(
         Api.Submission.SAVE,
+        payload
+      );
+      return response.data?.dataResponse ?? null;
+    },
+    [axiosInstance]
+  );
+
+  const forceSubmission = useCallback(
+    async (payload: SubmitProblemRequest): Promise<SubmissionResponse | null> => {
+      const response = await axiosInstance.post<ApiResponse<SubmissionResponse>>(
+        Api.Submission.FORCE,
         payload
       );
       return response.data?.dataResponse ?? null;
@@ -59,8 +75,21 @@ export const useSubmissionStudent = () => {
     [axiosInstance]
   );
 
+  const submitAndGrade = useCallback(
+    async (payload: SubmitProblemRequest): Promise<AutoGradeSubmissionResult | null> => {
+      const response = await axiosInstance.post<ApiResponse<AutoGradeSubmissionResult>>(
+        Api.Submission.SUBMIT_AND_GRADE,
+        payload
+      );
+      return response.data?.dataResponse ?? null;
+    },
+    [axiosInstance]
+  );
+
   return {
     saveSubmission,
+    forceSubmission,
+    submitAndGrade,
     getSubmissionsByStudentId,
     getLatestSubmissionsByExamAndProblem,
     getLatestSubmissionsByExam,

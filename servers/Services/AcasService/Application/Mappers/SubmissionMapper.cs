@@ -196,4 +196,24 @@ public class SubmissionMapper
             TotalTestCases = totalTestCases
         };
     }
+
+    public AutoGradeSubmissionResult ToAutoGradeSubmissionResult(
+        string submissionId,
+        string studentId,
+        List<TestResultResponse> testResults,
+        float finalScore,
+        string status)
+    {
+        return new AutoGradeSubmissionResult
+        {
+            SubmissionId = submissionId,
+            StudentId = studentId,
+            FinalScore = finalScore,
+            Status = status,
+            GradedDate = DateTime.UtcNow,
+            PassedTestCases = testResults.Count(r => r.Status == TestcaseStatus.SUCCESS.ToString()),
+            TotalTestCases = testResults.Count,
+            TestResults = testResults
+        };
+    }
 }

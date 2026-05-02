@@ -231,7 +231,7 @@ function ClassroomContent() {
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <Sidebar />
 
-      <div className="ml-20 flex-grow p-4 lg:ml-64 lg:p-8">
+      <div className="ml-20 min-w-0 flex-grow p-4 lg:ml-64 lg:p-8">
         <div className="mb-10 flex flex-wrap items-center gap-3">
           <DefaultOutlineCustomButton
             label="All classes"

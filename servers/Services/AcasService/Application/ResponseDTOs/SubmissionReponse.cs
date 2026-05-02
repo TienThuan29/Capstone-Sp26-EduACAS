@@ -228,4 +228,7 @@ public class AutoGradeSubmissionResult
 
     [JsonPropertyName("errorMessage")]
     public string? ErrorMessage { get; set; }
+
+    [JsonPropertyName("testResults")]
+    public List<TestResultResponse> TestResults { get; set; } = new();
 }
