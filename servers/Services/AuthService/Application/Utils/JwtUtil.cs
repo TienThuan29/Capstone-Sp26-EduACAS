@@ -78,9 +78,13 @@ public class JwtUtil
             var minutes = int.Parse(expiration[..^1]);
             return DateTime.UtcNow.AddMinutes(minutes);
         }
+        else if (expiration.EndsWith("s"))
+        {
+            var seconds = int.Parse(expiration[..^1]);
+            return DateTime.UtcNow.AddSeconds(seconds);
+        }
         else
         {
-            // Default to 1 day if format is not recognized
             return DateTime.UtcNow.AddDays(1);
         }
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dropdown, Button } from "flowbite-react";
 import { BellIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "@/contexts/AuthContext";
@@ -13,23 +13,35 @@ export function NotificationSection() {
   const { isLoggedIn } = useAuth();
 
   const [pageIndex, setPageIndex] = useState(1);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [accumulated, setAccumulated] = useState<Notification[]>([]);
 
   const { notifications, paged } = useNotification({
     pageIndex,
     pageSize: PAGE_SIZE,
     enabled: !!isLoggedIn(),
+    isRead: false,
   });
 
-  const unreadNotifications = notifications.filter((n: Notification) => !n.isRead);
-  const displayedNotifications = unreadNotifications.slice(0, visibleCount);
-  const hasMore = unreadNotifications.length >= visibleCount && (paged.hasNextPage || unreadNotifications.length > visibleCount);
+  // When pageIndex changes, accumulate the new notifications with previous ones
+  useEffect(() => {
+    if (pageIndex === 1) {
+      setAccumulated(notifications);
+    } else {
+      setAccumulated((prev) => {
+        const existingIds = new Set(prev.map((n) => n.id));
+        const newUnique = notifications.filter((n) => !existingIds.has(n.id));
+        return [...prev, ...newUnique];
+      });
+    }
+  }, [pageIndex, notifications]);
+
+  const unreadNotifications = accumulated.filter((n: Notification) => !n.isRead);
+  const hasMore = paged.hasNextPage && unreadNotifications.length < paged.totalCount;
 
   const handleShowMore = () => {
-    if (visibleCount >= unreadNotifications.length && paged.hasNextPage) {
+    if (paged.hasNextPage) {
       setPageIndex((prev) => prev + 1);
     }
-    setVisibleCount((prev) => prev + PAGE_SIZE);
   };
 
   if (!isLoggedIn()) return null;
@@ -72,7 +84,7 @@ export function NotificationSection() {
         ) : (
           <>
             <ul className="py-1">
-              {displayedNotifications.map((n: Notification) => (
+              {unreadNotifications.map((n: Notification) => (
                 <li
                   key={n.id}
                   className="px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-600 border-b border-gray-100 last:border-0 dark:border-gray-600"

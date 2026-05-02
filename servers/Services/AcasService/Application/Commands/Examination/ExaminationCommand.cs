@@ -122,6 +122,7 @@ public class ExaminationCommand : IExaminationCommand
             existingExam.Mode = mode;
             existingExam.UseStrict = examDto.UseStrict;
             existingExam.MinScoreThreshold = examDto.MinScoreThreshold;
+            existingExam.MaxAttempts = examDto.MaxAttempts;
             existingExam.UpdatedDate = DateTime.UtcNow;
 
             // Detect date changes and reschedule background jobs

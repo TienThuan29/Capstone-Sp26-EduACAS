@@ -227,4 +227,31 @@ public class ProblemQueryController : ControllerBase
             );
         }
     }
+
+    [HttpGet("from-examinations/classroom/{classroomId}")]
+    public async Task<ActionResult<ApiResponse<object>>> GetProblemsFromExaminationsByClassroomId([FromRoute] string classroomId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(classroomId))
+            {
+                return ResponseUtil.Error<object>("Classroom ID is required.", statusCode: 400);
+            }
+
+            var problems = await _problemQuery.GetProblemsFromExaminationsByClassroomIdAsync(classroomId);
+            return ResponseUtil.Success(
+                problems,
+                $"Retrieved {problems.Count} problems for classroom."
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving problems for classroom {ClassroomId}", classroomId);
+            return ResponseUtil.Error<object>(
+                "Failed to retrieve problems.",
+                error: ex.Message,
+                stack: ex.StackTrace
+            );
+        }
+    }
 }

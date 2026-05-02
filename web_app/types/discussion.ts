@@ -1,3 +1,5 @@
+import type { ProblemBasicResponse } from "./problem";
+
 export type DiscussionIssueStatus = "OPEN" | "CLOSED";
 
 /** Author display info from User service (e.g. RabbitMQ). */
@@ -18,6 +20,8 @@ export interface DiscussionIssueListItem {
   createdDate: string;
   status: DiscussionIssueStatus;
   tags: string[];
+  refProblemId?: string;
+  refProblemTitle?: string;
   isDeleted: boolean;
 }
 
@@ -54,6 +58,7 @@ export interface DiscussionIssue {
   content: string;
   attachments: string[];
   refProblemId: string;
+  refProblem?: ProblemBasicResponse | null;
   status: DiscussionIssueStatus;
   viewCount: number;
   comments: Comment[];

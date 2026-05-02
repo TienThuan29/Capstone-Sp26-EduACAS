@@ -23,6 +23,10 @@ public interface IDiscussionIssueCommand
       Task<DiscussionIssueDetailResponse?> ChangeStatusAsync(ChangeDiscussionStatusRequest request);
 
       Task<bool> SoftDeleteAsync(string issueId);
+
+      Task<DiscussionIssueDetailResponse?> UpdateCommentAsync(UpdateCommentRequest request);
+
+      Task<DiscussionIssueDetailResponse?> SoftDeleteCommentAsync(SoftDeleteCommentRequest request);
 }
 
 
@@ -32,19 +36,22 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
       private readonly DiscussionIssueMapper _discussionIssueMapper;
       private readonly IDiscussionIssueQuery _discussionIssueQuery;
       private readonly IBusinessNotificationService _businessNotificationService;
+      private readonly Messaging.User.UserRequestProducer _userRequestProducer;
       private readonly ILogger<DiscussionIssueCommand> _logger;
 
       public DiscussionIssueCommand(
           IDiscussionIssueRepository repository,
           DiscussionIssueMapper discussionIssueMapper,
           IDiscussionIssueQuery discussionIssueQuery,
-                              IBusinessNotificationService businessNotificationService,
+          IBusinessNotificationService businessNotificationService,
+          Messaging.User.UserRequestProducer userRequestProducer,
           ILogger<DiscussionIssueCommand> logger)
       {
             _repository = repository;
             _discussionIssueMapper = discussionIssueMapper;
             _discussionIssueQuery = discussionIssueQuery;
-                                    _businessNotificationService = businessNotificationService;
+            _businessNotificationService = businessNotificationService;
+            _userRequestProducer = userRequestProducer;
             _logger = logger;
       }
 
@@ -189,8 +196,76 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
                   _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
                   return null;
             }
+
+            var previousStatus = issue.Status;
             issue.Status = request.Status;
             issue.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+
+            if (updated != null && previousStatus != request.Status)
+            {
+                  var participantIds = CollectParticipantIds(issue);
+                  if (participantIds.Count > 0)
+                  {
+                        var statusText = request.Status == DiscussionIssueStatus.CLOSED ? "closed" : "reopened";
+                        var title = $"Discussion '{issue.Title}' has been {statusText}";
+                        var body = $"The discussion topic '{issue.Title}' has been marked as {statusText} by the lecturer.";
+
+                        await _businessNotificationService.NotifyUsersAsync(
+                            participantIds,
+                            NotificationType.DISCUSSION_ISSUE_STATUS_CHANGED,
+                            title,
+                            body,
+                            new Dictionary<string, object?>
+                            {
+                                  ["discussionIssueId"] = issue.Id,
+                                  ["classroomId"] = issue.ClassroomId,
+                                  ["newStatus"] = request.Status.ToString(),
+                                  ["previousStatus"] = previousStatus.ToString()
+                            }
+                        );
+                  }
+            }
+
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
+
+      public async Task<DiscussionIssueDetailResponse?> UpdateCommentAsync(UpdateCommentRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(request.IssueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
+                  return null;
+            }
+            var comment = FindCommentById(issue.Comments, request.CommentId);
+            if (comment == null)
+            {
+                  _logger.LogWarning("Comment not found: {CommentId}", request.CommentId);
+                  return null;
+            }
+            comment.Content = request.Content;
+            comment.UpdatedDate = DateTime.UtcNow;
+            var updated = await _repository.UpdateAsync(issue);
+            return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
+      }
+
+      public async Task<DiscussionIssueDetailResponse?> SoftDeleteCommentAsync(SoftDeleteCommentRequest request)
+      {
+            var issue = await _repository.FindByIdAsync(request.IssueId);
+            if (issue == null)
+            {
+                  _logger.LogWarning("Discussion issue not found: {IssueId}", request.IssueId);
+                  return null;
+            }
+            var comment = FindCommentById(issue.Comments, request.CommentId);
+            if (comment == null)
+            {
+                  _logger.LogWarning("Comment not found: {CommentId}", request.CommentId);
+                  return null;
+            }
+            comment.IsDeleted = true;
+            comment.UpdatedDate = DateTime.UtcNow;
             var updated = await _repository.UpdateAsync(issue);
             return updated == null ? null : await _discussionIssueQuery.GetByIdAsync(updated.Id);
       }
@@ -205,6 +280,24 @@ public class DiscussionIssueCommand : IDiscussionIssueCommand
             }
             await _repository.SoftDeleteAsync(issueId);
             return true;
+      }
+
+      private List<string> CollectParticipantIds(Models.DiscussionIssue issue)
+      {
+            var ids = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            if (!string.IsNullOrEmpty(issue.AuthorId)) ids.Add(issue.AuthorId);
+            CollectCommentAuthorIds(issue.Comments, ids);
+            return ids.ToList();
+      }
+
+      private void CollectCommentAuthorIds(IList<Models.Comment> comments, HashSet<string> ids)
+      {
+            if (comments == null) return;
+            foreach (var c in comments)
+            {
+                  if (!string.IsNullOrEmpty(c.AuthorId)) ids.Add(c.AuthorId);
+                  CollectCommentAuthorIds(c.Replies, ids);
+            }
       }
 
       private Models.Comment? FindCommentById(IList<Models.Comment> comments, string commentId)

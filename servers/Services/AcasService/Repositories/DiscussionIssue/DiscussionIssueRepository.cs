@@ -227,6 +227,28 @@ public class DiscussionIssueRepository : DynamoRepository, IDiscussionIssueRepos
         }
     }
 
+    public async Task IncrementViewCountAsync(string id)
+    {
+        try
+        {
+            var key = DynamoMapper.CreateKey(id);
+            var updates = new Dictionary<string, AttributeValueUpdate>
+            {
+                ["viewCount"] = new AttributeValueUpdate
+                {
+                    Action = AttributeAction.ADD,
+                    Value = new AttributeValue { N = "1" }
+                }
+            };
+            await UpdateItemAsync(key, updates, _discussionIssueTableName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error incrementing view count for discussion issue {Id}", id);
+            throw;
+        }
+    }
+
     public async Task<List<Models.DiscussionIssue>> FindAllAsync()
     {
         try

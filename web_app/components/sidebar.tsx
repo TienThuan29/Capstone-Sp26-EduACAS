@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useSidebar } from "@/contexts/SidebarContext";
 import { PageUrl } from "@/configs/page.url";
 import { LOGO_EDU_ACAS_2_TRANS, LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
-import { Button, Modal, ModalHeader, ModalBody } from "flowbite-react";
+import { Button, Modal, ModalHeader, ModalBody, Tooltip } from "flowbite-react";
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -30,7 +30,6 @@ import {
   PuzzlePieceIcon,
   UserGroupIcon,
   ClockIcon,
-  BanknotesIcon,
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
   ChartBarIcon,
@@ -119,7 +118,7 @@ const Sidebar = () => {
       href: PageUrl.QUESTION_BANK_PAGE,
     },
     {
-      icon: BanknotesIcon,
+      icon: BookOpenIcon,
       label: "Quiz Banks",
       href: PageUrl.QUIZ_BANK_PAGE,
     },
@@ -350,7 +349,13 @@ const Sidebar = () => {
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                <IconComponent className="h-5 w-5 shrink-0" />
+                {!isExpanded ? (
+                  <Tooltip content={item.label} style="light" placement="right">
+                    <IconComponent className="h-5 w-5 shrink-0 cursor-pointer" />
+                  </Tooltip>
+                ) : (
+                  <IconComponent className="h-5 w-5 shrink-0" />
+                )}
                 {isExpanded && <span className="text-sm">{item.label}</span>}
               </Link>
             );
@@ -378,7 +383,13 @@ const Sidebar = () => {
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                <IconComponent className="h-5 w-5 shrink-0" />
+                {!isExpanded ? (
+                  <Tooltip content={item.label} style="light" placement="right">
+                    <IconComponent className="h-5 w-5 shrink-0 cursor-pointer" />
+                  </Tooltip>
+                ) : (
+                  <IconComponent className="h-5 w-5 shrink-0" />
+                )}
                 {isExpanded && <span className="text-sm">{item.label}</span>}
               </Link>
             );
@@ -391,25 +402,27 @@ const Sidebar = () => {
         className={`border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"} space-y-2 p-4`}
       >
         {/* Dark Mode Toggle Button */}
-        <button
-          onClick={toggleTheme}
-          className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
-            isDarkMode
-              ? "text-gray-300 hover:bg-gray-800"
-              : "text-gray-700 hover:bg-gray-100"
-          }`}
-        >
-          {isDarkMode ? (
-            <MoonIcon className="h-5 w-5 shrink-0" />
-          ) : (
-            <SunIcon className="h-5 w-5 shrink-0" />
-          )}
-          {isExpanded && (
-            <span className="text-sm">
-              {isDarkMode ? "Light Mode" : "Dark Mode"}
-            </span>
-          )}
-        </button>
+        <Tooltip content={isDarkMode ? "Light Mode" : "Dark Mode"} style="light" placement="right">
+          <button
+            onClick={toggleTheme}
+            className={`flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 transition-colors ${
+              isDarkMode
+                ? "text-gray-300 hover:bg-gray-800"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            {isDarkMode ? (
+              <MoonIcon className="h-5 w-5 shrink-0" />
+            ) : (
+              <SunIcon className="h-5 w-5 shrink-0" />
+            )}
+            {isExpanded && (
+              <span className="text-sm">
+                {isDarkMode ? "Light Mode" : "Dark Mode"}
+              </span>
+            )}
+          </button>
+        </Tooltip>
 
         {/* Logout Button */}
         {isExpanded ? (
@@ -426,17 +439,19 @@ const Sidebar = () => {
             {isLoggingOut ? "Logging out..." : "Logout"}
           </button>
         ) : (
-          <button
-            onClick={() => setShowLogoutModal(true)}
-            disabled={isLoggingOut}
-            className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${
-              isDarkMode
-                ? "text-red-400 hover:bg-red-900/20"
-                : "text-red-600 hover:bg-red-50"
-            } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
-          >
-            <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
-          </button>
+          <Tooltip content="Logout" style="light" placement="right">
+            <button
+              onClick={() => setShowLogoutModal(true)}
+              disabled={isLoggingOut}
+              className={`flex w-full cursor-pointer justify-center rounded-lg p-2 transition-colors ${
+                isDarkMode
+                  ? "text-red-400 hover:bg-red-900/20"
+                  : "text-red-600 hover:bg-red-50"
+              } ${isLoggingOut ? "cursor-not-allowed opacity-50" : ""}`}
+            >
+              <ArrowRightEndOnRectangleIcon className="h-5 w-5 shrink-0" />
+            </button>
+          </Tooltip>
         )}
       </div>
 

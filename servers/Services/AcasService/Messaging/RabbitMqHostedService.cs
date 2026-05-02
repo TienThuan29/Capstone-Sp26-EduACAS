@@ -5,26 +5,28 @@ namespace AcasService.Messaging;
 
 public class RabbitMqHostedService : IHostedService
 {
-    private readonly IConnection _connection;
-    private readonly IModel _channel;
+    private readonly IConnection? _connection;
+    private readonly IModel? _channel;
     private readonly ILogger<RabbitMqHostedService> _logger;
-    private readonly string _hostName;
+    private readonly string? _hostName;
     private readonly int _port;
-    private readonly string _userName;
-    private readonly string _password;
+    private readonly string? _userName;
+    private readonly string? _password;
     private readonly string _virtualHost;
+
+    protected RabbitMqHostedService() { }
 
     public RabbitMqHostedService(
         IConfiguration configuration,
         ILogger<RabbitMqHostedService> logger)
     {
         _logger = logger;
-        _hostName = configuration["RabbitMQ:HostName"] ?? 
+        _hostName = configuration["RabbitMQ:HostName"] ??
                    throw new ArgumentNullException("RabbitMQ:HostName is not configured");
         _port = configuration.GetValue<int>("RabbitMQ:Port", 5672);
-        _userName = configuration["RabbitMQ:UserName"] ?? 
+        _userName = configuration["RabbitMQ:UserName"] ??
                    throw new ArgumentNullException("RabbitMQ:UserName is not configured");
-        _password = configuration["RabbitMQ:Password"] ?? 
+        _password = configuration["RabbitMQ:Password"] ??
                    throw new ArgumentNullException("RabbitMQ:Password is not configured");
         _virtualHost = configuration["RabbitMQ:VirtualHost"] ?? "/";
 
@@ -43,8 +45,8 @@ public class RabbitMqHostedService : IHostedService
         _channel = _connection.CreateModel();
     }
 
-    public IConnection Connection => _connection;
-    public IModel Channel => _channel;
+    public IConnection? Connection => _connection;
+    public virtual IModel? Channel => _channel;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
@@ -55,21 +57,21 @@ public class RabbitMqHostedService : IHostedService
         {
             _logger.LogInformation("Checking RabbitMQ connection...");
             
-            if (!_connection.IsOpen)
+            if (!_connection!.IsOpen)
             {
                 _logger.LogWarning("RabbitMQ connection is not open. Attempting to reconnect...");
             }
 
             // Test connection by declaring a test queue (will be deleted immediately)
             var testQueueName = $"health-check-{Guid.NewGuid()}";
-            _channel.QueueDeclare(
+            _channel!.QueueDeclare(
                 queue: testQueueName,
                 durable: false,
                 exclusive: true,
                 autoDelete: true,
                 arguments: null);
             
-            _channel.QueueDelete(testQueueName);
+            _channel!.QueueDelete(testQueueName);
             
             _logger.LogInformation("RabbitMQ connection established successfully");
         }
@@ -91,18 +93,25 @@ public class RabbitMqHostedService : IHostedService
         {
             _logger.LogInformation("Closing RabbitMQ connection...");
             
-            if (_channel.IsOpen)
+            if (_channel!.IsOpen)
             {
                 _channel.Close();
             }
             
-            if (_connection.IsOpen)
+            if (_connection!.IsOpen)
             {
                 _connection.Close();
             }
             
-            _channel.Dispose();
-            _connection.Dispose();
+            if (_channel != null)
+            {
+                _channel.Dispose();
+            }
+
+            if (_connection != null)
+            {
+                _connection.Dispose();
+            }
             
             _logger.LogInformation("RabbitMQ connection closed");
         }

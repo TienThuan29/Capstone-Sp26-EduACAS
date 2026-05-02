@@ -13,6 +13,8 @@ public class UserRequestProducer
     private const string BatchRequestQueueName = "user.getbatch.request";
     private const string ResponseQueueName = "user.get.response";
 
+    protected UserRequestProducer() { }
+
     public UserRequestProducer(
         RabbitMqHostedService rabbitMqService,
         ILogger<UserRequestProducer> logger)
@@ -22,7 +24,7 @@ public class UserRequestProducer
         InitializeQueues();
     }
 
-    private void InitializeQueues()
+    protected virtual void InitializeQueues()
     {
         var channel = _rabbitMqService.Channel;
         
@@ -64,7 +66,7 @@ public class UserRequestProducer
             RequestQueueName, ResponseQueueName, BatchRequestQueueName, AllUsersRequestQueueName);
     }
 
-    public async Task<UserProfileResponse?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
+    public virtual async Task<UserProfileResponse?> GetUserByIdAsync(string userId, CancellationToken cancellationToken = default)
     {
         var channel = _rabbitMqService.Channel;
         var correlationId = Guid.NewGuid().ToString();
@@ -166,7 +168,7 @@ public class UserRequestProducer
         }
     }
 
-    public async Task<List<UserProfileResponse>> GetUsersByIdsAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
+    public virtual async Task<List<UserProfileResponse>> GetUsersByIdsAsync(IEnumerable<string> userIds, CancellationToken cancellationToken = default)
     {
         var idList = userIds.Distinct().Where(id => !string.IsNullOrWhiteSpace(id)).ToList();
         if (idList.Count == 0)
@@ -255,7 +257,7 @@ public class UserRequestProducer
     private const string AllUsersRequestQueueName = "user.getall.request";
     private const string AllUsersResponseQueueName = "user.getall.response";
 
-    public async Task<List<UserProfileResponse>> GetAllUsersAsync(CancellationToken cancellationToken = default)
+    public virtual async Task<List<UserProfileResponse>> GetAllUsersAsync(CancellationToken cancellationToken = default)
     {
         var channel = _rabbitMqService.Channel;
         var correlationId = Guid.NewGuid().ToString();

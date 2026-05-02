@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/services/fcm_service.dart';
@@ -7,16 +8,18 @@ import 'package:mobile/features/presentation/auth/login_page.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // Determine environment from build type:
+  // - Release build type (--release) -> prod (uses .env.prod)
+  // - Debug build type (--debug)    -> local (uses .env)
+  final isRelease = kReleaseMode;
+  final envFile = isRelease ? '.env.prod' : '.env';
+
   try {
-    // Load environment variables (optional)
-    await dotenv.load(fileName: ".env");
-    debugPrint('Environment loaded successfully');
+    await dotenv.load(fileName: envFile);
+    debugPrint('Environment loaded from: $envFile (mode: ${isRelease ? "release/prod" : "debug/local"})');
     debugPrint('API Base URL: ${dotenv.env['API_BASE_URL']}');
-    debugPrint('Dotenv initialized: ${dotenv.isInitialized}');
   } catch (e) {
-    debugPrint('Error loading .env file: $e');
-    debugPrint('Continuing with dart-define or fallback values');
-    // Continue with default values
+    debugPrint('Error loading $envFile: $e');
   }
 
   try {

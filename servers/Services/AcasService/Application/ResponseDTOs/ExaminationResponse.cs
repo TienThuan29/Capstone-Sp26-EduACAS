@@ -49,6 +49,9 @@ public class ExaminationResponse
     [JsonPropertyName("minScoreThreshold")]
     public float MinScoreThreshold { get; set; }
 
+    [JsonPropertyName("maxAttempts")]
+    public int? MaxAttempts { get; set; }
+
     [JsonPropertyName("isDeleted")]
     public bool IsDeleted { get; set; }
 

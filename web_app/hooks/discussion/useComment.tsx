@@ -8,6 +8,8 @@ import type {
   WriteCommentPayload,
   ReplyCommentPayload,
   UpvoteCommentPayload,
+  UpdateCommentPayload,
+  SoftDeleteCommentPayload,
 } from "@/hooks/discussion/useDiscussionIssue";
 
 /** API response wrapper from backend ApiResponse<T> */
@@ -57,9 +59,35 @@ export const useComment = () => {
     [axiosInstance]
   );
 
+  /** PUT update a comment. Returns updated issue with comments. */
+  const updateComment = useCallback(
+    async (payload: UpdateCommentPayload): Promise<DiscussionIssue | null> => {
+      const response = await axiosInstance.put<ApiResponse<DiscussionIssue>>(
+        Api.DiscussionIssue.UPDATE_COMMENT(payload.commentId),
+        payload
+      );
+      return response.data?.dataResponse ?? null;
+    },
+    [axiosInstance]
+  );
+
+  /** PATCH soft-delete a comment. Returns updated issue with comments. */
+  const softDeleteComment = useCallback(
+    async (payload: SoftDeleteCommentPayload): Promise<DiscussionIssue | null> => {
+      const response = await axiosInstance.patch<ApiResponse<DiscussionIssue>>(
+        Api.DiscussionIssue.SOFT_DELETE_COMMENT(payload.commentId),
+        payload
+      );
+      return response.data?.dataResponse ?? null;
+    },
+    [axiosInstance]
+  );
+
   return {
     writeComment,
     replyComment,
     upvoteComment,
+    updateComment,
+    softDeleteComment,
   };
 };
