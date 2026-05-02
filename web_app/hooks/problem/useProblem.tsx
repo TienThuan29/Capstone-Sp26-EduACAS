@@ -45,6 +45,24 @@ export type UpdateProblemPayload = {
   tags?: string[];
 };
 
+export type ProblemReviewPayload =
+  | { title: string; content: string; fileData?: undefined; mimeType?: undefined }
+  | { title: string; fileData: string; mimeType: string; content?: undefined };
+
+export type ProblemReviewRecommendation = {
+  type: string;
+  severity: string;
+  description: string;
+  suggestedFix: string;
+};
+
+export type ProblemReviewResponse = {
+  suitabilityLabel: string;
+  summary: string;
+  recommendations: ProblemReviewRecommendation[];
+  concerns: string[];
+};
+
 
 export const useProblem = () => {
   const axiosInstance = useAxios();
@@ -165,15 +183,42 @@ export const useProblem = () => {
     [axiosInstance]
   );
 
+  const getProblemsFromExaminations = useCallback(
+    async (classroomId: string): Promise<ProblemBasicResponse[]> => {
+      const response = await axiosInstance.get(Api.Problem.GET_FROM_EXAMINATIONS(classroomId));
+      const data = response.data?.dataResponse;
+      return Array.isArray(data) ? data : [];
+    },
+    [axiosInstance],
+  );
+
+  const reviewProblem = useCallback(
+    async (payload: ProblemReviewPayload): Promise<ProblemReviewResponse> => {
+      try {
+        const response = await axiosInstance.post(Api.Problem.REVIEW, payload);
+        const data = response.data?.dataResponse;
+        if (!data) throw new Error('Invalid review response');
+        return data as ProblemReviewResponse;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error('Problem review failed:', error);
+        throw new Error(error.response?.data?.message || 'Failed to review problem');
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     // getAllProblems,
     getProblemsByLecturerId,
     getProblemsByLecturerIdPaged,
+    getProblemsFromExaminations,
     getProblemById,
     getProblemsByIds,
     createProblem,
     updateProblem,
     deleteProblem,
     extractOcrContent,
+    reviewProblem,
   };
 };

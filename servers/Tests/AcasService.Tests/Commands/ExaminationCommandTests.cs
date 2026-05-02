@@ -121,6 +121,7 @@ public class ExaminationCommandTests
             Mode = Mode.PRACTICAL,
             UseStrict = request.UseStrict,
             MinScoreThreshold = request.MinScoreThreshold,
+            MaxAttempts = request.MaxAttempts,
             Problems = new List<ExaminationProblem>()
         };
 
@@ -879,6 +880,7 @@ public class ExaminationCommandTests
         TotalMark = 100f,
         Status = "PENDING",
         Mode = "PRACTICAL",
+        MaxAttempts = null,
         Problems = new List<ExaminationProblemDTO>()
     };
 
@@ -894,6 +896,7 @@ public class ExaminationCommandTests
         Mode = Mode.PRACTICAL,
         IsPublicResult = true,
         TotalMark = 100f,
+        MaxAttempts = 2,
         Problems = new List<ExaminationProblem>()
     };
 }

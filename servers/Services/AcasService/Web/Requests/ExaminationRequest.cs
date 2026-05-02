@@ -67,4 +67,7 @@ public class ExaminationRequestDTO
 
     [JsonPropertyName("minScoreThreshold")]
     public float MinScoreThreshold { get; set; }
+
+    [JsonPropertyName("maxAttempts")]
+    public int? MaxAttempts { get; set; }
 }

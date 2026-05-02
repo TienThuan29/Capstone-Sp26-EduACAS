@@ -29,6 +29,7 @@ public class SubmissionCommandTests
     private readonly Mock<IBusinessNotificationService> _notifMock;
     private readonly SubmissionMapper _mapper;
     private readonly TestResultMapper _trMapper;
+    private readonly ProblemMapper _problemMapper;
     private readonly SubmissionCommand _command;
 
     public SubmissionCommandTests()
@@ -41,9 +42,10 @@ public class SubmissionCommandTests
         _examRepoMock = new Mock<IExaminationRepository>();
         _sessionRepoMock = new Mock<IStudentExamSessionRepository>();
         _notifMock = new Mock<IBusinessNotificationService>();
-        
+
         _mapper = new SubmissionMapper();
         _trMapper = new TestResultMapper();
+        _problemMapper = new ProblemMapper();
 
         _command = new SubmissionCommand(
             _submissionRepoMock.Object,
@@ -55,7 +57,8 @@ public class SubmissionCommandTests
             _examRepoMock.Object,
             _trMapper,
             _notifMock.Object,
-            _sessionRepoMock.Object
+            _sessionRepoMock.Object,
+            _problemMapper
         );
     }
 
@@ -457,5 +460,187 @@ public class SubmissionCommandTests
         var result = await _command.OverrideSubmissionScoreAsync("sub1", 5f, 100f);
 
         result.Should().BeTrue();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // FUNCTION F051 | SubmitAndGradeSubmissionAsync
+    // ──────────────────────────────────────────────────────────────────────────
+
+    // UTCD-01 | Success - All test cases pass (Normal)
+    [Fact]
+    public async Task UTCD01_SubmitAndGradeSubmissionAsync_AllPass_ReturnsCorrectScore()
+    {
+        var request = CreateRequest();
+        var problem = new Models.Problem
+        {
+            Id = "p1",
+            TestCases = new List<Models.TestCase>
+            {
+                new Models.TestCase { IsPublic = true, InputData = "1", ExpectedOutput = "1" },
+                new Models.TestCase { IsPublic = true, InputData = "2", ExpectedOutput = "2" }
+            }
+        };
+        var testResults = new List<TestResultResponse>
+        {
+            new TestResultResponse { Status = "SUCCESS" },
+            new TestResultResponse { Status = "SUCCESS" }
+        };
+
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync(problem);
+        _evaluatorMock.Setup(e => e.ExecuteTestcasesAsync(It.IsAny<string>(), It.IsAny<RumBatchRequest>(), It.IsAny<string>()))
+            .ReturnsAsync(testResults);
+        _submissionRepoMock.Setup(r => r.CreateAsync(It.IsAny<Models.Submission>()))
+            .ReturnsAsync((Models.Submission s) => { s.Id = "sub-new"; return s; });
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.FinalScore.Should().Be(100f);
+        result.PassedTestCases.Should().Be(2);
+        result.TotalTestCases.Should().Be(2);
+        result.Status.Should().Be(SubmissionStatus.GRADED.ToString());
+        result.SubmissionId.Should().Be("sub-new");
+        result.TestResults.Should().HaveCount(2);
+    }
+
+    // UTCD-02 | Success - Partial test cases pass (Normal)
+    [Fact]
+    public async Task UTCD02_SubmitAndGradeSubmissionAsync_PartialPass_ReturnsPartialScore()
+    {
+        var request = CreateRequest();
+        var problem = new Models.Problem
+        {
+            Id = "p1",
+            TestCases = new List<Models.TestCase>
+            {
+                new Models.TestCase { IsPublic = true, InputData = "1", ExpectedOutput = "1" },
+                new Models.TestCase { IsPublic = true, InputData = "2", ExpectedOutput = "2" },
+                new Models.TestCase { IsPublic = true, InputData = "3", ExpectedOutput = "3" },
+                new Models.TestCase { IsPublic = true, InputData = "4", ExpectedOutput = "4" }
+            }
+        };
+        var testResults = new List<TestResultResponse>
+        {
+            new TestResultResponse { Status = "SUCCESS" },
+            new TestResultResponse { Status = "SUCCESS" },
+            new TestResultResponse { Status = "FAIL" },
+            new TestResultResponse { Status = "FAIL" }
+        };
+
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync(problem);
+        _evaluatorMock.Setup(e => e.ExecuteTestcasesAsync(It.IsAny<string>(), It.IsAny<RumBatchRequest>(), It.IsAny<string>()))
+            .ReturnsAsync(testResults);
+        _submissionRepoMock.Setup(r => r.CreateAsync(It.IsAny<Models.Submission>()))
+            .ReturnsAsync((Models.Submission s) => { s.Id = "sub-new"; return s; });
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.FinalScore.Should().Be(50f);
+        result.PassedTestCases.Should().Be(2);
+        result.TotalTestCases.Should().Be(4);
+    }
+
+    // UTCD-03 | Problem not found (Abnormal)
+    [Fact]
+    public async Task UTCD03_SubmitAndGradeSubmissionAsync_ProblemNotFound_ReturnsError()
+    {
+        var request = CreateRequest();
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync((Models.Problem?)null);
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.ErrorMessage.Should().Be("Problem not found");
+        result.TotalTestCases.Should().Be(0);
+        _loggerMock.VerifyLog(LogLevel.Warning, "not found for practice submission", Times.Once());
+    }
+
+    // UTCD-04 | No public test cases (Boundary)
+    [Fact]
+    public async Task UTCD04_SubmitAndGradeSubmissionAsync_NoPublicTestCases_ReturnsError()
+    {
+        var request = CreateRequest();
+        var problem = new Models.Problem
+        {
+            Id = "p1",
+            TestCases = new List<Models.TestCase>
+            {
+                new Models.TestCase { IsPublic = false }
+            }
+        };
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync(problem);
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.ErrorMessage.Should().Contain("No test cases available");
+        result.TotalTestCases.Should().Be(0);
+        _loggerMock.VerifyLog(LogLevel.Information, "has no public test cases for practice submission", Times.Once());
+    }
+
+    // UTCD-05 | Evaluator throws exception (Abnormal)
+    [Fact]
+    public async Task UTCD05_SubmitAndGradeSubmissionAsync_EvaluatorFails_ReturnsExceptionMessage()
+    {
+        var request = CreateRequest();
+        var problem = new Models.Problem
+        {
+            Id = "p1",
+            TestCases = new List<Models.TestCase>
+            {
+                new Models.TestCase { IsPublic = true }
+            }
+        };
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync(problem);
+        _evaluatorMock.Setup(e => e.ExecuteTestcasesAsync(It.IsAny<string>(), It.IsAny<RumBatchRequest>(), It.IsAny<string>()))
+            .ThrowsAsync(new Exception("Compiler crash"));
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.ErrorMessage.Should().Be("Compiler crash");
+        result.TotalTestCases.Should().Be(1);
+        _loggerMock.VerifyLog(LogLevel.Error, "Failed to grade practice submission", Times.Once());
+    }
+
+    // UTCD-06 | Create fails (Abnormal)
+    [Fact]
+    public async Task UTCD06_SubmitAndGradeSubmissionAsync_CreateFails_ReturnsResultWithError()
+    {
+        var request = CreateRequest();
+        var problem = new Models.Problem
+        {
+            Id = "p1",
+            TestCases = new List<Models.TestCase>
+            {
+                new Models.TestCase { IsPublic = true }
+            }
+        };
+        var testResults = new List<TestResultResponse> { new TestResultResponse { Status = "SUCCESS" } };
+
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync(problem);
+        _evaluatorMock.Setup(e => e.ExecuteTestcasesAsync(It.IsAny<string>(), It.IsAny<RumBatchRequest>(), It.IsAny<string>()))
+            .ReturnsAsync(testResults);
+        _submissionRepoMock.Setup(r => r.CreateAsync(It.IsAny<Models.Submission>()))
+            .ReturnsAsync((Models.Submission?)null);
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.FinalScore.Should().Be(100f);
+        result.Status.Should().Be(SubmissionStatus.GRADED.ToString());
+        result.TestResults.Should().HaveCount(1);
+        result.ErrorMessage.Should().Be("Failed to save submission");
+        result.SubmissionId.Should().BeEmpty();
+        _loggerMock.VerifyLog(LogLevel.Warning, "Failed to save submission", Times.Once());
+    }
+
+    // UTCD-07 | No test cases at all (Boundary)
+    [Fact]
+    public async Task UTCD07_SubmitAndGradeSubmissionAsync_NoTestCasesAtAll_ReturnsError()
+    {
+        var request = CreateRequest();
+        var problem = new Models.Problem { Id = "p1", TestCases = new List<Models.TestCase>() };
+        _problemRepoMock.Setup(r => r.GetByIdAsync("p1")).ReturnsAsync(problem);
+
+        var result = await _command.SubmitAndGradeSubmissionAsync(request);
+
+        result.ErrorMessage.Should().Contain("No test cases available");
+        result.TotalTestCases.Should().Be(0);
     }
 }

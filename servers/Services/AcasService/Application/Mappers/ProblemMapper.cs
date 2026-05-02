@@ -5,7 +5,7 @@ namespace AcasService.Application.Mappers;
 
 public class ProblemMapper
 {
-    public ProblemResponse ToProblemResponse(Problem problem, string fileUrl, IEnumerable<TestCase> testCases)
+    public ProblemResponse ToProblemResponse(Problem problem, string fileUrl, IEnumerable<Models.TestCase> testCases)
     {
         return new ProblemResponse
         {
@@ -48,7 +48,7 @@ public class ProblemMapper
         };
     }
 
-    public TestCaseResponse ToTestCaseResponse(TestCase testCase)
+    public TestCaseResponse ToTestCaseResponse(Models.TestCase testCase)
     {
         return new TestCaseResponse
         {
@@ -63,6 +63,24 @@ public class ProblemMapper
             DecimalPlaces = testCase.DecimalPlaces,
             IsTokenComparision = testCase.IsTokenComparision,
             IsNotOrderedComparision = testCase.IsNotOrderedComparision
+        };
+    }
+
+    public Web.Requests.TestCase ToTestCaseRequest(Models.TestCase tc)
+    {
+        return new Web.Requests.TestCase
+        {
+            Id = tc.Id,
+            ProblemId = tc.ProblemId,
+            InputData = tc.InputData,
+            ExpectedOutput = tc.ExpectedOutput,
+            IsPublic = tc.IsPublic,
+            IsCaseInsensitive = tc.IsCaseInsensitive,
+            IsFloatingPoint = tc.IsFloatingPoint,
+            FloatingPointTolerance = tc.FloatingPointTolerance,
+            DecimalPlaces = tc.DecimalPlaces,
+            IsTokenComparision = tc.IsTokenComparision,
+            IsNotOrderedComparision = tc.IsNotOrderedComparision
         };
     }
 

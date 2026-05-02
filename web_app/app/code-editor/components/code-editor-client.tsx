@@ -54,7 +54,7 @@ export function CodeEditorClient({
   const { getByExam, lock } = useStudentExamSession();
   const { getExaminationById } = useExamination();
   const { getProblemsByIds } = useProblem();
-  const { saveSubmission } = useSubmissionStudent();
+  const { saveSubmission, forceSubmission } = useSubmissionStudent();
   const { user } = useAuth();
   const {
     editorState,
@@ -69,6 +69,8 @@ export function CodeEditorClient({
     isSubmitting,
     selectedCompiler,
     incrementSubmissionsRefresh,
+    submissionError,
+    clearSubmissionError,
   } = useEditorContext();
 
   const problemId = examination.problem.id;
@@ -190,7 +192,7 @@ export function CodeEditorClient({
       }
 
       try {
-        await saveSubmission({
+        await forceSubmission({
           examId,
           problemId: pid,
           studentId: sid,
@@ -215,6 +217,7 @@ export function CodeEditorClient({
     editorState.code,
     examination.programmingLanguage.id,
     saveSubmission,
+    forceSubmission,
     submitCode,
     incrementSubmissionsRefresh,
   ]);
@@ -245,7 +248,8 @@ export function CodeEditorClient({
       // ignore localStorage errors
     }
 
-    if (examination.endDatetime) {
+    // if (examination.endDatetime) {
+    if (isExamMode && examination.endDatetime) {
       setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
@@ -561,6 +565,15 @@ export function CodeEditorClient({
         message={[overlay?.msg, overlay?.sub].filter(Boolean).join(' ')}
         alertType={overlay?.alertType}
         variant="info"
+      />
+
+      {/* Submission error modal (e.g. MaxAttempts exceeded) */}
+      <WarningModal
+        isOpen={!!submissionError}
+        onClose={clearSubmissionError}
+        title="Submission Failed"
+        message={submissionError ?? ""}
+        variant="error"
       />
     </>
   );

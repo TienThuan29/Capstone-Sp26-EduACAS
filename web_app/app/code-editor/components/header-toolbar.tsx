@@ -15,6 +15,7 @@ import { useStudentExamSession } from "@/hooks/examination/useStudentExamSession
 import type { StudentExamSessionPhase } from "@/types/student-exam-session";
 import { ConfirmModal } from "./confirm-modal";
 import { EditorSettingsModal } from "./editor-settings-modal";
+import { WarningModal } from "./warning-modal";
 import { Button, Dropdown, DropdownItem } from "flowbite-react";
 
 export function HeaderToolbar() {
@@ -26,13 +27,19 @@ export function HeaderToolbar() {
     toggleTheme,
     resetCode,
     submitCode,
+    submitAndGrade,
     isSubmitting,
+    isExamMode,
     examId,
     examClassroomId,
     selectedCompiler,
     setSelectedCompiler,
     timerSeconds,
-    isExamMode,
+    submissionError,
+    clearSubmissionError,
+    incrementSubmissionsRefresh,
+    setPracticeTestResults,
+    isPracticeSubmitting,
   } = useEditorContext();
 
   const formatTime = (s: number) => {
@@ -92,11 +99,11 @@ export function HeaderToolbar() {
             size="sm"
             color="green"
             onClick={() => setShowSubmitModal(true)}
-            disabled={isSubmitting || isExamEnded || isExamSessionLoading}
+            disabled={isSubmitting || isPracticeSubmitting || isExamEnded || isExamSessionLoading}
             className="flex cursor-pointer items-center gap-1.5"
           >
             <PaperAirplaneIcon className="h-4 w-4" />
-            <span>{isSubmitting ? "Submitting…" : "Submit"}</span>
+            <span>{isSubmitting || isPracticeSubmitting ? "Submitting…" : "Submit"}</span>
           </Button>
 
           {/* Language - Compiler (from examination) */}
@@ -257,16 +264,38 @@ export function HeaderToolbar() {
       {/* Submit code confirmation modal */}
       <ConfirmModal
         isOpen={showSubmitModal}
-        onClose={() => !isSubmitting && setShowSubmitModal(false)}
+        onClose={() => !(isSubmitting || isPracticeSubmitting) && setShowSubmitModal(false)}
         onConfirm={async () => {
-          await submitCode();
+          if (isExamMode) {
+            await submitCode();
+          } else {
+            clearSubmissionError();
+            const result = await submitAndGrade();
+            if (result) {
+              setPracticeTestResults(null); // Clear so SubmissionsTab shows fresh data
+              incrementSubmissionsRefresh();
+            }
+          }
           setShowSubmitModal(false);
         }}
-        title="Submit code"
-        message="Are you sure you want to submit your code for this problem? You may not be able to resubmit depending on exam settings."
-        confirmText={isSubmitting ? "Submitting…" : "Submit"}
+        title={isExamMode ? "Submit code" : "Submit & Grade"}
+        message={
+          isExamMode
+            ? "Are you sure you want to submit your code for this problem? You may not be able to resubmit depending on exam settings."
+            : "Submit your code to run all test cases and get your score. This will not count against any exam attempt limits."
+        }
+        confirmText={isSubmitting || isPracticeSubmitting ? "Submitting…" : "Submit"}
         cancelText="Cancel"
         confirmVariant="green"
+      />
+
+      {/* Submission error modal (e.g. MaxAttempts exceeded) */}
+      <WarningModal
+        isOpen={!!submissionError}
+        onClose={clearSubmissionError}
+        title="Submission Failed"
+        message={submissionError ?? ""}
+        variant="error"
       />
     </>
   );

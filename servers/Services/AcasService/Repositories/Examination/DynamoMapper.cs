@@ -25,10 +25,16 @@ namespace AcasService.Repositories.Examination;
                 ["useStrict"] = new AttributeValue { BOOL = exam.UseStrict },
                 ["minScoreThreshold"] = new AttributeValue { N = exam.MinScoreThreshold.ToString() },
                 ["isDeleted"] = new AttributeValue { BOOL = exam.IsDeleted },
-                ["createdDate"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.CreatedDate) },
-                ["updatedDate"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.UpdatedDate) },
-                ["description"] = new AttributeValue { S = exam.Description ?? string.Empty }
             };
+
+            if (exam.MaxAttempts.HasValue)
+            {
+                item["maxAttempts"] = new AttributeValue { N = exam.MaxAttempts.Value.ToString() };
+            }
+
+            item["createdDate"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.CreatedDate) };
+            item["updatedDate"] = new AttributeValue { S = DynamoDbDateTime.ToUtcString(exam.UpdatedDate) };
+            item["description"] = new AttributeValue { S = exam.Description ?? string.Empty };
 
             if (exam.Problems != null && exam.Problems.Count > 0)
             {
@@ -67,7 +73,8 @@ namespace AcasService.Repositories.Examination;
                 IsDeleted = item["isDeleted"].BOOL,
                 CreatedDate = DynamoDbDateTime.FromUtcString(item["createdDate"].S),
                 UpdatedDate = DynamoDbDateTime.FromUtcString(item["updatedDate"].S),
-                Description = item.ContainsKey("description") ? item["description"].S : string.Empty
+                Description = item.ContainsKey("description") ? item["description"].S : string.Empty,
+                MaxAttempts = item.ContainsKey("maxAttempts") ? int.Parse(item["maxAttempts"].N) : null
             };
 
             if (item.ContainsKey("problems") && item["problems"].L.Count > 0)

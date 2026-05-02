@@ -15,7 +15,7 @@ import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { CodeBlockLowlight } from "@tiptap/extension-code-block-lowlight";
 import { createLowlight, all } from "lowlight";
-import { Button, Badge, Avatar, Select, Label, HR } from "flowbite-react";
+import { Button, Badge, Avatar, Select, Label, HR, Modal, ModalHeader, ModalBody, ModalFooter, TextInput } from "flowbite-react";
 import { useThemeContext } from "@/components/theme-provider";
 import { TextEditor } from "@/components/text-editor";
 import type {
@@ -71,6 +71,8 @@ import {
   ChatBubbleLeftRightIcon,
   EyeIcon,
   ChevronLeftIcon,
+  PencilSquareIcon,
+  TrashIcon,
 } from "@heroicons/react/24/outline";
 import { useRoleValidator } from "@/hooks/authorization/useRoleValidation";
 import { useAuth } from "@/contexts/AuthContext";
@@ -85,6 +87,8 @@ type DiscussionDetailProps = {
   onUpvote?: (target: "issue" | "comment", id: string) => void;
   onStatusChange?: (status: DiscussionIssueStatus) => void;
   onSubmitComment?: (content: string, parentCommentId?: string) => void;
+  onEditComment?: (commentId: string, content: string) => void;
+  onDeleteComment?: (commentId: string) => void;
 };
 
 type DiscussionDetailSidebarProps = {
@@ -137,6 +141,22 @@ function DiscussionDetailSidebar({
               </p>
             </div>
           </div>
+
+          {issue.refProblem && (
+            <div className="flex flex-col gap-1 border-t border-gray-200 pt-3 dark:border-gray-600">
+              <Label className="text-xs font-medium tracking-wider text-gray-500 uppercase dark:text-gray-400">
+                Related Problem
+              </Label>
+              <div className="flex items-center gap-2">
+                <span className="rounded border border-gray-200 bg-gray-50 px-2.5 py-1.5 text-sm text-gray-700 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">
+                  {issue.refProblem.title}
+                </span>
+                <span className="text-xs text-gray-500 dark:text-gray-400">
+                  ({issue.refProblem.difficulty})
+                </span>
+              </div>
+            </div>
+          )}
 
           <div className="flex flex-col gap-2 border-t border-gray-200 pt-3 dark:border-gray-600">
             <Label
@@ -345,6 +365,9 @@ function CommentTree({
   onReply,
   replyingToCommentId,
   renderReplyBox,
+  onEdit,
+  onDelete,
+  currentUserId,
 }: {
   comments: Comment[];
   depth?: number;
@@ -352,6 +375,9 @@ function CommentTree({
   onReply?: (commentId: string) => void;
   replyingToCommentId?: string | null;
   renderReplyBox?: (isReply?: boolean) => ReactNode;
+  onEdit?: (commentId: string) => void;
+  onDelete?: (commentId: string) => void;
+  currentUserId?: string;
 }) {
   return (
     <ul className="space-y-4">
@@ -419,6 +445,30 @@ function CommentTree({
                       Reply
                     </Button>
                   )}
+                  {onEdit && comment.authorId === currentUserId && (
+                    <Button
+                      size="xs"
+                      color="gray"
+                      outline
+                      className="cursor-pointer"
+                      onClick={() => onEdit(comment.id)}
+                    >
+                      <PencilSquareIcon className="mr-1 h-3.5 w-3.5" />
+                      Edit
+                    </Button>
+                  )}
+                  {onDelete && comment.authorId === currentUserId && (
+                    <Button
+                      size="xs"
+                      color="red"
+                      outline
+                      className="cursor-pointer"
+                      onClick={() => onDelete(comment.id)}
+                    >
+                      <TrashIcon className="mr-1 h-3.5 w-3.5" />
+                      Delete
+                    </Button>
+                  )}
                 </div>
               </div>
             </div>
@@ -432,6 +482,9 @@ function CommentTree({
                   onReply={onReply}
                   replyingToCommentId={replyingToCommentId}
                   renderReplyBox={renderReplyBox}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                  currentUserId={currentUserId}
                 />
               </div>
             )}
@@ -450,12 +503,21 @@ export function DiscussionDetail({
   onUpvote,
   onStatusChange,
   onSubmitComment,
+  onEditComment,
+  onDeleteComment,
 }: DiscussionDetailProps) {
+  const { user } = useAuth();
   const [commentDraft, setCommentDraft] = useState("");
   const [showCommentBox, setShowCommentBox] = useState(false);
   const [replyingToCommentId, setReplyingToCommentId] = useState<string | null>(
     null,
   );
+
+  const [editingComment, setEditingComment] = useState<{ id: string; content: string } | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [deletingCommentId, setDeletingCommentId] = useState<string | null>(null);
+
+  const isIssueClosed = issue.status === "CLOSED";
 
   const openWriteComment = () => {
     setReplyingToCommentId(null);
@@ -483,6 +545,41 @@ export function DiscussionDetail({
     closeCommentBox();
   };
 
+  const openEditComment = (commentId: string) => {
+    const findComment = (comments: Comment[]): Comment | undefined => {
+      for (const c of comments) {
+        if (c.id === commentId) return c;
+        const found = findComment(c.replies);
+        if (found) return found;
+      }
+      return undefined;
+    };
+    const comment = findComment(issue.comments);
+    if (comment) {
+      setEditingComment({ id: commentId, content: comment.content });
+      setEditContent(comment.content);
+    }
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingComment) return;
+    const markdown = htmlToMarkdown(editContent);
+    if (!markdown.trim()) return;
+    onEditComment?.(editingComment.id, markdown);
+    setEditingComment(null);
+    setEditContent("");
+  };
+
+  const handleDeleteComment = (commentId: string) => {
+    setDeletingCommentId(commentId);
+  };
+
+  const confirmDeleteComment = () => {
+    if (!deletingCommentId) return;
+    onDeleteComment?.(deletingCommentId);
+    setDeletingCommentId(null);
+  };
+
   const renderReplyBox = (isReply = false) => (
     <CommentReplyBox
       compact={isReply}
@@ -494,8 +591,65 @@ export function DiscussionDetail({
     />
   );
 
+  const showCommentForm = !isIssueClosed || user?.role === "LECTURER" || user?.role === "ADMIN";
+
   return (
     <div className="space-y-3">
+      {/* Edit comment modal */}
+      <Modal show={editingComment !== null} onClose={() => setEditingComment(null)} size="lg">
+        <ModalHeader>Edit comment</ModalHeader>
+        <ModalBody>
+          <TextInput
+            type="text"
+            value={editContent}
+            onChange={(e) => setEditContent(e.target.value)}
+            placeholder="Edit your comment"
+            className="w-full"
+          />
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="gray"
+            onClick={() => setEditingComment(null)}
+            className="cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            className="cursor-pointer bg-[#1F4E79] hover:bg-[#1F4E79]/90 dark:bg-[#C9A24D] dark:hover:bg-[#C9A24D]/90"
+            onClick={handleSaveEdit}
+          >
+            Save
+          </Button>
+        </ModalFooter>
+      </Modal>
+
+      {/* Delete comment confirmation modal */}
+      <Modal show={deletingCommentId !== null} onClose={() => setDeletingCommentId(null)} size="md">
+        <ModalHeader>Delete comment</ModalHeader>
+        <ModalBody>
+          <p className="text-sm text-gray-600 dark:text-gray-300">
+            Are you sure you want to delete this comment? This action cannot be undone.
+          </p>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="gray"
+            onClick={() => setDeletingCommentId(null)}
+            className="cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            color="red"
+            onClick={confirmDeleteComment}
+            className="cursor-pointer"
+          >
+            Delete
+          </Button>
+        </ModalFooter>
+      </Modal>
+
       {!hideBackButton && (
         <Button
           color="light"
@@ -516,6 +670,11 @@ export function DiscussionDetail({
               {issue.title}
             </h1>
             <div className="flex flex-wrap gap-2">
+              {issue.refProblem && (
+                <Badge color="blue">
+                  {issue.refProblem.title}
+                </Badge>
+              )}
               {issue.tags?.map((tag) => (
                 <Badge key={tag} color="gray">
                   {tag}
@@ -539,27 +698,32 @@ export function DiscussionDetail({
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                 Comments
               </h3>
-              <Button
-                size="sm"
-                color="light"
-                className="cursor-pointer"
-                onClick={openWriteComment}
-              >
-                <ChatBubbleLeftRightIcon className="mr-2 h-4 w-4" />
-                Write comment
-              </Button>
+              {showCommentForm && (
+                <Button
+                  size="sm"
+                  color="light"
+                  className="cursor-pointer"
+                  onClick={openWriteComment}
+                >
+                  <ChatBubbleLeftRightIcon className="mr-2 h-4 w-4" />
+                  Write comment
+                </Button>
+              )}
             </div>
             <CommentTree
               comments={issue.comments}
               onUpvote={onUpvote ? (id) => onUpvote("comment", id) : undefined}
-              onReply={openReply}
+              onReply={showCommentForm ? openReply : undefined}
               replyingToCommentId={replyingToCommentId}
               renderReplyBox={renderReplyBox}
+              onEdit={showCommentForm ? openEditComment : undefined}
+              onDelete={showCommentForm ? handleDeleteComment : undefined}
+              currentUserId={user?.id}
             />
           </div>
 
           {/* Write a Comment - at bottom only for new top-level comment */}
-          {showCommentBox && !replyingToCommentId && renderReplyBox(false)}
+          {showCommentBox && !replyingToCommentId && showCommentForm && renderReplyBox(false)}
         </div>
 
         {/* Right column: metadata & actions */}

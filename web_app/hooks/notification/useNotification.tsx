@@ -19,6 +19,7 @@ type UseNotificationOptions = {
   pageIndex?: number;
   pageSize?: number;
   enabled?: boolean;
+  isRead?: boolean | null;
 };
 
 function sortUnreadFirstNewest(items: Notification[]): Notification[] {
@@ -44,6 +45,7 @@ export const useNotification = ({
   pageIndex = 1,
   pageSize = 10,
   enabled = true,
+  isRead = null,
 }: UseNotificationOptions = {}) => {
   const axiosInstance = useAxios();
   const { user, authTokens } = useAuth();
@@ -74,9 +76,15 @@ export const useNotification = ({
     setError(null);
 
     try {
-      const url = `${Api.Notification.GET_BY_USER}?userId=${encodeURIComponent(
-        userId
-      )}&pageIndex=${encodeURIComponent(pageIndex)}&pageSize=${encodeURIComponent(pageSize)}`;
+      const params = new URLSearchParams({
+        userId: userId,
+        pageIndex: String(pageIndex),
+        pageSize: String(pageSize),
+      });
+      if (isRead !== null) {
+        params.append("isRead", String(isRead));
+      }
+      const url = `${Api.Notification.GET_BY_USER}?${params.toString()}`;
 
       const response = await axiosInstance.get<ApiResponse<PagedNotifications>>(url);
       const data = response.data?.dataResponse;
@@ -117,7 +125,7 @@ export const useNotification = ({
     } finally {
       setLoading(false);
     }
-  }, [axiosInstance, enabled, userId, pageIndex, pageSize]);
+  }, [axiosInstance, enabled, userId, pageIndex, pageSize, isRead]);
 
   useEffect(() => {
     refresh();

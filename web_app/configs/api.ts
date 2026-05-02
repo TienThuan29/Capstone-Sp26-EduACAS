@@ -116,10 +116,12 @@ export const Api = {
     GET_BY_ID: (id: string) => `/api/acas/v1/problems/${id}`,
     GET_BY_IDS: "/api/acas/v1/problems/by-ids",
     GET_BY_LECTURER: (lecturerId: string) => `/api/acas/v1/problems/lecturer/${lecturerId}`,
+    GET_FROM_EXAMINATIONS: (classroomId: string) => `/api/acas/v1/problems/from-examinations/classroom/${classroomId}`,
     CREATE: "/api/acas/v1/problems",
     UPDATE: (id: string) => `/api/acas/v1/problems/${id}`,
     DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
     OCR_EXTRACT: '/api/acas/v1/ocr/extract',
+    REVIEW: '/api/acas/v1/problems/review',
   },
 
   Question: {
@@ -177,11 +179,14 @@ export const Api = {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
     SAVE: '/api/v1/submissions',
+    FORCE: '/api/v1/submissions/force',
+    SUBMIT_AND_GRADE: '/api/v1/submissions/submit-and-grade',
     GET_BY_ID: (id: string) => `/api/v1/submissions/${id}`,
     GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
     GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
     GET_LATEST_BY_EXAM: (examId: string) => `/api/v1/submissions/exam/${examId}/latest-all`,
     GET_VERSIONS: (submissionId: string) => `/api/v1/submissions/${submissionId}/versions`,
+    GET_VERSIONS_BY_STUDENT_EXAM_PROBLEM: (examId: string, problemId: string, studentId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/student/${studentId}/versions`,
     AUTO_GRADE: '/api/v1/submissions/auto-grade',
     RE_GRADE: (id: string) => `/api/v1/submissions/${id}/regrade`,
     OVERRIDE_SCORE: (id: string) => `/api/v1/submissions/${id}/score`,
@@ -237,6 +242,8 @@ export const Api = {
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
     GET_ADMIN: "/api/acas/v1/discussion-issues/admin",
+    UPDATE_COMMENT: (commentId: string) => `/api/acas/v1/discussion-issues/comments/${commentId}`,
+    SOFT_DELETE_COMMENT: (commentId: string) => `/api/acas/v1/discussion-issues/comments/${commentId}/soft-delete`,
   },
 
   Proctoring: {

@@ -51,6 +51,7 @@ export interface Examination {
   mode: ExaminationMode;
   useStrict: boolean;
   minScoreThreshold: number;
+  maxAttempts: number | null;
   isDeleted: boolean;
   createdDate: string;
   updatedDate: string;
@@ -79,6 +80,7 @@ export interface ExaminationRequest {
   mode: ExaminationMode;
   useStrict: boolean;
   minScoreThreshold: number;
+  maxAttempts: number | null;
 }
 
 export interface ExamProblem {

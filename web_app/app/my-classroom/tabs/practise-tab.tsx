@@ -126,6 +126,12 @@ export function PractiseTab({
                       <span>Problems:</span>
                       <span className="font-bold">{problemCount}</span>
                     </div>
+                    <div className="flex justify-between">
+                      <span>Max attempts:</span>
+                      <span className="font-bold">
+                        {exam.maxAttempts != null ? exam.maxAttempts : "Unlimited"}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex gap-2">
