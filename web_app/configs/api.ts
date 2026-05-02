@@ -254,6 +254,7 @@ export const Api = {
   ErrorGroup: {
     GENERATE: "/api/v1/error-groups/generate",
     CHECK_SIMILARITY: "/api/v1/error-groups/check-similarity",
+    RECOMMEND_MIN_TOKEN_MATCH: "/api/v1/error-groups/recommend-min-token-match",
     GET_SUMMARY_BY_PROBLEM: (examId: string, problemId: string) => `/api/v1/error-groups/exam/${examId}/problem/${problemId}`,
     GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
     GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,

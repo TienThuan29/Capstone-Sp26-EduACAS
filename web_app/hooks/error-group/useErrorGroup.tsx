@@ -69,11 +69,23 @@ export const useErrorGroup = () => {
     [axiosInstance]
   );
 
+  const getRecommendedMinTokenMatch = useCallback(
+    async (examId: string, problemId: string): Promise<number> => {
+      const response = await axiosInstance.post<ApiResponse<number>>(
+        Api.ErrorGroup.RECOMMEND_MIN_TOKEN_MATCH,
+        { examId, problemId }
+      );
+      return response.data?.dataResponse ?? 4;
+    },
+    [axiosInstance]
+  );
+
   return {
     generateErrorGroups,
     checkSimilarity,
     getErrorGroupsByProblem,
     getErrorGroupsByExam,
     getErrorGroupDetail,
+    getRecommendedMinTokenMatch,
   };
 };
