@@ -11,8 +11,11 @@ import { useToast } from "@/hooks/useToast"
 import { Card, Badge } from "flowbite-react"
 import {
   AcademicCapIcon,
+  BellIcon,
   BookOpenIcon,
+  ChatBubbleLeftRightIcon,
   CodeBracketIcon,
+  UsersIcon,
   UserGroupIcon,
   UserPlusIcon,
   ArrowRightIcon,
@@ -161,31 +164,31 @@ export default function AdminDashboard() {
 
   const statsData = [
     {
-      title: "Tổng số lớp học",
+      title: "Total Classrooms",
       value: stats.classrooms.toString(),
       icon: <AcademicCapIcon className="h-6 w-6" />,
       accent: "blue" as const,
     },
     {
-      title: "Tổng số môn học",
+      title: "Total Subjects",
       value: stats.subjects.toString(),
       icon: <BookOpenIcon className="h-6 w-6" />,
       accent: "purple" as const,
     },
     {
-      title: "Ngôn ngữ lập trình",
+      title: "Programming Languages",
       value: stats.programmingLanguages.toString(),
       icon: <CodeBracketIcon className="h-6 w-6" />,
       accent: "green" as const,
     },
     {
-      title: "Tổng số sinh viên",
+      title: "Total Students",
       value: stats.students.toLocaleString("vi-VN"),
       icon: <UserGroupIcon className="h-6 w-6" />,
       accent: "orange" as const,
     },
     {
-      title: "Tổng số giảng viên",
+      title: "Total Lecturers",
       value: stats.teachers.toLocaleString("vi-VN"),
       icon: <UserPlusIcon className="h-6 w-6" />,
       accent: "pink" as const,
@@ -212,6 +215,34 @@ export default function AdminDashboard() {
       description: "Add, edit, delete programming language",
       icon: <CodeBracketIcon className="h-5 w-5" />,
       href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Users",
+      description: "View and manage user accounts",
+      icon: <UsersIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_USERS_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Notifications",
+      description: "Create and manage notifications",
+      icon: <BellIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_NOTIFICATIONS_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Discussions",
+      description: "Review and moderate discussions",
+      icon: <ChatBubbleLeftRightIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_DISCUSSIONS_PAGE,
+      accent: "gray" as const,
+    },
+    {
+      title: "Manage Materials",
+      description: "Manage learning materials",
+      icon: <BookOpenIcon className="h-5 w-5" />,
+      href: PageUrl.ADMIN_MATERIALS_PAGE,
       accent: "gray" as const,
     },
   ]
@@ -254,7 +285,7 @@ export default function AdminDashboard() {
           <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
             {quickActions.map((action, index) => {
               const style = accentStyles[action.accent] ?? accentStyles.gray
               return (

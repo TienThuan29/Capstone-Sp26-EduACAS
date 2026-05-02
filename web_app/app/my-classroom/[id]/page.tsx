@@ -15,15 +15,18 @@ import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import {
   ExamsTab,
   MaterialsTab,
-  AssignmentsTab,
+  // AssignmentsTab,
   PractiseTab,
   OverviewTab,
   SlotTab,
   DiscussionTab,
   StudentDashboardTab,
   QuizzesTab,
+  AcademicWarningsTab,
+  CompletedExamsTab,
 } from "@/app/my-classroom/tabs";
 import { ClassroomDetailPageSkeleton } from "@/components/ui/skeletons";
+import { ClassroomInfoBar } from "@/components/ClassroomInfoBar";
 
 function ClassroomContent() {
   const params = useParams();
@@ -61,7 +64,7 @@ function ClassroomContent() {
       router.push("/my-classroom");
     } catch (error) {
       console.error("Failed to leave class:", error);
-      alert("Rời lớp học thất bại. Vui lòng thử lại sau.");
+      alert("Failed to leave class. Please try again later.");
     } finally {
       setLeaveLoading(false);
     }
@@ -157,8 +160,8 @@ function ClassroomContent() {
         );
       case "materials":
         return <MaterialsTab classId={classId} />;
-      case "assignments":
-        return <AssignmentsTab />;
+      // case "assignments":
+      //   return <AssignmentsTab />;
       case "practise":
         return (
           <PractiseTab
@@ -189,6 +192,22 @@ function ClassroomContent() {
             classroomId={classId}
             classroomName={classroom.className}
             studentId={studentId}
+          />
+        );
+      case "academic-warning":
+        return (
+          <AcademicWarningsTab
+            classroomId={classId}
+            studentId={studentId}
+            classroomName={classroom?.className}
+          />
+        );
+      case "completed-exams":
+        return (
+          <CompletedExamsTab
+            classroomId={classId}
+            studentId={studentId}
+            classroomName={classroom?.className}
           />
         );
       default:
@@ -239,6 +258,11 @@ function ClassroomContent() {
               onClick={quizDetailBack}
               className="group inline-flex w-fit cursor-pointer items-center gap-3 border border-gray-200 px-6 py-2.5 text-sm font-bold text-[#1F4E79] hover:border-[#1F4E79] hover:bg-[#1F4E79] hover:text-white dark:border-gray-700 dark:bg-gray-800 dark:text-[#C9A24D] dark:hover:border-[#C9A24D] dark:hover:bg-[#C9A24D] dark:hover:text-gray-900"
             />
+          )}
+          {activeTab !== "overview" && classroom && (
+            <div className="ml-auto">
+              <ClassroomInfoBar classroom={classroom} compact />
+            </div>
           )}
         </div>
 

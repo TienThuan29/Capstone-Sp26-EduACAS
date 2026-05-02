@@ -10,6 +10,7 @@ export const Api = {
     REGISTER_VERIFICATION: "/api/auth/v1/register-verification",
     VERIFY_EMAIL: "/api/auth/v1/verify-email",
     FORGOT_PASSWORD: "/api/auth/v1/forgot-password",
+    CHECK_EMAIL: "/api/auth/v1/check-email",
     RESET_PASSWORD: "/api/auth/v1/reset-password",
     RESET_FIRST_LOGIN_PASSWORD: "/api/auth/v1/reset-first-login-password",
     GET_PROFILE: "/api/auth/v1/profile",
@@ -167,6 +168,7 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/materials/${id}`,
     DELETE: (id: string) => `/api/acas/v1/materials/${id}`,
     SOFT_DELETE: (id: string) => `/api/acas/v1/materials/${id}/soft-delete`,
+    RESTORE: (id: string) => `/api/acas/v1/materials/${id}/restore`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/acas/v1/materials/classroom/${classroomId}`,
     GET_ADMIN: '/api/acas/v1/materials/admin',
   },
@@ -245,6 +247,7 @@ export const Api = {
   ErrorGroup: {
     GENERATE: "/api/v1/error-groups/generate",
     CHECK_SIMILARITY: "/api/v1/error-groups/check-similarity",
+    RECOMMEND_MIN_TOKEN_MATCH: "/api/v1/error-groups/recommend-min-token-match",
     GET_SUMMARY_BY_PROBLEM: (examId: string, problemId: string) => `/api/v1/error-groups/exam/${examId}/problem/${problemId}`,
     GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
     GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,
@@ -350,5 +353,12 @@ export const Api = {
   AcademicWarning: {
     SEND_BATCH: "/api/v1/academic-warnings/batch",
     SEND_SINGLE: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
+    GET_BY_STUDENT: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
+    GET_BY_CLASSROOM: (classroomId: string) => `/api/v1/academic-warnings/classroom/${classroomId}`,
+    GET_BY_ID: (id: string) => `/api/v1/academic-warnings/${id}`,
+  },
+
+  PublicStatistics: {
+    GET: "/api/acas/v1/public-statistics",
   },
 };

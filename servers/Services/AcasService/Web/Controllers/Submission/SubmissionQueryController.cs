@@ -1,4 +1,5 @@
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.KeystrokeLogs;
 using AcasService.Application.Queries.Problem;
 using AcasService.Application.Queries.Submission;
 using AcasService.Application.ResponseDTOs;
@@ -15,17 +16,20 @@ public class SubmissionQueryController : ControllerBase
 {
       private readonly ISubmissionQuery _submissionQuery;
       private readonly IProblemQuery _problemQuery;
+      private readonly IKeystrokeLogsQuery _keystrokeLogsQuery;
       private readonly SubmissionMapper _submissionMapper;
       private readonly ILogger<SubmissionQueryController> _logger;
 
       public SubmissionQueryController(
             ISubmissionQuery submissionQuery,
             IProblemQuery problemQuery,
+            IKeystrokeLogsQuery keystrokeLogsQuery,
             SubmissionMapper submissionMapper,
             ILogger<SubmissionQueryController> logger)
       {
             _submissionQuery = submissionQuery;
             _problemQuery = problemQuery;
+            _keystrokeLogsQuery = keystrokeLogsQuery;
             _submissionMapper = submissionMapper;
             _logger = logger;
       }
@@ -71,18 +75,20 @@ public class SubmissionQueryController : ControllerBase
       }
 
       [HttpGet("exam/{examId}/latest-all")]
-      public async Task<ActionResult<ApiResponse<List<ProblemSubmissionsResponse>>>> GetLatestSubmissionsByExam([FromRoute] string examId)
+      public async Task<ActionResult<ApiResponse<List<ProblemSubmissionsResponse>>>> GetLatestSubmissionsByExam(
+            [FromRoute] string examId,
+            [FromQuery] string? studentId = null)
       {
             try
             {
                   if (string.IsNullOrWhiteSpace(examId))
                         return ResponseUtil.Error<List<ProblemSubmissionsResponse>>("Exam ID is required.", 400);
-                  var result = await _submissionQuery.GetLatestSubmissionsByExamAsync(examId);
+                  var result = await _submissionQuery.GetLatestSubmissionsByExamAsync(examId, studentId);
                   return ResponseUtil.Success(result, $"Retrieved latest submissions for {result.Count} problem(s).");
             }
             catch (Exception ex)
             {
-                  _logger.LogError(ex, "Error getting latest submissions for exam {ExamId}", examId);
+                  _logger.LogError(ex, "Error getting latest submissions for exam {ExamId}, student {StudentId}", examId, studentId);
                   return ResponseUtil.Error<List<ProblemSubmissionsResponse>>("Failed to get latest submissions", 500);
             }
       }
@@ -130,6 +136,12 @@ public class SubmissionQueryController : ControllerBase
                         submission.StudentId,
                         submission.ExamId,
                         submission.ProblemId);
+
+                  foreach (var v in versions)
+                  {
+                        var logs = await _keystrokeLogsQuery.GetBySubmissionIdAsync(v.Id);
+                        v.KeystrokeLogs = logs ?? new List<Models.KeystrokeLog>();
+                  }
 
                   var problem = await _problemQuery.GetProblemByIdAsync(submission.ProblemId);
                   ProblemLiteResponse? problemLite = null;

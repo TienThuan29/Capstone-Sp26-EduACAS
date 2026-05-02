@@ -47,7 +47,7 @@ export function HeaderToolbar() {
   const activeCompiler = selectedCompiler ?? compilers[0] ?? null;
   const dropdownLabel =
     compilers.length > 0 && activeCompiler
-      ? `${lang?.name ?? "Language"} - ${activeCompiler.name}`
+      ? `${lang?.name ?? "Language"} - ${activeCompiler.name?.trim() || activeCompiler.id}`
       : (lang?.name ?? "Language");
 
   const [showResetModal, setShowResetModal] = useState(false);
@@ -117,7 +117,8 @@ export function HeaderToolbar() {
                       : "cursor-pointer"
                   }
                 >
-                  {lang?.name ?? "Language"} - {compiler.name}
+                  {/* {lang?.name ?? "Language"} - {compiler.name}   */}
+                  {lang?.name ?? "Language"} - {(compiler.name?.trim() || compiler.id)}
                 </DropdownItem>
               ))
             ) : (

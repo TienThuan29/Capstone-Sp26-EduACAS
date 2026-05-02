@@ -1,22 +1,31 @@
 using System.Diagnostics;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using AcasService.Models;
 using Microsoft.Extensions.Logging;
+using AcasService.Application.Utils;
 
 namespace AcasService.Application.Commands.ErrorGroup;
 
 public interface IJPlagCommand
 {
-    Task<List<JPlagMatch>> RunSimilarityCheckAsync(string language, List<Models.Submission> submissions);
+    Task<List<JPlagMatch>> RunSimilarityCheckAsync(
+        string language,
+        List<Models.Submission> submissions,
+        string? baseCode = null,
+        string? baseCodeFileName = null,
+        int? customMinTokenMatch = null,
+        double? customMinSimilarity = null);
+
+
+    
+    int CalculateRecommendedMinTokenMatch(List<Models.Submission> submissions, string? baseCode = null);
 }
 
 public class JPlagCommand : IJPlagCommand
 {
-    private const int MinTokenMatchBaseCStyle = 8;
-    private const int MinTokenMatchBaseScriptLike = 6;
-    private const int MinTokenMatchBasePythonLike = 5;
-    private const int MinTokenMatchBaseDefault = 3;
 
     private readonly string _jarPath;
     private readonly ILogger<JPlagCommand> _logger;
@@ -27,7 +36,13 @@ public class JPlagCommand : IJPlagCommand
         _jarPath = Path.Combine(AppContext.BaseDirectory, "Application", "Thirdparty", "jplag.jar");
     }
 
-    public async Task<List<JPlagMatch>> RunSimilarityCheckAsync(string language, List<Models.Submission> submissions)
+    public async Task<List<JPlagMatch>> RunSimilarityCheckAsync(
+        string language,
+        List<Models.Submission> submissions,
+        string? baseCode = null,
+        string? baseCodeFileName = null,
+        int? customMinTokenMatch = null,
+        double? customMinSimilarity = null)
     {
         if (submissions == null || submissions.Count < 2)
         {
@@ -38,50 +53,81 @@ public class JPlagCommand : IJPlagCommand
         string sessionId = Guid.NewGuid().ToString();
         string tempDir = Path.Combine(Path.GetTempPath(), "AcasJPlag", sessionId);
         string submissionDir = Path.Combine(tempDir, "submissions");
+        string baseCodeDir = Path.Combine(tempDir, "basecode");
         string resultBaseName = Path.Combine(tempDir, "results");
         string resultZipPath = resultBaseName + ".jplag";
 
         try
         {
-            _logger.LogWarning("Bắt đầu chuẩn bị dữ liệu cho JPlag (Session: {SessionId}, Language: {Lang})", sessionId, language);
-            string ext = GetExtensionForLanguage(language);
+            _logger.LogWarning("Bắt đầu chuẩn bị dữ liệu cho JPlag với Base-Code (Session: {SessionId}, Language: {Lang})", sessionId, language);
+            string ext = LanguageUtils.GetExtensionForLanguage(language);
+            Directory.CreateDirectory(submissionDir);
+
+            if (submissions.Count > 100)
+            {
+                _logger.LogWarning("CẢNH BÁO: Số lượng bài nộp lớn ({Count}). Quá trình JPlag có thể tốn nhiều tài nguyên.", submissions.Count);
+            }
 
             foreach (var sub in submissions)
             {
-                string subFolderId = sub.Id;
-                string studentDir = Path.Combine(submissionDir, subFolderId);
+                if (string.IsNullOrWhiteSpace(sub.Source))
+                {
+                    _logger.LogInformation("Bỏ qua bài nộp {SubId} do nội dung trống.", sub.Id);
+                    continue;
+                }
+
+                string studentDir = Path.Combine(submissionDir, sub.Id);
                 Directory.CreateDirectory(studentDir);
                 string filePath = Path.Combine(studentDir, $"solution.{ext}");
                 string source = sub.Source ?? "";
                 if (language.ToLower().Contains("csharp") || language.ToLower().Contains("cs"))
                 {
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"namespace\s+[A-Za-z0-9_.]+", "namespace Unified");
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"(public\s+|partial\s+)*class\s+[A-Za-z0-9_]+", "class Submission");
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"namespace\s+[A-Za-z0-9_.]+(\s*\{)?", "namespace Unified {");
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"(public\s+|private\s+|internal\s+|partial\s+)*class\s+[A-Za-z0-9_]+", "class Submission");
+                }
+                else if (language.ToLower().Contains("python"))
+                {
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"class\s+[A-Za-z0-9_]+", "class Submission");
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"def\s+[A-Za-z0-9_]+", "def function_name");
+                }
+                else if (language.ToLower().Contains("javascript") || language.ToLower().Contains("typescript") || language.ToLower().Contains("js") || language.ToLower().Contains("ts"))
+                {
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"class\s+[A-Za-z0-9_]+", "class Submission");
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"function\s+[A-Za-z0-9_]*", "function function_name");
+                    source = System.Text.RegularExpressions.Regex.Replace(source, @"(const|let|var)\s+[A-Za-z0-9_]+", "$1 variable_name");
                 }
                 await File.WriteAllTextAsync(filePath, source);
-                
-                string preview = sub.Source.Length > 100 ? sub.Source.Substring(0, 100) : sub.Source;
-                _logger.LogCritical("PREVIEW {Student}: {Content}...", sub.StudentId, preview.Replace("\n", " "));
+                _logger.LogInformation("Đã tạo file: {FilePath} (Size: {Size})", filePath, sub.Source.Length);
+            }
 
-                if (File.Exists(filePath))
-                    _logger.LogWarning("Đã tạo file: {FilePath} (Size: {Size})", filePath, sub.Source.Length);
-                else
-                    _logger.LogError("LỖI: Không thể tạo file: {FilePath}", filePath);
+            if (!string.IsNullOrWhiteSpace(baseCode))
+            {
+                Directory.CreateDirectory(baseCodeDir);
+                string baseCodeFile = baseCodeFileName ?? $"basecode.{ext}";
+                string baseCodePath = Path.Combine(baseCodeDir, baseCodeFile);
+                await File.WriteAllTextAsync(baseCodePath, baseCode);
+                _logger.LogWarning("Đã tạo base-code file tại: {BaseCodePath} (Size: {Size})", baseCodePath, baseCode.Length);
+            }
+            else
+            {
+                _logger.LogInformation("Không có base-code được cung cấp, bỏ qua bước tạo base-code directory.");
             }
 
             await Task.Delay(500);
 
-            int minTokenMatch = CalculateMinTokenMatch(language, submissions[0].Source);
+            int minTokenMatch = customMinTokenMatch ?? CalculateRecommendedMinTokenMatch(submissions, baseCode);
+            double minSimilarity = customMinSimilarity ?? 0.0;
             string jplagLang = MapLanguageForJPlag(language);
-            
+
             if (Directory.Exists(submissionDir))
             {
                 var subDirs = Directory.GetDirectories(submissionDir);
                 _logger.LogWarning("Cấu trúc thư mục quét: {Dir} chứa {Count} thư mục con.", submissionDir, subDirs.Length);
-                foreach(var d in subDirs) {
-                   var files = Directory.GetFiles(d, "*.*", SearchOption.AllDirectories);
-                   _logger.LogWarning("  - SubDir {Name}: {Count} files ({Files})", 
-                       Path.GetFileName(d), files.Length, string.Join(", ", files.Select(Path.GetFileName)));
+                foreach (var d in subDirs)
+                {
+                    var files = Directory.GetFiles(d, "*.*", SearchOption.AllDirectories);
+                    _logger.LogWarning("  - SubDir {Name}: {Count} files ({Files})",
+                        Path.GetFileName(d), files.Length, string.Join(", ", files.Select(Path.GetFileName)));
                 }
             }
 
@@ -97,17 +143,26 @@ public class JPlagCommand : IJPlagCommand
             processInfo.ArgumentList.Add("-Djava.awt.headless=true");
             processInfo.ArgumentList.Add("-jar");
             processInfo.ArgumentList.Add(_jarPath);
-            processInfo.ArgumentList.Add("--mode"); 
-            processInfo.ArgumentList.Add("RUN");    
+            processInfo.ArgumentList.Add("--mode");
+            processInfo.ArgumentList.Add("RUN");
             processInfo.ArgumentList.Add("-l");
             processInfo.ArgumentList.Add(jplagLang);
             processInfo.ArgumentList.Add("-r");
-            processInfo.ArgumentList.Add(resultBaseName); 
+            processInfo.ArgumentList.Add(resultBaseName);
             processInfo.ArgumentList.Add("-t");
             processInfo.ArgumentList.Add(minTokenMatch.ToString());
-            processInfo.ArgumentList.Add("-m");
-            processInfo.ArgumentList.Add("0.0");
+            processInfo.ArgumentList.Add("--encoding");
+            processInfo.ArgumentList.Add("UTF-8");
+            processInfo.ArgumentList.Add("--normalize");
             processInfo.ArgumentList.Add("--overwrite");
+
+            if (!string.IsNullOrWhiteSpace(baseCode) && Directory.Exists(baseCodeDir))
+            {
+                processInfo.ArgumentList.Add("-bc");
+                processInfo.ArgumentList.Add(baseCodeDir);
+                _logger.LogWarning("Thêm --base-code argument: {BaseCodeDir}", baseCodeDir);
+            }
+
             processInfo.ArgumentList.Add(submissionDir);
 
             _logger.LogWarning("Thực thi JPlag: java {Args}", string.Join(" ", processInfo.ArgumentList));
@@ -115,11 +170,14 @@ public class JPlagCommand : IJPlagCommand
             using var process = Process.Start(processInfo);
             if (process == null) throw new Exception("Không thể khởi động tiến trình Java.");
 
+            var outputTask = process.StandardOutput.ReadToEndAsync();
+            var errTask = process.StandardError.ReadToEndAsync();
+
             await process.WaitForExitAsync();
 
-            string output = await process.StandardOutput.ReadToEndAsync();
-            string err = await process.StandardError.ReadToEndAsync();
-            
+            string output = await outputTask;
+            string err = await errTask;
+
             if (!string.IsNullOrWhiteSpace(output)) _logger.LogCritical("JPlag STDOUT: {Output}", output);
             if (!string.IsNullOrWhiteSpace(err)) _logger.LogCritical("JPlag STDERR: {Error}", err);
 
@@ -129,17 +187,21 @@ public class JPlagCommand : IJPlagCommand
             }
 
             _logger.LogWarning("JPlag hoàn tất thành công. Đang phân tích kết quả...");
-            var results = await ExtractMatchesFromArchiveAsync(resultZipPath);
+            var rawResults = await ExtractMatchesFromArchiveAsync(resultZipPath);
 
-            _logger.LogWarning("Đã tìm thấy {Count} cặp tương đồng từ JPlag.", results.Count);
-            foreach(var m in results.Take(10)) {
+            
+            var results = rawResults.Where(m => m.SimilarityScore >= minSimilarity).ToList();
+
+            _logger.LogWarning("Đã tìm thấy {Count} cặp tương đồng từ JPlag (sau khi lọc C# >= {Sim}%).", results.Count, minSimilarity * 100);
+            foreach (var m in results.Take(10))
+            {
                 _logger.LogWarning("  - Match: {S1} vs {S2} ({Sim}%)", m.Submission1Id, m.Submission2Id, Math.Round(m.SimilarityScore * 100, 2));
             }
             return results;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Lỗi xảy ra trong quá trình chạy JPlag Similarity Check");
+            _logger.LogError(ex, "Lỗi xảy ra trong quá trình chạy JPlag Similarity Check với Base-Code");
             throw;
         }
         finally
@@ -159,23 +221,56 @@ public class JPlagCommand : IJPlagCommand
         }
     }
 
-    private int CalculateMinTokenMatch(string language, string sourceCode)
+
+    private int EstimateTokenCount(string sourceCode, string language)
     {
-        int baseM = language.ToLower() switch {
-            "csharp" or "c#" or "java" or "cpp" or "c++" or "c" => MinTokenMatchBaseCStyle,
-            "javascript" or "typescript" or "go" or "golang" or "rust" => MinTokenMatchBaseScriptLike,
-            "python" or "python3" or "kotlin" or "swift" or "scala" => MinTokenMatchBasePythonLike,
-            _ => MinTokenMatchBaseDefault
-        };
+        if (string.IsNullOrWhiteSpace(sourceCode)) return 0;
 
-        int lineCount = sourceCode.Split('\n').Length;
-        double multiplier = lineCount switch {
-            < 300 => 1.0,
-            >= 300 and < 1000 => 1.5,
-            _ => 2.25
-        };
+        string code = sourceCode;
+        string mappedLang = MapLanguageForJPlag(language);
 
-        return (int)(baseM * multiplier);
+        if (mappedLang == "python3" || mappedLang == "rlang")
+        {
+            code = Regex.Replace(code, @"#.*?$", "", RegexOptions.Multiline);
+        }
+        else
+        {
+            code = Regex.Replace(code, @"/\*.*?\*/|//.*?$", "", RegexOptions.Singleline | RegexOptions.Multiline);
+        }
+        code = Regex.Replace(code, @"([""'])(?:(?=(\\?))\2.)*?\1", "STRING", RegexOptions.Singleline);
+        return Regex.Matches(code, @"[a-zA-Z0-9_]+|[^\s\w]").Count;
+    }
+
+    public int CalculateRecommendedMinTokenMatch(List<Models.Submission> submissions, string? baseCode = null)
+    {
+        string language = submissions.FirstOrDefault(s => !string.IsNullOrEmpty(s.LanguageId))?.LanguageId ?? "";
+        int baseCodeTokens = string.IsNullOrWhiteSpace(baseCode) ? 0 : EstimateTokenCount(baseCode, language);
+        
+        var tokenCounts = new List<int>();
+
+        foreach (var sub in submissions)
+        {
+            if (string.IsNullOrWhiteSpace(sub.Source)) continue;
+            int totalCount = EstimateTokenCount(sub.Source, language);
+            int studentCount = Math.Max(totalCount - baseCodeTokens, 1);
+            if (studentCount > 0) tokenCounts.Add(studentCount);
+        }
+
+        if (tokenCounts.Count == 0) return 4;
+
+        tokenCounts.Sort();
+        int medianTokens = tokenCounts[tokenCounts.Count / 2];
+
+        int matchRule = medianTokens switch
+        {
+            <= 50 => 4,     
+            <= 150 => 6,    
+            <= 300 => 8,    
+            <= 700 => 10,   
+            <= 1500 => 12,  
+            _ => 14         
+        };
+        return Math.Max(matchRule, 3);
     }
 
     private async Task<List<JPlagMatch>> ExtractMatchesFromArchiveAsync(string zipPath)
@@ -311,21 +406,6 @@ public class JPlagCommand : IJPlagCommand
 
         return results;
     }
-    
-    private string GetExtensionForLanguage(string lang) => lang.ToLower() switch {
-        "csharp" or "c#" => "cs",
-        "java" => "java",
-        "python" or "python3" => "py",
-        "cpp" or "c++" or "c" => "cpp",
-        "go" or "golang" => "go",
-        "javascript" => "js",
-        "typescript" => "ts",
-        "kotlin" => "kt",
-        "rust" => "rs",
-        "swift" => "swift",
-        _ => "txt"
-    };
-
     private string MapLanguageForJPlag(string lang) => lang.ToLower() switch {
         "csharp" or "c#" => "csharp",
         "java" => "java",

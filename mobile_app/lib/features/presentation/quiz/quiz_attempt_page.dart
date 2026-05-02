@@ -81,19 +81,12 @@ class _QuizAttemptPageState extends State<QuizAttemptPage> {
           : await QuizPracticeService.startAttempt(
               classroomQuizId: widget.classroomQuiz.id,
               studentId: userId,
+              passcode: widget.classroomQuiz.passcode,
             );
 
       final enrichedAttempt = await QuizPracticeService.getAttemptById(attempt.id) ?? attempt;
 
-      final refs = [...widget.quizDetail.questions]
-        ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
-
-      final questionFutures = refs
-          .map((ref) => QuizPracticeService.getQuestionById(ref.questionId))
-          .toList();
-
-      final loadedQuestions = await Future.wait(questionFutures);
-      final questions = loadedQuestions.whereType<QuestionDetail>().toList();
+      final questions = enrichedAttempt.questions;
 
       if (questions.isEmpty) {
         throw Exception('This quiz has no available questions.');
@@ -704,12 +697,21 @@ class _QuizAttemptPageState extends State<QuizAttemptPage> {
     }
 
     final question = _questions[_currentIndex];
+    final isMultipleChoice = _normalizeQuestionType(question.type) == 'MULTIPLE_CHOICE';
+    final correctCount = isMultipleChoice ? question.correctCount : 0;
+
+    String typeLabel = _questionTypeLabel(question.type);
+    if (isMultipleChoice && correctCount > 0) {
+      typeLabel = '$typeLabel (Choose $correctCount)';
+    }
+
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Text(
                 'Question ${_currentIndex + 1} of ${_questions.length}',
@@ -719,31 +721,40 @@ class _QuizAttemptPageState extends State<QuizAttemptPage> {
                   color: AppColors.textSecondary,
                 ),
               ),
-              const Spacer(),
-              OutlinedButton.icon(
-                onPressed: _isSubmitting ? null : _openQuestionNavigator,
-                icon: const Icon(Icons.grid_view_rounded, size: 16),
-                label: const Text('Questions'),
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                  visualDensity: VisualDensity.compact,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
-                ),
-                child: Text(
-                  _questionTypeLabel(question.type),
-                  style: const TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
-                  ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Wrap(
+                  alignment: WrapAlignment.end,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
+                  children: [
+                    OutlinedButton.icon(
+                      onPressed: _isSubmitting ? null : _openQuestionNavigator,
+                      icon: const Icon(Icons.grid_view_rounded, size: 16),
+                      label: const Text('Questions'),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(999),
+                        border: Border.all(color: Colors.grey.withValues(alpha: 0.2)),
+                      ),
+                      child: Text(
+                        typeLabel,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -756,14 +767,35 @@ class _QuizAttemptPageState extends State<QuizAttemptPage> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Text(
-              question.content,
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.textPrimary,
-                fontWeight: FontWeight.w700,
-                height: 1.5,
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (question.imageUrl != null && question.imageUrl!.isNotEmpty) ...[
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      question.imageUrl!,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          const SizedBox(height: 100, child: Center(child: Icon(Icons.broken_image, color: Colors.grey))),
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return const SizedBox(height: 100, child: Center(child: CircularProgressIndicator()));
+                      },
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
+                Text(
+                  question.content,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.textPrimary,
+                    fontWeight: FontWeight.w700,
+                    height: 1.5,
+                  ),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 14),

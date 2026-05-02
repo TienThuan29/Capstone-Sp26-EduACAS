@@ -16,14 +16,14 @@ export default function ContactPage() {
           <div
             className="inline-flex items-center gap-2 mb-6 px-5 py-2 rounded-full text-sm font-semibold bg-white dark:bg-gray-700 text-[#1F4E79] dark:text-[#C9A24D]"
           >
-            <SparklesIcon /> LIÊN HỆ
+            <SparklesIcon /> CONTACT
           </div>
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            <span className="text-[#1F4E79] dark:text-white">Liên hệ với </span>
-            <span className="text-[#C9A24D]">chúng tôi</span>
+            <span className="text-[#1F4E79] dark:text-white">Contact </span>
+            <span className="text-[#C9A24D]">Us</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            Chúng tôi luôn sẵn sàng hỗ trợ bạn. Hãy liên hệ với chúng tôi qua các phương thức bên dưới
+            We are always ready to support you. Contact us through the methods below
           </p>
         </div>
       </section>
@@ -36,10 +36,10 @@ export default function ContactPage() {
             <div className="space-y-6">
               <div>
                 <h2 className="text-3xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-                  Thông tin liên hệ
+                  Contact Information
                 </h2>
                 <p className="text-lg text-gray-700 dark:text-gray-300">
-                  Chọn phương thức liên hệ phù hợp với bạn
+                  Choose a contact method that suits you
                 </p>
               </div>
 
@@ -59,7 +59,7 @@ export default function ContactPage() {
                         support@edu-acas.edu.vn
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Phản hồi trong vòng 24 giờ
+                        Response within 24 hours
                       </p>
                     </div>
                   </div>
@@ -78,7 +78,7 @@ export default function ContactPage() {
                         (+84) 123 456 789
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Thứ 2 - Thứ 6, 8:00 - 17:00
+                        Monday - Friday, 8:00 - 17:00
                       </p>
                     </div>
                   </div>
@@ -92,13 +92,13 @@ export default function ContactPage() {
                     </div>
                     <div className="flex-1">
                       <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
-                        Địa chỉ
+                        Address
                       </h4>
                       <p className="text-gray-700 dark:text-gray-300">
-                        Trường Đại học FPT
+                        FPT University
                       </p>
                       <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                        Hòa Lạc, Hà Nội, Việt Nam
+                        Hoa Lac, Hanoi, Vietnam
                       </p>
                     </div>
                   </div>
@@ -107,7 +107,7 @@ export default function ContactPage() {
 
               <Card className="p-6 border-2 bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#1F4E79" }}>
                 <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-                  Kết nối với chúng tôi
+                  Connect with Us
                 </h4>
                 <div className="flex gap-4">
                   <a
@@ -153,18 +153,18 @@ export default function ContactPage() {
             {/* Contact Form */}
             <Card className="p-8 border-2 bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
               <h3 className="text-2xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-6">
-                Gửi tin nhắn cho chúng tôi
+                Send Us a Message
               </h3>
               <form className="space-y-5">
                 <div>
                   <Label htmlFor="fullname" className="mb-2">
-                    Họ và tên <span className="text-red-500">*</span>
+                    Full Name <span className="text-red-500">*</span>
                   </Label>
                   <TextInput
                     id="fullname"
                     type="text"
                     required
-                    placeholder="Nhập họ tên của bạn"
+                    placeholder="Enter your full name"
                     className="mt-1"
                   />
                 </div>
@@ -182,7 +182,7 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <Label htmlFor="phone" className="mb-2">
-                    Số điện thoại
+                    Phone Number
                   </Label>
                   <TextInput
                     id="phone"
@@ -193,25 +193,25 @@ export default function ContactPage() {
                 </div>
                 <div>
                   <Label htmlFor="subject" className="mb-2">
-                    Chủ đề <span className="text-red-500">*</span>
+                    Subject <span className="text-red-500">*</span>
                   </Label>
                   <TextInput
                     id="subject"
                     type="text"
                     required
-                    placeholder="Chủ đề tin nhắn"
+                    placeholder="Message subject"
                     className="mt-1"
                   />
                 </div>
                 <div>
                   <Label htmlFor="message" className="mb-2">
-                    Nội dung <span className="text-red-500">*</span>
+                    Message Content <span className="text-red-500">*</span>
                   </Label>
                   <Textarea
                     id="message"
                     rows={6}
                     required
-                    placeholder="Nhập nội dung tin nhắn của bạn..."
+                    placeholder="Enter your message..."
                     className="mt-1 resize-none"
                   />
                 </div>
@@ -220,7 +220,7 @@ export default function ContactPage() {
                   className="w-full px-6 py-4 font-bold rounded-lg hover:scale-105 transition-all text-lg"
                   style={{ background: "linear-gradient(90deg, #1F4E79 0%, #C9A24D 100%)" }}
                 >
-                  Gửi tin nhắn
+                  Send Message
                 </Button>
               </form>
             </Card>
@@ -233,47 +233,65 @@ export default function ContactPage() {
         <div className="container mx-auto max-w-4xl">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-4">
-              Câu hỏi thường gặp
+              Frequently Asked Questions
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-300">
-              Tìm câu trả lời cho các câu hỏi phổ biến
+              Find answers to common questions
             </p>
           </div>
 
           <div className="space-y-4">
             <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
-                Làm thế nào để đăng ký tài khoản?
+                How do I register an account?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Bạn có thể đăng ký tài khoản bằng cách click vào nút &quot;Đăng ký&quot; ở góc trên bên phải và điền thông tin cần thiết.
+                You can register an account by clicking the &quot;Register&quot; button in the top right corner and filling in the required information. You may also sign in using your Google account for a faster registration process.
               </p>
             </Card>
 
             <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
-                Edu-ACAS hỗ trợ những ngôn ngữ lập trình nào?
+                What programming languages does Edu-ACAS support?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Hiện tại chúng tôi hỗ trợ Python, Java, C++, JavaScript và nhiều ngôn ngữ khác. Danh sách đầy đủ có thể xem tại trang Features.
+                Edu-ACAS supports a wide range of languages including Python, Java, JavaScript, C/C++, TypeScript, and C#. Our automatic grading system evaluates submissions in all supported languages. Full details can be found on the Features page.
               </p>
             </Card>
 
             <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
-                Có mất phí khi sử dụng nền tảng không?
+                Is there a fee for using the platform?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Edu-ACAS miễn phí cho sinh viên FPT University. Các trường khác vui lòng liên hệ để biết thêm thông tin.
+                Edu-ACAS is a free educational platform provided by FPT University. Students and lecturers can access all features including assignments, automatic grading, discussion forums, and progress tracking at no cost.
               </p>
             </Card>
 
             <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
-                Tôi quên mật khẩu, phải làm sao?
+                How does automatic grading work?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
-                Bạn có thể click vào &quot;Quên mật khẩu&quot; ở trang đăng nhập và làm theo hướng dẫn để khôi phục mật khẩu.
+                When you submit your code, the system automatically evaluates it against predefined test cases covering syntax, logic, and performance. You receive detailed feedback instantly, helping you identify and fix issues without waiting for manual review.
+              </p>
+            </Card>
+
+            <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
+              <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
+                How can I ask questions about an assignment?
+              </h4>
+              <p className="text-gray-700 dark:text-gray-300">
+                Each classroom has a dedicated discussion forum where you can post questions and engage in conversations with both your lecturer and classmates. This keeps all course-related discussions organized and accessible.
+              </p>
+            </Card>
+
+            <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
+              <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
+                I forgot my password, what should I do?
+              </h4>
+              <p className="text-gray-700 dark:text-gray-300">
+                You can click &quot;Forgot Password&quot; on the login page and follow the instructions sent to your registered email to reset your password.
               </p>
             </Card>
           </div>

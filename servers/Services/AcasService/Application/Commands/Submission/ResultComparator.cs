@@ -155,10 +155,24 @@ public class ResultComparator : IResultComparator
                   }
             }
 
-            // If neither tolerance nor decimal places specified, use exact equality
+            // If neither tolerance nor decimal places specified, use epsilon-based comparison
             if (!option.FloatingPointTolerance.HasValue && !option.DecimalPlaces.HasValue)
             {
-                  return actualValue == expectedValue;
+                  // return actualValue == expectedValue;
+                  // Use epsilon comparison to handle floating-point representation errors
+                  // (e.g., 0.1 + 0.2 != 0.3 in binary floating-point)
+                  const double epsilon = 1e-9d;
+                  double diff = Math.Abs(actualValue - expectedValue);
+                  if (diff < epsilon)
+                  {
+                        return true;
+                  }
+                  // Special case: when both values are near zero, use a tighter threshold
+                  if (Math.Abs(actualValue) < epsilon && Math.Abs(expectedValue) < epsilon)
+                  {
+                        return true;
+                  }
+                  return false;
             }
 
             return true; // Passed all checks

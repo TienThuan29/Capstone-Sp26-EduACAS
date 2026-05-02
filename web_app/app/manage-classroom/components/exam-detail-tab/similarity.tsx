@@ -29,6 +29,7 @@ import {
   ArrowPathIcon,
   EyeIcon,
   CodeBracketSquareIcon,
+  Cog6ToothIcon,
 } from '@heroicons/react/24/outline';
 import type { Examination } from '@/types/examination';
 import type { ClassroomStudentResponse } from '@/types/classroom';
@@ -55,7 +56,8 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
     getErrorGroupsByProblem,
     getErrorGroupsByExam,
     generateErrorGroups,
-    checkSimilarity
+    checkSimilarity,
+    getRecommendedMinTokenMatch
   } = useErrorGroup();
   const { getLatestSubmissionsByExam } = useSubmission();
   const { showSuccess, showError, showWarning } = useToast();
@@ -70,7 +72,15 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
   const [actionLoadingPerGroup, setActionLoadingPerGroup] = useState<Record<string, boolean>>({});
   const [selectedProblemId, setSelectedProblemId] = useState<string>('all');
 
-  // Selected pair for diff modal
+  const [settingsModalProblemId, setSettingsModalProblemId] = useState<string | null>(null);
+  const [similaritySettings, setSimilaritySettings] = useState<Record<string, {
+    minTokenMatch?: number;
+    minSimilarity: number;
+    excludeBaseCode: boolean;
+  }>>({});
+  const [recommendLoading, setRecommendLoading] = useState(false);
+  const [recommendedValue, setRecommendedValue] = useState<number | null>(null);
+
   const [diffModalPair, setDiffModalPair] = useState<{
     groupId: string;
     sub1Id: string;
@@ -189,10 +199,15 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
         return;
       }
 
+      const settings = similaritySettings[problemId];
+
       await checkSimilarity({
         examId,
         problemId,
-        groupIds: groupIds.length > 0 ? groupIds : undefined
+        groupIds: groupIds.length > 0 ? groupIds : undefined,
+        minTokenMatch: settings?.minTokenMatch,
+        minSimilarity: settings?.minSimilarity,
+        excludeBaseCode: settings?.excludeBaseCode,
       });
 
       showSuccess("Scan completed successfully.");
@@ -205,9 +220,59 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
     }
   };
 
+  const handleOpenSettings = (problemId: string) => {
+    setSettingsModalProblemId(problemId);
+    setRecommendedValue(null);
+    if (!similaritySettings[problemId]) {
+      setSimilaritySettings(prev => ({
+        ...prev,
+        [problemId]: {
+          minTokenMatch: undefined,
+          minSimilarity: 0,
+          excludeBaseCode: true,
+        }
+      }));
+    }
+  };
+
+  const handleRecommendMinTokenMatch = async () => {
+    if (!settingsModalProblemId) return;
+    setRecommendLoading(true);
+    try {
+      const recommended = await getRecommendedMinTokenMatch(examId, settingsModalProblemId);
+      setRecommendedValue(recommended);
+      setSimilaritySettings(prev => ({
+        ...prev,
+        [settingsModalProblemId]: {
+          ...prev[settingsModalProblemId],
+          minTokenMatch: recommended,
+        }
+      }));
+      showSuccess(`Recommended MinTokenMatch: ${recommended}`);
+    } catch (err) {
+      console.error('Failed to get recommendation', err);
+      showError("Failed to calculate recommendation.");
+    } finally {
+      setRecommendLoading(false);
+    }
+  };
+
   const renderSignature = (signature: string) => {
     if (!signature) return null;
-    const parts = signature.split('_');
+    
+    let parts: string[] = [];
+    if (signature.includes('###')) {
+      parts = signature.split('###');
+    } else {
+      parts = signature.split('_').reduce((acc: string[], curr: string) => {
+        if (acc.length > 0 && (curr.startsWith('ERROR|') || acc[acc.length - 1].split('|').length < 3)) {
+          acc[acc.length - 1] += '_' + curr;
+        } else {
+          acc.push(curr);
+        }
+        return acc;
+      }, []);
+    }
 
     return (
       <div className="text-xs font-mono text-gray-600 bg-gray-50 p-2.5 rounded border border-gray-200 dark:bg-gray-900 dark:border-gray-800 space-y-1 w-full max-w-4xl mt-2 line-clamp-4 hover:line-clamp-none transition-all">
@@ -300,6 +365,16 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
                   <p className="text-xs text-gray-500">Max mark: {ep.mark}</p>
                 </div>
                 <div className="flex gap-2">
+                  <Tooltip content="Similarity Settings">
+                    <Button
+                      size="xs"
+                      color="light"
+                      className="cursor-pointer"
+                      onClick={() => handleOpenSettings(ep.problemId)}
+                    >
+                      <Cog6ToothIcon className="h-4 w-4" />
+                    </Button>
+                  </Tooltip>
                   <Button
                     size="xs"
                     color="light"
@@ -459,6 +534,149 @@ export function SimilarityTabContent({ examination }: SimilarityTabContentProps)
         pair={diffModalPair}
         onClose={() => setDiffModalPair(null)}
       />
+
+      {settingsModalProblemId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-700 bg-gradient-to-r from-[#1F4E79]/10 to-[#C9A24D]/10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#1F4E79] rounded-lg">
+                  <Cog6ToothIcon className="h-5 w-5 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">Similarity Settings</h3>
+                  <p className="text-xs text-gray-500">{problemDetails[settingsModalProblemId] || settingsModalProblemId}</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-5 space-y-6">
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Minimum Token Match
+                </label>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  The minimum number of consecutive code structures that must match to be flagged as plagiarism.
+                  A lower value increases detection sensitivity, while a higher value reduces false positives.
+                </p>
+                <input
+                  type="number"
+                  min={3}
+                  max={50}
+                  value={similaritySettings[settingsModalProblemId]?.minTokenMatch ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value ? parseInt(e.target.value) : undefined;
+                    setSimilaritySettings(prev => ({
+                      ...prev,
+                      [settingsModalProblemId!]: {
+                        ...prev[settingsModalProblemId!],
+                        minTokenMatch: val,
+                      }
+                    }));
+                  }}
+                  placeholder="Auto (system calculates)"
+                  className="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm py-2.5 px-3 focus:ring-[#1F4E79] focus:border-[#1F4E79]"
+                />
+                <div className="flex items-center gap-2">
+                  <Button
+                    size="sm"
+                    className="cursor-pointer bg-[#C9A24D] hover:bg-[#B08A3E] text-white whitespace-nowrap"
+                    onClick={handleRecommendMinTokenMatch}
+                    disabled={recommendLoading}
+                  >
+                    {recommendLoading ? <Spinner size="sm" className="mr-1" /> : null}
+                    Suggest
+                  </Button>
+                  {recommendedValue !== null && (
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">
+                      Recommended value: <span className="font-bold">{recommendedValue}</span>
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Minimum Similarity Threshold
+                </label>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  Only pairs with similarity above this threshold will appear in results.
+                </p>
+                <div className="flex items-center gap-4">
+                  <input
+                    type="range"
+                    min={0}
+                    max={100}
+                    step={5}
+                    value={Math.round((similaritySettings[settingsModalProblemId]?.minSimilarity ?? 0) * 100)}
+                    onChange={(e) => {
+                      setSimilaritySettings(prev => ({
+                        ...prev,
+                        [settingsModalProblemId!]: {
+                          ...prev[settingsModalProblemId!],
+                          minSimilarity: parseInt(e.target.value) / 100,
+                        }
+                      }));
+                    }}
+                    className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-[#1F4E79]"
+                  />
+                  <span className="text-sm font-bold text-[#1F4E79] dark:text-blue-400 min-w-[45px] text-right">
+                    {Math.round((similaritySettings[settingsModalProblemId]?.minSimilarity ?? 0) * 100)}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                  Exclude Base Code
+                </label>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  When enabled, the code template provided by the lecturer will be excluded from the comparison,
+                  ensuring only student-written code is analyzed.
+                </p>
+                <div className="flex items-center gap-3 pt-1">
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={similaritySettings[settingsModalProblemId]?.excludeBaseCode ?? true}
+                    onClick={() => {
+                      setSimilaritySettings(prev => ({
+                        ...prev,
+                        [settingsModalProblemId!]: {
+                          ...prev[settingsModalProblemId!],
+                          excludeBaseCode: !(prev[settingsModalProblemId!]?.excludeBaseCode ?? true),
+                        }
+                      }));
+                    }}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-[#1F4E79] focus:ring-offset-2 ${(similaritySettings[settingsModalProblemId]?.excludeBaseCode ?? true)
+                      ? 'bg-[#1F4E79]'
+                      : 'bg-gray-300 dark:bg-gray-600'
+                      }`}
+                  >
+                    <span
+                      className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-lg transition-transform ${(similaritySettings[settingsModalProblemId]?.excludeBaseCode ?? true) ? 'translate-x-6' : 'translate-x-1'
+                        }`}
+                    />
+                  </button>
+                  <span className="text-sm text-gray-600 dark:text-gray-400">
+                    {(similaritySettings[settingsModalProblemId]?.excludeBaseCode ?? true) ? 'Enabled (Recommended)' : 'Disabled'}
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="px-6 py-4 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3 bg-gray-50 dark:bg-gray-800/50">
+              <Button
+                size="sm"
+                color="light"
+                className="cursor-pointer"
+                onClick={() => setSettingsModalProblemId(null)}
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -634,8 +634,8 @@ type NumberOfTestcasesModalProps = {
 };
 
 const MIN_TESTCASES = 1;
-const MAX_TESTCASES = 20;
-const DEFAULT_COUNT = 5;
+const MAX_TESTCASES = 10;
+const DEFAULT_COUNT = 3;
 
 function NumberOfTestcasesModal({
   open,
@@ -679,6 +679,9 @@ function NumberOfTestcasesModal({
             onChange={(e) => setCount(Number(e.target.value) || DEFAULT_COUNT)}
             placeholder={`${DEFAULT_COUNT}`}
           />
+          <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+            For faster and more accurate results, generate <strong>3 or fewer</strong> test cases at a time. Requesting more may take significantly longer or fail due to API rate limits.
+          </p>
           {error && (
             <p className="text-sm text-red-500">{error}</p>
           )}

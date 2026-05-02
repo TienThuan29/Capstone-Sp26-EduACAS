@@ -1,4 +1,10 @@
 .env
+
+*./.vscode
+.vscode/
+.vscode/*
+.cursor/
+.env
 .env.production
 .env.local
 .env.*.local

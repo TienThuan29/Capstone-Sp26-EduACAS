@@ -55,7 +55,6 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
                       classroomId: widget.classroom.id,
                       classroomName: widget.classroom.className,
                     ),
-                    LecturerQuizzesTab(classroomId: widget.classroom.id),
                   ],
                 ),
               ),
@@ -156,7 +155,6 @@ class _ClassroomDetailPageState extends State<ClassroomDetailPage>
           Tab(text: 'Materials'),
           Tab(text: 'Quizzes'),
           Tab(text: 'Discussions'),
-          Tab(text: 'Quizzes'),
         ],
       ),
     );

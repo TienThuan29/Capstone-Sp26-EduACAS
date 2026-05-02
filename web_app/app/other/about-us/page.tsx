@@ -1,5 +1,6 @@
 "use client"
 
+import { useEffect, useState } from "react"
 import { Card } from "flowbite-react"
 import HomeNavbar from "@/components/navbar"
 import Footer from "@/components/footer"
@@ -10,8 +11,20 @@ import {
 } from "@/components/svg-icons"
 import Image from "next/image"
 import { LOGO_EDU_ACAS } from "@/assets/images"
+import { usePublicStatistics } from "@/hooks/public-statistics/usePublicStatistics"
+import type { PublicStatistics } from "@/types/public-statistics"
 
 export default function AboutUsPage() {
+  const { getPublicStatistics } = usePublicStatistics()
+  const [stats, setStats] = useState<PublicStatistics | null>(null)
+
+  useEffect(() => {
+    getPublicStatistics()
+      .then(setStats)
+      .catch(() => {
+        // silently fail — keep showing fallback numbers
+      })
+  }, [getPublicStatistics])
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <HomeNavbar />
@@ -29,7 +42,7 @@ export default function AboutUsPage() {
             <span className="text-[#C9A24D]">Edu-ACAS</span>
           </h1>
           <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed">
-            A modern programming learning platform connecting instructors and students in teaching, learning, and practicing programming languages
+            A modern programming learning platform connecting lecturers and students in teaching, learning, and practicing programming languages
           </p>
         </div>
       </section>
@@ -79,7 +92,7 @@ export default function AboutUsPage() {
                   Our Mission
                 </h2>
                 <p className="text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-                  Edu-ACAS is built with the mission to deliver the best programming learning experience for students and effective teaching tools for instructors. We believe that learning to code should be practiced in a professional environment with the right tools.
+                  Edu-ACAS is built with the mission to deliver the best programming learning experience for students and effective teaching tools for lecturers. We believe that learning to code should be practiced in a professional environment with the right tools.
                 </p>
               </div>
 
@@ -141,10 +154,10 @@ export default function AboutUsPage() {
                 </div>
               </div>
               <h3 className="text-xl font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-3">
-                Professional instructors
+                Professional lecturers
               </h3>
               <p className="text-gray-700 dark:text-gray-300">
-                Guided by experienced industry instructors, ensuring teaching quality
+                Guided by experienced industry lecturers, ensuring teaching quality
               </p>
             </Card>
 
@@ -179,19 +192,19 @@ export default function AboutUsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <Card className="p-8 text-center border-2 hover:shadow-lg transition-all bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
-              <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">1000+</div>
+              <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">{stats ? String(stats.totalStudents) : "—"}</div>
               <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Students</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Learning on the platform</p>
             </Card>
 
             <Card className="p-8 text-center border-2 hover:shadow-lg transition-all bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
-              <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">50+</div>
-              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Instructors</p>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Teaching on the system</p>
+              <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">{stats ? String(stats.totalLecturers) : "—"}</div>
+              <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Lecturers</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">Teaching on the platform</p>
             </Card>
 
             <Card className="p-8 text-center border-2 hover:shadow-lg transition-all bg-[#F5F7FA] dark:bg-gray-800" style={{ borderColor: "#C9A24D" }}>
-              <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">5+</div>
+              <div className="text-6xl font-mono font-bold text-[#C9A24D] mb-3">{stats ? String(stats.totalProgrammingLanguages) : "—"}</div>
               <p className="text-xl font-semibold text-[#1F4E79] dark:text-[#C9A24D] mb-1">Languages</p>
               <p className="text-sm text-gray-600 dark:text-gray-400">Programming languages supported</p>
             </Card>

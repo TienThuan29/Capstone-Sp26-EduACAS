@@ -6,6 +6,7 @@ using AcasService.Application.Commands.ProgrammingLanguage;
 using AcasService.Application.Commands.S3;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Mappers;
+using AcasService.Application.Queries.AcademicWarning;
 using AcasService.Application.Queries.Classroom;
 using AcasService.Application.Queries.Examination;
 using AcasService.Application.Queries.Problem;
@@ -51,6 +52,8 @@ using System.Threading.RateLimiting;
 using AcasService.Application.CodeRunner;
 using AcasService.Application.Commands.ClassEnrollments;
 using AcasService.Application.Commands.SlotCommand;
+using AcasService.Application.Queries.PublicStatistics;
+using AcasService.Repositories.PublicStatistics;
 using AcasService.Repositories.Slot;
 using AcasService.Application.Queries.ClassEnrollments;
 using AcasService.Application.Queries.Slot;
@@ -67,6 +70,7 @@ using AcasService.Application.Commands.DiscussionIssue;
 using AcasService.Application.Thirdparty;
 using AcasService.Application.Queries.Submission;
 using AcasService.Application.Queries.KeystrokeLogs;
+using AcasService.Repositories.Caching.Redis;
 using AcasService.Repositories.Caching.Redis.Submission;
 using AcasService.Repositories.Caching.Redis.KeystrokeLogs;
 using AcasService.Repositories.KeystrokeLogs;
@@ -93,12 +97,10 @@ using AcasService.Application.Queries.ErrorGroup;
 using AcasService.Repositories.Caching.Redis.Quiz;
 using AcasService.Web.Controllers.Notification;
 using AcasService.Application.Commands.Formatters;
-using AcasService.Application.Thirdparty;
 using AcasService.Repositories.AcademicWarning;
 using AcasService.Repositories.ExaminationTemplate;
 using AcasService.Application.Commands.ExaminationTemplate;
 using AcasService.Application.Queries.ExaminationTemplate;
-using AcasService.Application.Mappers;
 using AcasService.Application.Jobs;
 using Hangfire;
 using Hangfire.Dashboard;
@@ -120,17 +122,37 @@ var awsSecretKey = builder.Configuration["AWS:SecretKey"] ??
                    throw new InvalidOperationException("AWS_SECRET_KEY is not configured");
 
 var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
+
+// Cấu hình DynamoDB client với retry policy mạnh hơn
+var dynamoDbConfig = new Amazon.DynamoDBv2.AmazonDynamoDBConfig
+{
+    RegionEndpoint = regionEndpoint,
+    RetryMode = Amazon.Runtime.RequestRetryMode.Adaptive,
+    MaxErrorRetry = 10,
+    Timeout = TimeSpan.FromSeconds(30),
+};
+
+var awsCredentials = !string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey)
+    ? new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey)
+    : null;
+
+// Đăng ký DynamoDB client với Singleton lifetime để reuse connections
+builder.Services.AddSingleton<IAmazonDynamoDB>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<Program>>();
+    logger.LogInformation("Initializing DynamoDB client with Adaptive retry mode, MaxErrorRetry=10");
+    return new Amazon.DynamoDBv2.AmazonDynamoDBClient(awsCredentials, dynamoDbConfig);
+});
+
+// S3 client vẫn dùng cấu hình mặc định
 var awsOptions = new AWSOptions
 {
     Region = regionEndpoint
 };
-
-if (!string.IsNullOrEmpty(awsAccessKey) && !string.IsNullOrEmpty(awsSecretKey))
+if (awsCredentials != null)
 {
-    awsOptions.Credentials = new Amazon.Runtime.BasicAWSCredentials(awsAccessKey, awsSecretKey);
+    awsOptions.Credentials = awsCredentials;
 }
-
-builder.Services.AddAWSService<IAmazonDynamoDB>(awsOptions);
 builder.Services.AddAWSService<IAmazonS3>(awsOptions);
 
 // Redis configuration
@@ -236,11 +258,16 @@ builder.Services.AddScoped<IRegradingRequestRepository, RegradingRequestReposito
 builder.Services.AddScoped<IRegradingRequestCommand, RegradingRequestCommand>();
 builder.Services.AddScoped<IRegradingRequestQuery, RegradingRequestQuery>();
 
+// Public Statistics
+builder.Services.AddScoped<IPublicStatisticsRepository, PublicStatisticsRepository>();
+builder.Services.AddScoped<IPublicStatisticsQuery, PublicStatisticsQuery>();
+
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
 builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
 builder.Services.AddScoped<IQuizCache, QuizCache>();
 builder.Services.AddScoped<IExamLogCache, ExamLogCache>();
+builder.Services.AddScoped<IPublicStatisticsCache, PublicStatisticsCache>();
 
 // Command and Query
 builder.Services.AddScoped<IPrivateS3Command, PrivateS3Command>();
@@ -296,6 +323,7 @@ builder.Services.AddScoped<IFirebaseCloudMessageService, FirebaseCloudMessageSer
 builder.Services.AddScoped<INotificationCommand, NotificationCommand>();
 builder.Services.AddScoped<IBusinessNotificationService, BusinessNotificationService>();
 builder.Services.AddScoped<INotificationQuery, NotificationQuery>();
+builder.Services.AddScoped<IAcademicWarningQuery, AcademicWarningQuery>();
 builder.Services.AddScoped<IUserDeviceCommand, UserDeviceCommand>();
 builder.Services.AddScoped<IUserDeviceQuery, UserDeviceQuery>();
 builder.Services.AddScoped<IErrorGroupCommand, ErrorGroupCommand>();
@@ -336,7 +364,8 @@ builder.Services.AddScoped<ExaminationTemplateMapper>();
 builder.Services.AddHttpClient<ICodeRunnerService, CodeRunnerService>();
 builder.Services.AddHttpClient<ICompilationApi, CompilationApi>();
 builder.Services.AddHttpClient<ICodeFormatterApi, CodeFormatterApi>();
-builder.Services.AddHttpClient<IGeminiClient, GeminiClient>();
+builder.Services.AddHttpClient<IGeminiClient, GeminiClient>()
+    .ConfigureHttpClient(client => client.Timeout = TimeSpan.FromSeconds(120));
 
 // Azure Form Recognizer configuration
 var azureEndpoint = builder.Configuration["AzureFormRecognizer:Endpoint"] ??
