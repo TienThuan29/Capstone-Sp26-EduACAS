@@ -2,6 +2,7 @@ using AcasService.Application.Mappers;
 using AcasService.Application.ResponseDTOs;
 using AcasService.Messaging.User;
 using AcasService.Repositories.DiscussionIssue;
+using AcasService.Repositories.Problem;
 
 namespace AcasService.Application.Queries.DiscussionIssue;
 
@@ -24,17 +25,20 @@ public interface IDiscussionIssueQuery
 public class DiscussionIssueQuery : IDiscussionIssueQuery
 {
     private readonly IDiscussionIssueRepository _discussionIssueRepository;
+    private readonly IProblemRepository _problemRepository;
     private readonly DiscussionIssueMapper _discussionIssueMapper;
     private readonly UserRequestProducer _userRequestProducer;
     private readonly ILogger<DiscussionIssueQuery> _logger;
 
     public DiscussionIssueQuery(
         IDiscussionIssueRepository discussionIssueRepository,
+        IProblemRepository problemRepository,
         DiscussionIssueMapper discussionIssueMapper,
         UserRequestProducer userRequestProducer,
         ILogger<DiscussionIssueQuery> logger)
     {
         _discussionIssueRepository = discussionIssueRepository;
+        _problemRepository = problemRepository;
         _discussionIssueMapper = discussionIssueMapper;
         _userRequestProducer = userRequestProducer;
         _logger = logger;
@@ -56,6 +60,7 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
             .ToList();
 
         await EnrichListWithAuthorsAsync(responses);
+        await EnrichListWithRefProblemsAsync(responses);
 
         return new PagedResult<DiscussionIssueListResponse>(responses, totalCount, pageIndex, pageSize);
     }
@@ -70,8 +75,11 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
         var issue = await _discussionIssueRepository.FindByIdAsync(discussionId);
         if (issue == null) return null;
 
+        await _discussionIssueRepository.IncrementViewCountAsync(discussionId);
+
         var detail = _discussionIssueMapper.ToDetailResponse(issue);
         await EnrichDetailWithAuthorsAsync(detail);
+        await EnrichDetailWithRefProblemAsync(detail);
         return detail;
     }
 
@@ -91,6 +99,7 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
             .ToList();
 
         await EnrichListWithAuthorsAsync(responses);
+        await EnrichListWithRefProblemsAsync(responses);
 
         return new PagedResult<DiscussionIssueListResponse>(responses, totalCount, pageIndex, pageSize);
     }
@@ -156,5 +165,48 @@ public class DiscussionIssueQuery : IDiscussionIssueQuery
                 };
         }
         return result;
+    }
+
+    private async Task EnrichListWithRefProblemsAsync(List<DiscussionIssueListResponse> items)
+    {
+        var problemIds = items
+            .Select(x => x.RefProblemId)
+            .Where(id => !string.IsNullOrWhiteSpace(id))
+            .Distinct()
+            .ToList();
+        if (problemIds.Count == 0) return;
+
+        var problems = await _problemRepository.GetByIdsAsync(problemIds);
+        var map = problems
+            .Where(p => !p.IsDeleted)
+            .ToDictionary(p => p.Id, p => p.Title, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var item in items)
+        {
+            if (!string.IsNullOrWhiteSpace(item.RefProblemId) &&
+                map.TryGetValue(item.RefProblemId, out var title))
+            {
+                item.RefProblemTitle = title;
+            }
+        }
+    }
+
+    private async Task EnrichDetailWithRefProblemAsync(DiscussionIssueDetailResponse detail)
+    {
+        if (string.IsNullOrWhiteSpace(detail.RefProblemId)) return;
+
+        var problem = await _problemRepository.GetByIdAsync(detail.RefProblemId);
+        if (problem == null || problem.IsDeleted) return;
+
+        detail.RefProblem = new ProblemBasicResponse
+        {
+            Id = problem.Id,
+            Title = problem.Title,
+            Difficulty = problem.Difficulty,
+            Tags = problem.Tags?.ToList() ?? new List<string>(),
+            TestCasesCount = problem.TestCases?.Count(tc => !tc.IsDeleted) ?? 0,
+            CreatedDate = problem.CreatedDate,
+            UpdatedDate = problem.UpdatedDate
+        };
     }
 }

@@ -301,6 +301,7 @@ public class DynamoDbResetService : IDynamoDbResetService
                 Description = e.Description ?? "",
                 TotalMark = e.TotalMark, Status = status, Mode = mode,
                 IsPublicResult = true, IsDeleted = false,
+                MaxAttempts = null,
                 StartDatetime = now.AddDays(-7), EndDatetime = now.AddDays(30),
                 CreatedDate = now.AddDays(-14), UpdatedDate = now,
                 Problems = (e.Problems ?? new()).Select(p => new ExaminationProblem
@@ -924,6 +925,7 @@ public class DynamoDbResetService : IDynamoDbResetService
         public float TotalMark { get; set; }
         public string? Status { get; set; }
         public string? Mode { get; set; }
+        public int? MaxAttempts { get; set; }
         public List<ExamProblemDto>? Problems { get; set; }
     }
 

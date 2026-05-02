@@ -34,7 +34,7 @@ export function CustomPagination({
         return pages;
     };
 
-    if (totalPages <= 1) return null;
+    if (totalPages < 1) return null;
 
     return (
         <div className="flex items-center justify-center gap-2 py-4">

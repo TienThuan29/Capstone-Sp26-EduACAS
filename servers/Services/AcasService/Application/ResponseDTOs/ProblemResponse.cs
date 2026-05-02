@@ -104,3 +104,33 @@ public class ProblemBasicResponse
     [JsonPropertyName("updatedDate")]
     public DateTime UpdatedDate { get; set; }
 }
+
+public class ProblemReviewResponse
+{
+    [JsonPropertyName("suitabilityLabel")]
+    public string SuitabilityLabel { get; set; } = string.Empty;
+
+    [JsonPropertyName("summary")]
+    public string Summary { get; set; } = string.Empty;
+
+    [JsonPropertyName("recommendations")]
+    public List<ProblemReviewRecommendation> Recommendations { get; set; } = new List<ProblemReviewRecommendation>();
+
+    [JsonPropertyName("concerns")]
+    public List<string> Concerns { get; set; } = new List<string>();
+}
+
+public class ProblemReviewRecommendation
+{
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = string.Empty;
+
+    [JsonPropertyName("severity")]
+    public string Severity { get; set; } = string.Empty;
+
+    [JsonPropertyName("description")]
+    public string Description { get; set; } = string.Empty;
+
+    [JsonPropertyName("suggestedFix")]
+    public string SuggestedFix { get; set; } = string.Empty;
+}
