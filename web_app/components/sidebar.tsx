@@ -30,7 +30,6 @@ import {
   PuzzlePieceIcon,
   UserGroupIcon,
   ClockIcon,
-  BanknotesIcon,
   QuestionMarkCircleIcon,
   ChatBubbleLeftRightIcon,
   ChartBarIcon,
@@ -119,7 +118,7 @@ const Sidebar = () => {
       href: PageUrl.QUESTION_BANK_PAGE,
     },
     {
-      icon: BanknotesIcon,
+      icon: BookOpenIcon,
       label: "Quiz Banks",
       href: PageUrl.QUIZ_BANK_PAGE,
     },

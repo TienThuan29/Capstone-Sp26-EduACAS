@@ -1,4 +1,5 @@
 using Amazon.DynamoDBv2.Model;
+using System.Globalization;
 
 namespace AcasService.Repositories.Quiz;
 
@@ -29,7 +30,7 @@ public static class DynamoMapper
 					{
 						["quizId"] = new AttributeValue { S = question.QuizId },
 						["questionId"] = new AttributeValue { S = question.QuestionId },
-						["marks"] = new AttributeValue { N = question.Marks.ToString() },
+						["marks"] = new AttributeValue { N = question.Marks.ToString(CultureInfo.InvariantCulture) },
 						["displayOrder"] = new AttributeValue { N = question.DisplayOrder.ToString() }
 					}
 				}).ToList()
@@ -62,7 +63,7 @@ public static class DynamoMapper
 				{
 					QuizId = attribute.M["quizId"].S,
 					QuestionId = attribute.M["questionId"].S,
-					Marks = double.Parse(attribute.M["marks"].N),
+					Marks = double.Parse(attribute.M["marks"].N, CultureInfo.InvariantCulture),
 					DisplayOrder = int.Parse(attribute.M["displayOrder"].N)
 				})
 				.ToList();

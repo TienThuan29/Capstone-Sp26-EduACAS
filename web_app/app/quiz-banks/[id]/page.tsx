@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
+  ArrowPathIcon,
   BookOpenIcon,
   CheckIcon,
   ChevronDownIcon,
@@ -71,10 +72,14 @@ export default function QuizDetailPage() {
     useState<SelectedQuestionMap>({});
   const selectedQuestionsRef = useRef(selectedQuestions);
   const [reviewQuestions, setReviewQuestions] = useState<Question[]>([]);
+  const reviewQuestionsRef = useRef<Question[]>([]);
   const [loadingReviewQuestions, setLoadingReviewQuestions] = useState(false);
+  const [reviewPageIndex, setReviewPageIndex] = useState(1);
+  const reviewPageSize = 10;
 
   const [isQuizBankModalOpen, setIsQuizBankModalOpen] = useState(false);
   const [loadingQuizBank, setLoadingQuizBank] = useState(false);
+  const [importingQuizId, setImportingQuizId] = useState<string | null>(null);
   const [quizBankQuizzes, setQuizBankQuizzes] = useState<Quiz[]>([]);
   const [expandedQuizIds, setExpandedQuizIds] = useState<Record<string, boolean>>(
     {},
@@ -98,6 +103,10 @@ export default function QuizDetailPage() {
     selectedQuestionsRef.current = selectedQuestions;
   }, [selectedQuestions]);
 
+  useEffect(() => {
+    reviewQuestionsRef.current = reviewQuestions;
+  }, [reviewQuestions]);
+
   const selectedCount = useMemo(
     () => Object.keys(selectedQuestions).length,
     [selectedQuestions],
@@ -111,20 +120,44 @@ export default function QuizDetailPage() {
     [selectedQuestions],
   );
 
+  const formattedTotalMarks = useMemo(
+    () => Number(totalMarks.toFixed(2)),
+    [totalMarks],
+  );
+
+  const reviewTotalPages = useMemo(
+    () => Math.max(1, Math.ceil(reviewQuestions.length / reviewPageSize)),
+    [reviewQuestions.length, reviewPageSize],
+  );
+
+  const pagedReviewQuestions = useMemo(() => {
+    const startIndex = (reviewPageIndex - 1) * reviewPageSize;
+    return reviewQuestions.slice(startIndex, startIndex + reviewPageSize);
+  }, [reviewQuestions, reviewPageIndex, reviewPageSize]);
+
+  useEffect(() => {
+    setReviewPageIndex((prev) => Math.min(prev, reviewTotalPages));
+  }, [reviewTotalPages]);
+
   const autoDistributeMarks = useCallback(() => {
     if (selectedCount === 0) return;
-    const base = Math.floor(TOTAL_MARKS / selectedCount);
-    const remainder = TOTAL_MARKS % selectedCount;
+    const totalCents = Math.round(TOTAL_MARKS * 100);
+    const baseCents = Math.floor(totalCents / selectedCount);
+    const remainderCents = totalCents % selectedCount;
 
     setSelectedQuestions((prev) => {
       const next = { ...prev };
-      let extra = remainder;
-      Object.keys(next).forEach((qId) => {
+      const orderedQuestionIds = Object.entries(next)
+        .sort(([, a], [, b]) => a.displayOrder - b.displayOrder)
+        .map(([questionId]) => questionId);
+
+      orderedQuestionIds.forEach((qId, index) => {
+        const marksCents = baseCents + (index < remainderCents ? 1 : 0);
         next[qId] = {
           ...next[qId],
-          marks: extra > 0 ? base + 1 : base,
+          // Distribute with 2 decimal places and guarantee sum is exactly TOTAL_MARKS.
+          marks: Math.max(marksCents / 100, 0.01),
         };
-        if (extra > 0) extra -= 1;
       });
       return next;
     });
@@ -252,13 +285,27 @@ export default function QuizDetailPage() {
 
     setLoadingReviewQuestions(true);
     try {
-      const details = await Promise.all(selectedIds.map((id) => getQuestionById(id)));
-      const questionMap = details
+      const existingQuestionMap = reviewQuestionsRef.current.reduce<Record<string, Question>>(
+        (acc, item) => {
+          acc[item.id] = item;
+          return acc;
+        },
+        {},
+      );
+
+      const missingIds = selectedIds.filter((id) => !existingQuestionMap[id]);
+      const fetchedDetails = await Promise.all(missingIds.map((id) => getQuestionById(id)));
+      const fetchedQuestionMap = fetchedDetails
         .filter((item): item is Question => item !== null)
         .reduce<Record<string, Question>>((acc, item) => {
           acc[item.id] = item;
           return acc;
         }, {});
+
+      const questionMap = {
+        ...existingQuestionMap,
+        ...fetchedQuestionMap,
+      };
 
       const ordered = selectedIds
         .map((id) => questionMap[id])
@@ -310,8 +357,17 @@ export default function QuizDetailPage() {
           return a.displayOrder - b.displayOrder;
         });
 
+        const seenQuestionIds = new Set<string>();
+        const uniqueSourceQuestionItems = sourceQuestionItems.filter((item) => {
+          if (seenQuestionIds.has(item.questionId)) {
+            return false;
+          }
+          seenQuestionIds.add(item.questionId);
+          return true;
+        });
+
         const questionViews = await Promise.all(
-          sourceQuestionItems.map(async (item, index) => {
+          uniqueSourceQuestionItems.map(async (item, index) => {
             const detail = await getQuestionById(item.questionId);
             return {
               questionId: item.questionId,
@@ -409,11 +465,36 @@ export default function QuizDetailPage() {
 
   const handleImportWholeQuiz = useCallback(
     async (sourceQuizId: string) => {
-      const sourceQuestions = await loadQuizBankQuestions(sourceQuizId);
-      appendQuestionsToSelection(sourceQuestions);
-      toast.showSuccess(`Imported ${sourceQuestions.length} question(s) from quiz`);
+      setImportingQuizId(sourceQuizId);
+      try {
+        const sourceQuestions = await loadQuizBankQuestions(sourceQuizId);
+
+        if (sourceQuestions.length === 0) {
+          toast.showWarning("This quiz has no valid questions to import");
+          return;
+        }
+
+        const questionsToAdd = sourceQuestions.filter(
+          (item) => !selectedQuestionIdSet.has(item.questionId),
+        );
+        const duplicateCount = sourceQuestions.length - questionsToAdd.length;
+
+        if (questionsToAdd.length === 0) {
+          toast.showInfo("All questions in this quiz were already added");
+          return;
+        }
+
+        appendQuestionsToSelection(questionsToAdd);
+        toast.showSuccess(
+          duplicateCount > 0
+            ? `Imported ${questionsToAdd.length} question(s). Skipped ${duplicateCount} duplicate(s)`
+            : `Imported ${questionsToAdd.length} question(s) from quiz`,
+        );
+      } finally {
+        setImportingQuizId(null);
+      }
     },
-    [loadQuizBankQuestions, appendQuestionsToSelection, toast],
+    [loadQuizBankQuestions, selectedQuestionIdSet, appendQuestionsToSelection, toast],
   );
 
   const handleRemoveWholeQuiz = useCallback(
@@ -448,7 +529,7 @@ export default function QuizDetailPage() {
     }
 
     if (selectedCount > 0 && Math.abs(totalMarks - TOTAL_MARKS) > 0.001) {
-      toast.showError(`Total marks must equal ${TOTAL_MARKS}. Current total: ${totalMarks}`);
+      toast.showError(`Total marks must equal ${TOTAL_MARKS}. Current total: ${formattedTotalMarks}`);
       return;
     }
 
@@ -473,6 +554,10 @@ export default function QuizDetailPage() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleRefreshPage = () => {
+    window.location.reload();
   };
 
   if (!mounted) return null;
@@ -501,10 +586,21 @@ export default function QuizDetailPage() {
           </p>
         </div>
 
-        <Button className="cursor-pointer" color="blue" onClick={handleSave} disabled={saving || loading}>
-          <CheckIcon className="mr-2 h-5 w-5" />
-          {saving ? "Saving..." : "Save Assignment"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            className="cursor-pointer"
+            color="light"
+            onClick={handleRefreshPage}
+            disabled={saving}
+          >
+            <ArrowPathIcon className="mr-2 h-5 w-5" />
+            Refresh Page
+          </Button>
+          <Button className="cursor-pointer" color="blue" onClick={handleSave} disabled={saving || loading}>
+            <CheckIcon className="mr-2 h-5 w-5" />
+            {saving ? "Saving..." : "Save Assignment"}
+          </Button>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-3">
@@ -543,7 +639,7 @@ export default function QuizDetailPage() {
                         : "text-red-500"
                     }`}
                   >
-                    {totalMarks} / {TOTAL_MARKS}
+                    {formattedTotalMarks} / {TOTAL_MARKS}
                   </span>
                 </div>
                 <Button
@@ -573,12 +669,12 @@ export default function QuizDetailPage() {
           <Table>
             <TableHead>
               <TableRow>
-                <TableHeadCell>Actions</TableHeadCell>
                 <TableHeadCell>Question content</TableHeadCell>
                 <TableHeadCell>Type</TableHeadCell>
                 <TableHeadCell>Answer options</TableHeadCell>
                 <TableHeadCell>Marks</TableHeadCell>
                 <TableHeadCell>Display order</TableHeadCell>
+                <TableHeadCell>Actions</TableHeadCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -589,22 +685,10 @@ export default function QuizDetailPage() {
                   </TableCell>
                 </TableRow>
               ) : (
-                reviewQuestions.map((question) => {
+                pagedReviewQuestions.map((question) => {
                   const selected = selectedQuestions[question.id];
                   return (
                     <TableRow key={question.id}>
-                      <TableCell>
-                        <Button
-                          size="xs"
-                          color="red"
-                          className="cursor-pointer"
-                          onClick={() =>
-                            removeQuestionsFromSelection([question.id])
-                          }
-                        >
-                          <TrashIcon className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
                       <TableCell className="max-w-xl">
                         <div className="flex items-start gap-2">
                           <div className="line-clamp-2 text-sm max-w-[90%]">{question.content}</div>
@@ -656,16 +740,16 @@ export default function QuizDetailPage() {
                         <TextInput
                           id={`marks-${question.id}`}
                           type="number"
-                          min={0.5}
+                          min={0.01}
                           max={TOTAL_MARKS}
-                          step={0.5}
+                          step={0.01}
                           value={String(selected?.marks ?? 0)}
                           disabled={!selected}
                           onChange={(e) =>
                             updateSelectedMeta(
                               question.id,
                               "marks",
-                              Math.max(0.5, Math.min(Number(e.target.value || 0), TOTAL_MARKS)),
+                              Math.max(0.01, Math.min(Number(e.target.value || 0), TOTAL_MARKS)),
                             )
                           }
                         />
@@ -692,6 +776,18 @@ export default function QuizDetailPage() {
                           }
                         />
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          size="xs"
+                          color="red"
+                          className="cursor-pointer"
+                          onClick={() =>
+                            removeQuestionsFromSelection([question.id])
+                          }
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   );
                 })
@@ -700,6 +796,16 @@ export default function QuizDetailPage() {
           </Table>
         )}
       </div>
+
+      {!loading && !loadingReviewQuestions && reviewQuestions.length > 0 && (
+        <div className="mt-4">
+          <CustomPagination
+            currentPage={reviewPageIndex}
+            totalPages={reviewTotalPages}
+            onPageChange={setReviewPageIndex}
+          />
+        </div>
+      )}
 
       <Modal
         show={isQuizBankModalOpen}
@@ -750,9 +856,9 @@ export default function QuizDetailPage() {
                               ? handleRemoveWholeQuiz(sourceQuiz.id)
                               : handleImportWholeQuiz(sourceQuiz.id)
                           }
-                          disabled={loadingSourceQuestions}
+                          disabled={loadingSourceQuestions || importingQuizId === sourceQuiz.id}
                         >
-                          {loadingSourceQuestions
+                          {loadingSourceQuestions || importingQuizId === sourceQuiz.id
                             ? "Loading..."
                             : importedAll
                               ? "Remove all"
