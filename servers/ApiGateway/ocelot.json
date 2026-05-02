@@ -34,7 +34,10 @@
         }
       ],
       "UpstreamPathTemplate": "/api/v1/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "QoSOptions": {
+        "TimeoutValue": 300000
+      }
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
@@ -46,7 +49,10 @@
         }
       ],
       "UpstreamPathTemplate": "/api/acas/v1/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "QoSOptions": {
+        "TimeoutValue": 300000
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
