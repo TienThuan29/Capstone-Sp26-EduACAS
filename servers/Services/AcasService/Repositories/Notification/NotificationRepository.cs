@@ -54,23 +54,27 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
         }
     }
 
-    public async Task<List<Models.Notification>> FindByTargetUserIdAsync(string targetUserId)
+    public async Task<List<Models.Notification>> FindByTargetUserIdAsync(string targetUserId, bool? isRead = null)
     {
         try
         {
             var request = new ScanRequest
             {
                 TableName = _notificationTableName,
-                // Soft delete: if the item has isDeleted=true, exclude it.
-                // For backward compatibility, treat missing isDeleted as false.
                 FilterExpression =
-                    "targetUserId = :targetUserId AND (attribute_not_exists(isDeleted) OR isDeleted = :isDeletedFalse)",
+                    "targetUserId = :targetUserId AND (attribute_not_exists(isDeleted) OR isDeleted = :isDeletedFalse)" +
+                    (isRead.HasValue ? " AND isRead = :isRead" : ""),
                 ExpressionAttributeValues = new Dictionary<string, AttributeValue>
                 {
                     [":targetUserId"] = new AttributeValue { S = targetUserId },
                     [":isDeletedFalse"] = new AttributeValue { BOOL = false }
                 }
             };
+
+            if (isRead.HasValue)
+            {
+                request.ExpressionAttributeValues[":isRead"] = new AttributeValue { BOOL = isRead.Value };
+            }
 
             var response = await _dynamoDBClient.ScanAsync(request);
             return response.Items
@@ -80,7 +84,7 @@ public class NotificationRepository : DynamoRepository, INotificationRepository
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error finding notifications for user {TargetUserId}", targetUserId);
+            _logger.LogError(ex, "Error finding notifications for user {TargetUserId} with isRead filter {IsRead}", targetUserId, isRead);
             throw;
         }
     }

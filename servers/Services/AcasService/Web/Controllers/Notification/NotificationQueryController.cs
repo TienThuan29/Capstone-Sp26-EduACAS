@@ -27,14 +27,15 @@ public class NotificationQueryController : ControllerBase
     public async Task<ActionResult<ApiResponse<PagedResult<NotificationResponse>>>> GetByUserId(
         [FromQuery] string userId,
         [FromQuery] int pageIndex = 1,
-        [FromQuery] int pageSize = 10)
+        [FromQuery] int pageSize = 10,
+        [FromQuery] bool? isRead = null)
     {
         try
         {
             if (string.IsNullOrWhiteSpace(userId))
                 return ResponseUtil.Error<PagedResult<NotificationResponse>>("userId is required", 400);
 
-            var result = await _notificationQuery.GetNotificationsByUserIdAsync(userId, pageIndex, pageSize);
+            var result = await _notificationQuery.GetNotificationsByUserIdAsync(userId, pageIndex, pageSize, isRead);
             return ResponseUtil.Success(result, "Get notifications successfully", 200);
         }
         catch (Exception ex)
