@@ -76,3 +76,24 @@ public class ChangeDiscussionStatusRequest
 
     public DiscussionIssueStatus Status { get; set; }
 }
+
+public class UpdateCommentRequest
+{
+    [Required]
+    public string IssueId { get; set; } = string.Empty;
+
+    [Required]
+    public string CommentId { get; set; } = string.Empty;
+
+    [Required]
+    public string Content { get; set; } = string.Empty;
+}
+
+public class SoftDeleteCommentRequest
+{
+    [Required]
+    public string IssueId { get; set; } = string.Empty;
+
+    [Required]
+    public string CommentId { get; set; } = string.Empty;
+}

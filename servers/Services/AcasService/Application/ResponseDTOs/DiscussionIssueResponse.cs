@@ -48,6 +48,12 @@ public class DiscussionIssueListResponse
     [JsonPropertyName("tags")]
     public string[] Tags { get; set; } = Array.Empty<string>();
 
+    [JsonPropertyName("refProblemId")]
+    public string RefProblemId { get; set; } = string.Empty;
+
+    [JsonPropertyName("refProblemTitle")]
+    public string RefProblemTitle { get; set; } = string.Empty;
+
     [JsonPropertyName("isDeleted")]
     public bool IsDeleted { get; set; }
 }
@@ -80,6 +86,9 @@ public class DiscussionIssueDetailResponse
 
     [JsonPropertyName("refProblemId")]
     public string RefProblemId { get; set; } = string.Empty;
+
+    [JsonPropertyName("refProblem")]
+    public ProblemBasicResponse? RefProblem { get; set; }
 
     [JsonPropertyName("status")]
     public DiscussionIssueStatus Status { get; set; }

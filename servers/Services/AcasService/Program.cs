@@ -285,6 +285,7 @@ builder.Services.AddScoped<IExaminationJobScheduling, ExaminationJobScheduling>(
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
+builder.Services.AddScoped<IProblemReviewCommand, ProblemReviewCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<ITestcaseGenerator, TestcaseGenerator>();
 builder.Services.AddScoped<ITestcaseCommand, TestcaseCommand>();

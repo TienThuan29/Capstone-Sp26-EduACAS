@@ -35,7 +35,7 @@ namespace AcasService.Tests.Queries
                 new Notification { Id = "2", IsRead = false, SentDate = DateTime.Now.AddMinutes(-5) },
                 new Notification { Id = "3", IsRead = false, SentDate = DateTime.Now }
             };
-            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId)).ReturnsAsync(notifications);
+            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId, null)).ReturnsAsync(notifications);
 
             var result = await _sut.GetNotificationsByUserIdAsync(userId, 1, 10);
 
@@ -49,7 +49,7 @@ namespace AcasService.Tests.Queries
         public async Task GetNotificationsByUserIdAsync_UTC02_Boundary_ShouldReturnEmpty_WhenNoNotificationsFound()
         {
             var userId = "u1";
-            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId)).ReturnsAsync(new List<Notification>());
+            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId, null)).ReturnsAsync(new List<Notification>());
 
             var result = await _sut.GetNotificationsByUserIdAsync(userId, 1, 10);
             Assert.NotNull(result);
@@ -68,7 +68,7 @@ namespace AcasService.Tests.Queries
         public async Task GetNotificationsByUserIdAsync_UTC04_Boundary_ShouldCorrectPageSize_WhenExceeds100()
         {
             var userId = "u1";
-            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId)).ReturnsAsync(new List<Notification>());
+            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId, null)).ReturnsAsync(new List<Notification>());
 
             var result = await _sut.GetNotificationsByUserIdAsync(userId, 1, 200);
 
@@ -79,7 +79,7 @@ namespace AcasService.Tests.Queries
         public async Task GetNotificationsByUserIdAsync_UTC05_Boundary_ShouldCorrectPageSize_WhenIsZero()
         {
             var userId = "u1";
-            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId)).ReturnsAsync(new List<Notification>());
+            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(userId, null)).ReturnsAsync(new List<Notification>());
 
             var result = await _sut.GetNotificationsByUserIdAsync(userId, 1, 0);
 
@@ -97,7 +97,7 @@ namespace AcasService.Tests.Queries
                 new Notification { Id = "1", SentDate = DateTime.Now.AddMinutes(-10) },
                 new Notification { Id = "2", SentDate = DateTime.Now }
             };
-            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(targetUserId)).ReturnsAsync(notifications);
+            _notificationRepositoryMock.Setup(r => r.FindByTargetUserIdAsync(targetUserId, null)).ReturnsAsync(notifications);
 
             var result = await _sut.GetByTargetUserIdAsync(targetUserId);
 

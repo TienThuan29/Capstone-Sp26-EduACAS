@@ -17,7 +17,7 @@ import React, {
 import { useAuth } from '@/contexts/AuthContext';
 import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
-import type { SubmissionResponse } from '@/types/submission';
+import type { SubmissionResponse, AutoGradeSubmissionResult } from '@/types/submission';
 import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
 import { useKeystrokeTracking, KeystrokeRecord } from '@/hooks/typing/useKeystrokeTracking';
 
@@ -131,8 +131,15 @@ interface EditorContextType {
   // Actions
   runCode: () => Promise<void>;
   submitCode: () => Promise<SubmissionResponse | null>;
+  submitCodeForce: () => Promise<SubmissionResponse | null>;
+  submitAndGrade: () => Promise<AutoGradeSubmissionResult | null>;
+  practiceTestResults: AutoGradeSubmissionResult | null;
+  setPracticeTestResults: (result: AutoGradeSubmissionResult | null) => void;
   isRunning: boolean;
   isSubmitting: boolean;
+  isPracticeSubmitting: boolean;
+  submissionError: string | null;
+  clearSubmissionError: () => void;
 
   // Anti-cheat (Keystrokes)
   keystrokeCount: number;
@@ -169,7 +176,7 @@ const FALLBACK_BOILERPLATE: Record<string, string> = {
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
-  const { saveSubmission } = useSubmissionStudent();
+  const { saveSubmission, forceSubmission, submitAndGrade: submitAndGradeApi } = useSubmissionStudent();
 
   // Editor State – language is overwritten by examination.programmingLanguage when exam loads
   const [editorState, setEditorState] = useState<EditorState>({
@@ -233,6 +240,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [timeOffset, setTimeOffset] = useState(0); // Difference between server and client time
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const submitCodeForceRef = useRef<(() => Promise<SubmissionResponse | null>) | null>(null);
 
   // Layout
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
@@ -251,6 +259,15 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   // Loading States
   const [isRunning, setIsRunning] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPracticeSubmitting, setIsPracticeSubmitting] = useState(false);
+  const [practiceTestResults, setPracticeTestResultsState] = useState<AutoGradeSubmissionResult | null>(null);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  const clearSubmissionError = useCallback(() => setSubmissionError(null), []);
+
+  const setPracticeTestResults = useCallback((result: AutoGradeSubmissionResult | null) => {
+    setPracticeTestResultsState(result);
+  }, []);
 
   // Timer Effect
   useEffect(() => {
@@ -268,10 +285,10 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
               clearInterval(timerRef.current);
               timerRef.current = null;
             }
-            // Trigger auto-submit
+            // Trigger auto-submit (force bypasses MaxAttempts)
             if (isExamMode) {
-              console.log('Time is up! Auto-submitting...');
-              submitCode();
+              console.log('Time is up! Auto-submitting (force)...');
+              submitCodeForceRef.current?.();
             }
           } else {
             setTimerSeconds(diff);
@@ -290,7 +307,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
         clearInterval(timerRef.current);
       }
     };
-  }, [isTimerRunning, isExamMode, endTime, timeOffset]);
+  }, [isTimerRunning, isExamMode, endTime, timeOffset, submitCodeForceRef]);
 
   const setCode = useCallback((code: string) => {
     setEditorState((prev) => ({ ...prev, code }));
@@ -466,6 +483,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       return result;
     } catch (err) {
       console.error('submitCode failed:', err);
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
+      setSubmissionError(message ?? 'Submission failed. Please try again.');
       return null;
     } finally {
       setIsSubmitting(false);
@@ -480,6 +502,80 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     saveSubmission,
     incrementSubmissionsRefresh,
     flushKeystrokes,
+  ]);
+
+  const submitCodeForce = useCallback(async (): Promise<SubmissionResponse | null> => {
+    const studentId = user?.id;
+    if (!examId || !problem?.id || !studentId || !selectedCompiler) {
+      console.warn('submitCodeForce: missing required fields');
+      return null;
+    }
+    try {
+      const payload = {
+        examId,
+        problemId: problem.id,
+        studentId,
+        source: editorState.code,
+        languageId: editorState.language?.id ?? '',
+        compilerId: selectedCompiler.id,
+      };
+      return await forceSubmission(payload);
+    } catch (err) {
+      console.error('submitCodeForce failed:', err);
+      return null;
+    }
+  }, [
+    examId,
+    problem?.id,
+    user?.id,
+    selectedCompiler,
+    editorState.code,
+    editorState.language?.id,
+    forceSubmission,
+  ]);
+
+  // Keep ref in sync with latest submitCodeForce (so Timer Effect can use it safely)
+  submitCodeForceRef.current = submitCodeForce;
+
+  /** Submit and grade for PRACTICE mode — returns AutoGradeSubmissionResult with test results. */
+  const submitAndGrade = useCallback(async (): Promise<AutoGradeSubmissionResult | null> => {
+    const studentId = user?.id;
+    if (!examId || !problem?.id || !studentId || !selectedCompiler) {
+      console.warn('submitAndGrade: missing examId, problemId, studentId, or selectedCompiler');
+      return null;
+    }
+    setIsPracticeSubmitting(true);
+    try {
+      const payload = {
+        examId,
+        problemId: problem.id,
+        studentId,
+        source: editorState.code,
+        languageId: editorState.language?.id ?? '',
+        compilerId: selectedCompiler.id,
+      };
+      const result = await submitAndGradeApi(payload);
+      setPracticeTestResultsState(result);
+      return result;
+    } catch (err) {
+      console.error('submitAndGrade failed:', err);
+      const message =
+        err && typeof err === 'object' && 'response' in err
+          ? (err as { response?: { data?: { message?: string } } }).response?.data?.message
+          : null;
+      setSubmissionError(message ?? 'Submission failed. Please try again.');
+      return null;
+    } finally {
+      setIsPracticeSubmitting(false);
+    }
+  }, [
+    examId,
+    problem?.id,
+    user?.id,
+    selectedCompiler,
+    editorState.code,
+    editorState.language?.id,
+    submitAndGradeApi,
   ]);
 
   const value: EditorContextType = {
@@ -538,8 +634,15 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setDiffContent,
     runCode,
     submitCode,
+    submitCodeForce,
+    submitAndGrade,
+    practiceTestResults,
+    setPracticeTestResults,
     isRunning,
     isSubmitting,
+    isPracticeSubmitting,
+    submissionError,
+    clearSubmissionError,
     keystrokeCount,
     batchLogs,
     flushKeystrokes,

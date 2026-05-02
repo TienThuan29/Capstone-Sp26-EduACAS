@@ -43,6 +43,7 @@ public enum NotificationType
       NEW_REGRADING_REQUEST, //Sinh viên yêu cầu regrading
       REGRADING_APPROVED, //Giảng viên phê duyệt yêu cầu regrading
       REGRADING_REJECTED, //Giảng viên từ chối yêu cầu regrading
+      DISCUSSION_ISSUE_STATUS_CHANGED, //Giảng viên thay đổi trạng thái discussion issue
 
       // academic type
       ACADEMIC_WARNING_LEVEL_1, // Cảnh báo học vụ cấp độ 1

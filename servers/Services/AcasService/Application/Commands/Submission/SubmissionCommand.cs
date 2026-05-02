@@ -14,9 +14,12 @@ namespace AcasService.Application.Commands.Submission;
 public interface ISubmissionCommand
 {
       Task<SubmissionResponse?> SubmitProblemAsync(SubmitProblemRequest request);
+      Task<SubmissionResponse?> SubmitProblemForceAsync(SubmitProblemRequest request);
       Task<AutoGradeProblemResponse> AutoGradeAllSubmissionsOfProblemAysnc(BulkSubmissionGradingRequest bulkSubmissionGradingRequest);
       Task<AutoGradeSubmissionResult> RegradeSingleSubmissionAsync(string submissionId, SingleSubmissionRegradeRequest request);
       Task<bool> OverrideSubmissionScoreAsync(string submissionId, float newScore, float maxMark);
+
+      Task<AutoGradeSubmissionResult> SubmitAndGradeSubmissionAsync(SubmitProblemRequest request);
 }
 
 public class SubmissionCommand : ISubmissionCommand
@@ -31,6 +34,7 @@ public class SubmissionCommand : ISubmissionCommand
       private readonly IStudentExamSessionRepository _studentExamSessionRepository;
       private readonly TestResultMapper _testResultMapper;
       private readonly IBusinessNotificationService _businessNotificationService;
+      private readonly ProblemMapper _problemMapper;
 
       public SubmissionCommand(
             ISubmissionRepository submissionRepository,
@@ -42,7 +46,8 @@ public class SubmissionCommand : ISubmissionCommand
             IExaminationRepository examinationRepository,
             TestResultMapper testResultMapper,
             IBusinessNotificationService businessNotificationService,
-            IStudentExamSessionRepository studentExamSessionRepository)
+            IStudentExamSessionRepository studentExamSessionRepository,
+            ProblemMapper problemMapper)
       {
             _submissionRepository = submissionRepository;
             _submissionMapper = submissionMapper;
@@ -54,6 +59,7 @@ public class SubmissionCommand : ISubmissionCommand
             _studentExamSessionRepository = studentExamSessionRepository;
             _testResultMapper = testResultMapper;
             _businessNotificationService = businessNotificationService;
+            _problemMapper = problemMapper;
       }
 
       public async Task<SubmissionResponse?> SubmitProblemAsync(SubmitProblemRequest request)
@@ -84,7 +90,17 @@ public class SubmissionCommand : ISubmissionCommand
                       .ToList();
             }
 
-            submission.Version = sameExamProblem.Count == 0 ? 1 : sameExamProblem.Max(s => s.Version) + 1;
+            var currentAttempt = sameExamProblem.Count == 0 ? 1 : sameExamProblem.Max(s => s.Version) + 1;
+            if (examination != null && examination.MaxAttempts.HasValue && currentAttempt > examination.MaxAttempts.Value)
+            {
+                  _logger.LogWarning(
+                      "Submission rejected: student {StudentId} has exceeded max attempts ({MaxAttempts}) for exam {ExamId}, problem {ProblemId}",
+                      request.StudentId, examination.MaxAttempts.Value, request.ExamId, request.ProblemId);
+                  throw new InvalidOperationException(
+                      $"Maximum number of attempts ({examination.MaxAttempts.Value}) reached for this problem. No more submissions are allowed.");
+            }
+
+            submission.Version = currentAttempt;
 
             var created = await _submissionRepository.CreateAsync(submission);
             if (created == null)
@@ -95,6 +111,41 @@ public class SubmissionCommand : ISubmissionCommand
             }
 
             // save new list submissions to cache
+            var newList = sameExamProblem.Append(created).ToList();
+            await _submissionCache.SetAsync(cacheKey, newList);
+
+            return _submissionMapper.ToResponse(created);
+      }
+
+      public async Task<SubmissionResponse?> SubmitProblemForceAsync(SubmitProblemRequest request)
+      {
+            var submission = _submissionMapper.ToEntity(request);
+
+            var cacheKey = _submissionCache.GetSubmissionsListKey(request.StudentId, request.ExamId, request.ProblemId);
+            var sameExamProblem = await _submissionCache.GetAsync<List<Models.Submission>>(cacheKey);
+
+            if (sameExamProblem == null || sameExamProblem.Count == 0)
+            {
+                  var existingSubmissions = await _submissionRepository.GetByStudentIdAsync(request.StudentId);
+                  sameExamProblem = existingSubmissions
+                      .Where(s => s.ExamId == request.ExamId && s.ProblemId == request.ProblemId)
+                      .ToList();
+            }
+
+            submission.Version = sameExamProblem.Count == 0 ? 1 : sameExamProblem.Max(s => s.Version) + 1;
+
+            var created = await _submissionRepository.CreateAsync(submission);
+            if (created == null)
+            {
+                  _logger.LogWarning("Force submission failed for student {StudentId}, exam {ExamId}, problem {ProblemId}",
+                      request.StudentId, request.ExamId, request.ProblemId);
+                  return null;
+            }
+
+            _logger.LogInformation(
+                "Force submission {SubmissionId} created: student {StudentId}, exam {ExamId}, problem {ProblemId}, version {Version}",
+                created.Id, request.StudentId, request.ExamId, request.ProblemId, submission.Version);
+
             var newList = sameExamProblem.Append(created).ToList();
             await _submissionCache.SetAsync(cacheKey, newList);
 
@@ -135,7 +186,7 @@ public class SubmissionCommand : ISubmissionCommand
             var exam = await _examinationRepository.GetByIdAsync(examId);
             var problemMark = exam?.Problems?.FirstOrDefault(p => p.ProblemId == problemId)?.Mark ?? 0f;
 
-            var requestTestCases = hiddenTestCases.Select(MapToRequestTestCase).ToList();
+            var requestTestCases = hiddenTestCases.Select(tc => _problemMapper.ToTestCaseRequest(tc)).ToList();
             var stdinList = hiddenTestCases.Select(tc => tc.InputData).ToList();
 
             foreach (var submissionReq in bulkSubmissionGradingRequest.Submissions)
@@ -260,7 +311,7 @@ public class SubmissionCommand : ISubmissionCommand
             var exam = await _examinationRepository.GetByIdAsync(submission.ExamId);
             var problemMark = exam?.Problems?.FirstOrDefault(p => p.ProblemId == submission.ProblemId)?.Mark ?? 0f;
 
-            var requestTestCases = hiddenTestCases.Select(MapToRequestTestCase).ToList();
+            var requestTestCases = hiddenTestCases.Select(tc => _problemMapper.ToTestCaseRequest(tc)).ToList();
             var stdinList = hiddenTestCases.Select(tc => tc.InputData).ToList();
 
             var runBatchRequest = new RumBatchRequest
@@ -341,24 +392,6 @@ public class SubmissionCommand : ISubmissionCommand
             return (successCount / (float)testResults.Count) * problemMark;
       }
 
-      private AcasService.Web.Requests.TestCase MapToRequestTestCase(Models.TestCase tc)
-      {
-            return new AcasService.Web.Requests.TestCase
-            {
-                  Id = tc.Id,
-                  ProblemId = tc.ProblemId,
-                  InputData = tc.InputData,
-                  ExpectedOutput = tc.ExpectedOutput,
-                  IsPublic = tc.IsPublic,
-                  IsCaseInsensitive = tc.IsCaseInsensitive,
-                  IsFloatingPoint = tc.IsFloatingPoint,
-                  FloatingPointTolerance = tc.FloatingPointTolerance,
-                  DecimalPlaces = tc.DecimalPlaces,
-                  IsTokenComparision = tc.IsTokenComparision,
-                  IsNotOrderedComparision = tc.IsNotOrderedComparision
-            };
-      }
-
       public async Task<bool> OverrideSubmissionScoreAsync(string submissionId, float newScore, float maxMark)
       {
             var submission = await _submissionRepository.GetByIdAsync(submissionId);
@@ -407,5 +440,139 @@ public class SubmissionCommand : ISubmissionCommand
             );
 
             return true;
+      }
+
+      public async Task<AutoGradeSubmissionResult> SubmitAndGradeSubmissionAsync(SubmitProblemRequest request)
+      {
+            var problem = await _problemRepository.GetByIdAsync(request.ProblemId);
+            if (problem == null)
+            {
+                  _logger.LogWarning("Problem {ProblemId} not found for practice submission", request.ProblemId);
+                  return new AutoGradeSubmissionResult
+                  {
+                        SubmissionId = string.Empty,
+                        StudentId = request.StudentId,
+                        ErrorMessage = "Problem not found"
+                  };
+            }
+
+            int currentAttempt = 1;
+            var examination = !string.IsNullOrEmpty(request.ExamId)
+                ? await _examinationRepository.GetByIdAsync(request.ExamId)
+                : null;
+            if (examination != null)
+            {
+                  var existingSubmissions = await _submissionRepository.GetByStudentIdAsync(request.StudentId);
+                  var sameExamProblem = existingSubmissions
+                      .Where(s => s.ExamId == request.ExamId && s.ProblemId == request.ProblemId)
+                      .ToList();
+                  currentAttempt = sameExamProblem.Count == 0 ? 1 : sameExamProblem.Max(s => s.Version) + 1;
+
+                  if (examination.MaxAttempts.HasValue && currentAttempt > examination.MaxAttempts.Value)
+                  {
+                        _logger.LogWarning(
+                            "Practice submission rejected: student {StudentId} has exceeded max attempts ({MaxAttempts}) for exam {ExamId}, problem {ProblemId}",
+                            request.StudentId, examination.MaxAttempts.Value, request.ExamId, request.ProblemId);
+                        return new AutoGradeSubmissionResult
+                        {
+                              SubmissionId = string.Empty,
+                              StudentId = request.StudentId,
+                              ErrorMessage = $"Maximum number of attempts ({examination.MaxAttempts.Value}) reached for this problem. No more submissions are allowed."
+                        };
+                  }
+            }
+
+            // Use the problem's Mark from the exam (defaults to 100 for PRACTICE mode).
+            var problemMark = examination?.Problems?.FirstOrDefault(p => p.ProblemId == request.ProblemId)?.Mark ?? 100f;
+
+            var testCases = problem.TestCases
+                .Where(tc => !tc.IsDeleted && tc.IsPublic)
+                .ToList();
+
+            if (testCases.Count == 0)
+            {
+                  _logger.LogInformation("Problem {ProblemId} has no public test cases for practice submission", request.ProblemId);
+                  return new AutoGradeSubmissionResult
+                  {
+                        SubmissionId = string.Empty,
+                        StudentId = request.StudentId,
+                        TotalTestCases = 0,
+                        ErrorMessage = "No test cases available for this problem"
+                  };
+            }
+
+            var requestTestCases = testCases.Select(tc => _problemMapper.ToTestCaseRequest(tc)).ToList();
+            var stdinList = testCases.Select(tc => tc.InputData).ToList();
+
+            var runBatchRequest = new RumBatchRequest
+            {
+                  Source = request.Source,
+                  Options = new CompileOptions(),
+                  StdinList = stdinList,
+                  TestCases = requestTestCases
+            };
+
+            try
+            {
+                  var testResults = await _testcaseEvaluator.ExecuteTestcasesAsync(
+                      request.CompilerId,
+                      runBatchRequest,
+                      request.LanguageId
+                  );
+
+                  var finalScore = CalculateSubmissionScore(testResults, problemMark);
+                  var passedCount = testResults.Count(r => r.Status == TestcaseStatus.SUCCESS.ToString());
+                  var now = DateTime.UtcNow;
+
+                  var submission = _submissionMapper.ToEntity(request);
+                  submission.Version = currentAttempt;
+                  submission.Status = SubmissionStatus.GRADED;
+                  submission.FinalScore = finalScore;
+                  submission.GradedDate = now;
+                  submission.TestResults = testResults.Select(_testResultMapper.ToEntity).ToList();
+
+                  var created = await _submissionRepository.CreateAsync(submission);
+                  if (created == null)
+                  {
+                        _logger.LogWarning("Failed to save submission for student {StudentId}, problem {ProblemId}",
+                            request.StudentId, request.ProblemId);
+                        return new AutoGradeSubmissionResult
+                        {
+                              SubmissionId = string.Empty,
+                              StudentId = request.StudentId,
+                              FinalScore = finalScore,
+                              Status = SubmissionStatus.GRADED.ToString(),
+                              GradedDate = now,
+                              PassedTestCases = passedCount,
+                              TotalTestCases = testCases.Count,
+                              TestResults = testResults,
+                              ErrorMessage = "Failed to save submission"
+                        };
+                  }
+
+                  _logger.LogInformation(
+                      "Practice submission {SubmissionId} graded: {Passed}/{Total} test case(s), score {Score}",
+                      created.Id, passedCount, testCases.Count, finalScore);
+
+                  return _submissionMapper.ToAutoGradeSubmissionResult(
+                      created.Id,
+                      request.StudentId,
+                      testResults,
+                      finalScore,
+                      SubmissionStatus.GRADED.ToString()
+                  );
+            }
+            catch (Exception ex)
+            {
+                  _logger.LogError(ex, "Failed to grade practice submission for student {StudentId}, problem {ProblemId}",
+                      request.StudentId, request.ProblemId);
+                  return new AutoGradeSubmissionResult
+                  {
+                        SubmissionId = string.Empty,
+                        StudentId = request.StudentId,
+                        TotalTestCases = testCases.Count,
+                        ErrorMessage = ex.Message
+                  };
+            }
       }
 }

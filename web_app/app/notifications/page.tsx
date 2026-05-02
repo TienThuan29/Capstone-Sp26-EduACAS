@@ -12,6 +12,7 @@ import { useThemeContext } from "@/components/theme-provider";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNotification } from "@/hooks/notification/useNotification";
 import { useToast } from "@/hooks/useToast";
+import { CustomPagination } from "@/components/custom-pagination";
 import Sidebar from "@/components/sidebar";
 import type { Notification } from "@/types/notification";
 
@@ -23,16 +24,36 @@ export default function NotificationsPage() {
   const toast = useToast();
 
   const [activeTab, setActiveTab] = useState(0);
+  const [unreadPage, setUnreadPage] = useState(1);
+  const [readPage, setReadPage] = useState(1);
 
   const {
-    notifications: allNotifications,
-    loading,
+    notifications: unreadNotifications,
+    paged: unreadPaged,
+    loading: unreadLoading,
     markAsRead: callMarkAsRead,
     softDelete: callSoftDelete,
-  } = useNotification({ pageIndex: 1, pageSize: PAGE_SIZE * 10, enabled: !!user?.id });
+    refresh: refreshUnread,
+  } = useNotification({
+    pageIndex: unreadPage,
+    pageSize: PAGE_SIZE,
+    enabled: !!user?.id,
+    isRead: false,
+  });
 
-  const readNotifications = allNotifications.filter((n) => n.isRead);
-  const unreadNotifications = allNotifications.filter((n) => !n.isRead);
+  const {
+    notifications: readNotifications,
+    paged: readPaged,
+    loading: readLoading,
+    markAsRead: callMarkAsReadRead,
+    softDelete: callSoftDeleteRead,
+    refresh: refreshRead,
+  } = useNotification({
+    pageIndex: readPage,
+    pageSize: PAGE_SIZE,
+    enabled: !!user?.id,
+    isRead: true,
+  });
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {
@@ -49,6 +70,14 @@ export default function NotificationsPage() {
       toast.showSuccess("Notification deleted");
     } catch {
       toast.showError("Failed to delete notification");
+    }
+  };
+
+  const handlePageChange = (tabIndex: number) => (page: number) => {
+    if (tabIndex === 0) {
+      setUnreadPage(page);
+    } else {
+      setReadPage(page);
     }
   };
 
@@ -128,15 +157,15 @@ export default function NotificationsPage() {
               <span className="flex items-center gap-2">
                 <EnvelopeOpenIcon className="h-4 w-4" />
                 Unread
-                {unreadNotifications.length > 0 && (
+                {unreadPaged.totalCount > 0 && (
                   <span className="ml-1 inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-xs font-bold text-white">
-                    {unreadNotifications.length > 99 ? "99+" : unreadNotifications.length}
+                    {unreadPaged.totalCount > 99 ? "99+" : unreadPaged.totalCount}
                   </span>
                 )}
               </span>
             }>
               <div className="mt-4 space-y-3">
-                {loading && unreadNotifications.length === 0 ? (
+                {unreadLoading && unreadNotifications.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16">
                     <Spinner size="xl" />
                     <p className={`mt-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}>Loading...</p>
@@ -149,6 +178,11 @@ export default function NotificationsPage() {
                 ) : (
                   <>
                     {unreadNotifications.map((n) => renderNotificationItem(n, true))}
+                    <CustomPagination
+                      currentPage={unreadPage}
+                      totalPages={unreadPaged.totalPages}
+                      onPageChange={handlePageChange(0)}
+                    />
                   </>
                 )}
               </div>
@@ -161,7 +195,7 @@ export default function NotificationsPage() {
               </span>
             }>
               <div className="mt-4 space-y-3">
-                {loading && readNotifications.length === 0 ? (
+                {readLoading && readNotifications.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-16">
                     <Spinner size="xl" />
                     <p className={`mt-3 ${isDark ? "text-gray-400" : "text-gray-600"}`}>Loading...</p>
@@ -174,6 +208,11 @@ export default function NotificationsPage() {
                 ) : (
                   <>
                     {readNotifications.map((n) => renderNotificationItem(n, true))}
+                    <CustomPagination
+                      currentPage={readPage}
+                      totalPages={readPaged.totalPages}
+                      onPageChange={handlePageChange(1)}
+                    />
                   </>
                 )}
               </div>

@@ -54,6 +54,19 @@ export interface UpvoteCommentPayload {
   commentId: string;
 }
 
+/** Payload for editing a comment. */
+export interface UpdateCommentPayload {
+  issueId: string;
+  commentId: string;
+  content: string;
+}
+
+/** Payload for soft-deleting a comment. */
+export interface SoftDeleteCommentPayload {
+  issueId: string;
+  commentId: string;
+}
+
 export const useDiscussionIssue = () => {
   const axiosInstance = useAxios();
 
