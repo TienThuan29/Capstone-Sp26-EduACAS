@@ -45,6 +45,24 @@ export type UpdateProblemPayload = {
   tags?: string[];
 };
 
+export type ProblemReviewPayload =
+  | { title: string; content: string; fileData?: undefined; mimeType?: undefined }
+  | { title: string; fileData: string; mimeType: string; content?: undefined };
+
+export type ProblemReviewRecommendation = {
+  type: string;
+  severity: string;
+  description: string;
+  suggestedFix: string;
+};
+
+export type ProblemReviewResponse = {
+  suitabilityLabel: string;
+  summary: string;
+  recommendations: ProblemReviewRecommendation[];
+  concerns: string[];
+};
+
 
 export const useProblem = () => {
   const axiosInstance = useAxios();
@@ -165,6 +183,22 @@ export const useProblem = () => {
     [axiosInstance]
   );
 
+  const reviewProblem = useCallback(
+    async (payload: ProblemReviewPayload): Promise<ProblemReviewResponse> => {
+      try {
+        const response = await axiosInstance.post(Api.Problem.REVIEW, payload);
+        const data = response.data?.dataResponse;
+        if (!data) throw new Error('Invalid review response');
+        return data as ProblemReviewResponse;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } catch (error: any) {
+        console.error('Problem review failed:', error);
+        throw new Error(error.response?.data?.message || 'Failed to review problem');
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     // getAllProblems,
     getProblemsByLecturerId,
@@ -175,5 +209,6 @@ export const useProblem = () => {
     updateProblem,
     deleteProblem,
     extractOcrContent,
+    reviewProblem,
   };
 };

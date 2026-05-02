@@ -120,6 +120,7 @@ export const Api = {
     UPDATE: (id: string) => `/api/acas/v1/problems/${id}`,
     DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
     OCR_EXTRACT: '/api/acas/v1/ocr/extract',
+    REVIEW: '/api/acas/v1/problems/review',
   },
 
   Question: {

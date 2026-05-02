@@ -15,7 +15,9 @@ public class ProblemCommandController : ControllerBase
     private readonly IProblemCommand _problemCommand;
     private readonly ILogger<ProblemCommandController> _logger;
 
-    public ProblemCommandController(IProblemCommand problemCommand, ILogger<ProblemCommandController> logger)
+    public ProblemCommandController(
+        IProblemCommand problemCommand,
+        ILogger<ProblemCommandController> logger)
     {
         _problemCommand = problemCommand;
         _logger = logger;
@@ -262,4 +264,5 @@ public class ProblemCommandController : ControllerBase
             );
         }
     }
+
 }
