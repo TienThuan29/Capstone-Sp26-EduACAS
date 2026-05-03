@@ -1,0 +1,4604 @@
+[
+  {
+    "id": "klog-subm-003",
+    "submissionId": "subm-003",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-15T00:56:00.000Z",
+        "timeOffSet": "2026-02-15T00:57:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 10,
+        "content": "a=int(inpu"
+      },
+      {
+        "timeStartSet": "2026-02-15T01:01:00.000Z",
+        "timeOffSet": "2026-02-15T01:02:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 20,
+        "content": "a=int(input())\nb=int"
+      },
+      {
+        "timeStartSet": "2026-02-15T01:06:00.000Z",
+        "timeOffSet": "2026-02-15T01:07:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 30,
+        "content": "a=int(input())\nb=int(input())\n"
+      },
+      {
+        "timeStartSet": "2026-02-15T01:11:00.000Z",
+        "timeOffSet": "2026-02-15T01:12:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 40,
+        "content": "a=int(input())\nb=int(input())\nprint(a+b)"
+      }
+    ],
+    "createdDate": "2026-02-15T08:25:00"
+  },
+  {
+    "id": "klog-subm-019",
+    "submissionId": "subm-019",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-15T00:17:00.000Z",
+        "timeOffSet": "2026-02-15T00:18:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 10,
+        "content": "a=int(inpu"
+      },
+      {
+        "timeStartSet": "2026-02-15T00:22:00.000Z",
+        "timeOffSet": "2026-02-15T00:23:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 20,
+        "content": "a=int(input())\nb=int"
+      },
+      {
+        "timeStartSet": "2026-02-15T00:27:00.000Z",
+        "timeOffSet": "2026-02-15T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 30,
+        "content": "a=int(input())\nb=int(input())\n"
+      },
+      {
+        "timeStartSet": "2026-02-15T00:32:00.000Z",
+        "timeOffSet": "2026-02-15T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 40,
+        "content": "a=int(input())\nb=int(input())\nprint(a+b)"
+      }
+    ],
+    "createdDate": "2026-02-15T08:10:00"
+  },
+  {
+    "id": "klog-subm-033",
+    "submissionId": "subm-033",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-15T01:10:00.000Z",
+        "timeOffSet": "2026-02-15T01:11:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 10,
+        "content": "a=int(inpu"
+      },
+      {
+        "timeStartSet": "2026-02-15T01:15:00.000Z",
+        "timeOffSet": "2026-02-15T01:16:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 20,
+        "content": "a=int(input())\nb=int"
+      },
+      {
+        "timeStartSet": "2026-02-15T01:20:00.000Z",
+        "timeOffSet": "2026-02-15T01:21:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 30,
+        "content": "a=int(input())\nb=int(input())\n"
+      },
+      {
+        "timeStartSet": "2026-02-15T01:25:00.000Z",
+        "timeOffSet": "2026-02-15T01:26:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 40,
+        "content": "a=int(input())\nb=int(input())\nprint(a+b)"
+      }
+    ],
+    "createdDate": "2026-02-15T08:55:00"
+  },
+  {
+    "id": "klog-subm-095",
+    "submissionId": "subm-095",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-20T00:52:00.000Z",
+        "timeOffSet": "2026-01-20T00:53:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 10,
+        "content": "a=int(inpu"
+      },
+      {
+        "timeStartSet": "2026-01-20T00:57:00.000Z",
+        "timeOffSet": "2026-01-20T00:58:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 20,
+        "content": "a=int(input())\nb=int"
+      },
+      {
+        "timeStartSet": "2026-01-20T01:02:00.000Z",
+        "timeOffSet": "2026-01-20T01:03:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 30,
+        "content": "a=int(input())\nb=int(input())\n"
+      },
+      {
+        "timeStartSet": "2026-01-20T01:07:00.000Z",
+        "timeOffSet": "2026-01-20T01:08:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 40,
+        "content": "a=int(input())\nb=int(input())\nprint(a+b)"
+      }
+    ],
+    "createdDate": "2026-01-20T08:45:00"
+  },
+  {
+    "id": "klog-subm-104",
+    "submissionId": "subm-104",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-20T01:39:00.000Z",
+        "timeOffSet": "2026-01-20T01:40:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 10,
+        "content": "a=int(inpu"
+      },
+      {
+        "timeStartSet": "2026-01-20T01:44:00.000Z",
+        "timeOffSet": "2026-01-20T01:45:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 20,
+        "content": "a=int(input())\nb=int"
+      },
+      {
+        "timeStartSet": "2026-01-20T01:49:00.000Z",
+        "timeOffSet": "2026-01-20T01:50:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 30,
+        "content": "a=int(input())\nb=int(input())\n"
+      },
+      {
+        "timeStartSet": "2026-01-20T01:54:00.000Z",
+        "timeOffSet": "2026-01-20T01:55:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 40,
+        "content": "a=int(input())\nb=int(input())\nprint(a+b)"
+      }
+    ],
+    "createdDate": "2026-01-20T09:00:00"
+  },
+  {
+    "id": "klog-subm-127",
+    "submissionId": "subm-127",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T02:07:00.000Z",
+        "timeOffSet": "2026-02-05T02:08:00.000Z",
+        "duration": 60,
+        "cps": 0.58,
+        "charCount": 35,
+        "content": "score=int(input())\nif score>=90: pr"
+      },
+      {
+        "timeStartSet": "2026-02-05T02:12:00.000Z",
+        "timeOffSet": "2026-02-05T02:13:00.000Z",
+        "duration": 60,
+        "cps": 0.58,
+        "charCount": 70,
+        "content": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')"
+      },
+      {
+        "timeStartSet": "2026-02-05T02:17:00.000Z",
+        "timeOffSet": "2026-02-05T02:18:00.000Z",
+        "duration": 60,
+        "cps": 0.58,
+        "charCount": 105,
+        "content": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif sc"
+      },
+      {
+        "timeStartSet": "2026-02-05T02:22:00.000Z",
+        "timeOffSet": "2026-02-05T02:23:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 141,
+        "content": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')"
+      }
+    ],
+    "createdDate": "2026-02-05T09:45:00"
+  },
+  {
+    "id": "klog-subm-183",
+    "submissionId": "subm-183",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T01:01:00.000Z",
+        "timeOffSet": "2026-03-05T01:02:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "import math"
+      },
+      {
+        "timeStartSet": "2026-03-05T01:06:00.000Z",
+        "timeOffSet": "2026-03-05T01:07:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "import math\nr=float(in"
+      },
+      {
+        "timeStartSet": "2026-03-05T01:11:00.000Z",
+        "timeOffSet": "2026-03-05T01:12:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "import math\nr=float(input())\nprin"
+      },
+      {
+        "timeStartSet": "2026-03-05T01:16:00.000Z",
+        "timeOffSet": "2026-03-05T01:17:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "import math\nr=float(input())\nprint(math.pi*r*r)"
+      }
+    ],
+    "createdDate": "2026-03-05T08:40:00"
+  },
+  {
+    "id": "klog-subm-308",
+    "submissionId": "subm-308",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:05:00.000Z",
+        "timeOffSet": "2026-01-14T16:06:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:10:00.000Z",
+        "timeOffSet": "2026-01-14T16:11:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:15:00.000Z",
+        "timeOffSet": "2026-01-14T16:16:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:20:00.000Z",
+        "timeOffSet": "2026-01-14T16:21:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-309",
+    "submissionId": "subm-309",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:25:00.000Z",
+        "timeOffSet": "2026-01-14T16:26:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-01-14T16:30:00.000Z",
+        "timeOffSet": "2026-01-14T16:31:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:35:00.000Z",
+        "timeOffSet": "2026-01-14T16:36:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-01-14T16:40:00.000Z",
+        "timeOffSet": "2026-01-14T16:41:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-314",
+    "submissionId": "subm-314",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:12:00.000Z",
+        "timeOffSet": "2026-01-14T16:13:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:17:00.000Z",
+        "timeOffSet": "2026-01-14T16:18:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:22:00.000Z",
+        "timeOffSet": "2026-01-14T16:23:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:27:00.000Z",
+        "timeOffSet": "2026-01-14T16:28:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-318",
+    "submissionId": "subm-318",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:23:00.000Z",
+        "timeOffSet": "2026-01-14T16:24:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:28:00.000Z",
+        "timeOffSet": "2026-01-14T16:29:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:33:00.000Z",
+        "timeOffSet": "2026-01-14T16:34:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-01-14T16:38:00.000Z",
+        "timeOffSet": "2026-01-14T16:39:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-324",
+    "submissionId": "subm-324",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:18:00.000Z",
+        "timeOffSet": "2026-01-14T16:19:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:23:00.000Z",
+        "timeOffSet": "2026-01-14T16:24:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:28:00.000Z",
+        "timeOffSet": "2026-01-14T16:29:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:33:00.000Z",
+        "timeOffSet": "2026-01-14T16:34:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-326",
+    "submissionId": "subm-326",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:49:00.000Z",
+        "timeOffSet": "2026-01-14T16:50:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:54:00.000Z",
+        "timeOffSet": "2026-01-14T16:55:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:59:00.000Z",
+        "timeOffSet": "2026-01-14T17:00:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-01-14T17:04:00.000Z",
+        "timeOffSet": "2026-01-14T17:05:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-336",
+    "submissionId": "subm-336",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:24:00.000Z",
+        "timeOffSet": "2026-01-14T16:25:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:29:00.000Z",
+        "timeOffSet": "2026-01-14T16:30:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:34:00.000Z",
+        "timeOffSet": "2026-01-14T16:35:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:39:00.000Z",
+        "timeOffSet": "2026-01-14T16:40:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-343",
+    "submissionId": "subm-343",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:39:00.000Z",
+        "timeOffSet": "2026-01-14T16:40:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:44:00.000Z",
+        "timeOffSet": "2026-01-14T16:45:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:49:00.000Z",
+        "timeOffSet": "2026-01-14T16:50:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-01-14T16:54:00.000Z",
+        "timeOffSet": "2026-01-14T16:55:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-367",
+    "submissionId": "subm-367",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:48:00.000Z",
+        "timeOffSet": "2026-01-14T16:49:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:53:00.000Z",
+        "timeOffSet": "2026-01-14T16:54:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:58:00.000Z",
+        "timeOffSet": "2026-01-14T16:59:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-01-14T17:03:00.000Z",
+        "timeOffSet": "2026-01-14T17:04:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-370",
+    "submissionId": "subm-370",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-14T16:20:00.000Z",
+        "timeOffSet": "2026-01-14T16:21:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:25:00.000Z",
+        "timeOffSet": "2026-01-14T16:26:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:30:00.000Z",
+        "timeOffSet": "2026-01-14T16:31:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-01-14T16:35:00.000Z",
+        "timeOffSet": "2026-01-14T16:36:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-404",
+    "submissionId": "subm-404",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-31T16:15:00.000Z",
+        "timeOffSet": "2026-01-31T16:16:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:20:00.000Z",
+        "timeOffSet": "2026-01-31T16:21:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:25:00.000Z",
+        "timeOffSet": "2026-01-31T16:26:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:30:00.000Z",
+        "timeOffSet": "2026-01-31T16:31:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-412",
+    "submissionId": "subm-412",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-31T16:14:00.000Z",
+        "timeOffSet": "2026-01-31T16:15:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:19:00.000Z",
+        "timeOffSet": "2026-01-31T16:20:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-01-31T16:24:00.000Z",
+        "timeOffSet": "2026-01-31T16:25:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:29:00.000Z",
+        "timeOffSet": "2026-01-31T16:30:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-415",
+    "submissionId": "subm-415",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-31T16:32:00.000Z",
+        "timeOffSet": "2026-01-31T16:33:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:37:00.000Z",
+        "timeOffSet": "2026-01-31T16:38:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-01-31T16:42:00.000Z",
+        "timeOffSet": "2026-01-31T16:43:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:47:00.000Z",
+        "timeOffSet": "2026-01-31T16:48:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-435",
+    "submissionId": "subm-435",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-31T16:07:00.000Z",
+        "timeOffSet": "2026-01-31T16:08:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 43,
+        "content": "score = int(input())\nif score >= 90:\n    pr"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:12:00.000Z",
+        "timeOffSet": "2026-01-31T16:13:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 86,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\ne"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:17:00.000Z",
+        "timeOffSet": "2026-01-31T16:18:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 129,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score "
+      },
+      {
+        "timeStartSet": "2026-01-31T16:22:00.000Z",
+        "timeOffSet": "2026-01-31T16:23:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 172,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score >= 60:\n    print(\"D\")\nelse:\n    print(\"F\")\n"
+      }
+    ],
+    "createdDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-457",
+    "submissionId": "subm-457",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-31T16:30:00.000Z",
+        "timeOffSet": "2026-01-31T16:31:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:35:00.000Z",
+        "timeOffSet": "2026-01-31T16:36:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:40:00.000Z",
+        "timeOffSet": "2026-01-31T16:41:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:45:00.000Z",
+        "timeOffSet": "2026-01-31T16:46:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-465",
+    "submissionId": "subm-465",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-01-31T16:39:00.000Z",
+        "timeOffSet": "2026-01-31T16:40:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:44:00.000Z",
+        "timeOffSet": "2026-01-31T16:45:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-01-31T16:49:00.000Z",
+        "timeOffSet": "2026-01-31T16:50:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-01-31T16:54:00.000Z",
+        "timeOffSet": "2026-01-31T16:55:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-501",
+    "submissionId": "subm-501",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-09T16:27:00.000Z",
+        "timeOffSet": "2026-02-09T16:28:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:32:00.000Z",
+        "timeOffSet": "2026-02-09T16:33:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:37:00.000Z",
+        "timeOffSet": "2026-02-09T16:38:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:42:00.000Z",
+        "timeOffSet": "2026-02-09T16:43:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-02-10T00:00:00"
+  },
+  {
+    "id": "klog-subm-511",
+    "submissionId": "subm-511",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-09T16:30:00.000Z",
+        "timeOffSet": "2026-02-09T16:31:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:35:00.000Z",
+        "timeOffSet": "2026-02-09T16:36:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:40:00.000Z",
+        "timeOffSet": "2026-02-09T16:41:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:45:00.000Z",
+        "timeOffSet": "2026-02-09T16:46:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-02-10T00:00:00"
+  },
+  {
+    "id": "klog-subm-521",
+    "submissionId": "subm-521",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-09T16:16:00.000Z",
+        "timeOffSet": "2026-02-09T16:17:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:21:00.000Z",
+        "timeOffSet": "2026-02-09T16:22:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:26:00.000Z",
+        "timeOffSet": "2026-02-09T16:27:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-02-09T16:31:00.000Z",
+        "timeOffSet": "2026-02-09T16:32:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-02-10T00:00:00"
+  },
+  {
+    "id": "klog-subm-556",
+    "submissionId": "subm-556",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-17T16:47:00.000Z",
+        "timeOffSet": "2026-02-17T16:48:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 43,
+        "content": "score = int(input())\nif score >= 90:\n    pr"
+      },
+      {
+        "timeStartSet": "2026-02-17T16:52:00.000Z",
+        "timeOffSet": "2026-02-17T16:53:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 86,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\ne"
+      },
+      {
+        "timeStartSet": "2026-02-17T16:57:00.000Z",
+        "timeOffSet": "2026-02-17T16:58:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 129,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score "
+      },
+      {
+        "timeStartSet": "2026-02-17T17:02:00.000Z",
+        "timeOffSet": "2026-02-17T17:03:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 172,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score >= 60:\n    print(\"D\")\nelse:\n    print(\"F\")\n"
+      }
+    ],
+    "createdDate": "2026-02-18T00:00:00"
+  },
+  {
+    "id": "klog-subm-569",
+    "submissionId": "subm-569",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-17T16:19:00.000Z",
+        "timeOffSet": "2026-02-17T16:20:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 30,
+        "content": "year = int(input())\nis_leap = "
+      },
+      {
+        "timeStartSet": "2026-02-17T16:24:00.000Z",
+        "timeOffSet": "2026-02-17T16:25:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 60,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 "
+      },
+      {
+        "timeStartSet": "2026-02-17T16:29:00.000Z",
+        "timeOffSet": "2026-02-17T16:30:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 90,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\npri"
+      },
+      {
+        "timeStartSet": "2026-02-17T16:34:00.000Z",
+        "timeOffSet": "2026-02-17T16:35:00.000Z",
+        "duration": 60,
+        "cps": 0.52,
+        "charCount": 121,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\nprint(\"YES\" if is_leap else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-18T00:00:00"
+  },
+  {
+    "id": "klog-subm-589",
+    "submissionId": "subm-589",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-17T16:41:00.000Z",
+        "timeOffSet": "2026-02-17T16:42:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-02-17T16:46:00.000Z",
+        "timeOffSet": "2026-02-17T16:47:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-02-17T16:51:00.000Z",
+        "timeOffSet": "2026-02-17T16:52:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-02-17T16:56:00.000Z",
+        "timeOffSet": "2026-02-17T16:57:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-02-18T00:00:00"
+  },
+  {
+    "id": "klog-subm-652",
+    "submissionId": "subm-652",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-28T16:38:00.000Z",
+        "timeOffSet": "2026-02-28T16:39:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 19,
+        "content": "import math\na, b = "
+      },
+      {
+        "timeStartSet": "2026-02-28T16:43:00.000Z",
+        "timeOffSet": "2026-02-28T16:44:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 38,
+        "content": "import math\na, b = map(float, input()."
+      },
+      {
+        "timeStartSet": "2026-02-28T16:48:00.000Z",
+        "timeOffSet": "2026-02-28T16:49:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 57,
+        "content": "import math\na, b = map(float, input().split())\nprint(math"
+      },
+      {
+        "timeStartSet": "2026-02-28T16:53:00.000Z",
+        "timeOffSet": "2026-02-28T16:54:00.000Z",
+        "duration": 60,
+        "cps": 0.37,
+        "charCount": 79,
+        "content": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n"
+      }
+    ],
+    "createdDate": "2026-03-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-665",
+    "submissionId": "subm-665",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-28T16:23:00.000Z",
+        "timeOffSet": "2026-02-28T16:24:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 19,
+        "content": "import math\na, b = "
+      },
+      {
+        "timeStartSet": "2026-02-28T16:28:00.000Z",
+        "timeOffSet": "2026-02-28T16:29:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 38,
+        "content": "import math\na, b = map(float, input()."
+      },
+      {
+        "timeStartSet": "2026-02-28T16:33:00.000Z",
+        "timeOffSet": "2026-02-28T16:34:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 57,
+        "content": "import math\na, b = map(float, input().split())\nprint(math"
+      },
+      {
+        "timeStartSet": "2026-02-28T16:38:00.000Z",
+        "timeOffSet": "2026-02-28T16:39:00.000Z",
+        "duration": 60,
+        "cps": 0.37,
+        "charCount": 79,
+        "content": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n"
+      }
+    ],
+    "createdDate": "2026-03-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-678",
+    "submissionId": "subm-678",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-28T16:18:00.000Z",
+        "timeOffSet": "2026-02-28T16:19:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 19,
+        "content": "import math\na, b = "
+      },
+      {
+        "timeStartSet": "2026-02-28T16:23:00.000Z",
+        "timeOffSet": "2026-02-28T16:24:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 38,
+        "content": "import math\na, b = map(float, input()."
+      },
+      {
+        "timeStartSet": "2026-02-28T16:28:00.000Z",
+        "timeOffSet": "2026-02-28T16:29:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 57,
+        "content": "import math\na, b = map(float, input().split())\nprint(math"
+      },
+      {
+        "timeStartSet": "2026-02-28T16:33:00.000Z",
+        "timeOffSet": "2026-02-28T16:34:00.000Z",
+        "duration": 60,
+        "cps": 0.37,
+        "charCount": 79,
+        "content": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n"
+      }
+    ],
+    "createdDate": "2026-03-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-679",
+    "submissionId": "subm-679",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-28T16:17:00.000Z",
+        "timeOffSet": "2026-02-28T16:18:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 13,
+        "content": "import math\nr"
+      },
+      {
+        "timeStartSet": "2026-02-28T16:22:00.000Z",
+        "timeOffSet": "2026-02-28T16:23:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 26,
+        "content": "import math\nr = float(inpu"
+      },
+      {
+        "timeStartSet": "2026-02-28T16:27:00.000Z",
+        "timeOffSet": "2026-02-28T16:28:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 39,
+        "content": "import math\nr = float(input())\nprint(ma"
+      },
+      {
+        "timeStartSet": "2026-02-28T16:32:00.000Z",
+        "timeOffSet": "2026-02-28T16:33:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 54,
+        "content": "import math\nr = float(input())\nprint(math.pi * r * r)\n"
+      }
+    ],
+    "createdDate": "2026-03-01T00:00:00"
+  },
+  {
+    "id": "klog-subm-759",
+    "submissionId": "subm-759",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-07T16:17:00.000Z",
+        "timeOffSet": "2026-03-07T16:18:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 15,
+        "content": "c = float(input"
+      },
+      {
+        "timeStartSet": "2026-03-07T16:22:00.000Z",
+        "timeOffSet": "2026-03-07T16:23:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 30,
+        "content": "c = float(input())\nf = c * 9.0"
+      },
+      {
+        "timeStartSet": "2026-03-07T16:27:00.000Z",
+        "timeOffSet": "2026-03-07T16:28:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 45,
+        "content": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\np"
+      },
+      {
+        "timeStartSet": "2026-03-07T16:32:00.000Z",
+        "timeOffSet": "2026-03-07T16:33:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 62,
+        "content": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\nprint(f\"{f:.2f}\")\n"
+      }
+    ],
+    "createdDate": "2026-03-08T00:00:00"
+  },
+  {
+    "id": "klog-subm-779",
+    "submissionId": "subm-779",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-09T16:05:00.000Z",
+        "timeOffSet": "2026-03-09T16:06:00.000Z",
+        "duration": 60,
+        "cps": 0.53,
+        "charCount": 32,
+        "content": "n = int(input())\na, b = 0, 1\nres"
+      },
+      {
+        "timeStartSet": "2026-03-09T16:10:00.000Z",
+        "timeOffSet": "2026-03-09T16:11:00.000Z",
+        "duration": 60,
+        "cps": 0.53,
+        "charCount": 64,
+        "content": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    "
+      },
+      {
+        "timeStartSet": "2026-03-09T16:15:00.000Z",
+        "timeOffSet": "2026-03-09T16:16:00.000Z",
+        "duration": 60,
+        "cps": 0.53,
+        "charCount": 96,
+        "content": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    result.append(str(a))\n    a, b ="
+      },
+      {
+        "timeStartSet": "2026-03-09T16:20:00.000Z",
+        "timeOffSet": "2026-03-09T16:21:00.000Z",
+        "duration": 60,
+        "cps": 0.57,
+        "charCount": 130,
+        "content": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    result.append(str(a))\n    a, b = b, a + b\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-03-10T00:00:00"
+  },
+  {
+    "id": "klog-subm-790",
+    "submissionId": "subm-790",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-09T16:09:00.000Z",
+        "timeOffSet": "2026-03-09T16:10:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 40,
+        "content": "n = int(input())\narr = list(map(int, inp"
+      },
+      {
+        "timeStartSet": "2026-03-09T16:14:00.000Z",
+        "timeOffSet": "2026-03-09T16:15:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 80,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfo"
+      },
+      {
+        "timeStartSet": "2026-03-09T16:19:00.000Z",
+        "timeOffSet": "2026-03-09T16:20:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 120,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.a"
+      },
+      {
+        "timeStartSet": "2026-03-09T16:24:00.000Z",
+        "timeOffSet": "2026-03-09T16:25:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 163,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.append(str(prefix))\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-03-10T00:00:00"
+  },
+  {
+    "id": "klog-subm-821",
+    "submissionId": "subm-821",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-14T16:38:00.000Z",
+        "timeOffSet": "2026-03-14T16:39:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-14T16:43:00.000Z",
+        "timeOffSet": "2026-03-14T16:44:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-14T16:48:00.000Z",
+        "timeOffSet": "2026-03-14T16:49:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-14T16:53:00.000Z",
+        "timeOffSet": "2026-03-14T16:54:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-851",
+    "submissionId": "subm-851",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-14T16:45:00.000Z",
+        "timeOffSet": "2026-03-14T16:46:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-14T16:50:00.000Z",
+        "timeOffSet": "2026-03-14T16:51:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-14T16:55:00.000Z",
+        "timeOffSet": "2026-03-14T16:56:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-14T17:00:00.000Z",
+        "timeOffSet": "2026-03-14T17:01:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-853",
+    "submissionId": "subm-853",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-14T16:08:00.000Z",
+        "timeOffSet": "2026-03-14T16:09:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-14T16:13:00.000Z",
+        "timeOffSet": "2026-03-14T16:14:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-14T16:18:00.000Z",
+        "timeOffSet": "2026-03-14T16:19:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-14T16:23:00.000Z",
+        "timeOffSet": "2026-03-14T16:24:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T00:00:00"
+  },
+  {
+    "id": "klog-subm-887",
+    "submissionId": "subm-887",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-19T16:38:00.000Z",
+        "timeOffSet": "2026-03-19T16:39:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-19T16:43:00.000Z",
+        "timeOffSet": "2026-03-19T16:44:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-19T16:48:00.000Z",
+        "timeOffSet": "2026-03-19T16:49:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-19T16:53:00.000Z",
+        "timeOffSet": "2026-03-19T16:54:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-20T00:00:00"
+  },
+  {
+    "id": "klog-subm-911",
+    "submissionId": "subm-911",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-04T16:43:00.000Z",
+        "timeOffSet": "2026-03-04T16:44:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-04T16:48:00.000Z",
+        "timeOffSet": "2026-03-04T16:49:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-04T16:53:00.000Z",
+        "timeOffSet": "2026-03-04T16:54:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-04T16:58:00.000Z",
+        "timeOffSet": "2026-03-04T16:59:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-05T00:00:00"
+  },
+  {
+    "id": "klog-subm-914",
+    "submissionId": "subm-914",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-04T16:44:00.000Z",
+        "timeOffSet": "2026-03-04T16:45:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-04T16:49:00.000Z",
+        "timeOffSet": "2026-03-04T16:50:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-04T16:54:00.000Z",
+        "timeOffSet": "2026-03-04T16:55:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-04T16:59:00.000Z",
+        "timeOffSet": "2026-03-04T17:00:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-05T00:00:00"
+  },
+  {
+    "id": "klog-subm-943",
+    "submissionId": "subm-943",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-01T02:39:00.000Z",
+        "timeOffSet": "2026-06-01T02:40:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-06-01T02:44:00.000Z",
+        "timeOffSet": "2026-06-01T02:45:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-06-01T02:49:00.000Z",
+        "timeOffSet": "2026-06-01T02:50:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-06-01T02:54:00.000Z",
+        "timeOffSet": "2026-06-01T02:55:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-06-01T10:00:00"
+  },
+  {
+    "id": "klog-subm-986",
+    "submissionId": "subm-986",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-05T01:17:00.000Z",
+        "timeOffSet": "2026-06-05T01:18:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:22:00.000Z",
+        "timeOffSet": "2026-06-05T01:23:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-06-05T01:27:00.000Z",
+        "timeOffSet": "2026-06-05T01:28:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:32:00.000Z",
+        "timeOffSet": "2026-06-05T01:33:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-06-05T09:00:00"
+  },
+  {
+    "id": "klog-subm-994",
+    "submissionId": "subm-994",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-05T01:28:00.000Z",
+        "timeOffSet": "2026-06-05T01:29:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:33:00.000Z",
+        "timeOffSet": "2026-06-05T01:34:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-06-05T01:38:00.000Z",
+        "timeOffSet": "2026-06-05T01:39:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:43:00.000Z",
+        "timeOffSet": "2026-06-05T01:44:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-06-05T09:00:00"
+  },
+  {
+    "id": "klog-subm-997",
+    "submissionId": "subm-997",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-05T01:12:00.000Z",
+        "timeOffSet": "2026-06-05T01:13:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:17:00.000Z",
+        "timeOffSet": "2026-06-05T01:18:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:22:00.000Z",
+        "timeOffSet": "2026-06-05T01:23:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-06-05T01:27:00.000Z",
+        "timeOffSet": "2026-06-05T01:28:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-06-05T09:00:00"
+  },
+  {
+    "id": "klog-subm-1060",
+    "submissionId": "subm-1060",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-10T01:37:00.000Z",
+        "timeOffSet": "2026-06-10T01:38:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-06-10T01:42:00.000Z",
+        "timeOffSet": "2026-06-10T01:43:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-06-10T01:47:00.000Z",
+        "timeOffSet": "2026-06-10T01:48:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-06-10T01:52:00.000Z",
+        "timeOffSet": "2026-06-10T01:53:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-06-10T09:00:00"
+  },
+  {
+    "id": "klog-subm-1068",
+    "submissionId": "subm-1068",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-01T00:13:00.000Z",
+        "timeOffSet": "2026-06-01T00:14:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-06-01T00:18:00.000Z",
+        "timeOffSet": "2026-06-01T00:19:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-06-01T00:23:00.000Z",
+        "timeOffSet": "2026-06-01T00:24:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-06-01T00:28:00.000Z",
+        "timeOffSet": "2026-06-01T00:29:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-06-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1084",
+    "submissionId": "subm-1084",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-06-01T00:22:00.000Z",
+        "timeOffSet": "2026-06-01T00:23:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-06-01T00:27:00.000Z",
+        "timeOffSet": "2026-06-01T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-06-01T00:32:00.000Z",
+        "timeOffSet": "2026-06-01T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-06-01T00:37:00.000Z",
+        "timeOffSet": "2026-06-01T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-06-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1093",
+    "submissionId": "subm-1093",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-07-15T01:10:00.000Z",
+        "timeOffSet": "2026-07-15T01:11:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-07-15T01:15:00.000Z",
+        "timeOffSet": "2026-07-15T01:16:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-07-15T01:20:00.000Z",
+        "timeOffSet": "2026-07-15T01:21:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-07-15T01:25:00.000Z",
+        "timeOffSet": "2026-07-15T01:26:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-07-15T09:00:00"
+  },
+  {
+    "id": "klog-subm-1102",
+    "submissionId": "subm-1102",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-07-15T01:19:00.000Z",
+        "timeOffSet": "2026-07-15T01:20:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-07-15T01:24:00.000Z",
+        "timeOffSet": "2026-07-15T01:25:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-07-15T01:29:00.000Z",
+        "timeOffSet": "2026-07-15T01:30:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-07-15T01:34:00.000Z",
+        "timeOffSet": "2026-07-15T01:35:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-07-15T09:00:00"
+  },
+  {
+    "id": "klog-subm-1114",
+    "submissionId": "subm-1114",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-07-20T00:06:00.000Z",
+        "timeOffSet": "2026-07-20T00:07:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-07-20T00:11:00.000Z",
+        "timeOffSet": "2026-07-20T00:12:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-07-20T00:16:00.000Z",
+        "timeOffSet": "2026-07-20T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-07-20T00:21:00.000Z",
+        "timeOffSet": "2026-07-20T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-07-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1153",
+    "submissionId": "subm-1153",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-07-01T00:11:00.000Z",
+        "timeOffSet": "2026-07-01T00:12:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-07-01T00:16:00.000Z",
+        "timeOffSet": "2026-07-01T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-07-01T00:21:00.000Z",
+        "timeOffSet": "2026-07-01T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-07-01T00:26:00.000Z",
+        "timeOffSet": "2026-07-01T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-07-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1223",
+    "submissionId": "subm-1223",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-10-10T01:12:00.000Z",
+        "timeOffSet": "2026-10-10T01:13:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-10-10T01:17:00.000Z",
+        "timeOffSet": "2026-10-10T01:18:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-10-10T01:22:00.000Z",
+        "timeOffSet": "2026-10-10T01:23:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-10-10T01:27:00.000Z",
+        "timeOffSet": "2026-10-10T01:28:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-10-10T09:00:00"
+  },
+  {
+    "id": "klog-subm-1253",
+    "submissionId": "subm-1253",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-12-01T00:18:00.000Z",
+        "timeOffSet": "2026-12-01T00:19:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 43,
+        "content": "score = int(input())\nif score >= 90:\n    pr"
+      },
+      {
+        "timeStartSet": "2026-12-01T00:23:00.000Z",
+        "timeOffSet": "2026-12-01T00:24:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 86,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\ne"
+      },
+      {
+        "timeStartSet": "2026-12-01T00:28:00.000Z",
+        "timeOffSet": "2026-12-01T00:29:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 129,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score "
+      },
+      {
+        "timeStartSet": "2026-12-01T00:33:00.000Z",
+        "timeOffSet": "2026-12-01T00:34:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 172,
+        "content": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score >= 60:\n    print(\"D\")\nelse:\n    print(\"F\")\n"
+      }
+    ],
+    "createdDate": "2026-12-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1274",
+    "submissionId": "subm-1274",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:45:00.000Z",
+        "timeOffSet": "2026-02-20T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 58,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:50:00.000Z",
+        "timeOffSet": "2026-02-20T00:51:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 116,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a =="
+      },
+      {
+        "timeStartSet": "2026-02-20T00:55:00.000Z",
+        "timeOffSet": "2026-02-20T00:56:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 174,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or"
+      },
+      {
+        "timeStartSet": "2026-02-20T01:00:00.000Z",
+        "timeOffSet": "2026-02-20T01:01:00.000Z",
+        "duration": 60,
+        "cps": 0.98,
+        "charCount": 233,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1282",
+    "submissionId": "subm-1282",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:17:00.000Z",
+        "timeOffSet": "2026-02-20T00:18:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 58,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:22:00.000Z",
+        "timeOffSet": "2026-02-20T00:23:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 116,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a =="
+      },
+      {
+        "timeStartSet": "2026-02-20T00:27:00.000Z",
+        "timeOffSet": "2026-02-20T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 174,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:32:00.000Z",
+        "timeOffSet": "2026-02-20T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.98,
+        "charCount": 233,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1284",
+    "submissionId": "subm-1284",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:16:00.000Z",
+        "timeOffSet": "2026-02-20T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 58,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:21:00.000Z",
+        "timeOffSet": "2026-02-20T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 116,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a =="
+      },
+      {
+        "timeStartSet": "2026-02-20T00:26:00.000Z",
+        "timeOffSet": "2026-02-20T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 174,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:31:00.000Z",
+        "timeOffSet": "2026-02-20T00:32:00.000Z",
+        "duration": 60,
+        "cps": 0.98,
+        "charCount": 233,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1311",
+    "submissionId": "subm-1311",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:44:00.000Z",
+        "timeOffSet": "2026-02-20T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 58,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:49:00.000Z",
+        "timeOffSet": "2026-02-20T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 116,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a =="
+      },
+      {
+        "timeStartSet": "2026-02-20T00:54:00.000Z",
+        "timeOffSet": "2026-02-20T00:55:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 174,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:59:00.000Z",
+        "timeOffSet": "2026-02-20T01:00:00.000Z",
+        "duration": 60,
+        "cps": 0.98,
+        "charCount": 233,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1317",
+    "submissionId": "subm-1317",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:27:00.000Z",
+        "timeOffSet": "2026-02-20T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 58,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:32:00.000Z",
+        "timeOffSet": "2026-02-20T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 116,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a =="
+      },
+      {
+        "timeStartSet": "2026-02-20T00:37:00.000Z",
+        "timeOffSet": "2026-02-20T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 174,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:42:00.000Z",
+        "timeOffSet": "2026-02-20T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.98,
+        "charCount": 233,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1320",
+    "submissionId": "subm-1320",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:30:00.000Z",
+        "timeOffSet": "2026-02-20T00:31:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 13,
+        "content": "import math\nr"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:35:00.000Z",
+        "timeOffSet": "2026-02-20T00:36:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 26,
+        "content": "import math\nr = float(inpu"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:40:00.000Z",
+        "timeOffSet": "2026-02-20T00:41:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 39,
+        "content": "import math\nr = float(input())\nprint(ma"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:45:00.000Z",
+        "timeOffSet": "2026-02-20T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 54,
+        "content": "import math\nr = float(input())\nprint(math.pi * r * r)\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1322",
+    "submissionId": "subm-1322",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T00:10:00.000Z",
+        "timeOffSet": "2026-02-20T00:11:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 13,
+        "content": "import math\nr"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:15:00.000Z",
+        "timeOffSet": "2026-02-20T00:16:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 26,
+        "content": "import math\nr = float(inpu"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:20:00.000Z",
+        "timeOffSet": "2026-02-20T00:21:00.000Z",
+        "duration": 60,
+        "cps": 0.22,
+        "charCount": 39,
+        "content": "import math\nr = float(input())\nprint(ma"
+      },
+      {
+        "timeStartSet": "2026-02-20T00:25:00.000Z",
+        "timeOffSet": "2026-02-20T00:26:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 54,
+        "content": "import math\nr = float(input())\nprint(math.pi * r * r)\n"
+      }
+    ],
+    "createdDate": "2026-02-20T08:00:00"
+  },
+  {
+    "id": "klog-subm-1355",
+    "submissionId": "subm-1355",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-15T02:45:00.000Z",
+        "timeOffSet": "2026-03-15T02:46:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 21,
+        "content": "p, r, t = map(float, "
+      },
+      {
+        "timeStartSet": "2026-03-15T02:50:00.000Z",
+        "timeOffSet": "2026-03-15T02:51:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 42,
+        "content": "p, r, t = map(float, input().split())\namou"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:55:00.000Z",
+        "timeOffSet": "2026-03-15T02:56:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 63,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100"
+      },
+      {
+        "timeStartSet": "2026-03-15T03:00:00.000Z",
+        "timeOffSet": "2026-03-15T03:01:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 84,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100) ** t\nprint(amount)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T10:00:00"
+  },
+  {
+    "id": "klog-subm-1380",
+    "submissionId": "subm-1380",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-15T02:22:00.000Z",
+        "timeOffSet": "2026-03-15T02:23:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 39,
+        "content": "import math\nx1, y1 = map(float, input()"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:27:00.000Z",
+        "timeOffSet": "2026-03-15T02:28:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 78,
+        "content": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().s"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:32:00.000Z",
+        "timeOffSet": "2026-03-15T02:33:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 117,
+        "content": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().split())\ndist = math.sqrt((x2 - x1) ** 2"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:37:00.000Z",
+        "timeOffSet": "2026-03-15T02:38:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 157,
+        "content": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().split())\ndist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)\nprint(f\"{dist:.1f}\")\n"
+      }
+    ],
+    "createdDate": "2026-03-15T10:00:00"
+  },
+  {
+    "id": "klog-subm-1388",
+    "submissionId": "subm-1388",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-15T02:39:00.000Z",
+        "timeOffSet": "2026-03-15T02:40:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 21,
+        "content": "p, r, t = map(float, "
+      },
+      {
+        "timeStartSet": "2026-03-15T02:44:00.000Z",
+        "timeOffSet": "2026-03-15T02:45:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 42,
+        "content": "p, r, t = map(float, input().split())\namou"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:49:00.000Z",
+        "timeOffSet": "2026-03-15T02:50:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 63,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:54:00.000Z",
+        "timeOffSet": "2026-03-15T02:55:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 84,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100) ** t\nprint(amount)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T10:00:00"
+  },
+  {
+    "id": "klog-subm-1415",
+    "submissionId": "subm-1415",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-15T02:35:00.000Z",
+        "timeOffSet": "2026-03-15T02:36:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 21,
+        "content": "p, r, t = map(float, "
+      },
+      {
+        "timeStartSet": "2026-03-15T02:40:00.000Z",
+        "timeOffSet": "2026-03-15T02:41:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 42,
+        "content": "p, r, t = map(float, input().split())\namou"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:45:00.000Z",
+        "timeOffSet": "2026-03-15T02:46:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 63,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:50:00.000Z",
+        "timeOffSet": "2026-03-15T02:51:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 84,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100) ** t\nprint(amount)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T10:00:00"
+  },
+  {
+    "id": "klog-subm-1426",
+    "submissionId": "subm-1426",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-15T02:33:00.000Z",
+        "timeOffSet": "2026-03-15T02:34:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 19,
+        "content": "import math\na, b = "
+      },
+      {
+        "timeStartSet": "2026-03-15T02:38:00.000Z",
+        "timeOffSet": "2026-03-15T02:39:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 38,
+        "content": "import math\na, b = map(float, input()."
+      },
+      {
+        "timeStartSet": "2026-03-15T02:43:00.000Z",
+        "timeOffSet": "2026-03-15T02:44:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 57,
+        "content": "import math\na, b = map(float, input().split())\nprint(math"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:48:00.000Z",
+        "timeOffSet": "2026-03-15T02:49:00.000Z",
+        "duration": 60,
+        "cps": 0.37,
+        "charCount": 79,
+        "content": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n"
+      }
+    ],
+    "createdDate": "2026-03-15T10:00:00"
+  },
+  {
+    "id": "klog-subm-1432",
+    "submissionId": "subm-1432",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-15T02:09:00.000Z",
+        "timeOffSet": "2026-03-15T02:10:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 21,
+        "content": "p, r, t = map(float, "
+      },
+      {
+        "timeStartSet": "2026-03-15T02:14:00.000Z",
+        "timeOffSet": "2026-03-15T02:15:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 42,
+        "content": "p, r, t = map(float, input().split())\namou"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:19:00.000Z",
+        "timeOffSet": "2026-03-15T02:20:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 63,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100"
+      },
+      {
+        "timeStartSet": "2026-03-15T02:24:00.000Z",
+        "timeOffSet": "2026-03-15T02:25:00.000Z",
+        "duration": 60,
+        "cps": 0.35,
+        "charCount": 84,
+        "content": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100) ** t\nprint(amount)\n"
+      }
+    ],
+    "createdDate": "2026-03-15T10:00:00"
+  },
+  {
+    "id": "klog-subm-1471",
+    "submissionId": "subm-1471",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-04-01T00:29:00.000Z",
+        "timeOffSet": "2026-04-01T00:30:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 15,
+        "content": "c = float(input"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:34:00.000Z",
+        "timeOffSet": "2026-04-01T00:35:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 30,
+        "content": "c = float(input())\nf = c * 9.0"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:39:00.000Z",
+        "timeOffSet": "2026-04-01T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 45,
+        "content": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\np"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:44:00.000Z",
+        "timeOffSet": "2026-04-01T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 62,
+        "content": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\nprint(f\"{f:.2f}\")\n"
+      }
+    ],
+    "createdDate": "2026-04-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1483",
+    "submissionId": "subm-1483",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-04-01T00:37:00.000Z",
+        "timeOffSet": "2026-04-01T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 15,
+        "content": "c = float(input"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:42:00.000Z",
+        "timeOffSet": "2026-04-01T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 30,
+        "content": "c = float(input())\nf = c * 9.0"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:47:00.000Z",
+        "timeOffSet": "2026-04-01T00:48:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 45,
+        "content": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\np"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:52:00.000Z",
+        "timeOffSet": "2026-04-01T00:53:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 62,
+        "content": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\nprint(f\"{f:.2f}\")\n"
+      }
+    ],
+    "createdDate": "2026-04-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1517",
+    "submissionId": "subm-1517",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T02:35:00.000Z",
+        "timeOffSet": "2026-02-20T02:36:00.000Z",
+        "duration": 60,
+        "cps": 0.53,
+        "charCount": 32,
+        "content": "n = int(input())\na, b = 0, 1\nres"
+      },
+      {
+        "timeStartSet": "2026-02-20T02:40:00.000Z",
+        "timeOffSet": "2026-02-20T02:41:00.000Z",
+        "duration": 60,
+        "cps": 0.53,
+        "charCount": 64,
+        "content": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    "
+      },
+      {
+        "timeStartSet": "2026-02-20T02:45:00.000Z",
+        "timeOffSet": "2026-02-20T02:46:00.000Z",
+        "duration": 60,
+        "cps": 0.53,
+        "charCount": 96,
+        "content": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    result.append(str(a))\n    a, b ="
+      },
+      {
+        "timeStartSet": "2026-02-20T02:50:00.000Z",
+        "timeOffSet": "2026-02-20T02:51:00.000Z",
+        "duration": 60,
+        "cps": 0.57,
+        "charCount": 130,
+        "content": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    result.append(str(a))\n    a, b = b, a + b\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-02-20T10:00:00"
+  },
+  {
+    "id": "klog-subm-1525",
+    "submissionId": "subm-1525",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-20T02:21:00.000Z",
+        "timeOffSet": "2026-02-20T02:22:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 40,
+        "content": "n = int(input())\narr = list(map(int, inp"
+      },
+      {
+        "timeStartSet": "2026-02-20T02:26:00.000Z",
+        "timeOffSet": "2026-02-20T02:27:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 80,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfo"
+      },
+      {
+        "timeStartSet": "2026-02-20T02:31:00.000Z",
+        "timeOffSet": "2026-02-20T02:32:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 120,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.a"
+      },
+      {
+        "timeStartSet": "2026-02-20T02:36:00.000Z",
+        "timeOffSet": "2026-02-20T02:37:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 163,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.append(str(prefix))\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-02-20T10:00:00"
+  },
+  {
+    "id": "klog-subm-1553",
+    "submissionId": "subm-1553",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:13:00.000Z",
+        "timeOffSet": "2026-03-25T00:14:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 39,
+        "content": "n, k = map(int, input().split())\nk = k "
+      },
+      {
+        "timeStartSet": "2026-03-25T00:18:00.000Z",
+        "timeOffSet": "2026-03-25T00:19:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 78,
+        "content": "n, k = map(int, input().split())\nk = k % n\narr = list(map(int, input().split()"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:23:00.000Z",
+        "timeOffSet": "2026-03-25T00:24:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 117,
+        "content": "n, k = map(int, input().split())\nk = k % n\narr = list(map(int, input().split()))\nresult = [str(arr[(i + k) % n]) for "
+      },
+      {
+        "timeStartSet": "2026-03-25T00:28:00.000Z",
+        "timeOffSet": "2026-03-25T00:29:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 156,
+        "content": "n, k = map(int, input().split())\nk = k % n\narr = list(map(int, input().split()))\nresult = [str(arr[(i + k) % n]) for i in range(n)]\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-1578",
+    "submissionId": "subm-1578",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:13:00.000Z",
+        "timeOffSet": "2026-03-10T00:14:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 17,
+        "content": "s = input().strip"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:18:00.000Z",
+        "timeOffSet": "2026-03-10T00:19:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 34,
+        "content": "s = input().strip()\nunique = sorte"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:23:00.000Z",
+        "timeOffSet": "2026-03-10T00:24:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 51,
+        "content": "s = input().strip()\nunique = sorted(set(s))\nprint(\""
+      },
+      {
+        "timeStartSet": "2026-03-10T00:28:00.000Z",
+        "timeOffSet": "2026-03-10T00:29:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 68,
+        "content": "s = input().strip()\nunique = sorted(set(s))\nprint(\" \".join(unique))\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-1597",
+    "submissionId": "subm-1597",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:16:00.000Z",
+        "timeOffSet": "2026-03-25T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 39,
+        "content": "import math\nx1, y1 = map(float, input()"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:21:00.000Z",
+        "timeOffSet": "2026-03-25T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 78,
+        "content": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().s"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:26:00.000Z",
+        "timeOffSet": "2026-03-25T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.65,
+        "charCount": 117,
+        "content": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().split())\ndist = math.sqrt((x2 - x1) ** 2"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:31:00.000Z",
+        "timeOffSet": "2026-03-25T00:32:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 157,
+        "content": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().split())\ndist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)\nprint(f\"{dist:.1f}\")\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-1634",
+    "submissionId": "subm-1634",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-01T00:38:00.000Z",
+        "timeOffSet": "2026-03-01T00:39:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 40,
+        "content": "n, m = map(int, input().split())\nresult "
+      },
+      {
+        "timeStartSet": "2026-03-01T00:43:00.000Z",
+        "timeOffSet": "2026-03-01T00:44:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 80,
+        "content": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(m"
+      },
+      {
+        "timeStartSet": "2026-03-01T00:48:00.000Z",
+        "timeOffSet": "2026-03-01T00:49:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 120,
+        "content": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(map(int, input().split()))\n    result.app"
+      },
+      {
+        "timeStartSet": "2026-03-01T00:53:00.000Z",
+        "timeOffSet": "2026-03-01T00:54:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 163,
+        "content": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(map(int, input().split()))\n    result.append(str(sum(row)))\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-03-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1649",
+    "submissionId": "subm-1649",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-01T00:22:00.000Z",
+        "timeOffSet": "2026-03-01T00:23:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 40,
+        "content": "n, m = map(int, input().split())\nresult "
+      },
+      {
+        "timeStartSet": "2026-03-01T00:27:00.000Z",
+        "timeOffSet": "2026-03-01T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 80,
+        "content": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(m"
+      },
+      {
+        "timeStartSet": "2026-03-01T00:32:00.000Z",
+        "timeOffSet": "2026-03-01T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 120,
+        "content": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(map(int, input().split()))\n    result.app"
+      },
+      {
+        "timeStartSet": "2026-03-01T00:37:00.000Z",
+        "timeOffSet": "2026-03-01T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 163,
+        "content": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(map(int, input().split()))\n    result.append(str(sum(row)))\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-03-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1668",
+    "submissionId": "subm-1668",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-01T00:44:00.000Z",
+        "timeOffSet": "2026-03-01T00:45:00.000Z",
+        "duration": 60,
+        "cps": 1.08,
+        "charCount": 65,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nseen = set"
+      },
+      {
+        "timeStartSet": "2026-03-01T00:49:00.000Z",
+        "timeOffSet": "2026-03-01T00:50:00.000Z",
+        "duration": 60,
+        "cps": 1.08,
+        "charCount": 130,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nseen = set()\ndupes = []\nfor x in arr:\n    if x in seen:\n        dupes.appen"
+      },
+      {
+        "timeStartSet": "2026-03-01T00:54:00.000Z",
+        "timeOffSet": "2026-03-01T00:55:00.000Z",
+        "duration": 60,
+        "cps": 1.08,
+        "charCount": 195,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nseen = set()\ndupes = []\nfor x in arr:\n    if x in seen:\n        dupes.append(x)\n    else:\n        seen.add(x)\ndupes = sorted(set(dupes))\nif "
+      },
+      {
+        "timeStartSet": "2026-03-01T00:59:00.000Z",
+        "timeOffSet": "2026-03-01T01:00:00.000Z",
+        "duration": 60,
+        "cps": 1.13,
+        "charCount": 263,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nseen = set()\ndupes = []\nfor x in arr:\n    if x in seen:\n        dupes.append(x)\n    else:\n        seen.add(x)\ndupes = sorted(set(dupes))\nif dupes:\n    print(\" \".join(map(str, dupes)))\nelse:\n    print(\"NONE\")\n"
+      }
+    ],
+    "createdDate": "2026-03-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1684",
+    "submissionId": "subm-1684",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-04-01T00:22:00.000Z",
+        "timeOffSet": "2026-04-01T00:23:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 30,
+        "content": "year = int(input())\nis_leap = "
+      },
+      {
+        "timeStartSet": "2026-04-01T00:27:00.000Z",
+        "timeOffSet": "2026-04-01T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 60,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 "
+      },
+      {
+        "timeStartSet": "2026-04-01T00:32:00.000Z",
+        "timeOffSet": "2026-04-01T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 90,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\npri"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:37:00.000Z",
+        "timeOffSet": "2026-04-01T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.52,
+        "charCount": 121,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\nprint(\"YES\" if is_leap else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-04-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1689",
+    "submissionId": "subm-1689",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-04-01T00:47:00.000Z",
+        "timeOffSet": "2026-04-01T00:48:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-04-01T00:52:00.000Z",
+        "timeOffSet": "2026-04-01T00:53:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:57:00.000Z",
+        "timeOffSet": "2026-04-01T00:58:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-04-01T01:02:00.000Z",
+        "timeOffSet": "2026-04-01T01:03:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-04-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1691",
+    "submissionId": "subm-1691",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-04-01T00:33:00.000Z",
+        "timeOffSet": "2026-04-01T00:34:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-04-01T00:38:00.000Z",
+        "timeOffSet": "2026-04-01T00:39:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-04-01T00:43:00.000Z",
+        "timeOffSet": "2026-04-01T00:44:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-04-01T00:48:00.000Z",
+        "timeOffSet": "2026-04-01T00:49:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-04-01T08:00:00"
+  },
+  {
+    "id": "klog-subm-1713",
+    "submissionId": "subm-1713",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:39:00.000Z",
+        "timeOffSet": "2026-03-10T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:44:00.000Z",
+        "timeOffSet": "2026-03-10T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:49:00.000Z",
+        "timeOffSet": "2026-03-10T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:54:00.000Z",
+        "timeOffSet": "2026-03-10T00:55:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-1752",
+    "submissionId": "subm-1752",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:25:00.000Z",
+        "timeOffSet": "2026-02-05T00:26:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:30:00.000Z",
+        "timeOffSet": "2026-02-05T00:31:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:35:00.000Z",
+        "timeOffSet": "2026-02-05T00:36:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:40:00.000Z",
+        "timeOffSet": "2026-02-05T00:41:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1759",
+    "submissionId": "subm-1759",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:35:00.000Z",
+        "timeOffSet": "2026-02-05T00:36:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:40:00.000Z",
+        "timeOffSet": "2026-02-05T00:41:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:45:00.000Z",
+        "timeOffSet": "2026-02-05T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-02-05T00:50:00.000Z",
+        "timeOffSet": "2026-02-05T00:51:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1796",
+    "submissionId": "subm-1796",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:16:00.000Z",
+        "timeOffSet": "2026-02-05T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:21:00.000Z",
+        "timeOffSet": "2026-02-05T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:26:00.000Z",
+        "timeOffSet": "2026-02-05T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:31:00.000Z",
+        "timeOffSet": "2026-02-05T00:32:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1819",
+    "submissionId": "subm-1819",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:37:00.000Z",
+        "timeOffSet": "2026-02-05T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:42:00.000Z",
+        "timeOffSet": "2026-02-05T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:47:00.000Z",
+        "timeOffSet": "2026-02-05T00:48:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-02-05T00:52:00.000Z",
+        "timeOffSet": "2026-02-05T00:53:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1844",
+    "submissionId": "subm-1844",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:09:00.000Z",
+        "timeOffSet": "2026-02-05T00:10:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:14:00.000Z",
+        "timeOffSet": "2026-02-05T00:15:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-02-05T00:19:00.000Z",
+        "timeOffSet": "2026-02-05T00:20:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:24:00.000Z",
+        "timeOffSet": "2026-02-05T00:25:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1863",
+    "submissionId": "subm-1863",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:27:00.000Z",
+        "timeOffSet": "2026-02-05T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:32:00.000Z",
+        "timeOffSet": "2026-02-05T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:37:00.000Z",
+        "timeOffSet": "2026-02-05T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-02-05T00:42:00.000Z",
+        "timeOffSet": "2026-02-05T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1867",
+    "submissionId": "subm-1867",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:34:00.000Z",
+        "timeOffSet": "2026-02-05T00:35:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-02-05T00:39:00.000Z",
+        "timeOffSet": "2026-02-05T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:44:00.000Z",
+        "timeOffSet": "2026-02-05T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-02-05T00:49:00.000Z",
+        "timeOffSet": "2026-02-05T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1869",
+    "submissionId": "subm-1869",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:35:00.000Z",
+        "timeOffSet": "2026-02-05T00:36:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:40:00.000Z",
+        "timeOffSet": "2026-02-05T00:41:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-02-05T00:45:00.000Z",
+        "timeOffSet": "2026-02-05T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:50:00.000Z",
+        "timeOffSet": "2026-02-05T00:51:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1887",
+    "submissionId": "subm-1887",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:11:00.000Z",
+        "timeOffSet": "2026-02-05T00:12:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:16:00.000Z",
+        "timeOffSet": "2026-02-05T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:21:00.000Z",
+        "timeOffSet": "2026-02-05T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-02-05T00:26:00.000Z",
+        "timeOffSet": "2026-02-05T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1900",
+    "submissionId": "subm-1900",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-05T00:45:00.000Z",
+        "timeOffSet": "2026-02-05T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:50:00.000Z",
+        "timeOffSet": "2026-02-05T00:51:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-02-05T00:55:00.000Z",
+        "timeOffSet": "2026-02-05T00:56:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-02-05T01:00:00.000Z",
+        "timeOffSet": "2026-02-05T01:01:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-02-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-1952",
+    "submissionId": "subm-1952",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-15T00:26:00.000Z",
+        "timeOffSet": "2026-02-15T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 30,
+        "content": "year = int(input())\nis_leap = "
+      },
+      {
+        "timeStartSet": "2026-02-15T00:31:00.000Z",
+        "timeOffSet": "2026-02-15T00:32:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 60,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 "
+      },
+      {
+        "timeStartSet": "2026-02-15T00:36:00.000Z",
+        "timeOffSet": "2026-02-15T00:37:00.000Z",
+        "duration": 60,
+        "cps": 0.5,
+        "charCount": 90,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\npri"
+      },
+      {
+        "timeStartSet": "2026-02-15T00:41:00.000Z",
+        "timeOffSet": "2026-02-15T00:42:00.000Z",
+        "duration": 60,
+        "cps": 0.52,
+        "charCount": 121,
+        "content": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\nprint(\"YES\" if is_leap else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-02-15T08:00:00"
+  },
+  {
+    "id": "klog-subm-2006",
+    "submissionId": "subm-2006",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-02-15T00:32:00.000Z",
+        "timeOffSet": "2026-02-15T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 58,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c"
+      },
+      {
+        "timeStartSet": "2026-02-15T00:37:00.000Z",
+        "timeOffSet": "2026-02-15T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 116,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a =="
+      },
+      {
+        "timeStartSet": "2026-02-15T00:42:00.000Z",
+        "timeOffSet": "2026-02-15T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.97,
+        "charCount": 174,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or"
+      },
+      {
+        "timeStartSet": "2026-02-15T00:47:00.000Z",
+        "timeOffSet": "2026-02-15T00:48:00.000Z",
+        "duration": 60,
+        "cps": 0.98,
+        "charCount": 233,
+        "content": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n"
+      }
+    ],
+    "createdDate": "2026-02-15T08:00:00"
+  },
+  {
+    "id": "klog-subm-2048",
+    "submissionId": "subm-2048",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:09:00.000Z",
+        "timeOffSet": "2026-03-10T00:10:00.000Z",
+        "duration": 60,
+        "cps": 0.38,
+        "charCount": 23,
+        "content": "weight, height = map(fl"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:14:00.000Z",
+        "timeOffSet": "2026-03-10T00:15:00.000Z",
+        "duration": 60,
+        "cps": 0.38,
+        "charCount": 46,
+        "content": "weight, height = map(float, input().split())\nb"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:19:00.000Z",
+        "timeOffSet": "2026-03-10T00:20:00.000Z",
+        "duration": 60,
+        "cps": 0.38,
+        "charCount": 69,
+        "content": "weight, height = map(float, input().split())\nbmi = weight / (height *"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:24:00.000Z",
+        "timeOffSet": "2026-03-10T00:25:00.000Z",
+        "duration": 60,
+        "cps": 0.42,
+        "charCount": 94,
+        "content": "weight, height = map(float, input().split())\nbmi = weight / (height ** 2)\nprint(f\"{bmi:.1f}\")\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2061",
+    "submissionId": "subm-2061",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:23:00.000Z",
+        "timeOffSet": "2026-03-10T00:24:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 19,
+        "content": "import math\na, b = "
+      },
+      {
+        "timeStartSet": "2026-03-10T00:28:00.000Z",
+        "timeOffSet": "2026-03-10T00:29:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 38,
+        "content": "import math\na, b = map(float, input()."
+      },
+      {
+        "timeStartSet": "2026-03-10T00:33:00.000Z",
+        "timeOffSet": "2026-03-10T00:34:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 57,
+        "content": "import math\na, b = map(float, input().split())\nprint(math"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:38:00.000Z",
+        "timeOffSet": "2026-03-10T00:39:00.000Z",
+        "duration": 60,
+        "cps": 0.37,
+        "charCount": 79,
+        "content": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2072",
+    "submissionId": "subm-2072",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:36:00.000Z",
+        "timeOffSet": "2026-03-10T00:37:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 19,
+        "content": "import math\na, b = "
+      },
+      {
+        "timeStartSet": "2026-03-10T00:41:00.000Z",
+        "timeOffSet": "2026-03-10T00:42:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 38,
+        "content": "import math\na, b = map(float, input()."
+      },
+      {
+        "timeStartSet": "2026-03-10T00:46:00.000Z",
+        "timeOffSet": "2026-03-10T00:47:00.000Z",
+        "duration": 60,
+        "cps": 0.32,
+        "charCount": 57,
+        "content": "import math\na, b = map(float, input().split())\nprint(math"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:51:00.000Z",
+        "timeOffSet": "2026-03-10T00:52:00.000Z",
+        "duration": 60,
+        "cps": 0.37,
+        "charCount": 79,
+        "content": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2093",
+    "submissionId": "subm-2093",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:45:00.000Z",
+        "timeOffSet": "2026-03-10T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.78,
+        "charCount": 47,
+        "content": "import math\nn = int(input())\narr = list(map(flo"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:50:00.000Z",
+        "timeOffSet": "2026-03-10T00:51:00.000Z",
+        "duration": 60,
+        "cps": 0.78,
+        "charCount": 94,
+        "content": "import math\nn = int(input())\narr = list(map(float, input().split()))\nmean = sum(arr) / n\nvaria"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:55:00.000Z",
+        "timeOffSet": "2026-03-10T00:56:00.000Z",
+        "duration": 60,
+        "cps": 0.78,
+        "charCount": 141,
+        "content": "import math\nn = int(input())\narr = list(map(float, input().split()))\nmean = sum(arr) / n\nvariance = sum((x - mean) ** 2 for x in arr) / n\nstd"
+      },
+      {
+        "timeStartSet": "2026-03-10T01:00:00.000Z",
+        "timeOffSet": "2026-03-10T01:01:00.000Z",
+        "duration": 60,
+        "cps": 0.82,
+        "charCount": 190,
+        "content": "import math\nn = int(input())\narr = list(map(float, input().split()))\nmean = sum(arr) / n\nvariance = sum((x - mean) ** 2 for x in arr) / n\nstddev = math.sqrt(variance)\nprint(f\"{stddev:.4f}\")\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2109",
+    "submissionId": "subm-2109",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:06:00.000Z",
+        "timeOffSet": "2026-03-10T00:07:00.000Z",
+        "duration": 60,
+        "cps": 0.38,
+        "charCount": 23,
+        "content": "weight, height = map(fl"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:11:00.000Z",
+        "timeOffSet": "2026-03-10T00:12:00.000Z",
+        "duration": 60,
+        "cps": 0.38,
+        "charCount": 46,
+        "content": "weight, height = map(float, input().split())\nb"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:16:00.000Z",
+        "timeOffSet": "2026-03-10T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.38,
+        "charCount": 69,
+        "content": "weight, height = map(float, input().split())\nbmi = weight / (height *"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:21:00.000Z",
+        "timeOffSet": "2026-03-10T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.42,
+        "charCount": 94,
+        "content": "weight, height = map(float, input().split())\nbmi = weight / (height ** 2)\nprint(f\"{bmi:.1f}\")\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2113",
+    "submissionId": "subm-2113",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:36:00.000Z",
+        "timeOffSet": "2026-03-05T00:37:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 8,
+        "content": "n = inpu"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:41:00.000Z",
+        "timeOffSet": "2026-03-05T00:42:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 16,
+        "content": "n = input().stri"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:46:00.000Z",
+        "timeOffSet": "2026-03-05T00:47:00.000Z",
+        "duration": 60,
+        "cps": 0.13,
+        "charCount": 24,
+        "content": "n = input().strip()\nprin"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:51:00.000Z",
+        "timeOffSet": "2026-03-05T00:52:00.000Z",
+        "duration": 60,
+        "cps": 0.17,
+        "charCount": 34,
+        "content": "n = input().strip()\nprint(len(n))\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2131",
+    "submissionId": "subm-2131",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:12:00.000Z",
+        "timeOffSet": "2026-03-05T00:13:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:17:00.000Z",
+        "timeOffSet": "2026-03-05T00:18:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:22:00.000Z",
+        "timeOffSet": "2026-03-05T00:23:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:27:00.000Z",
+        "timeOffSet": "2026-03-05T00:28:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2134",
+    "submissionId": "subm-2134",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:24:00.000Z",
+        "timeOffSet": "2026-03-05T00:25:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-03-05T00:29:00.000Z",
+        "timeOffSet": "2026-03-05T00:30:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:34:00.000Z",
+        "timeOffSet": "2026-03-05T00:35:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-03-05T00:39:00.000Z",
+        "timeOffSet": "2026-03-05T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2137",
+    "submissionId": "subm-2137",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:13:00.000Z",
+        "timeOffSet": "2026-03-05T00:14:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:18:00.000Z",
+        "timeOffSet": "2026-03-05T00:19:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:23:00.000Z",
+        "timeOffSet": "2026-03-05T00:24:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-03-05T00:28:00.000Z",
+        "timeOffSet": "2026-03-05T00:29:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2152",
+    "submissionId": "subm-2152",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:15:00.000Z",
+        "timeOffSet": "2026-03-05T00:16:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-03-05T00:20:00.000Z",
+        "timeOffSet": "2026-03-05T00:21:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:25:00.000Z",
+        "timeOffSet": "2026-03-05T00:26:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-03-05T00:30:00.000Z",
+        "timeOffSet": "2026-03-05T00:31:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2171",
+    "submissionId": "subm-2171",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:32:00.000Z",
+        "timeOffSet": "2026-03-05T00:33:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-03-05T00:37:00.000Z",
+        "timeOffSet": "2026-03-05T00:38:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:42:00.000Z",
+        "timeOffSet": "2026-03-05T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-03-05T00:47:00.000Z",
+        "timeOffSet": "2026-03-05T00:48:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2189",
+    "submissionId": "subm-2189",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:39:00.000Z",
+        "timeOffSet": "2026-03-05T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 14,
+        "content": "n = int(input("
+      },
+      {
+        "timeStartSet": "2026-03-05T00:44:00.000Z",
+        "timeOffSet": "2026-03-05T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 28,
+        "content": "n = int(input())\nprint(\"Even"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:49:00.000Z",
+        "timeOffSet": "2026-03-05T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 42,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == "
+      },
+      {
+        "timeStartSet": "2026-03-05T00:54:00.000Z",
+        "timeOffSet": "2026-03-05T00:55:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 56,
+        "content": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2207",
+    "submissionId": "subm-2207",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-05T00:48:00.000Z",
+        "timeOffSet": "2026-03-05T00:49:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 6,
+        "content": "s = in"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:53:00.000Z",
+        "timeOffSet": "2026-03-05T00:54:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-03-05T00:58:00.000Z",
+        "timeOffSet": "2026-03-05T00:59:00.000Z",
+        "duration": 60,
+        "cps": 0.1,
+        "charCount": 18,
+        "content": "s = input()\nprint("
+      },
+      {
+        "timeStartSet": "2026-03-05T01:03:00.000Z",
+        "timeOffSet": "2026-03-05T01:04:00.000Z",
+        "duration": 60,
+        "cps": 0.15,
+        "charCount": 27,
+        "content": "s = input()\nprint(s[::-1])\n"
+      }
+    ],
+    "createdDate": "2026-03-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2224",
+    "submissionId": "subm-2224",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:30:00.000Z",
+        "timeOffSet": "2026-03-10T00:31:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2026-03-10T00:35:00.000Z",
+        "timeOffSet": "2026-03-10T00:36:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:40:00.000Z",
+        "timeOffSet": "2026-03-10T00:41:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2026-03-10T00:45:00.000Z",
+        "timeOffSet": "2026-03-10T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2269",
+    "submissionId": "subm-2269",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-10T00:49:00.000Z",
+        "timeOffSet": "2026-03-10T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 12,
+        "content": "s = input()\n"
+      },
+      {
+        "timeStartSet": "2026-03-10T00:54:00.000Z",
+        "timeOffSet": "2026-03-10T00:55:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 24,
+        "content": "s = input()\nprint(\"YES\" "
+      },
+      {
+        "timeStartSet": "2026-03-10T00:59:00.000Z",
+        "timeOffSet": "2026-03-10T01:00:00.000Z",
+        "duration": 60,
+        "cps": 0.2,
+        "charCount": 36,
+        "content": "s = input()\nprint(\"YES\" if s == s[::"
+      },
+      {
+        "timeStartSet": "2026-03-10T01:04:00.000Z",
+        "timeOffSet": "2026-03-10T01:05:00.000Z",
+        "duration": 60,
+        "cps": 0.25,
+        "charCount": 51,
+        "content": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n"
+      }
+    ],
+    "createdDate": "2026-03-10T08:00:00"
+  },
+  {
+    "id": "klog-subm-2311",
+    "submissionId": "subm-2311",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:34:00.000Z",
+        "timeOffSet": "2026-03-25T00:35:00.000Z",
+        "duration": 60,
+        "cps": 0.83,
+        "charCount": 50,
+        "content": "n = int(input())\na = set(map(int, input().split())"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:39:00.000Z",
+        "timeOffSet": "2026-03-25T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.83,
+        "charCount": 100,
+        "content": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split("
+      },
+      {
+        "timeStartSet": "2026-03-25T00:44:00.000Z",
+        "timeOffSet": "2026-03-25T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.83,
+        "charCount": 150,
+        "content": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split()))\nresult = sorted(a & b)\nif result:\n    print(\" "
+      },
+      {
+        "timeStartSet": "2026-03-25T00:49:00.000Z",
+        "timeOffSet": "2026-03-25T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.85,
+        "charCount": 201,
+        "content": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split()))\nresult = sorted(a & b)\nif result:\n    print(\" \".join(map(str, result)))\nelse:\n    print(\"EMPTY\")\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-2319",
+    "submissionId": "subm-2319",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:24:00.000Z",
+        "timeOffSet": "2026-03-25T00:25:00.000Z",
+        "duration": 60,
+        "cps": 0.83,
+        "charCount": 50,
+        "content": "n = int(input())\na = set(map(int, input().split())"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:29:00.000Z",
+        "timeOffSet": "2026-03-25T00:30:00.000Z",
+        "duration": 60,
+        "cps": 0.83,
+        "charCount": 100,
+        "content": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split("
+      },
+      {
+        "timeStartSet": "2026-03-25T00:34:00.000Z",
+        "timeOffSet": "2026-03-25T00:35:00.000Z",
+        "duration": 60,
+        "cps": 0.83,
+        "charCount": 150,
+        "content": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split()))\nresult = sorted(a & b)\nif result:\n    print(\" "
+      },
+      {
+        "timeStartSet": "2026-03-25T00:39:00.000Z",
+        "timeOffSet": "2026-03-25T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.85,
+        "charCount": 201,
+        "content": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split()))\nresult = sorted(a & b)\nif result:\n    print(\" \".join(map(str, result)))\nelse:\n    print(\"EMPTY\")\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-2324",
+    "submissionId": "subm-2324",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:39:00.000Z",
+        "timeOffSet": "2026-03-25T00:40:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 17,
+        "content": "s = input().strip"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:44:00.000Z",
+        "timeOffSet": "2026-03-25T00:45:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 34,
+        "content": "s = input().strip()\nunique = sorte"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:49:00.000Z",
+        "timeOffSet": "2026-03-25T00:50:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 51,
+        "content": "s = input().strip()\nunique = sorted(set(s))\nprint(\""
+      },
+      {
+        "timeStartSet": "2026-03-25T00:54:00.000Z",
+        "timeOffSet": "2026-03-25T00:55:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 68,
+        "content": "s = input().strip()\nunique = sorted(set(s))\nprint(\" \".join(unique))\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-2328",
+    "submissionId": "subm-2328",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:42:00.000Z",
+        "timeOffSet": "2026-03-25T00:43:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 17,
+        "content": "s = input().strip"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:47:00.000Z",
+        "timeOffSet": "2026-03-25T00:48:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 34,
+        "content": "s = input().strip()\nunique = sorte"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:52:00.000Z",
+        "timeOffSet": "2026-03-25T00:53:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 51,
+        "content": "s = input().strip()\nunique = sorted(set(s))\nprint(\""
+      },
+      {
+        "timeStartSet": "2026-03-25T00:57:00.000Z",
+        "timeOffSet": "2026-03-25T00:58:00.000Z",
+        "duration": 60,
+        "cps": 0.28,
+        "charCount": 68,
+        "content": "s = input().strip()\nunique = sorted(set(s))\nprint(\" \".join(unique))\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-2356",
+    "submissionId": "subm-2356",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-03-25T00:16:00.000Z",
+        "timeOffSet": "2026-03-25T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 40,
+        "content": "n = int(input())\narr = list(map(int, inp"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:21:00.000Z",
+        "timeOffSet": "2026-03-25T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 80,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfo"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:26:00.000Z",
+        "timeOffSet": "2026-03-25T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.67,
+        "charCount": 120,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.a"
+      },
+      {
+        "timeStartSet": "2026-03-25T00:31:00.000Z",
+        "timeOffSet": "2026-03-25T00:32:00.000Z",
+        "duration": 60,
+        "cps": 0.72,
+        "charCount": 163,
+        "content": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.append(str(prefix))\nprint(\" \".join(result))\n"
+      }
+    ],
+    "createdDate": "2026-03-25T08:00:00"
+  },
+  {
+    "id": "klog-subm-2421",
+    "submissionId": "subm-2421",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-11-10T05:39:00.000Z",
+        "timeOffSet": "2026-11-10T05:40:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-11-10T05:44:00.000Z",
+        "timeOffSet": "2026-11-10T05:45:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-11-10T05:49:00.000Z",
+        "timeOffSet": "2026-11-10T05:50:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-11-10T05:54:00.000Z",
+        "timeOffSet": "2026-11-10T05:55:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-11-10T13:00:00"
+  },
+  {
+    "id": "klog-subm-2422",
+    "submissionId": "subm-2422",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2026-11-10T05:14:00.000Z",
+        "timeOffSet": "2026-11-10T05:15:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2026-11-10T05:19:00.000Z",
+        "timeOffSet": "2026-11-10T05:20:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2026-11-10T05:24:00.000Z",
+        "timeOffSet": "2026-11-10T05:25:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2026-11-10T05:29:00.000Z",
+        "timeOffSet": "2026-11-10T05:30:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2026-11-10T13:00:00"
+  },
+  {
+    "id": "klog-subm-2426",
+    "submissionId": "subm-2426",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2027-01-05T00:11:00.000Z",
+        "timeOffSet": "2027-01-05T00:12:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 36,
+        "content": "n = int(input())\nif n % 15 == 0:\n   "
+      },
+      {
+        "timeStartSet": "2027-01-05T00:16:00.000Z",
+        "timeOffSet": "2027-01-05T00:17:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 72,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n"
+      },
+      {
+        "timeStartSet": "2027-01-05T00:21:00.000Z",
+        "timeOffSet": "2027-01-05T00:22:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 108,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n "
+      },
+      {
+        "timeStartSet": "2027-01-05T00:26:00.000Z",
+        "timeOffSet": "2027-01-05T00:27:00.000Z",
+        "duration": 60,
+        "cps": 0.6,
+        "charCount": 144,
+        "content": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n"
+      }
+    ],
+    "createdDate": "2027-01-05T08:00:00"
+  },
+  {
+    "id": "klog-subm-2429",
+    "submissionId": "subm-2429",
+    "keystrokeData": [
+      {
+        "timeStartSet": "2027-01-05T00:35:00.000Z",
+        "timeOffSet": "2027-01-05T00:36:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 11,
+        "content": "a = int(inp"
+      },
+      {
+        "timeStartSet": "2027-01-05T00:40:00.000Z",
+        "timeOffSet": "2027-01-05T00:41:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 22,
+        "content": "a = int(input())\nb = i"
+      },
+      {
+        "timeStartSet": "2027-01-05T00:45:00.000Z",
+        "timeOffSet": "2027-01-05T00:46:00.000Z",
+        "duration": 60,
+        "cps": 0.18,
+        "charCount": 33,
+        "content": "a = int(input())\nb = int(input())"
+      },
+      {
+        "timeStartSet": "2027-01-05T00:50:00.000Z",
+        "timeOffSet": "2027-01-05T00:51:00.000Z",
+        "duration": 60,
+        "cps": 0.23,
+        "charCount": 47,
+        "content": "a = int(input())\nb = int(input())\nprint(a + b)\n"
+      }
+    ],
+    "createdDate": "2027-01-05T08:00:00"
+  }
+]
