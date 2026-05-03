@@ -26,7 +26,7 @@ public class TestcaseCommand : ITestcaseCommand
 
         if (numberOfTestcases <= 0)
         {
-            numberOfTestcases = 5;
+            numberOfTestcases = 4;
         }
 
         var problem = new ProblemModel
