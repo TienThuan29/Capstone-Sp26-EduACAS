@@ -344,18 +344,18 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'Welcome Back',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
-          ),
-          Text(
-            'Sign in to continue',
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-          ),
+          // Text(
+          //   'Welcome Back',
+          //   style: TextStyle(
+          //     fontSize: 20,
+          //     fontWeight: FontWeight.bold,
+          //     color: Colors.grey[800],
+          //   ),
+          // ),
+          // Text(
+          //   'Sign in to continue',
+          //   style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+          // ),
           const SizedBox(height: 24),
           EnhancedTextField(
             controller: _emailController,
