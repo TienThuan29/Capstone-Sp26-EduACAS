@@ -184,3 +184,51 @@ public class ExamScoreDistributionItem
     [JsonPropertyName("percentage")]
     public float Percentage { get; set; }
 }
+
+public class QuizScoreStatisticsItem
+{
+    [JsonPropertyName("quizId")]
+    public string QuizId { get; set; } = string.Empty;
+
+    [JsonPropertyName("classroomQuizId")]
+    public string ClassroomQuizId { get; set; } = string.Empty;
+
+    [JsonPropertyName("quizTitle")]
+    public string QuizTitle { get; set; } = string.Empty;
+
+    [JsonPropertyName("averageScore")]
+    public float AverageScore { get; set; }
+
+    [JsonPropertyName("highestScore")]
+    public float HighestScore { get; set; }
+
+    [JsonPropertyName("lowestScore")]
+    public float LowestScore { get; set; }
+
+    [JsonPropertyName("medianScore")]
+    public float MedianScore { get; set; }
+
+    [JsonPropertyName("totalSubmissions")]
+    public int TotalSubmissions { get; set; }
+
+    [JsonPropertyName("totalStudents")]
+    public int TotalStudents { get; set; }
+
+    [JsonPropertyName("totalAttempts")]
+    public int TotalAttempts { get; set; }
+
+    [JsonPropertyName("submissionRate")]
+    public float SubmissionRate { get; set; }
+
+    [JsonPropertyName("passRate")]
+    public float PassRate { get; set; }
+
+    [JsonPropertyName("startTime")]
+    public DateTime StartTime { get; set; }
+
+    [JsonPropertyName("endTime")]
+    public DateTime EndTime { get; set; }
+
+    [JsonPropertyName("scoreDistribution")]
+    public List<ScoreDistributionItem> ScoreDistribution { get; set; } = new();
+}

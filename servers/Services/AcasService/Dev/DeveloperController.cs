@@ -110,6 +110,52 @@ public class DeveloperController : ControllerBase
             });
         }
     }
+
+    /// <summary>
+    /// Seeds rich quiz data (questions, quizzes, classroom quizzes, quiz attempts)
+    /// for Introduction to Programming class (cls-001) without wiping existing data.
+    /// Creates realistic data for dashboard visualization including multi-attempt students.
+    /// Only available when running in Development environment.
+    /// </summary>
+    [HttpPost("seed-cls001-quiz-data")]
+    [ProducesResponseType(typeof(ResetDbResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ResetDbResponse>> SeedCls001QuizData(CancellationToken cancellationToken)
+    {
+        if (!_env.IsDevelopment())
+        {
+            _logger.LogWarning("seed-cls001-quiz-data was called in non-Development environment; rejecting");
+            return StatusCode(403, new ResetDbResponse
+            {
+                Success = false,
+                Message = "This endpoint is only available in Development environment."
+            });
+        }
+
+        try
+        {
+            var result = await _resetService.SeedCls001QuizDataAsync(cancellationToken);
+            return Ok(new ResetDbResponse
+            {
+                Success = result.Success,
+                TablesWiped = result.TablesWiped,
+                ItemsSeeded = result.ItemsSeeded,
+                Message = result.Success
+                    ? $"Seeded {result.ItemsSeeded} quiz items for cls-001 (Introduction to Programming)."
+                    : result.ErrorMessage
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "seed-cls001-quiz-data failed");
+            return StatusCode(500, new ResetDbResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
+    }
 }
 
 public class ResetDbResponse

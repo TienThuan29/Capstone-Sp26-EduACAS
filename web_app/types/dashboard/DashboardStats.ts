@@ -67,6 +67,24 @@ export interface ExamScoreStatistics {
   scoreDistribution: ExamScoreDistribution[];
 }
 
+export interface QuizScoreStatistics {
+  quizId: string;
+  classroomQuizId: string;
+  quizTitle: string;
+  averageScore: number;
+  highestScore: number;
+  lowestScore: number;
+  medianScore: number;
+  totalSubmissions: number;
+  totalStudents: number;
+  totalAttempts: number;
+  submissionRate: number;
+  passRate: number;
+  startTime: string;
+  endTime: string;
+  scoreDistribution: ScoreDistribution[];
+}
+
 export interface ClassroomDashboardData {
   overview: DashboardOverview;
   scoreDistribution: ScoreDistribution[];

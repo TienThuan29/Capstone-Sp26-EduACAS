@@ -1,0 +1,65 @@
+[
+  {
+    "id": "quiz-009",
+    "subjectId": "sub-001",
+    "title": "Variables and Data Types",
+    "duration": 15,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      { "questionId": "qzq-019", "marks": 2, "displayOrder": 1 },
+      { "questionId": "qzq-020", "marks": 3, "displayOrder": 2 },
+      { "questionId": "qzq-021", "marks": 2, "displayOrder": 3 },
+      { "questionId": "qzq-022", "marks": 3, "displayOrder": 4 }
+    ]
+  },
+  {
+    "id": "quiz-010",
+    "subjectId": "sub-001",
+    "title": "Control Flow and Loops",
+    "duration": 20,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      { "questionId": "qzq-023", "marks": 2, "displayOrder": 1 },
+      { "questionId": "qzq-024", "marks": 3, "displayOrder": 2 },
+      { "questionId": "qzq-025", "marks": 5, "displayOrder": 3 }
+    ]
+  },
+  {
+    "id": "quiz-011",
+    "subjectId": "sub-001",
+    "title": "Functions and Data Structures",
+    "duration": 25,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      { "questionId": "qzq-026", "marks": 3, "displayOrder": 1 },
+      { "questionId": "qzq-027", "marks": 2, "displayOrder": 2 },
+      { "questionId": "qzq-028", "marks": 2, "displayOrder": 3 },
+      { "questionId": "qzq-029", "marks": 3, "displayOrder": 4 }
+    ]
+  },
+  {
+    "id": "quiz-012",
+    "subjectId": "sub-001",
+    "title": "Lists, Strings, and Error Handling",
+    "duration": 20,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      { "questionId": "qzq-030", "marks": 2, "displayOrder": 1 },
+      { "questionId": "qzq-031", "marks": 2, "displayOrder": 2 },
+      { "questionId": "qzq-032", "marks": 2, "displayOrder": 3 },
+      { "questionId": "qzq-033", "marks": 4, "displayOrder": 4 }
+    ]
+  },
+  {
+    "id": "quiz-013",
+    "subjectId": "sub-001",
+    "title": "Midterm Comprehensive Quiz",
+    "duration": 30,
+    "createdBy": "usr-lec-001",
+    "questions": [
+      { "questionId": "qzq-034", "marks": 2, "displayOrder": 1 },
+      { "questionId": "qzq-035", "marks": 2, "displayOrder": 2 },
+      { "questionId": "qzq-036", "marks": 6, "displayOrder": 3 }
+    ]
+  }
+]

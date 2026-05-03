@@ -28,8 +28,7 @@ import { AtRiskStudentsList } from "@/components/classroom-dashboard/lists/AtRis
 import { RecentWarningsList } from "@/components/classroom-dashboard/lists/RecentWarningsList";
 import { StudentDashboardSkeleton } from "@/components/ui/skeletons";
 import type { ClassroomStudentResponse } from "@/types/classroom";
-import type { ClassroomQuiz } from "@/types/quiz";
-import type { QuizAttempt } from "@/types/quiz-attempt";
+import type { ClassroomQuiz, QuizAttemptResponse } from "@/types/quiz";
 import type {
   ScoreDistribution,
   AtRiskStudent,
@@ -80,7 +79,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const [students, setStudents] = useState<ClassroomStudentResponse[]>([]);
   const [classroomQuizzes, setClassroomQuizzes] = useState<ClassroomQuiz[]>([]);
   const [quizNameMap, setQuizNameMap] = useState<Record<string, string>>({});
-  const [attemptsByStudent, setAttemptsByStudent] = useState<Record<string, QuizAttempt[]>>({});
+  const [attemptsByStudent, setAttemptsByStudent] = useState<Record<string, QuizAttemptResponse[]>>({});
 
   // Legacy dashboard state (incoming HEAD version)
   const [scoreDistribution, setScoreDistribution] = useState<ScoreDistribution[]>([]);
@@ -94,6 +93,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const [examStatsLoading, setExamStatsLoading] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [activeSubTab, setActiveSubTab] = useState<DashboardSubTab>("overview");
+  const [quizLoading, setQuizLoading] = useState(false);
 
   // Calculate overview stats from classStats
   const totalStudents = classStats.reduce((sum, cls) => sum + cls.totalStudents, 0);
@@ -168,19 +168,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
           (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
         );
 
-        const attemptsEntries = await Promise.all(
-          studentList
-            .filter((student) => student.isJoining)
-            .map(async (student) => {
-              const attempts = await getAttemptsByStudent(student.studentId);
-              return [student.studentId, attempts] as const;
-            }),
-        );
-
-        if (!active) {
-          return;
-        }
-
         const nameMap = allQuizzes.reduce<Record<string, string>>((acc, quiz) => {
           acc[quiz.id] = quiz.title;
           return acc;
@@ -199,7 +186,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
         // Set current version data
         setStudents(studentList.filter((student) => student.isJoining));
         setClassroomQuizzes(sortedClassroomQuizzes);
-        setAttemptsByStudent(Object.fromEntries(attemptsEntries));
         setQuizNameMap(nameMap);
       } catch (err: unknown) {
         if (!active) {
@@ -227,7 +213,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   }, [
     classId,
     getAllQuizzes,
-    getAttemptsByStudent,
     getAtRiskStudents,
     getClassStats,
     getClassroomQuizzesByClassroom,
@@ -238,6 +223,51 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
     selectedExamId,
   ]);
 
+  // Lazy-load quiz attempts when switching to Quiz tab (avoids N+1 on initial page load)
+  useEffect(() => {
+    if (activeSubTab !== "quiz") return;
+    if (Object.keys(attemptsByStudent).length > 0) return; // already loaded
+    if (students.length === 0) return;
+
+    let active = true;
+    setQuizLoading(true);
+
+    const fetchQuizAttempts = async () => {
+      const joiningStudents = students.filter((s) => s.isJoining);
+      if (joiningStudents.length === 0) {
+        setQuizLoading(false);
+        return;
+      }
+
+      // Process in batches of 5 to avoid rate limiting
+      const batchSize = 5;
+        const results: Record<string, QuizAttemptResponse[]> = {};
+
+        for (let i = 0; i < joiningStudents.length; i += batchSize) {
+          if (!active) return;
+          const batch = joiningStudents.slice(i, i + batchSize);
+          // eslint-disable-next-line no-await-in-loop
+          await Promise.all(
+            batch.map(async (student) => {
+              const attempts = await getAttemptsByStudent(student.studentId);
+              results[student.studentId] = attempts;
+            })
+          );
+        }
+
+        if (active) {
+          setAttemptsByStudent(results);
+          setQuizLoading(false);
+        }
+    };
+
+    void fetchQuizAttempts();
+
+    return () => {
+      active = false;
+    };
+  }, [activeSubTab, attemptsByStudent, getAttemptsByStudent, students]);
+
   const filteredClassroomQuizzes = useMemo(() => classroomQuizzes, [classroomQuizzes]);
 
   const studentSeries = useMemo<StudentScoreSeries[]>(() => {
@@ -246,7 +276,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
     return students
       .map((student) => {
         const attempts = attemptsByStudent[student.studentId] ?? [];
-        const attemptsByClassroomQuiz = attempts.reduce<Record<string, QuizAttempt[]>>((acc, attempt) => {
+        const attemptsByClassroomQuiz = attempts.reduce<Record<string, QuizAttemptResponse[]>>((acc, attempt) => {
           if (!classroomQuizIds.has(attempt.classroomQuizId)) {
             return acc;
           }
@@ -259,14 +289,14 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
 
         const points = filteredClassroomQuizzes.map((classroomQuiz) => {
           const quizAttempts = (attemptsByClassroomQuiz[classroomQuiz.id] ?? [])
-            .filter((attempt) => attempt.status === "SUBMITTED" && attempt.finalScore != null)
+            .filter((attempt) => attempt.status === "SUBMITTED" && attempt.score != null)
             .sort((a, b) => b.attemptNumber - a.attemptNumber);
 
           if (quizAttempts.length === 0) {
             return null;
           }
 
-          return Number(quizAttempts[0].finalScore);
+          return Number(quizAttempts[0].score);
         });
 
         const valid = points.filter((score): score is number => score != null);
@@ -409,7 +439,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
           </div>
 
           {/* Additional Metric Cards */}
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <MetricCard
               icon={<UserGroupIcon className="h-5 w-5" />}
               label="Active Students"
@@ -422,19 +452,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
               value={filteredClassroomQuizzes.length.toString()}
               accent="text-[#C9A24D]"
             />
-            {/* <MetricCard
-              icon={<ChartBarIcon className="h-5 w-5" />}
-              label="Class Average (Attempts)"
-              value={
-                classAverageSeries.filter((x): x is number => x != null).length > 0
-                  ? (
-                      classAverageSeries.filter((x): x is number => x != null).reduce((sum, score) => sum + score, 0) /
-                      classAverageSeries.filter((x): x is number => x != null).length
-                    ).toFixed(2)
-                  : "N/A"
-              }
-              accent="text-emerald-600"
-            /> */}
           </div>
 
           {/* Score Distribution Chart (ALL modes) */}
@@ -518,12 +535,12 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
       {/* ===== Quiz Tab ===== */}
       {activeSubTab === "quiz" && (
         <QuizStatisticsSection
+          classId={classId}
           classroomQuizzes={classroomQuizzes}
           attemptsByStudent={attemptsByStudent}
           students={students}
-          scoreDistribution={scoreDistribution}
-          scoreDistLoading={scoreDistLoading}
           quizNameMap={quizNameMap}
+          loading={quizLoading}
         />
       )}
     </div>

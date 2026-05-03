@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Badge } from "flowbite-react";
 import {
   UserGroupIcon,
@@ -22,10 +22,11 @@ import { LineChart } from "@/components/classroom-dashboard/charts/LineChart";
 import { ScoreDistributionChart } from "@/components/classroom-dashboard/charts/ScoreDistributionChart";
 import { QuizHeatmapChart } from "@/components/classroom-dashboard/charts/QuizHeatmapChart";
 import { QuizCompletionRateChart } from "@/components/classroom-dashboard/charts/QuizCompletionRateChart";
-import type { ClassroomQuiz } from "@/types/quiz";
-import type { QuizAttempt } from "@/types/quiz-attempt";
+import { useQuizStatistics } from "@/hooks/dashboard/useQuizStatistics";
+import type { ClassroomQuiz, QuizAttemptResponse } from "@/types/quiz";
 import type { ClassroomStudentResponse } from "@/types/classroom";
-import type { ScoreDistribution } from "@/types/dashboard/DashboardStats";
+import type { ScoreDistribution, QuizScoreStatistics } from "@/types/dashboard/DashboardStats";
+import { StudentQuizAttemptDetail } from "./StudentQuizAttemptDetail";
 
 type StudentScoreSeries = {
   studentId: string;
@@ -36,25 +37,40 @@ type StudentScoreSeries = {
 };
 
 interface QuizStatisticsSectionProps {
+  classId: string;
   classroomQuizzes: ClassroomQuiz[];
-  attemptsByStudent: Record<string, QuizAttempt[]>;
+  attemptsByStudent: Record<string, QuizAttemptResponse[]>;
   students: ClassroomStudentResponse[];
-  scoreDistribution: ScoreDistribution[];
-  scoreDistLoading: boolean;
   quizNameMap: Record<string, string>;
+  loading?: boolean;
 }
 
 const PASS_THRESHOLD = 5.0; // out of 10
 
 export function QuizStatisticsSection({
+  classId,
   classroomQuizzes,
   attemptsByStudent,
   students,
-  scoreDistribution,
-  scoreDistLoading,
   quizNameMap,
+  loading = false,
 }: QuizStatisticsSectionProps) {
   const [selectedQuizIndex, setSelectedQuizIndex] = useState(0);
+  const { getQuizStatistics } = useQuizStatistics();
+  const [quizStats, setQuizStats] = useState<QuizScoreStatistics[]>([]);
+  const [statsLoading, setStatsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!classId) return;
+    setStatsLoading(true);
+    getQuizStatistics(classId)
+      .then((data) => {
+        setQuizStats(data);
+      })
+      .finally(() => {
+        setStatsLoading(false);
+      });
+  }, [classId, getQuizStatistics]);
 
   const filteredClassroomQuizzes = useMemo(
     () =>
@@ -70,7 +86,7 @@ export function QuizStatisticsSection({
     return students
       .map((student) => {
         const attempts = attemptsByStudent[student.studentId] ?? [];
-        const attemptsByClassroomQuiz = attempts.reduce<Record<string, QuizAttempt[]>>(
+        const attemptsByClassroomQuiz = attempts.reduce<Record<string, QuizAttemptResponse[]>>(
           (acc, attempt) => {
             if (!classroomQuizIds.has(attempt.classroomQuizId)) return acc;
             if (!acc[attempt.classroomQuizId]) acc[attempt.classroomQuizId] = [];
@@ -84,11 +100,11 @@ export function QuizStatisticsSection({
           const quizAttempts = (attemptsByClassroomQuiz[classroomQuiz.id] ?? [])
             .filter(
               (attempt) =>
-                attempt.status === "SUBMITTED" && attempt.finalScore != null
+                attempt.status === "SUBMITTED" && attempt.score != null
             )
             .sort((a, b) => b.attemptNumber - a.attemptNumber);
           if (quizAttempts.length === 0) return null;
-          return Number(quizAttempts[0].finalScore);
+          return Number(quizAttempts[0].score);
         });
 
         const valid = points.filter((score): score is number => score != null);
@@ -153,6 +169,36 @@ export function QuizStatisticsSection({
     });
   }, [filteredClassroomQuizzes, studentSeries, students, quizNameMap]);
 
+  // --- Score distribution from API (aggregated across all quizzes) ---
+  const quizScoreDistribution = useMemo<ScoreDistribution[]>(() => {
+    if (quizStats.length === 0) return [];
+
+    const rangeMap: Record<string, number> = {
+      "9-10": 0,
+      "7-8": 0,
+      "5-6": 0,
+      "3-4": 0,
+      "0-2": 0,
+    };
+    let totalCount = 0;
+
+    for (const qs of quizStats) {
+      for (const item of qs.scoreDistribution) {
+        const range = item.range;
+        if (range in rangeMap) {
+          rangeMap[range] += item.count;
+          totalCount += item.count;
+        }
+      }
+    }
+
+    return Object.entries(rangeMap).map(([range, count]) => ({
+      range,
+      count,
+      percentage: totalCount > 0 ? (count / totalCount) * 100 : 0,
+    }));
+  }, [quizStats]);
+
   // --- Pass/Fail counts across all quizzes ---
   const passFailData = useMemo(() => {
     const passCount = studentSeries.filter((s) => s.averageScore >= PASS_THRESHOLD).length;
@@ -188,6 +234,7 @@ export function QuizStatisticsSection({
     return studentSeries.map((s) => {
       const score = s.points[selectedQuizIndex];
       return {
+        studentId: s.studentId,
         studentName: s.studentName,
         score,
         passed: score !== null && score >= PASS_THRESHOLD,
@@ -195,14 +242,37 @@ export function QuizStatisticsSection({
     });
   }, [selectedQuiz, selectedQuizIndex, studentSeries]);
 
+  // Attempts for selected quiz, keyed by studentId (used for modal)
+  const attemptsByStudentForQuiz = useMemo(() => {
+    if (!selectedQuiz) return {};
+    const result: Record<string, QuizAttemptResponse[]> = {};
+    for (const student of students) {
+      const attempts = (attemptsByStudent[student.studentId] ?? [])
+        .filter((a) => a.classroomQuizId === selectedQuiz.id)
+        .sort((a, b) => a.attemptNumber - b.attemptNumber);
+      if (attempts.length > 0) result[student.studentId] = attempts;
+    }
+    return result;
+  }, [selectedQuiz, students, attemptsByStudent]);
+
+  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
+
   const passedInQuiz = perQuizPassFail.filter((s) => s.passed).length;
   const failedInQuiz = perQuizPassFail.filter((s) => !s.passed && s.score !== null).length;
   const noSubmissionInQuiz = perQuizPassFail.filter((s) => s.score === null).length;
 
   return (
     <>
+      {/* Loading overlay while fetching quiz attempts */}
+      {loading && (
+        <div className="mb-4 flex items-center justify-center gap-3 rounded-lg border border-blue-200 bg-blue-50 py-4 text-sm text-blue-700 dark:border-blue-800 dark:bg-blue-950 dark:text-blue-300">
+          <div className="h-5 w-5 animate-spin rounded-full border-2 border-blue-500 border-t-transparent" />
+          Loading quiz attempt data…
+        </div>
+      )}
+
       {/* === Metric Cards === */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <MetricCard
           icon={<UserGroupIcon className="h-5 w-5" />}
           label="Active Students"
@@ -231,22 +301,10 @@ export function QuizStatisticsSection({
           accent="text-emerald-600"
           bgClass="bg-emerald-50 dark:bg-emerald-950"
         />
-        <MetricCard
-          icon={<CheckCircleIcon className="h-5 w-5" />}
-          label="Pass Rate"
-          value={
-            studentSeries.length > 0
-              ? `${((passFailData[0].value / studentSeries.length) * 100).toFixed(0)}%`
-              : "N/A"
-          }
-          subtext={`${passFailData[0].value} passing / ${passFailData[1].value} failing`}
-          accent="text-violet-600"
-          bgClass="bg-violet-50 dark:bg-violet-950"
-        />
       </div>
 
       {/* === Row: Class Trend + Quiz Pass/Fail Distribution === */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
+      <div className="">
         {/* Class Average Trend */}
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:col-span-3">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
@@ -258,7 +316,6 @@ export function QuizStatisticsSection({
                 Average score per quiz across all students
               </p>
             </div>
-            <Badge color="info">Phase 1</Badge>
           </div>
           <LineChart
             points={classAverageSeries}
@@ -269,86 +326,16 @@ export function QuizStatisticsSection({
             strokeClassName="stroke-emerald-500"
           />
         </div>
-
-        {/* Pass / Fail Distribution */}
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:col-span-2">
-          <div className="mb-4">
-            <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-              Pass / Fail Distribution
-            </h3>
-            <p className="text-xs text-gray-500 dark:text-gray-400">
-              Based on overall average (threshold: ≥{PASS_THRESHOLD})
-            </p>
-          </div>
-          {studentSeries.length === 0 ? (
-            <p className="text-sm text-gray-500 dark:text-gray-400">No data.</p>
-          ) : (
-            <div className="space-y-4">
-              {passFailData.map(({ name, value, color }) => (
-                <div key={name}>
-                  <div className="mb-1 flex justify-between text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">{name}</span>
-                    <span className="font-bold text-gray-800 dark:text-gray-200">
-                      {value} ({((value / studentSeries.length) * 100).toFixed(0)}%)
-                    </span>
-                  </div>
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${(value / studentSeries.length) * 100}%`,
-                        backgroundColor: color,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-
-              {/* Pass/Fail Pie */}
-              <div className="flex justify-center">
-                <ResponsiveContainer width="100%" height={140}>
-                  <BarChart
-                    data={passFailData}
-                    layout="vertical"
-                    margin={{ top: 0, right: 40, left: 0, bottom: 0 }}
-                  >
-                    <XAxis type="number" hide />
-                    <YAxis
-                      type="category"
-                      dataKey="name"
-                      tick={{ fontSize: 11 }}
-                      tickLine={false}
-                      axisLine={false}
-                      width={90}
-                    />
-                    <Tooltip
-                      content={({ active, payload }) => {
-                        if (!active || !payload?.length) return null;
-                        const d = payload[0].payload;
-                        return (
-                          <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-md dark:border-gray-700 dark:bg-gray-800">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                              {d.name}
-                            </p>
-                            <p className="text-xs text-gray-600 dark:text-gray-300">
-                              {d.value} students ({(d.value / studentSeries.length * 100).toFixed(0)}%)
-                            </p>
-                          </div>
-                        );
-                      }}
-                    />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                      {passFailData.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          )}
-        </div>
       </div>
+
+      {/* === Score Distribution === */}
+      <ScoreDistributionChart
+        data={quizScoreDistribution}
+        selectedMode="QUIZ"
+        onModeChange={() => {}}
+        loading={statsLoading}
+        showModeSelector={false}
+      />
 
       {/* === Quiz Completion Rate & Avg Score === */}
       <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -364,7 +351,7 @@ export function QuizStatisticsSection({
       </div>
 
       {/* === Student Performance Heatmap === */}
-      {heatmapData.length > 0 && heatmapData[0].scores.length > 0 && (
+      {/* {heatmapData.length > 0 && heatmapData[0].scores.length > 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4">
             <h3 className="text-base font-semibold text-gray-900 dark:text-white">
@@ -376,34 +363,45 @@ export function QuizStatisticsSection({
           </div>
           <QuizHeatmapChart data={heatmapData} maxScore={globalMaxScore} />
         </div>
-      )}
+      )} */}
 
-      {/* === Selected Quiz Detail: Pass/Fail breakdown === */}
-      {selectedQuiz && (
+      {/* === Selected Quiz Detail === */}
+      {filteredClassroomQuizzes.length > 0 && (
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-            <div>
+            <div className="flex flex-wrap items-center gap-3">
               <h3 className="text-base font-semibold text-gray-900 dark:text-white">
-                Quiz Detail: {selectedQuizStats?.quizFullName}
+                Quiz Detail
               </h3>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Pass/Fail breakdown per student for this quiz
-              </p>
+              <select
+                value={selectedQuizIndex}
+                onChange={(e) => setSelectedQuizIndex(Number(e.target.value))}
+                className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 shadow-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
+              >
+                {filteredClassroomQuizzes.map((quiz, idx) => (
+                  <option key={quiz.id} value={idx}>
+                    {quizNameMap[quiz.quizId] ?? quiz.quizId}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-wrap gap-2">
               <div className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
                 <CheckCircleIcon className="h-4 w-4" />
-                Pass: {passedInQuiz}
+                {">="} 5: {passedInQuiz}
               </div>
               <div className="flex items-center gap-1 text-xs text-red-500 dark:text-red-400">
                 <XCircleIcon className="h-4 w-4" />
-                Fail: {failedInQuiz}
+                {"<"} 5: {failedInQuiz}
               </div>
               <div className="flex items-center gap-1 text-xs text-gray-400">
                 No sub: {noSubmissionInQuiz}
               </div>
             </div>
           </div>
+          <p className="mb-3 text-xs text-gray-500 dark:text-gray-400">
+            Click on a bar to view attempt history
+          </p>
           {perQuizPassFail.length === 0 ? (
             <p className="text-sm text-gray-500 dark:text-gray-400">No students.</p>
           ) : (
@@ -448,6 +446,9 @@ export function QuizStatisticsSection({
                         <p className="text-xs text-gray-500">
                           {d.passed ? "Passing" : d.score !== null ? "Failing" : "No submission"}
                         </p>
+                        {d.score !== null && (
+                          <p className="mt-1 text-xs text-blue-500">Click to view attempts</p>
+                        )}
                       </div>
                     );
                   }}
@@ -459,6 +460,7 @@ export function QuizStatisticsSection({
                   {perQuizPassFail.map((entry) => (
                     <Cell
                       key={entry.studentName}
+                      cursor={entry.score !== null ? "pointer" : "default"}
                       fill={
                         entry.score === null
                           ? "#D1D5DB"
@@ -466,6 +468,11 @@ export function QuizStatisticsSection({
                             ? "#10B981"
                             : "#EF4444"
                       }
+                      onClick={() => {
+                        if (entry.score !== null) {
+                          setSelectedStudentId(entry.studentId);
+                        }
+                      }}
                     />
                   ))}
                 </Bar>
@@ -475,14 +482,16 @@ export function QuizStatisticsSection({
         </div>
       )}
 
-      {/* === Score Distribution === */}
-      <ScoreDistributionChart
-        data={scoreDistribution}
-        selectedMode="QUIZ"
-        onModeChange={() => {}}
-        loading={scoreDistLoading}
-        showModeSelector={false}
-      />
+      {selectedStudentId && selectedQuiz && (
+        <StudentQuizAttemptDetail
+          studentName={
+            perQuizPassFail.find((s) => s.studentId === selectedStudentId)?.studentName ?? ""
+          }
+          quizName={quizNameMap[selectedQuiz.quizId] ?? selectedQuiz.quizId}
+          attempts={attemptsByStudentForQuiz[selectedStudentId] ?? []}
+          onClose={() => setSelectedStudentId(null)}
+        />
+      )}
     </>
   );
 }
