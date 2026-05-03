@@ -1152,8 +1152,7 @@ class _CreateEditIssuePageState extends State<CreateEditIssuePage> {
   Future<void> _loadProblems() async {
     setState(() => _loadingProblems = true);
     try {
-      final userId = await TokenStorage.getUserId() ?? '';
-      final problems = await ProblemService.getByLecturerId(userId);
+      final problems = await ProblemService.getProblemsFromExaminations(widget.classroomId);
       if (mounted) {
         setState(() {
           _availableProblems = problems;

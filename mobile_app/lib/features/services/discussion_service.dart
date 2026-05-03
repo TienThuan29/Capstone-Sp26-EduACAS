@@ -313,4 +313,56 @@ class CommentService {
       throw Exception('Failed to upvote comment: $e');
     }
   }
+
+  /// PUT update a comment. Returns updated issue with comments.
+  static Future<DiscussionIssue?> updateComment({
+    required String commentId,
+    required String content,
+  }) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) throw Exception('No access token found');
+
+      final response = await ApiNetwork.putWithAuth(
+        endpoint: ApiConfig.updateCommentEndpoint(commentId),
+        token: token,
+        body: {'content': content},
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        return DiscussionIssue.fromJson(
+            response['dataResponse'] as Map<String, dynamic>);
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Failed to update comment: $e');
+      throw Exception('Failed to update comment: $e');
+    }
+  }
+
+  /// PATCH soft-delete a comment. Returns updated issue with comments.
+  static Future<DiscussionIssue?> softDeleteComment({
+    required String commentId,
+  }) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) throw Exception('No access token found');
+
+      final response = await ApiNetwork.patchWithAuth(
+        endpoint: ApiConfig.softDeleteCommentEndpoint(commentId),
+        token: token,
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        return DiscussionIssue.fromJson(
+            response['dataResponse'] as Map<String, dynamic>);
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Failed to delete comment: $e');
+      throw Exception('Failed to delete comment: $e');
+    }
+  }
 }

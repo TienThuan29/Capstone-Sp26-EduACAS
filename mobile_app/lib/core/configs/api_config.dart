@@ -97,12 +97,18 @@ class ApiConfig {
       '/api/acas/v1/discussion-issues/comments/reply';
   static String get upvoteCommentEndpoint =>
       '/api/acas/v1/discussion-issues/comments/upvote';
+  static String updateCommentEndpoint(String commentId) =>
+      '/api/acas/v1/discussion-issues/comments/$commentId';
+  static String softDeleteCommentEndpoint(String commentId) =>
+      '/api/acas/v1/discussion-issues/comments/$commentId/soft-delete';
 
   // Problem endpoints
   static String problemsByLecturerEndpoint(String lecturerId) =>
       '/api/acas/v1/problems/lecturer/$lecturerId';
   static String problemByIdEndpoint(String id) =>
       '/api/acas/v1/problems/$id';
+  static String problemsFromExaminationsEndpoint(String classroomId) =>
+      '/api/acas/v1/problems/from-examinations/classroom/$classroomId';
 
     // Subject endpoints
     static String get subjectsEndpoint => '/api/acas/v1/subjects';
