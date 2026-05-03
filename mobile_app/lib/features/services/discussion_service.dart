@@ -316,6 +316,7 @@ class CommentService {
 
   /// PUT update a comment. Returns updated issue with comments.
   static Future<DiscussionIssue?> updateComment({
+    required String issueId,
     required String commentId,
     required String content,
   }) async {
@@ -326,7 +327,11 @@ class CommentService {
       final response = await ApiNetwork.putWithAuth(
         endpoint: ApiConfig.updateCommentEndpoint(commentId),
         token: token,
-        body: {'content': content},
+        body: {
+          'issueId': issueId,
+          'commentId': commentId,
+          'content': content,
+        },
       );
 
       if (response['success'] == true && response['dataResponse'] != null) {
@@ -343,6 +348,7 @@ class CommentService {
 
   /// PATCH soft-delete a comment. Returns updated issue with comments.
   static Future<DiscussionIssue?> softDeleteComment({
+    required String issueId,
     required String commentId,
   }) async {
     try {
@@ -352,6 +358,10 @@ class CommentService {
       final response = await ApiNetwork.patchWithAuth(
         endpoint: ApiConfig.softDeleteCommentEndpoint(commentId),
         token: token,
+        body: {
+          'issueId': issueId,
+          'commentId': commentId,
+        },
       );
 
       if (response['success'] == true && response['dataResponse'] != null) {

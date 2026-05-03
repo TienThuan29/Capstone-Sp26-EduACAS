@@ -30,8 +30,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage>
   String? _replyingToCommentId;
   String? _replyingToName;
 
-  // Edit comment state
-  String? _editingCommentId;
+  // Edit comment controller
   final TextEditingController _editCommentController = TextEditingController();
 
   // Delete comment state
@@ -108,36 +107,153 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage>
   }
 
   void _startEditingComment(String commentId, String currentContent) {
-    setState(() {
-      _editingCommentId = commentId;
-      _editCommentController.text = currentContent;
-    });
-  }
-
-  void _cancelEditing() {
-    setState(() {
-      _editingCommentId = null;
+    _editCommentController.text = currentContent;
+    showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 16,
+          bottom: MediaQuery.of(ctx).viewInsets.bottom + 24,
+        ),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                const Icon(Icons.edit_rounded, size: 20, color: AppColors.info),
+                const SizedBox(width: 8),
+                const Text(
+                  'Edit Comment',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: TextField(
+                controller: _editCommentController,
+                maxLines: null,
+                minLines: 3,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'Edit your comment...',
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(ctx, false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.pop(ctx, true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: const Center(
+                        child: Text(
+                          'Update',
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        _submitEditComment(commentId);
+      }
       _editCommentController.clear();
     });
   }
 
-  Future<void> _submitEditComment() async {
-    if (_editingCommentId == null || _editCommentController.text.trim().isEmpty) {
+  Future<void> _submitEditComment(String commentId) async {
+    if (_editCommentController.text.trim().isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Comment content cannot be empty'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
       return;
     }
 
     setState(() {});
     try {
       final updated = await CommentService.updateComment(
-        commentId: _editingCommentId!,
+        issueId: widget.issueId,
+        commentId: commentId,
         content: _editCommentController.text.trim(),
       );
       if (updated != null && mounted) {
-        setState(() {
-          _issue = updated;
-          _editingCommentId = null;
-          _editCommentController.clear();
-        });
+        setState(() => _issue = updated);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Comment updated'),
@@ -278,6 +394,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage>
     setState(() {});
     try {
       final updated = await CommentService.softDeleteComment(
+        issueId: widget.issueId,
         commentId: _deletingCommentId!,
       );
       if (updated != null && mounted) {
@@ -470,16 +587,12 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage>
                                           currentUserId: _currentUserId ?? '',
                                           currentUserRole: _currentUserRole ?? '',
                                           isLecturerOrAdmin: _isLecturerOrAdmin,
-                                          isEditing: _editingCommentId == comment.id,
                                           isDeleting: _deletingCommentId == comment.id,
-                                          editController: _editCommentController,
                                           onReply: _startReplying,
                                           onUpvote: _upvoteComment,
                                           onEdit: _startEditingComment,
                                           onDelete: _confirmDeleteComment,
                                           onCancelReply: _cancelReply,
-                                          onSubmitEdit: _submitEditComment,
-                                          onCancelEdit: _cancelEditing,
                                         )),
                                     if (_issue!.comments.isEmpty) _buildEmptyComments(),
                                     const SizedBox(height: 20),
@@ -1136,16 +1249,12 @@ class _CommentCard extends StatelessWidget {
   final String currentUserId;
   final String currentUserRole;
   final bool isLecturerOrAdmin;
-  final bool isEditing;
   final bool isDeleting;
-  final TextEditingController? editController;
   final Function(String, String) onReply;
   final Function(String) onUpvote;
   final Function(String, String) onEdit;
   final Function(String) onDelete;
   final VoidCallback onCancelReply;
-  final VoidCallback? onSubmitEdit;
-  final VoidCallback? onCancelEdit;
   final int depth;
 
   const _CommentCard({
@@ -1153,16 +1262,12 @@ class _CommentCard extends StatelessWidget {
     required this.currentUserId,
     required this.currentUserRole,
     required this.isLecturerOrAdmin,
-    this.isEditing = false,
     this.isDeleting = false,
-    this.editController,
     required this.onReply,
     required this.onUpvote,
     required this.onEdit,
     required this.onDelete,
     required this.onCancelReply,
-    this.onSubmitEdit,
-    this.onCancelEdit,
     this.depth = 0,
   });
 
@@ -1320,29 +1425,21 @@ class _CommentCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 10),
 
-                      // Content or Edit form
-                      if (isEditing && editController != null)
-                        _EditCommentForm(
-                          controller: editController!,
-                          onSubmit: onSubmitEdit ?? () {},
-                          onCancel: onCancelEdit ?? () {},
-                        )
-                      else
-                        Text(
-                          comment.content,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textPrimary,
-                            height: 1.5,
-                            fontWeight: FontWeight.w500,
-                          ),
+                      // Content
+                      Text(
+                        comment.content,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textPrimary,
+                          height: 1.5,
+                          fontWeight: FontWeight.w500,
                         ),
+                      ),
 
                       const SizedBox(height: 10),
 
                       // Action buttons row
-                      if (!isEditing)
-                        Wrap(
+                      Wrap(
                           spacing: 6,
                           runSpacing: 6,
                           children: [
@@ -1429,15 +1526,12 @@ class _CommentCard extends StatelessWidget {
                           currentUserId: currentUserId,
                           currentUserRole: currentUserRole,
                           isLecturerOrAdmin: isLecturerOrAdmin,
-                          isEditing: false,
                           isDeleting: false,
                           onReply: onReply,
                           onUpvote: onUpvote,
                           onEdit: onEdit,
                           onDelete: onDelete,
                           onCancelReply: onCancelReply,
-                          onSubmitEdit: onSubmitEdit,
-                          onCancelEdit: onCancelEdit,
                           depth: (depth + 1).clamp(0, 3),
                         ))
                     .toList(),
@@ -1445,114 +1539,6 @@ class _CommentCard extends StatelessWidget {
             ),
         ],
       ),
-    );
-  }
-}
-
-// ──────────────────────────────────────────────
-//  Edit Comment Form (inline)
-// ──────────────────────────────────────────────
-
-class _EditCommentForm extends StatelessWidget {
-  final TextEditingController controller;
-  final VoidCallback onSubmit;
-  final VoidCallback onCancel;
-
-  const _EditCommentForm({
-    required this.controller,
-    required this.onSubmit,
-    required this.onCancel,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-          decoration: BoxDecoration(
-            color: AppColors.info.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: AppColors.info.withValues(alpha: 0.2)),
-          ),
-          child: Row(
-            children: [
-              const Icon(Icons.edit_rounded, size: 14, color: AppColors.info),
-              const SizedBox(width: 6),
-              const Text(
-                'Editing comment',
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.info,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          decoration: BoxDecoration(
-            color: AppColors.background,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey.shade200),
-          ),
-          child: TextField(
-            controller: controller,
-            maxLines: null,
-            minLines: 3,
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              hintText: 'Edit your comment...',
-              hintStyle: TextStyle(color: AppColors.textLight),
-            ),
-          ),
-        ),
-        const SizedBox(height: 10),
-        Row(
-          children: [
-            GestureDetector(
-              onTap: onCancel,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  'Cancel',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
-            GestureDetector(
-              onTap: onSubmit,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: const Text(
-                  'Update',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ],
     );
   }
 }
