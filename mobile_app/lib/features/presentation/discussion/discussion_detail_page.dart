@@ -4,7 +4,6 @@ import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/discussion_issue.dart';
 import 'package:mobile/features/models/comment.dart';
 import 'package:mobile/features/services/discussion_service.dart';
-import 'package:mobile/core/widgets/background.dart';
 
 class DiscussionDetailPage extends StatefulWidget {
   final String issueId;
@@ -18,36 +17,51 @@ class DiscussionDetailPage extends StatefulWidget {
   State<DiscussionDetailPage> createState() => _DiscussionDetailPageState();
 }
 
-class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
+class _DiscussionDetailPageState extends State<DiscussionDetailPage>
+    with TickerProviderStateMixin {
   DiscussionIssue? _issue;
   bool _isLoading = true;
   bool _isSendingComment = false;
+  bool _isChangingStatus = false;
   String? _currentUserId;
+  String? _currentUserRole;
   final TextEditingController _commentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-
   String? _replyingToCommentId;
   String? _replyingToName;
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
 
   @override
   void initState() {
     super.initState();
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
     _loadInitialData();
+    _fadeController.forward();
   }
 
   Future<void> _loadInitialData() async {
     _currentUserId = await TokenStorage.getUserId();
-    _loadIssue();
+    _currentUserRole = await TokenStorage.getUserRole();
+    await _loadIssue();
   }
 
   @override
   void dispose() {
     _commentController.dispose();
     _scrollController.dispose();
+    _fadeController.dispose();
     super.dispose();
   }
 
-  /// Load the full issue (with embedded comments) via getById
   Future<void> _loadIssue() async {
     setState(() => _isLoading = true);
     try {
@@ -60,10 +74,13 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to load discussion: $e'), backgroundColor: AppColors.error),
-        );
         setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load discussion: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
       }
     }
   }
@@ -82,7 +99,6 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
     });
   }
 
-  /// POST a comment or reply
   Future<void> _submitComment() async {
     final content = _commentController.text.trim();
     if (content.isEmpty || _currentUserId == null) return;
@@ -114,7 +130,6 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
           _replyingToName = null;
         });
 
-        // Scroll to bottom
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (_scrollController.hasClients) {
             _scrollController.animateTo(
@@ -128,7 +143,10 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to post comment: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Failed to post comment: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
         setState(() => _isSendingComment = false);
       }
@@ -142,17 +160,56 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
         commentId: commentId,
       );
       if (updatedIssue != null && mounted) {
-        setState(() {
-          _issue = updatedIssue;
-        });
+        setState(() => _issue = updatedIssue);
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to upvote: $e'), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text('Failed to upvote: $e'),
+            backgroundColor: AppColors.error,
+          ),
         );
       }
     }
+  }
+
+  Future<void> _changeStatus(DiscussionIssueStatus newStatus) async {
+    setState(() => _isChangingStatus = true);
+    try {
+      final updated = await DiscussionIssueService.changeStatus(
+        issueId: widget.issueId,
+        status: newStatus,
+      );
+      if (updated != null && mounted) {
+        setState(() => _issue = updated);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              newStatus == DiscussionIssueStatus.CLOSED
+                  ? 'Discussion closed'
+                  : 'Discussion reopened',
+            ),
+            backgroundColor: AppColors.success,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to change status: $e'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isChangingStatus = false);
+    }
+  }
+
+  bool get _isLecturerOrAdmin {
+    return _currentUserRole == 'LECTURER' || _currentUserRole == 'ADMIN';
   }
 
   @override
@@ -161,214 +218,382 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
       backgroundColor: AppColors.background,
       body: Stack(
         children: [
-          const GradientBackground(),
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Color(0xFFE8EEF4),
+                  Color(0xFFF5F7FA),
+                  AppColors.backgroundWhite,
+                ],
+                stops: [0.0, 0.4, 1.0],
+              ),
+            ),
+          ),
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(context),
-              Expanded(
-                child: _isLoading
-                    ? const Center(
-                        child: CircularProgressIndicator(
-                            color: AppColors.primary))
-                    : _issue == null
-                        ? const Center(child: Text('Discussion not found'))
-                        : RefreshIndicator(
-                            onRefresh: _loadIssue,
-                            color: AppColors.primary,
-                            child: ListView(
-                              controller: _scrollController,
-                              padding: const EdgeInsets.symmetric(
-                                  horizontal: 16, vertical: 8),
-                              children: [
-                                _buildIssueContent(),
-                                const SizedBox(height: 32),
-                                _buildCommentHeader(),
-                                ...(_issue!.comments).map((comment) => _CommentCard(
-                                      comment: comment,
-                                      currentUserId: _currentUserId ?? '',
-                                      onReply: _startReplying,
-                                      onUpvote: _upvoteComment,
-                                    )),
-                                if (_issue!.comments.isEmpty) _buildEmptyComments(),
-                                const SizedBox(height: 20),
-                              ],
+                _buildTopBar(),
+                Expanded(
+                  child: _isLoading
+                      ? const Center(
+                          child:
+                              CircularProgressIndicator(color: AppColors.primary),
+                        )
+                      : _issue == null
+                          ? const Center(child: Text('Discussion not found'))
+                          : RefreshIndicator(
+                              color: AppColors.primary,
+                              onRefresh: _loadIssue,
+                              child: FadeTransition(
+                                opacity: _fadeAnimation,
+                                child: ListView(
+                                  controller: _scrollController,
+                                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 100),
+                                  children: [
+                                    _buildIssueCard(),
+                                    const SizedBox(height: 20),
+                                    _buildCommentHeader(),
+                                    ...(_issue!.comments).map((comment) =>
+                                        _CommentCard(
+                                          comment: comment,
+                                          currentUserId: _currentUserId ?? '',
+                                          currentUserRole: _currentUserRole ?? '',
+                                          isLecturerOrAdmin: _isLecturerOrAdmin,
+                                          onReply: _startReplying,
+                                          onUpvote: _upvoteComment,
+                                          onCancelReply: _cancelReply,
+                                        )),
+                                    if (_issue!.comments.isEmpty) _buildEmptyComments(),
+                                    const SizedBox(height: 20),
+                                  ],
+                                ),
+                              ),
                             ),
-                          ),
-              ),
-              _buildCommentInput(),
-            ],
-          ),
-        ),
-      ],
-    ),
-  );
-}
-
-  Widget _buildHeader(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.arrow_back_ios_new_rounded,
-                    color: AppColors.primary, size: 20),
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 16),
-              Container(
-                width: 40,
-                height: 40,
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.forum_rounded,
-                    color: AppColors.primary, size: 20),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Discussion Detail',
-                      style: TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.textPrimary,
-                        letterSpacing: -0.5,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      'Started by ${_issue?.displayName ?? '...'}',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+                if (_issue != null &&
+                    (_issue!.status == DiscussionIssueStatus.OPEN ||
+                        _isLecturerOrAdmin))
+                  _buildCommentInput(),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildIssueContent() {
-    final issue = _issue!;
+  Widget _buildTopBar() {
     return Container(
+      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: () => Navigator.pop(context),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.arrow_back_ios_new_rounded,
+                size: 18,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Discussion',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                if (_issue != null)
+                  Text(
+                    _issue!.displayName,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          if (_isLecturerOrAdmin && _issue != null)
+            _StatusToggleButton(
+              status: _issue!.status,
+              isLoading: _isChangingStatus,
+              onStatusChange: _changeStatus,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildIssueCard() {
+    final issue = _issue!;
+    final isClosed = issue.status == DiscussionIssueStatus.CLOSED;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 15,
-            offset: const Offset(0, 5),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
           ),
         ],
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header - Author & Status
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: isClosed
+                    ? [Colors.grey.shade100, Colors.grey.shade50]
+                    : [
+                        AppColors.primary.withValues(alpha: 0.04),
+                        AppColors.primary.withValues(alpha: 0.01),
+                      ],
+              ),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  child: Text(
-                    issue.displayName.isNotEmpty ? issue.displayName[0].toUpperCase() : '?',
-                    style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        issue.displayName,
-                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatDate(issue.createdDate),
-                        style: const TextStyle(fontSize: 11, color: AppColors.textLight),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: issue.status == DiscussionIssueStatus.CLOSED
-                        ? Colors.red.withValues(alpha: 0.1)
-                        : AppColors.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    issue.status == DiscussionIssueStatus.CLOSED ? 'CLOSED' : 'OPEN',
-                    style: TextStyle(
-                      color: issue.status == DiscussionIssueStatus.CLOSED ? Colors.red : AppColors.primary,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
+                Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 22,
+                      backgroundColor: isClosed
+                          ? Colors.grey.shade300
+                          : AppColors.primary.withValues(alpha: 0.12),
+                      backgroundImage: issue.authorDisplay?.avatarUrl != null &&
+                              issue.authorDisplay!.avatarUrl!.isNotEmpty
+                          ? NetworkImage(issue.authorDisplay!.avatarUrl!)
+                          : null,
+                      child: issue.authorDisplay?.avatarUrl == null ||
+                              issue.authorDisplay!.avatarUrl!.isEmpty
+                          ? Text(
+                              issue.displayName.isNotEmpty
+                                  ? issue.displayName[0].toUpperCase()
+                                  : '?',
+                              style: TextStyle(
+                                color: isClosed
+                                    ? Colors.grey.shade600
+                                    : AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                              ),
+                            )
+                          : null,
                     ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            issue.displayName,
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          Text(
+                            _formatDate(issue.createdDate),
+                            style: const TextStyle(
+                              fontSize: 11,
+                              color: AppColors.textLight,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: isClosed
+                            ? Colors.grey.shade100
+                            : AppColors.success.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: isClosed
+                              ? Colors.grey.shade300
+                              : AppColors.success.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Container(
+                            width: 7,
+                            height: 7,
+                            decoration: BoxDecoration(
+                              color: isClosed ? Colors.grey : AppColors.success,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            isClosed ? 'Closed' : 'Open',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w700,
+                              color: isClosed
+                                  ? Colors.grey.shade600
+                                  : AppColors.success,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                // Title
+                Text(
+                  issue.title,
+                  style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    height: 1.3,
+                    letterSpacing: -0.3,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Text(
-              issue.title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: AppColors.textPrimary,
-                letterSpacing: -0.5,
-                height: 1.2,
-              ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              issue.content,
-              style: const TextStyle(
-                fontSize: 15,
-                color: AppColors.textPrimary,
-                height: 1.6,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            if (issue.viewCount > 0) ...[
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  Icon(Icons.visibility_outlined, size: 14, color: Colors.grey[400]),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${issue.viewCount} views',
-                    style: TextStyle(fontSize: 12, color: Colors.grey[400]),
+          ),
+
+          // Content
+          Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Problem reference
+                if (issue.refProblem != null ||
+                    (issue.refProblemId.isNotEmpty)) ...[
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: AppColors.accent.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.accent.withValues(alpha: 0.15),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: AppColors.accent.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Icon(
+                            Icons.code_rounded,
+                            size: 16,
+                            color: AppColors.accentDark,
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text(
+                                'Related Problem',
+                                style: TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.accentDark,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              Text(
+                                issue.refProblem?.title ??
+                                    'Problem',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(height: 16),
                 ],
-              ),
-            ],
-          ],
-        ),
+                // Content body
+                Text(
+                  issue.content,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    color: AppColors.textPrimary,
+                    height: 1.7,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                // Stats row
+                Row(
+                  children: [
+                    _StatBadge(
+                      icon: Icons.visibility_outlined,
+                      value: issue.viewCount,
+                      label: 'views',
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 12),
+                    _StatBadge(
+                      icon: Icons.chat_bubble_outline_rounded,
+                      value: issue.commentCount,
+                      label: 'comments',
+                      color: Colors.orange,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -376,17 +601,37 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   Widget _buildCommentHeader() {
     final commentCount = _issue?.commentCount ?? 0;
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20, left: 4),
+      padding: const EdgeInsets.only(bottom: 16, left: 4),
       child: Row(
         children: [
-          const Icon(Icons.forum_outlined, size: 18, color: AppColors.textSecondary),
-          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: const Icon(
+              Icons.forum_outlined,
+              size: 18,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(width: 10),
           Text(
             '$commentCount Comments',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textPrimary,
+            ),
           ),
-          const SizedBox(width: 16),
-          const Expanded(child: Divider(color: Colors.black12)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Container(
+              height: 1,
+              color: Colors.grey.withValues(alpha: 0.1),
+            ),
+          ),
         ],
       ),
     );
@@ -398,11 +643,34 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
       child: Center(
         child: Column(
           children: [
-            Icon(Icons.chat_bubble_outline_rounded, size: 48, color: Colors.grey[300]),
-            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade100,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.chat_bubble_outline_rounded,
+                size: 32,
+                color: Colors.grey.shade400,
+              ),
+            ),
+            const SizedBox(height: 12),
             const Text(
               'No comments yet',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey),
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Text(
+              'Be the first to comment!',
+              style: TextStyle(
+                fontSize: 13,
+                color: AppColors.textLight,
+              ),
             ),
           ],
         ),
@@ -412,32 +680,37 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
 
   Widget _buildCommentInput() {
     return Container(
-      padding: EdgeInsets.fromLTRB(16, 12, 16, 12 + MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.fromLTRB(
+        16,
+        12,
+        16,
+        12 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -5),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (_replyingToCommentId != null)
             Container(
               margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
               decoration: BoxDecoration(
-                color: AppColors.primary.withValues(alpha: 0.1),
+                color: AppColors.primary.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.reply_rounded, size: 16, color: AppColors.primary),
+                  const Icon(Icons.reply_rounded,
+                      size: 16, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -453,7 +726,8 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                   ),
                   GestureDetector(
                     onTap: _cancelReply,
-                    child: const Icon(Icons.close_rounded, size: 18, color: AppColors.primary),
+                    child: const Icon(Icons.close_rounded,
+                        size: 18, color: AppColors.primary),
                   ),
                 ],
               ),
@@ -463,6 +737,7 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
             children: [
               Expanded(
                 child: Container(
+                  constraints: const BoxConstraints(maxHeight: 120),
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   decoration: BoxDecoration(
                     color: AppColors.background,
@@ -471,21 +746,47 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
                   child: TextField(
                     controller: _commentController,
                     decoration: InputDecoration(
-                      hintText: _replyingToCommentId != null ? 'Type your reply...' : 'Share your thoughts...',
+                      hintText: _replyingToCommentId != null
+                          ? 'Type your reply...'
+                          : 'Share your thoughts...',
                       border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 12),
                     ),
-                    maxLines: 5,
+                    maxLines: null,
                     minLines: 1,
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
-              IconButton(
-                onPressed: _isSendingComment ? null : _submitComment,
-                icon: _isSendingComment
-                    ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Icon(Icons.send_rounded, color: AppColors.primary),
+              const SizedBox(width: 10),
+              GestureDetector(
+                onTap: _isSendingComment ? null : _submitComment,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.primary.withValues(alpha: 0.3),
+                        blurRadius: 8,
+                        offset: const Offset(0, 3),
+                      ),
+                    ],
+                  ),
+                  child: _isSendingComment
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Icon(Icons.send_rounded,
+                          color: Colors.white, size: 20),
+                ),
               ),
             ],
           ),
@@ -495,22 +796,150 @@ class _DiscussionDetailPageState extends State<DiscussionDetailPage> {
   }
 
   String _formatDate(DateTime dt) {
-    return '${dt.day}/${dt.month}/${dt.year} ${dt.hour}:${dt.minute.toString().padLeft(2, '0')}';
+    final months = [
+      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    ];
+    return '${months[dt.month - 1]} ${dt.day}, ${dt.year} at ${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
   }
 }
+
+// ──────────────────────────────────────────────
+//  Status Toggle Button
+// ──────────────────────────────────────────────
+
+class _StatusToggleButton extends StatelessWidget {
+  final DiscussionIssueStatus status;
+  final bool isLoading;
+  final Function(DiscussionIssueStatus) onStatusChange;
+
+  const _StatusToggleButton({
+    required this.status,
+    required this.isLoading,
+    required this.onStatusChange,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isClosed = status == DiscussionIssueStatus.CLOSED;
+    return GestureDetector(
+      onTap: isLoading
+          ? null
+          : () => onStatusChange(
+                isClosed
+                    ? DiscussionIssueStatus.OPEN
+                    : DiscussionIssueStatus.CLOSED,
+              ),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.06),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: isLoading
+            ? const SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    isClosed ? Icons.lock_open_rounded : Icons.lock_rounded,
+                    size: 16,
+                    color: isClosed ? AppColors.success : Colors.grey.shade600,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    isClosed ? 'Reopen' : 'Close',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      color:
+                          isClosed ? AppColors.success : Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+//  Stat Badge
+// ──────────────────────────────────────────────
+
+class _StatBadge extends StatelessWidget {
+  final IconData icon;
+  final int value;
+  final String label;
+  final Color color;
+
+  const _StatBadge({
+    required this.icon,
+    required this.value,
+    required this.label,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.06),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            '$value $label',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ──────────────────────────────────────────────
+//  Comment Card (Threaded)
+// ──────────────────────────────────────────────
 
 class _CommentCard extends StatelessWidget {
   final Comment comment;
   final String currentUserId;
+  final String currentUserRole;
+  final bool isLecturerOrAdmin;
   final Function(String, String) onReply;
   final Function(String) onUpvote;
+  final VoidCallback onCancelReply;
   final int depth;
 
   const _CommentCard({
     required this.comment,
     required this.currentUserId,
+    required this.currentUserRole,
+    required this.isLecturerOrAdmin,
     required this.onReply,
     required this.onUpvote,
+    required this.onCancelReply,
     this.depth = 0,
   });
 
@@ -518,140 +947,270 @@ class _CommentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     if (comment.isDeleted) return const SizedBox.shrink();
 
+    final isOwn = comment.authorId == currentUserId;
+    final leftIndent = depth * 32.0;
+
     return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
+      padding: EdgeInsets.only(bottom: 12, left: leftIndent),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              CircleAvatar(
-                radius: 16,
-                backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                child: Text(
-                  comment.displayName.isNotEmpty ? comment.displayName[0].toUpperCase() : '?',
-                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 14),
-                ),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              border: Border(
+                left: depth > 0
+                    ? BorderSide(
+                        color: depth == 1
+                            ? AppColors.primary.withValues(alpha: 0.3)
+                            : depth == 2
+                                ? Colors.orange.withValues(alpha: 0.3)
+                                : Colors.grey.withValues(alpha: 0.3),
+                        width: 2,
+                      )
+                    : BorderSide.none,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Wrap(
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      spacing: 8,
-                      runSpacing: 4,
-                      children: [
-                        Text(
-                          comment.displayName,
-                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                        ),
-                        Text(
-                          _formatTimeAgo(comment.createdDate),
-                          style: const TextStyle(fontSize: 12, color: AppColors.textLight),
-                        ),
-                        if (comment.authorId == currentUserId)
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                            child: const Text('You', style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.bold)),
-                          )
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      comment.content,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        color: AppColors.textPrimary,
-                        height: 1.5,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Author row
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor:
+                            AppColors.primary.withValues(alpha: 0.08),
+                        backgroundImage:
+                            comment.authorDisplay?.avatarUrl != null &&
+                                    comment.authorDisplay!.avatarUrl!.isNotEmpty
+                                ? NetworkImage(comment.authorDisplay!.avatarUrl!)
+                                : null,
+                        child:
+                            comment.authorDisplay?.avatarUrl == null ||
+                                    comment.authorDisplay!.avatarUrl!.isEmpty
+                                ? Text(
+                                    comment.displayName.isNotEmpty
+                                        ? comment.displayName[0].toUpperCase()
+                                        : '?',
+                                    style: const TextStyle(
+                                      color: AppColors.primary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 12,
+                                    ),
+                                  )
+                                : null,
                       ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Flexible(
+                                  child: Text(
+                                    comment.displayName,
+                                    style: const TextStyle(
+                                      fontSize: 13,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.textPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                                if (isOwn) ...[
+                                  const SizedBox(width: 6),
+                                  Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 1),
+                                    decoration: BoxDecoration(
+                                      color:
+                                          AppColors.primary.withValues(alpha: 0.08),
+                                      borderRadius: BorderRadius.circular(4),
+                                    ),
+                                    child: const Text(
+                                      'You',
+                                      style: TextStyle(
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.primary,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                            Text(
+                              _formatTimeAgo(comment.createdDate),
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.textLight,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      // Upvote badge
+                      if (comment.upVoteCount > 0)
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.success.withValues(alpha: 0.08),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.thumb_up_alt_rounded,
+                                  size: 11, color: AppColors.success),
+                              const SizedBox(width: 3),
+                              Text(
+                                '${comment.upVoteCount}',
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppColors.success,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  // Content
+                  Text(
+                    comment.content,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textPrimary,
+                      height: 1.5,
+                      fontWeight: FontWeight.w500,
                     ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        InkWell(
-                          onTap: () => onUpvote(comment.id),
-                          borderRadius: BorderRadius.circular(4),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                            child: Row(
-                              children: [
-                                Icon(Icons.thumb_up_alt_outlined, size: 16, color: AppColors.textSecondary),
-                                const SizedBox(width: 4),
-                                Text(
-                                  comment.upVoteCount > 0 ? '${comment.upVoteCount}' : 'Upvote',
-                                  style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        InkWell(
-                          onTap: () => onReply(comment.id, comment.displayName),
-                          borderRadius: BorderRadius.circular(4),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.chat_bubble_outline_rounded, size: 16, color: AppColors.textSecondary),
-                                const SizedBox(width: 4),
-                                const Text(
-                                  'Reply',
-                                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
+                  ),
+                  const SizedBox(height: 10),
+                  // Actions
+                  Row(
+                    children: [
+                      _ActionBtn(
+                        icon: Icons.thumb_up_outlined,
+                        label: 'Upvote',
+                        onTap: () => onUpvote(comment.id),
+                        color: AppColors.textSecondary,
+                      ),
+                      const SizedBox(width: 4),
+                      _ActionBtn(
+                        icon: Icons.reply_rounded,
+                        label: 'Reply',
+                        onTap: () =>
+                            onReply(comment.id, comment.displayName),
+                        color: AppColors.primary,
+                      ),
+                      if (isOwn) ...[
                       ],
-                    ),
-                  ],
-                ),
+                    ],
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
-          
+
+          // Nested replies
           if (comment.replies.isNotEmpty)
             Padding(
-              padding: EdgeInsets.only(left: depth < 3 ? 44 : 0, top: 12),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: depth < 3 
-                      ? Border(left: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 2))
-                      : null,
-                ),
-                padding: EdgeInsets.only(left: depth < 3 ? 12 : 0),
-                child: Column(
-                  children: comment.replies
-                      .map((reply) => _CommentCard(
-                            comment: reply,
-                            currentUserId: currentUserId,
-                            onReply: onReply,
-                            onUpvote: onUpvote,
-                            depth: depth + 1,
-                          ))
-                      .toList(),
-                ),
+              padding: const EdgeInsets.only(top: 8),
+              child: Column(
+                children: comment.replies
+                    .map((reply) => _CommentCard(
+                          comment: reply,
+                          currentUserId: currentUserId,
+                          currentUserRole: currentUserRole,
+                          isLecturerOrAdmin: isLecturerOrAdmin,
+                          onReply: onReply,
+                          onUpvote: onUpvote,
+                          onCancelReply: onCancelReply,
+                          depth: (depth + 1).clamp(0, 3),
+                        ))
+                    .toList(),
               ),
             ),
         ],
       ),
     );
   }
+}
 
-  String _formatTimeAgo(DateTime date) {
-    final duration = DateTime.now().difference(date);
-    if (duration.inDays > 7) return '${date.day}/${date.month}';
-    if (duration.inDays > 0) return '${duration.inDays}d ago';
-    if (duration.inHours > 0) return '${duration.inHours}h ago';
-    if (duration.inMinutes > 0) return '${duration.inMinutes}m ago';
-    return 'Just now';
+// ──────────────────────────────────────────────
+//  Action Button
+// ──────────────────────────────────────────────
+
+class _ActionBtn extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final Color color;
+
+  const _ActionBtn({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+    required this.color,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 14, color: color),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
+}
+
+// ──────────────────────────────────────────────
+//  Helpers
+// ──────────────────────────────────────────────
+
+String _formatTimeAgo(DateTime date) {
+  final now = DateTime.now();
+  final diff = now.difference(date);
+  if (diff.inMinutes < 1) return 'just now';
+  if (diff.inMinutes < 60) return '${diff.inMinutes}m ago';
+  if (diff.inHours < 24) return '${diff.inHours}h ago';
+  if (diff.inDays < 7) return '${diff.inDays}d ago';
+  if (diff.inDays < 30) return '${(diff.inDays / 7).floor()}w ago';
+  return '${date.day}/${date.month}/${date.year}';
 }
