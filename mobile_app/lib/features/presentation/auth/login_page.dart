@@ -32,7 +32,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _animationController = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
@@ -52,7 +52,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         );
 
     _animationController.forward();
-    _loadRememberMeData();
+    // Defer SharedPreferences I/O so it doesn't block first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadRememberMeData();
+    });
   }
 
   Future<void> _loadRememberMeData() async {
@@ -60,10 +63,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     if (rememberMe) {
       final savedEmail = await TokenStorage.getSavedEmail();
       if (savedEmail != null && savedEmail.isNotEmpty) {
-        setState(() {
-          _rememberMe = true;
-          _emailController.text = savedEmail;
-        });
+        if (mounted) {
+          setState(() {
+            _rememberMe = true;
+            _emailController.text = savedEmail;
+          });
+        }
       }
     }
   }
@@ -111,19 +116,19 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
         final loginResponse = await AuthService.login(loginRequest);
 
-        setState(() {
-          _isLoading = false;
-        });
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
 
         if (loginResponse.success && loginResponse.dataResponse != null) {
           final userProfile = loginResponse.dataResponse!.userProfile;
 
-          // Save user name, role and id for later use
           await TokenStorage.saveUserName(userProfile.fullname);
           await TokenStorage.saveUserRole(userProfile.role);
           await TokenStorage.saveUserId(userProfile.id);
 
-          // Handle remember me preference
           if (_rememberMe) {
             await TokenStorage.setRememberMe(true);
             await TokenStorage.saveEmail(email);
@@ -133,7 +138,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           }
 
           if (mounted) {
-            // Navigate based on user role
             RoleNavigator.navigateByRole(context, userProfile.role);
           }
         } else {
@@ -145,11 +149,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           }
         }
       } catch (e) {
-        setState(() {
-          _isLoading = false;
-        });
-
         if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
           String errorMessage = 'Login failed: ${e.toString()}';
           if (e.toString().contains('Invalid email or password')) {
             errorMessage = 'Invalid email or password';
@@ -186,14 +189,11 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     final isTablet = size.width > 600;
 
     return Scaffold(
-      // Enable resizing when keyboard appears
       resizeToAvoidBottomInset: true,
       body: Stack(
         children: [
-          // Background elements remain unchanged
-          GradientBackground(),
+          const GradientBackground(),
 
-          // Keep decorative elements
           Positioned(
             top: -size.height * 0.1,
             right: -size.width * 0.2,
@@ -219,7 +219,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             ),
           ),
 
-          // Main content - now scrollable to handle keyboard
           SafeArea(
             child: SingleChildScrollView(
               physics: const ClampingScrollPhysics(),
@@ -232,37 +231,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   opacity: _fadeAnimation,
                   child: SlideTransition(
                     position: _slideAnimation,
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final availableHeight =
-                            MediaQuery.of(context).size.height -
-                            MediaQuery.of(context).padding.top -
-                            MediaQuery.of(context).padding.bottom -
-                            40;
-                        return ConstrainedBox(
-                          constraints: BoxConstraints(
-                            minHeight: availableHeight > 0
-                                ? availableHeight
-                                : 0,
-                          ),
-                          child: IntrinsicHeight(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                // Header
-                                _buildCompactHeader(),
-
-                                // Main login form
-                                _buildEnhancedLoginForm(),
-
-                                // Social login options
-                                _buildFooter(),
-                              ],
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                    child: _buildContentColumn(context, size),
                   ),
                 ),
               ),
@@ -273,10 +242,26 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     );
   }
 
+  Widget _buildContentColumn(BuildContext context, Size size) {
+    final topPadding = MediaQuery.of(context).padding.top;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final availableHeight = size.height - topPadding - bottomPadding - 40;
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        SizedBox(height: availableHeight > 0 ? availableHeight * 0.05 : 0),
+        _buildCompactHeader(),
+        _buildEnhancedLoginForm(),
+        _buildFooter(),
+        SizedBox(height: availableHeight > 0 ? availableHeight * 0.05 : 0),
+      ],
+    );
+  }
+
   Widget _buildFooter() {
     return Column(
       children: [
-        // Chỉ giữ divider từ _buildSocialLoginOptions
         Padding(
           padding: const EdgeInsets.only(top: 24.0),
           child: Row(
@@ -294,10 +279,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   Widget _buildCompactHeader() {
     return Column(
       children: [
-        // Logo with animation
         TweenAnimationBuilder(
           tween: Tween<double>(begin: 0.8, end: 1.0),
-          duration: const Duration(seconds: 1),
+          duration: const Duration(milliseconds: 500),
           curve: Curves.elasticOut,
           builder: (context, value, child) {
             return Transform.scale(
@@ -317,8 +301,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           },
         ),
         const SizedBox(height: 16),
-
-        // App title
         RichText(
           text: const TextSpan(
             children: [
@@ -344,8 +326,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           ),
         ),
         const SizedBox(height: 6),
-
-        // Subtitle
         Text(
           'Professional Programming Learning',
           style: TextStyle(
@@ -364,7 +344,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Form header
           Text(
             'Welcome Back',
             style: TextStyle(
@@ -378,8 +357,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             style: TextStyle(fontSize: 14, color: Colors.grey[600]),
           ),
           const SizedBox(height: 24),
-
-          // Email field
           EnhancedTextField(
             controller: _emailController,
             label: 'Email',
@@ -389,8 +366,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             validator: _validateEmail,
           ),
           const SizedBox(height: 20),
-
-          // Password field
           EnhancedTextField(
             controller: _passwordController,
             label: 'Password',
@@ -414,12 +389,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             validator: _validatePassword,
           ),
           const SizedBox(height: 12),
-
-          // Remember me and Forgot password
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Remember me checkbox
               Row(
                 children: [
                   Checkbox(
@@ -452,7 +424,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   ),
                 ],
               ),
-              // Forgot password button
               TextButton(
                 onPressed: () {
                   Navigator.push(
@@ -494,8 +465,6 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             ],
           ),
           const SizedBox(height: 24),
-
-          // Login button
           EnhancedButton(
             text: 'Sign In',
             isLoading: _isLoading,

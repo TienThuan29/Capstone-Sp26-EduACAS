@@ -1,39 +1,54 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/features/services/fcm_service.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:mobile/features/presentation/auth/login_page.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Determine environment from build type:
-  // - Release build type (--release) -> prod (uses .env.prod)
-  // - Debug build type (--debug)    -> local (uses .env)
-  final isRelease = kReleaseMode;
-  final envFile = isRelease ? '.env.prod' : '.env';
-
+  // Load .env file
   try {
-    await dotenv.load(fileName: envFile);
-    debugPrint('Environment loaded from: $envFile (mode: ${isRelease ? "release/prod" : "debug/local"})');
+    await dotenv.load(fileName: '.env');
+    debugPrint('Environment loaded from: .env');
     debugPrint('API Base URL: ${dotenv.env['API_BASE_URL']}');
   } catch (e) {
-    debugPrint('Error loading $envFile: $e');
+    debugPrint('Error loading .env: $e');
   }
 
+  // Initialize Firebase BEFORE runApp() (required for background messages)
   try {
-    await FcmService.initialize();
-    debugPrint('FCM initialized successfully');
+    await FcmService.initializeFirebase();
+    debugPrint('Firebase core initialized');
   } catch (e) {
-    debugPrint('FCM initialization failed: $e');
+    debugPrint('Firebase initialization failed: $e');
   }
 
-  runApp(const MyApp());
+  runApp(const EduACASApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class EduACASApp extends StatefulWidget {
+  const EduACASApp({super.key});
+
+  @override
+  State<EduACASApp> createState() => _EduACASAppState();
+}
+
+class _EduACASAppState extends State<EduACASApp> {
+  @override
+  void initState() {
+    super.initState();
+    // Initialize FCM listeners AFTER app starts - non-blocking
+    _initFcm();
+  }
+
+  Future<void> _initFcm() async {
+    try {
+      await FcmService.initializePostRun();
+    } catch (e) {
+      debugPrint('FCM post-init failed: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
