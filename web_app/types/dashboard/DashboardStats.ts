@@ -19,6 +19,7 @@ export interface ScoreDistribution {
 export interface AtRiskStudent {
   studentId: string;
   studentName: string;
+  avatarUrl?: string | null;
   averageScore: number;
   warningLevel: number;
   trend: "improving" | "stable" | "declining";
@@ -51,6 +52,7 @@ export interface ExamScoreDistribution {
 export interface ExamScoreStatistics {
   examId: string;
   examName: string;
+  mode: string;
   totalMark: number;
   averageScore: number;
   highestScore: number;

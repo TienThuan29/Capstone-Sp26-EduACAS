@@ -133,6 +133,9 @@ public class ExamScoreStatisticsItem
     [JsonPropertyName("examName")]
     public string ExamName { get; set; } = string.Empty;
 
+    [JsonPropertyName("mode")]
+    public string Mode { get; set; } = string.Empty;
+
     [JsonPropertyName("totalMark")]
     public float TotalMark { get; set; }
 

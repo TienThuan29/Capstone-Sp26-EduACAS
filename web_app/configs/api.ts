@@ -83,7 +83,7 @@ export const Api = {
     GET_DASHBOARD_AT_RISK: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/at-risk`,
     GET_DASHBOARD_WARNINGS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/warnings`,
     GET_CLASS_STATS: "/api/acas/v1/classrooms/dashboard/stats",
-    GET_EXAM_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics`,
+    GET_EXAM_STATISTICS: (classroomId: string, mode?: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics${mode ? `?mode=${mode}` : ""}`,
 
     // Student Dashboard
     GET_STUDENT_OVERVIEW: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/overview`,
