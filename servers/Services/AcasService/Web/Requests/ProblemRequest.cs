@@ -128,3 +128,27 @@ public class TestcaseGenerationPreviewRequest
     [Range(1, 20, ErrorMessage = "NumberOfTestcases must be between 1 and 20")]
     public int NumberOfTestcases { get; set; } = 1;
 }
+
+public class ProblemReviewRequest
+{
+    [Required(ErrorMessage = "Title is required")]
+    [StringLength(500, MinimumLength = 3, ErrorMessage = "Title must be between 3 and 500 characters")]
+    public string Title { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Content of the problem. Used when lecturer enters/edits content manually.
+    /// If null or empty, the content will be read from FileData.
+    /// </summary>
+    public string? Content { get; set; }
+
+    /// <summary>
+    /// File data as base64-encoded string. Used when the problem content is a file upload.
+    /// </summary>
+    public string? FileData { get; set; }
+
+    /// <summary>
+    /// MIME type of the file (e.g., "application/pdf", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "text/plain").
+    /// Required when FileData is provided.
+    /// </summary>
+    public string? MimeType { get; set; }
+}

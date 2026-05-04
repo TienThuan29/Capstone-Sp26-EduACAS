@@ -108,7 +108,7 @@ function SubmissionsContent({
                     ) : '-'}
                   </TableCell>
                   <TableCell className="text-center">
-                    {attempt.status === 'SUBMITTED' && attempt.score !== undefined ? (
+                    {attempt.status === 'SUBMITTED' && attempt.score != null ? (
                       <Badge color="success" className="px-3 font-bold mx-auto w-fit">
                         {attempt.score.toFixed(1)} / {maxScore.toFixed(1)}
                       </Badge>

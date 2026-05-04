@@ -1,7 +1,7 @@
 import { config } from "./config";
 
 export const Api = {
-  BASE_API: config.API_GATEWAY_BASE_URL || "",
+  BASE_API: config.API_GATEWAY_BASE_URL || "http://localhost:8080",
 
   Auth: {
     LOGIN: "/api/auth/v1/authenticate",
@@ -83,7 +83,8 @@ export const Api = {
     GET_DASHBOARD_AT_RISK: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/at-risk`,
     GET_DASHBOARD_WARNINGS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/warnings`,
     GET_CLASS_STATS: "/api/acas/v1/classrooms/dashboard/stats",
-    GET_EXAM_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics`,
+    GET_EXAM_STATISTICS: (classroomId: string, mode?: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics${mode ? `?mode=${mode}` : ""}`,
+    GET_QUIZ_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/quiz-statistics`,
 
     // Student Dashboard
     GET_STUDENT_OVERVIEW: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/overview`,
@@ -116,10 +117,12 @@ export const Api = {
     GET_BY_ID: (id: string) => `/api/acas/v1/problems/${id}`,
     GET_BY_IDS: "/api/acas/v1/problems/by-ids",
     GET_BY_LECTURER: (lecturerId: string) => `/api/acas/v1/problems/lecturer/${lecturerId}`,
+    GET_FROM_EXAMINATIONS: (classroomId: string) => `/api/acas/v1/problems/from-examinations/classroom/${classroomId}`,
     CREATE: "/api/acas/v1/problems",
     UPDATE: (id: string) => `/api/acas/v1/problems/${id}`,
     DELETE: (id: string) => `/api/acas/v1/problems/${id}`,
     OCR_EXTRACT: '/api/acas/v1/ocr/extract',
+    REVIEW: '/api/acas/v1/problems/review',
   },
 
   Question: {
@@ -177,11 +180,14 @@ export const Api = {
     EXECUTE_CUSTOM_TESTCASE: '/api/v1/submissions/execute/custom-testcase',
     EXECUTE_PUBLIC_TESTCASES: '/api/v1/submissions/execute/public-testcases',
     SAVE: '/api/v1/submissions',
+    FORCE: '/api/v1/submissions/force',
+    SUBMIT_AND_GRADE: '/api/v1/submissions/submit-and-grade',
     GET_BY_ID: (id: string) => `/api/v1/submissions/${id}`,
     GET_BY_STUDENT: (studentId: string) => `/api/v1/submissions/student/${studentId}`,
     GET_LATEST_BY_EXAM_AND_PROBLEM: (examId: string, problemId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/latest`,
     GET_LATEST_BY_EXAM: (examId: string) => `/api/v1/submissions/exam/${examId}/latest-all`,
     GET_VERSIONS: (submissionId: string) => `/api/v1/submissions/${submissionId}/versions`,
+    GET_VERSIONS_BY_STUDENT_EXAM_PROBLEM: (examId: string, problemId: string, studentId: string) => `/api/v1/submissions/exam/${examId}/problem/${problemId}/student/${studentId}/versions`,
     AUTO_GRADE: '/api/v1/submissions/auto-grade',
     RE_GRADE: (id: string) => `/api/v1/submissions/${id}/regrade`,
     OVERRIDE_SCORE: (id: string) => `/api/v1/submissions/${id}/score`,
@@ -237,6 +243,8 @@ export const Api = {
     CHANGE_STATUS: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/status`,
     SOFT_DELETE: (issueId: string) => `/api/acas/v1/discussion-issues/${issueId}/soft-delete`,
     GET_ADMIN: "/api/acas/v1/discussion-issues/admin",
+    UPDATE_COMMENT: (commentId: string) => `/api/acas/v1/discussion-issues/comments/${commentId}`,
+    SOFT_DELETE_COMMENT: (commentId: string) => `/api/acas/v1/discussion-issues/comments/${commentId}/soft-delete`,
   },
 
   Proctoring: {
@@ -247,6 +255,7 @@ export const Api = {
   ErrorGroup: {
     GENERATE: "/api/v1/error-groups/generate",
     CHECK_SIMILARITY: "/api/v1/error-groups/check-similarity",
+    RECOMMEND_MIN_TOKEN_MATCH: "/api/v1/error-groups/recommend-min-token-match",
     GET_SUMMARY_BY_PROBLEM: (examId: string, problemId: string) => `/api/v1/error-groups/exam/${examId}/problem/${problemId}`,
     GET_SUMMARY_BY_EXAM: (examId: string) => `/api/v1/error-groups/exam/${examId}`,
     GET_DETAIL: (groupId: string) => `/api/v1/error-groups/${groupId}`,
@@ -359,5 +368,13 @@ export const Api = {
 
   PublicStatistics: {
     GET: "/api/acas/v1/public-statistics",
+  },
+
+  AdminStatistics: {
+    GET_EXAMINATION_STATS: "/api/v1/admin/statistics/examinations",
+    GET_SUBMISSION_BY_LANGUAGE: "/api/v1/admin/statistics/submissions-by-language",
+    GET_STUDENT_LECTURER_RATIO: "/api/v1/admin/statistics/student-lecturer-ratio",
+    GET_USERS_BY_SUBJECT: "/api/v1/admin/statistics/users-by-subject",
+    GET_DISCUSSION_STATS: "/api/v1/admin/statistics/discussions",
   },
 };

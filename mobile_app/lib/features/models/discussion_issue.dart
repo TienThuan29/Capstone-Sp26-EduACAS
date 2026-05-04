@@ -144,8 +144,9 @@ class DiscussionIssue {
   /// Display name: use authorDisplay.fullName if available, fallback to authorId
   String get displayName => authorDisplay?.fullName ?? authorId;
 
-  /// Comment count from embedded comments list
-  int get commentCount => comments.length;
+  /// Comment count from embedded comments list (including all replies)
+  int get commentCount =>
+      comments.fold(0, (sum, c) => sum + c.totalRecursiveCount);
 
   factory DiscussionIssue.fromJson(Map<String, dynamic> json) {
     return DiscussionIssue(

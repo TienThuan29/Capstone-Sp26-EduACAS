@@ -7,6 +7,8 @@ using AcasService.Application.Commands.S3;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Mappers;
 using AcasService.Application.Queries.AcademicWarning;
+using AcasService.Application.Queries.AdminDiscussionStatistics;
+using AcasService.Application.Queries.AdminExaminationStatistics;
 using AcasService.Application.Queries.Classroom;
 using AcasService.Application.Queries.Examination;
 using AcasService.Application.Queries.Problem;
@@ -90,6 +92,7 @@ using AcasService.Application.Queries.Quiz;
 using AcasService.Application.Queries.Question;
 using AcasService.Application.Queries.ClassroomQuiz;
 using AcasService.Application.Queries.QuizAttempt;
+using AcasService.Application.Queries.QuizStatistics;
 using AcasService.Application.Queries.StudentAnswer;
 using AcasService.Repositories.ErrorGroup;
 using AcasService.Application.Commands.ErrorGroup;
@@ -262,6 +265,12 @@ builder.Services.AddScoped<IRegradingRequestQuery, RegradingRequestQuery>();
 builder.Services.AddScoped<IPublicStatisticsRepository, PublicStatisticsRepository>();
 builder.Services.AddScoped<IPublicStatisticsQuery, PublicStatisticsQuery>();
 
+// Admin Examination Statistics
+builder.Services.AddScoped<IAdminExaminationStatisticsQuery, AdminExaminationStatisticsQuery>();
+
+// Admin Discussion Statistics
+builder.Services.AddScoped<IAdminDiscussionStatisticsQuery, AdminDiscussionStatisticsQuery>();
+
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();
 builder.Services.AddScoped<IKeystrokeLogsCache, KeystrokeLogsCache>();
@@ -285,6 +294,7 @@ builder.Services.AddScoped<IExaminationJobScheduling, ExaminationJobScheduling>(
 builder.Services.AddScoped<IProgrammingLanguageCommand, ProgrammingLanguageCommand>();
 builder.Services.AddScoped<IProgrammingLanguageQuery, ProgrammingLanguageQuery>();
 builder.Services.AddScoped<IProblemCommand, ProblemCommand>();
+builder.Services.AddScoped<IProblemReviewCommand, ProblemReviewCommand>();
 builder.Services.AddScoped<IProblemQuery, ProblemQuery>();
 builder.Services.AddScoped<ITestcaseGenerator, TestcaseGenerator>();
 builder.Services.AddScoped<ITestcaseCommand, TestcaseCommand>();
@@ -317,6 +327,7 @@ builder.Services.AddScoped<IClassroomQuizCommand, ClassroomQuizCommand>();
 builder.Services.AddScoped<IClassroomQuizQuery, ClassroomQuizQuery>();
 builder.Services.AddScoped<IQuizAttemptCommand, QuizAttemptCommand>();
 builder.Services.AddScoped<IQuizAttemptQuery, QuizAttemptQuery>();
+builder.Services.AddScoped<IQuizStatisticsQuery, QuizStatisticsQuery>();
 builder.Services.AddScoped<IStudentAnswerCommand, StudentAnswerCommand>();
 builder.Services.AddScoped<IStudentAnswerQuery, StudentAnswerQuery>();
 builder.Services.AddScoped<IFirebaseCloudMessageService, FirebaseCloudMessageService>();

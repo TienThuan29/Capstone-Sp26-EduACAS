@@ -23,7 +23,7 @@ public class UserQuery : IUserQuery
     private readonly IConfiguration _configuration;
     private readonly JwtUtil _jwtUtil;
     private readonly UserMapper _userMapper;
-    private readonly GoogleTokenVerifier _googleTokenVerifier;
+    private readonly IGoogleTokenVerifier _googleTokenVerifier;
     private readonly ILogger<UserQuery> _logger;
     
     public UserQuery(
@@ -31,7 +31,7 @@ public class UserQuery : IUserQuery
         IConfiguration configuration,
         UserMapper userMapper,
         JwtUtil jwtUtil,
-        GoogleTokenVerifier googleTokenVerifier,
+        IGoogleTokenVerifier googleTokenVerifier,
         ILogger<UserQuery> logger
     ) {
         _userRepository = userRepository;

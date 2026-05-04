@@ -14,10 +14,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-01 — Exact match (Boundary)
+    // F028-UTCID01 Exact match
     // ========================================================================
     [Fact]
-    public void Compare_ExactMatch_ReturnsSuccess()
+    public void ExactMatch_ReturnsSuccess()
     {
         var option = new TestcaseOption();
         var result = _sut.Compare("Hello World", "Hello World", option);
@@ -25,10 +25,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-02 — Exact mismatch (Boundary)
+    // F028-UTCID02 Exact mismatch
     // ========================================================================
     [Fact]
-    public void Compare_ExactMismatch_ReturnsFail()
+    public void ExactMismatch_ReturnsFail()
     {
         var option = new TestcaseOption();
         var result = _sut.Compare("Hello World", "Hello world", option);
@@ -36,10 +36,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-03 — Case insensitive match (Normal)
+    // F028-UTCID03 Case insensitive match
     // ========================================================================
     [Fact]
-    public void Compare_CaseInsensitiveMatch_ReturnsSuccess()
+    public void CaseInsensitiveMatch_ReturnsSuccess()
     {
         var option = new TestcaseOption { IsCaseInsensitive = true };
         var result = _sut.Compare("Hello World", "HELLO WORLD", option);
@@ -47,21 +47,21 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-04 — Case insensitive mismatch (Normal)
+    // F028-UTCID04 Case insensitive mismatch
     // ========================================================================
     [Fact]
-    public void Compare_CaseInsensitiveMismatch_ReturnsFail()
+    public void CaseInsensitiveMismatch_ReturnsFail()
     {
         var option = new TestcaseOption { IsCaseInsensitive = true };
-        var result = _sut.Compare("Hello World", "Goodbye World", option);
+        var result = _sut.Compare("Hello World", "HELLO WORLD!!!", option);
         result.Should().Be(TestcaseStatus.FAIL);
     }
 
     // ========================================================================
-    // RC-05 — Floating point within tolerance (Normal)
+    // F028-UTCID05 Floating point within tolerance
     // ========================================================================
     [Fact]
-    public void Compare_FloatingPointWithinTolerance_ReturnsSuccess()
+    public void FloatingPointWithinTolerance_ReturnsSuccess()
     {
         var option = new TestcaseOption
         {
@@ -73,10 +73,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-06 — Floating point outside tolerance (Normal)
+    // F028-UTCID06 Floating point outside tolerance
     // ========================================================================
     [Fact]
-    public void Compare_FloatingPointOutsideTolerance_ReturnsFail()
+    public void FloatingPointOutsideTolerance_ReturnsFail()
     {
         var option = new TestcaseOption
         {
@@ -89,10 +89,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-07 — Floating point exact (Boundary)
+    // F028-UTCID07 Floating point exact match
     // ========================================================================
     [Fact]
-    public void Compare_FloatingPointExact_ReturnsSuccess()
+    public void FloatingPointExact_ReturnsSuccess()
     {
         var option = new TestcaseOption { IsFloatingPoint = true };
         var result = _sut.Compare("3.1415926535", "3.1415926535", option);
@@ -100,10 +100,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-08 — Token comparison exact (Boundary)
+    // F028-UTCID08 Token comparison exact match
     // ========================================================================
     [Fact]
-    public void Compare_TokenComparisonExact_ReturnsSuccess()
+    public void TokenComparisonExact_ReturnsSuccess()
     {
         var option = new TestcaseOption { IsTokenComparision = true };
         var result = _sut.Compare("foo bar baz", "foo bar baz", option);
@@ -111,10 +111,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-09 — Token comparison different order (Normal)
+    // F028-UTCID09 Token comparison different order
     // ========================================================================
     [Fact]
-    public void Compare_TokenComparisonDifferentOrder_ReturnsFail()
+    public void TokenComparisonDifferentOrder_ReturnsFail()
     {
         var option = new TestcaseOption { IsTokenComparision = true };
         var result = _sut.Compare("foo bar baz", "bar foo baz", option);
@@ -122,10 +122,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-10 — Token comparison extra token (Normal)
+    // F028-UTCID10 Token comparison extra token
     // ========================================================================
     [Fact]
-    public void Compare_TokenComparisonExtraToken_ReturnsFail()
+    public void TokenComparisonExtraToken_ReturnsFail()
     {
         var option = new TestcaseOption { IsTokenComparision = true };
         var result = _sut.Compare("foo bar baz", "foo bar baz qux", option);
@@ -133,10 +133,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-11 — Unordered comparison exact (Boundary)
+    // F028-UTCID11 Unordered comparison exact
     // ========================================================================
     [Fact]
-    public void Compare_UnorderedComparisonExact_ReturnsSuccess()
+    public void UnorderedComparisonExact_ReturnsSuccess()
     {
         var option = new TestcaseOption
         {
@@ -148,10 +148,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-12 — Unordered comparison missing token (Abnormal)
+    // F028-UTCID12 Unordered comparison missing token
     // ========================================================================
     [Fact]
-    public void Compare_UnorderedComparisonMissingToken_ReturnsFail()
+    public void UnorderedComparisonMissingToken_ReturnsFail()
     {
         var option = new TestcaseOption
         {
@@ -163,10 +163,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-13 — Empty expected, empty actual (Boundary)
+    // F028-UTCID13 - Empty expected, empty actual
     // ========================================================================
     [Fact]
-    public void Compare_EmptyExpectedEmptyActual_ReturnsSuccess()
+    public void EmptyExpectedEmptyActual_ReturnsSuccess()
     {
         var option = new TestcaseOption();
         var result = _sut.Compare("", "", option);
@@ -174,10 +174,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-14 — Empty expected, non-empty actual (Boundary)
+    // F028-UTCID14 - Empty expected, non-empty actual
     // ========================================================================
     [Fact]
-    public void Compare_EmptyExpectedNonEmptyActual_ReturnsFail()
+    public void EmptyExpectedNonEmptyActual_ReturnsFail()
     {
         var option = new TestcaseOption();
         var result = _sut.Compare("", "something", option);
@@ -185,10 +185,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-15 — Whitespace handling (Boundary)
+    // F028-UTCID15 - Whitespace handling (trim)
     // ========================================================================
     [Fact]
-    public void Compare_WhitespaceHandling_ReturnsSuccess()
+    public void WhitespaceHandling_ReturnsSuccess()
     {
         var option = new TestcaseOption { IsTokenComparision = true };
         var result = _sut.Compare("  Hello   World  ", "Hello World", option);
@@ -196,10 +196,10 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-16 — Null expected (Abnormal)
+    // F028-UTCID16 - Null expected
     // ========================================================================
     [Fact]
-    public void Compare_NullExpected_ThrowsNullReferenceException()
+    public void NullExpected_ThrowsNullReferenceException()
     {
         var option = new TestcaseOption();
         var act = () => _sut.Compare(null!, "Hello World", option);
@@ -207,13 +207,71 @@ public class ResultComparatorTests
     }
 
     // ========================================================================
-    // RC-17 — Null actual (Abnormal)
+    // F028-UTCID17 - Null actual
     // ========================================================================
     [Fact]
-    public void Compare_NullActual_ThrowsNullReferenceException()
+    public void NullActual_ThrowsNullReferenceException()
     {
         var option = new TestcaseOption();
         var act = () => _sut.Compare("Hello World", null!, option);
+        act.Should().Throw<NullReferenceException>();
+    }
+
+    // ========================================================================
+    // F028-UTCID18 - Decimal places (2 places)
+    // ========================================================================
+    [Fact]
+    public void DecimalPlacesTwo_SameRoundedValue_ReturnsSuccess()
+    {
+        var option = new TestcaseOption
+        {
+            IsFloatingPoint = true,
+            DecimalPlaces = 2
+        };
+        var result = _sut.Compare("3.14159", "3.14", option);
+        result.Should().Be(TestcaseStatus.SUCCESS);
+    }
+
+    // ========================================================================
+    // F028-UTCID19 - Comma as decimal separator
+    // ========================================================================
+    [Fact]
+    public void CommaAsDecimalSeparator_ReturnsSuccess()
+    {
+        var option = new TestcaseOption { IsFloatingPoint = true };
+        var result = _sut.Compare("3,14159", "3.14159", option);
+        result.Should().Be(TestcaseStatus.SUCCESS);
+    }
+
+    // ========================================================================
+    // F028-UTCID20 - Floating point epsilon (no tolerance, no decimal places)
+    // ========================================================================
+    [Fact]
+    public void FloatingPointEpsilon_SameValue_ReturnsSuccess()
+    {
+        var option = new TestcaseOption { IsFloatingPoint = true };
+        var result = _sut.Compare("0.1", "0.1", option);
+        result.Should().Be(TestcaseStatus.SUCCESS);
+    }
+
+    // ========================================================================
+    // F028-UTCID21 - Token comparison different token count
+    // ========================================================================
+    [Fact]
+    public void TokenComparisonDifferentTokenCount_ReturnsFail()
+    {
+        var option = new TestcaseOption { IsTokenComparision = true };
+        var result = _sut.Compare("foo bar", "foo", option);
+        result.Should().Be(TestcaseStatus.FAIL);
+    }
+
+    // ========================================================================
+    // F028-UTCID22 - Null option
+    // ========================================================================
+    [Fact]
+    public void NullOption_ThrowsNullReferenceException()
+    {
+        var act = () => _sut.Compare("Hello World", "Hello World", null!);
         act.Should().Throw<NullReferenceException>();
     }
 }

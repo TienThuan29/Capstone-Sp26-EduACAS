@@ -18,6 +18,16 @@ public interface IGeminiClient
         string prompt,
         GeminiGenerationConfig? generationConfig = null,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends a prompt with an attached file (base64) to Gemini API and returns the generated text response.
+    /// </summary>
+    Task<string> GenerateContentWithFileAsync(
+        string prompt,
+        string fileDataBase64,
+        string mimeType,
+        GeminiGenerationConfig? generationConfig = null,
+        CancellationToken cancellationToken = default);
 }
 
 public class GeminiClient : IGeminiClient
@@ -35,6 +45,7 @@ public class GeminiClient : IGeminiClient
         ILogger<GeminiClient> logger)
     {
         _httpClient = httpClient;
+        _httpClient.Timeout = TimeSpan.FromSeconds(90);
         _logger = logger;
         _modelName = configuration["Gemini:ModelName"] ?? throw new InvalidOperationException("Gemini:ModelName is not configured");
         _apiKey = configuration["Gemini:ApiKey"] ?? throw new InvalidOperationException("Gemini:ApiKey is not configured");
@@ -166,6 +177,116 @@ public class GeminiClient : IGeminiClient
         }
         return null;
     }
+
+    public async Task<string> GenerateContentWithFileAsync(
+        string prompt,
+        string fileDataBase64,
+        string mimeType,
+        GeminiGenerationConfig? generationConfig = null,
+        CancellationToken cancellationToken = default)
+    {
+        const int maxRetries = 4;
+        Exception? lastException = null;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            try
+            {
+                var result = await SendRequestWithFileAsync(prompt, fileDataBase64, mimeType, generationConfig, cancellationToken);
+                if (attempt > 1)
+                {
+                    _logger.LogInformation("Gemini API file request succeeded after {Attempt} retries", attempt);
+                }
+                return result;
+            }
+            catch (HttpRequestException ex) when (IsRetryableStatusCode(ex))
+            {
+                lastException = ex;
+
+                if (attempt == maxRetries)
+                {
+                    _logger.LogError(ex,
+                        "Gemini API file request failed after {MaxRetries} attempts. StatusCode={StatusCode}",
+                        maxRetries, GetStatusCode(ex));
+                    throw;
+                }
+
+                var delay = TimeSpan.FromSeconds(Math.Pow(2, attempt - 1));
+                _logger.LogWarning(
+                    "Gemini API file request returned retryable error (attempt {Attempt}/{MaxRetries}): StatusCode={StatusCode}, Delay={Delay}s",
+                    attempt, maxRetries, GetStatusCode(ex), delay.TotalSeconds);
+
+                await Task.Delay(delay, cancellationToken);
+            }
+        }
+
+        throw lastException ?? new InvalidOperationException("Gemini API file request failed unexpectedly");
+    }
+
+    private async Task<string> SendRequestWithFileAsync(
+        string prompt,
+        string fileDataBase64,
+        string mimeType,
+        GeminiGenerationConfig? generationConfig,
+        CancellationToken cancellationToken)
+    {
+        var request = new GeminiGenerateContentRequest
+        {
+            Contents =
+            [
+                new GeminiContent
+                {
+                    Parts =
+                    [
+                        new GeminiPart { Text = prompt },
+                        new GeminiPart
+                        {
+                            InlineData = new GeminiInlineData
+                            {
+                                MimeType = mimeType,
+                                Data = fileDataBase64
+                            }
+                        }
+                    ]
+                }
+            ],
+            GenerationConfig = generationConfig
+        };
+
+        var url = $"{BaseUrl}/models/{_modelName}:generateContent";
+        var json = JsonSerializer.Serialize(request, _jsonOptions);
+        var httpRequest = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+
+        httpRequest.Headers.Add("x-goog-api-key", _apiKey);
+        _logger.LogInformation(
+            "Gemini API file request: Url={Url}, BodyLength={BodyLength}",
+            url, json.Length);
+
+        var response = await _httpClient.SendAsync(httpRequest, cancellationToken);
+        var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError(
+                "Gemini API file error: StatusCode={StatusCode}, Response={Response}",
+                response.StatusCode, responseBody);
+            response.EnsureSuccessStatusCode();
+        }
+
+        var parsed = JsonSerializer.Deserialize<GeminiGenerateContentResponse>(responseBody, _jsonOptions);
+        var text = parsed?.Candidates?.FirstOrDefault()?.Content?.Parts?.FirstOrDefault()?.Text;
+
+        if (string.IsNullOrEmpty(text))
+        {
+            _logger.LogWarning("Gemini API file request returned empty or missing text. Response: {Response}", responseBody);
+            return string.Empty;
+        }
+
+        return text;
+    }
 }
 
 
@@ -210,7 +331,20 @@ public sealed class GeminiContent
 public sealed class GeminiPart
 {
     [JsonPropertyName("text")]
-    public string Text { get; set; } = string.Empty;
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string? Text { get; set; }
+
+    [JsonPropertyName("inlineData")]
+    public GeminiInlineData? InlineData { get; set; }
+}
+
+public sealed class GeminiInlineData
+{
+    [JsonPropertyName("mimeType")]
+    public string MimeType { get; set; } = string.Empty;
+
+    [JsonPropertyName("data")]
+    public string Data { get; set; } = string.Empty;
 }
 
 public sealed class GeminiGenerateContentResponse

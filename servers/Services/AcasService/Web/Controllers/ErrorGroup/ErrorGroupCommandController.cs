@@ -52,12 +52,20 @@ public class ErrorGroupCommandController : ControllerBase
         {
             if (request.GroupIds != null && request.GroupIds.Count > 0)
             {
-                // await _errorGroupCommand.CheckSimilarityForGroupsAsync(request.GroupIds);
-                await _errorGroupCommand.CheckSimilarityForGroupsWithExcludeCodeBaseAsync(request.GroupIds);
+                await _errorGroupCommand.CheckSimilarityForGroupsAsync(
+                    request.GroupIds,
+                    request.MinTokenMatch,
+                    request.MinSimilarity,
+                    request.ExcludeBaseCode);
             }
             else if (!string.IsNullOrEmpty(request.ProblemId))
             {
-                await _errorGroupCommand.CheckSimilarityForProblemWithExcludeCodeBaseAsync(request.ExamId, request.ProblemId);
+                await _errorGroupCommand.CheckSimilarityForProblemAsync(
+                    request.ExamId,
+                    request.ProblemId,
+                    request.MinTokenMatch,
+                    request.MinSimilarity,
+                    request.ExcludeBaseCode);
             }
             else
             {
@@ -70,6 +78,24 @@ public class ErrorGroupCommandController : ControllerBase
         {
             _logger.LogError(ex, "Error checking similarity for problem {ProblemId}", request.ProblemId);
             return ResponseUtil.Error<string>("Failed to check similarity", 500);
+        }
+    }
+
+    [HttpPost("recommend-min-token-match")]
+    public async Task<ActionResult<ApiResponse<int>>> RecommendMinTokenMatch([FromBody] ErrorGroupRequest request)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(request.ExamId) || string.IsNullOrEmpty(request.ProblemId))
+                return ResponseUtil.Error<int>("ExamId and ProblemId are required", 400);
+
+            var recommended = await _errorGroupCommand.CalculateRecommendedMinTokenMatchAsync(request.ExamId, request.ProblemId);
+            return ResponseUtil.Success(recommended, $"Recommended MinTokenMatch: {recommended}", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error calculating recommended MinTokenMatch for problem {ProblemId}", request.ProblemId);
+            return ResponseUtil.Error<int>("Failed to calculate recommendation", 500);
         }
     }
 }

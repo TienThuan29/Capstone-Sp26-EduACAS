@@ -170,6 +170,18 @@ export function OverviewTabContent({
               )
             }
           />
+          <DetailRow
+            label="Max attempts"
+            value={
+              examination.maxAttempts != null ? (
+                <span className="inline-block w-fit">
+                  <Badge color="blue">{examination.maxAttempts}</Badge>
+                </span>
+              ) : (
+                <span className="text-gray-400">Unlimited</span>
+              )
+            }
+          />
         </>
       )}
       <DetailRow

@@ -12,4 +12,5 @@ public interface IDiscussionIssueRepository
     Task<(List<Models.DiscussionIssue> Items, int TotalCount)> FindPagedAsync(string? search, int pageIndex, int pageSize);
     Task SoftDeleteAsync(string id);
     Task DeleteAsync(string id);
+    Task IncrementViewCountAsync(string id);
 }

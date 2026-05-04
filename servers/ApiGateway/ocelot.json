@@ -34,7 +34,10 @@
         }
       ],
       "UpstreamPathTemplate": "/api/v1/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "QoSOptions": {
+        "TimeoutValue": 300000
+      }
     },
     {
       "DownstreamPathTemplate": "/api/v1/{everything}",
@@ -46,7 +49,10 @@
         }
       ],
       "UpstreamPathTemplate": "/api/acas/v1/{everything}",
-      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ]
+      "UpstreamHttpMethod": [ "GET", "POST", "PUT", "DELETE", "PATCH" ],
+      "QoSOptions": {
+        "TimeoutValue": 300000
+      }
     },
     {
       "DownstreamPathTemplate": "/api/{everything}",
@@ -83,6 +89,30 @@
       ],
       "UpstreamPathTemplate": "/swagger/acas/swagger.json",
       "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/lsp",
+      "DownstreamScheme": "ws",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "UpstreamPathTemplate": "/api/lsp",
+      "UpstreamHttpMethod": [ "GET" ]
+    },
+    {
+      "DownstreamPathTemplate": "/socket.io/{everything}",
+      "DownstreamScheme": "ws",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "localhost",
+          "Port": 5000
+        }
+      ],
+      "UpstreamPathTemplate": "/socket.io/{everything}",
+      "UpstreamHttpMethod": [ "GET", "POST" ]
     }
   ],
   "GlobalConfiguration": {

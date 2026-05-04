@@ -12,4 +12,13 @@ public class ErrorGroupRequest
 
     [JsonPropertyName("groupIds")]
     public List<string>? GroupIds { get; set; }
+
+    [JsonPropertyName("minTokenMatch")]
+    public int? MinTokenMatch { get; set; }
+
+    [JsonPropertyName("minSimilarity")]
+    public double? MinSimilarity { get; set; }
+
+    [JsonPropertyName("excludeBaseCode")]
+    public bool? ExcludeBaseCode { get; set; }
 }

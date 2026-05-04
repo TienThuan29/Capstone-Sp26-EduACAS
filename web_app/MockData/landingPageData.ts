@@ -7,13 +7,6 @@ import {
   BarChartIcon,
   ChatBubbleLeftIcon,
 } from "@/components/svg-icons"
-import {
-  PYTHON_CODE_IMG,
-  JAVASCRIPT_CODE_IMG,
-  JAVA_CODE_IMG,
-  SQL_CODE_IMG,
-  // C_CODE_IMG,
-} from "@/assets/images"
 
 export const heroStats = [
   { number: "4+", label: "Languages" },
@@ -68,43 +61,37 @@ export const communityStats = [
 
 export const programmingLanguages = [
   {
-    img: PYTHON_CODE_IMG,
+    img: "/LanguageLandingPage/Python.png",
     title: "Python programming",
     desc: "Learn Python through hands-on exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
     badge: "Python",
   },
   {
-    img: JAVASCRIPT_CODE_IMG,
+    img: "/LanguageLandingPage/JavaScript.png",
     title: "JavaScript",
     desc: "Master JavaScript with interactive exercises on ES6+, asynchronous programming, and DOM manipulation. Detailed content will be added later.",
     badge: "JavaScript",
   },
   {
-    img: JAVA_CODE_IMG,
+    img: "/LanguageLandingPage/JavaCode.png",
     title: "Java programming",
     desc: "Learn Java with exercises on OOP, data structures, and enterprise application development. Detailed content will be added later.",
     badge: "Java",
   },
-  // {
-  //   img: SQL_CODE_IMG,
-  //   title: "SQL & Databases",
-  //   desc: "Practice SQL queries, database design, and work effectively with relational databases. Detailed content will be added later.",
-  //   badge: "SQL",
-  // },
   {
-    img: SQL_CODE_IMG,
+    img: "/LanguageLandingPage/C++Code.png",
     title: "C/C++ programming",
     desc: "Learn C/C++ with exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
     badge: "C/C++",
   },
   {
-    img: SQL_CODE_IMG,
+    img: "/LanguageLandingPage/TypeScriptCode.png",
     title: "TypeScript programming",
     desc: "Learn TypeScript with exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
     badge: "TypeScript",
   },
   {
-    img: SQL_CODE_IMG,
+    img: "/LanguageLandingPage/CSharpCode.png",
     title: "C# programming",
     desc: "Learn C# with exercises on data structures, algorithms, and real-world applications. Detailed content will be added later.",
     badge: "C#",

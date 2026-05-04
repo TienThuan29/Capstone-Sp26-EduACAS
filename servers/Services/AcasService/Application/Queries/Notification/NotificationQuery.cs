@@ -9,7 +9,8 @@ public interface INotificationQuery
     Task<PagedResult<NotificationResponse>> GetNotificationsByUserIdAsync(
         string userId,
         int pageIndex = 1,
-        int pageSize = 10);
+        int pageSize = 10,
+        bool? isRead = null);
 
     Task<List<NotificationResponse>> GetByTargetUserIdAsync(string targetUserId);
 
@@ -38,7 +39,8 @@ public class NotificationQuery : INotificationQuery
     public async Task<PagedResult<NotificationResponse>> GetNotificationsByUserIdAsync(
         string userId,
         int pageIndex = 1,
-        int pageSize = 10)
+        int pageSize = 10,
+        bool? isRead = null)
     {
         try
         {
@@ -49,7 +51,7 @@ public class NotificationQuery : INotificationQuery
             if (pageSize < 1) pageSize = 10;
             if (pageSize > 100) pageSize = 100;
 
-            var all = await _notificationRepository.FindByTargetUserIdAsync(userId);
+            var all = await _notificationRepository.FindByTargetUserIdAsync(userId, isRead);
             var ordered = all
                 .OrderBy(n => n.IsRead)
                 .ThenByDescending(n => n.SentDate)

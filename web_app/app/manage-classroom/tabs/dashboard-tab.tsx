@@ -1,8 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { Badge, Spinner } from "flowbite-react";
-import { ChartBarIcon, AcademicCapIcon, UserGroupIcon, DocumentArrowDownIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { Badge } from "flowbite-react";
+import {
+  ChartBarIcon,
+  AcademicCapIcon,
+  UserGroupIcon,
+  DocumentArrowDownIcon,
+  Cog6ToothIcon,
+  TableCellsIcon,
+} from "@heroicons/react/24/outline";
 import { useStudentClassroom } from "@/hooks/classroom/useStudentClassroom";
 import { useClassroomQuiz } from "@/hooks/quiz/useClassroomQuiz";
 import { useQuiz } from "@/hooks/quiz/useQuiz";
@@ -10,14 +17,18 @@ import { useQuizAttempt } from "@/hooks/quiz/useQuizAttempt";
 import { useClassroomDashboard } from "@/hooks/dashboard/useClassroomDashboard";
 import { DefaultOutlineCustomButton } from "@/components/ui/custom-button";
 import { StatsCard } from "@/components/classroom-dashboard/cards/StatsCard";
-import { ScoreDistributionChart, ExamMode } from "@/components/classroom-dashboard/charts/ScoreDistributionChart";
+import { ScoreDistributionChart } from "@/components/classroom-dashboard/charts/ScoreDistributionChart";
+import type { ScoreMode } from "@/components/classroom-dashboard/charts/ScoreDistributionChart";
 import { ExamScoreStatisticsChart } from "@/components/classroom-dashboard/charts/ExamScoreStatisticsChart";
+import { LineChart } from "@/components/classroom-dashboard/charts/LineChart";
+import { PracticalStatisticsSection } from "@/components/classroom-dashboard/sections/PracticalStatisticsSection";
+import { ExaminationStatisticsSection } from "@/components/classroom-dashboard/sections/ExaminationStatisticsSection";
+import { QuizStatisticsSection } from "@/components/classroom-dashboard/sections/QuizStatisticsSection";
 import { AtRiskStudentsList } from "@/components/classroom-dashboard/lists/AtRiskStudentsList";
 import { RecentWarningsList } from "@/components/classroom-dashboard/lists/RecentWarningsList";
-import { StudentDashboardSkeleton, DashboardTabSkeleton } from "@/components/ui/skeletons";
+import { StudentDashboardSkeleton } from "@/components/ui/skeletons";
 import type { ClassroomStudentResponse } from "@/types/classroom";
-import type { ClassroomQuiz } from "@/types/quiz";
-import type { QuizAttempt } from "@/types/quiz-attempt";
+import type { ClassroomQuiz, QuizAttemptResponse } from "@/types/quiz";
 import type {
   ScoreDistribution,
   AtRiskStudent,
@@ -38,6 +49,14 @@ type StudentScoreSeries = {
   submittedCount: number;
   averageScore: number;
 };
+
+type DashboardSubTab = "overview" | "exam" | "quiz";
+
+const SUB_TABS: { id: DashboardSubTab; label: string; icon: ReactNode }[] = [
+  { id: "overview", label: "Overview", icon: <ChartBarIcon className="h-4 w-4" /> },
+  { id: "exam", label: "Exam Statistics", icon: <TableCellsIcon className="h-4 w-4" /> },
+  { id: "quiz", label: "Quiz Statistics", icon: <AcademicCapIcon className="h-4 w-4" /> },
+];
 
 export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const { getStudentsByClassId } = useStudentClassroom();
@@ -60,11 +79,11 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const [students, setStudents] = useState<ClassroomStudentResponse[]>([]);
   const [classroomQuizzes, setClassroomQuizzes] = useState<ClassroomQuiz[]>([]);
   const [quizNameMap, setQuizNameMap] = useState<Record<string, string>>({});
-  const [attemptsByStudent, setAttemptsByStudent] = useState<Record<string, QuizAttempt[]>>({});
+  const [attemptsByStudent, setAttemptsByStudent] = useState<Record<string, QuizAttemptResponse[]>>({});
 
   // Legacy dashboard state (incoming HEAD version)
   const [scoreDistribution, setScoreDistribution] = useState<ScoreDistribution[]>([]);
-  const [selectedMode, setSelectedMode] = useState<ExamMode | "ALL">("ALL");
+  const [selectedMode, setSelectedMode] = useState<ScoreMode>("ALL");
   const [scoreDistLoading, setScoreDistLoading] = useState(false);
   const [atRiskStudents, setAtRiskStudents] = useState<AtRiskStudent[]>([]);
   const [recentWarnings, setRecentWarnings] = useState<RecentWarning[]>([]);
@@ -73,6 +92,8 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
   const [examStatsLoading, setExamStatsLoading] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [activeSubTab, setActiveSubTab] = useState<DashboardSubTab>("overview");
+  const [quizLoading, setQuizLoading] = useState(false);
 
   // Calculate overview stats from classStats
   const totalStudents = classStats.reduce((sum, cls) => sum + cls.totalStudents, 0);
@@ -85,7 +106,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const totalWarnings = recentWarnings.length;
 
   // Load score distribution when mode changes
-  const loadScoreDistribution = async (mode: ExamMode | "ALL") => {
+  const loadScoreDistribution = async (mode: ScoreMode) => {
     setScoreDistLoading(true);
     try {
       const modeParam = mode === "ALL" ? undefined : mode;
@@ -97,7 +118,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   };
 
   // Handle mode change
-  const handleModeChange = (mode: ExamMode | "ALL") => {
+  const handleModeChange = (mode: ScoreMode) => {
     setSelectedMode(mode);
     loadScoreDistribution(mode);
   };
@@ -136,7 +157,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
           getAtRiskStudents(5),
           getRecentWarnings(5),
           getClassStats(classId),
-          getExamStatistics(classId),
+          getExamStatistics(classId, undefined, "EXAMINATION"),
         ]);
 
         if (!active) {
@@ -146,19 +167,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
         const sortedClassroomQuizzes = [...classroomQuizList].sort(
           (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
         );
-
-        const attemptsEntries = await Promise.all(
-          studentList
-            .filter((student) => student.isJoining)
-            .map(async (student) => {
-              const attempts = await getAttemptsByStudent(student.studentId);
-              return [student.studentId, attempts] as const;
-            }),
-        );
-
-        if (!active) {
-          return;
-        }
 
         const nameMap = allQuizzes.reduce<Record<string, string>>((acc, quiz) => {
           acc[quiz.id] = quiz.title;
@@ -178,7 +186,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
         // Set current version data
         setStudents(studentList.filter((student) => student.isJoining));
         setClassroomQuizzes(sortedClassroomQuizzes);
-        setAttemptsByStudent(Object.fromEntries(attemptsEntries));
         setQuizNameMap(nameMap);
       } catch (err: unknown) {
         if (!active) {
@@ -206,7 +213,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   }, [
     classId,
     getAllQuizzes,
-    getAttemptsByStudent,
     getAtRiskStudents,
     getClassStats,
     getClassroomQuizzesByClassroom,
@@ -217,6 +223,51 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
     selectedExamId,
   ]);
 
+  // Lazy-load quiz attempts when switching to Quiz tab (avoids N+1 on initial page load)
+  useEffect(() => {
+    if (activeSubTab !== "quiz") return;
+    if (Object.keys(attemptsByStudent).length > 0) return; // already loaded
+    if (students.length === 0) return;
+
+    let active = true;
+    setQuizLoading(true);
+
+    const fetchQuizAttempts = async () => {
+      const joiningStudents = students.filter((s) => s.isJoining);
+      if (joiningStudents.length === 0) {
+        setQuizLoading(false);
+        return;
+      }
+
+      // Process in batches of 5 to avoid rate limiting
+      const batchSize = 5;
+        const results: Record<string, QuizAttemptResponse[]> = {};
+
+        for (let i = 0; i < joiningStudents.length; i += batchSize) {
+          if (!active) return;
+          const batch = joiningStudents.slice(i, i + batchSize);
+          // eslint-disable-next-line no-await-in-loop
+          await Promise.all(
+            batch.map(async (student) => {
+              const attempts = await getAttemptsByStudent(student.studentId);
+              results[student.studentId] = attempts;
+            })
+          );
+        }
+
+        if (active) {
+          setAttemptsByStudent(results);
+          setQuizLoading(false);
+        }
+    };
+
+    void fetchQuizAttempts();
+
+    return () => {
+      active = false;
+    };
+  }, [activeSubTab, attemptsByStudent, getAttemptsByStudent, students]);
+
   const filteredClassroomQuizzes = useMemo(() => classroomQuizzes, [classroomQuizzes]);
 
   const studentSeries = useMemo<StudentScoreSeries[]>(() => {
@@ -225,7 +276,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
     return students
       .map((student) => {
         const attempts = attemptsByStudent[student.studentId] ?? [];
-        const attemptsByClassroomQuiz = attempts.reduce<Record<string, QuizAttempt[]>>((acc, attempt) => {
+        const attemptsByClassroomQuiz = attempts.reduce<Record<string, QuizAttemptResponse[]>>((acc, attempt) => {
           if (!classroomQuizIds.has(attempt.classroomQuizId)) {
             return acc;
           }
@@ -238,14 +289,14 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
 
         const points = filteredClassroomQuizzes.map((classroomQuiz) => {
           const quizAttempts = (attemptsByClassroomQuiz[classroomQuiz.id] ?? [])
-            .filter((attempt) => attempt.status === "SUBMITTED" && attempt.finalScore != null)
+            .filter((attempt) => attempt.status === "SUBMITTED" && attempt.score != null)
             .sort((a, b) => b.attemptNumber - a.attemptNumber);
 
           if (quizAttempts.length === 0) {
             return null;
           }
 
-          return Number(quizAttempts[0].finalScore);
+          return Number(quizAttempts[0].score);
         });
 
         const valid = points.filter((score): score is number => score != null);
@@ -289,7 +340,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
 
   // Show initial loading spinner only before first load attempt
   if (!hasLoadedOnce && (loading || legacyLoading)) {
-    return <DashboardTabSkeleton />;
+    return <StudentDashboardSkeleton />;
   }
 
   if (error || legacyError) {
@@ -327,148 +378,170 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
         </div>
       </div>
 
-      {/* Stats Cards (incoming HEAD version) */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total Students"
-          value={totalStudents || students.length}
-          changeLabel="in this class"
-          trend="stable"
-          className="bg-white dark:bg-gray-800"
-        />
-        <StatsCard
-          title="Class Average"
-          value={`${classAverage.toFixed(1)}/10`}
-          changeLabel="overall"
-          trend={
-            classAverage >= 7
-              ? "up"
-              : classAverage >= 5
-                ? "stable"
-                : "down"
-          }
-          className="bg-white dark:bg-gray-800"
-        />
-        <StatsCard
-          title="At Risk"
-          value={`${totalAtRisk} (${atRiskPercentage.toFixed(0)}%)`}
-          changeLabel="in this class"
-          trend={totalAtRisk > 0 ? "down" : "stable"}
-          variant={totalAtRisk > 0 ? "warning" : "default"}
-          className="bg-white dark:bg-gray-800"
-        />
-        <StatsCard
-          title="Warnings"
-          value={totalWarnings}
-          changeLabel="recent"
-          trend="stable"
-          className="bg-white dark:bg-gray-800"
-        />
-      </div>
-
-      {/* Additional Metric Cards (current version) */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <MetricCard
-          icon={<UserGroupIcon className="h-5 w-5" />}
-          label="Active Students"
-          value={students.length.toString()}
-          accent="text-[#1F4E79]"
-        />
-        <MetricCard
-          icon={<AcademicCapIcon className="h-5 w-5" />}
-          label="Assessments (Quiz Phase 1)"
-          value={filteredClassroomQuizzes.length.toString()}
-          accent="text-[#C9A24D]"
-        />
-        <MetricCard
-          icon={<ChartBarIcon className="h-5 w-5" />}
-          label="Class Average (Attempts)"
-          value={
-            classAverageSeries.filter((x): x is number => x != null).length > 0
-              ? (
-                  classAverageSeries.filter((x): x is number => x != null).reduce((sum, score) => sum + score, 0) /
-                  classAverageSeries.filter((x): x is number => x != null).length
-                ).toFixed(2)
-              : "N/A"
-          }
-          accent="text-emerald-600"
-        />
-      </div>
-
-      {/* Score Distribution Chart (incoming HEAD version) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
-        <ScoreDistributionChart
-          data={scoreDistribution}
-          selectedMode={selectedMode}
-          onModeChange={handleModeChange}
-          loading={scoreDistLoading}
-        />
-      </div>
-
-      {/* At Risk Students and Recent Warnings (incoming HEAD version) */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <AtRiskStudentsList students={atRiskStudents} />
-        <RecentWarningsList warnings={recentWarnings} />
-      </div>
-
-      {/* Exams statistics (incoming HEAD version) */}
-      <ExamScoreStatisticsChart
-        data={examStatistics}
-        selectedExamId={selectedExamId}
-        onExamChange={setSelectedExamId}
-        loading={examStatsLoading}
-      />
-
-      {/* Class Average Trend Chart (current version) */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 dark:border-gray-700 dark:bg-gray-800">
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white">
-            Class Average Trend (Quiz Attempt FinalScore)
-          </h3>
-          <Badge color="info">Phase 1</Badge>
-        </div>
-        <LineChart
-          points={classAverageSeries}
-          labels={filteredClassroomQuizzes.map((item) => quizNameMap[item.quizId] ?? item.quizId)}
-          maxY={globalMaxScore}
-          strokeClassName="stroke-emerald-500"
-        />
-      </div>
-
-      {/* Student Series Charts (current version) */}
-      <div className="grid grid-cols-1 gap-4 xl:grid-cols-2">
-        {studentSeries.map((series) => (
-          <div
-            key={series.studentId}
-            className="rounded-lg border border-gray-200 bg-white p-5 dark:border-gray-700 dark:bg-gray-800"
+      {/* Sub-tab navigation */}
+      <div className="flex flex-wrap gap-2 border-b border-gray-200 dark:border-gray-700 pb-px">
+        {SUB_TABS.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveSubTab(tab.id)}
+            className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium transition-colors ${
+              activeSubTab === tab.id
+                ? "border-b-2 border-[#1F4E79] text-[#1F4E79] dark:border-[#C9A24D] dark:text-[#C9A24D]"
+                : "text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+            }`}
           >
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <h4 className="text-base font-semibold text-gray-900 dark:text-white">
-                  {series.studentName}
-                </h4>
-                <p className="text-xs text-gray-500 dark:text-gray-400">
-                  {series.submittedCount} submitted / {filteredClassroomQuizzes.length} assessments
-                </p>
-              </div>
-              <Badge color="purple">Avg: {series.averageScore.toFixed(2)}</Badge>
-            </div>
-
-            <LineChart
-              points={series.points}
-              labels={filteredClassroomQuizzes.map((item) => quizNameMap[item.quizId] ?? item.quizId)}
-              maxY={globalMaxScore}
-            />
-          </div>
+            {tab.icon}
+            {tab.label}
+          </button>
         ))}
       </div>
 
-      {studentSeries.length === 0 && (
-        <div className="rounded-lg border border-dashed border-gray-300 bg-white py-10 text-center dark:border-gray-700 dark:bg-gray-800">
-          <p className="text-sm text-gray-600 dark:text-gray-300">
-            No active student data found for this classroom.
-          </p>
-        </div>
+      {/* ===== Overview Tab ===== */}
+      {activeSubTab === "overview" && (
+        <>
+          {/* Stats Cards */}
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="Total Students"
+              value={totalStudents || students.length}
+              changeLabel="in this class"
+              trend="stable"
+              className="bg-white dark:bg-gray-800"
+            />
+            <StatsCard
+              title="Class Average"
+              value={`${classAverage.toFixed(1)}/10`}
+              changeLabel="overall"
+              trend={
+                classAverage >= 7
+                  ? "up"
+                  : classAverage >= 5
+                    ? "stable"
+                    : "down"
+              }
+              className="bg-white dark:bg-gray-800"
+            />
+            <StatsCard
+              title="At Risk"
+              value={`${totalAtRisk} (${atRiskPercentage.toFixed(0)}%)`}
+              changeLabel="in this class"
+              trend={totalAtRisk > 0 ? "down" : "stable"}
+              variant={totalAtRisk > 0 ? "warning" : "default"}
+              className="bg-white dark:bg-gray-800"
+            />
+            <StatsCard
+              title="Warnings"
+              value={totalWarnings}
+              changeLabel="recent"
+              trend="stable"
+              className="bg-white dark:bg-gray-800"
+            />
+          </div>
+
+          {/* Additional Metric Cards */}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <MetricCard
+              icon={<UserGroupIcon className="h-5 w-5" />}
+              label="Active Students"
+              value={students.length.toString()}
+              accent="text-[#1F4E79]"
+            />
+            <MetricCard
+              icon={<AcademicCapIcon className="h-5 w-5" />}
+              label="Assessments (Quiz Phase 1)"
+              value={filteredClassroomQuizzes.length.toString()}
+              accent="text-[#C9A24D]"
+            />
+          </div>
+
+          {/* Score Distribution Chart (ALL modes) */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-1">
+            <ScoreDistributionChart
+              data={scoreDistribution}
+              selectedMode={selectedMode}
+              onModeChange={handleModeChange}
+              loading={scoreDistLoading}
+            />
+          </div>
+
+          {/* At Risk Students and Recent Warnings */}
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <AtRiskStudentsList students={atRiskStudents} />
+            <RecentWarningsList warnings={recentWarnings} />
+          </div>
+        </>
+      )}
+
+      {/* ===== Exam Tab ===== */}
+      {activeSubTab === "exam" && (
+        <>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatsCard
+              title="Total Students"
+              value={totalStudents || students.length}
+              changeLabel="in this class"
+              trend="stable"
+              className="bg-white dark:bg-gray-800"
+            />
+            <StatsCard
+              title="Class Average"
+              value={`${classAverage.toFixed(1)}/10`}
+              changeLabel="overall"
+              trend={classAverage >= 7 ? "up" : classAverage >= 5 ? "stable" : "down"}
+              className="bg-white dark:bg-gray-800"
+            />
+            <StatsCard
+              title="At Risk"
+              value={`${totalAtRisk} (${atRiskPercentage.toFixed(0)}%)`}
+              changeLabel="in this class"
+              trend={totalAtRisk > 0 ? "down" : "stable"}
+              variant={totalAtRisk > 0 ? "warning" : "default"}
+              className="bg-white dark:bg-gray-800"
+            />
+            <StatsCard
+              title="Warnings"
+              value={totalWarnings}
+              changeLabel="recent"
+              trend="stable"
+              className="bg-white dark:bg-gray-800"
+            />
+          </div>
+
+          {/* Exams statistics */}
+          <ExamScoreStatisticsChart
+            data={examStatistics}
+            selectedExamId={selectedExamId}
+            onExamChange={setSelectedExamId}
+            loading={examStatsLoading}
+          />
+
+          {/* Score Distribution (filtered EXAM) */}
+          <ScoreDistributionChart
+            data={scoreDistribution}
+            selectedMode="EXAMINATION"
+            onModeChange={() => {}}
+            loading={scoreDistLoading}
+            showModeSelector={false}
+          />
+
+          {/* EXAMINATION Statistics Section */}
+          <ExaminationStatisticsSection classId={classId} students={students} />
+
+          {/* PRACTICAL Statistics Section */}
+          <PracticalStatisticsSection classId={classId} students={students} />
+        </>
+      )}
+
+      {/* ===== Quiz Tab ===== */}
+      {activeSubTab === "quiz" && (
+        <QuizStatisticsSection
+          classId={classId}
+          classroomQuizzes={classroomQuizzes}
+          attemptsByStudent={attemptsByStudent}
+          students={students}
+          quizNameMap={quizNameMap}
+          loading={quizLoading}
+        />
       )}
     </div>
   );
@@ -498,143 +571,4 @@ function MetricCard({
   );
 }
 
-function LineChart({
-  points,
-  labels,
-  maxY,
-  strokeClassName = "stroke-[#1F4E79]",
-}: {
-  points: Array<number | null>;
-  labels: string[];
-  maxY: number;
-  strokeClassName?: string;
-}) {
-  const width = 720;
-  const height = 220;
-  const padding = 24;
-  const innerWidth = width - padding * 2;
-  const innerHeight = height - padding * 2;
 
-  if (points.length === 0) {
-    return <p className="text-sm text-gray-500 dark:text-gray-400">No chart data.</p>;
-  }
-
-  const stepX = points.length === 1 ? 0 : innerWidth / (points.length - 1);
-  const pointsWithCoord = points.map((score, index) => {
-    const x = padding + index * stepX;
-    if (score == null) {
-      return { x, y: null as number | null, score: null as number | null };
-    }
-    const ratio = maxY <= 0 ? 0 : score / maxY;
-    const y = padding + innerHeight - ratio * innerHeight;
-    return { x, y, score };
-  });
-
-  const segments: Array<string> = [];
-  let current: Array<{ x: number; y: number }> = [];
-  for (const point of pointsWithCoord) {
-    if (point.y == null) {
-      if (current.length >= 2) {
-        segments.push(current.map((p) => `${p.x},${p.y}`).join(" "));
-      }
-      current = [];
-      continue;
-    }
-    current.push({ x: point.x, y: point.y });
-  }
-  if (current.length >= 2) {
-    segments.push(current.map((p) => `${p.x},${p.y}`).join(" "));
-  }
-
-  return (
-    <div className="w-full overflow-x-auto">
-      <svg viewBox={`0 0 ${width} ${height}`} className="h-52 min-w-160 w-full">
-        <line
-          x1={padding}
-          y1={height - padding}
-          x2={width - padding}
-          y2={height - padding}
-          className="stroke-gray-300 dark:stroke-gray-600"
-          strokeWidth="1"
-        />
-        <line
-          x1={padding}
-          y1={padding}
-          x2={padding}
-          y2={height - padding}
-          className="stroke-gray-300 dark:stroke-gray-600"
-          strokeWidth="1"
-        />
-
-        {segments.map((segment, idx) => (
-          <polyline
-            key={idx}
-            points={segment}
-            fill="none"
-            strokeWidth="2.5"
-            className={strokeClassName}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        ))}
-
-        {pointsWithCoord.map((point, idx) => {
-          if (point.y == null) {
-            return null;
-          }
-          return (
-            <g key={idx}>
-              <circle
-                cx={point.x}
-                cy={point.y}
-                r="3.4"
-                className="fill-white stroke-[#1F4E79] dark:fill-gray-900"
-                strokeWidth="2"
-              />
-              <title>{`${labels[idx] ?? `Assessment ${idx + 1}`}: ${point.score?.toFixed(2)}`}</title>
-            </g>
-          );
-        })}
-
-        {labels.map((label, idx) => {
-          const x = padding + idx * stepX;
-          return (
-            <text
-              key={idx}
-              x={x}
-              y={height - 8}
-              textAnchor="middle"
-              className="fill-gray-500 text-[9px] dark:fill-gray-400"
-            >
-              {truncateLabel(label)}
-            </text>
-          );
-        })}
-
-        <text
-          x={padding - 6}
-          y={padding + 4}
-          textAnchor="end"
-          className="fill-gray-500 text-[10px] dark:fill-gray-400"
-        >
-          {maxY.toFixed(0)}
-        </text>
-        <text
-          x={padding - 6}
-          y={height - padding + 4}
-          textAnchor="end"
-          className="fill-gray-500 text-[10px] dark:fill-gray-400"
-        >
-          0
-        </text>
-      </svg>
-    </div>
-  );
-}
-
-function truncateLabel(label: string): string {
-  if (label.length <= 10) {
-    return label;
-  }
-  return `${label.slice(0, 9)}…`;
-}

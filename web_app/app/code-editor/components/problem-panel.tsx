@@ -90,7 +90,6 @@ function getStatusLabel(status: string) {
 const TABS = [
   { id: "problem" as const, label: "Problem", icon: FileText },
   { id: "submissions" as const, label: "Submission Histories", icon: History },
-  // { id: "hints" as const, label: "Hints", icon: Lightbulb },
 ];
 
 export function ProblemPanel() {
@@ -437,51 +436,3 @@ function SubmissionsTab() {
     </div>
   );
 }
-
-// function HintsTab() {
-//   const [expandedHints, setExpandedHints] = useState<Set<number>>(new Set());
-
-//   const toggleHint = (index: number) => {
-//     setExpandedHints((prev) => {
-//       const newSet = new Set(prev);
-//       if (newSet.has(index)) {
-//         newSet.delete(index);
-//       } else {
-//         newSet.add(index);
-//       }
-//       return newSet;
-//     });
-//   };
-
-//   return (
-//     <div className="space-y-3">
-//       {MOCK_HINTS.map((hint, index) => (
-//         <div
-//           key={index}
-//           className="overflow-hidden rounded-lg border border-gray-700 bg-gray-800"
-//         >
-//           <button
-//             onClick={() => toggleHint(index)}
-//             className="hover:bg-gray-750 flex w-full items-center justify-between p-4 text-left transition-colors"
-//           >
-//             <span className="flex items-center gap-2 font-medium text-gray-200">
-//               <Lightbulb className="h-4 w-4 text-yellow-500" />
-//               Hint {index + 1}
-//             </span>
-//             <ChevronRight
-//               className={clsx(
-//                 "h-5 w-5 text-gray-400 transition-transform",
-//                 expandedHints.has(index) && "rotate-90",
-//               )}
-//             />
-//           </button>
-//           {expandedHints.has(index) && (
-//             <div className="bg-gray-850 border-t border-gray-700 p-4 text-sm text-gray-300">
-//               {hint}
-//             </div>
-//           )}
-//         </div>
-//       ))}
-//     </div>
-//   );
-// }

@@ -47,6 +47,7 @@ public class ExaminationMapper
             Mode = exam.Mode,
             UseStrict = exam.UseStrict,
             MinScoreThreshold = exam.MinScoreThreshold,
+            MaxAttempts = exam.MaxAttempts,
             IsDeleted = exam.IsDeleted,
             CreatedDate = exam.CreatedDate,
             UpdatedDate = exam.UpdatedDate
@@ -73,7 +74,8 @@ public class ExaminationMapper
             Status = status,
             Mode = mode,
             UseStrict = examRequest.UseStrict,
-            MinScoreThreshold = examRequest.MinScoreThreshold
+            MinScoreThreshold = examRequest.MinScoreThreshold,
+            MaxAttempts = examRequest.MaxAttempts
         };
     }
 

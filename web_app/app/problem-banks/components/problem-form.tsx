@@ -13,6 +13,7 @@ import {
   Label,
   Spinner,
   FileInput,
+  Alert,
 } from "flowbite-react";
 import {
   ArrowLeftIcon,
@@ -24,7 +25,9 @@ import {
   DocumentTextIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  SparklesIcon,
 } from "@heroicons/react/24/outline";
+import { HiInformationCircle, HiCheck, HiX } from "react-icons/hi";
 import { useToast } from "@/hooks/useToast";
 import { useProblem } from "@/hooks/problem/useProblem";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
@@ -38,6 +41,7 @@ import type {
   CreateProblemPayload,
   CreateTestCasePayload,
   UpdateProblemPayload,
+  ProblemReviewResponse,
 } from "@/hooks/problem/useProblem";
 import { DefaultCustomButton } from "@/components/ui/custom-button";
 import { TestcaseBlock } from "./testcase-block";
@@ -101,7 +105,7 @@ export function ProblemForm({
   const { isDark } = useThemeContext();
   const toast = useToast();
   const { uploadFile } = usePrivateS3();
-  const { getProblemById, createProblem, updateProblem, extractOcrContent } =
+  const { getProblemById, createProblem, updateProblem, extractOcrContent, reviewProblem } =
     useProblem();
   const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
 
@@ -112,9 +116,12 @@ export function ProblemForm({
   const [formData, setFormData] = useState<FormData>(initialFormData);
   const [submitting, setSubmitting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [testCases, setTestCases] = useState<CreateTestCasePayload[]>([]);
   const [showTestcaseForm, setShowTestcaseForm] = useState(false);
-  const [expandedTcIndices, setExpandedTcIndices] = useState<Set<number>>(new Set());
+  const [expandedTcIndices, setExpandedTcIndices] = useState<Set<number>>(
+    new Set(),
+  );
   const [editorHtml, setEditorHtml] = useState("");
   const [tagInput, setTagInput] = useState("");
   const [programmingLanguages, setProgrammingLanguages] = useState<
@@ -127,6 +134,9 @@ export function ProblemForm({
   const [pendingEditorContent, setPendingEditorContent] = useState<
     string | null
   >(null);
+  const [reviewing, setReviewing] = useState(false);
+  const [reviewResult, setReviewResult] = useState<ProblemReviewResponse | null>(null);
+  const [reviewError, setReviewError] = useState<string | null>(null);
 
   const lowlight = createLowlight(all);
 
@@ -273,6 +283,7 @@ export function ProblemForm({
     try {
       const fileName = await uploadFile(file);
       setFormData((prev) => ({ ...prev, fileName }));
+      setUploadedFile(file);
       toast.showSuccess("File uploaded. File name saved.");
     } catch (error: unknown) {
       const err = error as { response?: { data?: { message?: string } } };
@@ -321,6 +332,50 @@ export function ProblemForm({
       console.error("OCR extraction error:", error);
     } finally {
       setExtracting(false);
+    }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(file);
+    });
+
+  const handleReview = async () => {
+    if (!formData.title.trim()) {
+      toast.showError("Please enter a title before reviewing");
+      return;
+    }
+    setReviewing(true);
+    setReviewResult(null);
+    setReviewError(null);
+    try {
+      if (modeState === PROBLEM_MODE.FROM_FILE && uploadedFile) {
+        const base64 = await fileToBase64(uploadedFile);
+        const result = await reviewProblem({
+          title: formData.title,
+          fileData: base64.split(",")[1],
+          mimeType: uploadedFile.type,
+        });
+        setReviewResult(result);
+      } else {
+        if (!editor) return;
+        const html = editor.getHTML();
+        const content = new TurndownService().turndown(html);
+        if (!content.trim()) {
+          toast.showError("Please enter problem content before reviewing");
+          return;
+        }
+        const result = await reviewProblem({ title: formData.title, content });
+        setReviewResult(result);
+      }
+    } catch (error: unknown) {
+      const err = error as { message?: string };
+      setReviewError(err.message || "Failed to review problem");
+    } finally {
+      setReviewing(false);
     }
   };
 
@@ -447,6 +502,15 @@ export function ProblemForm({
               </div>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                color="purple"
+                onClick={handleReview}
+                disabled={reviewing || submitting}
+                title="Review problem with AI"
+              >
+                {reviewing ? <Spinner size="sm" className="mr-2" /> : <SparklesIcon className="mr-2 h-4 w-4" />}
+                {reviewing ? "Reviewing..." : "Review with AI"}
+              </Button>
               <Button color="gray" as={Link} href={PageUrl.QUESTION_BANKS_PAGE}>
                 Cancel
               </Button>
@@ -461,6 +525,89 @@ export function ProblemForm({
           </div>
         </div>
       </div>
+
+      {(reviewResult || reviewError) && (
+        <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
+          {reviewResult && (
+            <Alert
+              color={
+                reviewResult.suitabilityLabel === "SUITABLE"
+                  ? "success"
+                  : reviewResult.suitabilityLabel === "NOT_SUITABLE"
+                    ? "failure"
+                    : "warning"
+              }
+              icon={
+                reviewResult.suitabilityLabel === "SUITABLE"
+                  ? HiCheck
+                  : reviewResult.suitabilityLabel === "NOT_SUITABLE"
+                    ? HiX
+                    : HiInformationCircle
+              }
+              onDismiss={() => {
+                setReviewResult(null);
+                setReviewError(null);
+              }}
+              rounded
+              additionalContent={
+                <div className="mt-2 space-y-3">
+                  <p className="text-sm font-medium">{reviewResult.summary}</p>
+                  {reviewResult.recommendations.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold uppercase">Recommendations:</p>
+                      {reviewResult.recommendations.map((rec, i) => (
+                        <div key={i} className="text-xs">
+                          <span className={`inline-block rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase ${
+                            rec.severity === "ERROR"
+                              ? "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300"
+                              : rec.severity === "WARNING"
+                                ? "bg-yellow-100 text-yellow-700 dark:bg-yellow-900 dark:text-yellow-300"
+                                : "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300"
+                          }`}>
+                            {rec.severity}
+                          </span>
+                          {" "}
+                          <span className="font-medium">{rec.description}</span>
+                          {rec.suggestedFix && (
+                            <span className="block text-gray-500 dark:text-gray-400">
+                              Fix: {rec.suggestedFix}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {reviewResult.concerns.length > 0 && (
+                    <div className="space-y-1">
+                      <p className="text-xs font-semibold uppercase">Concerns:</p>
+                      {reviewResult.concerns.map((concern, i) => (
+                        <p key={i} className="text-xs text-gray-600 dark:text-gray-400">
+                          • {concern}
+                        </p>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              }
+            >
+              <span className="font-medium">
+                AI Review: {reviewResult.suitabilityLabel.replace("_", " ")}
+              </span>
+            </Alert>
+          )}
+          {reviewError && (
+            <Alert
+              color="failure"
+              icon={HiX}
+              onDismiss={() => setReviewError(null)}
+              rounded
+            >
+              <span className="font-medium">Review Failed: </span>
+              {reviewError}
+            </Alert>
+          )}
+        </div>
+      )}
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <form
@@ -689,10 +836,7 @@ export function ProblemForm({
                     onChange={(e) => {
                       const langId = e.target.value;
                       setSelectedLanguageId(langId);
-                      if (
-                        langId &&
-                        !formData.codeTemplates[langId]
-                      ) {
+                      if (langId && !formData.codeTemplates[langId]) {
                         setFormData({
                           ...formData,
                           codeTemplates: {
@@ -927,20 +1071,36 @@ export function ProblemForm({
                           return next;
                         });
                       };
-                      const attrs: { label: string; value: string | number | boolean }[] = [
+                      const attrs: {
+                        label: string;
+                        value: string | number | boolean;
+                      }[] = [
                         { label: "Public", value: tc.isPublic },
-                        { label: "Case insensitive", value: tc.isCaseInsensitive },
+                        {
+                          label: "Case insensitive",
+                          value: tc.isCaseInsensitive,
+                        },
                         { label: "Floating point", value: tc.isFloatingPoint },
                         {
                           label: "Floating point tolerance",
-                          value: tc.floatingPointTolerance != null ? tc.floatingPointTolerance : "—",
+                          value:
+                            tc.floatingPointTolerance != null
+                              ? tc.floatingPointTolerance
+                              : "—",
                         },
                         {
                           label: "Decimal places",
-                          value: tc.decimalPlaces != null ? tc.decimalPlaces : "—",
+                          value:
+                            tc.decimalPlaces != null ? tc.decimalPlaces : "—",
                         },
-                        { label: "Token comparison", value: tc.isTokenComparision ?? false },
-                        { label: "Not ordered comparison", value: tc.isNotOrderedComparision ?? false },
+                        {
+                          label: "Token comparison",
+                          value: tc.isTokenComparision ?? false,
+                        },
+                        {
+                          label: "Not ordered comparison",
+                          value: tc.isNotOrderedComparision ?? false,
+                        },
                       ];
                       return (
                         <div
@@ -973,7 +1133,11 @@ export function ProblemForm({
                                 onClick={toggleExpanded}
                                 className="cursor-pointer"
                                 aria-expanded={isExpanded}
-                                title={isExpanded ? "Collapse attributes" : "Expand attributes"}
+                                title={
+                                  isExpanded
+                                    ? "Collapse attributes"
+                                    : "Expand attributes"
+                                }
                               >
                                 {isExpanded ? (
                                   <ChevronUpIcon className="h-4 w-4" />
@@ -990,7 +1154,7 @@ export function ProblemForm({
                                     prev.filter((_, i) => i !== index),
                                   )
                                 }
-                                className="text-red-500 hover:text-red-700 cursor-pointer"
+                                className="cursor-pointer text-red-500 hover:text-red-700"
                               >
                                 <TrashIcon className="h-4 w-4" />
                               </Button>
@@ -1001,7 +1165,10 @@ export function ProblemForm({
                               className={`space-y-1.5 border-t px-3 py-2 ${isDark ? "border-gray-700 text-gray-400" : "border-gray-200 text-gray-600"}`}
                             >
                               {attrs.map(({ label, value }) => (
-                                <div key={label} className="flex flex-wrap gap-1">
+                                <div
+                                  key={label}
+                                  className="flex flex-wrap gap-1"
+                                >
                                   <span className="font-medium text-gray-500">
                                     {label}:
                                   </span>

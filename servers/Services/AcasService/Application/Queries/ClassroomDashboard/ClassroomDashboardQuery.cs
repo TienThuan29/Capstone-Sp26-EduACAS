@@ -17,7 +17,7 @@ public interface IClassroomDashboardQuery
     Task<List<AtRiskStudentItem>> GetAtRiskStudentsAsync(string classroomId, int limit);
     Task<List<RecentWarningItem>> GetRecentWarningsAsync(string classroomId, int limit);
     Task<List<ClassStatsItem>> GetClassStatsAsync(string? classroomId);
-    Task<List<ExamScoreStatisticsItem>> GetExamScoreStatisticsAsync(string classroomId, string? examId = null);
+    Task<List<ExamScoreStatisticsItem>> GetExamScoreStatisticsAsync(string classroomId, string? examId = null, string? mode = null);
 }
 
 public class ClassroomDashboardQuery : IClassroomDashboardQuery
@@ -284,7 +284,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
         }
     }
 
-    public async Task<List<ExamScoreStatisticsItem>> GetExamScoreStatisticsAsync(string classroomId, string? examId = null)
+    public async Task<List<ExamScoreStatisticsItem>> GetExamScoreStatisticsAsync(string classroomId, string? examId = null, string? mode = null)
     {
         try
         {
@@ -293,6 +293,14 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
             if (!string.IsNullOrEmpty(examId))
             {
                 exams = exams.Where(e => e.Id == examId).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(mode))
+            {
+                if (Enum.TryParse<Mode>(mode, ignoreCase: true, out var modeEnum))
+                {
+                    exams = exams.Where(e => e.Mode == modeEnum).ToList();
+                }
             }
 
             if (exams.Count == 0)
@@ -327,6 +335,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                     {
                         ExamId = exam.Id,
                         ExamName = exam.ExamName,
+                        Mode = exam.Mode.ToString().ToUpperInvariant(),
                         TotalMark = exam.TotalMark,
                         AverageScore = 0,
                         HighestScore = 0,
@@ -384,6 +393,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                 {
                     ExamId = exam.Id,
                     ExamName = exam.ExamName,
+                    Mode = exam.Mode.ToString().ToUpperInvariant(),
                     TotalMark = exam.TotalMark,
                     AverageScore = (float)Math.Round(averageScore, 2),
                     HighestScore = (float)Math.Round(highestScore, 2),

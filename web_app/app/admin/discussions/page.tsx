@@ -33,6 +33,8 @@ import {
   XMarkIcon,
   LockOpenIcon,
   LockClosedIcon,
+  CodeBracketIcon,
+  DocumentTextIcon,
 } from "@heroicons/react/24/outline";
 import { formatDate } from "@/utils/datetime-utils";
 import { useToast } from "@/hooks/useToast";
@@ -41,17 +43,23 @@ import { useAdminDiscussionIssue } from "@/hooks/discussion/useAdminDiscussionIs
 import type { DiscussionIssueListItem, PagedDiscussionIssues, DiscussionIssue, Comment as DiscussionComment } from "@/types/discussion";
 import Sidebar from "@/components/sidebar";
 import { AdminDiscussionsSkeleton } from "@/components/ui/skeletons";
+import { Api } from "@/configs/api";
+import useAxios from "@/hooks/useAxios";
+import type { AdminDiscussionStatisticsResponse } from "@/types/admin/admin-stats";
 
 const PAGE_SIZE = 10;
 
 export default function AdminDiscussionsPage() {
   const { isDark } = useThemeContext();
+  const axiosInstance = useAxios();
   const { showSuccess, showError } = useToast();
   const { getAdminDiscussions, getDiscussionDetail, toggleDiscussionStatus, softDeleteIssue, loading } = useAdminDiscussionIssue();
 
   const [pagedData, setPagedData] = useState<PagedDiscussionIssues | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [discussionStats, setDiscussionStats] = useState<AdminDiscussionStatisticsResponse | null>(null);
+  const [statsLoading, setStatsLoading] = useState(true);
 
   const [selectedIssue, setSelectedIssue] = useState<DiscussionIssue | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -70,6 +78,23 @@ export default function AdminDiscussionsPage() {
   useEffect(() => {
     fetchDiscussions();
   }, [fetchDiscussions]);
+
+  const fetchDiscussionStats = useCallback(async () => {
+    try {
+      setStatsLoading(true);
+      const res = await axiosInstance.get(Api.AdminStatistics.GET_DISCUSSION_STATS);
+      if (res.data?.dataResponse) {
+        setDiscussionStats(res.data.dataResponse);
+      }
+    } catch {
+    } finally {
+      setStatsLoading(false);
+    }
+  }, [axiosInstance]);
+
+  useEffect(() => {
+    fetchDiscussionStats();
+  }, [fetchDiscussionStats]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,11 +175,107 @@ export default function AdminDiscussionsPage() {
                   Monitor and moderate all discussion issues across classrooms
                 </p>
               </div>
-              <Button color="gray" onClick={() => fetchDiscussions()} disabled={loading}>
+              <Button color="gray" onClick={() => { fetchDiscussions(); fetchDiscussionStats(); }} disabled={loading}>
                 <ArrowPathIcon className={`h-5 w-5 mr-2 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </Button>
             </div>
+
+            {/* Discussion Statistics */}
+            {statsLoading ? (
+              <div className="flex justify-center p-6">
+                <Spinner size="md" />
+              </div>
+            ) : discussionStats && (
+              <>
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 lg:grid-cols-5">
+                  <div className={`rounded-xl border p-4 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+                    <div className={`flex items-center gap-3 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      <ChatBubbleLeftRightIcon className="h-5 w-5" />
+                      <span className="text-xs font-medium uppercase tracking-wider">Total</span>
+                    </div>
+                    <p className={`mt-2 text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      {discussionStats.totalDiscussions}
+                    </p>
+                  </div>
+                  <div className={`rounded-xl border border-l-4 border-l-green-500 p-4 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+                    <div className={`flex items-center gap-3 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      <LockOpenIcon className="h-5 w-5 text-green-500" />
+                      <span className="text-xs font-medium uppercase tracking-wider">Active</span>
+                    </div>
+                    <p className={`mt-2 text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      {discussionStats.activeDiscussions}
+                    </p>
+                  </div>
+                  <div className={`rounded-xl border border-l-4 border-l-gray-400 p-4 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+                    <div className={`flex items-center gap-3 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      <LockClosedIcon className="h-5 w-5 text-gray-400" />
+                      <span className="text-xs font-medium uppercase tracking-wider">Closed</span>
+                    </div>
+                    <p className={`mt-2 text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      {discussionStats.closedDiscussions}
+                    </p>
+                  </div>
+                  <div className={`rounded-xl border border-l-4 border-l-blue-500 p-4 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+                    <div className={`flex items-center gap-3 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      <DocumentTextIcon className="h-5 w-5 text-blue-500" />
+                      <span className="text-xs font-medium uppercase tracking-wider">Comments</span>
+                    </div>
+                    <p className={`mt-2 text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      {discussionStats.totalComments}
+                    </p>
+                  </div>
+                  <div className={`rounded-xl border border-l-4 border-l-purple-500 p-4 ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-200"}`}>
+                    <div className={`flex items-center gap-3 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      <EyeIcon className="h-5 w-5 text-purple-500" />
+                      <span className="text-xs font-medium uppercase tracking-wider">Views</span>
+                    </div>
+                    <p className={`mt-2 text-2xl font-bold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      {discussionStats.totalViews}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Discussions by Classroom */}
+                {discussionStats.discussionsByClassroom.length > 0 && (
+                  <Card className={isDark ? "bg-gray-800 border-gray-700" : ""}>
+                    <h3 className={`text-sm font-semibold uppercase tracking-wider mb-3 ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                      Discussions by Classroom
+                    </h3>
+                    <div className="overflow-x-auto">
+                      <Table hoverable className={isDark ? "bg-gray-800" : ""}>
+                        <TableHead>
+                          <TableRow>
+                            <TableHeadCell className={isDark ? "bg-gray-700 text-gray-200" : ""}>Classroom</TableHeadCell>
+                            <TableHeadCell className={`${isDark ? "bg-gray-700 text-gray-200" : ""} text-center`}>Total</TableHeadCell>
+                            <TableHeadCell className={`${isDark ? "bg-gray-700 text-gray-200" : ""} text-center`}>Active</TableHeadCell>
+                            <TableHeadCell className={`${isDark ? "bg-gray-700 text-gray-200" : ""} text-center`}>Closed</TableHeadCell>
+                            <TableHeadCell className={`${isDark ? "bg-gray-700 text-gray-200" : ""} text-center`}>Comments</TableHeadCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {discussionStats.discussionsByClassroom.map((item) => (
+                            <TableRow key={item.classroomId} className={isDark ? "bg-gray-800 border-gray-700" : ""}>
+                              <TableCell className={`font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
+                                {item.classroomName}
+                              </TableCell>
+                              <TableCell className="text-center">{item.totalDiscussions}</TableCell>
+                              <TableCell className="text-center">
+                                <Badge color="success">{item.activeDiscussions}</Badge>
+                              </TableCell>
+                              <TableCell className="text-center">
+                                <Badge color="gray">{item.closedDiscussions}</Badge>
+                              </TableCell>
+                              <TableCell className="text-center">{item.totalComments}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </Card>
+                )}
+              </>
+            )}
 
             <Card className={isDark ? "bg-gray-800 border-gray-700" : "bg-white"}>
           <div className="flex flex-col gap-4">

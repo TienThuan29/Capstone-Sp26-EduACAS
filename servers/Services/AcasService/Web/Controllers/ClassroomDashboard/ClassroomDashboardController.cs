@@ -109,11 +109,12 @@ public class ClassroomDashboardController : ControllerBase
     [HttpGet("{classroomId}/dashboard/exam-statistics")]
     public async Task<ActionResult<ApiResponse<List<ExamScoreStatisticsItem>>>> GetExamScoreStatistics(
         [FromRoute] string classroomId,
-        [FromQuery] string? examId = null)
+        [FromQuery] string? examId = null,
+        [FromQuery] string? mode = null)
     {
         try
         {
-            var result = await _classroomDashboardQuery.GetExamScoreStatisticsAsync(classroomId, examId);
+            var result = await _classroomDashboardQuery.GetExamScoreStatisticsAsync(classroomId, examId, mode);
             return ResponseUtil.Success(result, "Exam score statistics retrieved successfully", 200);
         }
         catch (Exception ex)

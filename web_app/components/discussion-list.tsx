@@ -8,6 +8,7 @@ import {
   Button,
   Label,
   Modal,
+  Select,
   ModalBody,
   ModalFooter,
   ModalHeader,
@@ -47,6 +48,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useThemeContext } from "@/components/theme-provider";
 import { TextEditor } from "@/components/text-editor";
 import { htmlToMarkdown, markdownToHtml } from "@/utils/markdown-converter";
+import { useProblem } from "@/hooks/problem/useProblem";
+import type { ProblemBasicResponse } from "@/types/problem";
+import { normalizeDifficulty } from "@/types/problem";
 import type { DiscussionIssue, DiscussionIssueListItem } from "@/types/discussion";
 
 const PAGE_SIZE = 10;
@@ -291,6 +295,11 @@ export function DiscussionList({
                     </TimelineTitle>
                     <TimelineBody className="text-gray-600 dark:text-gray-300">
                       <div className="mt-2 flex flex-wrap gap-2">
+                        {issue.refProblemTitle && (
+                          <Badge color="blue" className="font-medium">
+                            {issue.refProblemTitle}
+                          </Badge>
+                        )}
                         {tags.map((tag) => (
                           <Badge key={tag} color="gray" className="font-medium">
                             {tag}
@@ -430,11 +439,23 @@ function NewDiscussionForm({
   const { user } = useAuth();
   const { isDark } = useThemeContext();
   const { createIssue, updateIssue } = useDiscussionIssue();
+  const { getProblemsFromExaminations } = useProblem();
   const [title, setTitle] = useState("");
   const [contentHtml, setContentHtml] = useState("");
   const [refProblemId, setRefProblemId] = useState("");
+  const [problems, setProblems] = useState<ProblemBasicResponse[]>([]);
+  const [loadingProblems, setLoadingProblems] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!classId) return;
+    setLoadingProblems(true);
+    getProblemsFromExaminations(classId)
+      .then(setProblems)
+      .catch(() => setProblems([]))
+      .finally(() => setLoadingProblems(false));
+  }, [classId, getProblemsFromExaminations]);
 
   const editor = useEditor({
     extensions: [
@@ -549,7 +570,7 @@ function NewDiscussionForm({
       <div className="space-y-4">
         <div>
           <Label htmlFor="new-issue-title" className="mb-1 block text-gray-900 dark:text-white">
-            Title
+            Title <span className="text-red-500">*</span>
           </Label>
           <TextInput
             id="new-issue-title"
@@ -567,19 +588,30 @@ function NewDiscussionForm({
             helperText="Use the toolbar to format your question or description. You can use code blocks for snippets."
           />
         </div>
-        {/* Future feature: related problem,... */}
-        {/* <div>
+        <div>
           <Label htmlFor="new-issue-ref" className="mb-1 block text-gray-900 dark:text-white">
             Related problem (optional)
           </Label>
-          <TextInput
+        {problems.length > 0 ? (
+          <Select
             id="new-issue-ref"
-            placeholder="Problem ID if this relates to a specific problem"
             value={refProblemId}
             onChange={(e) => setRefProblemId(e.target.value)}
             className="w-full"
-          />
-        </div> */}
+          >
+            <option value="">-- No related problem --</option>
+            {problems.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.title} ({normalizeDifficulty(p.difficulty)})
+              </option>
+            ))}
+          </Select>
+        ) : loadingProblems ? (
+          <p className="text-sm text-gray-500 dark:text-gray-400">Loading problems...</p>
+        ) : (
+          <p className="text-sm text-gray-500 dark:text-gray-400">No problems available in this classroom yet.</p>
+        )}
+        </div>
         {submitError && (
           <p className="text-sm text-red-600 dark:text-red-400">{submitError}</p>
         )}
