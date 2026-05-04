@@ -7,6 +7,8 @@ using AcasService.Application.Commands.S3;
 using AcasService.Application.Commands.Subject;
 using AcasService.Application.Mappers;
 using AcasService.Application.Queries.AcademicWarning;
+using AcasService.Application.Queries.AdminDiscussionStatistics;
+using AcasService.Application.Queries.AdminExaminationStatistics;
 using AcasService.Application.Queries.Classroom;
 using AcasService.Application.Queries.Examination;
 using AcasService.Application.Queries.Problem;
@@ -262,6 +264,12 @@ builder.Services.AddScoped<IRegradingRequestQuery, RegradingRequestQuery>();
 // Public Statistics
 builder.Services.AddScoped<IPublicStatisticsRepository, PublicStatisticsRepository>();
 builder.Services.AddScoped<IPublicStatisticsQuery, PublicStatisticsQuery>();
+
+// Admin Examination Statistics
+builder.Services.AddScoped<IAdminExaminationStatisticsQuery, AdminExaminationStatisticsQuery>();
+
+// Admin Discussion Statistics
+builder.Services.AddScoped<IAdminDiscussionStatisticsQuery, AdminDiscussionStatisticsQuery>();
 
 // cahing
 builder.Services.AddScoped<ISubmissionCache, SubmissionCache>();

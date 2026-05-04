@@ -8,7 +8,6 @@ import { Api } from "@/configs/api"
 import { Constant } from "@/configs/constant"
 import useAxios from "@/hooks/useAxios"
 import { useToast } from "@/hooks/useToast"
-import { Card, Badge } from "flowbite-react"
 import {
   AcademicCapIcon,
   BellIcon,
@@ -19,9 +18,16 @@ import {
   UserGroupIcon,
   UserPlusIcon,
   ArrowRightIcon,
+  DocumentTextIcon,
+  ArrowTrendingUpIcon,
+  CheckCircleIcon,
+  ClockIcon,
 } from "@heroicons/react/24/solid"
 import { PageUrl } from "@/configs/page.url"
 import { AdminDashboardSkeleton } from "@/components/ui/skeletons";
+import { ExaminationOverviewChart } from "@/components/admin-dashboard/charts/ExaminationOverviewChart";
+import { SubmissionByLanguageChart } from "@/components/admin-dashboard/charts/SubmissionByLanguageChart";
+import type { AdminExaminationStatistics, SubmissionByLanguageResponse } from "@/types/admin/admin-stats";
 
 type AccentKey = "blue" | "purple" | "green" | "orange" | "pink" | "gray"
 
@@ -114,6 +120,8 @@ export default function AdminDashboard() {
     students: 0,
     teachers: 0
   })
+  const [examStats, setExamStats] = useState<AdminExaminationStatistics | null>(null)
+  const [languageStats, setLanguageStats] = useState<SubmissionByLanguageResponse | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -123,11 +131,13 @@ export default function AdminDashboard() {
   const fetchStats = async () => {
     try {
       setLoading(true)
-      const [classroomsRes, subjectsRes, languagesRes, usersRes] = await Promise.all([
+      const [classroomsRes, subjectsRes, languagesRes, usersRes, examStatsRes, languageStatsRes] = await Promise.all([
         axiosInstance.get(Api.Classroom.GET_ALL_CLASSROOMS),
         axiosInstance.get(Api.Subject.GET_ALL),
         axiosInstance.get(Api.ProgrammingLanguage.GET_ALL),
-        axiosInstance.get(Api.User.GET_ALL)
+        axiosInstance.get(Api.User.GET_ALL),
+        axiosInstance.get(Api.AdminStatistics.GET_EXAMINATION_STATS),
+        axiosInstance.get(Api.AdminStatistics.GET_SUBMISSION_BY_LANGUAGE),
       ])
 
       type UserWithRole = { role: string }
@@ -142,6 +152,16 @@ export default function AdminDashboard() {
         students,
         teachers
       })
+
+      const rawExamStats = examStatsRes.data?.dataResponse
+      if (rawExamStats) {
+        setExamStats(rawExamStats)
+      }
+
+      const rawLanguageStats = languageStatsRes.data?.dataResponse
+      if (rawLanguageStats) {
+        setLanguageStats(rawLanguageStats)
+      }
     } catch {
       toast.showError('Cannot load statistics')
     } finally {
@@ -196,55 +216,13 @@ export default function AdminDashboard() {
   ]
 
   const quickActions = [
-    {
-      title: "Manage Classrooms",
-      description: "Add, edit, delete classroom",
-      icon: <AcademicCapIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_CLASSES_PAGE,
-      accent: "gray" as const,
-    },
-    {
-      title: "Manage Subjects",
-      description: "Add, edit, delete subject",
-      icon: <BookOpenIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_SUBJECTS_PAGE,
-      accent: "gray" as const,
-    },
-    {
-      title: "Manage Programming Languages",
-      description: "Add, edit, delete programming language",
-      icon: <CodeBracketIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE,
-      accent: "gray" as const,
-    },
-    {
-      title: "Manage Users",
-      description: "View and manage user accounts",
-      icon: <UsersIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_USERS_PAGE,
-      accent: "gray" as const,
-    },
-    {
-      title: "Manage Notifications",
-      description: "Create and manage notifications",
-      icon: <BellIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_NOTIFICATIONS_PAGE,
-      accent: "gray" as const,
-    },
-    {
-      title: "Manage Discussions",
-      description: "Review and moderate discussions",
-      icon: <ChatBubbleLeftRightIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_DISCUSSIONS_PAGE,
-      accent: "gray" as const,
-    },
-    {
-      title: "Manage Materials",
-      description: "Manage learning materials",
-      icon: <BookOpenIcon className="h-5 w-5" />,
-      href: PageUrl.ADMIN_MATERIALS_PAGE,
-      accent: "gray" as const,
-    },
+    { title: "Manage Classrooms", icon: <AcademicCapIcon className="h-5 w-5" />, href: PageUrl.ADMIN_CLASSES_PAGE },
+    { title: "Manage Subjects", icon: <BookOpenIcon className="h-5 w-5" />, href: PageUrl.ADMIN_SUBJECTS_PAGE },
+    { title: "Manage Programming Languages", icon: <CodeBracketIcon className="h-5 w-5" />, href: PageUrl.ADMIN_PROGRAMMING_LANGUAGES_PAGE },
+    { title: "Manage Users", icon: <UsersIcon className="h-5 w-5" />, href: PageUrl.ADMIN_USERS_PAGE },
+    { title: "Manage Notifications", icon: <BellIcon className="h-5 w-5" />, href: PageUrl.ADMIN_NOTIFICATIONS_PAGE },
+    { title: "Manage Discussions", icon: <ChatBubbleLeftRightIcon className="h-5 w-5" />, href: PageUrl.ADMIN_DISCUSSIONS_PAGE },
+    { title: "Manage Materials", icon: <BookOpenIcon className="h-5 w-5" />, href: PageUrl.ADMIN_MATERIALS_PAGE },
   ]
 
   const recentActivities = [
@@ -280,36 +258,94 @@ export default function AdminDashboard() {
           </div>
         </section>
 
+        
+
+        {/* Examination System Statistics */}
+        {examStats && (
+          <section className="mb-8">
+            <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Examination System
+            </h2>
+            <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <StatCard
+                title="Total Exams"
+                value={examStats.totalExaminations}
+                icon={<DocumentTextIcon className="h-6 w-6" />}
+                accent="blue"
+              />
+              <StatCard
+                title="Active"
+                value={examStats.activeExaminations}
+                icon={<ClockIcon className="h-6 w-6" />}
+                accent="green"
+              />
+              <StatCard
+                title="Completed"
+                value={examStats.completedExaminations}
+                icon={<CheckCircleIcon className="h-6 w-6" />}
+                accent="purple"
+              />
+              <StatCard
+                title="Total Submissions"
+                value={examStats.totalSubmissions}
+                icon={<ArrowTrendingUpIcon className="h-6 w-6" />}
+                accent="orange"
+              />
+            </div>
+            <ExaminationOverviewChart data={examStats} />
+          </section>
+        )}
+
+        {/* Programming Language Statistics */}
+        {languageStats && languageStats.totalSubmissions > 0 && (
+          <section className="mb-8">
+            <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+              Programming Language Usage
+            </h2>
+            <div className="mb-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-2">
+              <StatCard
+                title="Total Submissions"
+                value={languageStats.totalSubmissions}
+                icon={<ArrowTrendingUpIcon className="h-6 w-6" />}
+                accent="blue"
+              />
+              <StatCard
+                title="Languages Used"
+                value={languageStats.totalLanguages}
+                icon={<CodeBracketIcon className="h-6 w-6" />}
+                accent="purple"
+              />
+            </div>
+            <SubmissionByLanguageChart data={languageStats} />
+          </section>
+        )}
+
         {/* Quick Actions */}
         <section className="mb-8">
-          <h2 className={`mb-4 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+          <h2 className={`mb-3 text-sm font-semibold uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
             Quick Actions
           </h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+          <div className={`overflow-hidden rounded-xl border ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
             {quickActions.map((action, index) => {
-              const style = accentStyles[action.accent] ?? accentStyles.gray
+              const isLast = index === quickActions.length - 1
               return (
                 <Link key={index} href={action.href}>
                   <div
                     className={`
-                      group flex items-center gap-4 rounded-xl border border-gray-200 bg-white p-4
-                      transition-colors hover:border-gray-300
-                      dark:border-gray-700 dark:bg-gray-800 dark:hover:border-gray-600
-                      border-l-4 ${style.border}
+                      group flex items-center gap-3 px-4 py-3
+                      transition-colors hover:${isDark ? "bg-gray-700" : "bg-gray-50"}
+                      ${!isLast ? `border-b ${isDark ? "border-gray-700" : "border-gray-100"}` : ""}
                     `}
                   >
-                    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.iconBg} ${style.iconColor}`}>
+                    <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400`}>
                       {action.icon}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <h3 className={`font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                      <h3 className={`text-sm font-medium ${isDark ? "text-white" : "text-gray-900"}`}>
                         {action.title}
                       </h3>
-                      <p className={`mt-0.5 text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
-                        {action.description}
-                      </p>
                     </div>
-                    <ArrowRightIcon className={`h-5 w-5 shrink-0 ${isDark ? "text-gray-500 group-hover:text-gray-400" : "text-gray-400 group-hover:text-gray-600"}`} />
+                    <ArrowRightIcon className={`h-4 w-4 shrink-0 transition-transform group-hover:translate-x-1 ${isDark ? "text-gray-600 group-hover:text-gray-400" : "text-gray-400 group-hover:text-gray-600"}`} />
                   </div>
                 </Link>
               )
@@ -357,7 +393,7 @@ export default function AdminDashboard() {
             </div>
           </Card>
         </div> */}
-        
+
       </main>
     </div>
   )

@@ -369,4 +369,12 @@ export const Api = {
   PublicStatistics: {
     GET: "/api/acas/v1/public-statistics",
   },
+
+  AdminStatistics: {
+    GET_EXAMINATION_STATS: "/api/v1/admin/statistics/examinations",
+    GET_SUBMISSION_BY_LANGUAGE: "/api/v1/admin/statistics/submissions-by-language",
+    GET_STUDENT_LECTURER_RATIO: "/api/v1/admin/statistics/student-lecturer-ratio",
+    GET_USERS_BY_SUBJECT: "/api/v1/admin/statistics/users-by-subject",
+    GET_DISCUSSION_STATS: "/api/v1/admin/statistics/discussions",
+  },
 };
