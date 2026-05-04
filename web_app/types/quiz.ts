@@ -89,7 +89,7 @@ export interface QuizAttempt {
   startTime: string;
   submittedAt?: string;
   status: QuizAttemptStatus;
-  score: number;
+  score?: number | null;
   attemptNumber: number;
   correctAnswers?: number;
   totalQuestions?: number;
@@ -105,7 +105,7 @@ export interface QuizAttemptResponse {
   attemptNumber: number;
   studentName?: string;
   studentEmail?: string;
-  score?: number;
+  score?: number | null;
   correctAnswers?: number;
   totalQuestions?: number;
   answers: Record<string, string>;

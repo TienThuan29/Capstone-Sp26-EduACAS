@@ -40,7 +40,7 @@ public class TestcaseGenerator : ITestcaseGenerator
             var problemId = problem.Id;
 
             // Build prompt from template
-            var prompt = promptTemplate
+            var prompt = promptTemplateCompact
                 .Replace("{{NUMBER_OF_TESTCASES}}", numberOfTestcases.ToString(CultureInfo.InvariantCulture))
                 .Replace("{{PROBLEM_TITLE}}", problem.Title ?? string.Empty)
                 .Replace("{{PROBLEM_CONTENT}}", problem.Content ?? string.Empty);
@@ -48,7 +48,7 @@ public class TestcaseGenerator : ITestcaseGenerator
             var generationConfig = new GeminiGenerationConfig
             {
                   Temperature = 0.4,
-                  MaxOutputTokens = 8192
+                  MaxOutputTokens = 16384
             };
 
             var raw = await _geminiClient.GenerateContentAsync(prompt, generationConfig);
@@ -430,5 +430,35 @@ Example (one object; generate {{NUMBER_OF_TESTCASES}} like this):
 Generate the full JSON array of {{NUMBER_OF_TESTCASES}} test cases now. Do not stop early; include every object.
 """;
 
-      
+      public readonly string promptTemplateCompact = """
+You are an automated test case generator. Given the problem below, generate exactly {{NUMBER_OF_TESTCASES}} test cases as a JSON array.
+
+Problem Title: {{PROBLEM_TITLE}}
+Problem Content: {{PROBLEM_CONTENT}}
+
+Each test case object must have these exact fields:
+- "InputData": string (raw stdin)
+- "ExpectedOutput": string (raw stdout)
+- "IsPublic": bool (true for simple illustrative cases, false for hidden/tricky cases)
+- "IsCaseInsensitive": bool (true only if output comparison is case-insensitive)
+- "IsFloatingPoint": bool (true only if output contains floating-point numbers)
+- "FloatingPointTolerance": number or null (absolute error tolerance, set when IsFloatingPoint is true)
+- "DecimalPlaces": integer or null (decimal places to compare, set when IsFloatingPoint is true)
+- "IsTokenComparision": bool (true when output should be compared token-by-token)
+- "IsNotOrderedComparision": bool (true only when token order does not matter)
+
+Requirements:
+- Cover typical cases, edge cases (empty, single, min/max), large valid inputs, and tricky corner cases.
+- Avoid duplicate testcases; each must add unique coverage.
+- All testcases must strictly follow the given I/O format.
+
+IMPORTANT:
+- Respond with ONLY a valid JSON array. No markdown, no explanation, no text outside the array.
+- Generate EXACTLY {{NUMBER_OF_TESTCASES}} test case objects. Do not truncate the response.
+- Use minimal whitespace to save tokens.
+
+Example (generate {{NUMBER_OF_TESTCASES}} like this):
+[{"InputData":"3\n1 2 3\n","ExpectedOutput":"6\n","IsPublic":true,"IsCaseInsensitive":false,"IsFloatingPoint":false,"FloatingPointTolerance":null,"DecimalPlaces":null,"IsTokenComparision":false,"IsNotOrderedComparision":false}]
+""";
+
 }

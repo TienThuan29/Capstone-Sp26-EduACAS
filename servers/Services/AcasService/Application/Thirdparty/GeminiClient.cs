@@ -45,6 +45,7 @@ public class GeminiClient : IGeminiClient
         ILogger<GeminiClient> logger)
     {
         _httpClient = httpClient;
+        _httpClient.Timeout = TimeSpan.FromSeconds(90);
         _logger = logger;
         _modelName = configuration["Gemini:ModelName"] ?? throw new InvalidOperationException("Gemini:ModelName is not configured");
         _apiKey = configuration["Gemini:ApiKey"] ?? throw new InvalidOperationException("Gemini:ApiKey is not configured");

@@ -12,6 +12,8 @@ import {
   UserCircleIcon,
   PencilIcon,
   PlusIcon,
+  UsersIcon,
+  BookOpenIcon,
 } from '@heroicons/react/24/outline'
 import { useUserManagement } from "@/hooks/user/useUserManagement"
 import { useToast } from "@/hooks/useToast"
@@ -19,6 +21,9 @@ import { UserProfile } from "@/types/user"
 import { DefaultCustomButton } from "@/components/ui/custom-button"
 import { formatDateOnly, formatTime } from "@/utils/datetime-utils"
 import { UserManagementSkeleton } from "@/components/ui/skeletons"
+import { Api } from "@/configs/api"
+import useAxios from "@/hooks/useAxios"
+import type { StudentLecturerRatioResponse, UsersBySubjectResponse } from "@/types/admin/admin-stats"
 
 const userStatsAccentStyles: Record<string, { border: string; iconBg: string; iconColor: string }> = {
   purple: { border: 'border-l-purple-500', iconBg: 'bg-purple-50 dark:bg-purple-500/10', iconColor: 'text-purple-600 dark:text-purple-400' },
@@ -97,6 +102,9 @@ export default function UsersManagement() {
     lecturer: 0,
     admin: 0,
   })
+  const [ratioStats, setRatioStats] = useState<StudentLecturerRatioResponse | null>(null)
+  const [subjectStats, setSubjectStats] = useState<UsersBySubjectResponse | null>(null)
+  const axiosInstance = useAxios()
 
   const [showGrantModal, setShowGrantModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
@@ -159,6 +167,21 @@ export default function UsersManagement() {
     }
   }, [getAllUsers])
 
+  const fetchUserStats = useCallback(async () => {
+    try {
+      const [ratioRes, subjectRes] = await Promise.all([
+        axiosInstance.get(Api.AdminStatistics.GET_STUDENT_LECTURER_RATIO),
+        axiosInstance.get(Api.AdminStatistics.GET_USERS_BY_SUBJECT),
+      ])
+      const rawRatio = ratioRes.data?.dataResponse
+      if (rawRatio) setRatioStats(rawRatio)
+      const rawSubject = subjectRes.data?.dataResponse
+      if (rawSubject) setSubjectStats(rawSubject)
+    } catch {
+      // Keep current stats if this request fails.
+    }
+  }, [axiosInstance])
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -167,8 +190,9 @@ export default function UsersManagement() {
     if (mounted) {
       fetchUsers()
       fetchOverallRoleStats()
+      fetchUserStats()
     }
-  }, [mounted, currentPage, fetchUsers, fetchOverallRoleStats, searchQuery])
+  }, [mounted, currentPage, fetchUsers, fetchOverallRoleStats, fetchUserStats, searchQuery])
 
   const onPageChange = (page: number) => {
     setCurrentPage(page)
@@ -340,6 +364,98 @@ export default function UsersManagement() {
             )
           })}
         </div>
+
+        {/* User Management Stats */}
+        {(ratioStats || subjectStats) && (
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 mb-6">
+            {/* Student:Lecturer Ratio */}
+            {ratioStats && (
+              <div className={`overflow-hidden rounded-xl border ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400">
+                      <UsersIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        Student:Lecturer Ratio
+                      </p>
+                      <p className={`text-2xl font-semibold tabular-nums tracking-tight ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {ratioStats.ratio}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-3">
+                    <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <p className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {ratioStats.totalStudents.toLocaleString("vi-VN")}
+                      </p>
+                      <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Students</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <p className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {ratioStats.totalLecturers.toLocaleString("vi-VN")}
+                      </p>
+                      <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Lecturers</p>
+                    </div>
+                    <div className="text-center p-3 rounded-lg bg-gray-50 dark:bg-gray-700/50">
+                      <p className={`text-lg font-semibold ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {ratioStats.totalClassrooms.toLocaleString("vi-VN")}
+                      </p>
+                      <p className={`text-xs ${isDark ? "text-gray-400" : "text-gray-500"}`}>Classes</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Users by Subject */}
+            {subjectStats && subjectStats.distribution.length > 0 && (
+              <div className={`overflow-hidden rounded-xl border ${isDark ? "border-gray-700 bg-gray-800" : "border-gray-200 bg-white"}`}>
+                <div className="p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-purple-50 text-purple-600 dark:bg-purple-500/10 dark:text-purple-400">
+                      <BookOpenIcon className="h-5 w-5" />
+                    </div>
+                    <div>
+                      <p className={`text-xs font-medium uppercase tracking-wider ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                        Students by Subject
+                      </p>
+                      <p className={`text-2xl font-semibold tabular-nums tracking-tight ${isDark ? "text-white" : "text-gray-900"}`}>
+                        {subjectStats.distribution.length}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="space-y-2 max-h-36 overflow-y-auto">
+                    {subjectStats.distribution.slice(0, 5).map((item) => (
+                      <div key={item.subjectId} className="flex items-center gap-3">
+                        <div className="min-w-0 flex-1">
+                          <p className={`text-sm font-medium truncate ${isDark ? "text-white" : "text-gray-900"}`}>
+                            {item.subjectName}
+                          </p>
+                          <p className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+                            {item.subjectCode}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className={`w-20 h-2 rounded-full ${isDark ? "bg-gray-700" : "bg-gray-100"}`}>
+                            <div
+                              className="h-2 rounded-full bg-purple-500"
+                              style={{ width: `${Math.max(item.percentage, 2)}%` }}
+                            />
+                          </div>
+                          <span className={`text-sm font-medium tabular-nums w-10 text-right ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+                            {item.totalStudents}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className={`p-6 rounded-xl border shadow-sm ${isDark ? "bg-gray-800 border-gray-700" : "bg-white border-gray-100"}`}>
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-8">
