@@ -7,6 +7,7 @@ import type {
   SendAcademicWarningBatchRequest,
   SendAcademicWarningResponse,
   AcademicWarningResponse,
+  BatchAcceptedResponse,
 } from '@/types/academic-warning';
 
 interface ApiResponse<T> {
@@ -21,16 +22,15 @@ export const useAcademicWarning = () => {
   const [loading, setLoading] = useState(false);
 
   const sendBatchAcademicWarnings = useCallback(
-    async (request: SendAcademicWarningBatchRequest): Promise<SendAcademicWarningResponse> => {
-      const response = await axiosInstance.post<ApiResponse<SendAcademicWarningResponse>>(
+    async (request: SendAcademicWarningBatchRequest): Promise<BatchAcceptedResponse> => {
+      const response = await axiosInstance.post<ApiResponse<BatchAcceptedResponse>>(
         Api.AcademicWarning.SEND_BATCH,
         request
       );
-      const data = response.data?.dataResponse;
-      if (!data) {
-        throw new Error(response.data?.error ?? 'Failed to send academic warnings');
+      if (response.data?.success && response.data.dataResponse) {
+        return response.data.dataResponse;
       }
-      return data;
+      throw new Error(response.data?.error ?? 'Failed to enqueue academic warnings');
     },
     [axiosInstance]
   );
@@ -65,10 +65,26 @@ export const useAcademicWarning = () => {
     [axiosInstance]
   );
 
+  const getByExamId = useCallback(
+    async (examId: string): Promise<AcademicWarningResponse[]> => {
+      setLoading(true);
+      try {
+        const response = await axiosInstance.get<ApiResponse<AcademicWarningResponse[]>>(
+          Api.AcademicWarning.GET_BY_EXAM(examId)
+        );
+        return response.data?.dataResponse ?? [];
+      } finally {
+        setLoading(false);
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     loading,
     sendBatchAcademicWarnings,
     getByStudentId,
     getByClassroomId,
+    getByExamId,
   };
 };

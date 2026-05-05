@@ -12,6 +12,8 @@ public static class AcademicWarningMapper
             Id = warning.Id,
             ClassroomId = warning.ClassroomId,
             StudentId = warning.StudentId,
+            ExamId = warning.ExamId,
+            ProblemId = warning.ProblemId,
             WarningLevel = warning.WarningLevel,
             TriggerType = warning.TriggerType.ToString(),
             SentDate = warning.SentDate,
@@ -42,7 +44,20 @@ public static class AcademicWarningMapper
                     Analysis = kvp.Value.Analysis,
                     Recomendation = kvp.Value.Recomendation
                 }
-            ) ?? new Dictionary<string, AnalysisEntryDto>()
+            ) ?? new Dictionary<string, AnalysisEntryDto>(),
+            ClassroomName = string.Empty,
+            ExamName = string.Empty,
+            ProblemTitle = string.Empty,
+            StudentName = string.Empty
         };
+    }
+
+    public static void PopulateDisplayFields(AcademicWarningResponse response,
+        string? classroomName, string? examName, string? problemTitle, string? studentName)
+    {
+        response.ClassroomName = classroomName ?? string.Empty;
+        response.ExamName = examName ?? string.Empty;
+        response.ProblemTitle = problemTitle ?? string.Empty;
+        response.StudentName = studentName ?? string.Empty;
     }
 }
