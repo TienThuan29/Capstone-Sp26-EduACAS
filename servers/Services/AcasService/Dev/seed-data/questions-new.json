@@ -1,0 +1,113 @@
+[
+  {
+    "id": "qzq-019",
+    "content": "What is the correct way to declare a variable in Python that cannot be changed later?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-020",
+    "content": "Which of the following are valid Python data types?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-021",
+    "content": "What will `print(type([]))` output in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-022",
+    "content": "Explain what a syntax error is and give an example.",
+    "type": "ESSAY",
+    "textAnswer": "A syntax error occurs when the code violates Python's grammatical rules, e.g., missing a colon after an if statement.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-023",
+    "content": "What is the output of `print(10 // 3)` in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-024",
+    "content": "Which of the following statements about Python loops are correct?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-025",
+    "content": "What does the `break` keyword do inside a loop?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-026",
+    "content": "What is the purpose of a function in programming?",
+    "type": "ESSAY",
+    "textAnswer": "Functions group reusable code, improve readability, and reduce repetition by allowing code to be called multiple times with different inputs.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-027",
+    "content": "How do you define a function that takes two parameters and returns their sum?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-028",
+    "content": "Which of the following are valid ways to create a list in Python?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-029",
+    "content": "What is the difference between `==` and `is` in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-030",
+    "content": "What does the `len()` function return for the string `\"Hello\"`?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-031",
+    "content": "Which of the following correctly accesses the last element of a list `my_list = [1, 2, 3, 4, 5]`?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-032",
+    "content": "What is the output of `print([x*2 for x in range(3)])`?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-033",
+    "content": "Explain the difference between a list and a dictionary in Python.",
+    "type": "ESSAY",
+    "textAnswer": "A list stores ordered elements by integer indices, while a dictionary stores key-value pairs for faster lookup by keys.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-034",
+    "content": "What is a runtime error?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-035",
+    "content": "Which of the following can cause an IndexError in Python?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-036",
+    "content": "What is the purpose of the `return` statement in a function?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  }
+]

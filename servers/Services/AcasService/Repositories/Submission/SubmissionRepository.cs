@@ -396,4 +396,33 @@ public class SubmissionRepository : DynamoRepository, ISubmissionRepository
             throw;
         }
     }
+
+    public async Task<List<Models.Submission>> GetAllAsync()
+    {
+        try
+        {
+            var allSubmissions = new List<Models.Submission>();
+            Dictionary<string, AttributeValue>? lastKey = null;
+
+            do
+            {
+                var request = new ScanRequest
+                {
+                    TableName = _submissionTableName,
+                    ExclusiveStartKey = lastKey
+                };
+
+                var response = await _dynamoDBClient.ScanAsync(request);
+                allSubmissions.AddRange(response.Items.Select(DynamoMapper.DynamoItemToSubmission).Where(s => s != null).Cast<Models.Submission>());
+                lastKey = response.LastEvaluatedKey;
+            } while (lastKey != null && lastKey.Count > 0);
+
+            return allSubmissions;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving all submissions");
+            throw;
+        }
+    }
 }

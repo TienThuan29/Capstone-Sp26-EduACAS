@@ -12,20 +12,23 @@ import {
 import { getScoreColor } from "@/types/dashboard/scoreColors";
 import type { ScoreDistribution } from "@/types/dashboard/DashboardStats";
 
-export type ExamMode = "EXAMINATION" | "PRACTICAL";
+export type ExamMode = "EXAMINATION" | "PRACTICAL" | "QUIZ";
+export type ScoreMode = ExamMode | "ALL";
 
 interface ScoreDistributionChartProps {
   data: ScoreDistribution[];
   title?: string;
-  selectedMode: ExamMode | "ALL";
-  onModeChange: (mode: ExamMode | "ALL") => void;
+  selectedMode: ScoreMode;
+  onModeChange: (mode: ScoreMode) => void;
   loading?: boolean;
+  showModeSelector?: boolean;
 }
 
-const MODE_OPTIONS: { value: ExamMode | "ALL"; label: string }[] = [
+const MODE_OPTIONS: { value: ScoreMode; label: string }[] = [
   { value: "ALL", label: "All Submissions" },
   { value: "EXAMINATION", label: "Examination" },
   { value: "PRACTICAL", label: "Practical" },
+  { value: "QUIZ", label: "Quiz" },
 ];
 
 export function ScoreDistributionChart({
@@ -34,6 +37,7 @@ export function ScoreDistributionChart({
   selectedMode,
   onModeChange,
   loading = false,
+  showModeSelector = true,
 }: ScoreDistributionChartProps) {
   return (
     <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -42,23 +46,25 @@ export function ScoreDistributionChart({
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
           {title}
         </h3>
-        <div className="flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            Mode:
-          </label>
-          <select
-            value={selectedMode}
-            onChange={(e) => onModeChange(e.target.value as ExamMode | "ALL")}
-            disabled={loading}
-            className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          >
-            {MODE_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        {showModeSelector && (
+          <div className="flex items-center gap-2">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              Mode:
+            </label>
+            <select
+              value={selectedMode}
+              onChange={(e) => onModeChange(e.target.value as ScoreMode)}
+              disabled={loading}
+              className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+            >
+              {MODE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       {loading ? (

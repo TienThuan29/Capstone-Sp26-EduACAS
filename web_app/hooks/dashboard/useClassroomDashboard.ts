@@ -122,7 +122,7 @@ export const useClassroomDashboard = (classroomId?: string) => {
   );
 
   const getExamStatistics = useCallback(
-    async (classroomIdParam?: string, examId?: string): Promise<ExamScoreStatistics[]> => {
+    async (classroomIdParam?: string, examId?: string, mode?: string): Promise<ExamScoreStatistics[]> => {
       const targetClassroomId = classroomIdParam || classroomId;
 
       if (!targetClassroomId) {
@@ -133,7 +133,7 @@ export const useClassroomDashboard = (classroomId?: string) => {
       setError(null);
       try {
         const response = await axiosInstance.get(
-          Api.Classroom.GET_EXAM_STATISTICS(targetClassroomId),
+          Api.Classroom.GET_EXAM_STATISTICS(targetClassroomId, mode),
           { params: { examId: examId || undefined } }
         );
         return response.data?.dataResponse || [];

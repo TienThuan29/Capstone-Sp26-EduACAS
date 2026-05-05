@@ -24,8 +24,11 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ocelot config
-builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+// builder.Configuration.AddJsonFile("ocelot.json", optional: false, reloadOnChange: true);
+// ocelot config - use ocelot.prod.json in Docker containers, ocelot.json for dotnet run locally
+var useProdOcelot = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("OCELOT_USE_PROD"));
+var ocelotFile = useProdOcelot ? "ocelot.prod.json" : "ocelot.json";
+builder.Configuration.AddJsonFile(ocelotFile, optional: false, reloadOnChange: true);
 builder.Services.AddOcelot(builder.Configuration);
 
 var app = builder.Build();
