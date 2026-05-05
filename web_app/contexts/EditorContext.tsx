@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { ProgrammingLanguage, Compiler } from '@/types/language';
 import { Problem, TestCase, getBoilerplateCode } from '@/types/examination';
 import type { SubmissionResponse, AutoGradeSubmissionResult } from '@/types/submission';
+import type * as monacoNS from 'monaco-editor';
 import { useSubmissionStudent } from '@/hooks/submission/useSubmissionStudent';
 import { useKeystrokeTracking, KeystrokeRecord } from '@/hooks/typing/useKeystrokeTracking';
 
@@ -145,6 +146,16 @@ interface EditorContextType {
   keystrokeCount: number;
   batchLogs: KeystrokeRecord[];
   flushKeystrokes: (submissionId: string) => Promise<void>;
+
+  // Monaco Editor Instance (for anti-cheat clipboard guard)
+  monacoEditorRef: React.RefObject<monacoNS.editor.IStandaloneCodeEditor | null>;
+  /**
+   * Register a callback to be invoked when the Monaco editor mounts.
+   * Safe to call before or after the editor has mounted.
+   */
+  registerOnEditorMount: (callback: (editor: monacoNS.editor.IStandaloneCodeEditor) => void) => void;
+  /** Internal: called by EditorPanel when Monaco mounts, notifies registered callbacks. */
+  handleEditorMountInternal: (editor: monacoNS.editor.IStandaloneCodeEditor) => void;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -264,6 +275,27 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [submissionError, setSubmissionError] = useState<string | null>(null);
 
   const clearSubmissionError = useCallback(() => setSubmissionError(null), []);
+
+  // Monaco editor instance ref — used by useExamViolationGuard for internal clipboard detection
+  const monacoEditorRef = useRef<monacoNS.editor.IStandaloneCodeEditor | null>(null);
+  // Stores callbacks to invoke when the Monaco editor mounts
+  const onEditorReadyCallbacksRef = useRef<((editor: monacoNS.editor.IStandaloneCodeEditor) => void)[]>([]);
+
+  const registerOnEditorMount = useCallback((callback: (editor: monacoNS.editor.IStandaloneCodeEditor) => void) => {
+    // If editor is already mounted, call immediately
+    if (monacoEditorRef.current) {
+      callback(monacoEditorRef.current);
+    }
+    // Otherwise register for later
+    onEditorReadyCallbacksRef.current.push(callback);
+  }, []);
+
+  const handleEditorMountInternal = useCallback((editor: monacoNS.editor.IStandaloneCodeEditor) => {
+    monacoEditorRef.current = editor;
+    // Notify all registered callbacks
+    onEditorReadyCallbacksRef.current.forEach((cb) => cb(editor));
+    onEditorReadyCallbacksRef.current = [];
+  }, []);
 
   const setPracticeTestResults = useCallback((result: AutoGradeSubmissionResult | null) => {
     setPracticeTestResultsState(result);
@@ -646,6 +678,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     keystrokeCount,
     batchLogs,
     flushKeystrokes,
+    monacoEditorRef,
+    registerOnEditorMount,
+    handleEditorMountInternal,
   };
 
   return (

@@ -240,9 +240,11 @@ function ExamDetailContent() {
       for (const [pid, subs] of byProblem.entries()) {
         const mine = subs.find((s) => s.studentId === studentId);
         if (!mine?.id) continue;
-        const trackerKeys = buildExamTrackerStorageKeys(examId, pid, studentId);
+        // Use sessionKeys.sessionKey to match the key used during caching
+        // (exam-session:{examId}:{studentId}), not the per-problem tracker key.
+        const examSessionKeys = buildExamSessionStorageKeys(examId, studentId);
         try {
-          await flushCachedExamLogs({ sessionKey: trackerKeys.sessionKey, submissionId: mine.id });
+          await flushCachedExamLogs({ sessionKey: examSessionKeys.sessionKey, submissionId: mine.id });
         } catch (err) {
           // Best-effort flush; don't block finalize/cleanup due to logging network issues.
           console.warn("flushCachedExamLogs failed:", err);

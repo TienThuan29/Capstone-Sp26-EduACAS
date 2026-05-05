@@ -154,7 +154,10 @@ export function ExamSessionGuard({
       message: string,
       detail: Record<string, unknown>
     ) => {
-      if (!sessionKeys) return;
+      if (!sessionKeys) {
+        console.warn('[ExamLog] handleAppendLog: sessionKeys is null, skipping', { type });
+        return;
+      }
 
       const entry: LogEntry = {
         time: new Date().toISOString(),
@@ -165,12 +168,16 @@ export function ExamSessionGuard({
         detail,
       };
 
+      const eventDetailStr = JSON.stringify(detail ?? {});
       const payload = {
-        sessionKey: trackerKeys?.sessionKey ?? sessionKeys.sessionKey,
+        // Always use sessionKeys.sessionKey so flush (which uses the same key)
+        // can find the cached entries in Redis. localStorage entries are kept
+        // separate per problem for UI display purposes.
+        sessionKey: sessionKeys.sessionKey,
         entries: [
           {
             eventType: type,
-            eventDetail: JSON.stringify(detail ?? {}),
+            eventDetail: eventDetailStr,
             message,
             severity,
             isViolation,
@@ -178,6 +185,8 @@ export function ExamSessionGuard({
           },
         ],
       };
+
+      console.log('[ExamLog] handleAppendLog', { type, sessionKey: sessionKeys.sessionKey });
 
       if (trackerKeys) {
         setLogs((prev) => {
@@ -200,7 +209,9 @@ export function ExamSessionGuard({
       }
 
       // Avoid unhandled rejections (network/offline/401 redirect/etc.)
-      void cacheExamLogs(payload).catch(() => {});
+      void cacheExamLogs(payload).catch((err) => {
+        console.error('[ExamLog] cacheExamLogs failed', { type, err, payload });
+      });
     },
     [cacheExamLogs, sessionKeys, trackerKeys],
   );
@@ -276,7 +287,6 @@ export function ExamSessionGuard({
         }
       }
     }
-    window.dispatchEvent(new CustomEvent('exam:reset-clipboard'));
     setOverlay(null);
   }, [overlay?.alertType, sessionKeys, serverPhase]);
 
