@@ -323,7 +323,7 @@ export function useExamViolationGuard({
       : { violationCount: count, ...detail };
 
     current.onLog(
-      eventType, 'warning', true,
+      eventType, 'warning', false,
       `${reason} — warning strike ${count}`,
       warningDetail,
     );
@@ -1013,7 +1013,7 @@ export function useExamViolationGuard({
               const toProblemId = findProblemId(container);
 
               currentInner.onLog(
-                isCutOp ? 'CUT_PASTE' : 'COPY_PASTE', 'info', false,
+                isCutOp ? 'CUT_PASTE' : 'COPY_PASTE', 'warning', false,
                 `Pasted ${pastedText.length} character(s)${toProblemId ? ` into Problem ${toProblemId}` : ''}`,
                 { length: pastedText.length, content: pastedText, from: fromProblemId, to: toProblemId },
               );

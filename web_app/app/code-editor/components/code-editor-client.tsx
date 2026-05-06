@@ -73,6 +73,7 @@ export function CodeEditorClient({
     clearSubmissionError,
     monacoEditorRef,
     registerOnEditorMount,
+    lastSubmissionId,
   } = useEditorContext();
 
   const problemId = examination.problem.id;
@@ -340,10 +341,11 @@ export function CodeEditorClient({
       message: string,
       detail: Record<string, unknown>
     ) => {
-      console.log('[ExamLog] handleAppendLog', { type, sessionKey: sessionKeys?.sessionKey });
+      const logCacheKey = sessionKeys?.buildPerProblemLogKey(problemId) ?? storageKeys?.sessionKey ?? sessionKeys?.sessionKey ?? '';
+      console.log('[ExamLog] handleAppendLog', { type, logCacheKey, problemId });
 
-      if (!sessionKeys) {
-        console.warn('[ExamLog] handleAppendLog: sessionKeys is null, skipping', { type });
+      if (!logCacheKey) {
+        console.warn('[ExamLog] handleAppendLog: no cache key available, skipping', { type });
         return;
       }
       const entry: LogEntry = {
@@ -361,11 +363,10 @@ export function CodeEditorClient({
         }
         return next;
       });
-      // Use sessionKeys.sessionKey so flush (which uses the same key)
-      // can find the cached entries in Redis. localStorage entries are kept
-      // per problem for UI display purposes.
+      // Cache with per-problem key so each problem's logs are isolated.
+      // The key format matches the exam-tracker prefix: exam-tracker:{examId}:{problemId}:{studentId}
       void cacheExamLogs({
-        sessionKey: sessionKeys.sessionKey,
+        sessionKey: logCacheKey,
         entries: [
           {
             eventType: type,
@@ -378,7 +379,7 @@ export function CodeEditorClient({
         ],
       }).catch(() => {});
     },
-    [cacheExamLogs, sessionKeys, storageKeys]
+    [cacheExamLogs, sessionKeys, storageKeys, problemId]
   );
 
   useEffect(() => {
@@ -516,6 +517,12 @@ export function CodeEditorClient({
     localStorage.setItem(storageKeys.answerStorageKey, editorState.code);
   }, [editorState.code, storageKeys]);
 
+  // Persist lastSubmissionId from EditorContext into localStorage so handleLeaveProblem can find it.
+  useEffect(() => {
+    if (!storageKeys || !lastSubmissionId) return;
+    localStorage.setItem(storageKeys.lastSubmissionIdStorageKey, lastSubmissionId);
+  }, [lastSubmissionId, storageKeys]);
+
   useEffect(() => {
     if (!storageKeys || !sessionKeys) return;
 
@@ -525,13 +532,18 @@ export function CodeEditorClient({
       setOverlay(null);
       setScreen('end');
 
-      const submissionId = localStorage.getItem(storageKeys.lastSubmissionIdStorageKey) ?? '';
+      // Prefer localStorage (may have been set by a previous visit); fall back to context state.
+      const submissionId =
+        localStorage.getItem(storageKeys.lastSubmissionIdStorageKey) ||
+        lastSubmissionId ||
+        '';
       if (!submissionId) return;
 
       try {
+        // Use per-problem cache key to match the key used during caching.
+        const logCacheKey = sessionKeys?.buildPerProblemLogKey(problemId) ?? storageKeys?.sessionKey ?? sessionKeys?.sessionKey ?? '';
         await flushCachedExamLogs({
-          // Use sessionKeys.sessionKey to match the key used during caching.
-          sessionKey: sessionKeys.sessionKey,
+          sessionKey: logCacheKey,
           submissionId,
         });
       } catch (err) {
@@ -550,7 +562,7 @@ export function CodeEditorClient({
     return () => {
       window.removeEventListener('exam:leave-problem', handleLeaveProblem as EventListener);
     };
-  }, [flushCachedExamLogs, sessionKeys, storageKeys]);
+  }, [flushCachedExamLogs, sessionKeys, storageKeys, lastSubmissionId]);
 
   const handleCloseOverlay = useCallback(async () => {
     if (sessionKeys) {

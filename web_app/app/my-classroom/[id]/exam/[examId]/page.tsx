@@ -237,14 +237,15 @@ function ExamDetailContent() {
       }
       const latest = await getLatestSubmissionsByExam(examId);
       const byProblem = new Map(latest.map((p) => [p.problemId, p.submissions]));
+      const examSessionKeys = buildExamSessionStorageKeys(examId, studentId);
       for (const [pid, subs] of byProblem.entries()) {
         const mine = subs.find((s) => s.studentId === studentId);
         if (!mine?.id) continue;
-        // Use sessionKeys.sessionKey to match the key used during caching
-        // (exam-session:{examId}:{studentId}), not the per-problem tracker key.
-        const examSessionKeys = buildExamSessionStorageKeys(examId, studentId);
+        // Use per-problem cache key (with problemId) to match the key used during caching,
+        // so each problem's logs are flushed with its own submissionId.
+        const logCacheKey = examSessionKeys.buildPerProblemLogKey(pid);
         try {
-          await flushCachedExamLogs({ sessionKey: examSessionKeys.sessionKey, submissionId: mine.id });
+          await flushCachedExamLogs({ sessionKey: logCacheKey, submissionId: mine.id });
         } catch (err) {
           // Best-effort flush; don't block finalize/cleanup due to logging network issues.
           console.warn("flushCachedExamLogs failed:", err);

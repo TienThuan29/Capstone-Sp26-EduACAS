@@ -156,6 +156,9 @@ interface EditorContextType {
   registerOnEditorMount: (callback: (editor: monacoNS.editor.IStandaloneCodeEditor) => void) => void;
   /** Internal: called by EditorPanel when Monaco mounts, notifies registered callbacks. */
   handleEditorMountInternal: (editor: monacoNS.editor.IStandaloneCodeEditor) => void;
+
+  /** ID of the most recently saved submission — used by code-editor-client to persist lastSubmissionId to localStorage. */
+  lastSubmissionId: string | null;
 }
 
 const EditorContext = createContext<EditorContextType | undefined>(undefined);
@@ -273,6 +276,9 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [isPracticeSubmitting, setIsPracticeSubmitting] = useState(false);
   const [practiceTestResults, setPracticeTestResultsState] = useState<AutoGradeSubmissionResult | null>(null);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  /** ID of the most recently saved submission — exposed via context so code-editor-client can persist it. */
+  const [lastSubmissionId, setLastSubmissionId] = useState<string | null>(null);
 
   const clearSubmissionError = useCallback(() => setSubmissionError(null), []);
 
@@ -505,6 +511,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       };
       const result = await saveSubmission(payload);
       if (result != null) {
+        setLastSubmissionId(result.id);
         try {
           await flushKeystrokes(result.id);
         } catch (err) {
@@ -681,6 +688,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     monacoEditorRef,
     registerOnEditorMount,
     handleEditorMountInternal,
+    lastSubmissionId,
   };
 
   return (

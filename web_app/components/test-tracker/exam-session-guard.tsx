@@ -154,8 +154,12 @@ export function ExamSessionGuard({
       message: string,
       detail: Record<string, unknown>
     ) => {
-      if (!sessionKeys) {
-        console.warn('[ExamLog] handleAppendLog: sessionKeys is null, skipping', { type });
+      const logCacheKey = resolvedProblemId && sessionKeys
+        ? sessionKeys.buildPerProblemLogKey(resolvedProblemId)
+        : sessionKeys?.sessionKey ?? null;
+
+      if (!logCacheKey) {
+        console.warn('[ExamLog] handleAppendLog: no cache key available, skipping', { type });
         return;
       }
 
@@ -170,10 +174,7 @@ export function ExamSessionGuard({
 
       const eventDetailStr = JSON.stringify(detail ?? {});
       const payload = {
-        // Always use sessionKeys.sessionKey so flush (which uses the same key)
-        // can find the cached entries in Redis. localStorage entries are kept
-        // separate per problem for UI display purposes.
-        sessionKey: sessionKeys.sessionKey,
+        sessionKey: logCacheKey,
         entries: [
           {
             eventType: type,
@@ -186,7 +187,7 @@ export function ExamSessionGuard({
         ],
       };
 
-      console.log('[ExamLog] handleAppendLog', { type, sessionKey: sessionKeys.sessionKey });
+      console.log('[ExamLog] handleAppendLog', { type, logCacheKey, resolvedProblemId });
 
       if (trackerKeys) {
         setLogs((prev) => {
@@ -213,7 +214,7 @@ export function ExamSessionGuard({
         console.error('[ExamLog] cacheExamLogs failed', { type, err, payload });
       });
     },
-    [cacheExamLogs, sessionKeys, trackerKeys],
+    [cacheExamLogs, sessionKeys, trackerKeys, resolvedProblemId],
   );
 
   const handleForceSubmitFromExamPage = useCallback(async () => {
