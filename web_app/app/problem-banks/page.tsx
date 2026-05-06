@@ -20,6 +20,7 @@ import {
   TableHeadCell,
   TableRow,
   Label,
+  Badge,
   Tooltip,
   Spinner,
 } from "flowbite-react";
@@ -304,13 +305,21 @@ export default function ProblemBanksPage() {
                       </span>
                     </TableCell>
                     <TableCell
-                      className={`max-w-[180px] ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                      className={isDark ? "text-gray-300" : "text-gray-700"}
                     >
                       {p.tags?.length ? (
-                        <span className="truncate" title={p.tags.join(", ")}>
-                          {p.tags.slice(0, 3).join(", ")}
-                          {p.tags.length > 3 ? ` +${p.tags.length - 3}` : ""}
-                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {p.tags.slice(0, 2).map((tag) => (
+                            <Badge key={tag} color="gray" className="text-xs">
+                              {tag}
+                            </Badge>
+                          ))}
+                          {p.tags.length > 2 && (
+                            <Badge color="info" className="text-xs">
+                              +{p.tags.length - 2}
+                            </Badge>
+                          )}
+                        </div>
                       ) : (
                         <span className="italic text-gray-400">—</span>
                       )}

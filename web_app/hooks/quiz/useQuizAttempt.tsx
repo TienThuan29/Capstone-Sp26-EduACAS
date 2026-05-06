@@ -103,10 +103,10 @@ export const useQuizAttempt = () => {
     }
   }, [axiosInstance]);
 
-  const getAttemptsByStudent = useCallback(async (studentId: string): Promise<QuizAttempt[]> => {
+  const getAttemptsByStudent = useCallback(async (studentId: string): Promise<QuizAttemptResponse[]> => {
     try {
       setError(null);
-      const response = await axiosInstance.get<{ dataResponse: QuizAttempt[] }>(
+      const response = await axiosInstance.get<{ dataResponse: QuizAttemptResponse[] }>(
         Api.QuizAttempt.GET_BY_STUDENT(studentId)
       );
       return response.data.dataResponse ?? [];

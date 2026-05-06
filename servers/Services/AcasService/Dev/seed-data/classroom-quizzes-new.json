@@ -1,0 +1,72 @@
+[
+  {
+    "id": "clsq-009",
+    "classroomId": "cls-001",
+    "quizId": "quiz-009",
+    "startTime": "2026-02-15T08:00:00",
+    "endTime": "2026-02-15T10:00:00",
+    "maxOfAttempts": 2,
+    "passcode": "cs101g1",
+    "status": "CLOSED",
+    "isDeleted": false,
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-02-10T10:00:00",
+    "updatedAt": "2026-02-15T10:05:00"
+  },
+  {
+    "id": "clsq-010",
+    "classroomId": "cls-001",
+    "quizId": "quiz-010",
+    "startTime": "2026-03-01T08:00:00",
+    "endTime": "2026-03-01T10:00:00",
+    "maxOfAttempts": 2,
+    "passcode": "cs101g1",
+    "status": "CLOSED",
+    "isDeleted": false,
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-02-20T10:00:00",
+    "updatedAt": "2026-03-01T10:05:00"
+  },
+  {
+    "id": "clsq-011",
+    "classroomId": "cls-001",
+    "quizId": "quiz-011",
+    "startTime": "2026-03-15T08:00:00",
+    "endTime": "2026-03-15T10:00:00",
+    "maxOfAttempts": 2,
+    "passcode": "cs101g1",
+    "status": "CLOSED",
+    "isDeleted": false,
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-03-10T10:00:00",
+    "updatedAt": "2026-03-15T10:05:00"
+  },
+  {
+    "id": "clsq-012",
+    "classroomId": "cls-001",
+    "quizId": "quiz-012",
+    "startTime": "2026-04-01T08:00:00",
+    "endTime": "2026-04-01T10:00:00",
+    "maxOfAttempts": 2,
+    "passcode": "cs101g1",
+    "status": "CLOSED",
+    "isDeleted": false,
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-03-25T10:00:00",
+    "updatedAt": "2026-04-01T10:05:00"
+  },
+  {
+    "id": "clsq-013",
+    "classroomId": "cls-001",
+    "quizId": "quiz-013",
+    "startTime": "2026-04-25T08:00:00",
+    "endTime": "2026-04-25T10:00:00",
+    "maxOfAttempts": 1,
+    "passcode": "cs101g1",
+    "status": "PUBLISHED",
+    "isDeleted": false,
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-04-20T10:00:00",
+    "updatedAt": "2026-04-25T08:00:00"
+  }
+]

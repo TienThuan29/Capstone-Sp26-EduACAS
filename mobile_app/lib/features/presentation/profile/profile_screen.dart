@@ -1,112 +1,162 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
-import 'package:mobile/core/widgets/enhanced_button.dart';
 import 'profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
   final VoidCallback? onLogout;
 
-  const ProfileScreen({super.key, this.onLogout});
+  const ProfileScreen({
+    super.key,
+    this.onLogout,
+  });
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends State<ProfileScreen>
+    with TickerProviderStateMixin {
   final _controller = ProfileController();
-  final _formKey = GlobalKey<FormState>();
-  
-  late TextEditingController _nameController;
-  late TextEditingController _emailController;
-  late TextEditingController _birthdayController;
-  late TextEditingController _roleController;
+
+  late AnimationController _fadeController;
+  late Animation<double> _fadeAnimation;
+  late Animation<Offset> _slideAnimation;
+
+  late AnimationController _staggerController;
 
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController();
-    _emailController = TextEditingController();
-    _birthdayController = TextEditingController();
-    _roleController = TextEditingController();
-    
+
+    _fadeController = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+    _fadeAnimation = CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    );
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -0.1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _fadeController,
+      curve: Curves.easeOut,
+    ));
+
+    _staggerController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+
     _loadProfile();
+    _fadeController.forward();
   }
 
   Future<void> _loadProfile() async {
     await _controller.fetchProfile(() {
-      if (mounted) setState(() {});
+      if (mounted) {
+        setState(() {});
+        _runStaggerAnimation();
+      }
     });
 
-    if (_controller.userProfile != null) {
-      _nameController.text = _controller.userProfile!.fullname;
-      _emailController.text = _controller.userProfile!.email;
-      
-      String bday = _controller.userProfile!.birthday ?? '';
-      if (bday.isNotEmpty) {
-        if (bday.contains('T')) {
-          bday = bday.split('T')[0];
-        } else if (bday.contains(' ')) {
-          bday = bday.split(' ')[0];
-        }
-      }
-      _birthdayController.text = bday;
-      
-      _roleController.text = _controller.userProfile!.role;
+    if (_controller.userProfile != null && mounted) {
+      _runStaggerAnimation();
     }
+  }
+
+  void _runStaggerAnimation() {
+    _staggerController.reset();
+    _staggerController.forward();
   }
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _emailController.dispose();
-    _birthdayController.dispose();
-    _roleController.dispose();
+    _fadeController.dispose();
+    _staggerController.dispose();
     super.dispose();
   }
 
-
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isTablet = size.width > 600;
+
     return Scaffold(
       body: Stack(
         children: [
           const GradientBackground(),
           SafeArea(
             child: _controller.isLoading && _controller.userProfile == null
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-                : SingleChildScrollView(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        _buildHeader(),
-                        const SizedBox(height: 32),
-                        _buildAvatarSection(),
-                        const SizedBox(height: 32),
-                        _buildProfileForm(),
-                        if (widget.onLogout != null) ...[
-                          const SizedBox(height: 48),
-                          EnhancedButton(
-                            text: 'Logout',
-                            onPressed: widget.onLogout!,
-                            isLoading: false,
-                            color: Colors.redAccent,
-                            height: 44,
-                            showArrow: false,
+                ? const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  )
+                : CustomScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    slivers: [
+                      SliverToBoxAdapter(
+                        child: SlideTransition(
+                          position: _slideAnimation,
+                          child: FadeTransition(
+                            opacity: _fadeAnimation,
+                            child: _buildAppBar(context),
                           ),
-                        ],
-                      ],
-                    ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: _buildHeroSection(context, isTablet),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: _buildStatsBar(context, isTablet),
+                      ),
+                      SliverToBoxAdapter(
+                        child: _buildProfileInfoSection(context, isTablet),
+                      ),
+                      SliverToBoxAdapter(
+                        child: _buildActionSection(context, isTablet),
+                      ),
+                      const SliverToBoxAdapter(
+                        child: SizedBox(height: 32),
+                      ),
+                    ],
                   ),
           ),
-          if (ModalRoute.of(context)?.canPop ?? false)
-            Positioned(
-              top: 50,
-              left: 20,
-              child: IconButton(
-                icon: const Icon(Icons.arrow_back_ios, color: AppColors.primary),
-                onPressed: () => Navigator.pop(context),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(8, 8, 16, 0),
+      child: Row(
+        children: [
+          if (Navigator.of(context).canPop())
+            IconButton(
+              onPressed: () => Navigator.pop(context),
+              icon: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.06),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.arrow_back_ios_new_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
               ),
             ),
         ],
@@ -114,149 +164,402 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        const Text(
-          'Your Information',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppColors.primary,
-          ),
-        ),
-        ],
-    );
-  }
+  Widget _buildHeroSection(BuildContext context, bool isTablet) {
+    final profile = _controller.userProfile;
+    final initials = _getInitials(profile?.fullname ?? 'U');
+    final avatarSize = isTablet ? 150.0 : 120.0;
 
-  Widget _buildAvatarSection() {
-    return Stack(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 24),
+      child: Center(
+        child: Container(
+          decoration: BoxDecoration(
             shape: BoxShape.circle,
-            gradient: AppColors.primaryGradient,
+            border: Border.all(color: Colors.white, width: 3),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.2),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
+            ],
           ),
           child: CircleAvatar(
-            radius: 60,
-            backgroundColor: Colors.white,
-            backgroundImage: _controller.userProfile?.avatarUrl != null && _controller.userProfile!.avatarUrl.isNotEmpty
-                ? NetworkImage(_controller.userProfile!.avatarUrl)
+            radius: avatarSize / 2,
+            backgroundColor: Colors.grey.shade200,
+            backgroundImage: profile?.avatarUrl != null &&
+                    profile!.avatarUrl.isNotEmpty
+                ? NetworkImage(profile.avatarUrl)
                 : null,
-            child: _controller.userProfile?.avatarUrl == null || _controller.userProfile!.avatarUrl.isEmpty
-                ? const Icon(Icons.person, size: 60, color: AppColors.primaryLight)
+            child: profile?.avatarUrl == null ||
+                    profile!.avatarUrl.isEmpty
+                ? Text(
+                    initials,
+                    style: TextStyle(
+                      fontSize: avatarSize / 2.5,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      letterSpacing: 1,
+                    ),
+                  )
                 : null,
           ),
         ),
-
-      ],
+      ),
     );
   }
 
-  Widget _buildProfileForm() {
-    return Form(
-      key: _formKey,
-      child: Column(
+  Widget _buildStatsBar(BuildContext context, bool isTablet) {
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildProfileInfoSection(BuildContext context, bool isTablet) {
+    final profile = _controller.userProfile;
+    final items = <_InfoItem>[
+      _InfoItem(
+        icon: Icons.person_outline_rounded,
+        label: 'Full Name',
+        value: profile?.fullname ?? '-',
+      ),
+      _InfoItem(
+        icon: Icons.email_outlined,
+        label: 'Email Address',
+        value: profile?.email ?? '-',
+      ),
+      _InfoItem(
+        icon: Icons.cake_outlined,
+        label: 'Birthday',
+        value: _formatBirthday(profile?.birthday),
+      ),
+      _InfoItem(
+        icon: Icons.badge_outlined,
+        label: 'Role',
+        value: _formatRole(profile?.role ?? '-'),
+      ),
+      _InfoItem(
+        icon: Icons.numbers_rounded,
+        label: 'Role Number',
+        value: profile?.roleNumber.isNotEmpty == true
+            ? profile!.roleNumber
+            : 'Not assigned',
+      ),
+    ];
+
+    return AnimatedBuilder(
+      animation: _staggerController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 10 * (1 - _staggerController.value)),
+          child: Opacity(
+            opacity: _staggerController.value,
+            child: child,
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...items.asMap().entries.map((entry) {
+              final index = entry.key;
+              final item = entry.value;
+              return _buildInfoRow(item, isLast: index == items.length - 1);
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(_InfoItem item, {required bool isLast}) {
+    return Container(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 16, top: 16),
+      decoration: BoxDecoration(
+        border: isLast
+            ? null
+            : Border(
+                bottom: BorderSide(
+                  color: Colors.grey.withValues(alpha: 0.06),
+                ),
+              ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _ProfileTextField(
-            controller: _nameController,
-            label: 'Full Name',
-            hint: 'Your full name',
-            icon: Icons.person_outline,
-            readOnly: true,
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.06),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(
+              item.icon,
+              size: 18,
+              color: AppColors.primaryLight,
+            ),
           ),
-          const SizedBox(height: 20),
-          _ProfileTextField(
-            controller: _emailController,
-            label: 'Email',
-            hint: 'Your email address',
-            icon: Icons.email_outlined,
-            readOnly: true,
-          ),
-          const SizedBox(height: 20),
-          _ProfileTextField(
-            controller: _birthdayController,
-            label: 'Birthday',
-            hint: 'Not provided',
-            icon: Icons.cake_outlined,
-            readOnly: true,
-          ),
-          const SizedBox(height: 20),
-          _ProfileTextField(
-            controller: _roleController,
-            label: 'Role',
-            hint: 'Your user role',
-            icon: Icons.work_outline,
-            readOnly: true,
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textLight,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  item.value,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
+
+  Widget _buildActionSection(BuildContext context, bool isTablet) {
+    if (widget.onLogout == null) return const SizedBox.shrink();
+
+    return AnimatedBuilder(
+      animation: _staggerController,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(0, 10 * (1 - _staggerController.value)),
+          child: Opacity(
+            opacity: _staggerController.value,
+            child: child,
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+        child: _ActionButton(
+          icon: Icons.logout_rounded,
+          label: 'Sign Out',
+          color: Colors.red.shade50,
+          textColor: Colors.red.shade700,
+          onTap: () => _showLogoutConfirmation(context),
+        ),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 24),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                Icons.logout_rounded,
+                size: 32,
+                color: Colors.red.shade700,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Sign Out',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Are you sure you want to sign out of your account?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade600,
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              children: [
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.close_rounded,
+                    label: 'Cancel',
+                    color: Colors.grey.shade100,
+                    textColor: AppColors.textSecondary,
+                    onTap: () => Navigator.pop(context),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _ActionButton(
+                    icon: Icons.logout_rounded,
+                    label: 'Sign Out',
+                    color: Colors.red,
+                    textColor: Colors.white,
+                    onTap: () {
+                      Navigator.pop(context);
+                      widget.onLogout?.call();
+                    },
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: MediaQuery.of(context).padding.bottom),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Helpers ---
+
+  String _getInitials(String name) {
+    final parts = name.trim().split(' ');
+    if (parts.length >= 2) {
+      return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+    }
+    return name.isNotEmpty ? name[0].toUpperCase() : 'U';
+  }
+
+  String _formatRole(String role) {
+    switch (role.toUpperCase()) {
+      case 'STUDENT':
+        return 'Student';
+      case 'LECTURER':
+        return 'Lecturer';
+      case 'ADMIN':
+        return 'Administrator';
+      default:
+        return role;
+    }
+  }
+
+  String _formatBirthday(String? birthday) {
+    if (birthday == null || birthday.isEmpty) return 'Not provided';
+    if (birthday.contains('T')) {
+      return birthday.split('T').first;
+    }
+    if (birthday.contains(' ')) {
+      return birthday.split(' ').first;
+    }
+    return birthday;
+  }
 }
 
-class _ProfileTextField extends StatelessWidget {
-  final TextEditingController controller;
-  final String label;
-  final String hint;
-  final IconData icon;
-  final bool readOnly;
-  final VoidCallback? onTap;
-  final String? Function(String?)? validator;
+// --- Data Models ---
 
-  const _ProfileTextField({
-    required this.controller,
-    required this.label,
-    required this.hint,
+class _InfoItem {
+  final IconData icon;
+  final String label;
+  final String value;
+
+  _InfoItem({
     required this.icon,
-    this.readOnly = false,
-    this.onTap,
-    this.validator,
+    required this.label,
+    required this.value,
+  });
+}
+
+// --- Action Button Widget ---
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final Color textColor;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.textColor,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(left: 4, bottom: 6),
-          child: Text(
-            label,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: Colors.grey[800],
-            ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: color != Colors.grey.shade100
+                ? [
+                    BoxShadow(
+                      color: color.withValues(alpha: 0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, color: textColor, size: 20),
+              const SizedBox(width: 10),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
           ),
         ),
-        TextFormField(
-          controller: controller,
-          readOnly: readOnly,
-          onTap: onTap,
-          validator: validator,
-          style: TextStyle(fontSize: 15, color: readOnly ? Colors.grey[600] : Colors.grey[800]),
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon, color: AppColors.primaryLight, size: 20),
-            filled: true,
-            fillColor: readOnly ? Colors.grey[200] : Colors.grey[50],
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: BorderSide.none,
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(16),
-              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-            ),
-          ),
-        ),
-      ],
+      ),
     );
   }
 }

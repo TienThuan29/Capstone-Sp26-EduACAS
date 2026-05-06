@@ -1,0 +1,76 @@
+[
+  { "id": "qzao-101", "questionId": "qzq-019", "content": "Using the `const` keyword", "isCorrect": false },
+  { "id": "qzao-102", "questionId": "qzq-019", "content": "Using uppercase variable names", "isCorrect": false },
+  { "id": "qzao-103", "questionId": "qzq-019", "content": "Using the `final` keyword", "isCorrect": false },
+  { "id": "qzao-104", "questionId": "qzq-019", "content": "None of the above — Python has no true constants", "isCorrect": true },
+
+  { "id": "qzao-105", "questionId": "qzq-020", "content": "int", "isCorrect": true },
+  { "id": "qzao-106", "questionId": "qzq-020", "content": "float", "isCorrect": true },
+  { "id": "qzao-107", "questionId": "qzq-020", "content": "string", "isCorrect": true },
+  { "id": "qzao-108", "questionId": "qzq-020", "content": "char", "isCorrect": false },
+
+  { "id": "qzao-109", "questionId": "qzq-021", "content": "<class 'list'>", "isCorrect": true },
+  { "id": "qzao-110", "questionId": "qzq-021", "content": "<class 'array'>", "isCorrect": false },
+  { "id": "qzao-111", "questionId": "qzq-021", "content": "list", "isCorrect": false },
+  { "id": "qzao-112", "questionId": "qzq-021", "content": "TypeError", "isCorrect": false },
+
+  { "id": "qzao-113", "questionId": "qzq-023", "content": "3.33", "isCorrect": false },
+  { "id": "qzao-114", "questionId": "qzq-023", "content": "3", "isCorrect": true },
+  { "id": "qzao-115", "questionId": "qzq-023", "content": "3.0", "isCorrect": false },
+  { "id": "qzao-116", "questionId": "qzq-023", "content": "Error", "isCorrect": false },
+
+  { "id": "qzao-117", "questionId": "qzq-024", "content": "`for` loop can iterate over any iterable", "isCorrect": true },
+  { "id": "qzao-118", "questionId": "qzq-024", "content": "`while` loop runs as long as a condition is true", "isCorrect": true },
+  { "id": "qzao-119", "questionId": "qzq-024", "content": "Loops can have an `else` clause in Python", "isCorrect": true },
+  { "id": "qzao-120", "questionId": "qzq-024", "content": "Python loops require curly braces", "isCorrect": false },
+
+  { "id": "qzao-121", "questionId": "qzq-025", "content": "Exits the program immediately", "isCorrect": false },
+  { "id": "qzao-122", "questionId": "qzq-025", "content": "Exits the current loop and continues to the next iteration", "isCorrect": false },
+  { "id": "qzao-123", "questionId": "qzq-025", "content": "Exits the loop entirely", "isCorrect": true },
+  { "id": "qzao-124", "questionId": "qzq-025", "content": "Pauses the loop", "isCorrect": false },
+
+  { "id": "qzao-125", "questionId": "qzq-027", "content": "def add(a, b): return a + b", "isCorrect": true },
+  { "id": "qzao-126", "questionId": "qzq-027", "content": "function add(a, b) { return a + b }", "isCorrect": false },
+  { "id": "qzao-127", "questionId": "qzq-027", "content": "func add(a, b) -> a + b", "isCorrect": false },
+  { "id": "qzao-128", "questionId": "qzq-027", "content": "void add(int a, int b) { return a + b }", "isCorrect": false },
+
+  { "id": "qzao-129", "questionId": "qzq-028", "content": "[1, 2, 3]", "isCorrect": true },
+  { "id": "qzao-130", "questionId": "qzq-028", "content": "list((1, 2, 3))", "isCorrect": true },
+  { "id": "qzao-131", "questionId": "qzq-028", "content": "{1, 2, 3}", "isCorrect": false },
+  { "id": "qzao-132", "questionId": "qzq-028", "content": "list(range(1, 4))", "isCorrect": true },
+
+  { "id": "qzao-133", "questionId": "qzq-029", "content": "== checks equality of values, is checks identity (memory address)", "isCorrect": true },
+  { "id": "qzao-134", "questionId": "qzq-029", "content": "Both check the same thing", "isCorrect": false },
+  { "id": "qzao-135", "questionId": "qzq-029", "content": "is checks equality of values, == checks identity", "isCorrect": false },
+  { "id": "qzao-136", "questionId": "qzq-029", "content": "Neither checks anything meaningful", "isCorrect": false },
+
+  { "id": "qzao-137", "questionId": "qzq-030", "content": "4", "isCorrect": false },
+  { "id": "qzao-138", "questionId": "qzq-030", "content": "5", "isCorrect": true },
+  { "id": "qzao-139", "questionId": "qzq-030", "content": "Hello", "isCorrect": false },
+  { "id": "qzao-140", "questionId": "qzq-030", "content": "Error", "isCorrect": false },
+
+  { "id": "qzao-141", "questionId": "qzq-031", "content": "my_list[-1]", "isCorrect": true },
+  { "id": "qzao-142", "questionId": "qzq-031", "content": "my_list[len(my_list) - 1]", "isCorrect": true },
+  { "id": "qzao-143", "questionId": "qzq-031", "content": "my_list[4]", "isCorrect": true },
+  { "id": "qzao-144", "questionId": "qzq-031", "content": "my_list[5]", "isCorrect": false },
+
+  { "id": "qzao-145", "questionId": "qzq-032", "content": "[0, 2, 4]", "isCorrect": true },
+  { "id": "qzao-146", "questionId": "qzq-032", "content": "[1, 2, 3]", "isCorrect": false },
+  { "id": "qzao-147", "questionId": "qzq-032", "content": "[2, 4, 6]", "isCorrect": false },
+  { "id": "qzao-148", "questionId": "qzq-032", "content": "Error", "isCorrect": false },
+
+  { "id": "qzao-149", "questionId": "qzq-034", "content": "An error that occurs while the program is executing", "isCorrect": true },
+  { "id": "qzao-150", "questionId": "qzq-034", "content": "An error in the code structure", "isCorrect": false },
+  { "id": "qzao-151", "questionId": "qzq-034", "content": "An error that occurs before the program runs", "isCorrect": false },
+  { "id": "qzao-152", "questionId": "qzq-034", "content": "A warning that does not stop execution", "isCorrect": false },
+
+  { "id": "qzao-153", "questionId": "qzq-035", "content": "Accessing an index that is out of bounds", "isCorrect": true },
+  { "id": "qzao-154", "questionId": "qzq-035", "content": "Using a negative index", "isCorrect": false },
+  { "id": "qzao-155", "questionId": "qzq-035", "content": "Calling len() on a list", "isCorrect": false },
+  { "id": "qzao-156", "questionId": "qzq-035", "content": "Appending to a list", "isCorrect": false },
+
+  { "id": "qzao-157", "questionId": "qzq-036", "content": "To send a value back to the caller", "isCorrect": true },
+  { "id": "qzao-158", "questionId": "qzq-036", "content": "To declare a variable", "isCorrect": false },
+  { "id": "qzao-159", "questionId": "qzq-036", "content": "To import a module", "isCorrect": false },
+  { "id": "qzao-160", "questionId": "qzq-036", "content": "To define a class", "isCorrect": false }
+]

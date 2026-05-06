@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY web_app/package.json web_app/package-lock.json* ./
 
-RUN npm ci --legacy-peer-deps
+RUN npm install --legacy-peer-deps
 
 # ---- Builder stage ----
 FROM deps AS builder

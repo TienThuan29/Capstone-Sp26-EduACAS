@@ -83,7 +83,8 @@ export const Api = {
     GET_DASHBOARD_AT_RISK: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/at-risk`,
     GET_DASHBOARD_WARNINGS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/warnings`,
     GET_CLASS_STATS: "/api/acas/v1/classrooms/dashboard/stats",
-    GET_EXAM_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics`,
+    GET_EXAM_STATISTICS: (classroomId: string, mode?: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/exam-statistics${mode ? `?mode=${mode}` : ""}`,
+    GET_QUIZ_STATISTICS: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/dashboard/quiz-statistics`,
 
     // Student Dashboard
     GET_STUDENT_OVERVIEW: (classroomId: string) => `/api/acas/v1/classrooms/${classroomId}/student-dashboard/overview`,
@@ -367,5 +368,13 @@ export const Api = {
 
   PublicStatistics: {
     GET: "/api/acas/v1/public-statistics",
+  },
+
+  AdminStatistics: {
+    GET_EXAMINATION_STATS: "/api/v1/admin/statistics/examinations",
+    GET_SUBMISSION_BY_LANGUAGE: "/api/v1/admin/statistics/submissions-by-language",
+    GET_STUDENT_LECTURER_RATIO: "/api/v1/admin/statistics/student-lecturer-ratio",
+    GET_USERS_BY_SUBJECT: "/api/v1/admin/statistics/users-by-subject",
+    GET_DISCUSSION_STATS: "/api/v1/admin/statistics/discussions",
   },
 };
