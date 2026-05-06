@@ -442,7 +442,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                 }
             }
 
-            var avgScore = problemSubmissions.Values.Average(s => s.FinalScore);
+            var totalScore = problemSubmissions.Values.Sum(s => s.FinalScore);
             var firstProblemId = problemSubmissions.Keys.FirstOrDefault() ?? string.Empty;
             var warning = new AcademicWarning
             {
@@ -455,8 +455,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                 TriggerType = AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE,
                 InvolvedExams = new InvolvedExamsInfo
                 {
-                    ExamScores = new Dictionary<string, float> { [examId] = avgScore },
-                    AverageScore = avgScore
+                    ExamScores = new Dictionary<string, float> { [examId] = totalScore },
+                    AverageScore = totalScore
                 },
                 LlmAnalysis = allAnalysisEntries,
                 CreatedDate = DateTime.UtcNow,
@@ -470,7 +470,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                 StudentId = studentId,
                 StudentEmail = profile?.Email ?? string.Empty,
                 StudentName = profile?.Fullname ?? studentId,
-                ExamScore = avgScore
+                ExamScore = totalScore
             });
         }
 
@@ -513,9 +513,9 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                         capturedResult.EmailSent = true;
 
                         _logger.LogInformation(
-                            "Academic warning sent V2: Student={StudentId}, Exam={ExamId}, AvgScore={AvgScore:F1}, Level={Level}",
+                            "Academic warning sent V2: Student={StudentId}, Exam={ExamId}, TotalScore={TotalScore:F1}, Level={Level}",
                             capturedResult.StudentId, examId,
-                            problemSubmissions.Values.Average(s => s.FinalScore), warningLevel);
+                            problemSubmissions.Values.Sum(s => s.FinalScore), warningLevel);
                     }
                     catch (Exception ex)
                     {
@@ -567,7 +567,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         var result = new StudentAcademicWarningResult
         {
             StudentId = studentId,
-            ExamScore = allProblemSubmissions.Values.Average(s => s.FinalScore)
+            ExamScore = allProblemSubmissions.Values.Sum(s => s.FinalScore)
         };
 
         try
@@ -640,8 +640,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                 TriggerType = AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE,
                 InvolvedExams = new InvolvedExamsInfo
                 {
-                    ExamScores = new Dictionary<string, float> { [examId] = allProblemSubmissions.Values.Average(s => s.FinalScore) },
-                    AverageScore = allProblemSubmissions.Values.Average(s => s.FinalScore)
+                    ExamScores = new Dictionary<string, float> { [examId] = allProblemSubmissions.Values.Sum(s => s.FinalScore) },
+                    AverageScore = allProblemSubmissions.Values.Sum(s => s.FinalScore)
                 },
                 LlmAnalysis = allAnalysisEntries,
                 CreatedDate = DateTime.UtcNow,
@@ -670,9 +670,9 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             result.EmailSent = true;
 
             _logger.LogInformation(
-                "Academic warning sent: Student={StudentId}, Exam={ExamId}, Problems={ProblemCount}, AvgScore={AvgScore:F1}, Level={Level}",
+                "Academic warning sent: Student={StudentId}, Exam={ExamId}, Problems={ProblemCount}, TotalScore={TotalScore:F1}, Level={Level}",
                 studentId, examId, allProblemSubmissions.Count,
-                allProblemSubmissions.Values.Average(s => s.FinalScore), warningLevel);
+                allProblemSubmissions.Values.Sum(s => s.FinalScore), warningLevel);
 
             // Step 9: Nếu là Level 1, kiểm tra tự động có cần gửi Level 2 không
             if (warningLevel == 1 && !string.IsNullOrWhiteSpace(classroomId))
@@ -1066,7 +1066,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             : "Academic Warning: Performance Concern";
         var levelColor = warningLevel == 1 ? "#FF9800" : "#F44336";
         var levelIcon = warningLevel == 1 ? "&#9888;" : "&#128546;";
-        var avgScore = scores.Count > 0 ? scores.Average() : 0f;
+        var totalScore = scores.Count > 0 ? scores.Sum() : 0f;
 
         var escapedAnalysis = string.IsNullOrWhiteSpace(llmAnalysis)
             ? "<p><em>No specific analysis available.</em></p>"
@@ -1138,8 +1138,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             {problemTable}
 
             <div style=""background:#f5f5f5;border-radius:8px;padding:20px;text-align:center;margin:20px 0;"">
-                <p style=""margin:0;font-size:13px;color:#666;"">Average Score</p>
-                <p style=""margin:5px 0 0;font-size:40px;font-weight:bold;color:#1976D2;"">{avgScore:F1}</p>
+                <p style=""margin:0;font-size:13px;color:#666;"">Total Score</p>
+                <p style=""margin:5px 0 0;font-size:40px;font-weight:bold;color:#1976D2;"">{totalScore:F1}</p>
             </div>
 
             <h3 style=""color:#333;font-size:16px;border-bottom:2px solid #1976D2;padding-bottom:8px;"">&#128161; AI-Powered Analysis &amp; Recommendations</h3>

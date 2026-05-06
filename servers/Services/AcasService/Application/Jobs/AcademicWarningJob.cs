@@ -157,7 +157,7 @@ public class AcademicWarningJob
                     }
                 }
 
-                var avgScore = student.ProblemSubmissions.Values.Average(s => s.FinalScore);
+                var totalScore = student.ProblemSubmissions.Values.Sum(s => s.FinalScore);
                 var firstProblemId = student.ProblemSubmissions.Keys.FirstOrDefault() ?? string.Empty;
 
                 var warning = new AcademicWarning
@@ -171,8 +171,8 @@ public class AcademicWarningJob
                     TriggerType = AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE,
                     InvolvedExams = new InvolvedExamsInfo
                     {
-                        ExamScores = new Dictionary<string, float> { [examId] = avgScore },
-                        AverageScore = avgScore
+                        ExamScores = new Dictionary<string, float> { [examId] = totalScore },
+                        AverageScore = totalScore
                     },
                     LlmAnalysis = allAnalysisEntries,
                     CreatedDate = DateTime.UtcNow,
@@ -186,7 +186,7 @@ public class AcademicWarningJob
                     StudentId = student.StudentId,
                     StudentEmail = profile?.Email ?? string.Empty,
                     StudentName = profile?.Fullname ?? student.StudentId,
-                    ExamScore = avgScore,
+                    ExamScore = totalScore,
                     WarningCreated = true
                 });
             }
@@ -360,7 +360,7 @@ public class AcademicWarningJob
             await Task.WhenAll(updateTasks);
 
             // Create warning
-            var avgScore = submissions.Values.Average(s => s.FinalScore);
+            var totalScore = submissions.Values.Sum(s => s.FinalScore);
             var firstProblemId = problemSubmissions.FirstOrDefault().ProblemId ?? string.Empty;
             var allAnalysisEntries = geminiByProblem
                 .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
@@ -385,8 +385,8 @@ public class AcademicWarningJob
                 TriggerType = AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE,
                 InvolvedExams = new InvolvedExamsInfo
                 {
-                    ExamScores = new Dictionary<string, float> { [examId] = avgScore },
-                    AverageScore = avgScore
+                    ExamScores = new Dictionary<string, float> { [examId] = totalScore },
+                    AverageScore = totalScore
                 },
                 LlmAnalysis = allAnalysisEntries,
                 CreatedDate = DateTime.UtcNow,
@@ -643,7 +643,7 @@ public class AcademicWarningJob
             : "Academic Warning: Performance Concern";
         var levelColor = warningLevel == 1 ? "#FF9800" : "#F44336";
         var levelIcon = warningLevel == 1 ? "&#9888;" : "&#128546;";
-        var avgScore = scores.Count > 0 ? scores.Average() : 0f;
+        var totalScore = scores.Count > 0 ? scores.Sum() : 0f;
 
         var escapedAnalysis = string.IsNullOrWhiteSpace(llmAnalysis)
             ? "<p><em>No specific analysis available.</em></p>"
@@ -703,8 +703,8 @@ public class AcademicWarningJob
             </p>
             {problemTable}
             <div style=""background:#f5f5f5;border-radius:8px;padding:20px;text-align:center;margin:20px 0;"">
-                <p style=""margin:0;font-size:13px;color:#666;"">Average Score</p>
-                <p style=""margin:5px 0 0;font-size:40px;font-weight:bold;color:#1976D2;"">{avgScore:F1}</p>
+                <p style=""margin:0;font-size:13px;color:#666;"">Total Score</p>
+                <p style=""margin:5px 0 0;font-size:40px;font-weight:bold;color:#1976D2;"">{totalScore:F1}</p>
             </div>
             <h3 style=""color:#333;font-size:16px;border-bottom:2px solid #1976D2;padding-bottom:8px;"">&#128161; AI-Powered Analysis &amp; Recommendations</h3>
             {escapedAnalysis}
