@@ -35,4 +35,7 @@ export interface ErrorGroupRequest {
   examId: string;
   problemId: string;
   groupIds?: string[];
+  minTokenMatch?: number;
+  minSimilarity?: number;
+  excludeBaseCode?: boolean;
 }

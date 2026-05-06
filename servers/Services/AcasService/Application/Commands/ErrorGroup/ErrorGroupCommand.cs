@@ -2,18 +2,20 @@ using AcasService.Repositories.Submission;
 using AcasService.Repositories.ErrorGroup;
 using AcasService.Repositories.Problem;
 using AcasService.Models;
+using AcasService.Application.Utils;
 
 namespace AcasService.Application.Commands.ErrorGroup;
 
 public interface IErrorGroupCommand
 {
     Task<int> GroupSubmissionsByErrorsAsync(string examId, string problemId);
-    Task CheckSimilarityForProblemAsync(string examId, string problemId);
-    Task CheckSimilarityForGroupsAsync(List<string> groupIds);
+    Task CheckSimilarityForGroupsAsync(List<string> groupIds,
+        int? minTokenMatch = null, double? minSimilarity = null, bool? excludeBaseCode = null);
 
-    Task CheckSimilarityForGroupsWithExcludeCodeBaseAsync(List<string> groupIds);
+    Task CheckSimilarityForProblemAsync(string examId, string problemId,
+        int? minTokenMatch = null, double? minSimilarity = null, bool? excludeBaseCode = null);
 
-    Task CheckSimilarityForProblemWithExcludeCodeBaseAsync(string examId, string problemId);
+    Task<int> CalculateRecommendedMinTokenMatchAsync(string examId, string problemId);
 }
 
 public class ErrorGroupCommand : IErrorGroupCommand
@@ -84,23 +86,17 @@ public class ErrorGroupCommand : IErrorGroupCommand
         }
     }
 
-    public async Task CheckSimilarityForProblemWithExcludeCodeBaseAsync(string examId, string problemId)
+    public async Task CheckSimilarityForProblemAsync(string examId, string problemId,
+        int? minTokenMatch = null, double? minSimilarity = null, bool? excludeBaseCode = null)
     {
         var groups = await _errorGroupRepository.GetByProblemIdPaginatedAsync(examId, problemId);
         if (groups == null || groups.Count == 0) return;
 
-        await ProcessCheckSimilarityForGroupsWithExcludeCodeBase(groups);
+        await ProcessCheckSimilarityForGroups(groups, minTokenMatch, minSimilarity, excludeBaseCode);
     }
 
-    public async Task CheckSimilarityForProblemAsync(string examId, string problemId)
-    {
-        var groups = await _errorGroupRepository.GetByProblemIdPaginatedAsync(examId, problemId);
-        if (groups == null || groups.Count == 0) return;
-
-        await ProcessCheckSimilarityForGroups(groups);
-    }
-
-    public async Task CheckSimilarityForGroupsAsync(List<string> groupIds)
+    public async Task CheckSimilarityForGroupsAsync(List<string> groupIds,
+        int? minTokenMatch = null, double? minSimilarity = null, bool? excludeBaseCode = null)
     {
         if (groupIds == null || groupIds.Count == 0) return;
 
@@ -112,27 +108,37 @@ public class ErrorGroupCommand : IErrorGroupCommand
         }
 
         if (groups.Count == 0) return;
-        await ProcessCheckSimilarityForGroups(groups);
+        await ProcessCheckSimilarityForGroups(groups, minTokenMatch, minSimilarity, excludeBaseCode);
     }
 
-    public async Task CheckSimilarityForGroupsWithExcludeCodeBaseAsync(List<string> groupIds)
+    public async Task<int> CalculateRecommendedMinTokenMatchAsync(string examId, string problemId)
     {
-        if (groupIds == null || groupIds.Count == 0) return;
+        var submissions = await _submissionRepository.GetLatestVersionSubmissionsOfProblemInExamPaginatedAsync(examId, problemId);
+        var validSubmissions = submissions
+            .Where(s => !string.IsNullOrWhiteSpace(s.Source))
+            .ToList();
 
-        var groups = new List<Models.ErrorGroup>();
-        foreach (var id in groupIds)
+        if (validSubmissions.Count < 2) return 4;
+
+        string? baseCode = null;
+        var problem = await _problemRepository.GetByIdAsync(problemId);
+        if (problem?.CodeTemplates != null)
         {
-            var group = await _errorGroupRepository.GetByIdAsync(id);
-            if (group != null) groups.Add(group);
+            var language = validSubmissions[0].LanguageId;
+            if (!string.IsNullOrEmpty(language) && problem.CodeTemplates.TryGetValue(language, out var template))
+            {
+                baseCode = template;
+            }
         }
 
-        if (groups.Count == 0) return;
-        // await ProcessCheckSimilarityForGroups(groups);
-        await ProcessCheckSimilarityForGroupsWithExcludeCodeBase(groups);
+        return _jplagCommand.CalculateRecommendedMinTokenMatch(validSubmissions, baseCode);
     }
 
-    private async Task ProcessCheckSimilarityForGroupsWithExcludeCodeBase(List<Models.ErrorGroup> groups)
+    private async Task ProcessCheckSimilarityForGroups(List<Models.ErrorGroup> groups,
+        int? minTokenMatch = null, double? minSimilarity = null, bool? excludeBaseCode = null)
     {
+        bool shouldExcludeBaseCode = excludeBaseCode ?? true;
+
         foreach (var group in groups)
         {
             if (group.SubmissionIds == null || group.SubmissionIds.Count < 2) continue;
@@ -152,13 +158,13 @@ public class ErrorGroupCommand : IErrorGroupCommand
             string? baseCode = null;
             string? baseCodeFileName = null;
 
-            if (!string.IsNullOrEmpty(group.ProblemId))
+            if (shouldExcludeBaseCode && !string.IsNullOrEmpty(group.ProblemId))
             {
                 var problem = await _problemRepository.GetByIdAsync(group.ProblemId);
                 if (problem?.CodeTemplates != null && problem.CodeTemplates.TryGetValue(language, out var template))
                 {
                     baseCode = template;
-                    baseCodeFileName = $"basecode.{GetExtensionForLanguage(language)}";
+                    baseCodeFileName = $"basecode.{LanguageUtils.GetExtensionForLanguage(language)}";
                     _logger.LogInformation("Found base-code template for problem {ProblemId}, language {Lang} (length: {Len})",
                         group.ProblemId, language, template.Length);
                 }
@@ -174,11 +180,13 @@ public class ErrorGroupCommand : IErrorGroupCommand
 
             try
             {
-                var results = await _jplagCommand.RunSimilarityCheckWithExcludeCodeBaseAsync(
+                var results = await _jplagCommand.RunSimilarityCheckAsync(
                     language,
                     submissions,
                     baseCode,
-                    baseCodeFileName);
+                    baseCodeFileName,
+                    minTokenMatch,
+                    minSimilarity);
 
                 group.JPlagResults = results;
                 group.JPlagStatus = JPlagStatus.COMPLETED;
@@ -193,68 +201,56 @@ public class ErrorGroupCommand : IErrorGroupCommand
         }
     }
 
-    private async Task ProcessCheckSimilarityForGroups(List<Models.ErrorGroup> groups)
-    {
-        foreach (var group in groups)
-        {
-            if (group.SubmissionIds == null || group.SubmissionIds.Count < 2) continue;
 
-            _logger.LogInformation("Starting similarity check for group {GroupId}", group.Id);
-
-            var submissions = new List<Models.Submission>();
-            foreach (var sid in group.SubmissionIds)
-            {
-                var sub = await _submissionRepository.GetByIdAsync(sid);
-                if (sub != null) submissions.Add(sub);
-            }
-
-            if (submissions.Count < 2) continue;
-
-            group.JPlagStatus = JPlagStatus.RUNNING;
-            await _errorGroupRepository.UpdateAsync(group);
-
-            try
-            {
-                string language = submissions[0].LanguageId;
-                var results = await _jplagCommand.RunSimilarityCheckAsync(language, submissions);
-
-                group.JPlagResults = results;
-                group.JPlagStatus = JPlagStatus.COMPLETED;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error running JPlag for group {GroupId}", group.Id);
-                group.JPlagStatus = JPlagStatus.FAILED;
-            }
-
-            await _errorGroupRepository.UpdateAsync(group);
-        }
-    }
 
     private string GenerateErrorSignature(Models.Submission submission)
     {
         var failedResults = submission.TestResults
             .Where(tr => tr.Status != TestcaseStatus.SUCCESS)
             .OrderBy(tr => tr.TestcaseId)
-            .Select(tr => $"{tr.TestcaseId}|{tr.Status}|{(string.IsNullOrEmpty(tr.ActualOutput) ? "NoOutput" : tr.ActualOutput)}")
+            .Select(tr => {
+                string category = tr.Status.ToString();
+                string detail = "NoOutput";
+
+                if (tr.Status == TestcaseStatus.TIMEOUT)
+                {
+                    detail = "TimeOut";
+                }
+                else if (tr.Status == TestcaseStatus.COMPILE_ERROR)
+                {
+                    detail = "CompileError";
+                }
+                else if (tr.Status == TestcaseStatus.RUNTIME_ERROR)
+                {
+                    string output = (tr.ActualOutput ?? "").ToLower();
+                    if (output.Contains("dividebyzero") || output.Contains("/ by zero"))
+                        detail = "DivideByZero";
+                    else if (output.Contains("indexoutofrange") || output.Contains("indexoutofbounds") || output.Contains("out of range"))
+                        detail = "OutOfRange";
+                    else if (output.Contains("nullreference") || output.Contains("nullpointer"))
+                        detail = "NullReference";
+                    else if (output.Contains("stackoverflow"))
+                        detail = "StackOverflow";
+                    else if (output.Contains("memory") || output.Contains("out of memory"))
+                        detail = "OutOfMemory";
+                    else
+                        detail = "OtherRuntimeError";
+                }
+                else if (!string.IsNullOrEmpty(tr.ActualOutput))
+                {
+                    detail = tr.ActualOutput.Trim()
+                               .Replace("|", ":").Replace("_", "-")
+                               .Replace("#", "")
+                               .Replace("\r", "").Replace("\n", " ");
+                    
+                    if (detail.Length > 100) detail = detail.Substring(0, 97) + "...";
+                }
+
+                return $"{tr.TestcaseId}|{category}|{detail}";
+            })
             .ToList();
 
         if (failedResults.Count == 0) return string.Empty;
-        return string.Join("_", failedResults);
+        return string.Join("###", failedResults);
     }
-
-    private static string GetExtensionForLanguage(string lang) => lang.ToLower() switch
-    {
-        "csharp" or "c#" => "cs",
-        "java" => "java",
-        "python" or "python3" => "py",
-        "cpp" or "c++" or "c" => "cpp",
-        "go" or "golang" => "go",
-        "javascript" => "js",
-        "typescript" => "ts",
-        "kotlin" => "kt",
-        "rust" => "rs",
-        "swift" => "swift",
-        _ => "txt"
-    };
 }
