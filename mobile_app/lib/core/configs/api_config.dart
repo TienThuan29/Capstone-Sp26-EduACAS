@@ -39,6 +39,8 @@ class ApiConfig {
   // Examination endpoints
   static String examinationsByClassEndpoint(String classId) =>
       '/api/acas/v1/examinations/by-class/$classId';
+  static String examinationsByClassAndModeEndpoint(String classId, String mode) =>
+      '/api/acas/v1/examinations/by-class/$classId/mode/$mode';
   static String examinationByIdEndpoint(String id) =>
       '/api/acas/v1/examinations/$id';
 

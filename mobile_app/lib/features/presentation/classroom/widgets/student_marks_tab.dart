@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
+import 'package:mobile/core/configs/api_config.dart';
 import 'package:mobile/features/models/examination.dart';
 import 'package:mobile/features/models/quiz_practice.dart';
 import 'package:mobile/features/models/submission.dart';
-import 'package:mobile/features/services/examination_service.dart';
+import 'package:mobile/core/network/api_network.dart';
 import 'package:mobile/features/services/problem_service.dart';
 import 'package:mobile/features/services/quiz_practice_service.dart';
 import 'package:mobile/features/services/submission_service.dart';
@@ -28,6 +29,7 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
 
   List<_QuizMarkItem> _quizMarks = [];
   List<_ExamMarkItem> _examMarks = [];
+  List<_ExamMarkItem> _practicalMarks = [];
 
   @override
   void initState() {
@@ -52,14 +54,18 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
       final results = await Future.wait([
         QuizPracticeService.getClassroomQuizzes(widget.classroomId),
         QuizPracticeService.getAttemptsByStudent(studentId),
-        ExaminationService.getExaminationsByClassId(widget.classroomId),
+        _fetchExaminationsByMode('PRACTICAL'),
+        _fetchExaminationsByMode('EXAMINATION'),
         SubmissionService.getSubmissionsByStudentId(studentId),
       ]);
 
       final classroomQuizzes = results[0] as List<ClassroomQuiz>;
       final attempts = results[1] as List<QuizAttemptInfo>;
-      final examinations = results[2] as List<Examination>;
-      final submissions = results[3] as List<Submission>;
+      final practicalExams = results[2] as List<Examination>;
+      final examModeExaminations = results[3] as List<Examination>;
+      final submissions = results[4] as List<Submission>;
+
+      final examinations = [...practicalExams, ...examModeExaminations];
 
       final examIds = examinations.map((e) => e.id).toSet();
       final examSubmissions = submissions.where((s) => examIds.contains(s.examId)).toList();
@@ -147,7 +153,10 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
           .toList()
         ..sort((a, b) => b.sortDate.compareTo(a.sortDate));
 
-      final examMarks = examinations.map((exam) {
+      final examMarks = <_ExamMarkItem>[];
+      final practicalMarks = <_ExamMarkItem>[];
+
+      for (final exam in examinations) {
         final submissionsOfExam = examSubmissions.where((s) => s.examId == exam.id).toList();
         final latestByProblem = _latestSubmissionByProblem(submissionsOfExam);
         final scoredByProblem = <String, Submission>{
@@ -192,15 +201,26 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
 
         final canShowScore = exam.mode == ExaminationMode.practical || exam.isPublicResult;
 
-        return _ExamMarkItem(
+        final markItem = _ExamMarkItem(
           examName: exam.examName,
           score: (scoredByProblem.isEmpty || !canShowScore) ? null : aggregatedScore,
           maxScore: exam.totalMark,
           latestSubmissionAt: _latestSubmissionDate(submissionsOfExam),
           problemScores: problemScores,
+          isPractical: exam.mode == ExaminationMode.practical,
         );
-      }).where((item) => item.score != null).toList()
-        ..sort((a, b) => b.sortDate.compareTo(a.sortDate));
+
+        if (markItem.score != null) {
+          if (exam.mode == ExaminationMode.practical) {
+            practicalMarks.add(markItem);
+          } else {
+            examMarks.add(markItem);
+          }
+        }
+      }
+
+      examMarks.sort((a, b) => b.sortDate.compareTo(a.sortDate));
+      practicalMarks.sort((a, b) => b.sortDate.compareTo(a.sortDate));
 
       if (!mounted) {
         return;
@@ -208,6 +228,7 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
       setState(() {
         _quizMarks = quizMarks;
         _examMarks = examMarks;
+        _practicalMarks = practicalMarks;
         _isLoading = false;
       });
     } catch (e) {
@@ -236,7 +257,7 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
   }
 
   Widget _buildContent() {
-    final isEmpty = _quizMarks.isEmpty && _examMarks.isEmpty;
+    final isEmpty = _quizMarks.isEmpty && _examMarks.isEmpty && _practicalMarks.isEmpty;
     if (isEmpty) {
       return _buildEmptyState();
     }
@@ -263,6 +284,16 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
             _buildSectionEmpty('No exam marks yet.')
           else
             ..._examMarks.map((item) => Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: _ExamMarkCard(item: item),
+                )),
+          const SizedBox(height: 14),
+          _buildSectionTitle('Practical Marks'),
+          const SizedBox(height: 10),
+          if (_practicalMarks.isEmpty)
+            _buildSectionEmpty('No practical marks yet.')
+          else
+            ..._practicalMarks.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 10),
                   child: _ExamMarkCard(item: item),
                 )),
@@ -383,6 +414,29 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
 
     return latestByProblem;
   }
+
+  Future<List<Examination>> _fetchExaminationsByMode(String mode) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) return [];
+
+      final response = await ApiNetwork.getWithAuth(
+        endpoint: ApiConfig.examinationsByClassAndModeEndpoint(widget.classroomId, mode),
+        token: token,
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final List<dynamic> data = response['dataResponse'];
+        return data
+            .map((json) => Examination.fromJson(json as Map<String, dynamic>))
+            .toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Failed to fetch examinations by mode $mode: $e');
+      return [];
+    }
+  }
 }
 
 class _QuizMarkItem {
@@ -411,6 +465,7 @@ class _ExamMarkItem {
   final double maxScore;
   final DateTime? latestSubmissionAt;
   final List<_ProblemScoreItem> problemScores;
+  final bool isPractical;
 
   const _ExamMarkItem({
     required this.examName,
@@ -418,6 +473,7 @@ class _ExamMarkItem {
     required this.maxScore,
     required this.latestSubmissionAt,
     required this.problemScores,
+    this.isPractical = false,
   });
 
   DateTime get sortDate => latestSubmissionAt ?? DateTime.fromMillisecondsSinceEpoch(0);
