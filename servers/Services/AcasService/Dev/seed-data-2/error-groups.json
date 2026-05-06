@@ -1,0 +1,325 @@
+[
+  {
+    "id": "eg-001",
+    "problemId": "prob-001",
+    "examId": "exam-001",
+    "errorSignature": "WRONG_ANSWER_LOGIC_ERROR",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-005",
+      "subm-029"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-005",
+        "submission2Id": "subm-029",
+        "similarityScore": 0.1229627,
+        "details": [
+          {
+            "startLine1": 3,
+            "endLine1": 10,
+            "startLine2": 1,
+            "endLine2": 7,
+            "tokens": 14
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-02-15T08:35:00"
+  },
+  {
+    "id": "eg-002",
+    "problemId": "prob-001",
+    "examId": "exam-001",
+    "errorSignature": "WRONG_ANSWER_NULL_POINTER_EXCEPTION",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-023",
+      "subm-045"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-023",
+        "submission2Id": "subm-045",
+        "similarityScore": 0.098637535,
+        "details": [
+          {
+            "startLine1": 6,
+            "endLine1": 12,
+            "startLine2": 5,
+            "endLine2": 8,
+            "tokens": 9
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-02-15T08:05:00"
+  },
+  {
+    "id": "eg-005",
+    "problemId": "prob-003",
+    "examId": "exam-cs101-01",
+    "errorSignature": "WRONG_ANSWER_TESTCASE_3_OUTPUT_42",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-070",
+      "subm-304",
+      "subm-310"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-070",
+        "submission2Id": "subm-304",
+        "similarityScore": 0.69180879,
+        "details": [
+          {
+            "startLine1": 5,
+            "endLine1": 11,
+            "startLine2": 2,
+            "endLine2": 8,
+            "tokens": 9
+          },
+          {
+            "startLine1": 16,
+            "endLine1": 20,
+            "startLine2": 12,
+            "endLine2": 14,
+            "tokens": 9
+          }
+        ]
+      },
+      {
+        "submission1Id": "subm-070",
+        "submission2Id": "subm-310",
+        "similarityScore": 0.19694327,
+        "details": [
+          {
+            "startLine1": 5,
+            "endLine1": 8,
+            "startLine2": 4,
+            "endLine2": 8,
+            "tokens": 9
+          }
+        ]
+      },
+      {
+        "submission1Id": "subm-304",
+        "submission2Id": "subm-310",
+        "similarityScore": 0.23240441,
+        "details": [
+          {
+            "startLine1": 6,
+            "endLine1": 11,
+            "startLine2": 5,
+            "endLine2": 10,
+            "tokens": 12
+          },
+          {
+            "startLine1": 14,
+            "endLine1": 18,
+            "startLine2": 11,
+            "endLine2": 14,
+            "tokens": 7
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-01-20T09:30:00"
+  },
+  {
+    "id": "eg-006",
+    "problemId": "prob-003",
+    "examId": "exam-cs101-01",
+    "errorSignature": "WRONG_ANSWER_LOGIC_ERROR",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-073",
+      "subm-112"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-073",
+        "submission2Id": "subm-112",
+        "similarityScore": 0.23233038,
+        "details": [
+          {
+            "startLine1": 5,
+            "endLine1": 7,
+            "startLine2": 3,
+            "endLine2": 5,
+            "tokens": 3
+          },
+          {
+            "startLine1": 11,
+            "endLine1": 14,
+            "startLine2": 7,
+            "endLine2": 9,
+            "tokens": 4
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-01-20T09:25:00"
+  },
+  {
+    "id": "eg-007",
+    "problemId": "prob-003",
+    "examId": "exam-cs101-01",
+    "errorSignature": "WRONG_ANSWER_NULL_POINTER_EXCEPTION",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-082",
+      "subm-103"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-082",
+        "submission2Id": "subm-103",
+        "similarityScore": 0.05386104,
+        "details": [
+          {
+            "startLine1": 2,
+            "endLine1": 5,
+            "startLine2": 6,
+            "endLine2": 12,
+            "tokens": 8
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-01-20T09:45:00"
+  },
+  {
+    "id": "eg-009",
+    "problemId": "prob-006",
+    "examId": "exam-cs101-02",
+    "errorSignature": "RUNTIME_ERROR_INDEX_OUT_OF_BOUNDS",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-118",
+      "subm-142"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-118",
+        "submission2Id": "subm-142",
+        "similarityScore": 0.73034792,
+        "details": [
+          {
+            "startLine1": 5,
+            "endLine1": 8,
+            "startLine2": 6,
+            "endLine2": 8,
+            "tokens": 9
+          },
+          {
+            "startLine1": 13,
+            "endLine1": 16,
+            "startLine2": 11,
+            "endLine2": 14,
+            "tokens": 9
+          },
+          {
+            "startLine1": 18,
+            "endLine1": 20,
+            "startLine2": 18,
+            "endLine2": 20,
+            "tokens": 7
+          },
+          {
+            "startLine1": 22,
+            "endLine1": 29,
+            "startLine2": 22,
+            "endLine2": 29,
+            "tokens": 11
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-02-05T09:25:00"
+  },
+  {
+    "id": "eg-010",
+    "problemId": "prob-005",
+    "examId": "exam-cs101-02",
+    "errorSignature": "RUNTIME_ERROR_INDEX_OUT_OF_BOUNDS",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-120",
+      "subm-144"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-120",
+        "submission2Id": "subm-144",
+        "similarityScore": 0.11951366,
+        "details": [
+          {
+            "startLine1": 6,
+            "endLine1": 9,
+            "startLine2": 1,
+            "endLine2": 5,
+            "tokens": 5
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-02-05T09:00:00"
+  },
+  {
+    "id": "eg-011",
+    "problemId": "prob-006",
+    "examId": "exam-cs101-02",
+    "errorSignature": "WRONG_ANSWER_TESTCASE_3_OUTPUT_42",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-121",
+      "subm-145"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-121",
+        "submission2Id": "subm-145",
+        "similarityScore": 0.15768582,
+        "details": [
+          {
+            "startLine1": 4,
+            "endLine1": 6,
+            "startLine2": 3,
+            "endLine2": 9,
+            "tokens": 7
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-02-05T09:30:00"
+  },
+  {
+    "id": "eg-012",
+    "problemId": "prob-006",
+    "examId": "exam-cs101-02",
+    "errorSignature": "WRONG_ANSWER_LOGIC_ERROR",
+    "jPlagStatus": "COMPLETED",
+    "submissionIds": [
+      "subm-124",
+      "subm-139"
+    ],
+    "jPlagResults": [
+      {
+        "submission1Id": "subm-124",
+        "submission2Id": "subm-139",
+        "similarityScore": 0.17455971,
+        "details": [
+          {
+            "startLine1": 3,
+            "endLine1": 5,
+            "startLine2": 6,
+            "endLine2": 9,
+            "tokens": 7
+          }
+        ]
+      }
+    ],
+    "createdDate": "2026-02-05T09:40:00"
+  }
+]

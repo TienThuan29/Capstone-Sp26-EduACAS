@@ -1,0 +1,754 @@
+[
+  {
+    "id": "exam-cs101-01",
+    "examName": "Lab Test 1 - Introduction to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-009",
+    "description": "Lab test on basic input/output and arithmetic operations. Exact string comparison.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "PRACTICAL",
+    "isPublicResult": true,
+    "maxAttempts": null,
+    "useStrict": false,
+    "minScoreThreshold": 0,
+    "startDatetime": "2026-01-20T08:00:00",
+    "endDatetime": "2026-01-20T10:00:00",
+    "createdDate": "2026-01-15T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-003",
+        "mark": 4
+      }
+    ]
+  },
+  {
+    "id": "exam-cs101-02",
+    "examName": "Lab Test 2 - Introduction to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-008",
+    "description": "Lab test on control flow and string manipulation.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "PRACTICAL",
+    "isPublicResult": true,
+    "maxAttempts": null,
+    "useStrict": false,
+    "minScoreThreshold": 0,
+    "startDatetime": "2026-02-05T08:00:00",
+    "endDatetime": "2026-02-05T10:00:00",
+    "createdDate": "2026-02-01T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-004",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-005",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-006",
+        "mark": 4
+      }
+    ]
+  },
+  {
+    "id": "exam-001",
+    "examName": "Midterm Exam - Introduction to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-013",
+    "description": "Midterm covering basic I/O and string operations. Exact string comparison.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-02-15T08:00:00",
+    "endDatetime": "2026-02-15T10:00:00",
+    "createdDate": "2026-02-10T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-002",
+    "examName": "Practice Quiz - Introduction to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-014",
+    "description": "Practice session on conditional logic. Case-insensitive output.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "PRACTICAL",
+    "isPublicResult": true,
+    "maxAttempts": null,
+    "useStrict": false,
+    "minScoreThreshold": 0,
+    "startDatetime": "2026-02-20T14:00:00",
+    "endDatetime": "2026-02-20T16:00:00",
+    "createdDate": "2026-02-18T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-006",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-007",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-008",
+        "mark": 4
+      }
+    ]
+  },
+  {
+    "id": "exam-cs101-03",
+    "examName": "Final Exam - Introduction to Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-007",
+    "description": "Final exam covering all topics including functions, lists, and file I/O.",
+    "totalMark": 10,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-10T08:00:00",
+    "endDatetime": "2026-04-10T11:00:00",
+    "createdDate": "2026-04-05T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-003",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-004",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-005",
+        "mark": 2
+      }
+    ]
+  },
+  {
+    "id": "exam-003",
+    "examName": "Midterm Exam - Data Structures and Algorithms G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-015",
+    "description": "Midterm covering array operations and basic algorithms.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-03-05T08:00:00",
+    "endDatetime": "2026-03-05T10:00:00",
+    "createdDate": "2026-03-01T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-010",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-011",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-004",
+    "examName": "Lab Test - Data Structures and Algorithms G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-007",
+    "description": "Lab test on formatted output. Decimal-places comparison.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "PRACTICAL",
+    "isPublicResult": true,
+    "maxAttempts": null,
+    "useStrict": false,
+    "minScoreThreshold": 0,
+    "startDatetime": "2026-03-12T14:00:00",
+    "endDatetime": "2026-03-12T16:00:00",
+    "createdDate": "2026-03-08T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-014",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-015",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-016",
+        "mark": 4
+      }
+    ]
+  },
+  {
+    "id": "exam-005",
+    "examName": "Midterm Exam - Object-Oriented Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-013",
+    "description": "Midterm covering class, inheritance, and polymorphism concepts.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-03-15T08:00:00",
+    "endDatetime": "2026-03-15T10:00:00",
+    "createdDate": "2026-03-10T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-018",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-019",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-006",
+    "examName": "Final Exam - Object-Oriented Programming G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-008",
+    "description": "Final exam on OOP principles and design patterns.",
+    "totalMark": 10,
+    "status": "ONGOING",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-08T08:00:00",
+    "endDatetime": "2026-04-08T11:00:00",
+    "createdDate": "2026-04-03T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-022",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-023",
+        "mark": 3
+      },
+      {
+        "problemId": "prob-024",
+        "mark": 4
+      }
+    ]
+  },
+  {
+    "id": "exam-007",
+    "examName": "Midterm Exam - Database Systems G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-011",
+    "description": "Midterm covering SQL queries and database design.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-03-20T08:00:00",
+    "endDatetime": "2026-03-20T10:00:00",
+    "createdDate": "2026-03-15T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-008",
+    "examName": "Midterm Exam - Software Engineering G1",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-010",
+    "description": "Midterm covering software development lifecycle and agile methodologies.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-03-25T08:00:00",
+    "endDatetime": "2026-03-25T10:00:00",
+    "createdDate": "2026-03-20T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-009",
+    "examName": "Midterm Exam - Introduction to Programming G2",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-012",
+    "description": "Midterm covering basic programming concepts for G2.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-03-10T08:00:00",
+    "endDatetime": "2026-03-10T10:00:00",
+    "createdDate": "2026-03-05T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-010",
+    "examName": "Final Exam - Introduction to Programming G2",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-015",
+    "description": "Final exam covering all topics for G2.",
+    "totalMark": 10,
+    "status": "PENDING",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-25T08:00:00",
+    "endDatetime": "2026-04-25T11:00:00",
+    "createdDate": "2026-04-10T00:00:00",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-003",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-004",
+        "mark": 2
+      },
+      {
+        "problemId": "prob-005",
+        "mark": 2
+      }
+    ]
+  },
+  {
+    "id": "exam-011",
+    "examName": "Progress Test 1 - CLS-001",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-013",
+    "description": "Automated generated exam for Progress Test 1. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-08T01:59:30.443",
+    "endDatetime": "2026-04-08T03:59:30.443",
+    "createdDate": "2026-04-03T01:59:30.443",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-012",
+    "examName": "Progress Test 2 - CLS-001",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-011",
+    "description": "Automated generated exam for Progress Test 2. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-16T02:34:15.425",
+    "endDatetime": "2026-04-16T04:34:15.425",
+    "createdDate": "2026-04-11T02:34:15.425",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-013",
+    "examName": "Mock Exam Final - CLS-002",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-014",
+    "description": "Automated generated exam for Mock Exam Final. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-05-01T15:34:20.680",
+    "endDatetime": "2026-05-01T17:34:20.680",
+    "createdDate": "2026-04-26T15:34:20.680",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-014",
+    "examName": "Assignment 1 Submission - CLS-003",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-013",
+    "description": "Automated generated exam for Assignment 1 Submission. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-15T08:20:25.021",
+    "endDatetime": "2026-04-15T10:20:25.021",
+    "createdDate": "2026-04-10T08:20:25.021",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-015",
+    "examName": "Assignment 2 Submission - CLS-003",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-015",
+    "description": "Automated generated exam for Assignment 2 Submission. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-20T19:49:11.152",
+    "endDatetime": "2026-04-20T21:49:11.152",
+    "createdDate": "2026-04-15T19:49:11.152",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-016",
+    "examName": "Quiz 1 - Networking - CLS-004",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-011",
+    "description": "Automated generated exam for Quiz 1 - Networking. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "PENDING",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-05-06T07:46:26.185",
+    "endDatetime": "2026-05-06T09:46:26.185",
+    "createdDate": "2026-05-01T07:46:26.185",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-017",
+    "examName": "Quiz 2 - SQL Basics - CLS-004",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-011",
+    "description": "Automated generated exam for Quiz 2 - SQL Basics. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-12T15:34:38.907",
+    "endDatetime": "2026-04-12T17:34:38.907",
+    "createdDate": "2026-04-07T15:34:38.907",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-018",
+    "examName": "Software Testing Lab 1 - CLS-005",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-008",
+    "description": "Automated generated exam for Software Testing Lab 1. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-14T21:44:50.550",
+    "endDatetime": "2026-04-14T23:44:50.550",
+    "createdDate": "2026-04-09T21:44:50.550",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-019",
+    "examName": "Software Testing Lab 2 - CLS-005",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-012",
+    "description": "Automated generated exam for Software Testing Lab 2. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-05-03T16:31:47.777",
+    "endDatetime": "2026-05-03T18:31:47.777",
+    "createdDate": "2026-04-28T16:31:47.777",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-020",
+    "examName": "Retake Exam - PRF192 - CLS-001",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-008",
+    "description": "Automated generated exam for Retake Exam - PRF192. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-07T04:44:41.363",
+    "endDatetime": "2026-04-07T06:44:41.363",
+    "createdDate": "2026-04-02T04:44:41.363",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-021",
+    "examName": "Final Presentation Slot 1 - CLS-005",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-015",
+    "description": "Automated generated exam for Final Presentation Slot 1. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-20T01:54:31.586",
+    "endDatetime": "2026-04-20T03:54:31.586",
+    "createdDate": "2026-04-15T01:54:31.586",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-022",
+    "examName": "Final Presentation Slot 2 - CLS-005",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-013",
+    "description": "Automated generated exam for Final Presentation Slot 2. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-11T10:03:07.283",
+    "endDatetime": "2026-04-11T12:03:07.283",
+    "createdDate": "2026-04-06T10:03:07.283",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-023",
+    "examName": "Practical Exam - G3 - CLS-007",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-007",
+    "description": "Automated generated exam for Practical Exam - G3. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": true,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-19T05:27:18.110",
+    "endDatetime": "2026-04-19T07:27:18.110",
+    "createdDate": "2026-04-14T05:27:18.110",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-024",
+    "examName": "Practical Exam - G4 - CLS-008",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-008",
+    "description": "Automated generated exam for Practical Exam - G4. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "COMPLETED",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-05-03T14:10:38.810",
+    "endDatetime": "2026-05-03T16:10:38.810",
+    "createdDate": "2026-04-28T14:10:38.810",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  },
+  {
+    "id": "exam-025",
+    "examName": "Mini Contest - Coding Club - CLS-001",
+    "programmingLanguageId": "python",
+    "classroomId": "cls-014",
+    "description": "Automated generated exam for Mini Contest - Coding Club. Created for defense demo purpose.",
+    "totalMark": 10,
+    "status": "PENDING",
+    "mode": "EXAMINATION",
+    "isPublicResult": false,
+    "maxAttempts": 1,
+    "startDatetime": "2026-04-30T15:49:50.242",
+    "endDatetime": "2026-04-30T17:49:50.242",
+    "createdDate": "2026-04-25T15:49:50.242",
+    "problems": [
+      {
+        "problemId": "prob-001",
+        "mark": 5
+      },
+      {
+        "problemId": "prob-002",
+        "mark": 5
+      }
+    ]
+  }
+]
