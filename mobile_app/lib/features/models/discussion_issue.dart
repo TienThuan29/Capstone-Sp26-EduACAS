@@ -28,6 +28,8 @@ class DiscussionIssueListItem {
   final DateTime createdDate;
   final DiscussionIssueStatus status;
   final List<String> tags;
+  final String? refProblemId;
+  final String? refProblemTitle;
 
   DiscussionIssueListItem({
     required this.id,
@@ -39,6 +41,8 @@ class DiscussionIssueListItem {
     required this.createdDate,
     this.status = DiscussionIssueStatus.OPEN,
     this.tags = const [],
+    this.refProblemId,
+    this.refProblemTitle,
   });
 
   /// Display name: use authorDisplay.fullName if available, fallback to authorId
@@ -58,6 +62,8 @@ class DiscussionIssueListItem {
           DateTime.tryParse(json['createdDate'] ?? '') ?? DateTime.now(),
       status: _parseStatus(json['status']),
       tags: List<String>.from(json['tags'] ?? []),
+      refProblemId: json['refProblemId'],
+      refProblemTitle: json['refProblemTitle'],
     );
   }
 }
@@ -115,6 +121,7 @@ class DiscussionIssue {
   final String content;
   final List<String> attachments;
   final String refProblemId;
+  final _RefProblemInfo? refProblem;
   final DiscussionIssueStatus status;
   final int viewCount;
   final List<Comment> comments;
@@ -132,6 +139,7 @@ class DiscussionIssue {
     required this.content,
     this.attachments = const [],
     this.refProblemId = '',
+    this.refProblem,
     this.status = DiscussionIssueStatus.OPEN,
     this.viewCount = 0,
     this.comments = const [],
@@ -160,6 +168,9 @@ class DiscussionIssue {
       content: json['content'] ?? '',
       attachments: List<String>.from(json['attachments'] ?? []),
       refProblemId: json['refProblemId'] ?? '',
+      refProblem: json['refProblem'] != null
+          ? _RefProblemInfo.fromJson(json['refProblem'])
+          : null,
       status: _parseStatus(json['status']),
       viewCount: json['viewCount'] ?? 0,
       comments: (json['comments'] as List<dynamic>?)
@@ -184,4 +195,25 @@ class DiscussionIssue {
         'attachments': attachments,
         'refProblemId': refProblemId,
       };
+}
+
+/// Lightweight ref problem info embedded in discussion issue detail
+class _RefProblemInfo {
+  final String id;
+  final String title;
+  final dynamic difficulty; // number (0/1/2) or string (EASY/MEDIUM/HARD)
+
+  _RefProblemInfo({
+    required this.id,
+    required this.title,
+    this.difficulty,
+  });
+
+  factory _RefProblemInfo.fromJson(Map<String, dynamic> json) {
+    return _RefProblemInfo(
+      id: json['id'] ?? '',
+      title: json['title'] ?? '',
+      difficulty: json['difficulty'],
+    );
+  }
 }

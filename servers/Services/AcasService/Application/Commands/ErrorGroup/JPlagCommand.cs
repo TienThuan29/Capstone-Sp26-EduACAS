@@ -79,23 +79,7 @@ public class JPlagCommand : IJPlagCommand
                 string studentDir = Path.Combine(submissionDir, sub.Id);
                 Directory.CreateDirectory(studentDir);
                 string filePath = Path.Combine(studentDir, $"solution.{ext}");
-                string source = sub.Source ?? "";
-                if (language.ToLower().Contains("csharp") || language.ToLower().Contains("cs"))
-                {
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"namespace\s+[A-Za-z0-9_.]+(\s*\{)?", "namespace Unified {");
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"(public\s+|private\s+|internal\s+|partial\s+)*class\s+[A-Za-z0-9_]+", "class Submission");
-                }
-                else if (language.ToLower().Contains("python"))
-                {
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"class\s+[A-Za-z0-9_]+", "class Submission");
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"def\s+[A-Za-z0-9_]+", "def function_name");
-                }
-                else if (language.ToLower().Contains("javascript") || language.ToLower().Contains("typescript") || language.ToLower().Contains("js") || language.ToLower().Contains("ts"))
-                {
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"class\s+[A-Za-z0-9_]+", "class Submission");
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"function\s+[A-Za-z0-9_]*", "function function_name");
-                    source = System.Text.RegularExpressions.Regex.Replace(source, @"(const|let|var)\s+[A-Za-z0-9_]+", "$1 variable_name");
-                }
+                string source = NormalizeSourceForJplag(language, sub.Source ?? "");
                 await File.WriteAllTextAsync(filePath, source);
                 _logger.LogInformation("Đã tạo file: {FilePath} (Size: {Size})", filePath, sub.Source.Length);
             }
@@ -105,7 +89,8 @@ public class JPlagCommand : IJPlagCommand
                 Directory.CreateDirectory(baseCodeDir);
                 string baseCodeFile = baseCodeFileName ?? $"basecode.{ext}";
                 string baseCodePath = Path.Combine(baseCodeDir, baseCodeFile);
-                await File.WriteAllTextAsync(baseCodePath, baseCode);
+                string normalizedBaseCode = NormalizeSourceForJplag(language, baseCode);
+                await File.WriteAllTextAsync(baseCodePath, normalizedBaseCode);
                 _logger.LogWarning("Đã tạo base-code file tại: {BaseCodePath} (Size: {Size})", baseCodePath, baseCode.Length);
             }
             else
@@ -245,9 +230,7 @@ public class JPlagCommand : IJPlagCommand
     {
         string language = submissions.FirstOrDefault(s => !string.IsNullOrEmpty(s.LanguageId))?.LanguageId ?? "";
         int baseCodeTokens = string.IsNullOrWhiteSpace(baseCode) ? 0 : EstimateTokenCount(baseCode, language);
-        
         var tokenCounts = new List<int>();
-
         foreach (var sub in submissions)
         {
             if (string.IsNullOrWhiteSpace(sub.Source)) continue;
@@ -255,22 +238,69 @@ public class JPlagCommand : IJPlagCommand
             int studentCount = Math.Max(totalCount - baseCodeTokens, 1);
             if (studentCount > 0) tokenCounts.Add(studentCount);
         }
-
         if (tokenCounts.Count == 0) return 4;
-
         tokenCounts.Sort();
-        int medianTokens = tokenCounts[tokenCounts.Count / 2];
+        
+        var trimmed = tokenCounts.Count >= 4 ? TrimOutliersByIqr(tokenCounts) : tokenCounts;
+        if (trimmed.Count == 0) trimmed = tokenCounts;
 
-        int matchRule = medianTokens switch
+        int medianLength = QuantileInt(trimmed, 0.50);
+
+        double recommended = 3.0 + (Math.Log10(medianLength + 1) * Math.Log10(trimmed.Count + 1));
+
+        int finalThreshold = (int)Math.Round(recommended, MidpointRounding.AwayFromZero);
+
+        return Math.Max(3, finalThreshold);
+    }
+
+    private static string NormalizeSourceForJplag(string language, string source)
+    {
+        if (string.IsNullOrEmpty(source)) return source;
+        string lang = (language ?? "").ToLowerInvariant();
+
+        if (lang.Contains("csharp") || lang.Contains("c#") || lang == "cs")
         {
-            <= 50 => 4,     
-            <= 150 => 6,    
-            <= 300 => 8,    
-            <= 700 => 10,   
-            <= 1500 => 12,  
-            _ => 14         
-        };
-        return Math.Max(matchRule, 3);
+            source = Regex.Replace(source, @"namespace\s+[A-Za-z0-9_.]+(\s*\{)?", "namespace Unified {");
+            source = Regex.Replace(source, @"(public\s+|private\s+|internal\s+|partial\s+)*class\s+[A-Za-z0-9_]+", "class Submission");
+        }
+        else if (lang.Contains("python"))
+        {
+            source = Regex.Replace(source, @"class\s+[A-Za-z0-9_]+", "class Submission");
+            source = Regex.Replace(source, @"def\s+[A-Za-z0-9_]+", "def function_name");
+        }
+        else if (lang.Contains("javascript") || lang.Contains("typescript") || lang == "js" || lang == "ts")
+        {
+            source = Regex.Replace(source, @"class\s+[A-Za-z0-9_]+", "class Submission");
+            source = Regex.Replace(source, @"function\s+[A-Za-z0-9_]*", "function function_name");
+            source = Regex.Replace(source, @"(const|let|var)\s+[A-Za-z0-9_]+", "$1 variable_name");
+        }
+
+        return source;
+    }
+
+    private static int QuantileInt(List<int> sortedAscending, double q)
+    {
+        if (sortedAscending == null || sortedAscending.Count == 0) return 0;
+        if (q <= 0) return sortedAscending[0];
+        if (q >= 1) return sortedAscending[^1];
+        double pos = (sortedAscending.Count - 1) * q;
+        int lo = (int)Math.Floor(pos);
+        int hi = (int)Math.Ceiling(pos);
+        if (lo == hi) return sortedAscending[lo];
+        double weight = pos - lo;
+        return (int)Math.Round(sortedAscending[lo] * (1 - weight) + sortedAscending[hi] * weight);
+    }
+
+    private static List<int> TrimOutliersByIqr(List<int> sortedAscending)
+    {
+        if (sortedAscending.Count < 4) return new List<int>(sortedAscending);
+        int q1 = QuantileInt(sortedAscending, 0.25);
+        int q3 = QuantileInt(sortedAscending, 0.75);
+        int iqr = Math.Max(q3 - q1, 1);
+        double lower = q1 - 1.5 * iqr;
+        double upper = q3 + 1.5 * iqr;
+        var trimmed = sortedAscending.Where(x => x >= lower && x <= upper).ToList();
+        return trimmed.Count >= 3 ? trimmed : new List<int>(sortedAscending);
     }
 
     private async Task<List<JPlagMatch>> ExtractMatchesFromArchiveAsync(string zipPath)

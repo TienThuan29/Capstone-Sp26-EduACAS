@@ -153,12 +153,27 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           setState(() {
             _isLoading = false;
           });
-          String errorMessage = 'Login failed: ${e.toString()}';
-          if (e.toString().contains('Invalid email or password')) {
+          
+          String errorStr = e.toString()
+              .replaceAll('Exception: ', '')
+              .replaceAll('Login failed: ', '')
+              .trim();
+          
+          String errorMessage = errorStr;
+          
+          if (errorStr.contains('Invalid email or password') || 
+              errorStr.contains('Server error (400)') || 
+              errorStr.contains('Server error (401)')) {
             errorMessage = 'Invalid email or password';
-          } else if (e.toString().contains('Network error')) {
+          } else if (errorStr.contains('Network error: ')) {
+            errorMessage = errorStr.replaceFirst('Network error: ', '');
+          } else if (errorStr.contains('timeout') || 
+                     errorStr.contains('SocketException') || 
+                     errorStr.contains('Connection refused') ||
+                     errorStr.contains('Network error')) {
             errorMessage = 'Network error. Please check your connection.';
           }
+          
           _showErrorSnackBar(errorMessage);
         }
       }

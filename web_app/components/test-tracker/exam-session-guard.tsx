@@ -154,7 +154,14 @@ export function ExamSessionGuard({
       message: string,
       detail: Record<string, unknown>
     ) => {
-      if (!sessionKeys) return;
+      const logCacheKey = resolvedProblemId && sessionKeys
+        ? sessionKeys.buildPerProblemLogKey(resolvedProblemId)
+        : sessionKeys?.sessionKey ?? null;
+
+      if (!logCacheKey) {
+        console.warn('[ExamLog] handleAppendLog: no cache key available, skipping', { type });
+        return;
+      }
 
       const entry: LogEntry = {
         time: new Date().toISOString(),
@@ -165,12 +172,13 @@ export function ExamSessionGuard({
         detail,
       };
 
+      const eventDetailStr = JSON.stringify(detail ?? {});
       const payload = {
-        sessionKey: trackerKeys?.sessionKey ?? sessionKeys.sessionKey,
+        sessionKey: logCacheKey,
         entries: [
           {
             eventType: type,
-            eventDetail: JSON.stringify(detail ?? {}),
+            eventDetail: eventDetailStr,
             message,
             severity,
             isViolation,
@@ -178,6 +186,8 @@ export function ExamSessionGuard({
           },
         ],
       };
+
+      console.log('[ExamLog] handleAppendLog', { type, logCacheKey, resolvedProblemId });
 
       if (trackerKeys) {
         setLogs((prev) => {
@@ -200,9 +210,11 @@ export function ExamSessionGuard({
       }
 
       // Avoid unhandled rejections (network/offline/401 redirect/etc.)
-      void cacheExamLogs(payload).catch(() => {});
+      void cacheExamLogs(payload).catch((err) => {
+        console.error('[ExamLog] cacheExamLogs failed', { type, err, payload });
+      });
     },
-    [cacheExamLogs, sessionKeys, trackerKeys],
+    [cacheExamLogs, sessionKeys, trackerKeys, resolvedProblemId],
   );
 
   const handleForceSubmitFromExamPage = useCallback(async () => {
@@ -276,7 +288,6 @@ export function ExamSessionGuard({
         }
       }
     }
-    window.dispatchEvent(new CustomEvent('exam:reset-clipboard'));
     setOverlay(null);
   }, [overlay?.alertType, sessionKeys, serverPhase]);
 

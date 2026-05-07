@@ -646,12 +646,12 @@ function UpdateClassroomModal({
 
           <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
             <p className="mb-3 text-sm font-medium text-gray-700 dark:text-gray-300">
-              Grading Settings
+              Academic Warning Settings
             </p>
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="avgScoreThreshold">
-                  Avg score threshold
+                  Average score threshold
                 </Label>
                 <TextInput
                   id="avgScoreThreshold"

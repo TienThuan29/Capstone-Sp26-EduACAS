@@ -52,10 +52,13 @@ import { WarningModal } from "@/app/code-editor/components/warning-modal";
 import { deriveExamViolationFlag, type ExamViolationFlag } from "@/utils/exam-log-flag";
 import { useExamLog } from "@/hooks/examination/useExamLog";
 import { useAcademicWarning } from "@/hooks/academic-warning/useAcademicWarning";
+import { useToast } from "@/hooks/useToast";
 import { ExamSubmissionsTabSkeleton } from "@/components/ui/skeletons";
 
 export type SubmissionsTabContentProps = {
   examination: Examination;
+  /** Called after warnings are successfully enqueued — increments the warning tab's refresh counter. */
+  onWarningSent?: () => void;
 };
 
 const SUBMISSIONS_PAGE_SIZE = 10;
@@ -68,12 +71,14 @@ type ProblemSubmissions = {
 
 export function SubmissionsTabContent({
   examination,
+  onWarningSent,
 }: SubmissionsTabContentProps) {
   const router = useRouter();
   const { getStudentsByClassId } = useStudentClassroom();
   const { getLatestSubmissionsByExam, runAutoGrading, reGradeSubmission } = useSubmissionLecturer();
   const { getExamLogsBySubmission } = useExamLog();
   const { sendBatchAcademicWarnings } = useAcademicWarning();
+  const { showSuccess, showError } = useToast();
   const { getBySubmissionId, approve, reject, loading: regradingLoading } = useRegradingRequestManagement();
   const { getFileUrl } = usePrivateS3();
 
@@ -122,10 +127,6 @@ export function SubmissionsTabContent({
   const [lecturerNote, setLecturerNote] = useState("");
   const [handleLoading, setHandleLoading] = useState(false);
   const [showWarningModal, setShowWarningModal] = useState(false);
-  const [warningResult, setWarningResult] = useState<{
-    success: boolean;
-    message: string;
-  } | null>(null);
   const [sendingWarning, setSendingWarning] = useState(false);
   const [warningModal, setWarningModal] = useState<{ isOpen: boolean; message: string }>({
     isOpen: false,
@@ -405,12 +406,12 @@ export function SubmissionsTabContent({
 
   /**
    * Handle send batch academic warnings (level 1) for students below threshold.
+   * Enqueues the job and returns immediately with a toast notification.
    */
   const handleSendAcademicWarnings = useCallback(async () => {
     if (!classId || !examId) return;
     setShowWarningModal(false);
     setSendingWarning(true);
-    setWarningResult(null);
     try {
       const result = await sendBatchAcademicWarnings({
         classroomId: classId,
@@ -418,17 +419,15 @@ export function SubmissionsTabContent({
         warningLevel: 1,
         minScoreThreshold: 5.0,
       });
-      setWarningResult({
-        success: result.failedCount === 0,
-        message: `Academic warnings sent: ${result.processedStudents}/${result.totalStudents} students processed.`,
-      });
+      showSuccess("Academic warning job enqueued successfully. Warnings and emails will be sent in the background.");
+      onWarningSent?.();
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to send academic warnings.";
-      setWarningResult({ success: false, message });
+      const message = err instanceof Error ? err.message : "Failed to enqueue academic warnings.";
+      showError(message);
     } finally {
       setSendingWarning(false);
     }
-  }, [classId, examId, sendBatchAcademicWarnings]);
+  }, [classId, examId, sendBatchAcademicWarnings, showSuccess, showError, onWarningSent]);
 
   if (loading) {
     return <ExamSubmissionsTabSkeleton />;
@@ -540,29 +539,6 @@ export function SubmissionsTabContent({
             size="xs"
             className="mt-2 cursor-pointer"
             onClick={() => setGradingResult(null)}
-          >
-            Dismiss
-          </Button>
-        </div>
-      )}
-
-      {warningResult && (
-        <div
-          className={`mb-4 rounded-lg border p-4 ${
-            warningResult.success
-              ? "border-yellow-200 bg-yellow-50 text-yellow-800 dark:border-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200"
-              : "border-red-200 bg-red-50 text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-200"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <ExclamationTriangleIcon className="h-5 w-5" />
-            <p className="font-medium">{warningResult.message}</p>
-          </div>
-          <Button
-            color={warningResult.success ? "yellow" : "red"}
-            size="xs"
-            className="mt-2 cursor-pointer"
-            onClick={() => setWarningResult(null)}
           >
             Dismiss
           </Button>

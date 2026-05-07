@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
+import 'package:file_picker/file_picker.dart';
 import 'profile_controller.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -77,6 +78,97 @@ class _ProfileScreenState extends State<ProfileScreen>
     _fadeController.dispose();
     _staggerController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+        allowMultiple: false,
+        withData: true,
+      );
+
+      if (result == null || result.files.isEmpty) return;
+
+      final file = result.files.first;
+      
+      // Explicitly check extension
+      final extension = file.extension?.toLowerCase();
+      final allowedExtensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+      if (extension != null && !allowedExtensions.contains(extension)) {
+        if (mounted) {
+          _showErrorDialog(
+            'Invalid format',
+            'Please select an image in JPG, PNG, WebP or GIF format.',
+          );
+        }
+        return;
+      }
+
+      // Limit 5MB
+      if (file.size > 5 * 1024 * 1024) {
+        if (mounted) {
+          _showErrorDialog(
+            'File too large',
+            'The image size must be less than 5MB.',
+          );
+        }
+        return;
+      }
+
+      if (file.bytes == null) return;
+
+      final url = await _controller.uploadAvatar(
+        file.bytes!,
+        file.name,
+        () => setState(() {}),
+      );
+
+      if (url != null) {
+        final success = await _controller.updateProfile(
+          {'avatarUrl': url},
+          () => setState(() {}),
+        );
+
+        if (success && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Avatar updated successfully')),
+          );
+        } else if (mounted) {
+          _showErrorDialog('Update failed', _controller.errorMessage ?? 'Please try again.');
+        }
+      } else if (mounted) {
+        _showErrorDialog('Upload failed', _controller.errorMessage ?? 'Please try again.');
+      }
+    } catch (e) {
+      if (mounted) {
+        String cleanMessage = e.toString().replaceAll('Exception: ', '');
+        _showErrorDialog('Upload failed', cleanMessage);
+      }
+    }
+  }
+
+  void _showErrorDialog(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.error_outline, color: Colors.red),
+            const SizedBox(width: 10),
+            Text(title),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -167,7 +259,7 @@ class _ProfileScreenState extends State<ProfileScreen>
   Widget _buildHeroSection(BuildContext context, bool isTablet) {
     final profile = _controller.userProfile;
     final initials = _getInitials(profile?.fullname ?? 'U');
-    final avatarSize = isTablet ? 150.0 : 120.0;
+    final avatarSize = isTablet ? 200.0 : 160.0;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 24),
@@ -184,26 +276,135 @@ class _ProfileScreenState extends State<ProfileScreen>
               ),
             ],
           ),
-          child: CircleAvatar(
-            radius: avatarSize / 2,
-            backgroundColor: Colors.grey.shade200,
-            backgroundImage: profile?.avatarUrl != null &&
-                    profile!.avatarUrl.isNotEmpty
-                ? NetworkImage(profile.avatarUrl)
-                : null,
-            child: profile?.avatarUrl == null ||
-                    profile!.avatarUrl.isEmpty
-                ? Text(
-                    initials,
-                    style: TextStyle(
-                      fontSize: avatarSize / 2.5,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      letterSpacing: 1,
+          child: Stack(
+            children: [
+              GestureDetector(
+                onTap: () {
+                  if (profile?.avatarUrl != null && profile!.avatarUrl.isNotEmpty) {
+                    _showFullImage(context, profile.avatarUrl);
+                  }
+                },
+                child: Hero(
+                  tag: 'profile_avatar',
+                  child: Container(
+                    width: avatarSize,
+                    height: avatarSize,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade200,
+                      shape: BoxShape.circle,
+                      image: profile?.avatarUrl != null &&
+                              profile!.avatarUrl.isNotEmpty
+                          ? DecorationImage(
+                              image: NetworkImage(profile!.avatarUrl),
+                              fit: BoxFit.cover,
+                            )
+                          : null,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.15),
+                          blurRadius: 15,
+                          spreadRadius: 2,
+                          offset: const Offset(0, 5),
+                        ),
+                      ],
                     ),
-                  )
-                : null,
+                    child: profile?.avatarUrl == null ||
+                            profile!.avatarUrl.isEmpty
+                        ? Center(
+                            child: Text(
+                              initials,
+                              style: TextStyle(
+                                fontSize: avatarSize / 2.5,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                          )
+                        : null,
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: -5,
+                right: -5,
+                child: GestureDetector(
+                  onTap: _pickAndUploadAvatar,
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 3),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.3),
+                          blurRadius: 8,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: _controller.isLoading
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2,
+                            ),
+                          )
+                        : const Icon(
+                            Icons.camera_alt_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
+                  ),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullImage(BuildContext context, String imageUrl) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: EdgeInsets.zero,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                width: double.infinity,
+                height: double.infinity,
+                color: Colors.black.withValues(alpha: 0.9),
+              ),
+            ),
+            Hero(
+              tag: 'profile_avatar',
+              child: InteractiveViewer(
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+            Positioned(
+              top: 40,
+              right: 20,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
         ),
       ),
     );

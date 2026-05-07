@@ -1,0 +1,16 @@
+[
+  { "id": "qzq-037", "content": "True or False: Binary search requires the input list to be sorted.", "type": "SINGLE_CHOICE", "createdBy": "usr-lec-003" },
+  { "id": "qzq-038", "content": "Which of the following are stable sorting algorithms?", "type": "MULTIPLE_CHOICE", "createdBy": "usr-lec-003" },
+  { "id": "qzq-039", "content": "Which data structure is most suitable for implementing a FIFO queue?", "type": "SINGLE_CHOICE", "createdBy": "usr-lec-003" },
+  { "id": "qzq-040", "content": "Which of the following are divide-and-conquer algorithms?", "type": "MULTIPLE_CHOICE", "createdBy": "usr-lec-003" },
+
+  { "id": "qzq-041", "content": "True or False: In C, the expression `*ptr` accesses the value stored at the address in `ptr`.", "type": "SINGLE_CHOICE", "createdBy": "usr-lec-003" },
+  { "id": "qzq-042", "content": "Which statements about `malloc` and `free` are correct?", "type": "MULTIPLE_CHOICE", "createdBy": "usr-lec-003" },
+  { "id": "qzq-043", "content": "Which type is most appropriate to store a single ASCII character?", "type": "SINGLE_CHOICE", "createdBy": "usr-lec-003" },
+  { "id": "qzq-044", "content": "Which actions can lead to a segmentation fault in C?", "type": "MULTIPLE_CHOICE", "createdBy": "usr-lec-003" },
+
+  { "id": "qzq-045", "content": "True or False: A primary key must contain unique values.", "type": "SINGLE_CHOICE", "createdBy": "usr-lec-004" },
+  { "id": "qzq-046", "content": "Which of the following are valid SQL join types?", "type": "MULTIPLE_CHOICE", "createdBy": "usr-lec-004" },
+  { "id": "qzq-047", "content": "What does the WHERE clause do in SQL?", "type": "SINGLE_CHOICE", "createdBy": "usr-lec-004" },
+  { "id": "qzq-048", "content": "Which of the following are ACID properties?", "type": "MULTIPLE_CHOICE", "createdBy": "usr-lec-004" }
+]

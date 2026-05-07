@@ -64,4 +64,38 @@ class ProfileController {
       onUpdate();
     }
   }
+
+  Future<String?> uploadAvatar(List<int> fileBytes, String fileName, Function() onUpdate) async {
+    isLoading = true;
+    errorMessage = null;
+    onUpdate();
+
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) {
+        throw Exception('No access token found');
+      }
+
+      final response = await AuthService.uploadAvatar(
+        token: token,
+        fileBytes: fileBytes,
+        fileName: fileName,
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final url = response['dataResponse']['url'] as String?;
+        return url;
+      } else {
+        errorMessage = response['message'] ?? 'Upload failed';
+        return null;
+      }
+    } catch (e) {
+      errorMessage = e.toString();
+      return null;
+    } finally {
+      isLoading = false;
+      onUpdate();
+    }
+  }
 }
+

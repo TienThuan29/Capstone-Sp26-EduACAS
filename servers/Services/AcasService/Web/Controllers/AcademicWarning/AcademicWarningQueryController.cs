@@ -68,6 +68,29 @@ public class AcademicWarningQueryController : ControllerBase
         }
     }
 
+    [HttpGet("exam/{examId}")]
+    public async Task<ActionResult<ApiResponse<List<AcademicWarningResponse>>>> GetByExamId(
+        [FromRoute] string examId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(examId))
+                return ResponseUtil.Error<List<AcademicWarningResponse>>("Exam ID is required", 400);
+
+            var warnings = await _query.GetByExamIdAsync(examId);
+            return ResponseUtil.Success(warnings, "Academic warnings retrieved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting academic warnings for exam {ExamId}", examId);
+            return ResponseUtil.Error<List<AcademicWarningResponse>>(
+                "Failed to retrieve academic warnings.",
+                500,
+                error: ex.Message,
+                stack: ex.StackTrace);
+        }
+    }
+
     [HttpGet("{id}")]
     public async Task<ActionResult<ApiResponse<AcademicWarningResponse>>> GetById([FromRoute] string id)
     {

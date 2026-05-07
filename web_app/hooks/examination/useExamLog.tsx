@@ -48,10 +48,15 @@ export const useExamLog = () => {
   const getExamLogsBySubmission = useCallback(
     async (submissionId: string): Promise<ExamLogResponse[]> => {
       if (!submissionId) return [];
+      console.log("[useExamLog] GET request:", Api.ExamLog.GET_BY_SUBMISSION(submissionId));
       const response = await axiosInstance.get<ApiResponse<ExamLogResponse[]>>(
         Api.ExamLog.GET_BY_SUBMISSION(submissionId),
       );
-      return response.data?.dataResponse ?? [];
+      console.log("[useExamLog] Raw response:", response);
+      console.log("[useExamLog] response.data:", response.data);
+      const logs = response.data?.dataResponse ?? [];
+      console.log("[useExamLog] Parsed logs:", logs);
+      return logs;
     },
     [axiosInstance]
   );
