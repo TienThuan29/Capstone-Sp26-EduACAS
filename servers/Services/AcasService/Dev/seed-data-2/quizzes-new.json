@@ -1,0 +1,59 @@
+[
+  {
+    "id": "quiz-009",
+    "subjectId": "sub-008",
+    "classroomId": "cls-013",
+    "title": "Algorithm Design with Python Quiz",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-04-28T08:00:00",
+    "endDatetime": "2026-04-28T10:00:00",
+    "createdBy": "usr-lec-003",
+    "createdAt": "2026-04-20T10:00:00",
+    "updatedAt": "2026-04-28T10:05:00",
+    "questions": [
+      { "quizId": "quiz-009", "questionId": "qzq-037", "marks": 2.5, "displayOrder": 1 },
+      { "quizId": "quiz-009", "questionId": "qzq-038", "marks": 2.5, "displayOrder": 2 },
+      { "quizId": "quiz-009", "questionId": "qzq-039", "marks": 2.5, "displayOrder": 3 },
+      { "quizId": "quiz-009", "questionId": "qzq-040", "marks": 2.5, "displayOrder": 4 }
+    ]
+  },
+  {
+    "id": "quiz-010",
+    "subjectId": "sub-013",
+    "classroomId": "cls-014",
+    "title": "C Programming Fundamentals Quiz",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-05-01T08:00:00",
+    "endDatetime": "2026-05-01T10:00:00",
+    "createdBy": "usr-lec-003",
+    "createdAt": "2026-04-24T10:00:00",
+    "updatedAt": "2026-05-01T10:05:00",
+    "questions": [
+      { "quizId": "quiz-010", "questionId": "qzq-041", "marks": 2.5, "displayOrder": 1 },
+      { "quizId": "quiz-010", "questionId": "qzq-042", "marks": 2.5, "displayOrder": 2 },
+      { "quizId": "quiz-010", "questionId": "qzq-043", "marks": 2.5, "displayOrder": 3 },
+      { "quizId": "quiz-010", "questionId": "qzq-044", "marks": 2.5, "displayOrder": 4 }
+    ]
+  },
+  {
+    "id": "quiz-011",
+    "subjectId": "sub-004",
+    "classroomId": "cls-015",
+    "title": "Database Systems Quiz",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-05-03T08:00:00",
+    "endDatetime": "2026-05-03T10:00:00",
+    "createdBy": "usr-lec-004",
+    "createdAt": "2026-04-26T10:00:00",
+    "updatedAt": "2026-05-03T10:05:00",
+    "questions": [
+      { "quizId": "quiz-011", "questionId": "qzq-045", "marks": 2.5, "displayOrder": 1 },
+      { "quizId": "quiz-011", "questionId": "qzq-046", "marks": 2.5, "displayOrder": 2 },
+      { "quizId": "quiz-011", "questionId": "qzq-047", "marks": 2.5, "displayOrder": 3 },
+      { "quizId": "quiz-011", "questionId": "qzq-048", "marks": 2.5, "displayOrder": 4 }
+    ]
+  }
+]
