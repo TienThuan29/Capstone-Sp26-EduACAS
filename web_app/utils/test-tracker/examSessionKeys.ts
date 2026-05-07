@@ -8,15 +8,13 @@ export type ExamSessionStorageKeys = {
   aggregatedViolationsStorageKey: string;
   aggregatedLogsStorageKey: string;
   aggregatedAnswerStorageKey: string;
-  /** Builds a Redis cache key for exam logs that includes the problemId, so each problem's logs are cached separately. */
-  buildPerProblemLogKey: (problemId: string) => string;
 };
 
 export type ExamSessionPhase = 'verify' | 'active' | 'locked' | 'completed';
 
 export function buildExamSessionStorageKeys(examId: string, studentId: string): ExamSessionStorageKeys {
   const prefix = `exam-session:${examId}:${studentId}`;
-  const base: Omit<ExamSessionStorageKeys, 'buildPerProblemLogKey'> = {
+  return {
     examId,
     studentId,
     sessionKey: prefix,
@@ -26,10 +24,6 @@ export function buildExamSessionStorageKeys(examId: string, studentId: string): 
     aggregatedViolationsStorageKey: `${prefix}:violations`,
     aggregatedLogsStorageKey: `${prefix}:aggregate-logs`,
     aggregatedAnswerStorageKey: `${prefix}:aggregate-answer`,
-  };
-  return {
-    ...base,
-    buildPerProblemLogKey: (problemId: string) => `exam-tracker:${examId}:${problemId}:${studentId}`,
   };
 }
 

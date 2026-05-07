@@ -4,7 +4,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/features/models/announcement.dart';
 import 'package:mobile/features/models/classroom.dart';
-import 'package:mobile/features/presentation/classroom/student_classroom_hub_page.dart';
+import 'package:mobile/features/presentation/classroom/student_classroom_detail_page.dart';
 import 'package:mobile/features/presentation/discussion/discussion_detail_page.dart';
 import 'package:mobile/features/presentation/examination/examination_detail_page.dart';
 import 'package:mobile/features/presentation/problem/problem_detail_page.dart';
@@ -311,7 +311,7 @@ class _AnnouncementPageState extends State<AnnouncementPage> {
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (_) => StudentClassroomHubPage(
+        builder: (_) => StudentClassroomDetailPage(
           classroom: classroom!,
           initialTabIndex: initialTabIndex,
         ),

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { loader } from '@monaco-editor/react';
 import type { OnMount, OnChange } from '@monaco-editor/react';
@@ -81,7 +81,7 @@ function mapToMonaco(item: LspCompletionItem): monaco.languages.CompletionItem {
 }
 
 export function EditorPanel() {
-  const { editorState, setCode, monacoEditorRef, handleEditorMountInternal } = useEditorContext();
+  const { editorState, setCode } = useEditorContext();
   const { formatCode } = useCodeFormatter();
 
   const languageId = editorState.language.id;
@@ -107,8 +107,6 @@ export function EditorPanel() {
   const handleEditorMount: OnMount = useCallback((editor, monacoInstance) => {
     // Store Monaco instance ref for syntax checking
     monacoRef.current = monacoInstance;
-    // Notify anti-cheat guards via EditorContext
-    handleEditorMountInternal(editor);
 
     // Set up the text model for syntax checking
     setModel(editor.getModel());
@@ -212,12 +210,11 @@ export function EditorPanel() {
   );
 
   // Cleanup syntax check markers on unmount
-  useEffect(() => {
+  React.useEffect(() => {
     return () => {
       clear();
-      monacoEditorRef.current = null;
     };
-  }, [clear, monacoEditorRef]);
+  }, [clear]);
 
   return (
     <div className="relative h-full w-full">

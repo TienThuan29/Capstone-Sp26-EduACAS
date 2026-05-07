@@ -249,25 +249,12 @@ enum ExaminationMode {
   final int value;
   const ExaminationMode(this.value);
 
-  static ExaminationMode fromValue(dynamic value) {
-    if (value is int) {
-      return ExaminationMode.values.firstWhere(
-        (mode) => mode.value == value,
-        orElse: () => ExaminationMode.practical,
-      );
-    }
-    if (value is String) {
-      final lower = value.trim().toLowerCase();
-      if (lower == 'practical' || lower == '0') return ExaminationMode.practical;
-      if (lower == 'examination' || lower == '1' || lower == 'exam') return ExaminationMode.examination;
-    }
-    if (value is num) {
-      return ExaminationMode.values.firstWhere(
-        (mode) => mode.value == value.toInt(),
-        orElse: () => ExaminationMode.practical,
-      );
-    }
-    return ExaminationMode.practical;
+  static ExaminationMode fromValue(int value) {
+    final parsedValue = _asInt(value);
+    return ExaminationMode.values.firstWhere(
+      (mode) => mode.value == parsedValue,
+      orElse: () => ExaminationMode.practical,
+    );
   }
 }
 
@@ -347,7 +334,7 @@ class Examination {
       isPublicResult: _asBool(json['isPublicResult']),
       totalMark: _asDouble(json['totalMark']),
       status: ExaminationStatus.fromValue(_asInt(json['status'])),
-      mode: ExaminationMode.fromValue(json['mode']),
+      mode: ExaminationMode.fromValue(_asInt(json['mode'])),
       isDeleted: _asBool(json['isDeleted']),
       createdDate: json['createdDate'] ?? '',
       updatedDate: json['updatedDate'] ?? '',

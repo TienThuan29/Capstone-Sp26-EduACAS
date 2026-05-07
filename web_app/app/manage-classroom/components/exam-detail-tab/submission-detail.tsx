@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useRef } from "react";
-import clsx from "clsx";
+import { useState, useEffect, useCallback } from "react";
 import {
   Button,
   Spinner,
@@ -18,9 +17,6 @@ import {
   Select,
 } from "flowbite-react";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
-import { DocumentTextIcon } from "@heroicons/react/24/outline";
-import { X } from "lucide-react";
-import { CustomPagination } from "@/components/custom-pagination";
 import type {
   ExamLogResponse,
   KeystrokeRecordResponse,
@@ -33,110 +29,6 @@ import { useExamLog } from "@/hooks/examination/useExamLog";
 import { formatDate, formatGradedDate } from "@/utils/datetime-utils";
 import { deriveExamViolationFlag } from "@/utils/exam-log-flag";
 import { SubmissionDetailTabSkeleton } from "@/components/ui/skeletons";
-
-interface DropdownOption {
-  value: string;
-  label: string;
-  dotColor?: string;
-  bgColor?: string;
-  textColor?: string;
-}
-
-interface StyledDropdownProps {
-  label: string;
-  options: DropdownOption[];
-  value: string;
-  onChange: (value: string) => void;
-  minWidth?: string;
-}
-
-function StyledDropdown({ label, options, value, onChange, minWidth = "140px" }: StyledDropdownProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef<HTMLDivElement>(null);
-
-  const selectedOption = options.find((opt) => opt.value === value) ?? options[0];
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
-
-  return (
-    <div className="relative" ref={dropdownRef}>
-      <label className="mb-0.5 block text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
-        {label}
-      </label>
-      <button
-        type="button"
-        onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition-all hover:border-gray-300 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
-        style={{ minWidth }}
-      >
-        {selectedOption.dotColor && (
-          <span
-            className="h-2 w-2 shrink-0 rounded-full"
-            style={{ backgroundColor: selectedOption.dotColor }}
-          />
-        )}
-        <span className="flex-1 text-left">{selectedOption.label}</span>
-        <svg
-          className={`h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-          strokeWidth={2.5}
-        >
-          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-        </svg>
-      </button>
-
-      {isOpen && (
-        <div className="absolute left-0 top-full z-20 mt-1 min-w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-xl dark:border-gray-700 dark:bg-gray-800">
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => { onChange(opt.value); setIsOpen(false); }}
-                className={clsx(
-                  "flex w-full items-center gap-2.5 px-3 py-2 text-left text-xs transition-colors hover:bg-gray-50 dark:hover:bg-gray-700",
-                  isSelected
-                    ? "bg-blue-50 font-semibold text-blue-700 dark:bg-blue-900/30 dark:text-blue-400"
-                    : "text-gray-700 dark:text-gray-300"
-                )}
-              >
-                {opt.dotColor && (
-                  <span
-                    className="h-2 w-2 shrink-0 rounded-full"
-                    style={{ backgroundColor: opt.dotColor }}
-                  />
-                )}
-                <span className={clsx(
-                  "rounded px-1.5 py-0.5 font-bold uppercase tracking-wider",
-                  opt.bgColor,
-                  opt.textColor
-                )}>
-                  {opt.label}
-                </span>
-                {isSelected && (
-                  <svg className="ml-auto h-3.5 w-3.5 text-blue-500 dark:text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                )}
-              </button>
-            );
-          })}
-        </div>
-      )}
-    </div>
-  );
-}
 
 export type SubmissionDetailProps = {
   submissionId: string;
@@ -271,14 +163,10 @@ export function SubmissionDetail({
   const [loading, setLoading] = useState(false);
   const [logsLoading, setLogsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [severityFilter, setSeverityFilter] = useState<string>("all");
-  const [violationFilter, setViolationFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
+  const [severityFilter, setSeverityFilter] = useState<"all" | "info" | "warning" | "critical">("all");
+  const [violationFilter, setViolationFilter] = useState<"all" | "only_violation" | "only_non_violation">("all");
   const [versions, setVersions] = useState<SubmissionResponse[]>([]);
   const [loadingVersions, setLoadingVersions] = useState(false);
-  const [logPage, setLogPage] = useState(1);
-  const LOGS_PER_PAGE = 10;
-  const [selectedLogDetail, setSelectedLogDetail] = useState<{ log: ExamLogResponse; parsedDetail: Record<string, unknown> } | null>(null);
 
   const fetchSubmission = useCallback(async () => {
     setLoading(true);
@@ -322,18 +210,16 @@ export function SubmissionDetail({
     setLogsLoading(true);
     void (async () => {
       try {
-        const idToQuery = submission?.id || submissionId;
-        console.log("[DEBUG] Fetching exam logs for submissionId:", idToQuery);
-        const logs = await getExamLogsBySubmission(idToQuery);
-        console.log("[DEBUG] Received exam logs:", logs);
+        const logs = await getExamLogsBySubmission(submission?.id || submissionId);
         if (!cancelled) {
           setExamLogs(logs);
-          setLogsLoading(false);
         }
-      } catch (err) {
-        console.error("[DEBUG] Failed to fetch exam logs:", err);
+      } catch {
         if (!cancelled) {
           setExamLogs([]);
+        }
+      } finally {
+        if (!cancelled) {
           setLogsLoading(false);
         }
       }
@@ -342,7 +228,7 @@ export function SubmissionDetail({
     return () => {
       cancelled = true;
     };
-  }, [submissionId, submission?.id]);
+  }, [getExamLogsBySubmission, submissionId, submission?.id]);
 
   const results = submission?.testResults ?? [];
 
@@ -358,18 +244,8 @@ export function SubmissionDetail({
       violationFilter === "all"
       || (violationFilter === "only_violation" && log.isViolation)
       || (violationFilter === "only_non_violation" && !log.isViolation);
-    const passType = typeFilter === "all" || log.eventType === typeFilter;
-    return passSeverity && passViolation && passType;
+    return passSeverity && passViolation;
   });
-
-  // Extract unique event types for the dropdown
-  const uniqueEventTypes = Array.from(new Set(examLogs.map((log) => log.eventType))).sort();
-
-  const logTotalPages = Math.max(1, Math.ceil(filteredExamLogs.length / LOGS_PER_PAGE));
-  const safeLogPage = Math.min(logPage, logTotalPages);
-  const paginatedLogs = [...filteredExamLogs]
-    .sort((a, b) => new Date(a.clientTimestamp).getTime() - new Date(b.clientTimestamp).getTime())
-    .slice((safeLogPage - 1) * LOGS_PER_PAGE, safeLogPage * LOGS_PER_PAGE);
   const violationFlag = deriveExamViolationFlag(examLogs);
   const flagColor =
     violationFlag === "CRITICAL"
@@ -508,21 +384,19 @@ export function SubmissionDetail({
                 </div>
                 <div>
                   <span className="text-gray-500 dark:text-gray-400">Status</span>
-                  <p className={`mt-0.5 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider ${
-                    submission.status === "GRADED"
-                      ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                      : submission.status === "PENDING"
-                        ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
-                        : "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400"
-                  }`}>
-                    <span className={`h-1.5 w-1.5 rounded-full ${
-                      submission.status === "GRADED"
-                        ? "bg-emerald-500"
-                        : submission.status === "PENDING"
-                          ? "bg-amber-500"
-                          : "bg-gray-500"
-                    }`}></span>
-                    {submission.status}
+                  <p>
+                    <Badge
+                      color={
+                        submission.status === "GRADED"
+                          ? "success"
+                          : submission.status === "PENDING"
+                            ? "warning"
+                            : "gray"
+                      }
+                      size="sm"
+                    >
+                      {submission.status}
+                    </Badge>
                   </p>
                 </div>
               </div>
@@ -567,47 +441,36 @@ export function SubmissionDetail({
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    <div className="mb-1 flex items-center justify-between">
-                      <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-                        {filteredExamLogs.length} of {examLogs.length} logs
-                      </p>
-                    </div>
-                    <div className="mb-4 flex flex-wrap items-end gap-4 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                      <StyledDropdown
-                        label="Severity"
-                        value={severityFilter}
-                        onChange={(val) => { setSeverityFilter(val); setLogPage(1); }}
-                        options={[
-                          { value: "all", label: "All", dotColor: "#9CA3AF" },
-                          { value: "info", label: "Info", dotColor: "#3B82F6", bgColor: "bg-blue-100 dark:bg-blue-900/40", textColor: "text-blue-700 dark:text-blue-400" },
-                          { value: "warning", label: "Warning", dotColor: "#F59E0B", bgColor: "bg-amber-100 dark:bg-amber-900/40", textColor: "text-amber-700 dark:text-amber-400" },
-                          { value: "critical", label: "Critical", dotColor: "#EF4444", bgColor: "bg-red-100 dark:bg-red-900/40", textColor: "text-red-700 dark:text-red-400" },
-                        ]}
-                        minWidth="140px"
-                      />
-                      <div className="h-8 w-px bg-gray-200 self-center dark:bg-gray-700"></div>
-                      <StyledDropdown
-                        label="Violation"
-                        value={violationFilter}
-                        onChange={(val) => { setViolationFilter(val); setLogPage(1); }}
-                        options={[
-                          { value: "all", label: "All", dotColor: "#9CA3AF" },
-                          { value: "only_violation", label: "Violations", dotColor: "#EF4444", bgColor: "bg-red-100 dark:bg-red-900/40", textColor: "text-red-700 dark:text-red-400" },
-                          { value: "only_non_violation", label: "Safe", dotColor: "#10B981", bgColor: "bg-emerald-100 dark:bg-emerald-900/40", textColor: "text-emerald-700 dark:text-emerald-400" },
-                        ]}
-                        minWidth="140px"
-                      />
-                      <div className="h-8 w-px bg-gray-200 self-center dark:bg-gray-700"></div>
-                      <StyledDropdown
-                        label="Type"
-                        value={typeFilter}
-                        onChange={(val) => { setTypeFilter(val); setLogPage(1); }}
-                        options={[
-                          { value: "all", label: "All Types", dotColor: "#9CA3AF" },
-                          ...uniqueEventTypes.map((type) => ({ value: type, label: type, dotColor: "#6366F1" })),
-                        ]}
-                        minWidth="160px"
-                      />
+                    <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                      <div>
+                        <Label htmlFor="log-severity-filter" className="mb-1 block">
+                          Severity
+                        </Label>
+                        <Select
+                          id="log-severity-filter"
+                          value={severityFilter}
+                          onChange={(e) => setSeverityFilter(e.target.value as "all" | "info" | "warning" | "critical")}
+                        >
+                          <option value="all">All</option>
+                          <option value="info">Info</option>
+                          <option value="warning">Warning</option>
+                          <option value="critical">Critical</option>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="log-violation-filter" className="mb-1 block">
+                          Violation
+                        </Label>
+                        <Select
+                          id="log-violation-filter"
+                          value={violationFilter}
+                          onChange={(e) => setViolationFilter(e.target.value as "all" | "only_violation" | "only_non_violation")}
+                        >
+                          <option value="all">All</option>
+                          <option value="only_violation">Only violations</option>
+                          <option value="only_non_violation">Only non-violations</option>
+                        </Select>
+                      </div>
                     </div>
 
                     {filteredExamLogs.length === 0 ? (
@@ -615,238 +478,52 @@ export function SubmissionDetail({
                         No logs match current filters.
                       </p>
                     ) : (
-                      <>
-                        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-                        <div className="overflow-x-auto">
-                      <Table hoverable className="[&_th]:bg-gray-50 dark:[&_th]:bg-gray-900 [&_th]:border-gray-100 dark:[&_th]:border-gray-700">
-                        <TableHead>
-                          <TableRow className="border-b border-gray-100 dark:border-gray-700">
-                            <TableHeadCell className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Time</TableHeadCell>
-                            <TableHeadCell className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Type</TableHeadCell>
-                            <TableHeadCell className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Severity</TableHeadCell>
-                            <TableHeadCell className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Violation</TableHeadCell>
-                            <TableHeadCell className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Message</TableHeadCell>
-                            <TableHeadCell className="w-16 text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400">Content</TableHeadCell>
-                          </TableRow>
-                        </TableHead>
-                        <TableBody>
-                          {[...paginatedLogs]
-                            .map((log) => {
-                              let parsedDetail: Record<string, unknown> = {};
-                              try {
-                                parsedDetail = JSON.parse(log.eventDetail || '{}');
-                              } catch { /* ignore */ }
-                              return { log, parsedDetail };
-                            })
-                            .map(({ log, parsedDetail }) => (
-                            <TableRow key={log.id} className="group transition-colors hover:bg-blue-50/50 dark:hover:bg-gray-700/40">
-                              <TableCell className="whitespace-nowrap py-3">
-                                <div className="flex flex-col">
-                                  <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    {formatDate(log.clientTimestamp).split(' ')[0]}
-                                  </span>
-                                  <span className="text-xs text-gray-400 dark:text-gray-500">
-                                    {formatDate(log.clientTimestamp).split(' ')[1] ?? ''}
-                                  </span>
-                                </div>
+                      <div className="overflow-x-auto">
+                    <Table hoverable>
+                      <TableHead>
+                        <TableRow>
+                          <TableHeadCell>Time</TableHeadCell>
+                          <TableHeadCell>Type</TableHeadCell>
+                          <TableHeadCell>Severity</TableHeadCell>
+                          <TableHeadCell>Violation</TableHeadCell>
+                          <TableHeadCell>Message</TableHeadCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {[...filteredExamLogs]
+                          .sort((a, b) => new Date(a.clientTimestamp).getTime() - new Date(b.clientTimestamp).getTime())
+                          .map((log) => (
+                            <TableRow key={log.id}>
+                              <TableCell className="whitespace-nowrap">
+                                {formatDate(log.clientTimestamp)}
                               </TableCell>
-                              <TableCell className="py-3">
-                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1 font-mono text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
-                                  {log.eventType}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-3">
-                                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
-                                  String(log.severity).toLowerCase() === "critical"
-                                    ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                                    : String(log.severity).toLowerCase() === "warning"
-                                      ? "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400"
-                                      : "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400"
-                                }`}>
-                                  <span className={`h-1.5 w-1.5 rounded-full ${
-                                    String(log.severity).toLowerCase() === "critical"
-                                      ? "bg-red-500"
-                                      : String(log.severity).toLowerCase() === "warning"
-                                        ? "bg-amber-500"
-                                        : "bg-blue-500"
-                                  }`}></span>
-                                  {String(log.severity).toUpperCase()}
-                                </span>
-                              </TableCell>
-                              <TableCell className="py-3">
-                                <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wider ${
-                                  log.isViolation
-                                    ? "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-400"
-                                    : "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-400"
-                                }`}>
-                                  <span className={`h-1.5 w-1.5 rounded-full ${log.isViolation ? "bg-red-500" : "bg-emerald-500"}`}></span>
-                                  {log.isViolation ? "Yes" : "No"}
-                                </span>
-                              </TableCell>
-                              <TableCell className="max-w-[480px] py-3">
-                                <p className="truncate text-sm text-gray-700 dark:text-gray-300" title={log.message}>
-                                  {log.message}
-                                </p>
-                              </TableCell>
-                              <TableCell className="py-3">
-                                {parsedDetail.content ? (
-                                  <button
-                                    onClick={() => setSelectedLogDetail({ log, parsedDetail })}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600 transition-all duration-200 hover:scale-105 hover:border-blue-400 hover:bg-blue-100 hover:shadow-sm dark:border-blue-800 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:border-blue-600 dark:hover:bg-blue-900/50"
-                                    title="View content details"
-                                  >
-                                    <DocumentTextIcon className="h-3.5 w-3.5" />
-                                    <span>View</span>
-                                  </button>
-                                ) : (
-                                  <span className="text-gray-300 dark:text-gray-600">—</span>
-                                )}
-                              </TableCell>
-                            </TableRow>
-                            ))}
-                        </TableBody>
-                      </Table>
-                        </div>
-                        </div>
-                        {logTotalPages > 1 && (
-                          <CustomPagination
-                            currentPage={logPage}
-                            totalPages={logTotalPages}
-                            onPageChange={setLogPage}
-                          />
-                        )}
-                      </>
-                    )}
-
-                    {selectedLogDetail && (
-                      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                        <div
-                          className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-                          onClick={() => setSelectedLogDetail(null)}
-                        />
-                        <div className="relative z-10 w-full max-w-2xl animate-in fade-in zoom-in-95 duration-200">
-                          {/* Modal Card */}
-                          <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-700 dark:bg-gray-800">
-                            {/* Header */}
-                            <div className="flex items-center justify-between border-b border-gray-100 bg-linear-to-r from-blue-50 to-indigo-50 px-6 py-4 dark:border-gray-700 dark:from-gray-800 dark:to-gray-800">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600 dark:bg-blue-900/50 dark:text-blue-400">
-                                  <DocumentTextIcon className="h-5 w-5" />
-                                </div>
-                                <div>
-                                  <h3 className="text-base font-bold text-gray-900 dark:text-white">
-                                    Log Detail
-                                  </h3>
-                                  <p className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                                    Event #{selectedLogDetail.log.id?.slice(0, 8) ?? '—'}
-                                  </p>
-                                </div>
-                              </div>
-                              <button
-                                onClick={() => setSelectedLogDetail(null)}
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 transition-all duration-200 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-200"
-                              >
-                                <X className="h-5 w-5" />
-                              </button>
-                            </div>
-
-                            {/* Body */}
-                            <div className="overflow-y-auto p-6 max-h-[60vh]">
-                              {/* Badges Row */}
-                              <div className="mb-5 flex flex-wrap items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-gray-600 dark:bg-gray-700 dark:text-gray-300">
-                                  <span className="h-1.5 w-1.5 rounded-full bg-gray-400"></span>
-                                  {selectedLogDetail.log.eventType}
-                                </span>
+                              <TableCell className="font-mono text-xs">{log.eventType}</TableCell>
+                              <TableCell>
                                 <Badge
                                   color={
-                                    String(selectedLogDetail.log.severity).toLowerCase() === "critical"
+                                    String(log.severity).toLowerCase() === "critical"
                                       ? "failure"
-                                      : String(selectedLogDetail.log.severity).toLowerCase() === "warning"
+                                      : String(log.severity).toLowerCase() === "warning"
                                         ? "warning"
                                         : "info"
                                   }
+                                  size="sm"
                                 >
-                                  {String(selectedLogDetail.log.severity).toUpperCase()}
+                                  {String(log.severity).toUpperCase()}
                                 </Badge>
-                                <Badge color={selectedLogDetail.log.isViolation ? "failure" : "success"}>
-                                  {selectedLogDetail.log.isViolation ? "Violation" : "Non-violation"}
+                              </TableCell>
+                              <TableCell>
+                                <Badge color={log.isViolation ? "failure" : "success"} size="sm">
+                                  {log.isViolation ? "Yes" : "No"}
                                 </Badge>
-                              </div>
-
-                              {/* Meta Grid */}
-                              <div className="mb-5 grid grid-cols-2 gap-3 rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                                <div>
-                                  <p className="mb-1 text-xs font-medium uppercase tracking-wider text-gray-400">Time</p>
-                                  <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                    {formatDate(selectedLogDetail.log.clientTimestamp)}
-                                  </p>
-                                </div>
-                                {!!selectedLogDetail.parsedDetail.length && (
-                                  <div>
-                                    <p className="mb-1 text-xs font-medium uppercase tracking-wider text-gray-400">Length</p>
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                      {String(selectedLogDetail.parsedDetail.length)} chars
-                                    </p>
-                                  </div>
-                                )}
-                                {!!selectedLogDetail.parsedDetail.from && (
-                                  <div>
-                                    <p className="mb-1 text-xs font-medium uppercase tracking-wider text-gray-400">From</p>
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                      {String(selectedLogDetail.parsedDetail.from)}
-                                    </p>
-                                  </div>
-                                )}
-                                {!!selectedLogDetail.parsedDetail.to && (
-                                  <div>
-                                    <p className="mb-1 text-xs font-medium uppercase tracking-wider text-gray-400">To</p>
-                                    <p className="text-sm font-semibold text-gray-900 dark:text-white">
-                                      {String(selectedLogDetail.parsedDetail.to)}
-                                    </p>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Message */}
-                              <div className="mb-5">
-                                <p className="mb-2 text-xs font-medium uppercase tracking-wider text-gray-400">Message</p>
-                                <div className="rounded-xl border border-gray-100 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-900/50">
-                                  <p className="whitespace-pre-wrap text-sm text-gray-700 dark:text-gray-300 [word-break:break-word]">
-                                    {selectedLogDetail.log.message}
-                                  </p>
-                                </div>
-                              </div>
-
-                              {/* Content */}
-                              {!!selectedLogDetail.parsedDetail.content && (
-                                <div>
-                                  <div className="mb-2 flex items-center justify-between">
-                                    <p className="text-xs font-medium uppercase tracking-wider text-gray-400">Content</p>
-                                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-500 dark:bg-gray-700 dark:text-gray-400">
-                                      {String(selectedLogDetail.parsedDetail.content).length} chars
-                                    </span>
-                                  </div>
-                                  <div className="overflow-hidden rounded-xl border border-blue-100 bg-slate-950 shadow-inner dark:border-blue-900/50">
-                                    <pre className="max-h-52 overflow-auto p-4 font-mono text-xs leading-relaxed text-emerald-400 whitespace-pre-wrap [word-break:break-word] [scrollbar-width:thin]">
-{String(selectedLogDetail.parsedDetail.content)}</pre>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-
-                            {/* Footer */}
-                            <div className="flex items-center justify-end border-t border-gray-100 bg-gray-50 px-6 py-3 dark:border-gray-700 dark:bg-gray-900/50">
-                              <button
-                                onClick={() => setSelectedLogDetail(null)}
-                                className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm transition-all duration-200 hover:bg-gray-50 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                              >
-                                <X className="h-4 w-4" />
-                                Close
-                              </button>
-                            </div>
-                          </div>
-                        </div>
+                              </TableCell>
+                              <TableCell className="max-w-[480px] whitespace-pre-wrap wrap-break-word">
+                                {log.message}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                      </TableBody>
+                    </Table>
                       </div>
                     )}
                   </div>

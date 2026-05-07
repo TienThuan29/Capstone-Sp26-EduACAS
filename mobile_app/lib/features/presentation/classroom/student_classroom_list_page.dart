@@ -3,7 +3,7 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/features/services/classroom_service.dart';
-import 'package:mobile/features/presentation/classroom/student_classroom_hub_page.dart';
+import 'package:mobile/features/presentation/classroom/student_classroom_detail_page.dart';
 import 'package:mobile/core/widgets/background.dart';
 
 class StudentClassroomListPage extends StatefulWidget {
@@ -381,7 +381,7 @@ class _StudentClassroomListPageState extends State<StudentClassroomListPage> wit
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => StudentClassroomHubPage(classroom: classroom)),
+                    MaterialPageRoute(builder: (context) => StudentClassroomDetailPage(classroom: classroom)),
                   );
                 },
                 child: Padding(

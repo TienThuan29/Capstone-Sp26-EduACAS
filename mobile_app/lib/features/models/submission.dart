@@ -8,7 +8,6 @@ class Submission {
   final double? finalScore;
   final String status;
   final DateTime? submittedDate;
-  final Map<String, dynamic> rawData;
 
   const Submission({
     required this.id,
@@ -20,7 +19,6 @@ class Submission {
     required this.finalScore,
     required this.status,
     required this.submittedDate,
-    this.rawData = const {},
   });
 
   factory Submission.fromJson(Map<String, dynamic> json) {
@@ -34,7 +32,6 @@ class Submission {
       finalScore: (json['finalScore'] as num?)?.toDouble(),
       status: (json['status'] ?? '').toString(),
       submittedDate: DateTime.tryParse((json['submittedDate'] ?? '').toString())?.toUtc(),
-      rawData: Map<String, dynamic>.from(json),
     );
   }
 
