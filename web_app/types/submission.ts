@@ -194,6 +194,8 @@ export interface SubmissionResponse {
   aiFeedback?: string;
   /** Lecturer's written feedback for the submission */
   lecturerFeedback?: string;
+  /** Material IDs recommended by the lecturer */
+  materialRecommendation?: string[];
 }
 
 /** One problem's submissions from GET exam/{examId}/latest-all */

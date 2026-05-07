@@ -1,5 +1,6 @@
 using System.Text;
 using Hangfire;
+using AcasService.Application.Commands.Notification;
 using AcasService.Application.Jobs;
 using AcasService.Application.Thirdparty;
 using AcasService.Messaging.User;
@@ -42,6 +43,18 @@ public interface IAcademicWarningCommand
         string studentId,
         SendAcademicWarningRequest request,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Saves lecturer feedback and material recommendation for a specific submission.
+    /// Optionally sends a notification to the student about the feedback.
+    /// </summary>
+    Task<bool> SaveLecturerFeedbackAsync(
+        string submissionId,
+        string lecturerFeedback,
+        string materialRecommendation,
+        bool sendFeedbackToStudent,
+        string? problemTitle = null,
+        CancellationToken cancellationToken = default);
 }
 
 public class AcademicWarningCommand : IAcademicWarningCommand
@@ -56,6 +69,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
     private readonly IEmailService _emailService;
     private readonly UserRequestProducer _userRequestProducer;
     private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IBusinessNotificationService _businessNotificationService;
     private readonly ILogger<AcademicWarningCommand> _logger;
 
     public AcademicWarningCommand(
@@ -69,6 +83,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         IEmailService emailService,
         UserRequestProducer userRequestProducer,
         IBackgroundJobClient backgroundJobClient,
+        IBusinessNotificationService businessNotificationService,
         ILogger<AcademicWarningCommand> logger)
     {
         _submissionRepository = submissionRepository;
@@ -81,6 +96,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         _emailService = emailService;
         _userRequestProducer = userRequestProducer;
         _backgroundJobClient = backgroundJobClient;
+        _businessNotificationService = businessNotificationService;
         _logger = logger;
     }
 
@@ -875,6 +891,156 @@ public class AcademicWarningCommand : IAcademicWarningCommand
 
         await SendSingleAcademicWarningAsync_V3(studentId, level2Request, cancellationToken);
         return true;
+    }
+
+    /// <summary>
+    /// Saves lecturer feedback and material recommendation for a specific submission.
+    /// If sendFeedbackToStudent is true, sends a notification to the student via SignalR.
+    /// </summary>
+    public async Task<bool> SaveLecturerFeedbackAsync(
+        string submissionId,
+        string lecturerFeedback,
+        string materialRecommendation,
+        bool sendFeedbackToStudent,
+        string? problemTitle = null,
+        CancellationToken cancellationToken = default)
+    {
+        var submission = await _submissionRepository.GetByIdAsync(submissionId);
+        if (submission == null)
+        {
+            _logger.LogWarning("Submission {SubmissionId} not found for lecturer feedback", submissionId);
+            return false;
+        }
+
+        submission.LecturerFeedback = lecturerFeedback;
+        submission.MaterialRecommendation = !string.IsNullOrWhiteSpace(materialRecommendation)
+            ? materialRecommendation
+                .Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList()
+            : new List<string>();
+        submission.UpdatedDate = DateTime.UtcNow;
+
+        var updated = await _submissionRepository.UpdateAsync(submission);
+        if (updated == null)
+        {
+            _logger.LogError("Failed to save lecturer feedback for submission {SubmissionId}", submissionId);
+            return false;
+        }
+
+        _logger.LogInformation(
+            "Lecturer feedback saved for submission {SubmissionId}. SendToStudent={SendToStudent}",
+            submissionId, sendFeedbackToStudent);
+
+        if (sendFeedbackToStudent && !string.IsNullOrWhiteSpace(lecturerFeedback))
+        {
+            var studentProfile = await _userRequestProducer.GetUserByIdAsync(submission.StudentId, cancellationToken);
+            if (studentProfile != null && !string.IsNullOrWhiteSpace(studentProfile.Email))
+            {
+                try
+                {
+                    var subject = string.IsNullOrWhiteSpace(problemTitle)
+                        ? "You have received new feedback from your lecturer"
+                        : $"You have received new feedback for: {problemTitle}";
+                    var htmlBody = BuildLecturerFeedbackEmailHtml(
+                        studentProfile.Fullname,
+                        problemTitle ?? submission.ProblemId,
+                        lecturerFeedback,
+                        materialRecommendation);
+                    await _emailService.SendEmailAsync(studentProfile.Email, subject, htmlBody, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex,
+                        "Failed to send feedback email to student {StudentId} for submission {SubmissionId}",
+                        submission.StudentId, submissionId);
+                }
+            }
+
+            try
+            {
+                await _businessNotificationService.NotifyUsersAsync(
+                    new[] { submission.StudentId },
+                    NotificationType.GRADE_RESULT,
+                    "New feedback from lecturer",
+                    $"Your lecturer has provided feedback on your submission for problem {submission.ProblemId}.",
+                    new Dictionary<string, object?>
+                    {
+                        ["submissionId"] = submission.Id,
+                        ["examId"] = submission.ExamId,
+                        ["problemId"] = submission.ProblemId,
+                        ["feedback"] = lecturerFeedback,
+                        ["materialRecommendation"] = materialRecommendation
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to send feedback notification to student {StudentId} for submission {SubmissionId}",
+                    submission.StudentId, submissionId);
+            }
+        }
+
+        return true;
+    }
+
+    private static string BuildLecturerFeedbackEmailHtml(
+        string studentName,
+        string problemTitle,
+        string lecturerFeedback,
+        string materialRecommendation)
+    {
+        var materialSection = string.Empty;
+        if (!string.IsNullOrWhiteSpace(materialRecommendation))
+        {
+            var materials = materialRecommendation
+                .Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (materials.Length > 0)
+            {
+                materialSection = $@"
+<div style=""margin-top: 24px; padding: 16px; background-color: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;"">
+  <h3 style=""margin: 0 0 8px 0; color: #1e40af; font-size: 16px;"">Recommended Materials</h3>
+  <p style=""margin: 0 0 8px 0; color: #374151; font-size: 14px;"">
+    Your lecturer has recommended the following materials to help you improve:
+  </p>
+  <ul style=""margin: 0; padding-left: 20px; color: #374151; font-size: 14px;"">
+    {string.Join(Environment.NewLine, materials.Select(m => $"<li>{System.Net.WebUtility.HtmlEncode(m)}</li>"))}
+  </ul>
+</div>";
+            }
+        }
+
+        return $@"<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+</head>
+<body style=""font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;"">
+  <div style=""background-color: #ffffff; border-radius: 8px; padding: 24px; border: 1px solid #e5e7eb;"">
+    <h2 style=""margin: 0 0 4px 0; color: #1f2937;"">New Feedback from Lecturer</h2>
+    <p style=""margin: 0 0 16px 0; color: #6b7280; font-size: 14px;"">
+      Hi {System.Net.WebUtility.HtmlEncode(studentName)}, you have received new feedback for your submission.
+    </p>
+
+    <div style=""margin-bottom: 16px;"">
+      <h3 style=""margin: 0 0 4px 0; color: #374151; font-size: 14px;"">Problem</h3>
+      <p style=""margin: 0; color: #111827; font-size: 16px; font-weight: 600;"">{System.Net.WebUtility.HtmlEncode(problemTitle)}</p>
+    </div>
+
+    <div style=""padding: 16px; background-color: #f9fafb; border-radius: 4px;"">
+      <h3 style=""margin: 0 0 8px 0; color: #374151; font-size: 14px;"">Feedback</h3>
+      <p style=""margin: 0; color: #111827; font-size: 14px; line-height: 1.6; white-space: pre-wrap;"">{System.Net.WebUtility.HtmlEncode(lecturerFeedback)}</p>
+    </div>
+
+    {materialSection}
+
+    <p style=""margin-top: 24px; color: #6b7280; font-size: 12px;"">
+      Please log in to the Edu-ACAS platform to view the full details and recommended materials.
+    </p>
+  </div>
+</body>
+</html>";
     }
 
     /// <summary>

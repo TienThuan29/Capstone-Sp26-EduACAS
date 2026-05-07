@@ -25,7 +25,7 @@ import { DIFFICULTY } from "@/types/problem";
 import type { SubmissionResponse } from "@/types/submission";
 import { SubmissionsTabSkeleton } from "@/components/ui/skeletons";
 
-type ProblemTab = "problem" | "submissions" ;
+type ProblemTab = "problem" | "submissions" | "lecturerNote";
 
 function CodeBlock({
   children,
@@ -92,14 +92,20 @@ const TABS = [
   { id: "submissions" as const, label: "Submission Histories", icon: History },
 ];
 
-export function ProblemPanel() {
+type ProblemPanelProps = {
+  extraTabs?: { id: ProblemTab; label: string; icon?: React.ElementType }[];
+  extraTabContent?: Partial<Record<ProblemTab, React.ReactNode>>;
+};
+
+export function ProblemPanel({ extraTabs = [], extraTabContent = {} }: ProblemPanelProps) {
   const [activeTab, setActiveTab] = useState<ProblemTab>("problem");
+  const allTabs = [...TABS, ...extraTabs];
 
   return (
     <div className="flex h-full flex-col bg-gray-900">
       {/* Tabs */}
       <div className="flex border-b border-gray-700">
-        {TABS.map((tab) => (
+        {allTabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
@@ -110,7 +116,7 @@ export function ProblemPanel() {
                 : "text-gray-400 hover:text-gray-200",
             )}
           >
-            <tab.icon className="h-4 w-4" />
+            {tab.icon && <tab.icon className="h-4 w-4" />}
             {tab.label}
           </button>
         ))}
@@ -120,6 +126,7 @@ export function ProblemPanel() {
       <div className="flex-1 overflow-y-auto p-4">
         {activeTab === "problem" && <DescriptionTab />}
         {activeTab === "submissions" && <SubmissionsTab />}
+        {activeTab === "lecturerNote" && extraTabContent["lecturerNote"]}
         {/* {activeTab === "hints" && <HintsTab />} */}
       </div>
     </div>

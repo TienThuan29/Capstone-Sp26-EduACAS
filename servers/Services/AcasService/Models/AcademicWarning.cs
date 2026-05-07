@@ -55,6 +55,8 @@ public class AcademicWarningAnalysisEntry
     public string Analysis { get; set; } = string.Empty;
 
     public string Recomendation { get; set; } = string.Empty;
+
+    public List<string> MaterialRecommendation { get; set; } = new();
 }
 
 public enum AcademicWarningTriggerType

@@ -116,4 +116,41 @@ public class AcademicWarningCommandController : ControllerBase
                 500);
         }
     }
+
+    /// <summary>
+    /// PATCH /api/v1/academic-warnings/feedback
+    /// Saves lecturer feedback and material recommendation for a submission.
+    /// Optionally sends a notification to the student if sendFeedbackToStudent is true.
+    /// </summary>
+    [HttpPatch("feedback")]
+    public async Task<ActionResult<ApiResponse<bool>>> SaveLecturerFeedback(
+        [FromBody] SaveLecturerFeedbackRequest request,
+        [FromQuery] string submissionId)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(submissionId))
+                return ResponseUtil.Error<bool>("Submission ID is required", 400);
+
+            var success = await _academicWarningCommand.SaveLecturerFeedbackAsync(
+                submissionId,
+                request.LecturerFeedback ?? string.Empty,
+                request.MaterialRecommendation != null
+                    ? string.Join(Environment.NewLine, request.MaterialRecommendation)
+                    : string.Empty,
+                request.SendFeedbackToStudent,
+                request.ProblemTitle,
+                CancellationToken.None);
+
+            if (!success)
+                return ResponseUtil.Error<bool>("Submission not found or update failed", 400);
+
+            return ResponseUtil.Success(success, "Feedback saved successfully", 200);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving lecturer feedback for submission {SubmissionId}", submissionId);
+            return ResponseUtil.Error<bool>("Failed to save feedback: " + ex.Message, 500);
+        }
+    }
 }

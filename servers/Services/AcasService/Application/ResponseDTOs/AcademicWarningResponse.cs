@@ -59,4 +59,6 @@ public class AnalysisEntryDto
     public string Analysis { get; set; } = string.Empty;
     [JsonPropertyName("recomendation")]
     public string Recomendation { get; set; } = string.Empty;
+    [JsonPropertyName("materialRecommendation")]
+    public List<string> MaterialRecommendation { get; set; } = new();
 }

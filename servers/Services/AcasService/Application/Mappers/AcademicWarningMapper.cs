@@ -33,7 +33,8 @@ public static class AcademicWarningMapper
                 {
                     SubmissionId = kvp.Value.SubmissionId,
                     Analysis = kvp.Value.Analysis,
-                    Recomendation = kvp.Value.Recomendation
+                    Recomendation = kvp.Value.Recomendation,
+                    MaterialRecommendation = kvp.Value.MaterialRecommendation
                 }
             ) ?? new Dictionary<string, AnalysisEntryDto>(),
             LecturerAnalysis = warning.LecturerAnalysis?.ToDictionary(
@@ -42,7 +43,8 @@ public static class AcademicWarningMapper
                 {
                     SubmissionId = kvp.Value.SubmissionId,
                     Analysis = kvp.Value.Analysis,
-                    Recomendation = kvp.Value.Recomendation
+                    Recomendation = kvp.Value.Recomendation,
+                    MaterialRecommendation = kvp.Value.MaterialRecommendation
                 }
             ) ?? new Dictionary<string, AnalysisEntryDto>(),
             ClassroomName = string.Empty,

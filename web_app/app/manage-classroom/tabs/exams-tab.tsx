@@ -71,8 +71,8 @@ const emptyForm: ExaminationRequest = {
   startDatetime: "",
   endDatetime: "",
   description: "",
-  isPublicResult: false,
-  totalMark: 0,
+  isPublicResult: true,
+  totalMark: 10,
   status: "PENDING",
   mode: "PRACTICAL",
   useStrict: false,
@@ -153,9 +153,9 @@ export function ExamsTab({
     setEditingExam(null);
     setFormData({
       ...emptyForm,
+      totalMark: 10,
       classroomId: classId,
       examName: template.examName,
-      totalMark: template.totalMark,
       problems: template.problems.map((p) => ({
         problemId: p.problemId,
         mark: p.mark,
@@ -179,6 +179,7 @@ export function ExamsTab({
     setEditingExam(null);
     setFormData({
       ...emptyForm,
+      totalMark: 10,
       classroomId: classId,
       startDatetime: toLocalNowString(),
       endDatetime: toLocalNowString(60 * 60 * 1000),
@@ -653,7 +654,7 @@ function ExaminationFormModal({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <Label htmlFor="totalMark">
-                Total mark <span className="text-red-500">*</span>
+                Total mark <span className="text-xs text-gray-400">(fixed at 10)</span>
               </Label>
               <TextInput
                 id="totalMark"
@@ -661,14 +662,8 @@ function ExaminationFormModal({
                 min={0}
                 max={10}
                 step={0.5}
-                required
-                value={formData.totalMark || ""}
-                onChange={(e) => {
-                  const raw = Number(e.target.value);
-                  const value =
-                    Number.isNaN(raw) ? 0 : Math.min(10, Math.max(0, raw));
-                  setFormData({ ...formData, totalMark: value });
-                }}
+                disabled
+                value={formData.totalMark}
                 className="mt-1"
               />
             </div>
@@ -711,17 +706,18 @@ function ExaminationFormModal({
             </Select>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {formData.mode === "EXAMINATION" && (
             <div className="flex items-center gap-2">
               <Checkbox
                 id="useStrict"
-                checked={formData.mode === "EXAMINATION" ? formData.useStrict : false}
-                disabled={formData.mode === "PRACTICAL"}
+                checked={formData.useStrict}
                 onChange={(e) =>
                   setFormData({ ...formData, useStrict: e.target.checked })
                 }
               />
               <Label htmlFor="useStrict">Use strict mode</Label>
             </div>
+          )}
             <div>
               <Label htmlFor="minScoreThreshold">
                 Min score threshold
