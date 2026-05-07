@@ -15,6 +15,17 @@ class DashboardOverview {
     required this.newWarningsToday,
   });
 
+  factory DashboardOverview.empty() {
+    return DashboardOverview(
+      totalStudents: 0,
+      classAverage: 0,
+      atRiskCount: 0,
+      atRiskPercentage: 0,
+      totalWarnings: 0,
+      newWarningsToday: 0,
+    );
+  }
+
   factory DashboardOverview.fromJson(Map<String, dynamic> json) {
     return DashboardOverview(
       totalStudents: json['totalStudents'] ?? 0,
