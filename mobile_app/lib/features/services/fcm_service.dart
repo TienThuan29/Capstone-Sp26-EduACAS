@@ -26,16 +26,26 @@ class FcmService {
   static final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  static bool _initialized = false;
+  static bool _firebaseInitialized = false;
+  static bool _fullyInitialized = false;
 
-  static Future<void> initialize() async {
-    if (_initialized) {
+  /// Must be called BEFORE runApp() - only initializes Firebase.
+  /// This is required for background message handling.
+  static Future<void> initializeFirebase() async {
+    if (_firebaseInitialized) {
       return;
     }
-
     await Firebase.initializeApp();
-
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+    _firebaseInitialized = true;
+  }
+
+  /// Call AFTER runApp() - initializes the rest (notifications, listeners).
+  /// This runs in background and does NOT block the UI thread.
+  static Future<void> initializePostRun() async {
+    if (_fullyInitialized) {
+      return;
+    }
 
     final messaging = FirebaseMessaging.instance;
     await messaging.requestPermission(alert: true, badge: true, sound: true);
@@ -76,7 +86,14 @@ class FcmService {
       await registerDeviceToken(token: token, accessToken: accessToken);
     });
 
-    _initialized = true;
+    _fullyInitialized = true;
+    debugPrint('FCM fully initialized (post-run)');
+  }
+
+  /// Backward-compatible method - use initializeFirebase() + initializePostRun() instead.
+  static Future<void> initialize() async {
+    await initializeFirebase();
+    await initializePostRun();
   }
 
   static Future<void> registerCurrentDeviceForLoggedInUser() async {

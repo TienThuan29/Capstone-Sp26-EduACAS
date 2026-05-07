@@ -58,6 +58,7 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
+      OCELOT_USE_PROD: "true"
       Services__AuthService__BaseUrl: http://auth-service:8081
       Services__AcasService__BaseUrl: http://acas-service:8002
     depends_on:

@@ -1,5 +1,6 @@
 "use client";
 
+import { Avatar } from "flowbite-react";
 import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
@@ -52,14 +53,14 @@ export function AtRiskStudentsList({ students }: AtRiskStudentsListProps) {
               className="flex items-center justify-between rounded-md border border-gray-100 bg-gray-50 p-3 transition-colors hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-700/30 dark:hover:bg-gray-700/50"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-gradient-to-br from-red-400 to-red-600 font-semibold text-white">
-                  {student.studentName
-                    .split(" ")
-                    .map((n) => n[0])
-                    .join("")
-                    .slice(0, 2)
-                    .toUpperCase()}
-                </div>
+              {/* {student.avatarUrl && (
+                  <Avatar img={student.avatarUrl} rounded />
+                )} */}
+                {student.avatarUrl ? (
+                  <Avatar img={student.avatarUrl} rounded />
+                ) : (
+                  <Avatar rounded></Avatar>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-medium text-gray-900 dark:text-white">
                     {student.studentName}

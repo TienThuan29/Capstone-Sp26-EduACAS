@@ -53,9 +53,12 @@ services:
     container_name: acas-api-gateway
     ports:
       - "8080:8080"
+    volumes:
+      - ./servers/ApiGateway/ocelot.prod.json:/app/ocelot.prod.json:ro
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT}
       ASPNETCORE_URLS: ${ASPNETCORE_URLS}
+      OCELOT_USE_PROD: "true"
       Services__AuthService__BaseUrl: http://auth-service:8081
       Services__AcasService__BaseUrl: http://acas-service:8002
     depends_on:
@@ -217,6 +220,9 @@ services:
     build:
       context: .
       dockerfile: web_app/Dockerfile
+      args:
+        NEXT_PUBLIC_BACKEND_BASE_URL: ${NEXT_PUBLIC_BACKEND_BASE_URL:-http://localhost:8080}
+        NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
     container_name: acas-web-app
     ports:
       - "3000:3000"

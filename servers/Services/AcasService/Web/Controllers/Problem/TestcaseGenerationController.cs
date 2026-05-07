@@ -32,7 +32,7 @@ public class TestcaseGenerationController : ControllerBase
 
         try
         {
-            var count = request.NumberOfTestcases <= 0 ? 5 : request.NumberOfTestcases;
+            var count = request.NumberOfTestcases <= 0 ? 4 : request.NumberOfTestcases;
             var testcases = await _testcaseCommand.GenerateFromStringAsync(request.Content, count);
             return ResponseUtil.Success(testcases, "Generated testcases successfully", 200);
         }
