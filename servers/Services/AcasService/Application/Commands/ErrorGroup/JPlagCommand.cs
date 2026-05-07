@@ -46,7 +46,7 @@ public class JPlagCommand : IJPlagCommand
     {
         if (submissions == null || submissions.Count < 2)
         {
-            _logger.LogWarning("Không đủ số lượng bài nộp để so sánh (ít nhất 2 bài).");
+            _logger.LogWarning("Insufficient number of submissions to compare (at least 2 required).");
             return new List<JPlagMatch>();
         }
 
@@ -59,20 +59,20 @@ public class JPlagCommand : IJPlagCommand
 
         try
         {
-            _logger.LogWarning("Bắt đầu chuẩn bị dữ liệu cho JPlag với Base-Code (Session: {SessionId}, Language: {Lang})", sessionId, language);
+            _logger.LogWarning("Starting data preparation for JPlag with Base-Code (Session: {SessionId}, Language: {Lang})", sessionId, language);
             string ext = LanguageUtils.GetExtensionForLanguage(language);
             Directory.CreateDirectory(submissionDir);
 
             if (submissions.Count > 100)
             {
-                _logger.LogWarning("CẢNH BÁO: Số lượng bài nộp lớn ({Count}). Quá trình JPlag có thể tốn nhiều tài nguyên.", submissions.Count);
+                _logger.LogWarning("WARNING: Large number of submissions ({Count}). JPlag process might consume significant resources.", submissions.Count);
             }
 
             foreach (var sub in submissions)
             {
                 if (string.IsNullOrWhiteSpace(sub.Source))
                 {
-                    _logger.LogInformation("Bỏ qua bài nộp {SubId} do nội dung trống.", sub.Id);
+                    _logger.LogInformation("Skipping submission {SubId} due to empty content.", sub.Id);
                     continue;
                 }
 
@@ -81,7 +81,7 @@ public class JPlagCommand : IJPlagCommand
                 string filePath = Path.Combine(studentDir, $"solution.{ext}");
                 string source = NormalizeSourceForJplag(language, sub.Source ?? "");
                 await File.WriteAllTextAsync(filePath, source);
-                _logger.LogInformation("Đã tạo file: {FilePath} (Size: {Size})", filePath, sub.Source.Length);
+                _logger.LogInformation("Created file: {FilePath} (Size: {Size})", filePath, sub.Source.Length);
             }
 
             if (!string.IsNullOrWhiteSpace(baseCode))
@@ -91,11 +91,11 @@ public class JPlagCommand : IJPlagCommand
                 string baseCodePath = Path.Combine(baseCodeDir, baseCodeFile);
                 string normalizedBaseCode = NormalizeSourceForJplag(language, baseCode);
                 await File.WriteAllTextAsync(baseCodePath, normalizedBaseCode);
-                _logger.LogWarning("Đã tạo base-code file tại: {BaseCodePath} (Size: {Size})", baseCodePath, baseCode.Length);
+                _logger.LogWarning("Created base-code file at: {BaseCodePath} (Size: {Size})", baseCodePath, baseCode.Length);
             }
             else
             {
-                _logger.LogInformation("Không có base-code được cung cấp, bỏ qua bước tạo base-code directory.");
+                _logger.LogInformation("No base-code provided, skipping base-code directory creation.");
             }
 
             await Task.Delay(500);
@@ -107,7 +107,7 @@ public class JPlagCommand : IJPlagCommand
             if (Directory.Exists(submissionDir))
             {
                 var subDirs = Directory.GetDirectories(submissionDir);
-                _logger.LogWarning("Cấu trúc thư mục quét: {Dir} chứa {Count} thư mục con.", submissionDir, subDirs.Length);
+                _logger.LogWarning("Scan directory structure: {Dir} contains {Count} subdirectories.", submissionDir, subDirs.Length);
                 foreach (var d in subDirs)
                 {
                     var files = Directory.GetFiles(d, "*.*", SearchOption.AllDirectories);
@@ -145,15 +145,15 @@ public class JPlagCommand : IJPlagCommand
             {
                 processInfo.ArgumentList.Add("-bc");
                 processInfo.ArgumentList.Add(baseCodeDir);
-                _logger.LogWarning("Thêm --base-code argument: {BaseCodeDir}", baseCodeDir);
+                _logger.LogWarning("Added --base-code argument: {BaseCodeDir}", baseCodeDir);
             }
 
             processInfo.ArgumentList.Add(submissionDir);
 
-            _logger.LogWarning("Thực thi JPlag: java {Args}", string.Join(" ", processInfo.ArgumentList));
+            _logger.LogWarning("Executing JPlag: java {Args}", string.Join(" ", processInfo.ArgumentList));
 
             using var process = Process.Start(processInfo);
-            if (process == null) throw new Exception("Không thể khởi động tiến trình Java.");
+            if (process == null) throw new Exception("Failed to start Java process.");
 
             var outputTask = process.StandardOutput.ReadToEndAsync();
             var errTask = process.StandardError.ReadToEndAsync();
@@ -168,16 +168,16 @@ public class JPlagCommand : IJPlagCommand
 
             if (process.ExitCode != 0)
             {
-                throw new Exception($"JPlag thất bại với Exit Code {process.ExitCode}. Lỗi: {err} Output: {output}");
+                throw new Exception($"JPlag failed with Exit Code {process.ExitCode}. Error: {err} Output: {output}");
             }
 
-            _logger.LogWarning("JPlag hoàn tất thành công. Đang phân tích kết quả...");
+            _logger.LogWarning("JPlag completed successfully. Analyzing results...");
             var rawResults = await ExtractMatchesFromArchiveAsync(resultZipPath);
 
             
             var results = rawResults.Where(m => m.SimilarityScore >= minSimilarity).ToList();
 
-            _logger.LogWarning("Đã tìm thấy {Count} cặp tương đồng từ JPlag (sau khi lọc C# >= {Sim}%).", results.Count, minSimilarity * 100);
+            _logger.LogWarning("Found {Count} similar pairs from JPlag (after filtering >= {Sim}%).", results.Count, minSimilarity * 100);
             foreach (var m in results.Take(10))
             {
                 _logger.LogWarning("  - Match: {S1} vs {S2} ({Sim}%)", m.Submission1Id, m.Submission2Id, Math.Round(m.SimilarityScore * 100, 2));
@@ -186,7 +186,7 @@ public class JPlagCommand : IJPlagCommand
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Lỗi xảy ra trong quá trình chạy JPlag Similarity Check với Base-Code");
+            _logger.LogError(ex, "Error occurred during JPlag Similarity Check with Base-Code");
             throw;
         }
         finally
@@ -196,11 +196,11 @@ public class JPlagCommand : IJPlagCommand
                 try
                 {
                     Directory.Delete(tempDir, true);
-                    _logger.LogWarning("Đã xóa thư mục tạm: {TempDir}", tempDir);
+                    _logger.LogWarning("Deleted temporary directory: {TempDir}", tempDir);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Không thể xóa thư mục tạm: {TempDir}", tempDir);
+                    _logger.LogWarning(ex, "Failed to delete temporary directory: {TempDir}", tempDir);
                 }
             }
         }
@@ -344,7 +344,7 @@ public class JPlagCommand : IJPlagCommand
                     if (string.IsNullOrEmpty(sub1Id) || string.IsNullOrEmpty(sub2Id)) 
                     {
                         var js = jsonContent.Length > 200 ? jsonContent.Substring(0, 200) + "..." : jsonContent;
-                        _logger.LogCritical("BỎ QUA FILE DO KHÔNG TÌM THẤY ID SINH VIÊN: {File} - RAW JSON: {Raw}", entry.FullName, js);
+                        _logger.LogCritical("SKIPPED FILE DUE TO MISSING STUDENT ID: {File} - RAW JSON: {Raw}", entry.FullName, js);
                         continue;
                     }
 
@@ -356,7 +356,7 @@ public class JPlagCommand : IJPlagCommand
                     if (similarity == 0)
                     {
                         var keys = string.Join(", ", root.EnumerateObject().Select(p => p.Name));
-                        _logger.LogCritical("KHÔNG TÌM THẤY TỶ LỆ TRÙNG LẶP! CÁC KEYS: {Keys}", keys);
+                        _logger.LogCritical("SIMILARITY SCORE NOT FOUND! KEYS: {Keys}", keys);
                     }
                     
                     if (similarity > 1.0) similarity /= 100.0;
@@ -415,23 +415,23 @@ public class JPlagCommand : IJPlagCommand
                                 }
                             } 
                             catch { 
-                                _logger.LogWarning("Lỗi parse match element: {Json}", matchEl.GetRawText());
+                                _logger.LogWarning("Error parsing match element: {Json}", matchEl.GetRawText());
                             }
                         }
                     }
 
                     results.Add(match);
-                    _logger.LogInformation("Đã map thành công cặp: {S1} vs {S2} ({Sim}%)", sub1Id, sub2Id, Math.Round(similarity * 100, 2));
+                    _logger.LogInformation("Successfully mapped pair: {S1} vs {S2} ({Sim}%)", sub1Id, sub2Id, Math.Round(similarity * 100, 2));
                 }
                 catch (Exception ex)
                 {
-                     _logger.LogWarning("Lỗi parse file {File}: {Msg}", entry.FullName, ex.Message);
+                     _logger.LogWarning("Error parsing file {File}: {Msg}", entry.FullName, ex.Message);
                 }
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Lỗi nghiêm trọng khi giải nén ZIP của JPlag.");
+            _logger.LogError(ex, "Critical error when extracting JPlag ZIP.");
         }
 
         return results;

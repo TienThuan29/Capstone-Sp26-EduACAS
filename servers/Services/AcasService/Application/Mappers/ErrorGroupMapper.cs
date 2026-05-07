@@ -5,9 +5,7 @@ namespace AcasService.Application.Mappers;
 
 public class ErrorGroupMapper
 {
-    /// <summary>
-    /// Map sang bản tóm tắt (chỉ có %)
-    /// </summary>
+
     public ErrorGroupSummaryResponse ToSummaryResponse(ErrorGroup errorGroup)
     {
         return new ErrorGroupSummaryResponse
@@ -30,9 +28,7 @@ public class ErrorGroupMapper
         };
     }
 
-    /// <summary>
-    /// Map sang bản chi tiết (bao gồm tọa độ StartLine/EndLine)
-    /// </summary>
+
     public ErrorGroupDetailResponse ToDetailResponse(ErrorGroup errorGroup)
     {
         var response = new ErrorGroupDetailResponse
