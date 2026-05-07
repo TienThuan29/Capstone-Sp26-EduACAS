@@ -363,7 +363,9 @@ export const Api = {
     SEND_SINGLE: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
     GET_BY_STUDENT: (studentId: string) => `/api/v1/academic-warnings/student/${studentId}`,
     GET_BY_CLASSROOM: (classroomId: string) => `/api/v1/academic-warnings/classroom/${classroomId}`,
+    GET_BY_EXAM: (examId: string) => `/api/v1/academic-warnings/exam/${examId}`,
     GET_BY_ID: (id: string) => `/api/v1/academic-warnings/${id}`,
+    SAVE_FEEDBACK: "/api/v1/academic-warnings/feedback",
   },
 
   PublicStatistics: {

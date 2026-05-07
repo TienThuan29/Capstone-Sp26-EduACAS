@@ -9,6 +9,7 @@ import { ProblemsTabContent } from "../components/exam-detail-tab/problems";
 import { SubmissionsTabContent } from "../components/exam-detail-tab/submissions";
 import { SimilarityTabContent } from "../components/exam-detail-tab/similarity";
 import { ExamSessionTabContent } from "../components/exam-detail-tab/exam-session";
+import { AcademicWarningTabContent } from "../components/exam-detail-tab/academic-warning";
 
 const STATUS_LABELS: Record<ExaminationStatus, string> = {
   PENDING: "PENDING",
@@ -38,6 +39,7 @@ const TAB_PROBLEMS = 1;
 const TAB_SUBMISSIONS = 2;
 const TAB_SIMILARITY = 3;
 const TAB_SESSIONS = 4;
+const TAB_WARNINGS = 5;
 
 export function ExaminationDetailView({
   examination,
@@ -46,9 +48,14 @@ export function ExaminationDetailView({
   showBackInHeader = true,
 }: ExaminationDetailViewProps) {
   const [activeTab, setActiveTab] = useState(TAB_OVERVIEW);
+  const [warningRefreshTrigger, setWarningRefreshTrigger] = useState(0);
   const statusLabel = STATUS_LABELS[examination.status] ?? "PENDING";
   const modeLabel = MODE_LABELS[examination.mode] ?? "PRACTICAL";
   const problems = examination.problems ?? [];
+
+  const handleWarningSent = () => {
+    setWarningRefreshTrigger((n) => n + 1);
+  };
 
   return (
     <div className="bg-white shadow dark:bg-gray-800">
@@ -90,7 +97,10 @@ export function ExaminationDetailView({
           </TabItem>
           <TabItem title="Submissions" active={activeTab === TAB_SUBMISSIONS}>
             {activeTab === TAB_SUBMISSIONS && (
-              <SubmissionsTabContent examination={examination} />
+              <SubmissionsTabContent
+                examination={examination}
+                onWarningSent={handleWarningSent}
+              />
             )}
           </TabItem>
           <TabItem title="Similarity" active={activeTab === TAB_SIMILARITY}>
@@ -101,6 +111,14 @@ export function ExaminationDetailView({
           <TabItem title="Sessions" active={activeTab === TAB_SESSIONS}>
             {activeTab === TAB_SESSIONS && (
               <ExamSessionTabContent examination={examination} />
+            )}
+          </TabItem>
+          <TabItem title="Warnings" active={activeTab === TAB_WARNINGS}>
+            {activeTab === TAB_WARNINGS && (
+              <AcademicWarningTabContent
+                examination={examination}
+                refreshTrigger={warningRefreshTrigger}
+              />
             )}
           </TabItem>
         </Tabs>

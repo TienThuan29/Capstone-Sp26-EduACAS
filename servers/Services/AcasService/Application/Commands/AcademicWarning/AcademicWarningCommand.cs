@@ -1,4 +1,7 @@
 using System.Text;
+using Hangfire;
+using AcasService.Application.Commands.Notification;
+using AcasService.Application.Jobs;
 using AcasService.Application.Thirdparty;
 using AcasService.Messaging.User;
 using AcasService.Models;
@@ -24,19 +27,33 @@ public interface IAcademicWarningCommand
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Checks if a student qualifies for Level 2 warning based on Classroom.GradingSettings
-    /// and automatically sends Level 2 warning if conditions are met.
-    /// Called automatically after a Level 1 warning is processed.
+    /// V3: Fast-path version that immediately saves student contexts to DB and enqueues
+    /// background processing for Gemini analysis + email sending. Returns instantly so the
+    /// lecturer UI is never blocked by slow LLM calls.
     /// </summary>
-    /// <param name="studentId">Student ID to evaluate</param>
-    /// <param name="classroomId">Classroom ID containing GradingSettings</param>
-    /// <param name="currentExamId">Exam ID of the triggering Level 1 warning (excluded from avg calculation)</param>
-    /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>True if Level 2 warning was triggered and sent, false otherwise</returns>
-    Task<bool> CheckAndSendLevel2WarningAsync(
+    Task<string> SendBatchAcademicWarningsAsync_V3(
+        SendAcademicWarningBatchRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// V3: Fast-path version for a single student that immediately saves to DB and
+    /// enqueues background processing for Gemini analysis + email sending.
+    /// </summary>
+    Task<string> SendSingleAcademicWarningAsync_V3(
         string studentId,
-        string classroomId,
-        string currentExamId,
+        SendAcademicWarningRequest request,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Saves lecturer feedback and material recommendation for a specific submission.
+    /// Optionally sends a notification to the student about the feedback.
+    /// </summary>
+    Task<bool> SaveLecturerFeedbackAsync(
+        string submissionId,
+        string lecturerFeedback,
+        string materialRecommendation,
+        bool sendFeedbackToStudent,
+        string? problemTitle = null,
         CancellationToken cancellationToken = default);
 }
 
@@ -51,6 +68,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
     private readonly IGeminiClient _geminiClient;
     private readonly IEmailService _emailService;
     private readonly UserRequestProducer _userRequestProducer;
+    private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IBusinessNotificationService _businessNotificationService;
     private readonly ILogger<AcademicWarningCommand> _logger;
 
     public AcademicWarningCommand(
@@ -63,6 +82,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         IGeminiClient geminiClient,
         IEmailService emailService,
         UserRequestProducer userRequestProducer,
+        IBackgroundJobClient backgroundJobClient,
+        IBusinessNotificationService businessNotificationService,
         ILogger<AcademicWarningCommand> logger)
     {
         _submissionRepository = submissionRepository;
@@ -74,6 +95,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         _geminiClient = geminiClient;
         _emailService = emailService;
         _userRequestProducer = userRequestProducer;
+        _backgroundJobClient = backgroundJobClient;
+        _businessNotificationService = businessNotificationService;
         _logger = logger;
     }
 
@@ -208,6 +231,342 @@ public class AcademicWarningCommand : IAcademicWarningCommand
     }
 
     /// <summary>
+    /// V2: Sends academic warnings to all eligible students in a classroom using parallel processing.
+    /// All Gemini calls, user profile fetches, DB operations, and emails run concurrently
+    /// for maximum throughput on large classrooms.
+    /// </summary>
+    public async Task<SendAcademicWarningResponse> SendBatchAcademicWarningsAsync_V2(
+        SendAcademicWarningBatchRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = new SendAcademicWarningResponse();
+
+        var enrollments = await _classroomEnrollmentRepository.FindByClassIdAsync(request.ClassroomId);
+        if (enrollments == null || enrollments.Count == 0)
+        {
+            _logger.LogWarning("No enrollments found for classroom {ClassroomId}", request.ClassroomId);
+            return response;
+        }
+
+        var studentIds = enrollments
+            .Where(e => e.IsJoining && !string.IsNullOrWhiteSpace(e.StudentId))
+            .Select(e => e.StudentId)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        var submissions = await _submissionRepository.GetByExamIdsAsync(new List<string> { request.ExamId });
+
+        var latestSubmissionsByStudent = submissions
+            .Where(s => s.Status == Models.SubmissionStatus.GRADED || s.Status == Models.SubmissionStatus.REGRADED)
+            .GroupBy(s => s.StudentId)
+            .ToDictionary(
+                g => g.Key,
+                g => g
+                    .GroupBy(s => s.ProblemId)
+                    .ToDictionary(
+                        pg => pg.Key,
+                        pg => pg.OrderByDescending(s => s.Version).First()
+                    )
+            );
+
+        var eligibleStudents = latestSubmissionsByStudent
+            .Where(kv => kv.Value.Values.Any(s => s.FinalScore < request.MinScoreThreshold))
+            .ToList();
+
+        response.TotalStudents = eligibleStudents.Count;
+
+        var results = await ProcessBatchStudentsAsync_V2(
+            eligibleStudents,
+            request.ExamId,
+            request.WarningLevel,
+            request.ClassroomId,
+            cancellationToken);
+
+        foreach (var result in results)
+        {
+            response.Results.Add(result);
+            if (result.WarningCreated || result.EmailSent)
+                response.ProcessedStudents++;
+            else
+                response.FailedCount++;
+        }
+
+        return response;
+    }
+
+    /// <summary>
+    /// V2: Sends an academic warning to a single student using parallel operations.
+    /// </summary>
+    public async Task<SendAcademicWarningResponse> SendSingleAcademicWarningAsync_V2(
+        string studentId,
+        SendAcademicWarningRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var response = new SendAcademicWarningResponse();
+
+        var submissions = await _submissionRepository.GetByStudentIdAsync(studentId);
+        var examSubmissions = submissions
+            .Where(s => s.ExamId == request.ExamId)
+            .Where(s => s.Status == Models.SubmissionStatus.GRADED || s.Status == Models.SubmissionStatus.REGRADED)
+            .GroupBy(s => s.ProblemId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(s => s.Version).First()
+            );
+
+        if (examSubmissions.Count == 0)
+        {
+            _logger.LogWarning(
+                "No graded submission found for student {StudentId} in exam {ExamId}",
+                studentId, request.ExamId);
+            response.TotalStudents = 1;
+            response.FailedCount = 1;
+            response.Results.Add(new StudentAcademicWarningResult
+            {
+                StudentId = studentId,
+                ErrorMessage = "No graded submission found for this exam"
+            });
+            return response;
+        }
+
+        var exam = await _examinationRepository.GetByIdAsync(request.ExamId);
+        var results = await ProcessBatchStudentsAsync_V2(
+            new List<KeyValuePair<string, Dictionary<string, Models.Submission>>>
+            {
+                new(studentId, examSubmissions)
+            },
+            request.ExamId,
+            request.WarningLevel,
+            exam?.ClassroomId ?? string.Empty,
+            cancellationToken);
+
+        response.Results.Add(results.FirstOrDefault() ?? new StudentAcademicWarningResult { StudentId = studentId });
+        response.TotalStudents = 1;
+        if (response.Results[0].WarningCreated || response.Results[0].EmailSent)
+            response.ProcessedStudents = 1;
+        else
+            response.FailedCount = 1;
+
+        return response;
+    }
+
+    /// <summary>
+    /// V2: Processes multiple students concurrently. All heavy I/O operations are parallelized:
+    /// - User profile fetching (batch via RabbitMQ)
+    /// - Problem metadata loading (batch DB call)
+    /// - Gemini analysis per problem (fully parallel per student, then across students)
+    /// - Submission feedback updates (parallel writes)
+    /// - AcademicWarning record creation (parallel writes)
+    /// - Email sending (parallel sends)
+    /// </summary>
+    private async Task<List<StudentAcademicWarningResult>> ProcessBatchStudentsAsync_V2(
+        List<KeyValuePair<string, Dictionary<string, Models.Submission>>> eligibleStudents,
+        string examId,
+        int warningLevel,
+        string classroomId,
+        CancellationToken cancellationToken)
+    {
+        // Fetch all unique problem IDs across all students
+        var allProblemIds = eligibleStudents
+            .SelectMany(kv => kv.Value.Keys)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        var allStudentIds = eligibleStudents.Select(kv => kv.Key).ToList();
+
+        // Parallel: fetch problems + user profiles + exam info
+        var problemTask = _problemRepository.GetByIdsAsync(allProblemIds);
+        var userProfilesTask = _userRequestProducer.GetUsersByIdsAsync(allStudentIds, cancellationToken);
+        var examTask = _examinationRepository.GetByIdAsync(examId);
+
+        await Task.WhenAll(problemTask, userProfilesTask, examTask);
+
+        var problemsById = (await problemTask)
+            .Where(p => p != null)
+            .ToDictionary(p => p!.Id, StringComparer.Ordinal);
+        var userProfileMap = (await userProfilesTask)
+            .ToDictionary(u => u.Id, StringComparer.Ordinal);
+        var exam = await examTask;
+
+        // Step 1: Parallel Gemini calls across ALL (student, problem) pairs
+        var allStudentGeminiTasks = new List<Task<(string StudentId, string ProblemId, string Response)>>();
+
+        foreach (var (studentId, problemSubmissions) in eligibleStudents)
+        {
+            foreach (var (problemId, submission) in problemSubmissions)
+            {
+                var capturedStudentId = studentId;
+                var capturedProblemId = problemId;
+                var capturedSubmission = submission;
+
+                allStudentGeminiTasks.Add(
+                    Task.Run(async () =>
+                    {
+                        var problem = problemsById.GetValueOrDefault(capturedProblemId);
+                        var prompt = BuildLlmAnalysisPrompt(capturedSubmission, exam, problem, warningLevel);
+                        var geminiResponse = await _geminiClient.GenerateContentAsync(prompt, cancellationToken);
+                        return (capturedStudentId, capturedProblemId, geminiResponse);
+                    }, cancellationToken)
+                );
+            }
+        }
+
+        var geminiResults = await Task.WhenAll(allStudentGeminiTasks);
+
+        // Group Gemini results by student
+        var geminiByStudent = geminiResults
+            .GroupBy(r => r.StudentId)
+            .ToDictionary(g => g.Key, g => g.ToDictionary(r => r.ProblemId, r => r.Response, StringComparer.Ordinal));
+
+        // Step 2: Build combined feedback and create AcademicWarning records in parallel
+        var submissionUpdateTasks = new List<Task>();
+        var warningCreateTasks = new List<Task<AcademicWarning?>>();
+        var studentResults = new List<StudentAcademicWarningResult>();
+
+        foreach (var (studentId, problemSubmissions) in eligibleStudents)
+        {
+            var studentGemini = geminiByStudent.GetValueOrDefault(studentId) ?? new Dictionary<string, string>(StringComparer.Ordinal);
+
+            var combinedLlmResponse = string.Join("\n\n---\n\n",
+                studentGemini.Select(kv =>
+                    $"## Problem: {problemsById.GetValueOrDefault(kv.Key)?.Title ?? kv.Key}\n\n{kv.Value}"));
+
+            var allAnalysisEntries = studentGemini
+                .Where(kv => !string.IsNullOrWhiteSpace(kv.Value))
+                .ToDictionary(
+                    kv => kv.Key,
+                    kv => new AcademicWarningAnalysisEntry
+                    {
+                        SubmissionId = problemSubmissions[kv.Key].Id,
+                        Analysis = ExtractAnalysisFromResponse(kv.Value),
+                        Recomendation = ExtractRecommendationFromResponse(kv.Value)
+                    },
+                    StringComparer.Ordinal
+                );
+
+            // Parallel: update submissions feedback
+            if (warningLevel == 1 && !string.IsNullOrWhiteSpace(combinedLlmResponse))
+            {
+                foreach (var submission in problemSubmissions.Values)
+                {
+                    var individualFeedback = studentGemini.GetValueOrDefault(submission.ProblemId) ?? combinedLlmResponse;
+                    submission.AiFeedback = individualFeedback;
+                    submission.UpdatedDate = DateTime.UtcNow;
+                    submissionUpdateTasks.Add(
+                        _submissionRepository.UpdateAsync(submission)
+                    );
+                }
+            }
+
+            var totalScore = problemSubmissions.Values.Sum(s => s.FinalScore);
+            var firstProblemId = problemSubmissions.Keys.FirstOrDefault() ?? string.Empty;
+            var warning = new AcademicWarning
+            {
+                Id = Guid.NewGuid().ToString(),
+                ClassroomId = classroomId,
+                StudentId = studentId,
+                ExamId = examId,
+                ProblemId = firstProblemId,
+                WarningLevel = warningLevel,
+                TriggerType = AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE,
+                InvolvedExams = new InvolvedExamsInfo
+                {
+                    ExamScores = new Dictionary<string, float> { [examId] = totalScore },
+                    AverageScore = totalScore
+                },
+                LlmAnalysis = allAnalysisEntries,
+                CreatedDate = DateTime.UtcNow,
+                UpdatedDate = DateTime.UtcNow
+            };
+            warningCreateTasks.Add(_academicWarningRepository.CreateAsync(warning));
+
+            var profile = userProfileMap.GetValueOrDefault(studentId);
+            studentResults.Add(new StudentAcademicWarningResult
+            {
+                StudentId = studentId,
+                StudentEmail = profile?.Email ?? string.Empty,
+                StudentName = profile?.Fullname ?? studentId,
+                ExamScore = totalScore
+            });
+        }
+
+        await Task.WhenAll(submissionUpdateTasks);
+        var warningResults = await Task.WhenAll(warningCreateTasks);
+
+        // Step 3: Send emails in parallel
+        var emailTasks = new List<Task>();
+        for (int i = 0; i < studentResults.Count; i++)
+        {
+            var result = studentResults[i];
+            var warning = warningResults[i];
+            var problemSubmissions = eligibleStudents[i].Value;
+            var studentGemini = geminiByStudent.GetValueOrDefault(result.StudentId) ?? new Dictionary<string, string>(StringComparer.Ordinal);
+            var combinedLlmResponse = string.Join("\n\n---\n\n",
+                studentGemini.Select(kv =>
+                    $"## Problem: {problemsById.GetValueOrDefault(kv.Key)?.Title ?? kv.Key}\n\n{kv.Value}"));
+
+            var emailBody = BuildAcademicWarningEmailHtml(
+                result.StudentName,
+                exam?.ExamName ?? examId,
+                problemSubmissions.Values.Select(s => s.FinalScore).ToList(),
+                warningLevel,
+                combinedLlmResponse,
+                problemsById.ToDictionary(kv => kv.Key, kv => (Models.Problem?)kv.Value),
+                problemSubmissions);
+
+            var capturedResult = result;
+            emailTasks.Add(
+                Task.Run(async () =>
+                {
+                    try
+                    {
+                        await _emailService.SendEmailAsync(
+                            capturedResult.StudentEmail,
+                            $"[EduACAS] Academic Warning - Level {warningLevel}",
+                            emailBody,
+                            cancellationToken);
+
+                        capturedResult.EmailSent = true;
+
+                        _logger.LogInformation(
+                            "Academic warning sent V2: Student={StudentId}, Exam={ExamId}, TotalScore={TotalScore:F1}, Level={Level}",
+                            capturedResult.StudentId, examId,
+                            problemSubmissions.Values.Sum(s => s.FinalScore), warningLevel);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex,
+                            "Error sending email for student {StudentId} in exam {ExamId}",
+                            capturedResult.StudentId, examId);
+                        capturedResult.ErrorMessage = ex.Message;
+                    }
+                }, cancellationToken)
+            );
+        }
+
+        await Task.WhenAll(emailTasks);
+
+        // Mark warnings as created
+        for (int i = 0; i < studentResults.Count; i++)
+        {
+            if (warningResults[i] != null)
+                studentResults[i].WarningCreated = true;
+        }
+
+        // Step 4: Level 2 auto-check for Level 1 warnings — enqueued as background job
+        if (warningLevel == 1 && !string.IsNullOrWhiteSpace(classroomId))
+        {
+            foreach (var result in studentResults)
+            {
+                _backgroundJobClient.Enqueue<AcademicWarningJob>(job =>
+                    job.CheckAndSendLevel2ViaJobAsync(result.StudentId, classroomId, examId, CancellationToken.None));
+            }
+        }
+
+        return studentResults;
+    }
+
+    /// <summary>
     /// Core per-student processing: fetches user profile, calls Gemini for analysis for EACH problem,
     /// persists an AcademicWarning record with all problem analyses, then sends a styled HTML email.
     /// Each step is wrapped in a single try-catch so a failure for one student
@@ -224,7 +583,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         var result = new StudentAcademicWarningResult
         {
             StudentId = studentId,
-            ExamScore = allProblemSubmissions.Values.Average(s => s.FinalScore)
+            ExamScore = allProblemSubmissions.Values.Sum(s => s.FinalScore)
         };
 
         try
@@ -285,17 +644,20 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             }
 
             // Step 7: Tạo AcademicWarning record với analysis cho TẤT CẢ problems
+            var firstProblemId = allProblemSubmissions.Keys.FirstOrDefault() ?? string.Empty;
             var warning = new AcademicWarning
             {
                 Id = Guid.NewGuid().ToString(),
                 ClassroomId = classroomId,
                 StudentId = studentId,
+                ExamId = examId,
+                ProblemId = firstProblemId,
                 WarningLevel = warningLevel,
                 TriggerType = AcademicWarningTriggerType.SINGLE_EXAM_LOW_SCORE,
                 InvolvedExams = new InvolvedExamsInfo
                 {
-                    ExamScores = new Dictionary<string, float> { [examId] = allProblemSubmissions.Values.Average(s => s.FinalScore) },
-                    AverageScore = allProblemSubmissions.Values.Average(s => s.FinalScore)
+                    ExamScores = new Dictionary<string, float> { [examId] = allProblemSubmissions.Values.Sum(s => s.FinalScore) },
+                    AverageScore = allProblemSubmissions.Values.Sum(s => s.FinalScore)
                 },
                 LlmAnalysis = allAnalysisEntries,
                 CreatedDate = DateTime.UtcNow,
@@ -324,9 +686,9 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             result.EmailSent = true;
 
             _logger.LogInformation(
-                "Academic warning sent: Student={StudentId}, Exam={ExamId}, Problems={ProblemCount}, AvgScore={AvgScore:F1}, Level={Level}",
+                "Academic warning sent: Student={StudentId}, Exam={ExamId}, Problems={ProblemCount}, TotalScore={TotalScore:F1}, Level={Level}",
                 studentId, examId, allProblemSubmissions.Count,
-                allProblemSubmissions.Values.Average(s => s.FinalScore), warningLevel);
+                allProblemSubmissions.Values.Sum(s => s.FinalScore), warningLevel);
 
             // Step 9: Nếu là Level 1, kiểm tra tự động có cần gửi Level 2 không
             if (warningLevel == 1 && !string.IsNullOrWhiteSpace(classroomId))
@@ -346,14 +708,104 @@ public class AcademicWarningCommand : IAcademicWarningCommand
     }
 
     /// <summary>
-    /// Automatically checks if a student qualifies for Level 2 warning based on
-    /// Classroom.GradingSettings (AvgScoreThreshold and MinExamCount), then
-    /// sends Level 2 warning if all conditions are met.
-    ///
-    /// Conditions for Level 2 trigger:
-    /// - Student has at least MinExamCount graded submissions across all exams in the classroom
-    /// - The average score of those submissions falls below AvgScoreThreshold
-    /// - A Level 2 warning has not already been sent for this student in this classroom
+    /// V3: Fast-path that immediately saves eligible students to DB and enqueues
+    /// background Hangfire job for Gemini + email processing. Returns job ID instantly.
+    /// </summary>
+    public async Task<string> SendBatchAcademicWarningsAsync_V3(
+        SendAcademicWarningBatchRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var jobId = $"aw-batch-{Guid.NewGuid():N}";
+
+        var enrollments = await _classroomEnrollmentRepository.FindByClassIdAsync(request.ClassroomId);
+        if (enrollments == null || enrollments.Count == 0)
+        {
+            _logger.LogWarning("No enrollments for classroom {ClassroomId}", request.ClassroomId);
+            return jobId;
+        }
+
+        var studentIds = enrollments
+            .Where(e => e.IsJoining && !string.IsNullOrWhiteSpace(e.StudentId))
+            .Select(e => e.StudentId)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+
+        var submissions = await _submissionRepository.GetByExamIdsAsync(new List<string> { request.ExamId });
+
+        var latestSubmissionsByStudent = submissions
+            .Where(s => s.Status == Models.SubmissionStatus.GRADED || s.Status == Models.SubmissionStatus.REGRADED)
+            .GroupBy(s => s.StudentId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.GroupBy(s => s.ProblemId)
+                      .ToDictionary(pg => pg.Key, pg => pg.OrderByDescending(s => s.Version).First()));
+
+        var eligibleStudents = latestSubmissionsByStudent
+            .Where(kv => kv.Value.Values.Any(s => s.FinalScore < request.MinScoreThreshold))
+            .Select(kv => new EligibleStudentContext
+            {
+                StudentId = kv.Key,
+                ProblemSubmissions = kv.Value
+            })
+            .ToList();
+
+        _logger.LogInformation(
+            "V3 batch accepted: JobId={JobId}, Classroom={ClassroomId}, Exam={ExamId}, EligibleStudents={Count}",
+            jobId, request.ClassroomId, request.ExamId, eligibleStudents.Count);
+
+        _backgroundJobClient.Enqueue<AcademicWarningJob>(job =>
+            job.ProcessBatchAsync(jobId, eligibleStudents, request.ExamId, request.WarningLevel, request.ClassroomId, CancellationToken.None));
+
+        return jobId;
+    }
+
+    /// <summary>
+    /// V3: Fast-path for single student. Saves to DB and enqueues background job.
+    /// </summary>
+    public async Task<string> SendSingleAcademicWarningAsync_V3(
+        string studentId,
+        SendAcademicWarningRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var jobId = $"aw-single-{Guid.NewGuid():N}";
+
+        var submissions = await _submissionRepository.GetByStudentIdAsync(studentId);
+        var examSubmissions = submissions
+            .Where(s => s.ExamId == request.ExamId)
+            .Where(s => s.Status == Models.SubmissionStatus.GRADED || s.Status == Models.SubmissionStatus.REGRADED)
+            .GroupBy(s => s.ProblemId)
+            .ToDictionary(g => g.Key, g => g.OrderByDescending(s => s.Version).First());
+
+        if (examSubmissions.Count == 0)
+        {
+            _logger.LogWarning("No graded submission for student {StudentId} in exam {ExamId}", studentId, request.ExamId);
+            return jobId;
+        }
+
+        var exam = await _examinationRepository.GetByIdAsync(request.ExamId);
+        var classroomId = exam?.ClassroomId ?? string.Empty;
+
+        _logger.LogInformation(
+            "V3 single accepted: JobId={JobId}, Student={StudentId}, Exam={ExamId}",
+            jobId, studentId, request.ExamId);
+
+        _backgroundJobClient.Enqueue<AcademicWarningJob>(job =>
+            job.ProcessSingleFromDictAsync(
+                jobId,
+                studentId,
+                request.ExamId,
+                request.WarningLevel,
+                classroomId,
+                examSubmissions,
+                CancellationToken.None));
+
+        return jobId;
+    }
+
+    /// <summary>
+    /// Checks if a student qualifies for Level 2 warning based on Classroom.GradingSettings
+    /// and automatically sends Level 2 warning if conditions are met.
+    /// Called automatically after a Level 1 warning is processed.
     /// </summary>
     public async Task<bool> CheckAndSendLevel2WarningAsync(
         string studentId,
@@ -361,7 +813,6 @@ public class AcademicWarningCommand : IAcademicWarningCommand
         string currentExamId,
         CancellationToken cancellationToken = default)
     {
-        // Step 1: Fetch classroom settings (AvgScoreThreshold, MinExamCount)
         var classroom = await _classroomRepository.FindByIdAsync(classroomId);
         if (classroom == null)
         {
@@ -380,7 +831,6 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             return false;
         }
 
-        // Step 2: Check if Level 2 warning already exists for this student/classroom
         var existingWarnings = await _academicWarningRepository.FindByStudentIdAsync(studentId);
         bool alreadySentLevel2 = existingWarnings.Any(w =>
             w.ClassroomId == classroomId && w.WarningLevel == 2);
@@ -392,7 +842,6 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             return false;
         }
 
-        // Step 3: Get all graded submissions for this student across all exams in the classroom
         var allSubmissions = await _submissionRepository.GetByStudentIdAsync(studentId);
         var gradedSubmissions = allSubmissions
             .Where(s => s.Status == Models.SubmissionStatus.GRADED || s.Status == Models.SubmissionStatus.REGRADED)
@@ -406,7 +855,6 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             return false;
         }
 
-        // Step 4: Get all exam IDs in this classroom to filter submissions
         var classroomExams = await _examinationRepository.GetByClassIdAsync(classroomId);
         var classroomExamIds = classroomExams.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);
         var relevantSubmissions = gradedSubmissions
@@ -421,10 +869,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             return false;
         }
 
-        // Step 5: Calculate average score
         var averageScore = relevantSubmissions.Average(s => s.FinalScore);
 
-        // Step 6: Check if average falls below threshold
         if (averageScore >= settings.AvgScoreThreshold)
         {
             _logger.LogDebug(
@@ -433,7 +879,6 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             return false;
         }
 
-        // Step 7: All conditions met — send Level 2 warning
         _logger.LogInformation(
             "Student {StudentId} qualifies for Level 2 warning: Avg={Avg:F2}, Threshold={Threshold}, Count={Count}",
             studentId, averageScore, settings.AvgScoreThreshold, relevantSubmissions.Count);
@@ -444,20 +889,158 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             WarningLevel = 2
         };
 
-        var level2Result = await SendSingleAcademicWarningAsync(studentId, level2Request, cancellationToken);
+        await SendSingleAcademicWarningAsync_V3(studentId, level2Request, cancellationToken);
+        return true;
+    }
 
-        if (level2Result.ProcessedStudents > 0)
+    /// <summary>
+    /// Saves lecturer feedback and material recommendation for a specific submission.
+    /// If sendFeedbackToStudent is true, sends a notification to the student via SignalR.
+    /// </summary>
+    public async Task<bool> SaveLecturerFeedbackAsync(
+        string submissionId,
+        string lecturerFeedback,
+        string materialRecommendation,
+        bool sendFeedbackToStudent,
+        string? problemTitle = null,
+        CancellationToken cancellationToken = default)
+    {
+        var submission = await _submissionRepository.GetByIdAsync(submissionId);
+        if (submission == null)
         {
-            _logger.LogInformation(
-                "Level 2 warning automatically sent to student {StudentId} in classroom {ClassroomId}",
-                studentId, classroomId);
-            return true;
+            _logger.LogWarning("Submission {SubmissionId} not found for lecturer feedback", submissionId);
+            return false;
         }
 
-        _logger.LogWarning(
-            "Failed to send Level 2 warning to student {StudentId}: {Error}",
-            studentId, level2Result.Results.FirstOrDefault()?.ErrorMessage ?? "Unknown error");
-        return false;
+        submission.LecturerFeedback = lecturerFeedback;
+        submission.MaterialRecommendation = !string.IsNullOrWhiteSpace(materialRecommendation)
+            ? materialRecommendation
+                .Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList()
+            : new List<string>();
+        submission.UpdatedDate = DateTime.UtcNow;
+
+        var updated = await _submissionRepository.UpdateAsync(submission);
+        if (updated == null)
+        {
+            _logger.LogError("Failed to save lecturer feedback for submission {SubmissionId}", submissionId);
+            return false;
+        }
+
+        _logger.LogInformation(
+            "Lecturer feedback saved for submission {SubmissionId}. SendToStudent={SendToStudent}",
+            submissionId, sendFeedbackToStudent);
+
+        if (sendFeedbackToStudent && !string.IsNullOrWhiteSpace(lecturerFeedback))
+        {
+            var studentProfile = await _userRequestProducer.GetUserByIdAsync(submission.StudentId, cancellationToken);
+            if (studentProfile != null && !string.IsNullOrWhiteSpace(studentProfile.Email))
+            {
+                try
+                {
+                    var subject = string.IsNullOrWhiteSpace(problemTitle)
+                        ? "You have received new feedback from your lecturer"
+                        : $"You have received new feedback for: {problemTitle}";
+                    var htmlBody = BuildLecturerFeedbackEmailHtml(
+                        studentProfile.Fullname,
+                        problemTitle ?? submission.ProblemId,
+                        lecturerFeedback,
+                        materialRecommendation);
+                    await _emailService.SendEmailAsync(studentProfile.Email, subject, htmlBody, cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex,
+                        "Failed to send feedback email to student {StudentId} for submission {SubmissionId}",
+                        submission.StudentId, submissionId);
+                }
+            }
+
+            try
+            {
+                await _businessNotificationService.NotifyUsersAsync(
+                    new[] { submission.StudentId },
+                    NotificationType.GRADE_RESULT,
+                    "New feedback from lecturer",
+                    $"Your lecturer has provided feedback on your submission for problem {submission.ProblemId}.",
+                    new Dictionary<string, object?>
+                    {
+                        ["submissionId"] = submission.Id,
+                        ["examId"] = submission.ExamId,
+                        ["problemId"] = submission.ProblemId,
+                        ["feedback"] = lecturerFeedback,
+                        ["materialRecommendation"] = materialRecommendation
+                    }
+                );
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex,
+                    "Failed to send feedback notification to student {StudentId} for submission {SubmissionId}",
+                    submission.StudentId, submissionId);
+            }
+        }
+
+        return true;
+    }
+
+    private static string BuildLecturerFeedbackEmailHtml(
+        string studentName,
+        string problemTitle,
+        string lecturerFeedback,
+        string materialRecommendation)
+    {
+        var materialSection = string.Empty;
+        if (!string.IsNullOrWhiteSpace(materialRecommendation))
+        {
+            var materials = materialRecommendation
+                .Split(new[] { Environment.NewLine, "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            if (materials.Length > 0)
+            {
+                materialSection = $@"
+<div style=""margin-top: 24px; padding: 16px; background-color: #f0f9ff; border-left: 4px solid #3b82f6; border-radius: 4px;"">
+  <h3 style=""margin: 0 0 8px 0; color: #1e40af; font-size: 16px;"">Recommended Materials</h3>
+  <p style=""margin: 0 0 8px 0; color: #374151; font-size: 14px;"">
+    Your lecturer has recommended the following materials to help you improve:
+  </p>
+  <ul style=""margin: 0; padding-left: 20px; color: #374151; font-size: 14px;"">
+    {string.Join(Environment.NewLine, materials.Select(m => $"<li>{System.Net.WebUtility.HtmlEncode(m)}</li>"))}
+  </ul>
+</div>";
+            }
+        }
+
+        return $@"<!DOCTYPE html>
+<html>
+<head>
+  <meta charset=""utf-8"" />
+  <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+</head>
+<body style=""font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f9fafb;"">
+  <div style=""background-color: #ffffff; border-radius: 8px; padding: 24px; border: 1px solid #e5e7eb;"">
+    <h2 style=""margin: 0 0 4px 0; color: #1f2937;"">New Feedback from Lecturer</h2>
+    <p style=""margin: 0 0 16px 0; color: #6b7280; font-size: 14px;"">
+      Hi {System.Net.WebUtility.HtmlEncode(studentName)}, you have received new feedback for your submission.
+    </p>
+
+    <div style=""margin-bottom: 16px;"">
+      <h3 style=""margin: 0 0 4px 0; color: #374151; font-size: 14px;"">Problem</h3>
+      <p style=""margin: 0; color: #111827; font-size: 16px; font-weight: 600;"">{System.Net.WebUtility.HtmlEncode(problemTitle)}</p>
+    </div>
+
+    <div style=""padding: 16px; background-color: #f9fafb; border-radius: 4px;"">
+      <h3 style=""margin: 0 0 8px 0; color: #374151; font-size: 14px;"">Feedback</h3>
+      <p style=""margin: 0; color: #111827; font-size: 14px; line-height: 1.6; white-space: pre-wrap;"">{System.Net.WebUtility.HtmlEncode(lecturerFeedback)}</p>
+    </div>
+
+    {materialSection}
+
+    <p style=""margin-top: 24px; color: #6b7280; font-size: 12px;"">
+      Please log in to the Edu-ACAS platform to view the full details and recommended materials.
+    </p>
+  </div>
+</body>
+</html>";
     }
 
     /// <summary>
@@ -649,7 +1232,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             : "Academic Warning: Performance Concern";
         var levelColor = warningLevel == 1 ? "#FF9800" : "#F44336";
         var levelIcon = warningLevel == 1 ? "&#9888;" : "&#128546;";
-        var avgScore = scores.Count > 0 ? scores.Average() : 0f;
+        var totalScore = scores.Count > 0 ? scores.Sum() : 0f;
 
         var escapedAnalysis = string.IsNullOrWhiteSpace(llmAnalysis)
             ? "<p><em>No specific analysis available.</em></p>"
@@ -721,8 +1304,8 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             {problemTable}
 
             <div style=""background:#f5f5f5;border-radius:8px;padding:20px;text-align:center;margin:20px 0;"">
-                <p style=""margin:0;font-size:13px;color:#666;"">Average Score</p>
-                <p style=""margin:5px 0 0;font-size:40px;font-weight:bold;color:#1976D2;"">{avgScore:F1}</p>
+                <p style=""margin:0;font-size:13px;color:#666;"">Total Score</p>
+                <p style=""margin:5px 0 0;font-size:40px;font-weight:bold;color:#1976D2;"">{totalScore:F1}</p>
             </div>
 
             <h3 style=""color:#333;font-size:16px;border-bottom:2px solid #1976D2;padding-bottom:8px;"">&#128161; AI-Powered Analysis &amp; Recommendations</h3>

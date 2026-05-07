@@ -135,9 +135,11 @@ const Sidebar = () => {
       label: "Dashboard",
       href: `${pathname}?tab=dashboard`,
     },
-    // { icon: AcademicCapIcon, label: "Manage Classrooms", href: PageUrl.MANAGE_CLASSROOM_PAGE },
-    // { icon: DocumentTextIcon, label: "Manage Assignments", href: `${pathname}?tab=assignments` },
-    { icon: ClockIcon, label: "Manage Slots", href: `${pathname}?tab=slots` },
+    { 
+      icon: ClockIcon, 
+      label: "Manage Slots", 
+      href: `${pathname}?tab=slots` 
+    },
     {
       icon: PuzzlePieceIcon,
       label: "Manage Examinations",
@@ -163,7 +165,6 @@ const Sidebar = () => {
       label: "Discussion Channel",
       href: `${pathname}?tab=discussion`,
     },
-    // {icon: QuestionMarkCircleIcon, label: "Question Banks", href: `${pathname}?tab=question-banks` },
   ];
 
   const adminMenuItems = [
@@ -221,6 +222,16 @@ const Sidebar = () => {
     //   label: "Examinations",
     //   href: `${pathname}?tab=exams`,
     // },
+    { 
+      icon: ClockIcon, 
+      label: "Slots", 
+      href: `${pathname}?tab=slots` 
+    },
+    {
+      icon: BookOpenIcon,
+      label: "Materials",
+      href: `${pathname}?tab=materials`,
+    },
     {
       icon: PuzzlePieceIcon,
       label: "Practise Exercises",
@@ -230,12 +241,6 @@ const Sidebar = () => {
       icon: PencilSquareIcon,
       label: "Quizzes",
       href: `${pathname}?tab=quizzes`,
-    },
-    { icon: ClockIcon, label: "Slots", href: `${pathname}?tab=slots` },
-    {
-      icon: BookOpenIcon,
-      label: "Materials",
-      href: `${pathname}?tab=materials`,
     },
     {
       icon: ChatBubbleLeftRightIcon,

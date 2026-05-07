@@ -24,6 +24,10 @@ export interface SendAcademicWarningResponse {
   results: StudentAcademicWarningResult[];
 }
 
+export interface BatchAcceptedResponse {
+  jobId: string;
+}
+
 export interface AnalysisEntry {
   submissionId: string;
   analysis: string;
@@ -39,6 +43,8 @@ export interface AcademicWarningResponse {
   id: string;
   classroomId: string;
   studentId: string;
+  examId: string;
+  problemId: string;
   warningLevel: number;
   triggerType: string;
   sentDate: string;
@@ -48,4 +54,8 @@ export interface AcademicWarningResponse {
   involvedExams: InvolvedExamsInfo | null;
   llmAnalysis: Record<string, AnalysisEntry>;
   lecturerAnalysis: Record<string, AnalysisEntry>;
+  classroomName: string;
+  examName: string;
+  problemTitle: string;
+  studentName: string;
 }

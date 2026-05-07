@@ -82,6 +82,9 @@ public class SubmissionResponse
     [JsonPropertyName("lecturerFeedback")]
     public string LecturerFeedback { get; set; } = string.Empty;
 
+    [JsonPropertyName("materialRecommendation")]
+    public List<string> MaterialRecommendation { get; set; } = new();
+
     [JsonPropertyName("aiFeedback")]
     public string AiFeedback { get; set; } = string.Empty;
 

@@ -32,6 +32,11 @@ public static class DynamoMapper
             : "[]";
         item["testResults"] = new AttributeValue { S = testResultsJson };
 
+        var materialRecommendation = submission.MaterialRecommendation != null && submission.MaterialRecommendation.Count > 0
+            ? JsonSerializer.Serialize(submission.MaterialRecommendation)
+            : "[]";
+        item["materialRecommendation"] = new AttributeValue { S = materialRecommendation };
+
         return item;
     }
 
@@ -47,6 +52,12 @@ public static class DynamoMapper
         if (item.TryGetValue("keystrokeLogs", out var keystrokeLogsVal) && !string.IsNullOrEmpty(keystrokeLogsVal.S))
         {
             keystrokeLogs = JsonSerializer.Deserialize<List<Models.KeystrokeLog>>(keystrokeLogsVal.S) ?? [];
+        }
+
+        var materialRecommendation = new List<string>();
+        if (item.TryGetValue("materialRecommendation", out var materialRecommendationVal) && !string.IsNullOrEmpty(materialRecommendationVal.S))
+        {
+            materialRecommendation = JsonSerializer.Deserialize<List<string>>(materialRecommendationVal.S) ?? [];
         }
 
         return new Models.Submission
@@ -72,7 +83,8 @@ public static class DynamoMapper
             AiFeedback = item.ContainsKey("aiFeedback") ? item["aiFeedback"].S : string.Empty,
             UpdatedDate = DateTime.Parse(item["updatedDate"].S),
             TestResults = testResults,
-            KeystrokeLogs = keystrokeLogs
+            KeystrokeLogs = keystrokeLogs,
+            MaterialRecommendation = materialRecommendation
         };
     }
 

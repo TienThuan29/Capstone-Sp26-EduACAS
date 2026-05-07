@@ -72,3 +72,9 @@ public class StudentAcademicWarningResult
     [JsonPropertyName("errorMessage")]
     public string? ErrorMessage { get; set; }
 }
+
+public class BatchAcceptedResponse
+{
+    [JsonPropertyName("jobId")]
+    public string JobId { get; set; } = string.Empty;
+}

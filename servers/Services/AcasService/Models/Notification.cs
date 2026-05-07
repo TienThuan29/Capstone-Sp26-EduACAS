@@ -48,4 +48,5 @@ public enum NotificationType
       // academic type
       ACADEMIC_WARNING_LEVEL_1, // Cảnh báo học vụ cấp độ 1
       ACADEMIC_WARNING_LEVEL_2, // Cảnh báo học vụ cấp độ 2
+      ACADEMIC_WARNING_JOB_COMPLETED, // Job gửi academic warning đã hoàn thành
 }

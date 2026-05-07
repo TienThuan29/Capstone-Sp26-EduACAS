@@ -10,6 +10,10 @@ public class AcademicWarningResponse
     public string ClassroomId { get; set; } = string.Empty;
     [JsonPropertyName("studentId")]
     public string StudentId { get; set; } = string.Empty;
+    [JsonPropertyName("examId")]
+    public string ExamId { get; set; } = string.Empty;
+    [JsonPropertyName("problemId")]
+    public string ProblemId { get; set; } = string.Empty;
     [JsonPropertyName("warningLevel")]
     public int WarningLevel { get; set; }
     [JsonPropertyName("triggerType")]
@@ -28,6 +32,14 @@ public class AcademicWarningResponse
     public Dictionary<string, AnalysisEntryDto> LlmAnalysis { get; set; } = new();
     [JsonPropertyName("lecturerAnalysis")]
     public Dictionary<string, AnalysisEntryDto> LecturerAnalysis { get; set; } = new();
+    [JsonPropertyName("classroomName")]
+    public string ClassroomName { get; set; } = string.Empty;
+    [JsonPropertyName("examName")]
+    public string ExamName { get; set; } = string.Empty;
+    [JsonPropertyName("problemTitle")]
+    public string ProblemTitle { get; set; } = string.Empty;
+    [JsonPropertyName("studentName")]
+    public string StudentName { get; set; } = string.Empty;
 }
 
 public class InvolvedExamsInfoDto
@@ -47,4 +59,6 @@ public class AnalysisEntryDto
     public string Analysis { get; set; } = string.Empty;
     [JsonPropertyName("recomendation")]
     public string Recomendation { get; set; } = string.Empty;
+    [JsonPropertyName("materialRecommendation")]
+    public List<string> MaterialRecommendation { get; set; } = new();
 }

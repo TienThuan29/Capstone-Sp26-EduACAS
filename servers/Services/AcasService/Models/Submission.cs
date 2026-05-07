@@ -37,6 +37,8 @@ public class Submission
 
     public string LecturerFeedback { get; set; } = string.Empty;
 
+    public List<string> MaterialRecommendation { get; set; } = new();
+
     public string AiFeedback { get; set; } = string.Empty;
 
     public DateTime UpdatedDate { get; set; }
