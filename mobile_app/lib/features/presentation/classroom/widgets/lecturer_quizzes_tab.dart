@@ -281,29 +281,39 @@ class _LecturerQuizzesTabState extends State<LecturerQuizzesTab> {
   }
 
   Widget _buildTopBar() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Row(
         children: [
+          Container(
+            width: 8,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
           const Expanded(
             child: Text(
               'Classroom Quizzes',
               style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.w800,
+                fontSize: 24,
+                fontWeight: FontWeight.w900,
                 color: AppColors.textPrimary,
               ),
             ),
           ),
-          ElevatedButton.icon(
-            onPressed: _openCreateSheet,
-            icon: const Icon(Icons.add_rounded),
-            label: const Text('Assign Quiz'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.primary,
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              textStyle: const TextStyle(fontWeight: FontWeight.w700),
+          Material(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              onTap: _openCreateSheet,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: const Icon(Icons.add_rounded, color: AppColors.primary, size: 24),
+              ),
             ),
           ),
         ],

@@ -1,0 +1,107 @@
+[
+  {
+    "id": "sub-001",
+    "subjectCode": "CS101",
+    "subjectName": "Introduction to Programming",
+    "description": "Fundamentals of programming using Python. Topics include variables, control flow, functions, data structures, and basic algorithms.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-002",
+    "subjectCode": "CS201",
+    "subjectName": "Data Structures & Algorithms",
+    "description": "Study of fundamental data structures (arrays, linked lists, trees, graphs) and algorithm design techniques (sorting, searching, dynamic programming).",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-003",
+    "subjectCode": "CS301",
+    "subjectName": "Object-Oriented Programming",
+    "description": "Principles of OOP including encapsulation, inheritance, polymorphism, and design patterns using Java and C++.",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "sub-004",
+    "subjectCode": "CS401",
+    "subjectName": "Database Systems",
+    "description": "Relational database design, SQL, normalization, indexing, transactions, and introduction to NoSQL databases.",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "sub-005",
+    "subjectCode": "CS501",
+    "subjectName": "Software Engineering",
+    "description": "Software development lifecycle, agile methodologies, requirements engineering, testing strategies, and project management.",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "sub-006",
+    "subjectCode": "CS102",
+    "subjectName": "Programming with JavaScript",
+    "description": "Introduction to programming concepts through JavaScript, including variables, control flow, functions, arrays, and DOM basics.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-007",
+    "subjectCode": "CS203",
+    "subjectName": "Data Structures in C++",
+    "description": "Core data structures and algorithmic problem solving using C++, focusing on arrays, linked lists, stacks, queues, and trees.",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "sub-008",
+    "subjectCode": "CS202",
+    "subjectName": "Algorithm Design with Python",
+    "description": "Algorithmic thinking, complexity analysis, recursion, sorting, searching, and dynamic programming implemented in Python.",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "sub-009",
+    "subjectCode": "CS302",
+    "subjectName": "Object-Oriented Programming in Java",
+    "description": "OOP principles, class design, inheritance, polymorphism, interfaces, generics, and exception handling using Java.",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "sub-010",
+    "subjectCode": "SE101",
+    "subjectName": "Software Development Fundamentals",
+    "description": "Introduction to software engineering practices, version control, teamwork, documentation, and basic project workflows.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-011",
+    "subjectCode": "SE201",
+    "subjectName": "Web Application Development with TypeScript",
+    "description": "Build modern web applications with TypeScript, modular architecture, component-based design, and frontend integration.",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "sub-012",
+    "subjectCode": "SE302",
+    "subjectName": "Design Patterns and Clean Code",
+    "description": "Advanced software design with reusable patterns, refactoring techniques, code quality principles, and maintainable architecture.",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "sub-013",
+    "subjectCode": "IT101",
+    "subjectName": "Computer Systems and C Programming",
+    "description": "Computer organization fundamentals, memory concepts, pointers, structures, and low-level programming with C.",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "sub-014",
+    "subjectCode": "IT201",
+    "subjectName": "Full Stack JavaScript Development",
+    "description": "Client-server application development using JavaScript across frontend and backend layers, including API integration.",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "sub-015",
+    "subjectCode": "DB101",
+    "subjectName": "Database Fundamentals",
+    "description": "Relational database concepts, entity-relationship modeling, SQL basics, and normalization principles.",
+    "createdBy": "usr-lec-002"
+  }
+]

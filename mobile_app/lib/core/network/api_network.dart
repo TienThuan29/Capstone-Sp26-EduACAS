@@ -150,6 +150,67 @@ class ApiNetwork {
     }
   }
 
+  // Method for Multipart POST requests with Bearer token
+  static Future<Map<String, dynamic>> postMultipartWithAuth({
+    required String endpoint,
+    required String fieldName,
+    required List<int> fileBytes,
+    required String fileName,
+    required String token,
+    Map<String, String>? additionalHeaders,
+  }) async {
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}$endpoint');
+
+      debugPrint(' MULTIPART POST Request URL: $url');
+
+      final request = http.MultipartRequest('POST', url);
+      
+      // Add Authorization header
+      request.headers['Authorization'] = 'Bearer $token';
+      if (additionalHeaders != null) {
+        request.headers.addAll(additionalHeaders);
+      }
+
+      // Add file
+      final extension = fileName.split('.').last.toLowerCase();
+      String mimeType = 'image/jpeg';
+      if (extension == 'png') mimeType = 'image/png';
+      else if (extension == 'webp') mimeType = 'image/webp';
+      else if (extension == 'gif') mimeType = 'image/gif';
+
+      final multipartFile = http.MultipartFile.fromBytes(
+        fieldName,
+        fileBytes,
+        filename: fileName,
+        contentType: http.MediaType.parse(mimeType),
+      );
+      request.files.add(multipartFile);
+
+      debugPrint(' Request Headers: ${request.headers}');
+
+      final streamedResponse = await request.send().timeout(
+        ApiConfig.requestTimeout,
+        onTimeout: () {
+          throw Exception(
+            'Request timeout after ${ApiConfig.requestTimeout.inSeconds} seconds',
+          );
+        },
+      );
+
+      final response = await http.Response.fromStream(streamedResponse);
+
+      debugPrint(' Response Status: ${response.statusCode}');
+      debugPrint(' Response Body: ${response.body}');
+
+      return _handleResponse(response);
+    } catch (e) {
+      debugPrint(' Network Error: $e');
+      throw Exception('Network error during upload: $e');
+    }
+  }
+
+
   // Method for GET requests without Bearer token
   static Future<Map<String, dynamic>> getWithoutAuth({
     required String endpoint,
@@ -543,7 +604,13 @@ class ApiNetwork {
       }
     } else {
       debugPrint(' HTTP Error: ${response.statusCode} - ${response.body}');
-      throw Exception('HTTP ${response.statusCode}: ${response.body}');
+      try {
+        final errorData = jsonDecode(response.body);
+        if (errorData is Map && errorData.containsKey('message')) {
+          throw errorData['message'];
+        }
+      } catch (_) {}
+      throw 'Server error (${response.statusCode})';
     }
   }
 }

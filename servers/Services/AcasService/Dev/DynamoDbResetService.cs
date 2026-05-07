@@ -600,6 +600,51 @@ public class DynamoDbResetService : IDynamoDbResetService
                 warnings, Repositories.AcademicWarning.DynamoMapper.AcademicWarningToDynamoItem, ct);
         }
 
+        // 12) Exam Logs
+        var examLogDtos = LoadJson<ExamLogDto>("exam-logs.json");
+        var examLogs = examLogDtos.Select(e => new ExamLog
+        {
+            Id = AllocateSeedId(seedIdMap, e.Id),
+            SubmissionId = RemapSeedId(seedIdMap, e.SubmissionId, "examLog.submissionId"),
+            EventType = Enum.TryParse<ExamLogEventType>(e.EventType, true, out var et) ? et : ExamLogEventType.OTHER,
+            EventDetail = e.EventDetail ?? "",
+            Message = e.Message ?? "",
+            Severity = Enum.TryParse<ExamLogSeverity>(e.Severity, true, out var sv) ? sv : ExamLogSeverity.INFO,
+            IsViolation = e.IsViolation,
+            ClientTimestamp = e.ClientTimestamp,
+            CreatedDate = e.CreatedDate
+        }).ToList();
+        var examLogTable = tables.FirstOrDefault(t => t.EntityType == typeof(ExamLog)).TableName;
+        if (!string.IsNullOrEmpty(examLogTable))
+        {
+            seeded += await PutAllAsync(examLogTable,
+                examLogs, Repositories.ExamLog.DynamoMapper.ExamLogToDynamoItem, ct);
+        }
+
+        // 13) Keystroke Logs
+        var keystrokeLogDtos = LoadJson<KeystrokeLogDto>("keystroke-logs.json");
+        var keystrokeLogs = keystrokeLogDtos.Select(k => new KeystrokeLog
+        {
+            Id = AllocateSeedId(seedIdMap, k.Id),
+            SubmissionId = RemapSeedId(seedIdMap, k.SubmissionId, "keystrokeLog.submissionId"),
+            KeystrokeData = (k.KeystrokeData ?? new()).Select(r => new KeystrokeRecord
+            {
+                TimeStartSet = r.TimeStartSet,
+                TimeOffSet = r.TimeOffSet,
+                Duration = r.Duration,
+                Cps = r.Cps,
+                CharCount = r.CharCount,
+                Content = r.Content
+            }).ToList(),
+            CreatedDate = k.CreatedDate
+        }).ToList();
+        var keystrokeLogTable = tables.FirstOrDefault(t => t.EntityType == typeof(KeystrokeLog)).TableName;
+        if (!string.IsNullOrEmpty(keystrokeLogTable))
+        {
+            seeded += await PutAllAsync(keystrokeLogTable,
+                keystrokeLogs, Repositories.KeystrokeLogs.DynamoMapper.ToDynamoItem, ct);
+        }
+
         return seeded;
     }
 
@@ -1189,6 +1234,37 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string TriggerType { get; set; } = "";
         public bool IsRead { get; set; }
         public DateTime SentDate { get; set; }
+    }
+
+    private sealed class ExamLogDto
+    {
+        public string Id { get; set; } = "";
+        public string SubmissionId { get; set; } = "";
+        public string EventType { get; set; } = "";
+        public string EventDetail { get; set; } = "";
+        public string Message { get; set; } = "";
+        public string Severity { get; set; } = "";
+        public bool IsViolation { get; set; }
+        public DateTime ClientTimestamp { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    private sealed class KeystrokeLogDto
+    {
+        public string Id { get; set; } = "";
+        public string SubmissionId { get; set; } = "";
+        public List<KeystrokeRecordDto>? KeystrokeData { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    private sealed class KeystrokeRecordDto
+    {
+        public string TimeStartSet { get; set; } = "";
+        public string TimeOffSet { get; set; } = "";
+        public double Duration { get; set; }
+        public double Cps { get; set; }
+        public int CharCount { get; set; }
+        public string Content { get; set; } = "";
     }
 
     private sealed class CommentDto
