@@ -1,0 +1,1498 @@
+[
+  {
+    "id": "prob-001",
+    "lecturerId": "usr-lec-001",
+    "title": "Sum of Two Numbers",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "basic",
+      "input-output"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    long long a, b;\n    scanf(\"%lld %lld\", &a, &b);\n    printf(\"%lld\\n\", a + b);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    long long a, b;\n    cin >> a >> b;\n    cout << a + b << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        long a = sc.nextLong();\n        long b = sc.nextLong();\n        System.out.println(a + b);\n    }\n}\n",
+      "python": "a = int(input())\nb = int(input())\nprint(a + b)\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split('\\n');\nconst [a, b] = input.map(Number);\nconsole.log(a + b);\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split('\\n');\nconst [a, b] = input.map(Number);\nconsole.log(a + b);\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        long a = long.Parse(Console.ReadLine()!);\n        long b = long.Parse(Console.ReadLine()!);\n        Console.WriteLine(a + b);\n    }\n}\n"
+    },
+    "content": "## Description\nGiven two integers **a** and **b**, compute and print their sum.\n\n## Input Format\nTwo lines, each containing a single integer.\n- Line 1: integer **a** (-10^9 ≤ a ≤ 10^9)\n- Line 2: integer **b** (-10^9 ≤ b ≤ 10^9)\n\n## Output Format\nPrint a single integer — the sum of a and b.\n\n## Constraints\n- -10^9 ≤ a, b ≤ 10^9\n\n## Examples\n**Input:**\n```\n3\n5\n```\n**Output:**\n```\n8\n```",
+    "testCases": [
+      {
+        "id": "tc-001-01",
+        "input": "3\n5",
+        "expectedOutput": "8",
+        "isPublic": true
+      },
+      {
+        "id": "tc-001-02",
+        "input": "0\n0",
+        "expectedOutput": "0",
+        "isPublic": true
+      },
+      {
+        "id": "tc-001-03",
+        "input": "-10\n25",
+        "expectedOutput": "15",
+        "isPublic": false
+      },
+      {
+        "id": "tc-001-04",
+        "input": "1000000\n999999",
+        "expectedOutput": "1999999",
+        "isPublic": false
+      },
+      {
+        "id": "tc-001-05",
+        "input": "-500\n-300",
+        "expectedOutput": "-800",
+        "isPublic": false
+      }
+    ]
+  },
+  {
+    "id": "prob-002",
+    "lecturerId": "usr-lec-001",
+    "title": "FizzBuzz Single Number",
+    "difficulty": "EASY",
+    "tags": [
+      "conditional",
+      "basic",
+      "modular-arithmetic"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    if (n % 15 == 0) {\n        printf(\"FizzBuzz\\n\");\n    } else if (n % 3 == 0) {\n        printf(\"Fizz\\n\");\n    } else if (n % 5 == 0) {\n        printf(\"Buzz\\n\");\n    } else {\n        printf(\"%d\\n\", n);\n    }\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    if (n % 15 == 0) {\n        cout << \"FizzBuzz\" << endl;\n    } else if (n % 3 == 0) {\n        cout << \"Fizz\" << endl;\n    } else if (n % 5 == 0) {\n        cout << \"Buzz\" << endl;\n    } else {\n        cout << n << endl;\n    }\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        if (n % 15 == 0) {\n            System.out.println(\"FizzBuzz\");\n        } else if (n % 3 == 0) {\n            System.out.println(\"Fizz\");\n        } else if (n % 5 == 0) {\n            System.out.println(\"Buzz\");\n        } else {\n            System.out.println(n);\n        }\n    }\n}\n",
+      "python": "n = int(input())\nif n % 15 == 0:\n    print(\"FizzBuzz\")\nelif n % 3 == 0:\n    print(\"Fizz\")\nelif n % 5 == 0:\n    print(\"Buzz\")\nelse:\n    print(n)\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = parseInt(input);\nif (n % 15 === 0) {\n    console.log(\"FizzBuzz\");\n} else if (n % 3 === 0) {\n    console.log(\"Fizz\");\n} else if (n % 5 === 0) {\n    console.log(\"Buzz\");\n} else {\n    console.log(n);\n}\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = parseInt(input);\nif (n % 15 === 0) {\n    console.log(\"FizzBuzz\");\n} else if (n % 3 === 0) {\n    console.log(\"Fizz\");\n} else if (n % 5 === 0) {\n    console.log(\"Buzz\");\n} else {\n    console.log(n);\n}\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        if (n % 15 == 0) {\n            Console.WriteLine(\"FizzBuzz\");\n        } else if (n % 3 == 0) {\n            Console.WriteLine(\"Fizz\");\n        } else if (n % 5 == 0) {\n            Console.WriteLine(\"Buzz\");\n        } else {\n            Console.WriteLine(n);\n        }\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a positive integer **N**, print:\n- `FizzBuzz` if N is divisible by both 3 and 5\n- `Fizz` if N is divisible by 3 only\n- `Buzz` if N is divisible by 5 only\n- The number itself otherwise\n\n## Input Format\nA single integer **N** (1 ≤ N ≤ 10^6).\n\n## Output Format\nPrint the result as described above.\n\n## Examples\n**Input:**\n```\n15\n```\n**Output:**\n```\nFizzBuzz\n```",
+    "testCases": [
+      {
+        "id": "tc-002-01",
+        "input": "15",
+        "expectedOutput": "FizzBuzz",
+        "isPublic": true
+      },
+      {
+        "id": "tc-002-02",
+        "input": "9",
+        "expectedOutput": "Fizz",
+        "isPublic": true
+      },
+      {
+        "id": "tc-002-03",
+        "input": "10",
+        "expectedOutput": "Buzz",
+        "isPublic": false
+      },
+      {
+        "id": "tc-002-04",
+        "input": "7",
+        "expectedOutput": "7",
+        "isPublic": false
+      },
+      {
+        "id": "tc-002-05",
+        "input": "30",
+        "expectedOutput": "FizzBuzz",
+        "isPublic": false
+      },
+      {
+        "id": "tc-002-06",
+        "input": "1",
+        "expectedOutput": "1",
+        "isPublic": false
+      }
+    ]
+  },
+  {
+    "id": "prob-003",
+    "lecturerId": "usr-lec-001",
+    "title": "Reverse String",
+    "difficulty": "EASY",
+    "tags": [
+      "string",
+      "basic",
+      "manipulation"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char s[100001];\n    scanf(\"%s\", s);\n    int len = strlen(s);\n    for (int i = len - 1; i >= 0; i--) {\n        printf(\"%c\", s[i]);\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    string s;\n    cin >> s;\n    reverse(s.begin(), s.end());\n    cout << s << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        StringBuilder sb = new StringBuilder(s);\n        System.out.println(sb.reverse().toString());\n    }\n}\n",
+      "python": "s = input()\nprint(s[::-1])\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst s = input.split('\\n')[0];\nconsole.log(s.split('').reverse().join(''));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst s = input.split('\\n')[0];\nconsole.log(s.split('').reverse().join(''));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string s = Console.ReadLine()!;\n        char[] arr = s.ToCharArray();\n        Array.Reverse(arr);\n        Console.WriteLine(new string(arr));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a string **s**, print the reverse of s.\n\n## Input Format\nA single line containing a string **s** (1 ≤ |s| ≤ 10^5). The string consists of printable ASCII characters.\n\n## Output Format\nPrint the reversed string.\n\n## Examples\n**Input:**\n```\nhello\n```\n**Output:**\n```\nolleh\n```",
+    "testCases": [
+      {
+        "id": "tc-003-01",
+        "input": "hello",
+        "expectedOutput": "olleh",
+        "isPublic": true
+      },
+      {
+        "id": "tc-003-02",
+        "input": "a",
+        "expectedOutput": "a",
+        "isPublic": true
+      },
+      {
+        "id": "tc-003-03",
+        "input": "abcdef",
+        "expectedOutput": "fedcba",
+        "isPublic": false
+      },
+      {
+        "id": "tc-003-04",
+        "input": "racecar",
+        "expectedOutput": "racecar",
+        "isPublic": false
+      },
+      {
+        "id": "tc-003-05",
+        "input": "12345",
+        "expectedOutput": "54321",
+        "isPublic": false
+      }
+    ]
+  },
+  {
+    "id": "prob-004",
+    "lecturerId": "usr-lec-001",
+    "title": "Palindrome Check",
+    "difficulty": "EASY",
+    "tags": [
+      "string",
+      "basic",
+      "palindrome"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char s[100001];\n    scanf(\"%s\", s);\n    int len = strlen(s);\n    int isPalindrome = 1;\n    for (int i = 0; i < len / 2; i++) {\n        if (s[i] != s[len - 1 - i]) {\n            isPalindrome = 0;\n            break;\n        }\n    }\n    printf(\"%s\\n\", isPalindrome ? \"YES\" : \"NO\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    string s;\n    cin >> s;\n    string rev = s;\n    reverse(rev.begin(), rev.end());\n    cout << (s == rev ? \"YES\" : \"NO\") << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        String rev = new StringBuilder(s).reverse().toString();\n        System.out.println(s.equals(rev) ? \"YES\" : \"NO\");\n    }\n}\n",
+      "python": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst s = input.split('\\n')[0];\nconst rev = s.split('').reverse().join('');\nconsole.log(s === rev ? \"YES\" : \"NO\");\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst s = input.split('\\n')[0];\nconst rev = s.split('').reverse().join('');\nconsole.log(s === rev ? \"YES\" : \"NO\");\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string s = Console.ReadLine()!;\n        char[] arr = s.ToCharArray();\n        Array.Reverse(arr);\n        Console.WriteLine(s == new string(arr) ? \"YES\" : \"NO\");\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a string **s**, determine if it is a palindrome. A palindrome reads the same forwards and backwards.\n\n## Input Format\nA single line containing a string **s** (1 ≤ |s| ≤ 10^5), consisting of lowercase English letters.\n\n## Output Format\nPrint `YES` if the string is a palindrome, `NO` otherwise.\n\n## Examples\n**Input:**\n```\nracecar\n```\n**Output:**\n```\nYES\n```",
+    "testCases": [
+      {
+        "id": "tc-004-01",
+        "input": "racecar",
+        "expectedOutput": "YES",
+        "isPublic": true
+      },
+      {
+        "id": "tc-004-02",
+        "input": "hello",
+        "expectedOutput": "NO",
+        "isPublic": true
+      },
+      {
+        "id": "tc-004-03",
+        "input": "a",
+        "expectedOutput": "YES",
+        "isPublic": false
+      },
+      {
+        "id": "tc-004-04",
+        "input": "abba",
+        "expectedOutput": "YES",
+        "isPublic": false
+      },
+      {
+        "id": "tc-004-05",
+        "input": "abcd",
+        "expectedOutput": "NO",
+        "isPublic": false
+      }
+    ]
+  },
+  {
+    "id": "prob-005",
+    "lecturerId": "usr-lec-001",
+    "title": "Count Digits",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "basic",
+      "counting"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    unsigned long long n;\n    scanf(\"%llu\", &n);\n    int count = 0;\n    if (n == 0) {\n        printf(\"1\\n\");\n        return 0;\n    }\n    while (n > 0) {\n        count++;\n        n /= 10;\n    }\n    printf(\"%d\\n\", count);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    unsigned long long n;\n    cin >> n;\n    int count = 0;\n    if (n == 0) {\n        cout << 1 << endl;\n        return 0;\n    }\n    while (n > 0) {\n        count++;\n        n /= 10;\n    }\n    cout << count << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\nimport java.math.BigInteger;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String n = sc.next();\n        System.out.println(n.length());\n    }\n}\n",
+      "python": "n = input().strip()\nprint(len(n))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = input.split('\\n')[0];\nconsole.log(n.length);\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = input.split('\\n')[0];\nconsole.log(n.length);\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string n = Console.ReadLine()!;\n        Console.WriteLine(n.Length);\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a non-negative integer **N**, count and print the number of digits in N.\n\n## Input Format\nA single non-negative integer **N** (0 ≤ N ≤ 10^18).\n\n## Output Format\nPrint the number of digits in N.\n\n## Examples\n**Input:**\n```\n12345\n```\n**Output:**\n```\n5\n```",
+    "testCases": [
+      {
+        "id": "tc-005-01",
+        "input": "12345",
+        "expectedOutput": "5",
+        "isPublic": true
+      },
+      {
+        "id": "tc-005-02",
+        "input": "0",
+        "expectedOutput": "1",
+        "isPublic": true
+      },
+      {
+        "id": "tc-005-03",
+        "input": "100",
+        "expectedOutput": "3",
+        "isPublic": false
+      },
+      {
+        "id": "tc-005-04",
+        "input": "9",
+        "expectedOutput": "1",
+        "isPublic": false
+      },
+      {
+        "id": "tc-005-05",
+        "input": "999999999",
+        "expectedOutput": "9",
+        "isPublic": false
+      }
+    ]
+  },
+  {
+    "id": "prob-006",
+    "lecturerId": "usr-lec-001",
+    "title": "Grade Classifier",
+    "difficulty": "EASY",
+    "tags": [
+      "conditional",
+      "string",
+      "case-insensitive"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int score;\n    scanf(\"%d\", &score);\n    if (score >= 90) {\n        printf(\"A\\n\");\n    } else if (score >= 80) {\n        printf(\"B\\n\");\n    } else if (score >= 70) {\n        printf(\"C\\n\");\n    } else if (score >= 60) {\n        printf(\"D\\n\");\n    } else {\n        printf(\"F\\n\");\n    }\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int score;\n    cin >> score;\n    if (score >= 90) {\n        cout << \"A\" << endl;\n    } else if (score >= 80) {\n        cout << \"B\" << endl;\n    } else if (score >= 70) {\n        cout << \"C\" << endl;\n    } else if (score >= 60) {\n        cout << \"D\" << endl;\n    } else {\n        cout << \"F\" << endl;\n    }\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int score = sc.nextInt();\n        if (score >= 90) {\n            System.out.println(\"A\");\n        } else if (score >= 80) {\n            System.out.println(\"B\");\n        } else if (score >= 70) {\n            System.out.println(\"C\");\n        } else if (score >= 60) {\n            System.out.println(\"D\");\n        } else {\n            System.out.println(\"F\");\n        }\n    }\n}\n",
+      "python": "score = int(input())\nif score >= 90:\n    print(\"A\")\nelif score >= 80:\n    print(\"B\")\nelif score >= 70:\n    print(\"C\")\nelif score >= 60:\n    print(\"D\")\nelse:\n    print(\"F\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst score = parseInt(input);\nif (score >= 90) {\n    console.log(\"A\");\n} else if (score >= 80) {\n    console.log(\"B\");\n} else if (score >= 70) {\n    console.log(\"C\");\n} else if (score >= 60) {\n    console.log(\"D\");\n} else {\n    console.log(\"F\");\n}\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst score = parseInt(input);\nif (score >= 90) {\n    console.log(\"A\");\n} else if (score >= 80) {\n    console.log(\"B\");\n} else if (score >= 70) {\n    console.log(\"C\");\n} else if (score >= 60) {\n    console.log(\"D\");\n} else {\n    console.log(\"F\");\n}\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int score = int.Parse(Console.ReadLine()!);\n        if (score >= 90) {\n            Console.WriteLine(\"A\");\n        } else if (score >= 80) {\n            Console.WriteLine(\"B\");\n        } else if (score >= 70) {\n            Console.WriteLine(\"C\");\n        } else if (score >= 60) {\n            Console.WriteLine(\"D\");\n        } else {\n            Console.WriteLine(\"F\");\n        }\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a student's score (0-100), classify and print the letter grade:\n- **A** if score ≥ 90\n- **B** if 80 ≤ score < 90\n- **C** if 70 ≤ score < 80\n- **D** if 60 ≤ score < 70\n- **F** if score < 60\n\n## Input Format\nA single integer **score** (0 ≤ score ≤ 100).\n\n## Output Format\nPrint the letter grade. Output comparison is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n85\n```\n**Output:**\n```\nB\n```",
+    "testCases": [
+      {
+        "id": "tc-006-01",
+        "input": "85",
+        "expectedOutput": "B",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-006-02",
+        "input": "95",
+        "expectedOutput": "A",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-006-03",
+        "input": "72",
+        "expectedOutput": "C",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-006-04",
+        "input": "65",
+        "expectedOutput": "D",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-006-05",
+        "input": "45",
+        "expectedOutput": "F",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-006-06",
+        "input": "0",
+        "expectedOutput": "F",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      }
+    ]
+  },
+  {
+    "id": "prob-007",
+    "lecturerId": "usr-lec-001",
+    "title": "Even or Odd",
+    "difficulty": "EASY",
+    "tags": [
+      "conditional",
+      "basic",
+      "case-insensitive"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    long long n;\n    scanf(\"%lld\", &n);\n    printf(\"%s\\n\", (n % 2 == 0) ? \"Even\" : \"Odd\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    long long n;\n    cin >> n;\n    cout << (n % 2 == 0 ? \"Even\" : \"Odd\") << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        long n = sc.nextLong();\n        System.out.println(n % 2 == 0 ? \"Even\" : \"Odd\");\n    }\n}\n",
+      "python": "n = int(input())\nprint(\"Even\" if n % 2 == 0 else \"Odd\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = parseInt(input);\nconsole.log(n % 2 === 0 ? \"Even\" : \"Odd\");\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = parseInt(input);\nconsole.log(n % 2 === 0 ? \"Even\" : \"Odd\");\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        long n = long.Parse(Console.ReadLine()!);\n        Console.WriteLine(n % 2 == 0 ? \"Even\" : \"Odd\");\n    }\n}\n"
+    },
+    "content": "## Description\nGiven an integer **N**, determine if it is even or odd.\n\n## Input Format\nA single integer **N** (-10^9 ≤ N ≤ 10^9).\n\n## Output Format\nPrint `Even` if the number is even, `Odd` otherwise. Output is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n4\n```\n**Output:**\n```\nEven\n```",
+    "testCases": [
+      {
+        "id": "tc-007-01",
+        "input": "4",
+        "expectedOutput": "Even",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-007-02",
+        "input": "7",
+        "expectedOutput": "Odd",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-007-03",
+        "input": "0",
+        "expectedOutput": "Even",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-007-04",
+        "input": "-3",
+        "expectedOutput": "Odd",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-007-05",
+        "input": "1000000",
+        "expectedOutput": "Even",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      }
+    ]
+  },
+  {
+    "id": "prob-008",
+    "lecturerId": "usr-lec-001",
+    "title": "Leap Year Checker",
+    "difficulty": "EASY",
+    "tags": [
+      "conditional",
+      "date",
+      "case-insensitive"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int year;\n    scanf(\"%d\", &year);\n    int isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);\n    printf(\"%s\\n\", isLeap ? \"YES\" : \"NO\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int year;\n    cin >> year;\n    bool isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);\n    cout << (isLeap ? \"YES\" : \"NO\") << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int year = sc.nextInt();\n        boolean isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);\n        System.out.println(isLeap ? \"YES\" : \"NO\");\n    }\n}\n",
+      "python": "year = int(input())\nis_leap = (year % 4 == 0 and year % 100 != 0) or (year % 400 == 0)\nprint(\"YES\" if is_leap else \"NO\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst year = parseInt(input);\nconst isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);\nconsole.log(isLeap ? \"YES\" : \"NO\");\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst year = parseInt(input);\nconst isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);\nconsole.log(isLeap ? \"YES\" : \"NO\");\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int year = int.Parse(Console.ReadLine()!);\n        bool isLeap = (year % 4 == 0 && year % 100 != 0) || (year % 400 == 0);\n        Console.WriteLine(isLeap ? \"YES\" : \"NO\");\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a year, determine if it is a leap year.\n\nA year is a leap year if:\n- It is divisible by 4 **AND**\n- It is NOT divisible by 100, **UNLESS** it is also divisible by 400.\n\n## Input Format\nA single integer **year** (1 ≤ year ≤ 10^4).\n\n## Output Format\nPrint `YES` if leap year, `NO` otherwise. Output is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n2024\n```\n**Output:**\n```\nYES\n```",
+    "testCases": [
+      {
+        "id": "tc-008-01",
+        "input": "2024",
+        "expectedOutput": "YES",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-008-02",
+        "input": "1900",
+        "expectedOutput": "NO",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-008-03",
+        "input": "2000",
+        "expectedOutput": "YES",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-008-04",
+        "input": "2023",
+        "expectedOutput": "NO",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-008-05",
+        "input": "400",
+        "expectedOutput": "YES",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      }
+    ]
+  },
+  {
+    "id": "prob-009",
+    "lecturerId": "usr-lec-001",
+    "title": "Triangle Type Classifier",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "geometry",
+      "conditional",
+      "case-insensitive"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    long long a, b, c;\n    scanf(\"%lld %lld %lld\", &a, &b, &c);\n    if (a + b <= c || a + c <= b || b + c <= a) {\n        printf(\"Not a triangle\\n\");\n    } else if (a == b && b == c) {\n        printf(\"Equilateral\\n\");\n    } else if (a == b || a == c || b == c) {\n        printf(\"Isosceles\\n\");\n    } else {\n        printf(\"Scalene\\n\");\n    }\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    long long a, b, c;\n    cin >> a >> b >> c;\n    if (a + b <= c || a + c <= b || b + c <= a) {\n        cout << \"Not a triangle\" << endl;\n    } else if (a == b && b == c) {\n        cout << \"Equilateral\" << endl;\n    } else if (a == b || a == c || b == c) {\n        cout << \"Isosceles\" << endl;\n    } else {\n        cout << \"Scalene\" << endl;\n    }\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        long a = sc.nextLong(), b = sc.nextLong(), c = sc.nextLong();\n        if (a + b <= c || a + c <= b || b + c <= a) {\n            System.out.println(\"Not a triangle\");\n        } else if (a == b && b == c) {\n            System.out.println(\"Equilateral\");\n        } else if (a == b || a == c || b == c) {\n            System.out.println(\"Isosceles\");\n        } else {\n            System.out.println(\"Scalene\");\n        }\n    }\n}\n",
+      "python": "a, b, c = map(int, input().split())\nif a + b <= c or a + c <= b or b + c <= a:\n    print(\"Not a triangle\")\nelif a == b == c:\n    print(\"Equilateral\")\nelif a == b or a == c or b == c:\n    print(\"Isosceles\")\nelse:\n    print(\"Scalene\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [a, b, c] = input.map(Number);\nif (a + b <= c || a + c <= b || b + c <= a) {\n    console.log(\"Not a triangle\");\n} else if (a === b && b === c) {\n    console.log(\"Equilateral\");\n} else if (a === b || a === c || b === c) {\n    console.log(\"Isosceles\");\n} else {\n    console.log(\"Scalene\");\n}\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [a, b, c] = input.map(Number);\nif (a + b <= c || a + c <= b || b + c <= a) {\n    console.log(\"Not a triangle\");\n} else if (a === b && b === c) {\n    console.log(\"Equilateral\");\n} else if (a === b || a === c || b === c) {\n    console.log(\"Isosceles\");\n} else {\n    console.log(\"Scalene\");\n}\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] tokens = Console.ReadLine()!.Split();\n        long a = long.Parse(tokens[0]);\n        long b = long.Parse(tokens[1]);\n        long c = long.Parse(tokens[2]);\n        if (a + b <= c || a + c <= b || b + c <= a) {\n            Console.WriteLine(\"Not a triangle\");\n        } else if (a == b && b == c) {\n            Console.WriteLine(\"Equilateral\");\n        } else if (a == b || a == c || b == c) {\n            Console.WriteLine(\"Isosceles\");\n        } else {\n            Console.WriteLine(\"Scalene\");\n        }\n    }\n}\n"
+    },
+    "content": "## Description\nGiven three sides of a triangle, classify it as:\n- `Equilateral` — all three sides are equal\n- `Isosceles` — exactly two sides are equal\n- `Scalene` — all three sides are different\n- `Not a triangle` — if the sides cannot form a valid triangle (sum of any two sides must be greater than the third)\n\n## Input Format\nThree space-separated integers **a**, **b**, **c** (1 ≤ a, b, c ≤ 10^6).\n\n## Output Format\nPrint the type of triangle. Output is **case-insensitive**.\n\n## Examples\n**Input:**\n```\n3 3 3\n```\n**Output:**\n```\nEquilateral\n```",
+    "testCases": [
+      {
+        "id": "tc-009-01",
+        "input": "3 3 3",
+        "expectedOutput": "Equilateral",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-009-02",
+        "input": "3 3 5",
+        "expectedOutput": "Isosceles",
+        "isPublic": true,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-009-03",
+        "input": "3 4 5",
+        "expectedOutput": "Scalene",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-009-04",
+        "input": "1 2 10",
+        "expectedOutput": "Not a triangle",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      },
+      {
+        "id": "tc-009-05",
+        "input": "5 5 5",
+        "expectedOutput": "Equilateral",
+        "isPublic": false,
+        "isCaseInsensitive": true
+      }
+    ]
+  },
+  {
+    "id": "prob-010",
+    "lecturerId": "usr-lec-001",
+    "title": "Circle Area Calculator",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "floating-point",
+      "geometry"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <math.h>\n\nint main() {\n    double r;\n    scanf(\"%lf\", &r);\n    double area = M_PI * r * r;\n    printf(\"%.15g\\n\", area);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    double r;\n    cin >> r;\n    cout << setprecision(15) << M_PI * r * r << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\nimport java.io.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double r = sc.nextDouble();\n        double area = Math.PI * r * r;\n        System.out.println(area);\n    }\n}\n",
+      "python": "import math\nr = float(input())\nprint(math.pi * r * r)\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst r = parseFloat(input);\nconst area = Math.PI * r * r;\nconsole.log(area);\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst r = parseFloat(input);\nconst area = Math.PI * r * r;\nconsole.log(area);\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        double r = double.Parse(Console.ReadLine()!);\n        double area = Math.PI * r * r;\n        Console.WriteLine(area.ToString(\"G17\"));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven the radius of a circle, compute its area using the formula **A = π × r²**.\n\n## Input Format\nA single floating-point number **r** (0 ≤ r ≤ 10^6).\n\n## Output Format\nPrint the area of the circle. Your answer will be accepted if the absolute error is within **0.001**.\n\n## Constraints\n- 0 ≤ r ≤ 10^6\n\n## Examples\n**Input:**\n```\n5\n```\n**Output:**\n```\n78.53981633974483\n```",
+    "testCases": [
+      {
+        "id": "tc-010-01",
+        "input": "5",
+        "expectedOutput": "78.53981633974483",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-010-02",
+        "input": "1",
+        "expectedOutput": "3.141592653589793",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-010-03",
+        "input": "0",
+        "expectedOutput": "0.0",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-010-04",
+        "input": "2.5",
+        "expectedOutput": "19.634954084936208",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-010-05",
+        "input": "100",
+        "expectedOutput": "31415.926535897932",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      }
+    ]
+  },
+  {
+    "id": "prob-011",
+    "lecturerId": "usr-lec-001",
+    "title": "Hypotenuse Calculator",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "floating-point",
+      "geometry"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <math.h>\n\nint main() {\n    double a, b;\n    scanf(\"%lf %lf\", &a, &b);\n    double c = sqrt(a * a + b * b);\n    printf(\"%g\\n\", c);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    double a, b;\n    cin >> a >> b;\n    double c = sqrt(a * a + b * b);\n    cout << c << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double a = sc.nextDouble();\n        double b = sc.nextDouble();\n        double c = Math.sqrt(a * a + b * b);\n        System.out.println(c);\n    }\n}\n",
+      "python": "import math\na, b = map(float, input().split())\nprint(math.sqrt(a * a + b * b))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [a, b] = input.map(Number);\nconst c = Math.sqrt(a * a + b * b);\nconsole.log(c);\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [a, b] = input.map(Number);\nconst c = Math.sqrt(a * a + b * b);\nconsole.log(c);\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] tokens = Console.ReadLine()!.Split();\n        double a = double.Parse(tokens[0]);\n        double b = double.Parse(tokens[1]);\n        double c = Math.Sqrt(a * a + b * b);\n        Console.WriteLine(c);\n    }\n}\n"
+    },
+    "content": "## Description\nGiven the lengths of two legs of a right triangle **a** and **b**, compute the hypotenuse **c = √(a² + b²)**.\n\n## Input Format\nTwo space-separated floating-point numbers **a** and **b** (0 < a, b ≤ 10^4).\n\n## Output Format\nPrint the hypotenuse. Accepted if absolute error ≤ **0.0001**.\n\n## Examples\n**Input:**\n```\n3 4\n```\n**Output:**\n```\n5.0\n```",
+    "testCases": [
+      {
+        "id": "tc-011-01",
+        "input": "3 4",
+        "expectedOutput": "5.0",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.0001
+      },
+      {
+        "id": "tc-011-02",
+        "input": "5 12",
+        "expectedOutput": "13.0",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.0001
+      },
+      {
+        "id": "tc-011-03",
+        "input": "1 1",
+        "expectedOutput": "1.4142135623730951",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.0001
+      },
+      {
+        "id": "tc-011-04",
+        "input": "8 15",
+        "expectedOutput": "17.0",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.0001
+      },
+      {
+        "id": "tc-011-05",
+        "input": "6.5 3.2",
+        "expectedOutput": "7.244998274671292",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.0001
+      }
+    ]
+  },
+  {
+    "id": "prob-012",
+    "lecturerId": "usr-lec-001",
+    "title": "Compound Interest",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "math",
+      "floating-point",
+      "finance"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <math.h>\n\nint main() {\n    double p, r, t;\n    scanf(\"%lf %lf %lf\", &p, &r, &t);\n    double amount = p * pow(1 + r / 100.0, t);\n    printf(\"%.15g\\n\", amount);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    double p, r, t;\n    cin >> p >> r >> t;\n    double amount = p * pow(1 + r / 100.0, t);\n    cout << setprecision(15) << amount << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double p = sc.nextDouble();\n        double r = sc.nextDouble();\n        double t = sc.nextDouble();\n        double amount = p * Math.pow(1 + r / 100.0, t);\n        System.out.println(amount);\n    }\n}\n",
+      "python": "p, r, t = map(float, input().split())\namount = p * (1 + r / 100) ** t\nprint(amount)\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [p, r, t] = input.map(Number);\nconst amount = p * Math.pow(1 + r / 100, t);\nconsole.log(amount);\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [p, r, t] = input.map(Number);\nconst amount = p * Math.pow(1 + r / 100, t);\nconsole.log(amount);\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] tokens = Console.ReadLine()!.Split();\n        double p = double.Parse(tokens[0]);\n        double r = double.Parse(tokens[1]);\n        double t = double.Parse(tokens[2]);\n        double amount = p * Math.Pow(1 + r / 100.0, t);\n        Console.WriteLine(amount.ToString(\"G17\"));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a principal amount **P**, annual interest rate **r** (as a percentage), and number of years **t**, compute the final amount using compound interest formula:\n\n**A = P × (1 + r/100)^t**\n\n## Input Format\nThree space-separated values:\n- **P** (principal, 1 ≤ P ≤ 10^6)\n- **r** (annual rate %, 0 < r ≤ 100)\n- **t** (years, 1 ≤ t ≤ 50)\n\n## Output Format\nPrint the final amount. Accepted if absolute error ≤ **0.01**.\n\n## Examples\n**Input:**\n```\n1000 5 10\n```\n**Output:**\n```\n1628.894626777442\n```",
+    "testCases": [
+      {
+        "id": "tc-012-01",
+        "input": "1000 5 10",
+        "expectedOutput": "1628.894626777442",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.01
+      },
+      {
+        "id": "tc-012-02",
+        "input": "5000 8 3",
+        "expectedOutput": "6298.56",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.01
+      },
+      {
+        "id": "tc-012-03",
+        "input": "100 10 1",
+        "expectedOutput": "110.0",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.01
+      },
+      {
+        "id": "tc-012-04",
+        "input": "2500 3.5 20",
+        "expectedOutput": "4974.468602835913",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.01
+      },
+      {
+        "id": "tc-012-05",
+        "input": "10000 12 5",
+        "expectedOutput": "17623.416832",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.01
+      }
+    ]
+  },
+  {
+    "id": "prob-013",
+    "lecturerId": "usr-lec-001",
+    "title": "Distance Between Two Points",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "floating-point",
+      "geometry"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <math.h>\n\nint main() {\n    double x1, y1, x2, y2;\n    scanf(\"%lf %lf\", &x1, &y1);\n    scanf(\"%lf %lf\", &x2, &y2);\n    double dist = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));\n    printf(\"%.1f\\n\", dist);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    double x1, y1, x2, y2;\n    cin >> x1 >> y1;\n    cin >> x2 >> y2;\n    double dist = sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));\n    cout << fixed << setprecision(1) << dist << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double x1 = sc.nextDouble(), y1 = sc.nextDouble();\n        double x2 = sc.nextDouble(), y2 = sc.nextDouble();\n        double dist = Math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));\n        System.out.println(String.format(\"%.1f\", dist));\n    }\n}\n",
+      "python": "import math\nx1, y1 = map(float, input().split())\nx2, y2 = map(float, input().split())\ndist = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)\nprint(f\"{dist:.1f}\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [x1, y1, x2, y2] = input.map(Number);\nconst dist = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);\nconsole.log(dist.toFixed(1));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [x1, y1, x2, y2] = input.map(Number);\nconst dist = Math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2);\nconsole.log(dist.toFixed(1));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] t1 = Console.ReadLine()!.Split();\n        string[] t2 = Console.ReadLine()!.Split();\n        double x1 = double.Parse(t1[0]), y1 = double.Parse(t1[1]);\n        double x2 = double.Parse(t2[0]), y2 = double.Parse(t2[1]);\n        double dist = Math.Sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));\n        Console.WriteLine(dist.ToString(\"F1\"));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven two points **(x1, y1)** and **(x2, y2)** in a 2D plane, compute the Euclidean distance:\n\n**d = √((x2-x1)² + (y2-y1)²)**\n\n## Input Format\nTwo lines:\n- Line 1: two space-separated floats **x1 y1**\n- Line 2: two space-separated floats **x2 y2**\n\n## Output Format\nPrint the distance. Accepted if absolute error ≤ **0.001**.\n\n## Examples\n**Input:**\n```\n0 0\n3 4\n```\n**Output:**\n```\n5.0\n```",
+    "testCases": [
+      {
+        "id": "tc-013-01",
+        "input": "0 0\n3 4",
+        "expectedOutput": "5.0",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-013-02",
+        "input": "1 1\n4 5",
+        "expectedOutput": "5.0",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-013-03",
+        "input": "0 0\n0 0",
+        "expectedOutput": "0.0",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-013-04",
+        "input": "-3 -4\n3 4",
+        "expectedOutput": "10.0",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      },
+      {
+        "id": "tc-013-05",
+        "input": "1.5 2.5\n4.5 6.5",
+        "expectedOutput": "5.0",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "floatingPointTolerance": 0.001
+      }
+    ]
+  },
+  {
+    "id": "prob-014",
+    "lecturerId": "usr-lec-001",
+    "title": "Average Calculator",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "floating-point",
+      "decimal-places"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    long long sum = 0;\n    for (int i = 0; i < n; i++) {\n        long long x;\n        scanf(\"%lld\", &x);\n        sum += x;\n    }\n    printf(\"%.2f\\n\", (double)sum / n);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    long long sum = 0;\n    for (int i = 0; i < n; i++) {\n        long long x;\n        cin >> x;\n        sum += x;\n    }\n    cout << fixed << setprecision(2) << (double)sum / n << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        double sum = 0;\n        for (int i = 0; i < n; i++) {\n            sum += sc.nextLong();\n        }\n        System.out.printf(\"%.2f\\n\", sum / n);\n    }\n}\n",
+      "python": "n = int(input())\narr = list(map(int, input().split()))\navg = sum(arr) / n\nprint(f\"{avg:.2f}\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nconst avg = arr.reduce((a, b) => a + b, 0) / n;\nconsole.log(avg.toFixed(2));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nconst avg = arr.reduce((a, b) => a + b, 0) / n;\nconsole.log(avg.toFixed(2));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        long[] arr = Array.ConvertAll(Console.ReadLine()!.Split(), long.Parse);\n        double avg = (double)arr.Sum() / n;\n        Console.WriteLine(avg.ToString(\"F2\"));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven **N** integers, compute and print their average rounded to exactly **2 decimal places**.\n\n## Input Format\n- Line 1: integer **N** (1 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers (each between -10^6 and 10^6)\n\n## Output Format\nPrint the average as a floating-point number with exactly 2 decimal places.\n\n## Examples\n**Input:**\n```\n3\n10 20 30\n```\n**Output:**\n```\n20.00\n```",
+    "testCases": [
+      {
+        "id": "tc-014-01",
+        "input": "3\n10 20 30",
+        "expectedOutput": "20.00",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-014-02",
+        "input": "4\n1 2 3 4",
+        "expectedOutput": "2.50",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-014-03",
+        "input": "1\n7",
+        "expectedOutput": "7.00",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-014-04",
+        "input": "5\n10 10 10 10 11",
+        "expectedOutput": "10.20",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-014-05",
+        "input": "3\n-5 0 5",
+        "expectedOutput": "0.00",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      }
+    ]
+  },
+  {
+    "id": "prob-015",
+    "lecturerId": "usr-lec-001",
+    "title": "Temperature Converter (Celsius to Fahrenheit)",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "floating-point",
+      "conversion",
+      "decimal-places"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    double c;\n    scanf(\"%lf\", &c);\n    double f = c * 9.0 / 5.0 + 32.0;\n    printf(\"%.2f\\n\", f);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    double c;\n    cin >> c;\n    double f = c * 9.0 / 5.0 + 32.0;\n    cout << fixed << setprecision(2) << f << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double c = sc.nextDouble();\n        double f = c * 9.0 / 5.0 + 32.0;\n        System.out.printf(\"%.2f\\n\", f);\n    }\n}\n",
+      "python": "c = float(input())\nf = c * 9.0 / 5.0 + 32.0\nprint(f\"{f:.2f}\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst c = parseFloat(input);\nconst f = c * 9.0 / 5.0 + 32.0;\nconsole.log(f.toFixed(2));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst c = parseFloat(input);\nconst f = c * 9.0 / 5.0 + 32.0;\nconsole.log(f.toFixed(2));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        double c = double.Parse(Console.ReadLine()!);\n        double f = c * 9.0 / 5.0 + 32.0;\n        Console.WriteLine(f.ToString(\"F2\"));\n    }\n}\n"
+    },
+    "content": "## Description\nConvert a temperature from Celsius to Fahrenheit using the formula:\n\n**F = C × 9/5 + 32**\n\n## Input Format\nA single floating-point number **C** (-273.15 ≤ C ≤ 10^6).\n\n## Output Format\nPrint the temperature in Fahrenheit, rounded to **2 decimal places**.\n\n## Examples\n**Input:**\n```\n100\n```\n**Output:**\n```\n212.00\n```",
+    "testCases": [
+      {
+        "id": "tc-015-01",
+        "input": "100",
+        "expectedOutput": "212.00",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-015-02",
+        "input": "0",
+        "expectedOutput": "32.00",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-015-03",
+        "input": "-40",
+        "expectedOutput": "-40.00",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-015-04",
+        "input": "37.5",
+        "expectedOutput": "99.50",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      },
+      {
+        "id": "tc-015-05",
+        "input": "-273.15",
+        "expectedOutput": "-459.67",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 2
+      }
+    ]
+  },
+  {
+    "id": "prob-016",
+    "lecturerId": "usr-lec-001",
+    "title": "BMI Calculator",
+    "difficulty": "EASY",
+    "tags": [
+      "math",
+      "floating-point",
+      "health",
+      "decimal-places"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    double weight, height;\n    scanf(\"%lf %lf\", &weight, &height);\n    double bmi = weight / (height * height);\n    printf(\"%.1f\\n\", bmi);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    double weight, height;\n    cin >> weight >> height;\n    double bmi = weight / (height * height);\n    cout << fixed << setprecision(1) << bmi << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        double weight = sc.nextDouble();\n        double height = sc.nextDouble();\n        double bmi = weight / (height * height);\n        System.out.printf(\"%.1f\\n\", bmi);\n    }\n}\n",
+      "python": "weight, height = map(float, input().split())\nbmi = weight / (height ** 2)\nprint(f\"{bmi:.1f}\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [weight, height] = input.map(Number);\nconst bmi = weight / (height * height);\nconsole.log(bmi.toFixed(1));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst [weight, height] = input.map(Number);\nconst bmi = weight / (height * height);\nconsole.log(bmi.toFixed(1));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] tokens = Console.ReadLine()!.Split();\n        double weight = double.Parse(tokens[0]);\n        double height = double.Parse(tokens[1]);\n        double bmi = weight / (height * height);\n        Console.WriteLine(bmi.ToString(\"F1\"));\n    }\n}\n"
+    },
+    "content": "## Description\nCompute the Body Mass Index (BMI) given weight in kilograms and height in meters:\n\n**BMI = weight / height²**\n\n## Input Format\nTwo space-separated floating-point numbers:\n- **weight** in kg (1 ≤ weight ≤ 500)\n- **height** in meters (0.5 ≤ height ≤ 2.5)\n\n## Output Format\nPrint the BMI rounded to **1 decimal place**.\n\n## Examples\n**Input:**\n```\n70 1.75\n```\n**Output:**\n```\n22.9\n```",
+    "testCases": [
+      {
+        "id": "tc-016-01",
+        "input": "70 1.75",
+        "expectedOutput": "22.9",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 1
+      },
+      {
+        "id": "tc-016-02",
+        "input": "80 1.80",
+        "expectedOutput": "24.7",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 1
+      },
+      {
+        "id": "tc-016-03",
+        "input": "50 1.60",
+        "expectedOutput": "19.5",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 1
+      },
+      {
+        "id": "tc-016-04",
+        "input": "120 1.70",
+        "expectedOutput": "41.5",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 1
+      },
+      {
+        "id": "tc-016-05",
+        "input": "55 1.65",
+        "expectedOutput": "20.2",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 1
+      }
+    ]
+  },
+  {
+    "id": "prob-017",
+    "lecturerId": "usr-lec-001",
+    "title": "Standard Deviation",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "math",
+      "statistics",
+      "floating-point",
+      "decimal-places"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <math.h>\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    double sum = 0, sqSum = 0;\n    for (int i = 0; i < n; i++) {\n        double x;\n        scanf(\"%lf\", &x);\n        sum += x;\n        sqSum += x * x;\n    }\n    double mean = sum / n;\n    double variance = sqSum / n - mean * mean;\n    double stddev = sqrt(variance);\n    printf(\"%.4f\\n\", stddev);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    double sum = 0, sqSum = 0;\n    for (int i = 0; i < n; i++) {\n        double x;\n        cin >> x;\n        sum += x;\n        sqSum += x * x;\n    }\n    double mean = sum / n;\n    double variance = sqSum / n - mean * mean;\n    double stddev = sqrt(variance);\n    cout << fixed << setprecision(4) << stddev << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        double sum = 0, sqSum = 0;\n        for (int i = 0; i < n; i++) {\n            double x = sc.nextDouble();\n            sum += x;\n            sqSum += x * x;\n        }\n        double mean = sum / n;\n        double variance = sqSum / n - mean * mean;\n        double stddev = Math.sqrt(variance);\n        System.out.printf(\"%.4f\\n\", stddev);\n    }\n}\n",
+      "python": "import math\nn = int(input())\narr = list(map(float, input().split()))\nmean = sum(arr) / n\nvariance = sum((x - mean) ** 2 for x in arr) / n\nstddev = math.sqrt(variance)\nprint(f\"{stddev:.4f}\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nconst mean = arr.reduce((a, b) => a + b, 0) / n;\nconst variance = arr.reduce((sum, x) => sum + (x - mean) ** 2, 0) / n;\nconst stddev = Math.sqrt(variance);\nconsole.log(stddev.toFixed(4));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nconst mean = arr.reduce((a, b) => a + b, 0) / n;\nconst variance = arr.reduce((sum, x) => sum + (x - mean) ** 2, 0) / n;\nconst stddev = Math.sqrt(variance);\nconsole.log(stddev.toFixed(4));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        double[] arr = Array.ConvertAll(Console.ReadLine()!.Split(), double.Parse);\n        double sum = 0, sqSum = 0;\n        foreach (double x in arr) {\n            sum += x;\n            sqSum += x * x;\n        }\n        double mean = sum / n;\n        double variance = sqSum / n - mean * mean;\n        double stddev = Math.Sqrt(variance);\n        Console.WriteLine(stddev.ToString(\"F4\"));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven **N** numbers, compute the **population standard deviation**.\n\nσ = √( (1/N) × Σ(xi - μ)² )\n\nwhere μ is the mean.\n\n## Input Format\n- Line 1: integer **N** (2 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the population standard deviation rounded to **4 decimal places**.\n\n## Examples\n**Input:**\n```\n5\n2 4 4 4 5\n```\n**Output:**\n```\n0.8944\n```",
+    "testCases": [
+      {
+        "id": "tc-017-01",
+        "input": "5\n2 4 4 4 5",
+        "expectedOutput": "0.9798",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 4
+      },
+      {
+        "id": "tc-017-02",
+        "input": "4\n10 10 10 10",
+        "expectedOutput": "0.0000",
+        "isPublic": true,
+        "isFloatingPoint": true,
+        "decimalPlaces": 4
+      },
+      {
+        "id": "tc-017-03",
+        "input": "3\n1 5 9",
+        "expectedOutput": "3.2660",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 4
+      },
+      {
+        "id": "tc-017-04",
+        "input": "6\n1 2 3 4 5 6",
+        "expectedOutput": "1.7078",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 4
+      },
+      {
+        "id": "tc-017-05",
+        "input": "2\n0 100",
+        "expectedOutput": "50.0000",
+        "isPublic": false,
+        "isFloatingPoint": true,
+        "decimalPlaces": 4
+      }
+    ]
+  },
+  {
+    "id": "prob-018",
+    "lecturerId": "usr-lec-001",
+    "title": "Prefix Sum Array",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "array",
+      "prefix-sum",
+      "token-comparison"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    long long prefix = 0;\n    for (int i = 0; i < n; i++) {\n        long long x;\n        scanf(\"%lld\", &x);\n        prefix += x;\n        printf(\"%lld\", prefix);\n        if (i < n - 1) printf(\" \");\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    long long prefix = 0;\n    for (int i = 0; i < n; i++) {\n        long long x;\n        cin >> x;\n        prefix += x;\n        cout << prefix;\n        if (i < n - 1) cout << \" \";\n    }\n    cout << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        long prefix = 0;\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            long x = sc.nextLong();\n            prefix += x;\n            if (i > 0) sb.append(\" \");\n            sb.append(prefix);\n        }\n        System.out.println(sb.toString());\n    }\n}\n",
+      "python": "n = int(input())\narr = list(map(int, input().split()))\nprefix = 0\nresult = []\nfor x in arr:\n    prefix += x\n    result.append(str(prefix))\nprint(\" \".join(result))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nlet prefix = 0;\nconst result = arr.map(x => {\n    prefix += x;\n    return prefix;\n});\nconsole.log(result.join(' '));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nlet prefix = 0;\nconst result = arr.map(x => {\n    prefix += x;\n    return prefix;\n});\nconsole.log(result.join(' '));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        long[] arr = Array.ConvertAll(Console.ReadLine()!.Split(), long.Parse);\n        long prefix = 0;\n        var result = new System.Collections.Generic.List<string>();\n        foreach (long x in arr) {\n            prefix += x;\n            result.Add(prefix.ToString());\n        }\n        Console.WriteLine(string.Join(\" \", result));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven an array of **N** integers, compute and print the **prefix sum** array.\nThe prefix sum at index **i** is the sum of all elements from index 0 to i.\n\n## Input Format\n- Line 1: integer **N** (1 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the prefix sum array as space-separated values on a single line.\nOutput is compared **token-by-token** (whitespace is normalized).\n\n## Examples\n**Input:**\n```\n5\n1 2 3 4 5\n```\n**Output:**\n```\n1 3 6 10 15\n```",
+    "testCases": [
+      {
+        "id": "tc-018-01",
+        "input": "5\n1 2 3 4 5",
+        "expectedOutput": "1 3 6 10 15",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-018-02",
+        "input": "3\n10 -5 3",
+        "expectedOutput": "10 5 8",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-018-03",
+        "input": "1\n42",
+        "expectedOutput": "42",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-018-04",
+        "input": "4\n0 0 0 0",
+        "expectedOutput": "0 0 0 0",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-018-05",
+        "input": "6\n5 -3 2 -1 4 -2",
+        "expectedOutput": "5 2 4 3 7 5",
+        "isPublic": false,
+        "isTokenComparision": true
+      }
+    ]
+  },
+  {
+    "id": "prob-019",
+    "lecturerId": "usr-lec-001",
+    "title": "Fibonacci Sequence",
+    "difficulty": "EASY",
+    "tags": [
+      "dynamic-programming",
+      "sequence",
+      "token-comparison"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    long long a = 0, b = 1;\n    for (int i = 0; i < n; i++) {\n        printf(\"%lld\", a);\n        if (i < n - 1) printf(\" \");\n        long long c = a + b;\n        a = b;\n        b = c;\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    long long a = 0, b = 1;\n    for (int i = 0; i < n; i++) {\n        cout << a;\n        if (i < n - 1) cout << \" \";\n        long long c = a + b;\n        a = b;\n        b = c;\n    }\n    cout << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        long a = 0, b = 1;\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            if (i > 0) sb.append(\" \");\n            sb.append(a);\n            long c = a + b;\n            a = b;\n            b = c;\n        }\n        System.out.println(sb.toString());\n    }\n}\n",
+      "python": "n = int(input())\na, b = 0, 1\nresult = []\nfor i in range(n):\n    result.append(str(a))\n    a, b = b, a + b\nprint(\" \".join(result))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = parseInt(input);\nlet a = 0, b = 1;\nconst result: number[] = [];\nfor (let i = 0; i < n; i++) {\n    result.push(a);\n    [a, b] = [b, a + b];\n}\nconsole.log(result.join(' '));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nconst n = parseInt(input);\nlet a = 0, b = 1;\nconst result = [];\nfor (let i = 0; i < n; i++) {\n    result.push(a);\n    [a, b] = [b, a + b];\n}\nconsole.log(result.join(' '));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        long a = 0, b = 1;\n        var result = new System.Collections.Generic.List<string>();\n        for (int i = 0; i < n; i++) {\n            result.Add(a.ToString());\n            long c = a + b;\n            a = b;\n            b = c;\n        }\n        Console.WriteLine(string.Join(\" \", result));\n    }\n}\n"
+    },
+    "content": "## Description\nPrint the first **N** Fibonacci numbers. The Fibonacci sequence starts with F(1)=0, F(2)=1, and each subsequent number is the sum of the two preceding ones.\n\n## Input Format\nA single integer **N** (1 ≤ N ≤ 40).\n\n## Output Format\nPrint the first N Fibonacci numbers, separated by spaces.\n\n## Examples\n**Input:**\n```\n7\n```\n**Output:**\n```\n0 1 1 2 3 5 8\n```",
+    "testCases": [
+      {
+        "id": "tc-019-01",
+        "input": "7",
+        "expectedOutput": "0 1 1 2 3 5 8",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-019-02",
+        "input": "1",
+        "expectedOutput": "0",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-019-03",
+        "input": "2",
+        "expectedOutput": "0 1",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-019-04",
+        "input": "10",
+        "expectedOutput": "0 1 1 2 3 8 13 21 34",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-019-05",
+        "input": "5",
+        "expectedOutput": "0 1 1 2 3",
+        "isPublic": false,
+        "isTokenComparision": true
+      }
+    ]
+  },
+  {
+    "id": "prob-020",
+    "lecturerId": "usr-lec-001",
+    "title": "Left Rotate Array",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "array",
+      "rotation",
+      "token-comparison"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int n, k;\n    scanf(\"%d %d\", &n, &k);\n    k = k % n;\n    int* arr = (int*)malloc(n * sizeof(int));\n    for (int i = 0; i < n; i++) scanf(\"%d\", &arr[i]);\n    for (int i = 0; i < n; i++) {\n        int idx = (i + k) % n;\n        printf(\"%d\", arr[idx]);\n        if (i < n - 1) printf(\" \");\n    }\n    printf(\"\\n\");\n    free(arr);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n, k;\n    cin >> n >> k;\n    k = k % n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) cin >> arr[i];\n    for (int i = 0; i < n; i++) {\n        int idx = (i + k) % n;\n        cout << arr[idx];\n        if (i < n - 1) cout << \" \";\n    }\n    cout << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int k = sc.nextInt();\n        k = k % n;\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            if (i > 0) sb.append(\" \");\n            int idx = (i + k) % n;\n            sb.append(arr[idx]);\n        }\n        System.out.println(sb.toString());\n    }\n}\n",
+      "python": "n, k = map(int, input().split())\nk = k % n\narr = list(map(int, input().split()))\nresult = [str(arr[(i + k) % n]) for i in range(n)]\nprint(\" \".join(result))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nlet idx = 0;\nconst n = parseInt(input[idx++]);\nlet k = parseInt(input[idx++]);\nk = k % n;\nconst arr = input.slice(idx, idx + n).map(Number);\nconst result = [];\nfor (let i = 0; i < n; i++) {\n    result.push(arr[(i + k) % n]);\n}\nconsole.log(result.join(' '));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nlet idx = 0;\nconst n = parseInt(input[idx++]);\nlet k = parseInt(input[idx++]);\nk = k % n;\nconst arr = input.slice(idx, idx + n).map(Number);\nconst result = [];\nfor (let i = 0; i < n; i++) {\n    result.push(arr[(i + k) % n]);\n}\nconsole.log(result.join(' '));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] first = Console.ReadLine()!.Split();\n        int n = int.Parse(first[0]);\n        int k = int.Parse(first[1]);\n        k = k % n;\n        int[] arr = Array.ConvertAll(Console.ReadLine()!.Split(), int.Parse);\n        var result = new System.Collections.Generic.List<string>();\n        for (int i = 0; i < n; i++) {\n            result.Add(arr[(i + k) % n].ToString());\n        }\n        Console.WriteLine(string.Join(\" \", result));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven an array of **N** integers and a number **K**, perform **K left rotations** on the array and print the result.\n\nA left rotation shifts each element one position to the left, and the first element wraps around to the end.\n\n## Input Format\n- Line 1: two integers **N** and **K** (1 ≤ N ≤ 10^5, 0 ≤ K ≤ 10^6)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint the rotated array as space-separated values.\n\n## Examples\n**Input:**\n```\n5 2\n1 2 3 4 5\n```\n**Output:**\n```\n3 4 5 1 2\n```",
+    "testCases": [
+      {
+        "id": "tc-020-01",
+        "input": "5 2\n1 2 3 4 5",
+        "expectedOutput": "3 4 5 1 2",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-020-02",
+        "input": "4 0\n10 20 30 40",
+        "expectedOutput": "10 20 30 40",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-020-03",
+        "input": "3 3\n1 2 3",
+        "expectedOutput": "1 2 3",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-020-04",
+        "input": "5 7\n1 2 3 4 5",
+        "expectedOutput": "3 4 5 1 2",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-020-05",
+        "input": "1 100\n42",
+        "expectedOutput": "42",
+        "isPublic": false,
+        "isTokenComparision": true
+      }
+    ]
+  },
+  {
+    "id": "prob-021",
+    "lecturerId": "usr-lec-001",
+    "title": "Matrix Row Sums",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "matrix",
+      "2d-array",
+      "token-comparison"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    int n, m;\n    scanf(\"%d %d\", &n, &m);\n    for (int i = 0; i < n; i++) {\n        long long sum = 0;\n        for (int j = 0; j < m; j++) {\n            long long x;\n            scanf(\"%lld\", &x);\n            sum += x;\n        }\n        printf(\"%lld\", sum);\n        if (i < n - 1) printf(\" \");\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n, m;\n    cin >> n >> m;\n    for (int i = 0; i < n; i++) {\n        long long sum = 0;\n        for (int j = 0; j < m; j++) {\n            long long x;\n            cin >> x;\n            sum += x;\n        }\n        cout << sum;\n        if (i < n - 1) cout << \" \";\n    }\n    cout << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int m = sc.nextInt();\n        StringBuilder sb = new StringBuilder();\n        for (int i = 0; i < n; i++) {\n            long sum = 0;\n            for (int j = 0; j < m; j++) {\n                sum += sc.nextLong();\n            }\n            if (i > 0) sb.append(\" \");\n            sb.append(sum);\n        }\n        System.out.println(sb.toString());\n    }\n}\n",
+      "python": "n, m = map(int, input().split())\nresult = []\nfor i in range(n):\n    row = list(map(int, input().split()))\n    result.append(str(sum(row)))\nprint(\" \".join(result))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nlet idx = 0;\nconst n = parseInt(input[idx++]);\nconst m = parseInt(input[idx++]);\nconst result: number[] = [];\nfor (let i = 0; i < n; i++) {\n    let sum = 0;\n    for (let j = 0; j < m; j++) {\n        sum += parseInt(input[idx++]);\n    }\n    result.push(sum);\n}\nconsole.log(result.join(' '));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nlet idx = 0;\nconst n = parseInt(input[idx++]);\nconst m = parseInt(input[idx++]);\nconst result = [];\nfor (let i = 0; i < n; i++) {\n    let sum = 0;\n    for (let j = 0; j < m; j++) {\n        sum += parseInt(input[idx++]);\n    }\n    result.push(sum);\n}\nconsole.log(result.join(' '));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string[] nm = Console.ReadLine()!.Split();\n        int n = int.Parse(nm[0]);\n        int m = int.Parse(nm[1]);\n        var result = new System.Collections.Generic.List<string>();\n        for (int i = 0; i < n; i++) {\n            long[] row = Array.ConvertAll(Console.ReadLine()!.Split(), long.Parse);\n            result.Add(row.Sum().ToString());\n        }\n        Console.WriteLine(string.Join(\" \", result));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven an **N × M** matrix of integers, compute and print the sum of each row.\n\n## Input Format\n- Line 1: two integers **N** and **M** (1 ≤ N, M ≤ 100)\n- Next N lines: M space-separated integers each\n\n## Output Format\nPrint N space-separated integers — the sum of each row.\n\n## Examples\n**Input:**\n```\n2 3\n1 2 3\n4 5 6\n```\n**Output:**\n```\n6 15\n```",
+    "testCases": [
+      {
+        "id": "tc-021-01",
+        "input": "2 3\n1 2 3\n4 5 6",
+        "expectedOutput": "6 15",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-021-02",
+        "input": "1 1\n42",
+        "expectedOutput": "42",
+        "isPublic": true,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-021-03",
+        "input": "3 2\n1 -1\n2 -2\n3 -3",
+        "expectedOutput": "0 0 0",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-021-04",
+        "input": "2 4\n10 20 30 40\n5 5 5 5",
+        "expectedOutput": "100 20",
+        "isPublic": false,
+        "isTokenComparision": true
+      },
+      {
+        "id": "tc-021-05",
+        "input": "3 3\n1 0 0\n0 1 0\n0 0 1",
+        "expectedOutput": "1 1 1",
+        "isPublic": false,
+        "isTokenComparision": true
+      }
+    ]
+  },
+  {
+    "id": "prob-022",
+    "lecturerId": "usr-lec-001",
+    "title": "Prime Factorization",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "math",
+      "prime",
+      "factorization",
+      "unordered"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n\nint main() {\n    long long n;\n    scanf(\"%lld\", &n);\n    long long temp = n;\n    int first = 1;\n    for (long long p = 2; p * p <= temp; p++) {\n        while (temp % p == 0) {\n            if (!first) printf(\" \");\n            printf(\"%lld\", p);\n            first = 0;\n            temp /= p;\n        }\n    }\n    if (temp > 1) {\n        if (!first) printf(\" \");\n        printf(\"%lld\", temp);\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    long long n;\n    cin >> n;\n    long long temp = n;\n    vector<long long> factors;\n    for (long long p = 2; p * p <= temp; p++) {\n        while (temp % p == 0) {\n            factors.push_back(p);\n            temp /= p;\n        }\n    }\n    if (temp > 1) factors.push_back(temp);\n    for (size_t i = 0; i < factors.size(); i++) {\n        if (i > 0) cout << \" \";\n        cout << factors[i];\n    }\n    cout << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        long n = sc.nextLong();\n        long temp = n;\n        List<Long> factors = new ArrayList<>();\n        for (long p = 2; p * p <= temp; p++) {\n            while (temp % p == 0) {\n                factors.add(p);\n                temp /= p;\n            }\n        }\n        if (temp > 1) factors.add(temp);\n        for (int i = 0; i < factors.size(); i++) {\n            if (i > 0) System.out.print(\" \");\n            System.out.print(factors.get(i));\n        }\n        System.out.println();\n    }\n}\n",
+      "python": "import math\nn = int(input())\ntemp = n\nfactors = []\np = 2\nwhile p * p <= temp:\n    while temp % p == 0:\n        factors.append(p)\n        temp //= p\n    p += 1\nif temp > 1:\n    factors.append(temp)\nprint(\" \".join(map(str, factors)))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nlet n = parseInt(input);\nconst temp = n;\nconst factors: number[] = [];\nfor (let p = 2; p * p <= temp; p++) {\n    while (n % p === 0) {\n        factors.push(p);\n        n = Math.floor(n / p);\n    }\n}\nif (n > 1) factors.push(n);\nconsole.log(factors.join(' '));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim();\nlet n = parseInt(input);\nconst temp = n;\nconst factors = [];\nfor (let p = 2; p * p <= temp; p++) {\n    while (n % p === 0) {\n        factors.push(p);\n        n = Math.floor(n / p);\n    }\n}\nif (n > 1) factors.push(n);\nconsole.log(factors.join(' '));\n",
+      "csharp": "using System;\nusing System.Collections.Generic;\n\nclass Program {\n    static void Main() {\n        long n = long.Parse(Console.ReadLine()!);\n        long temp = n;\n        var factors = new List<long>();\n        for (long p = 2; p * p <= temp; p++) {\n            while (temp % p == 0) {\n                factors.Add(p);\n                temp /= p;\n            }\n        }\n        if (temp > 1) factors.Add(temp);\n        Console.WriteLine(string.Join(\" \", factors));\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a positive integer **N**, find all its **distinct prime factors**.\n\n## Input Format\nA single integer **N** (2 ≤ N ≤ 10^9).\n\n## Output Format\nPrint all distinct prime factors of N, separated by spaces.\nThe **order does not matter** — `2 3` and `3 2` are both accepted.\n\n## Examples\n**Input:**\n```\n12\n```\n**Output:**\n```\n2 3\n```",
+    "testCases": [
+      {
+        "id": "tc-022-01",
+        "input": "12",
+        "expectedOutput": "2 3",
+        "isPublic": true,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-022-02",
+        "input": "30",
+        "expectedOutput": "2 3 5",
+        "isPublic": true,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-022-03",
+        "input": "7",
+        "expectedOutput": "7",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-022-04",
+        "input": "100",
+        "expectedOutput": "2 5",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-022-05",
+        "input": "2310",
+        "expectedOutput": "2 3 5 7 11",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      }
+    ]
+  },
+  {
+    "id": "prob-023",
+    "lecturerId": "usr-lec-001",
+    "title": "Find Duplicate Elements",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "array",
+      "hashing",
+      "unordered"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <stdlib.h>\n\nint cmp(const void* a, const void* b) { return (*(int*)a - *(int*)b); }\n\nint main() {\n    int n;\n    scanf(\"%d\", &n);\n    int* arr = (int*)malloc(n * sizeof(int));\n    for (int i = 0; i < n; i++) scanf(\"%d\", &arr[i]);\n    qsort(arr, n, sizeof(int), cmp);\n    int found = 0;\n    for (int i = 1; i < n; i++) {\n        if (arr[i] == arr[i - 1]) {\n            if (found && arr[i] != arr[i - 1]) printf(\" \");\n            if (!found || arr[i] != arr[i - 1]) {\n                printf(\"%d\", arr[i]);\n                found = 1;\n            } else {\n                printf(\" %d\", arr[i]);\n            }\n        }\n    }\n    if (!found) printf(\"NONE\");\n    printf(\"\\n\");\n    free(arr);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> arr(n);\n    for (int i = 0; i < n; i++) cin >> arr[i];\n    sort(arr.begin(), arr.end());\n    set<int> dupes;\n    for (int i = 1; i < n; i++) {\n        if (arr[i] == arr[i - 1]) dupes.insert(arr[i]);\n    }\n    if (dupes.empty()) {\n        cout << \"NONE\" << endl;\n    } else {\n        bool first = true;\n        for (int x : dupes) {\n            if (!first) cout << \" \";\n            cout << x;\n            first = false;\n        }\n        cout << endl;\n    }\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        int[] arr = new int[n];\n        for (int i = 0; i < n; i++) arr[i] = sc.nextInt();\n        Set<Integer> dupes = new TreeSet<>();\n        Set<Integer> seen = new HashSet<>();\n        for (int x : arr) {\n            if (seen.contains(x)) dupes.add(x);\n            else seen.add(x);\n        }\n        if (dupes.isEmpty()) {\n            System.out.println(\"NONE\");\n        } else {\n            List<Integer> list = new ArrayList<>(dupes);\n            System.out.println(String.join(\" \", list.stream().map(String::valueOf).toArray(String[]::new)));\n        }\n    }\n}\n",
+      "python": "n = int(input())\narr = list(map(int, input().split()))\nseen = set()\ndupes = []\nfor x in arr:\n    if x in seen:\n        dupes.append(x)\n    else:\n        seen.add(x)\ndupes = sorted(set(dupes))\nif dupes:\n    print(\" \".join(map(str, dupes)))\nelse:\n    print(\"NONE\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nconst seen = new Set<number>();\nconst dupes: number[] = [];\nfor (const x of arr) {\n    if (seen.has(x)) {\n        dupes.push(x);\n    } else {\n        seen.add(x);\n    }\n}\nconst uniqueDupes = [...new Set(dupes)].sort((a, b) => a - b);\nif (uniqueDupes.length > 0) {\n    console.log(uniqueDupes.join(' '));\n} else {\n    console.log(\"NONE\");\n}\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nconst n = parseInt(input[0]);\nconst arr = input.slice(1, n + 1).map(Number);\nconst seen = new Set();\nconst dupes = [];\nfor (const x of arr) {\n    if (seen.has(x)) {\n        dupes.push(x);\n    } else {\n        seen.add(x);\n    }\n}\nconst uniqueDupes = [...new Set(dupes)].sort((a, b) => a - b);\nif (uniqueDupes.length > 0) {\n    console.log(uniqueDupes.join(' '));\n} else {\n    console.log(\"NONE\");\n}\n",
+      "csharp": "using System;\nusing System.Collections.Generic;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        int[] arr = Array.ConvertAll(Console.ReadLine()!.Split(), int.Parse);\n        var seen = new HashSet<int>();\n        var dupes = new List<int>();\n        foreach (int x in arr) {\n            if (seen.Contains(x)) dupes.Add(x);\n            else seen.Add(x);\n        }\n        var uniqueDupes = new SortedSet<int>(dupes);\n        if (uniqueDupes.Count == 0) {\n            Console.WriteLine(\"NONE\");\n        } else {\n            Console.WriteLine(string.Join(\" \", uniqueDupes));\n        }\n    }\n}\n"
+    },
+    "content": "## Description\nGiven an array of **N** integers, find and print all elements that appear **more than once**. Each duplicate should be printed only once.\n\n## Input Format\n- Line 1: integer **N** (1 ≤ N ≤ 10^5)\n- Line 2: N space-separated integers\n\n## Output Format\nPrint all duplicate values, separated by spaces. If no duplicates, print `NONE`.\nThe **order does not matter**.\n\n## Examples\n**Input:**\n```\n7\n1 2 3 2 4 3 5\n```\n**Output:**\n```\n2 3\n```",
+    "testCases": [
+      {
+        "id": "tc-023-01",
+        "input": "7\n1 2 3 2 4 3 5",
+        "expectedOutput": "2 3",
+        "isPublic": true,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-023-02",
+        "input": "5\n1 2 3 4 5",
+        "expectedOutput": "NONE",
+        "isPublic": true
+      },
+      {
+        "id": "tc-023-03",
+        "input": "6\n5 5 5 5 5 5",
+        "expectedOutput": "5",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-023-04",
+        "input": "8\n10 20 30 10 20 30 40 50",
+        "expectedOutput": "10 20 30",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-023-05",
+        "input": "1\n1",
+        "expectedOutput": "NONE",
+        "isPublic": false
+      }
+    ]
+  },
+  {
+    "id": "prob-024",
+    "lecturerId": "usr-lec-001",
+    "title": "Set Intersection",
+    "difficulty": "MEDIUM",
+    "tags": [
+      "set",
+      "hashing",
+      "unordered"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <stdlib.h>\n\nint cmp(const void* a, const void* b) { return (*(int*)a - *(int*)b); }\n\nint main() {\n    int n, m;\n    scanf(\"%d\", &n);\n    int* a = (int*)malloc(n * sizeof(int));\n    for (int i = 0; i < n; i++) scanf(\"%d\", &a[i]);\n    scanf(\"%d\", &m);\n    int* b = (int*)malloc(m * sizeof(int));\n    for (int i = 0; i < m; i++) scanf(\"%d\", &b[i]);\n    qsort(a, n, sizeof(int), cmp);\n    qsort(b, m, sizeof(int), cmp);\n    int* result = (int*)malloc(((n < m) ? n : m) * sizeof(int));\n    int k = 0;\n    int i = 0, j = 0;\n    while (i < n && j < m) {\n        if (a[i] == b[j]) {\n            if (k == 0 || result[k - 1] != a[i]) {\n                result[k++] = a[i];\n            }\n            i++; j++;\n        } else if (a[i] < b[j]) {\n            i++;\n        } else {\n            j++;\n        }\n    }\n    if (k == 0) {\n        printf(\"EMPTY\\n\");\n    } else {\n        for (int p = 0; p < k; p++) {\n            if (p > 0) printf(\" \");\n            printf(\"%d\", result[p]);\n        }\n        printf(\"\\n\");\n    }\n    free(a); free(b); free(result);\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    int n;\n    cin >> n;\n    vector<int> a(n);\n    for (int i = 0; i < n; i++) cin >> a[i];\n    int m;\n    cin >> m;\n    vector<int> b(m);\n    for (int i = 0; i < m; i++) cin >> b[i];\n    set<int> s1(a.begin(), a.end());\n    set<int> s2(b.begin(), b.end());\n    vector<int> result;\n    for (int x : s1) {\n        if (s2.count(x)) result.push_back(x);\n    }\n    if (result.empty()) {\n        cout << \"EMPTY\" << endl;\n    } else {\n        for (size_t i = 0; i < result.size(); i++) {\n            if (i > 0) cout << \" \";\n            cout << result[i];\n        }\n        cout << endl;\n    }\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        int n = sc.nextInt();\n        Set<Integer> s1 = new TreeSet<>();\n        for (int i = 0; i < n; i++) s1.add(sc.nextInt());\n        int m = sc.nextInt();\n        Set<Integer> s2 = new TreeSet<>();\n        for (int i = 0; i < m; i++) s2.add(sc.nextInt());\n        Set<Integer> intersection = new TreeSet<>(s1);\n        intersection.retainAll(s2);\n        if (intersection.isEmpty()) {\n            System.out.println(\"EMPTY\");\n        } else {\n            List<Integer> list = new ArrayList<>(intersection);\n            System.out.println(String.join(\" \", list.stream().map(String::valueOf).toArray(String[]::new)));\n        }\n    }\n}\n",
+      "python": "n = int(input())\na = set(map(int, input().split()))\nm = int(input())\nb = set(map(int, input().split()))\nresult = sorted(a & b)\nif result:\n    print(\" \".join(map(str, result)))\nelse:\n    print(\"EMPTY\")\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nlet idx = 0;\nconst n = parseInt(input[idx++]);\nconst set1 = new Set<number>();\nfor (let i = 0; i < n; i++) set1.add(parseInt(input[idx++]));\nconst m = parseInt(input[idx++]);\nconst set2 = new Set<number>();\nfor (let i = 0; i < m; i++) set2.add(parseInt(input[idx++]));\nconst intersection: number[] = [];\nfor (const x of set1) {\n    if (set2.has(x)) intersection.push(x);\n}\nintersection.sort((a, b) => a - b);\nif (intersection.length > 0) {\n    console.log(intersection.join(' '));\n} else {\n    console.log(\"EMPTY\");\n}\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split(/\\s+/);\nlet idx = 0;\nconst n = parseInt(input[idx++]);\nconst set1 = new Set();\nfor (let i = 0; i < n; i++) set1.add(parseInt(input[idx++]));\nconst m = parseInt(input[idx++]);\nconst set2 = new Set();\nfor (let i = 0; i < m; i++) set2.add(parseInt(input[idx++]));\nconst intersection = [];\nfor (const x of set1) {\n    if (set2.has(x)) intersection.push(x);\n}\nintersection.sort((a, b) => a - b);\nif (intersection.length > 0) {\n    console.log(intersection.join(' '));\n} else {\n    console.log(\"EMPTY\");\n}\n",
+      "csharp": "using System;\nusing System.Collections.Generic;\n\nclass Program {\n    static void Main() {\n        int n = int.Parse(Console.ReadLine()!);\n        var set1 = new SortedSet<int>();\n        foreach (var x in Console.ReadLine()!.Split()) set1.Add(int.Parse(x));\n        int m = int.Parse(Console.ReadLine()!);\n        var set2 = new SortedSet<int>();\n        foreach (var x in Console.ReadLine()!.Split()) set2.Add(int.Parse(x));\n        set1.IntersectWith(set2);\n        if (set1.Count == 0) {\n            Console.WriteLine(\"EMPTY\");\n        } else {\n            Console.WriteLine(string.Join(\" \", set1));\n        }\n    }\n}\n"
+    },
+    "content": "## Description\nGiven two arrays of integers, find and print all **common elements** (intersection). Each common element should be printed only once.\n\n## Input Format\n- Line 1: integer **N** (size of first array)\n- Line 2: N space-separated integers\n- Line 3: integer **M** (size of second array)\n- Line 4: M space-separated integers\n\n## Output Format\nPrint all common elements, separated by spaces. If no common elements, print `EMPTY`.\nThe **order does not matter**.\n\n## Examples\n**Input:**\n```\n5\n1 2 3 4 5\n4\n3 4 5 6\n```\n**Output:**\n```\n3 4 5\n```",
+    "testCases": [
+      {
+        "id": "tc-024-01",
+        "input": "5\n1 2 3 4 5\n4\n3 4 5 6",
+        "expectedOutput": "3 4 5",
+        "isPublic": true,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-024-02",
+        "input": "3\n1 2 3\n3\n4 5 6",
+        "expectedOutput": "EMPTY",
+        "isPublic": true
+      },
+      {
+        "id": "tc-024-03",
+        "input": "4\n10 20 30 40\n4\n40 30 20 10",
+        "expectedOutput": "10 20 30 40",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-024-04",
+        "input": "3\n1 1 2\n2\n1 2",
+        "expectedOutput": "1 2",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-024-05",
+        "input": "1\n5\n1\n5",
+        "expectedOutput": "5",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      }
+    ]
+  },
+  {
+    "id": "prob-025",
+    "lecturerId": "usr-lec-001",
+    "title": "Unique Characters in String",
+    "difficulty": "EASY",
+    "tags": [
+      "string",
+      "hashing",
+      "unordered"
+    ],
+    "codeTemplates": {
+      "c": "#include <stdio.h>\n#include <string.h>\n\nint main() {\n    char s[100001];\n    scanf(\"%s\", s);\n    int freq[26] = {0};\n    int len = strlen(s);\n    for (int i = 0; i < len; i++) {\n        freq[s[i] - 'a'] = 1;\n    }\n    int first = 1;\n    for (int i = 0; i < 26; i++) {\n        if (freq[i]) {\n            if (!first) printf(\" \");\n            printf(\"%c\", 'a' + i);\n            first = 0;\n        }\n    }\n    printf(\"\\n\");\n    return 0;\n}\n",
+      "c++": "#include <bits/stdc++.h>\nusing namespace std;\n\nint main() {\n    string s;\n    cin >> s;\n    set<char> unique(s.begin(), s.end());\n    bool first = true;\n    for (char c : unique) {\n        if (!first) cout << \" \";\n        cout << c;\n        first = false;\n    }\n    cout << endl;\n    return 0;\n}\n",
+      "java": "import java.util.*;\n\npublic class Main {\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.next();\n        Set<Character> unique = new TreeSet<>();\n        for (char c : s.toCharArray()) {\n            unique.add(c);\n        }\n        List<Character> list = new ArrayList<>(unique);\n        for (int i = 0; i < list.size(); i++) {\n            if (i > 0) System.out.print(\" \");\n            System.out.print(list.get(i));\n        }\n        System.out.println();\n    }\n}\n",
+      "python": "s = input().strip()\nunique = sorted(set(s))\nprint(\" \".join(unique))\n",
+      "typescript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split('\\n')[0];\nconst unique = [...new Set(input.split(''))].sort();\nconsole.log(unique.join(' '));\n",
+      "javascript": "const input = require('fs').readFileSync(0, 'utf-8').trim().split('\\n')[0];\nconst unique = [...new Set(input.split(''))].sort();\nconsole.log(unique.join(' '));\n",
+      "csharp": "using System;\n\nclass Program {\n    static void Main() {\n        string s = Console.ReadLine()!;\n        var unique = new SortedSet<char>(s);\n        int count = 0;\n        foreach (char c in unique) {\n            if (count > 0) Console.Write(\" \");\n            Console.Write(c);\n            count++;\n        }\n        Console.WriteLine();\n    }\n}\n"
+    },
+    "content": "## Description\nGiven a string of lowercase English letters, print all **distinct characters** that appear in it.\n\n## Input Format\nA single string **s** (1 ≤ |s| ≤ 10^5), consisting of lowercase English letters.\n\n## Output Format\nPrint the distinct characters separated by spaces.\nThe **order does not matter**.\n\n## Examples\n**Input:**\n```\nhello\n```\n**Output:**\n```\nh e l o\n```",
+    "testCases": [
+      {
+        "id": "tc-025-01",
+        "input": "hello",
+        "expectedOutput": "h e l o",
+        "isPublic": true,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-025-02",
+        "input": "a",
+        "expectedOutput": "a",
+        "isPublic": true,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-025-03",
+        "input": "aabbcc",
+        "expectedOutput": "a b c",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-025-04",
+        "input": "abcdefg",
+        "expectedOutput": "a b c d e f g",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      },
+      {
+        "id": "tc-025-05",
+        "input": "zzz",
+        "expectedOutput": "z",
+        "isPublic": false,
+        "isTokenComparision": true,
+        "isNotOrderedComparision": true
+      }
+    ]
+  }
+]

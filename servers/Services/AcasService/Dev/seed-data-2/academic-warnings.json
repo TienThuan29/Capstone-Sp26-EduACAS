@@ -1,0 +1,715 @@
+[
+  {
+    "id": "warn-001",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-005",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-001": 2.75,
+        "exam-002": 2.83
+      },
+      "averageScore": 2.79
+    },
+    "llmAnalysis": {
+      "exam-001": {
+        "submissionId": "subm-009",
+        "analysis": "Student scored 2.75/10 on the first exam. Failed both problems with multiple compilation errors.",
+        "recomendation": "Recommend intensive tutoring sessions and assignment review."
+      },
+      "exam-002": {
+        "submissionId": "subm-063",
+        "analysis": "Student scored 2.83/10 on the second exam. Continued poor performance shows lack of understanding of basic concepts.",
+        "recomendation": "Schedule one-on-one meeting with academic advisor."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-18T10:30:00",
+    "isRead": false,
+    "createdDate": "2026-02-18T10:30:00",
+    "updatedDate": "2026-02-18T10:30:00"
+  },
+  {
+    "id": "warn-002",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-014",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 1.75,
+        "exam-cs101-02": 1.83
+      },
+      "averageScore": 1.79
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-090",
+        "analysis": "Critical: Student scored only 1.75/10. Multiple failed test cases indicate fundamental misunderstanding of problem requirements.",
+        "recomendation": "Urgent intervention required. Consider mandatory study sessions."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-16T14:00:00",
+    "isRead": false,
+    "createdDate": "2026-02-16T14:00:00",
+    "updatedDate": "2026-02-16T14:00:00"
+  },
+  {
+    "id": "warn-003",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-009",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 4.5
+      },
+      "averageScore": 4.5
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-068",
+        "analysis": "Student scored below passing threshold but shows some understanding of basic concepts.",
+        "recomendation": "Recommend study group participation and office hours attendance."
+      }
+    },
+    "lecturerAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-068",
+        "analysis": "Declining trend observed. Student was passing in first few weeks.",
+        "recomendation": "Schedule consultation to discuss study strategies."
+      }
+    },
+    "sentDate": "2026-01-25T09:00:00",
+    "isRead": true,
+    "createdDate": "2026-01-25T09:00:00",
+    "updatedDate": "2026-01-25T09:00:00"
+  },
+  {
+    "id": "warn-004",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-004",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-001": 4.75
+      },
+      "averageScore": 4.75
+    },
+    "llmAnalysis": {
+      "exam-001": {
+        "submissionId": "subm-007",
+        "analysis": "Student performed below average but above critical threshold. Some concepts need reinforcement.",
+        "recomendation": "Encourage participation in practice quizzes and study sessions."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-22T16:30:00",
+    "isRead": false,
+    "createdDate": "2026-02-22T16:30:00",
+    "updatedDate": "2026-02-22T16:30:00"
+  },
+  {
+    "id": "warn-005",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-019",
+    "warningLevel": 1,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 4.67,
+        "exam-cs101-02": 4
+      },
+      "averageScore": 4.33
+    },
+    "llmAnalysis": {
+      "exam-cs101-02": {
+        "submissionId": "subm-161",
+        "analysis": "Consistent below-average performance across multiple exams.",
+        "recomendation": "Recommend tutoring and additional practice assignments."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-08T11:00:00",
+    "isRead": true,
+    "createdDate": "2026-02-08T11:00:00",
+    "updatedDate": "2026-02-08T11:00:00"
+  },
+  {
+    "id": "warn-006",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-024",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 2.33,
+        "exam-cs101-02": 2.67
+      },
+      "averageScore": 2.5
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-110",
+        "analysis": "Critical: Very low scores across both exams. Student may need foundational course support.",
+        "recomendation": "Strongly recommend academic counseling and remedial classes."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-01-28T08:30:00",
+    "isRead": false,
+    "createdDate": "2026-01-28T08:30:00",
+    "updatedDate": "2026-01-28T08:30:00"
+  },
+  {
+    "id": "warn-007",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-022",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-02": 4.67
+      },
+      "averageScore": 4.67
+    },
+    "llmAnalysis": {
+      "exam-cs101-02": {
+        "submissionId": "subm-170",
+        "analysis": "Borderline performance. Student shows potential but needs more practice.",
+        "recomendation": "Suggest joining study groups and utilizing available resources."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-02-10T13:00:00",
+    "isRead": true,
+    "createdDate": "2026-02-10T13:00:00",
+    "updatedDate": "2026-02-10T13:00:00"
+  },
+  {
+    "id": "warn-008",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-015",
+    "warningLevel": 1,
+    "triggerType": "SINGLE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-001": 1.75
+      },
+      "averageScore": 1.75
+    },
+    "llmAnalysis": {
+      "exam-001": {
+        "submissionId": "subm-027",
+        "analysis": "Critical low score. Multiple failed test cases on basic problems.",
+        "recomendation": "Immediate academic intervention recommended."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-03-01T10:00:00",
+    "isRead": false,
+    "createdDate": "2026-03-01T10:00:00",
+    "updatedDate": "2026-03-01T10:00:00"
+  },
+  {
+    "id": "warn-009",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-001",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 0,
+        "exam-cs101-02": 3.3,
+        "exam-001": 3.3,
+        "exam-002": 3.3
+      },
+      "averageScore": 2.47
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-302",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-397",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-523",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-614",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.689Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-010",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-002",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 0,
+        "exam-cs101-02": 0,
+        "exam-001": 3.3,
+        "exam-002": 3.3
+      },
+      "averageScore": 1.65
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-366",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-457",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-492",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-549",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-011",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-005",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 3.3,
+        "exam-cs101-02": 0,
+        "exam-001": 3.3,
+        "exam-002": 3.3
+      },
+      "averageScore": 2.47
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-309",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-404",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-529",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-558",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-012",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-006",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 3.3,
+        "exam-cs101-02": 1.7,
+        "exam-001": 3.3,
+        "exam-002": 2
+      },
+      "averageScore": 2.58
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-376",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-467",
+        "analysis": "Sinh viên đạt 1.7/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-531",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-631",
+        "analysis": "Sinh viên đạt 2/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-013",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-008",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 4,
+        "exam-cs101-02": 3.3,
+        "exam-001": 4,
+        "exam-002": 0
+      },
+      "averageScore": 2.83
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-318",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-415",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-534",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-564",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-014",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-010",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 0,
+        "exam-cs101-02": 4,
+        "exam-001": 3.3,
+        "exam-002": 0
+      },
+      "averageScore": 1.82
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-324",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-419",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-501",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-568",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-015",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-012",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 1.7,
+        "exam-cs101-02": 3.3,
+        "exam-001": 1.7,
+        "exam-002": 1.7
+      },
+      "averageScore": 2.1
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-328",
+        "analysis": "Sinh viên đạt 1.7/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-479",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-541",
+        "analysis": "Sinh viên đạt 1.7/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-573",
+        "analysis": "Sinh viên đạt 1.7/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-016",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-013",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 0,
+        "exam-cs101-02": 4,
+        "exam-001": 3.3,
+        "exam-002": 3.3
+      },
+      "averageScore": 2.65
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-331",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-481",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-507",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-576",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-017",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-016",
+    "warningLevel": 2,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 4,
+        "exam-001": 4,
+        "exam-002": 0
+      },
+      "averageScore": 2.67
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-341",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-510",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-585",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-018",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-017",
+    "warningLevel": 1,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 3.3,
+        "exam-cs101-02": 4,
+        "exam-001": 3.3,
+        "exam-002": 3.3
+      },
+      "averageScore": 3.47
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-343",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-429",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-001": {
+        "submissionId": "subm-513",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-588",
+        "analysis": "Sinh viên đạt 3.3/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-019",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-018",
+    "warningLevel": 1,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 0,
+        "exam-cs101-02": 10,
+        "exam-002": 2
+      },
+      "averageScore": 4
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-345",
+        "analysis": "Sinh viên đạt 0/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-432",
+        "analysis": "Sinh viên đạt 10/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-593",
+        "analysis": "Sinh viên đạt 2/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  },
+  {
+    "id": "warn-020",
+    "classroomId": "cls-001",
+    "studentId": "usr-stu-019",
+    "warningLevel": 1,
+    "triggerType": "AVERAGE_EXAM_LOW_SCORE",
+    "involvedExams": {
+      "examScores": {
+        "exam-cs101-01": 1.7,
+        "exam-cs101-02": 4,
+        "exam-002": 4
+      },
+      "averageScore": 3.23
+    },
+    "llmAnalysis": {
+      "exam-cs101-01": {
+        "submissionId": "subm-349",
+        "analysis": "Sinh viên đạt 1.7/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-cs101-02": {
+        "submissionId": "subm-435",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      },
+      "exam-002": {
+        "submissionId": "subm-596",
+        "analysis": "Sinh viên đạt 4/10 điểm. Mã nguồn cho thấy sinh viên không nắm vững kiến thức căn bản, sai logic từ những testcase đầu tiên.",
+        "recomendation": "Yêu cầu sinh viên tham gia buổi phụ đạo bắt buộc và làm thêm bài tập rèn luyện tư duy thuật toán."
+      }
+    },
+    "lecturerAnalysis": {},
+    "sentDate": "2026-05-04T06:16:01.712Z",
+    "isRead": false,
+    "createdDate": "2026-05-04T06:16:01.712Z",
+    "updatedDate": "2026-05-04T06:16:01.712Z"
+  }
+]

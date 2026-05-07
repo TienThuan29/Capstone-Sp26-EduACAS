@@ -20,6 +20,8 @@ class ApiConfig {
       '/api/acas/v1/device-token/register';
   static String get myAnnouncementsEndpoint => '/api/acas/v1/notifications/my';
   static String get examinationsEndpoint => '/api/acas/v1/examinations';
+  static String get uploadAvatarEndpoint => '/api/acas/v1/public-s3/upload';
+
 
   // Classroom endpoints
   static String lecturerClassroomsEndpoint(String lecturerId) =>
@@ -28,6 +30,16 @@ class ApiConfig {
       '/api/acas/v1/classrooms/student/$studentId';
   static String classroomByIdEndpoint(String id) =>
       '/api/acas/v1/classrooms/$id';
+
+  // Dashboard endpoints
+  static String classroomDashboardScoreDistributionEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/dashboard/score-distribution';
+  static String classroomDashboardAtRiskEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/dashboard/at-risk';
+  static String classroomDashboardWarningsEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/dashboard/warnings';
+  static String get classroomDashboardStatsEndpoint => 
+      '/api/acas/v1/classrooms/dashboard/stats';
 
   // Material endpoints
   static String materialsByClassroomEndpoint(String classroomId) =>

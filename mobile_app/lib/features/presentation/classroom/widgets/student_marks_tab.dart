@@ -250,11 +250,19 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
     return Stack(
       children: [
         const GradientBackground(),
-        _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-            : _error != null
-                ? _buildErrorState()
-                : _buildContent(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStickyHeader(),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  : _error != null
+                      ? _buildErrorState()
+                      : _buildContent(),
+            ),
+          ],
+        ),
       ],
     );
   }

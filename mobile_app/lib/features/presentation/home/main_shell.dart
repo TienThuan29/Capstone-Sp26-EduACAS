@@ -95,38 +95,17 @@ class _MainShellState extends State<MainShell> {
   // ── Logout ────────────────────────────────────────────
 
   Future<void> _handleLogout() async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout'),
-          ),
-        ],
-      ),
+    // Confirmation is now handled by the ProfileScreen modal
+    await TokenStorage.clearTokens();
+    await TokenStorage.clearUserName();
+    await TokenStorage.clearUserRole();
+    await TokenStorage.clearUserId();
+    if (!mounted) return;
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
     );
-
-    if (confirmed == true) {
-      await TokenStorage.clearTokens();
-      await TokenStorage.clearUserName();
-      await TokenStorage.clearUserRole();
-      await TokenStorage.clearUserId();
-      if (!mounted) return;
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const LoginPage()),
-        (route) => false,
-      );
-    }
   }
 
   // ── Menu config ───────────────────────────────────────

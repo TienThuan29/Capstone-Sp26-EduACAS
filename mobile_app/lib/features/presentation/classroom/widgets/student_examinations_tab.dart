@@ -78,7 +78,7 @@ class _StudentExaminationsTabState extends State<StudentExaminationsTab> {
           ),
           const SizedBox(width: 12),
           const Text(
-            'Examinations',
+            'Course Examinations',
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w900,
