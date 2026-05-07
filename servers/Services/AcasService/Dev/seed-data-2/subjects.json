@@ -44,8 +44,8 @@
   {
     "id": "sub-011",
     "subjectCode": "SE201",
-    "subjectName": "Web Application Development with TypeScript",
-    "description": "Build modern web applications with TypeScript, modular architecture, component-based design, and frontend integration.",
+    "subjectName": "Development with TypeScript",
+    "description": "Build modern web applications with TypeScript, modular architecture, component-based design.",
     "createdBy": "admin-eduacas"
   },
   {

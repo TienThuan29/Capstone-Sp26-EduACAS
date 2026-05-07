@@ -9,6 +9,12 @@ public interface IDynamoDbResetService
     Task<ResetResult> ResetAndSeedAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Wipes all discovered DynamoDB tables and re-seeds them with seed-data-2.
+    /// Only safe to call in Development environment.
+    /// </summary>
+    Task<ResetResult> ResetAndSeedSeedData2Async(CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Wipes and re-seeds only quiz-related tables: Quiz, Question, and AnswerOption.
     /// Only safe to call in Development environment.
     /// </summary>

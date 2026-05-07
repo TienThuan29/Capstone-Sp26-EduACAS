@@ -12,7 +12,8 @@ public class DynamoDbResetService : IDynamoDbResetService
 {
     private const int BatchWriteLimit = 25;
     private const string PartitionKeyName = "id";
-    private static readonly string SeedDataPath = Path.Combine(AppContext.BaseDirectory, "Dev", "seed-data");
+    private const string DefaultSeedDataFolder = "seed-data";
+    private string _seedDataFolder = DefaultSeedDataFolder;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -63,6 +64,11 @@ public class DynamoDbResetService : IDynamoDbResetService
         }
 
         return new ResetResult(true, tablesToWipe.Count + 1, seeded);
+    }
+
+    public async Task<ResetResult> ResetAndSeedSeedData2Async(CancellationToken cancellationToken = default)
+    {
+        return await UseSeedDataFolderAsync("seed-data-2", () => ResetAndSeedAsync(cancellationToken));
     }
 
     public async Task<ResetResult> ResetAndSeedQuizDataAsync(CancellationToken cancellationToken = default)
@@ -695,7 +701,7 @@ public class DynamoDbResetService : IDynamoDbResetService
 
     private List<T> LoadJson<T>(string filename)
     {
-        var path = Path.Combine(SeedDataPath, filename);
+        var path = Path.Combine(AppContext.BaseDirectory, "Dev", _seedDataFolder, filename);
         if (!File.Exists(path))
         {
             _logger.LogWarning("Seed file {File} not found at {Path}; skipping", filename, path);
@@ -712,6 +718,21 @@ public class DynamoDbResetService : IDynamoDbResetService
 
         _logger.LogInformation("Loaded {Count} items from {File}", items.Count, filename);
         return items;
+    }
+
+    private async Task<T> UseSeedDataFolderAsync<T>(string seedDataFolder, Func<Task<T>> action)
+    {
+        var previousFolder = _seedDataFolder;
+        _seedDataFolder = seedDataFolder;
+
+        try
+        {
+            return await action();
+        }
+        finally
+        {
+            _seedDataFolder = previousFolder;
+        }
     }
 
     // ───────────────────────────── Helpers ─────────────────────────────
