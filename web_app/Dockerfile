@@ -31,6 +31,16 @@ RUN npx next build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Cài compilers cho syntax check (python, gcc, g++, java, dotnet)
+RUN apk add --no-cache \
+    python3 \
+    gcc \
+    g++ \
+    musl-dev \
+    openjdk21 \
+    dotnet8 \
+    && ln -sf /usr/bin/python3 /usr/bin/python
+
 # Gọi lại ARG nếu bạn muốn biến này tồn tại ở runtime (tuỳ chọn nhưng nên có)
 ARG NEXT_PUBLIC_BACKEND_BASE_URL
 ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID

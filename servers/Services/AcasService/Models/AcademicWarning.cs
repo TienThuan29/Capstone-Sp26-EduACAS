@@ -15,6 +15,12 @@ public class AcademicWarning
     [Required]
     public string StudentId { get; set; } = string.Empty;
 
+    [Required]
+    public string ExamId { get; set; } = string.Empty;
+
+    [Required]
+    public string ProblemId { get; set; } = string.Empty;
+
     public int WarningLevel { get; set; }
 
     [Required]
@@ -49,6 +55,8 @@ public class AcademicWarningAnalysisEntry
     public string Analysis { get; set; } = string.Empty;
 
     public string Recomendation { get; set; } = string.Empty;
+
+    public List<string> MaterialRecommendation { get; set; } = new();
 }
 
 public enum AcademicWarningTriggerType

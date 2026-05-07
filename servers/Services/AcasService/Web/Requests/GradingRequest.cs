@@ -30,6 +30,30 @@ public class SubmissionScoreOverrideRequest
 
   [JsonPropertyName("maxMark")]
   public float MaxMark { get; set; }
+
+  [JsonPropertyName("sendFeedbackToStudent")]
+  public bool SendFeedbackToStudent { get; set; } = false;
+
+  [JsonPropertyName("lecturerFeedback")]
+  public string LecturerFeedback { get; set; } = string.Empty;
+
+  [JsonPropertyName("materialRecommendation")]
+  public List<string> MaterialRecommendation { get; set; } = new();
+}
+
+public class SaveLecturerFeedbackRequest
+{
+  [JsonPropertyName("lecturerFeedback")]
+  public string LecturerFeedback { get; set; } = string.Empty;
+
+  [JsonPropertyName("materialRecommendation")]
+  public List<string> MaterialRecommendation { get; set; } = new();
+
+  [JsonPropertyName("sendFeedbackToStudent")]
+  public bool SendFeedbackToStudent { get; set; } = false;
+
+  [JsonPropertyName("problemTitle")]
+  public string? ProblemTitle { get; set; }
 }
 
 public class SubmissionGradingRequest

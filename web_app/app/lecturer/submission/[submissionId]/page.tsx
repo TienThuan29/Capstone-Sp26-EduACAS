@@ -26,6 +26,7 @@ export default function LecturerSubmissionPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadedSubmission, setLoadedSubmission] = useState<SubmissionResponse | null>(null);
+  const [loadedClassroomId, setLoadedClassroomId] = useState<string | null>(null);
 
   // Guard: only fetch once on mount, regardless of how submissionId resolves
   const hasFetched = useRef(false);
@@ -53,6 +54,7 @@ export default function LecturerSubmissionPage() {
         // Resolve maxMark from the exam's problem list so the lecturer cannot override above it
         const examProblem = exam?.examProblems?.find((ep: any) => ep.problemId === submission.problemId);
         const maxMark = examProblem?.mark ?? 0;
+        const classroomId = exam?.classroom?.id ?? null;
 
         const [problems] = await Promise.all([
           getProblemsByIds([submission.problemId]),
@@ -62,6 +64,7 @@ export default function LecturerSubmissionPage() {
         const language = languages.find((l: any) => l.id === submission.languageId) ?? languages[0] ?? null;
 
         setLoadedSubmission({ ...submission, maxMark });
+        setLoadedClassroomId(classroomId ?? null);
 
         if (problem) {
           setProblem(problem as unknown as Problem);
@@ -105,5 +108,11 @@ export default function LecturerSubmissionPage() {
     );
   }
 
-  return <LecturerSubmissionWorkspace submission={loadedSubmission} submissionId={submissionId} />;
+  return (
+    <LecturerSubmissionWorkspace
+      submission={loadedSubmission}
+      submissionId={submissionId}
+      classroomId={loadedClassroomId ?? ''}
+    />
+  );
 }

@@ -17,6 +17,15 @@ import {
   Label,
   Select,
 } from "flowbite-react";
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  CartesianGrid,
+} from "recharts";
 import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 import { DocumentTextIcon } from "@heroicons/react/24/outline";
 import { X } from "lucide-react";
@@ -204,55 +213,157 @@ function KeystrokeLogsViewer({ records }: { records: KeystrokeRecordResponse[] }
 
   const selectedRecord = records[selectedIndex];
 
+  const chartData = records.map((record, index) => ({
+    index: index + 1,
+    cps: record.cps,
+    charCount: record.charCount,
+    duration: record.duration,
+    timeOffset: record.timeOffSet || `Log #${index + 1}`,
+    timeStart: record.timeStartSet,
+    content: record.content,
+  }));
+
+  const maxCps = Math.max(...records.map((r) => r.cps), 1);
+
   return (
-    <div className="flex flex-col md:flex-row overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
-      <div className="md:w-1/3 max-h-[500px] overflow-y-auto border-r border-gray-200 dark:border-gray-700">
-        <ul className="divide-y divide-gray-200 dark:divide-gray-700">
-          {records.map((record, index) => (
-            <li
-              key={`${record.timeStartSet}-${record.timeOffSet}-${index}`}
-              className={`cursor-pointer p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
-                selectedIndex === index
-                  ? "border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                  : "border-l-4 border-transparent"
-              }`}
-              onClick={() => setSelectedIndex(index)}
-            >
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-sm font-semibold text-gray-900 dark:text-white">
-                  {record.timeOffSet || `Log #${index + 1}`}
-                </span>
-                <Badge color="gray" size="sm">
-                  {record.charCount} chars
-                </Badge>
-              </div>
-              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                <span>CPS: {record.cps}</span>
-                <span>Dur: {record.duration}ms</span>
-              </div>
-              <div className="mt-1 text-xs text-gray-400 dark:text-gray-500 truncate">
-                {record.timeStartSet}
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-      <div className="md:w-2/3 max-h-[500px] overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900">
-        <div className="mb-4 flex items-center justify-between">
-          <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
-            Code Snapshot
-            <span className="ml-2 font-normal text-gray-500">
-              at {selectedRecord.timeOffSet}
-            </span>
-          </h4>
-          <Badge color="info">
-            Length: {selectedRecord.content?.length || 0}
-          </Badge>
+    <div className="flex flex-col overflow-hidden rounded-lg border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800">
+      <div className="flex flex-col md:flex-row overflow-hidden">
+        <div className="md:w-1/3 max-h-[500px] overflow-y-auto border-r border-gray-200 dark:border-gray-700">
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            {records.map((record, index) => (
+              <li
+                key={`${record.timeStartSet}-${record.timeOffSet}-${index}`}
+                className={`cursor-pointer p-4 transition-colors hover:bg-gray-50 dark:hover:bg-gray-700/50 ${
+                  selectedIndex === index
+                    ? "border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-l-4 border-transparent"
+                }`}
+                onClick={() => setSelectedIndex(index)}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {record.timeOffSet || `Log #${index + 1}`}
+                  </span>
+                  <Badge color="gray" size="sm">
+                    {record.charCount} chars
+                  </Badge>
+                </div>
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <span>CPS: {record.cps}</span>
+                  <span>Dur: {record.duration}ms</span>
+                </div>
+                <div className="mt-1 text-xs text-gray-400 dark:text-gray-500 truncate">
+                  {record.timeStartSet}
+                </div>
+              </li>
+            ))}
+          </ul>
         </div>
-        <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
-          <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 dark:text-gray-200 [word-break:break-word]">
-            {selectedRecord.content || "Empty content"}
-          </pre>
+        <div className="md:w-2/3 max-h-[500px] overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900">
+          <div className="mb-4 flex items-center justify-between">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Code Snapshot
+              <span className="ml-2 font-normal text-gray-500">
+                at {selectedRecord.timeOffSet}
+              </span>
+            </h4>
+            <Badge color="info">
+              Length: {selectedRecord.content?.length || 0}
+            </Badge>
+          </div>
+          <div className="rounded-lg border border-gray-200 bg-white p-4 dark:border-gray-700 dark:bg-gray-800">
+            <pre className="whitespace-pre-wrap font-mono text-sm text-gray-800 dark:text-gray-200 [word-break:break-word]">
+              {selectedRecord.content || "Empty content"}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <div className="border-t border-gray-200 p-4 dark:border-gray-700">
+        <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h4 className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Keystroke Speed (CPS) Over Time
+            </h4>
+            <div className="flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500 dark:bg-gray-700 dark:text-gray-400">
+              <span className="font-medium">X:</span> Snapshot #
+              <span className="mx-1 text-gray-300 dark:text-gray-600">|</span>
+              <span className="font-medium">Y:</span> CPS
+            </div>
+          </div>
+          <span className="text-xs text-gray-500 dark:text-gray-400">
+            {records.length} snapshots
+          </span>
+        </div>
+        <div className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800">
+          <ResponsiveContainer width="100%" height={180}>
+            <LineChart
+              data={chartData}
+              margin={{ top: 8, right: 8, left: -20, bottom: 0 }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="#E5E7EB"
+                className="dark:opacity-30"
+              />
+              <XAxis
+                dataKey="index"
+                tick={{ fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+                label={{
+                  value: "Snapshot #",
+                  position: "insideBottomRight",
+                  offset: -4,
+                  fontSize: 10,
+                  fill: "#9CA3AF",
+                }}
+              />
+              <YAxis
+                domain={[0, Math.ceil(maxCps * 1.2)]}
+                tick={{ fontSize: 11 }}
+                tickLine={false}
+                axisLine={false}
+                label={{
+                  value: "CPS",
+                  angle: -90,
+                  position: "insideLeft",
+                  fontSize: 10,
+                  fill: "#9CA3AF",
+                }}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload || payload.length === 0) return null;
+                  const data = payload[0].payload;
+                  return (
+                    <div className="rounded-lg border border-gray-200 bg-white px-3 py-2 shadow-md dark:border-gray-700 dark:bg-gray-800">
+                      <p className="text-xs font-semibold text-gray-900 dark:text-white">
+                        Snapshot #{data.index} &mdash; {data.timeOffset}
+                      </p>
+                      <p className="text-sm text-blue-600 dark:text-blue-400">
+                        CPS: <span className="font-bold">{data.cps}</span>
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        {data.charCount} chars &middot; {data.duration}ms
+                      </p>
+                      <p className="text-xs text-gray-400 mt-1 truncate max-w-[200px]">
+                        {data.timeStart}
+                      </p>
+                    </div>
+                  );
+                }}
+              />
+              <Line
+                type="monotone"
+                dataKey="cps"
+                stroke="#3B82F6"
+                strokeWidth={2.5}
+                dot={{ fill: "#3B82F6", strokeWidth: 0, r: 4 }}
+                activeDot={{ r: 6, fill: "#2563EB" }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import { GlobalDisallowedRouteExamGuard } from "@/components/student-exam-sessio
 import { SidebarProvider } from "@/contexts/SidebarContext";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LOGO_EDU_ACAS_SINGLE } from "@/assets/images";
+import { AcademicWarningToastListener } from "@/components/academic-warning/academic-warning-toast-listener";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -47,6 +48,7 @@ export default function RootLayout({
         <ThemeInit />
         <ToastProvider>
           <UserProvider>
+            <AcademicWarningToastListener />
             <ActiveExamSessionGate />
             <GlobalDisallowedRouteExamGuard />
             <SidebarProvider>
