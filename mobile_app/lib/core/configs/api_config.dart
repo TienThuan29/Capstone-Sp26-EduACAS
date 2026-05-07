@@ -51,6 +51,8 @@ class ApiConfig {
   // Examination endpoints
   static String examinationsByClassEndpoint(String classId) =>
       '/api/acas/v1/examinations/by-class/$classId';
+  static String examinationsByClassAndModeEndpoint(String classId, String mode) =>
+      '/api/acas/v1/examinations/by-class/$classId/mode/$mode';
   static String examinationByIdEndpoint(String id) =>
       '/api/acas/v1/examinations/$id';
 
@@ -109,12 +111,18 @@ class ApiConfig {
       '/api/acas/v1/discussion-issues/comments/reply';
   static String get upvoteCommentEndpoint =>
       '/api/acas/v1/discussion-issues/comments/upvote';
+  static String updateCommentEndpoint(String commentId) =>
+      '/api/acas/v1/discussion-issues/comments/$commentId';
+  static String softDeleteCommentEndpoint(String commentId) =>
+      '/api/acas/v1/discussion-issues/comments/$commentId/soft-delete';
 
   // Problem endpoints
   static String problemsByLecturerEndpoint(String lecturerId) =>
       '/api/acas/v1/problems/lecturer/$lecturerId';
   static String problemByIdEndpoint(String id) =>
       '/api/acas/v1/problems/$id';
+  static String problemsFromExaminationsEndpoint(String classroomId) =>
+      '/api/acas/v1/problems/from-examinations/classroom/$classroomId';
 
     // Subject endpoints
     static String get subjectsEndpoint => '/api/acas/v1/subjects';
@@ -137,6 +145,12 @@ class ApiConfig {
     static String softDeleteQuizEndpoint(String id) =>
       '/api/acas/v1/quizzes/$id/soft-delete';
     static String restoreQuizEndpoint(String id) => '/api/acas/v1/quizzes/$id/restore';
+
+    // Academic Warning endpoints (uses student dashboard endpoint - aligned with web_app)
+    static String studentDashboardWarningsEndpoint(String classroomId) =>
+        '/api/acas/v1/classrooms/$classroomId/student-dashboard/warnings';
+    static String academicWarningByIdEndpoint(String id) =>
+        '/api/v1/academic-warnings/$id';
 
   static Duration get requestTimeout {
     try {

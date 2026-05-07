@@ -54,4 +54,31 @@ class ProblemService {
       throw Exception('Failed to load problem: $e');
     }
   }
+
+  /// Get problems from all examinations of a classroom (matches web app).
+  static Future<List<ProblemBasic>> getProblemsFromExaminations(
+    String classroomId,
+  ) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) throw Exception('No access token found');
+
+      final response = await ApiNetwork.getWithAuth(
+        endpoint: ApiConfig.problemsFromExaminationsEndpoint(classroomId),
+        token: token,
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final List<dynamic> data = response['dataResponse'];
+        return data
+            .map((e) => ProblemBasic.fromJson(e as Map<String, dynamic>))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      debugPrint('Failed to get problems from examinations: $e');
+      return [];
+    }
+  }
 }

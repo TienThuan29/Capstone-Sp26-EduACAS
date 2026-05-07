@@ -25,8 +25,9 @@ export default function CodeEditorPage({ params, searchParams }: PageProps) {
   const { user } = useAuth();
 
   // Render ExamSessionGuard early so violation detection runs even during loading.
+  // Guard renders when we have examId OR when still loading (params not yet resolved).
   const showLoadingGuard = useMemo(() => {
-    return !!examId && !!user?.id && isLoading;
+    return (!!examId || isLoading) && !!user?.id;
   }, [examId, user?.id, isLoading]);
 
   // Unwrap params and searchParams

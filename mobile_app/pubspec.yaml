@@ -50,6 +50,7 @@ dependencies:
   shimmer: ^3.0.0
   syncfusion_flutter_pdfviewer: ^28.1.33
   webview_flutter: ^4.10.0
+  flutter_markdown: ^0.7.6
 
 dev_dependencies:
   flutter_test:
