@@ -106,12 +106,47 @@ class _StudentQuizzesTabState extends State<StudentQuizzesTab> {
     return Stack(
       children: [
         const GradientBackground(),
-        _isLoading
-            ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
-            : _error != null
-                ? _buildErrorState()
-                : _buildQuizList(),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildStickyHeader(),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                  : _error != null
+                      ? _buildErrorState()
+                      : _buildQuizList(),
+            ),
+          ],
+        ),
       ],
+    );
+  }
+
+  Widget _buildStickyHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Text(
+            'Course Quizzes',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 

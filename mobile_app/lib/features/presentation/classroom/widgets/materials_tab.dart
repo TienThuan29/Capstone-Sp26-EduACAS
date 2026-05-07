@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/core/theme/app_colors.dart';
+import 'package:mobile/core/widgets/background.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/material.dart' as model;
 import 'package:mobile/features/services/material_service.dart';
@@ -370,46 +371,51 @@ class _MaterialsTabState extends State<MaterialsTab> {
       );
     }
 
-    return Column(
+    return Stack(
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Row(
-            children: [
-              Container(
-                width: 8,
-                height: 32,
-                decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(4),
-                ),
+        const GradientBackground(),
+        Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+              child: Row(
+                children: [
+                  Container(
+                    width: 8,
+                    height: 32,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Classroom Materials',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const Spacer(),
+                  _buildAddButton(),
+                ],
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Materials',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              const Spacer(),
-              _buildAddButton(),
-            ],
-          ),
-        ),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: _loadMaterials,
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              itemCount: _materials.length,
-              itemBuilder: (context, index) {
-                final material = _materials[index];
-                return _buildMaterialCard(material);
-              },
             ),
-          ),
+            Expanded(
+              child: RefreshIndicator(
+                onRefresh: _loadMaterials,
+                child: ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  itemCount: _materials.length,
+                  itemBuilder: (context, index) {
+                    final material = _materials[index];
+                    return _buildMaterialCard(material);
+                  },
+                ),
+              ),
+            ),
+          ],
         ),
       ],
     );

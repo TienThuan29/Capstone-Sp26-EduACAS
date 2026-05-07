@@ -8,6 +8,7 @@ import 'package:mobile/features/presentation/classroom/widgets/student_marks_tab
 import 'package:mobile/features/presentation/classroom/widgets/student_quizzes_tab.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/services/classroom_service.dart';
+import 'package:mobile/features/presentation/classroom/widgets/student_dashboard_tab.dart';
 
 class StudentClassroomDetailPage extends StatefulWidget {
   final Classroom classroom;
@@ -36,8 +37,8 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
     super.initState();
     final safeInitialIndex = widget.initialTabIndex < 0
         ? 0
-      : (widget.initialTabIndex > 3 ? 3 : widget.initialTabIndex);
-    _tabController = TabController(length: 4, initialIndex: safeInitialIndex, vsync: this);
+      : (widget.initialTabIndex > 4 ? 4 : widget.initialTabIndex);
+    _tabController = TabController(length: 5, initialIndex: safeInitialIndex, vsync: this);
     _enrollController = TextEditingController();
     _isJoined = (widget.classroom.status?.toUpperCase() == 'JOINED');
     _getUserId();
@@ -75,6 +76,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
                   child: TabBarView(
                     controller: _tabController,
                     children: [
+                      StudentDashboardTab(classroomId: widget.classroom.id),
                       StudentMaterialsTab(classroomId: widget.classroom.id),
                       StudentQuizzesTab(classroomId: widget.classroom.id),
                       StudentMarksTab(classroomId: widget.classroom.id),
@@ -314,6 +316,7 @@ class _StudentClassroomDetailPageState extends State<StudentClassroomDetailPage>
         padding: const EdgeInsets.all(4),
         labelPadding: const EdgeInsets.symmetric(horizontal: 16),
         tabs: const [
+          Tab(text: 'Dashboard'),
           Tab(text: 'Materials'),
           Tab(text: 'Quizzes'),
           Tab(text: 'Mark'),

@@ -239,6 +239,33 @@ class _DiscussionIssueManagementPageState
       ),
       body: Column(
         children: [
+          // Sticky Header for embedded view
+          if (widget.isEmbedded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Classroom Discussions',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Ask questions and share knowledge with your classmates',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
           // Search bar
           _buildSearchBar(),
           // Stats bar
