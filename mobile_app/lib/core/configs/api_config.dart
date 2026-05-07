@@ -134,6 +134,12 @@ class ApiConfig {
       '/api/acas/v1/quizzes/$id/soft-delete';
     static String restoreQuizEndpoint(String id) => '/api/acas/v1/quizzes/$id/restore';
 
+    // Academic Warning endpoints (uses student dashboard endpoint - aligned with web_app)
+    static String studentDashboardWarningsEndpoint(String classroomId) =>
+        '/api/acas/v1/classrooms/$classroomId/student-dashboard/warnings';
+    static String academicWarningByIdEndpoint(String id) =>
+        '/api/v1/academic-warnings/$id';
+
   static Duration get requestTimeout {
     try {
       final timeoutSeconds =

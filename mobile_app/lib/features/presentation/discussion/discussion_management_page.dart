@@ -287,7 +287,7 @@ class _DiscussionIssueManagementPageState
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(),
+                widget.isEmbedded ? _buildEmbeddedHeader() : _buildHeader(),
                 if (!widget.isEmbedded) _buildSearchBar(),
                 _buildFilterBar(),
                 Expanded(
@@ -336,6 +336,64 @@ class _DiscussionIssueManagementPageState
         elevation: 4,
         icon: const Icon(Icons.add_rounded),
         label: const Text('New Discussion'),
+      ),
+    );
+  }
+
+  Widget _buildEmbeddedHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 32,
+            decoration: BoxDecoration(
+              color: AppColors.primary,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
+          const Icon(Icons.forum_outlined, color: AppColors.primary, size: 24),
+          const SizedBox(width: 10),
+          const Text(
+            'Discussion Channel',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+            ),
+          ),
+          const Spacer(),
+          PopupMenuButton<String>(
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.06),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.sort_rounded, size: 20, color: AppColors.primary),
+            ),
+            onSelected: (value) {
+              setState(() {
+                _sortBy = value;
+                _applyFilters();
+              });
+            },
+            itemBuilder: (_) => [
+              _sortMenuItem('newest', 'Newest First', Icons.arrow_downward_rounded),
+              _sortMenuItem('oldest', 'Oldest First', Icons.arrow_upward_rounded),
+              _sortMenuItem('most_comments', 'Most Comments', Icons.chat_bubble_rounded),
+            ],
+          ),
+        ],
       ),
     );
   }

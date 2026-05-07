@@ -191,6 +191,8 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
               'Problem ${problemId.length > 8 ? problemId.substring(0, 8) : problemId}';
 
           return _ProblemScoreItem(
+            examId: exam.id,
+            submissionId: submission.id,
             problemTitle: problemTitle,
             score: submission.finalScore,
             version: submission.version,
@@ -202,6 +204,7 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
         final canShowScore = exam.mode == ExaminationMode.practical || exam.isPublicResult;
 
         final markItem = _ExamMarkItem(
+          examId: exam.id,
           examName: exam.examName,
           score: (scoredByProblem.isEmpty || !canShowScore) ? null : aggregatedScore,
           maxScore: exam.totalMark,
@@ -256,6 +259,35 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
     );
   }
 
+  Widget _buildSectionHeader(String title, IconData icon, Color accentColor) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 8,
+            height: 32,
+            decoration: BoxDecoration(
+              color: accentColor,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Icon(icon, color: accentColor, size: 24),
+          const SizedBox(width: 10),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: accentColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildContent() {
     final isEmpty = _quizMarks.isEmpty && _examMarks.isEmpty && _practicalMarks.isEmpty;
     if (isEmpty) {
@@ -268,47 +300,36 @@ class _StudentMarksTabState extends State<StudentMarksTab> {
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 20, 16, 24),
         children: [
-          _buildSectionTitle('Quiz Marks'),
-          const SizedBox(height: 10),
+          _buildSectionHeader('Quiz Marks', Icons.quiz_outlined, AppColors.primary),
+          const SizedBox(height: 4),
           if (_quizMarks.isEmpty)
             _buildSectionEmpty('No quiz marks yet.')
           else
             ..._quizMarks.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: _QuizMarkCard(item: item),
                 )),
-          const SizedBox(height: 14),
-          _buildSectionTitle('Exam Marks'),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
+          _buildSectionHeader('Exam Marks', Icons.assignment_outlined, AppColors.accent),
+          const SizedBox(height: 4),
           if (_examMarks.isEmpty)
             _buildSectionEmpty('No exam marks yet.')
           else
             ..._examMarks.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: _ExamMarkCard(item: item),
                 )),
-          const SizedBox(height: 14),
-          _buildSectionTitle('Practical Marks'),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
+          _buildSectionHeader('Practical Marks', Icons.science_outlined, const Color(0xFF00BCD4)),
+          const SizedBox(height: 4),
           if (_practicalMarks.isEmpty)
             _buildSectionEmpty('No practical marks yet.')
           else
             ..._practicalMarks.map((item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: 12),
                   child: _ExamMarkCard(item: item),
                 )),
         ],
-      ),
-    );
-  }
-
-  Widget _buildSectionTitle(String text) {
-    return Text(
-      text,
-      style: const TextStyle(
-        fontSize: 20,
-        fontWeight: FontWeight.w900,
-        color: AppColors.textPrimary,
       ),
     );
   }
@@ -460,6 +481,7 @@ class _QuizMarkItem {
 }
 
 class _ExamMarkItem {
+  final String examId;
   final String examName;
   final double? score;
   final double maxScore;
@@ -468,6 +490,7 @@ class _ExamMarkItem {
   final bool isPractical;
 
   const _ExamMarkItem({
+    required this.examId,
     required this.examName,
     required this.score,
     required this.maxScore,
@@ -480,12 +503,16 @@ class _ExamMarkItem {
 }
 
 class _ProblemScoreItem {
+  final String examId;
+  final String submissionId;
   final String problemTitle;
   final double? score;
   final int version;
   final DateTime? submittedAt;
 
   const _ProblemScoreItem({
+    required this.examId,
+    required this.submissionId,
     required this.problemTitle,
     required this.score,
     required this.version,
@@ -500,125 +527,184 @@ class _QuizMarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final score = item.score ?? 0;
+    final max = item.maxScore ?? 100;
+    final percentage = max > 0 ? (score / max * 100).clamp(0.0, 100.0).toDouble() : 0.0;
+    final scoreColor = _getScoreColor(percentage);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-            child: Column(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    _scorePill(
-                      label: item.maxScore == null
-                          ? _formatScore(item.score)
-                          : '${_formatScore(item.score)} / ${_formatScore(item.maxScore)}',
-                      backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                      textColor: AppColors.primary,
-                    ),
-                    const SizedBox(width: 8),
-                    if (item.attemptNumber != null)
-                      _scorePill(
-                        label: 'Latest Attempt #${item.attemptNumber}',
-                        backgroundColor: Colors.grey.withValues(alpha: 0.15),
-                        textColor: AppColors.textSecondary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          height: 1.3,
+                        ),
                       ),
-                  ],
-                ),
-                if (item.submittedAt != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Submitted: ${_fmt(item.submittedAt!)}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          if (item.attemptNumber != null) ...[
+                            _InfoChip(
+                              icon: Icons.refresh_rounded,
+                              label: 'Attempt #${item.attemptNumber}',
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          if (item.submittedAt != null)
+                            _InfoChip(
+                              icon: Icons.schedule_rounded,
+                              label: _fmt(item.submittedAt!),
+                              color: AppColors.textLight,
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
-                ],
+                ),
+                const SizedBox(width: 16),
+                _ScoreCircle(
+                  score: score,
+                  max: max,
+                  percentage: percentage,
+                  color: scoreColor,
+                  size: 72,
+                ),
               ],
             ),
           ),
           if (item.allAttempts.length > 1) ...[
-            const Divider(height: 1),
+            Container(
+              height: 1,
+              color: Colors.grey.withValues(alpha: 0.08),
+            ),
             Theme(
               data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
               child: ExpansionTile(
                 backgroundColor: Colors.transparent,
                 collapsedBackgroundColor: Colors.transparent,
-                tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-                childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-                title: Text(
-                  'Previous attempts (${item.allAttempts.length - 1})',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                children: item.allAttempts.skip(1).map((attempt) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 8),
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: Colors.grey.withValues(alpha: 0.06),
-                      borderRadius: BorderRadius.circular(10),
+                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+                title: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                'Attempt #${attempt.attemptNumber}',
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Attempt history (${item.allAttempts.length})',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                children: item.allAttempts.asMap().entries.map((entry) {
+                  final attemptIndex = entry.key;
+                  final attempt = entry.value;
+                  final isLatest = attemptIndex == 0;
+                  final attScore = attempt.finalScore ?? 0;
+                  final attMax = item.maxScore ?? 100;
+                  final attPct = attMax > 0 ? (attScore / attMax * 100).clamp(0.0, 100.0).toDouble() : 0.0;
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isLatest ? AppColors.primary.withValues(alpha: 0.04) : Colors.grey.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
+                          color: isLatest ? AppColors.primary.withValues(alpha: 0.15) : Colors.grey.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 4,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: _getScoreColor(attPct).withValues(alpha: isLatest ? 1.0 : 0.5),
+                              borderRadius: BorderRadius.circular(2),
                             ),
-                            Text(
-                              item.maxScore == null 
-                                  ? _formatScore(attempt.finalScore) 
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  isLatest ? 'Attempt #${attempt.attemptNumber} (Latest)' : 'Attempt #${attempt.attemptNumber}',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: isLatest ? AppColors.primary : AppColors.textPrimary,
+                                  ),
+                                ),
+                                if (attempt.endTime != null) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    _fmt(attempt.endTime!),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: AppColors.textLight,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: _getScoreColor(attPct).withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              item.maxScore == null
+                                  ? _formatScore(attempt.finalScore)
                                   : '${_formatScore(attempt.finalScore)} / ${_formatScore(item.maxScore)}',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w800,
-                                color: AppColors.primary,
+                                color: _getScoreColor(attPct),
                               ),
                             ),
-                          ],
-                        ),
-                        if (attempt.endTime != null) ...[
-                          const SizedBox(height: 6),
-                          Text(
-                            'Submitted: ${_fmt(attempt.endTime!)}',
-                            style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
                           ),
-                        ]
-                      ],
+                        ],
+                      ),
                     ),
                   );
                 }).toList(),
@@ -638,123 +724,279 @@ class _ExamMarkCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final scoreLabel = '${_formatScore(item.score)} / ${_formatScore(item.maxScore)}';
+    final score = item.score ?? 0;
+    final max = item.maxScore;
+    final percentage = max > 0 ? (score / max * 100).clamp(0.0, 100.0).toDouble() : 0.0;
+    final scoreColor = _getScoreColor(percentage);
 
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-            child: Column(
+            padding: const EdgeInsets.all(16),
+            child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  item.examName,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        item.examName,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          color: AppColors.textPrimary,
+                          height: 1.3,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      if (item.latestSubmissionAt != null)
+                        _InfoChip(
+                          icon: Icons.schedule_rounded,
+                          label: 'Submitted: ${_fmt(item.latestSubmissionAt!)}',
+                          color: AppColors.textLight,
+                        ),
+                      const SizedBox(height: 10),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 8),
-                _scorePill(
-                  label: scoreLabel,
-                  backgroundColor: AppColors.primary.withValues(alpha: 0.1),
-                  textColor: AppColors.primary,
+                const SizedBox(width: 16),
+                _ScoreCircle(
+                  score: score,
+                  max: max,
+                  percentage: percentage,
+                  color: scoreColor,
+                  size: 72,
                 ),
-                if (item.latestSubmissionAt != null) ...[
-                  const SizedBox(height: 8),
-                  Text(
-                    'Latest submission: ${_fmt(item.latestSubmissionAt!)}',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                  ),
-                ],
               ],
             ),
           ),
-          const Divider(height: 1),
-          Theme(
-            data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
-            child: ExpansionTile(
-              backgroundColor: Colors.transparent,
-              collapsedBackgroundColor: Colors.transparent,
-              tilePadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 0),
-              childrenPadding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
-              title: Text(
-                'Problem scores (${item.problemScores.length})',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textSecondary,
-                ),
-              ),
-              children: item.problemScores.isEmpty
-                  ? [
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          'No submission score yet.',
-                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                        ),
+          if (item.problemScores.isNotEmpty) ...[
+            Container(
+              height: 1,
+              color: Colors.grey.withValues(alpha: 0.08),
+            ),
+            Theme(
+              data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
+              child: ExpansionTile(
+                backgroundColor: Colors.transparent,
+                collapsedBackgroundColor: Colors.transparent,
+                tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                childrenPadding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+                title: Row(
+                  children: [
+                    Container(
+                      width: 4,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: AppColors.accent.withValues(alpha: 0.7),
+                        borderRadius: BorderRadius.circular(2),
                       ),
-                    ]
-                  : item.problemScores.map((problem) {
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 8),
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(10),
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Problem breakdown (${item.problemScores.length})',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+                children: item.problemScores.isEmpty
+                    ? [
+                        const Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 8),
+                            child: Text(
+                              'No submission score yet.',
+                              style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            ),
+                          ),
                         ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              children: [
-                                Expanded(
+                      ]
+                    : item.problemScores.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final problem = entry.value;
+                        final probScore = problem.score ?? 0;
+                        final probMax = max;
+                        final probPct = probMax > 0 ? (probScore / probMax * 100).clamp(0.0, 100.0).toDouble() : 0.0;
+                        final probColor = _getScoreColor(probPct);
+                        final isLast = index == item.problemScores.length - 1;
+
+                        return Container(
+                          margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.withValues(alpha: 0.04),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: Colors.grey.withValues(alpha: 0.07)),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 24,
+                                height: 24,
+                                decoration: BoxDecoration(
+                                  color: probColor.withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Center(
                                   child: Text(
-                                    problem.problemTitle,
-                                    style: const TextStyle(
-                                      fontSize: 13,
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.textPrimary,
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w800,
+                                      color: probColor,
                                     ),
                                   ),
                                 ),
-                                Text(
+                              ),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      problem.problemTitle,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.textPrimary,
+                                      ),
+                                    ),
+                                    if (problem.submittedAt != null) ...[
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        'v${problem.version} • ${_fmt(problem.submittedAt!)}',
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          color: AppColors.textLight,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                decoration: BoxDecoration(
+                                  color: probColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Text(
                                   _formatScore(problem.score),
-                                  style: const TextStyle(
-                                    fontSize: 13,
+                                  style: TextStyle(
+                                    fontSize: 12,
                                     fontWeight: FontWeight.w800,
-                                    color: AppColors.primary,
+                                    color: probColor,
                                   ),
                                 ),
-                              ],
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              'Version ${problem.version}${problem.submittedAt != null ? ' • ${_fmt(problem.submittedAt!)}' : ''}',
-                              style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
-                            ),
-                          ],
-                        ),
-                      );
-                    }).toList(),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+              ),
             ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+Widget _InfoChip({
+  required IconData icon,
+  required String label,
+  required Color color,
+}) {
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 13, color: color),
+      const SizedBox(width: 4),
+      Text(
+        label,
+        style: TextStyle(fontSize: 12, color: color, fontWeight: FontWeight.w500),
+      ),
+    ],
+  );
+}
+
+class _ScoreCircle extends StatelessWidget {
+  final double score;
+  final double max;
+  final double percentage;
+  final Color color;
+  final double size;
+
+  const _ScoreCircle({
+    required this.score,
+    required this.max,
+    required this.percentage,
+    required this.color,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: CircularProgressIndicator(
+              value: percentage / 100,
+              strokeWidth: 6,
+              backgroundColor: color.withValues(alpha: 0.1),
+              valueColor: AlwaysStoppedAnimation(color),
+            ),
+          ),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                _formatScore(score),
+                style: TextStyle(
+                  fontSize: size * 0.24,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  height: 1,
+                ),
+              ),
+              Text(
+                '/ ${_formatScore(max)}',
+                style: TextStyle(
+                  fontSize: size * 0.14,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textLight,
+                  height: 1.1,
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -762,26 +1004,10 @@ class _ExamMarkCard extends StatelessWidget {
   }
 }
 
-Widget _scorePill({
-  required String label,
-  required Color backgroundColor,
-  required Color textColor,
-}) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-    decoration: BoxDecoration(
-      color: backgroundColor,
-      borderRadius: BorderRadius.circular(999),
-    ),
-    child: Text(
-      label,
-      style: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w700,
-        color: textColor,
-      ),
-    ),
-  );
+Color _getScoreColor(double percentage) {
+  if (percentage >= 80) return AppColors.success;
+  if (percentage >= 60) return AppColors.warning;
+  return AppColors.error;
 }
 
 String _formatScore(double? score) {

@@ -1836,16 +1836,16 @@ class _CommentCard extends StatelessWidget {
                         onTap: () => onNavigateToReplies(comment),
                         color: AppColors.primary,
                       ),
-                      if (hasReplies) ...[
+                        if (hasReplies) ...[
                         const SizedBox(width: 6),
                         GestureDetector(
                           onTap: () => onNavigateToReplies(comment),
                           child: Container(
                             padding: const EdgeInsets.symmetric(
-                                horizontal: 8, vertical: 4),
+                                horizontal: 8, vertical: 6),
                             decoration: BoxDecoration(
                               color: Colors.orange.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(10),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
@@ -1946,7 +1946,7 @@ class _ActionBtn extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.08),
           borderRadius: BorderRadius.circular(10),
