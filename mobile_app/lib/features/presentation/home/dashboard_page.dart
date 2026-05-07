@@ -106,10 +106,7 @@ class DashboardPage extends StatelessWidget {
           label: 'My Profile',
           description: 'Update your personal information',
           color: AppColors.info,
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const ProfileScreen()),
-          ),
+          onTap: () => onNavigate(2),
         ),
       ];
     }
@@ -129,10 +126,7 @@ class DashboardPage extends StatelessWidget {
         label: 'My Profile',
         description: 'Update your personal information and settings',
         color: AppColors.accent,
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const ProfileScreen()),
-        ),
+        onTap: () => onNavigate(3),
       ),
     ];
   }

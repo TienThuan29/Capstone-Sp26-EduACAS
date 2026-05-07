@@ -54,14 +54,30 @@ type UseExamViolationGuardParams = {
     detail: Record<string, unknown>,
   ) => void;
   onForceSubmit: () => void | Promise<void>;
+  /**
+   * Callback from EditorContext that fires when the Monaco editor mounts.
+   * The anti-cheat guard registers its paste interceptor here.
+   */
+  onMonacoEditorMount?: (callback: (editor: import('monaco-editor').editor.IStandaloneCodeEditor) => void) => void;
   enableDevtoolsInDevelopment?: boolean;
+  /** Ref to the Monaco editor instance, used to capture selection text for copy/cut detection. */
+  monacoEditorRef?: RefObject<import('monaco-editor').editor.IStandaloneCodeEditor | null>;
 };
 
-type LatestParams = Omit<UseExamViolationGuardParams, 'enableDevtoolsInDevelopment'>;
+type LatestParams = Omit<UseExamViolationGuardParams, 'enableDevtoolsInDevelopment' | 'monacoEditorRef'> & {
+  monacoEditorRef: import('monaco-editor').editor.IStandaloneCodeEditor | null;
+  onMonacoEditorMount?: (callback: (editor: import('monaco-editor').editor.IStandaloneCodeEditor) => void) => void;
+};
 
 // ═══════════════════════════════════════════════════════════════════
-// HELPERS
+// HELPERS (module-level, no React state)
 // ═══════════════════════════════════════════════════════════════════
+
+/** Checks if the exam session is currently active by reading localStorage. */
+const isExamInProgress = (params: { examStatusStorageKey: string }): boolean => {
+  const status = localStorage.getItem(params.examStatusStorageKey);
+  return status === 'in_progress' || status === 'active';
+};
 
 const parseStoredLogs = (rawValue: string | null): LogEntry[] => {
   if (!rawValue) return [];
@@ -88,36 +104,26 @@ const findProblemId = (target: EventTarget | null): string | null => {
   return null;
 };
 
-const INTERNAL_CLIPBOARD_TTL_MS = 2 * 60 * 1000;
-type ClipboardOperation = 'copy' | 'cut';
-
-const isValidInternalClipboard = (
-  value: {
-    text: string;
-    fromProblemId: string | null;
-    operation: ClipboardOperation;
-    capturedAt: number;
-  } | null
-): value is NonNullable<typeof value> => {
-  if (!value) return false;
-  if (!value.text || value.text.length === 0) return false;
-  return (Date.now() - value.capturedAt) <= INTERNAL_CLIPBOARD_TTL_MS;
-};
-
-const getSelectedTextFromInputLike = (el: Element | null): string => {
-  if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement)) return '';
-  const start = el.selectionStart ?? 0;
-  const end = el.selectionEnd ?? 0;
-  if (end <= start) return '';
-  return el.value.slice(start, end);
-};
-
-const getSelectedTextFromEvent = (event: Event): string => {
-  const fromTarget = getSelectedTextFromInputLike(event.target as Element | null);
-  if (fromTarget.length > 0) return fromTarget;
-  const fromActiveElement = getSelectedTextFromInputLike(document.activeElement);
-  if (fromActiveElement.length > 0) return fromActiveElement;
-  return window.getSelection()?.toString() || '';
+/** Extract selected text from a Monaco editor instance. Returns empty string if no editor or no selection. */
+const getSelectedTextFromMonaco = (
+  editor: import('monaco-editor').editor.IStandaloneCodeEditor | null
+): string => {
+  if (!editor) return '';
+  const selection = editor.getSelection();
+  if (!selection || selection.isEmpty()) {
+    const position = editor.getPosition();
+    if (position) {
+      const model = editor.getModel();
+      if (model) {
+        const lineContent = model.getLineContent(position.lineNumber);
+        return lineContent;
+      }
+    }
+    return '';
+  }
+  const model = editor.getModel();
+  if (!model) return '';
+  return model.getValueInRange(selection);
 };
 
 const FULLSCREEN_VIEWPORT_TOLERANCE_PX = 4;
@@ -222,9 +228,12 @@ export function useExamViolationGuard({
   onLog,
   onForceSubmit,
   enableDevtoolsInDevelopment = false,
+  monacoEditorRef,
+  onMonacoEditorMount,
 }: UseExamViolationGuardParams) {
   const wasDevtoolsOpenRef = useRef(false);
   const blurLockTimeoutRef = useRef<number | null>(null);
+  const monacoCleanupRef = useRef<(() => void) | null>(null);
   const tabHiddenAtRef = useRef<number | null>(null);
   const windowBlurAtRef = useRef<number | null>(null);
   const fullscreenExitAtRef = useRef<number | null>(null);
@@ -232,6 +241,16 @@ export function useExamViolationGuard({
   const fullscreenViolationLoggedRef = useRef(false);
   const fullscreenWatchdogStartAtRef = useRef<number | null>(null);
   const fullscreenWatchdogWarningShownRef = useRef(false);
+  /** Tracks whether the last copy/cut operation was a cut, so paste can log CUT_PASTE vs COPY_PASTE. */
+  const lastCopyOperationWasCutRef = useRef(false);
+  /** Tracks the problemId from which the last copy/cut was performed. */
+  const lastCopyFromProblemIdRef = useRef<string | null>(null);
+  /** Tracks drag context for DRAG_DROP detection. */
+  const dragContextRef = useRef<{
+    text: string;
+    fromProblemId: string | null;
+    capturedAt: number;
+  } | null>(null);
 
   const FULLSCREEN_EXIT_GRACE_MS = 500;
   const FULLSCREEN_ENFORCEMENT_INTERVAL_MS = 500;
@@ -263,7 +282,6 @@ export function useExamViolationGuard({
 
     if (shouldLock) {
       current.isExamFinishedRef.current = true;
-      // Sync with global session phase naming: when locked, exam must be ended.
       localStorage.setItem(current.examStatusStorageKey, 'locked');
 
       const criticalDetail = includeLockedInDetail
@@ -278,7 +296,6 @@ export function useExamViolationGuard({
 
       current.setScreen('exam');
       current.setOverlay(buildCriticalLockOverlay(reason));
-      // onForceSubmit may be async in some callers; never let it become an unhandled rejection.
       try {
         void Promise.resolve(current.onForceSubmit()).catch((err) => {
           current.onLog(
@@ -306,7 +323,7 @@ export function useExamViolationGuard({
       : { violationCount: count, ...detail };
 
     current.onLog(
-      eventType, 'warning', true,
+      eventType, 'warning', false,
       `${reason} — warning strike ${count}`,
       warningDetail,
     );
@@ -319,40 +336,30 @@ export function useExamViolationGuard({
     if (startedAt === null) return 0;
     return Math.max(0, Date.now() - startedAt);
   };
-  
-  const internalClipboardRef = useRef<{
-    text: string;
-    fromProblemId: string | null;
-    operation: ClipboardOperation;
-    capturedAt: number;
-  } | null>(null);
-  
-  const dragContextRef = useRef<{
-    text: string;
-    fromProblemId: string | null;
-    capturedAt: number;
-  } | null>(null);
-  
+
   const latestRef = useRef<LatestParams>({
     examStatusStorageKey, violationStorageKey, logsStorageKey, answerStorageKeys, answerStorageKey,
     maxTolerance, answer, violationCountRef, isInitializingRef, isReloadingRef,
     isExamFinishedRef, examStartTimeRef, setAnswer, restoreAnswers, persistAnswers, setLogs, setScreen, setOverlay,
     onLog, onForceSubmit,
+    onMonacoEditorMount,
+    monacoEditorRef: monacoEditorRef?.current ?? null,
   });
 
-  // Sync latest params
   useEffect(() => {
     latestRef.current = {
       examStatusStorageKey, violationStorageKey, logsStorageKey, answerStorageKeys, answerStorageKey,
       maxTolerance, answer, violationCountRef, isInitializingRef, isReloadingRef,
       isExamFinishedRef, examStartTimeRef, setAnswer, restoreAnswers, persistAnswers, setLogs, setScreen, setOverlay,
       onLog, onForceSubmit,
+      onMonacoEditorMount,
+      monacoEditorRef: monacoEditorRef?.current ?? null,
     };
   }, [
     examStatusStorageKey, violationStorageKey, logsStorageKey, answerStorageKeys, answerStorageKey,
     maxTolerance, answer, violationCountRef, isInitializingRef, isReloadingRef,
     isExamFinishedRef, examStartTimeRef, setAnswer, restoreAnswers, persistAnswers, setLogs, setScreen, setOverlay,
-    onLog, onForceSubmit,
+    onLog, onForceSubmit, onMonacoEditorMount,
   ]);
 
   // ─────────────────────────────────────────────────────────────
@@ -362,12 +369,10 @@ export function useExamViolationGuard({
     const current = latestRef.current;
     current.isReloadingRef.current = false;
 
-    // Không chạy restore/reload UI khi chưa có key hợp lệ (tránh ghi localStorage key rỗng).
     if (!current.examStatusStorageKey) {
       return;
     }
 
-    // Chỉ khởi tạo violation/logs khi có key tracker hợp lệ (trang exam chưa chọn problem từng truyền key rỗng).
     if (current.violationStorageKey) {
       if (!localStorage.getItem(current.violationStorageKey)) {
         localStorage.setItem(current.violationStorageKey, '0');
@@ -424,16 +429,10 @@ export function useExamViolationGuard({
   // EFFECT 2: Tất cả event listeners (violation detection)
   // ─────────────────────────────────────────────────────────────
   useEffect(() => {
-    const isExamInProgress = (latest: LatestParams): boolean => {
-      const status = localStorage.getItem(latest.examStatusStorageKey);
-      return status === 'in_progress' || status === 'active';
-    };
-
     let isEffectDisposed = false;
     let removeDevtoolsListener: (() => void) | null = null;
     let disableDetector: (() => void) | null = null;
 
-    // Helper: Xử lý tập trung các hành vi vi phạm
     const processViolation = (
       current: LatestParams,
       eventType: string,
@@ -444,7 +443,6 @@ export function useExamViolationGuard({
     ) => {
       const includeLockedInDetail = options.includeLockedInDetail ?? true;
 
-      // Trang exam chưa có problemId → tracker key rỗng; không ghi localStorage key ''.
       if (!current.examStatusStorageKey?.trim() || !current.violationStorageKey?.trim()) {
         return;
       }
@@ -563,111 +561,39 @@ export function useExamViolationGuard({
     };
 
     // ── COPY / CUT ──────────────────────────────────────────
-    const handleCopyCut = (event: Event, operation: ClipboardOperation) => {
+    // Track operation type and source problemId so paste can log COPY_PASTE/CUT_PASTE with from/to.
+    const handleCopy = () => {
       const current = latestRef.current;
       if (!isExamInProgress(current)) return;
-
-      const selection = getSelectedTextFromEvent(event);
-      if (selection && selection.length > 0) {
-        const problemId = findProblemId(event.target);
-        internalClipboardRef.current = {
-          text: selection,
-          fromProblemId: problemId,
-          operation,
-          capturedAt: Date.now(),
-        };
-      }
+      lastCopyOperationWasCutRef.current = false;
+      lastCopyFromProblemIdRef.current = findProblemId(document.activeElement);
     };
 
-    const handleCopy = (e: Event) => handleCopyCut(e, 'copy');
-    const handleCut = (e: Event) => handleCopyCut(e, 'cut');
-
-    // ── RESET INTERNAL CLIPBOARD BUFFER ──────────────────────
-    const handleResetClipboard = () => {
-      internalClipboardRef.current = null;
-      dragContextRef.current = null;
-    };
-
-    // ── PASTE ───────────────────────────────────────────────
-    const handlePaste = (event: ClipboardEvent) => {
+    const handleCut = () => {
       const current = latestRef.current;
       if (!isExamInProgress(current)) return;
+      lastCopyOperationWasCutRef.current = true;
+      lastCopyFromProblemIdRef.current = findProblemId(document.activeElement);
+    };
 
-      const pasteData = event.clipboardData?.getData('text') || '';
-      if (pasteData.length > 0) {
-        const internalClipboard = internalClipboardRef.current;
-        const toProblemId = findProblemId(event.target);
-        const isInternalClipboardPaste = isValidInternalClipboard(internalClipboard) && internalClipboard.text === pasteData;
-        if (!isInternalClipboardPaste) {
-          // Chặn nội dung dán từ nguồn bên ngoài
-          event.preventDefault();
-          processViolation(current, 'EXTERNAL_PASTE', 'Pasted content from an external source');
-          return;
+    // ── RESET SYSTEM CLIPBOARD ────────────────────────────────
+    /** Clears the system clipboard when the exam starts. This is called from
+     *  page.tsx via a custom event before the exam begins. */
+    const handleResetClipboard = async () => {
+      if (typeof navigator !== 'undefined' && typeof ClipboardItem !== 'undefined') {
+        try {
+          const item = new ClipboardItem({ 'text/plain': new Blob([' '], { type: 'text/plain' }) });
+          await navigator.clipboard.write([item]);
+        } catch {
+          // Clipboard API unavailable or permission denied — ignore silently.
         }
-
-        const pair = internalClipboard?.operation === 'cut' ? 'CUT_PASTE' : 'COPY_PASTE';
-
-        current.onLog(
-          pair, 'info', false,
-          `Pasted ${pasteData.length} internal character(s)${toProblemId ? ` into Problem ${toProblemId}` : ''} (${pair})`,
-          {
-            length: pasteData.length,
-            content: pasteData,
-            from: internalClipboard?.fromProblemId,
-            to: toProblemId,
-          },
-        );
-        // Bỏ dòng: internalClipboardRef.current = null; để coder có thể paste nhiều lần!
       }
-    };
-
-    // ── DRAG START & DROP ───────────────────────────────────
-    const handleDragStart = (event: DragEvent) => {
-      const current = latestRef.current;
-      if (!isExamInProgress(current)) return;
-
-      const draggedText = event.dataTransfer?.getData('text') || getSelectedTextFromEvent(event);
-      if (draggedText.length === 0) return;
-
-      dragContextRef.current = {
-        text: draggedText,
-        fromProblemId: findProblemId(event.target),
-        capturedAt: Date.now(),
-      };
-    };
-
-    const handleDrop = (event: DragEvent) => {
-      const current = latestRef.current;
-      if (!isExamInProgress(current)) return;
-
-      const droppedText = event.dataTransfer?.getData('text') || dragContextRef.current?.text || '';
-      if (droppedText.length > 0) {
-        event.preventDefault();
-
-        const toProblemId = findProblemId(event.target);
-        current.onLog(
-          'DRAG_DROP', 'warning', false,
-          `Drag-and-dropped ${droppedText.length} character(s)${toProblemId ? ` into Problem ${toProblemId}` : ''}`,
-          {
-            length: droppedText.length,
-            content: droppedText,
-            from: dragContextRef.current?.fromProblemId ?? null,
-            to: toProblemId,
-          },
-        );
-        dragContextRef.current = null;
-      }
-    };
-
-    const handleDragOver = (event: DragEvent) => {
-      event.preventDefault();
     };
 
     // ── WINDOW BLUR / FOCUS ─────────────────────────────────
     const handleBlur = () => {
       const current = latestRef.current;
-      
-      // Bỏ qua nếu thí sinh đang tương tác với iframe (như file PDF đề bài)
+
       if (document.activeElement?.tagName === 'IFRAME') return;
       if (isWithinStartupGuardGrace(current)) return;
 
@@ -686,7 +612,7 @@ export function useExamViolationGuard({
             windowBlurAtRef.current = null;
           }
           blurLockTimeoutRef.current = null;
-        }, 150); // Tăng xíu thời gian delay cho an toàn
+        }, 150);
       }
     };
 
@@ -702,7 +628,6 @@ export function useExamViolationGuard({
         return;
       }
 
-      // Khi vừa quay lại từ tab ẩn, để TAB_LEAVE xử lý, tránh double log WINDOW_BLUR.
       if (tabHiddenAtRef.current !== null) {
         windowBlurAtRef.current = null;
         return;
@@ -746,15 +671,7 @@ export function useExamViolationGuard({
       const current = latestRef.current;
       if (!isExamInProgress(current)) return;
 
-      // Windows clipboard history shortcut (Win + V)
-      const isWindowsPlatform = typeof navigator !== 'undefined' && /Win/i.test(navigator.userAgent);
-      if (isWindowsPlatform && event.metaKey && !event.ctrlKey && !event.shiftKey && event.key.toUpperCase() === 'V') {
-        event.preventDefault();
-        processViolation(current, 'KEYBOARD_SHORTCUT', 'Blocked keyboard shortcut: Win+V (clipboard history)');
-        return;
-      }
-
-      // Let regular paste flow naturally; strict validation happens in handlePaste.
+      // Let Ctrl+V pass through so the paste handler in EFFECT 6 can detect it.
       if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toUpperCase() === 'V') {
         return;
       }
@@ -793,7 +710,6 @@ export function useExamViolationGuard({
       }
 
       if (isDevtoolOpen && !wasDevtoolsOpenRef.current) {
-        // Có thể forceLock = true luôn cho trường hợp cố tình mở devtools
         processViolation(
           current,
           'DEVTOOLS_OPEN',
@@ -832,16 +748,12 @@ export function useExamViolationGuard({
         );
       });
 
-    // ── REGISTER LISTENERS ──────────────────────────────────
+    // ── REGISTER GLOBAL LISTENERS ─────────────────────────────
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     document.addEventListener('copy', handleCopy);
     document.addEventListener('cut', handleCut);
-    document.addEventListener('paste', handlePaste, true);
     window.addEventListener('exam:reset-clipboard', handleResetClipboard as EventListener);
-    document.addEventListener('dragstart', handleDragStart);
-    document.addEventListener('drop', handleDrop);
-    document.addEventListener('dragover', handleDragOver);
     window.addEventListener('blur', handleBlur);
     window.addEventListener('focus', handleFocus);
     document.addEventListener('contextmenu', handleContextMenu);
@@ -862,11 +774,7 @@ export function useExamViolationGuard({
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       document.removeEventListener('copy', handleCopy);
       document.removeEventListener('cut', handleCut);
-      document.removeEventListener('paste', handlePaste, true);
       window.removeEventListener('exam:reset-clipboard', handleResetClipboard as EventListener);
-      document.removeEventListener('dragstart', handleDragStart);
-      document.removeEventListener('drop', handleDrop);
-      document.removeEventListener('dragover', handleDragOver);
       window.removeEventListener('blur', handleBlur);
       window.removeEventListener('focus', handleFocus);
       document.removeEventListener('contextmenu', handleContextMenu);
@@ -918,13 +826,12 @@ export function useExamViolationGuard({
         if (!localStorage.getItem(current.violationStorageKey)) missingKeys.push('exam_violations');
 
         if (missingKeys.length > 0) {
-          // Khôi phục dữ liệu
           localStorage.setItem(current.examStatusStorageKey, 'active');
-          
+
           current.violationCountRef.current += 1;
           const count = current.violationCountRef.current;
           localStorage.setItem(current.violationStorageKey, String(count));
-          
+
           if (current.persistAnswers) {
             current.persistAnswers((key, value) => localStorage.setItem(key, value));
           } else if (current.answer) {
@@ -952,12 +859,6 @@ export function useExamViolationGuard({
 
   // ─────────────────────────────────────────────────────────────
   // EFFECT 5: Fullscreen state enforcement
-  // After startup grace, periodically verify that fullscreen is active.
-  // This catches the case where the page reloads (browser exits
-  // fullscreen) and no `fullscreenchange` event fires because the
-  // page was never in fullscreen after load. It also provides a
-  // fallback strike when users stay out of fullscreen (e.g. F11 path
-  // where some browsers may skip `fullscreenchange`).
   // ─────────────────────────────────────────────────────────────
   useEffect(() => {
     const check = window.setInterval(() => {
@@ -1021,5 +922,181 @@ export function useExamViolationGuard({
     }, FULLSCREEN_ENFORCEMENT_INTERVAL_MS);
 
     return () => window.clearInterval(check);
+  }, []);
+
+  // ─────────────────────────────────────────────────────────────
+  // EFFECT 6: Copy/Cut/Paste interceptor — registers via onMonacoEditorMount callback
+  //
+  // Copy and cut inside Monaco don't bubble to document, so we intercept
+  // them here on the editor container. Paste is also intercepted here
+  // so all three operations share the same scope and refs.
+  // Uses latestRef to avoid stale closures.
+  // ─────────────────────────────────────────────────────────────
+  // EFFECT 6: Copy/Cut/Paste interceptor — registers via onMonacoEditorMount callback
+  //
+  // Monaco intercepts Ctrl+C/X/V at the container level.
+  // Solution: capture-phase listener with stopImmediatePropagation to prevent Monaco's
+  // own listener from also executing. Guard flag prevents double-logging.
+  // ─────────────────────────────────────────────────────────────
+  useEffect(() => {
+    // Prevent the same paste from being logged twice
+    let pasteHandledByUs = false;
+
+    const onMount = (editor: import('monaco-editor').editor.IStandaloneCodeEditor) => {
+      const container = editor.getDomNode();
+      if (!container) return;
+
+      const captureCopyOperation = (isCut: boolean, target: EventTarget | null) => {
+        lastCopyOperationWasCutRef.current = isCut;
+        lastCopyFromProblemIdRef.current = findProblemId(target);
+      };
+
+      const handleContainerKeyDown = (e: KeyboardEvent) => {
+        const current = latestRef.current;
+        if (!isExamInProgress(current)) return;
+        if (e.ctrlKey || e.metaKey) {
+          if (e.key === 'c' || e.key === 'C') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            captureCopyOperation(false, e.target);
+            // Delegate actual copy to browser
+            const sel = editor.getSelection();
+            if (sel) {
+              const selectedText = editor.getModel()?.getValueInRange(sel) ?? '';
+              navigator.clipboard.writeText(selectedText).catch(() => {});
+            }
+          } else if (e.key === 'x' || e.key === 'X') {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            captureCopyOperation(true, e.target);
+            // Delegate actual cut to browser
+            const sel = editor.getSelection();
+            if (sel) {
+              const selectedText = editor.getModel()?.getValueInRange(sel) ?? '';
+              navigator.clipboard.writeText(selectedText).catch(() => {});
+              editor.executeEdits('exam-guard-cut', [{ range: sel, text: '' }]);
+            }
+          } else if (e.key === 'v' || e.key === 'V') {
+            // Guard: Monaco's own listener would re-trigger us via model changes
+            if (pasteHandledByUs) return;
+            pasteHandledByUs = true;
+            setTimeout(() => { pasteHandledByUs = false; }, 100);
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            void (async () => {
+              const currentInner = latestRef.current;
+              if (!isExamInProgress(currentInner)) return;
+
+              let pastedText = '';
+              try {
+                pastedText = await navigator.clipboard.readText();
+              } catch { /* clipboard read failed, ignore */ }
+
+              if (!pastedText) return;
+
+              const isCutOp = lastCopyOperationWasCutRef.current;
+              const fromProblemId = lastCopyFromProblemIdRef.current;
+              lastCopyOperationWasCutRef.current = false;
+              lastCopyFromProblemIdRef.current = null;
+
+              const selection = editor.getSelection();
+              if (selection) {
+                editor.executeEdits('exam-guard-paste', [
+                  { range: selection, text: pastedText, forceMoveMarkers: true },
+                ]);
+                const newPos = selection.getEndPosition();
+                editor.setPosition(newPos);
+              }
+
+              const toProblemId = findProblemId(container);
+
+              currentInner.onLog(
+                isCutOp ? 'CUT_PASTE' : 'COPY_PASTE', 'warning', false,
+                `Pasted ${pastedText.length} character(s)${toProblemId ? ` into Problem ${toProblemId}` : ''}`,
+                { length: pastedText.length, content: pastedText, from: fromProblemId, to: toProblemId },
+              );
+            })();
+          }
+        }
+      };
+
+      // ── DRAG START & DROP ───────────────────────────────────
+      const handleDragStart = (event: DragEvent) => {
+        const current = latestRef.current;
+        if (!isExamInProgress(current)) return;
+
+        event.stopImmediatePropagation();
+
+        const draggedText = event.dataTransfer?.getData('text') || getSelectedTextFromMonaco(editor);
+        if (draggedText.length === 0) return;
+
+        dragContextRef.current = {
+          text: draggedText,
+          fromProblemId: findProblemId(event.target as EventTarget | null),
+          capturedAt: Date.now(),
+        };
+      };
+
+      const handleDrop = (event: DragEvent) => {
+        const current = latestRef.current;
+        if (!isExamInProgress(current)) return;
+
+        event.stopImmediatePropagation();
+
+        const droppedText = event.dataTransfer?.getData('text') || dragContextRef.current?.text || '';
+        if (droppedText.length === 0) return;
+
+        event.preventDefault();
+
+        const selection = editor.getSelection();
+        if (selection) {
+          editor.executeEdits('exam-guard-drop', [
+            { range: selection, text: droppedText, forceMoveMarkers: true },
+          ]);
+          const newPos = selection.getEndPosition();
+          editor.setPosition(newPos);
+        }
+
+        const toProblemId = findProblemId(container);
+        current.onLog(
+          'DRAG_DROP', 'warning', false,
+          `Drag-and-dropped ${droppedText.length} character(s)${toProblemId ? ` into Problem ${toProblemId}` : ''}`,
+          {
+            length: droppedText.length,
+            content: droppedText,
+            from: dragContextRef.current?.fromProblemId ?? null,
+            to: toProblemId,
+          },
+        );
+        dragContextRef.current = null;
+      };
+
+      const handleDragOver = (event: DragEvent) => {
+        event.preventDefault();
+      };
+
+      container.addEventListener('keydown', handleContainerKeyDown, true);
+      container.addEventListener('dragstart', handleDragStart, true);
+      container.addEventListener('dragover', handleDragOver, true);
+      container.addEventListener('drop', handleDrop, false);
+
+      return () => {
+        container.removeEventListener('keydown', handleContainerKeyDown, true);
+        container.removeEventListener('dragstart', handleDragStart, true);
+        container.removeEventListener('dragover', handleDragOver, true);
+        container.removeEventListener('drop', handleDrop, false);
+      };
+    };
+
+    const cleanup = latestRef.current.onMonacoEditorMount?.(onMount);
+    monacoCleanupRef.current = cleanup ?? null;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      monacoCleanupRef.current?.();
+    };
   }, []);
 }

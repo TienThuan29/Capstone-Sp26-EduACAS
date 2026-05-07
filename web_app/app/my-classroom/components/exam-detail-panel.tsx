@@ -20,12 +20,16 @@ import {
   CloudArrowUpIcon,
   SparklesIcon,
   UserCircleIcon,
+  DocumentIcon,
 } from "@heroicons/react/24/outline";
 import ReactMarkdown from "react-markdown";
 import { useExaminationDetail } from "@/hooks/examination/useExaminationDetail";
 import { useRegradingRequest } from "@/hooks/regrading-request/useRegradingRequest";
 import { usePrivateS3 } from "@/hooks/s3/usePrivateS3";
+import { useMaterial } from "@/hooks/material/useMaterial";
 import { useAuth } from "@/contexts/AuthContext";
+import type { Material } from "@/types/material";
+import MaterialPreviewDrawer from "@/components/ui/MaterialPreviewDrawer";
 import type { Examination } from "@/types/examination";
 import type { ProblemSubmissionsResponse, SubmissionResponse, TestResultResponse } from "@/types/submission";
 import type { RegradingRequest } from "@/types/regrading-request";
@@ -105,6 +109,7 @@ interface SubmissionDetailModalProps {
   problemTitle: string;
   maxMark: number;
   examId: string;
+  classroomId: string;
   regradingRequests?: RegradingRequest[];
 }
 
@@ -115,13 +120,24 @@ function SubmissionDetailModal({
   problemTitle,
   maxMark,
   examId,
+  classroomId,
   regradingRequests = [],
 }: SubmissionDetailModalProps) {
   const { submitFromExamDetail } = useRegradingRequest();
+  const { getMaterialsByClassroom } = useMaterial();
   const [activeSection, setActiveSection] = useState<"info" | "code" | "testresults" | "aifeedback" | "lecturerfeedback">("info");
   const [regradingReason, setRegradingReason] = useState("");
   const [regradingSuccess, setRegradingSuccess] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [materials, setMaterials] = useState<Material[]>([]);
+  const [previewingMaterial, setPreviewingMaterial] = useState<Material | null>(null);
+
+  useEffect(() => {
+    if (!classroomId) return;
+    void getMaterialsByClassroom(classroomId)
+      .then((mats) => setMaterials(mats))
+      .catch(() => setMaterials([]));
+  }, [classroomId, getMaterialsByClassroom]);
 
   const relatedRegrading = regradingRequests.filter(
     (r) => r.submissionId === submission?.id
@@ -392,11 +408,39 @@ function SubmissionDetailModal({
                   </h4>
                 </div>
                 {submission.lecturerFeedback ? (
-                  <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
-                    <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <ReactMarkdown>{submission.lecturerFeedback}</ReactMarkdown>
+                  <>
+                    <div className="rounded-lg border border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800">
+                      <div className="prose prose-sm dark:prose-invert max-w-none">
+                        <ReactMarkdown>{submission.lecturerFeedback}</ReactMarkdown>
+                      </div>
                     </div>
-                  </div>
+                    {submission.materialRecommendation && submission.materialRecommendation.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <DocumentIcon className="h-4 w-4 text-blue-500" />
+                          <h5 className="text-sm font-medium text-gray-900 dark:text-white">
+                            Recommended Materials
+                          </h5>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {submission.materialRecommendation.map((materialId) => {
+                            const material = materials.find((m) => m.id === materialId);
+                            if (!material) return null;
+                            return (
+                              <button
+                                key={material.id}
+                                onClick={() => setPreviewingMaterial(material)}
+                                className="flex items-center gap-1.5 rounded-md border border-gray-200 bg-gray-50 px-3 py-1.5 text-sm text-blue-600 hover:border-blue-400 hover:bg-blue-50 dark:border-gray-600 dark:bg-gray-800 dark:text-blue-400 dark:hover:border-blue-500 dark:hover:bg-gray-700 cursor-pointer"
+                              >
+                                <DocumentIcon className="h-4 w-4" />
+                                <span className="truncate max-w-[200px]">{material.filename}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center dark:border-gray-700 dark:bg-gray-800">
                     <UserCircleIcon className="mx-auto h-12 w-12 text-gray-300 dark:text-gray-600" />
@@ -471,6 +515,11 @@ function SubmissionDetailModal({
           </div>
         </div>
       </ModalBody>
+      <MaterialPreviewDrawer
+        material={previewingMaterial}
+        isOpen={!!previewingMaterial}
+        onClose={() => setPreviewingMaterial(null)}
+      />
     </Modal>
   );
 }
@@ -1485,6 +1534,7 @@ export function ExamDetailPanel({ examId, studentId: studentIdProp, onClose }: E
         problemTitle={selectedProblemTitle}
         maxMark={selectedMaxMark}
         examId={examId}
+        classroomId={exam?.classroom?.id ?? ""}
         regradingRequests={myRequests}
       />
     </div>

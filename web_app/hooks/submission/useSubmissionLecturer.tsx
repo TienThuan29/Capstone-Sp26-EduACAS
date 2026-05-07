@@ -99,6 +99,25 @@ export const useSubmissionLecturer = () => {
     [axiosInstance]
   );
 
+  const saveLecturerFeedback = useCallback(
+    async (
+      submissionId: string,
+      lecturerFeedback: string,
+      materialRecommendation: string[],
+      sendFeedbackToStudent: boolean,
+      problemTitle?: string
+    ): Promise<void> => {
+      const response = await axiosInstance.patch<ApiResponse<boolean>>(
+        `${Api.AcademicWarning.SAVE_FEEDBACK}?submissionId=${encodeURIComponent(submissionId)}`,
+        { lecturerFeedback, materialRecommendation, sendFeedbackToStudent, problemTitle }
+      );
+      if (!response.data?.dataResponse) {
+        throw new Error(response.data?.error ?? 'Failed to save feedback');
+      }
+    },
+    [axiosInstance]
+  );
+
   return {
     getLatestSubmissionsByExamAndProblem,
     getLatestSubmissionsByExam,
@@ -106,5 +125,6 @@ export const useSubmissionLecturer = () => {
     reGradeSubmission,
     overrideSubmissionScore,
     getVersionsByStudentExamProblem,
+    saveLecturerFeedback,
   };
 };

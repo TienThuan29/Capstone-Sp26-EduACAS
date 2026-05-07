@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Panel,
@@ -8,7 +8,7 @@ import {
   Separator,
 } from 'react-resizable-panels';
 import { PanelLeftClose, PanelLeft, ArrowLeftIcon, RefreshCw, Play } from 'lucide-react';
-import { Button, Spinner, Badge, Label, TextInput, Tooltip } from 'flowbite-react';
+import { Button, Spinner, Badge, Label, TextInput, Tooltip, Modal, ModalHeader, ModalBody, ModalFooter } from 'flowbite-react';
 import clsx from 'clsx';
 import { useEditorContext } from '@/contexts/EditorContext';
 import { EditorPanel } from '@/app/code-editor/components/editor-panel';
@@ -20,6 +20,116 @@ import { useCustomTest } from '@/hooks/coding/useCustomTest';
 import { useToast } from '@/hooks/useToast';
 import { formatDate } from '@/utils/datetime-utils';
 import type { TestResultResponse } from '@/types/submission';
+import { MaterialSelector } from '@/components/ui/MaterialSelector';
+import type { Material } from '@/types/material';
+import { useMaterial } from '@/hooks/material/useMaterial';
+
+function LecturerNoteTab({
+  submissionId,
+  classroomId,
+  initialFeedback,
+  initialMaterial,
+  onFeedbackChange,
+  onMaterialChange,
+  saveFeedback,
+  showSuccess,
+  showError,
+  problemTitle,
+}: {
+  submissionId: string;
+  classroomId: string;
+  initialFeedback: string;
+  initialMaterial: string[];
+  onFeedbackChange: (v: string) => void;
+  onMaterialChange: (v: string[]) => void;
+  saveFeedback: (
+    id: string,
+    feedback: string,
+    material: string[],
+    send: boolean,
+    problemTitle?: string
+  ) => Promise<void>;
+  showSuccess: (msg: string) => void;
+  showError: (msg: string) => void;
+  problemTitle?: string;
+}) {
+  const [sendingFeedback, setSendingFeedback] = useState(false);
+  const { getMaterialsByClassroom } = useMaterial();
+  const [materials, setMaterials] = useState<Material[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!classroomId) return;
+    setMaterialsLoading(true);
+    getMaterialsByClassroom(classroomId)
+      .then((mats) => setMaterials(mats))
+      .catch(() => setMaterials([]))
+      .finally(() => setMaterialsLoading(false));
+  }, [classroomId, getMaterialsByClassroom]);
+
+  const handleSave = async () => {
+    setSendingFeedback(true);
+    try {
+      await saveFeedback(submissionId, initialFeedback, initialMaterial, false, problemTitle);
+      showSuccess('Feedback saved successfully.');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to save feedback.');
+    } finally {
+      setSendingFeedback(false);
+    }
+  };
+
+  return (
+    <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
+      {/* Feedback textarea */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-300">
+          Feedback for Student
+        </label>
+        <p className="text-xs text-gray-500">
+          Write feedback to help the student understand their mistakes and how to improve.
+        </p>
+        <textarea
+          value={initialFeedback}
+          onChange={(e) => onFeedbackChange(e.target.value)}
+          placeholder="e.g. Your solution has a correct approach but fails on edge cases where input size is large. Consider using a more efficient algorithm..."
+          rows={6}
+          className="resize-none rounded-md border border-gray-700 bg-gray-800 p-3 text-sm text-gray-200 placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
+      </div>
+
+      {/* Material recommendation */}
+      <div className="flex flex-col gap-2">
+        <label className="text-sm font-medium text-gray-300">
+          Recommended Materials
+        </label>
+        <p className="text-xs text-gray-500">
+          Select materials from the classroom to recommend to the student.
+        </p>
+        <MaterialSelector
+          materials={materials ?? []}
+          selectedIds={initialMaterial}
+          onChange={onMaterialChange}
+          loading={materialsLoading}
+        />
+      </div>
+
+      {/* Save button */}
+      <div className="flex justify-end">
+        <Button
+          size="sm"
+          color="blue"
+          onClick={() => void handleSave()}
+          disabled={sendingFeedback}
+          className="cursor-pointer"
+        >
+          {sendingFeedback ? <Spinner size="sm" /> : null}
+          Save Feedback
+        </Button>
+      </div>
+    </div>
+  );
+}
 
 function ResizeHandle({
   direction = 'horizontal',
@@ -40,16 +150,18 @@ function ResizeHandle({
 type LecturerSubmissionWorkspaceProps = {
   submission: SubmissionResponse;
   submissionId: string;
+  classroomId: string;
 };
 
 export function LecturerSubmissionWorkspace({
   submission,
   submissionId,
+  classroomId,
 }: LecturerSubmissionWorkspaceProps) {
   const router = useRouter();
   const { showSuccess, showError } = useToast();
-  const { editorState, selectedCompiler, isLeftPanelCollapsed, toggleLeftPanel, setConsoleOutput, consoleOutput, customInput, setCustomInput } = useEditorContext();
-  const { reGradeSubmission, overrideSubmissionScore } = useSubmissionLecturer();
+  const { editorState, selectedCompiler, isLeftPanelCollapsed, toggleLeftPanel, setConsoleOutput, consoleOutput, customInput, setCustomInput, problem } = useEditorContext();
+  const { reGradeSubmission, overrideSubmissionScore, saveLecturerFeedback } = useSubmissionLecturer();
   const { runPublicTests, isRunning: isRunningPublic, results: publicResults, error: publicError } = usePublicTests();
   const { runCustomTest, isRunning: isRunningCustom } = useCustomTest();
 
@@ -57,7 +169,11 @@ export function LecturerSubmissionWorkspace({
   const [regrading, setRegrading] = useState(false);
   const [scoreInput, setScoreInput] = useState(String(submission.finalScore ?? ''));
   const [savingScore, setSavingScore] = useState(false);
+  const [showScoreModal, setShowScoreModal] = useState(false);
+  const [sendFeedbackToStudent, setSendFeedbackToStudent] = useState(true);
   const [activeTab, setActiveTab] = useState<'testcases' | 'custom' | 'output'>('testcases');
+  const [lecturerFeedback, setLecturerFeedback] = useState(submission.lecturerFeedback ?? '');
+  const [materialRecommendation, setMaterialRecommendation] = useState<string[]>([]);
 
   const handleRunPublicTests = async () => {
     setConsoleOutput('');
@@ -87,7 +203,7 @@ export function LecturerSubmissionWorkspace({
     }
   };
 
-  const handleSaveScore = async () => {
+  const handleSaveScore = () => {
     const score = parseFloat(scoreInput);
     if (isNaN(score) || score < 0) {
       showError('Please enter a valid non-negative score.');
@@ -97,11 +213,24 @@ export function LecturerSubmissionWorkspace({
       showError(`Score cannot exceed max mark (${submission.maxMark}).`);
       return;
     }
+    setShowScoreModal(true);
+  };
+
+  const confirmSaveScore = async () => {
+    const score = parseFloat(scoreInput);
     setSavingScore(true);
     try {
       await overrideSubmissionScore(submissionId, score, submission.maxMark ?? 0);
-      showSuccess('Score saved successfully.');
+      await saveLecturerFeedback(
+        submissionId,
+        lecturerFeedback,
+        materialRecommendation,
+        sendFeedbackToStudent,
+        problem?.title,
+      );
+      showSuccess('Score and feedback saved successfully.');
       setCurrentSubmission((prev) => ({ ...prev, finalScore: score }));
+      setShowScoreModal(false);
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Failed to save score.';
       showError(msg);
@@ -201,14 +330,40 @@ export function LecturerSubmissionWorkspace({
           {!isLeftPanelCollapsed && (
             <>
               <Panel defaultSize={300} minSize={100} maxSize={600} id="problem-panel">
-                <div className="relative h-full">
-                  <Button
-                    onClick={toggleLeftPanel}
-                    className="absolute right-2 top-1 z-10 cursor-pointer rounded-md bg-gray-800 p-1.5 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
-                  >
-                    <PanelLeftClose className="h-4 w-4" />
-                  </Button>
-                  <ProblemPanel />
+                <div className="relative flex h-full flex-col">
+                  {/* Left panel tab bar */}
+                  <div className="flex shrink-0 items-center justify-between border-b border-gray-700 bg-gray-900">
+                    <div />
+                    <Button
+                      onClick={toggleLeftPanel}
+                      className="mr-2 cursor-pointer rounded-md bg-gray-800 p-1.5 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white"
+                    >
+                      <PanelLeftClose className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  {/* Tab content */}
+                  <div className="flex-1 overflow-hidden">
+                    <ProblemPanel
+                      extraTabs={[{ id: "lecturerNote", label: "Lecturer Note" }]}
+                      extraTabContent={{
+                        lecturerNote: (
+                          <LecturerNoteTab
+                            submissionId={submissionId}
+                            classroomId={classroomId}
+                            initialFeedback={lecturerFeedback}
+                            initialMaterial={materialRecommendation}
+                            onFeedbackChange={setLecturerFeedback}
+                            onMaterialChange={setMaterialRecommendation}
+                            saveFeedback={saveLecturerFeedback}
+                            showSuccess={showSuccess}
+                            showError={showError}
+                            problemTitle={problem?.title}
+                          />
+                        ),
+                      }}
+                    />
+                  </div>
                 </div>
               </Panel>
               <ResizeHandle direction="horizontal" />
@@ -408,6 +563,7 @@ export function LecturerSubmissionWorkspace({
                             </div>
                           </div>
                         )}
+
                       </div>
                     </div>
                   </Panel>
@@ -423,6 +579,77 @@ export function LecturerSubmissionWorkspace({
           </Panel>
         </Group>
       </div>
+
+      {/* Save Score Confirmation Modal */}
+      <Modal
+        show={showScoreModal}
+        onClose={() => setShowScoreModal(false)}
+        size="md"
+        popup
+      >
+        <ModalHeader />
+        <ModalBody>
+          <div className="flex flex-col gap-5">
+            <div>
+              <p className="text-base font-medium text-gray-300">
+                Save score for this submission?
+              </p>
+              <p className="mt-1 text-sm text-gray-500">
+                The score <span className="font-semibold text-white">{scoreInput}</span>
+                {submission.maxMark != null && submission.maxMark > 0 && (
+                  <span className="text-gray-500"> / {submission.maxMark}</span>
+                )}
+                {' '}will be saved and the submission will be marked as graded.
+              </p>
+            </div>
+
+            <div className="flex items-start gap-3 rounded-lg border border-blue-800/50 bg-blue-900/20 p-3">
+              <input
+                id="send-feedback-checkbox"
+                type="checkbox"
+                checked={sendFeedbackToStudent}
+                onChange={(e) => setSendFeedbackToStudent(e.target.checked)}
+                className="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-600 focus:ring-offset-gray-800"
+              />
+              <label htmlFor="send-feedback-checkbox" className="cursor-pointer">
+                <span className="text-sm font-medium text-gray-200">
+                  Send feedback to student
+                </span>
+                <p className="mt-0.5 text-xs text-gray-400">
+                  Notify the student about the feedback you have written in the Lecturer Note tab.
+                </p>
+              </label>
+            </div>
+
+            {sendFeedbackToStudent && (
+              <div className="rounded-md border border-gray-700 bg-gray-800/50 p-3">
+                <p className="mb-1 text-xs font-medium text-gray-400">Feedback preview:</p>
+                <p className="text-sm text-gray-300">
+                  {lecturerFeedback.trim() || <span className="italic text-gray-500">No feedback written yet</span>}
+                </p>
+              </div>
+            )}
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color="gray"
+            onClick={() => setShowScoreModal(false)}
+            className="cursor-pointer"
+          >
+            Cancel
+          </Button>
+          <Button
+            color="blue"
+            onClick={() => void confirmSaveScore()}
+            disabled={savingScore}
+            className="cursor-pointer"
+          >
+            {savingScore ? <Spinner size="sm" /> : null}
+            {savingScore ? 'Saving...' : 'Save Score'}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </div>
   );
 }

@@ -144,6 +144,33 @@ public class AcademicWarningRepository : DynamoRepository, IAcademicWarningRepos
         }
     }
 
+    public async Task<List<Models.AcademicWarning>> FindByExamIdAsync(string examId)
+    {
+        try
+        {
+            var request = new ScanRequest
+            {
+                TableName = _academicWarningTableName,
+                FilterExpression = "examId = :examId",
+                ExpressionAttributeValues = new Dictionary<string, AttributeValue>
+                {
+                    [":examId"] = new AttributeValue { S = examId }
+                }
+            };
+
+            var response = await _dynamoDBClient.ScanAsync(request);
+            return response.Items
+                .Select(item => DynamoMapper.DynamoItemToAcademicWarning(item))
+                .OrderByDescending(aw => aw.SentDate)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error finding academic warnings for exam {ExamId}", examId);
+            throw;
+        }
+    }
+
     public async Task<Models.AcademicWarning?> UpdateAsync(Models.AcademicWarning academicWarning)
     {
         try

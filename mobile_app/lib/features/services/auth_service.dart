@@ -95,4 +95,26 @@ class AuthService {
   static Future<Map<String, dynamic>> logout(String token) async {
     return {};
   }
+
+  // Upload avatar to S3
+  static Future<Map<String, dynamic>> uploadAvatar({
+    required String token,
+    required List<int> fileBytes,
+    required String fileName,
+  }) async {
+    try {
+      final response = await ApiNetwork.postMultipartWithAuth(
+        endpoint: ApiConfig.uploadAvatarEndpoint,
+        fieldName: 'file',
+        fileBytes: fileBytes,
+        fileName: fileName,
+        token: token,
+      );
+
+      return response;
+    } catch (e) {
+      throw Exception('Failed to upload avatar: $e');
+    }
+  }
 }
+

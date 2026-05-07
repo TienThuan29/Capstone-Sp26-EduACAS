@@ -1,0 +1,102 @@
+[
+  {
+    "id": "qatt-226",
+    "classroomQuizId": "clsq-014",
+    "studentId": "usr-stu-001",
+    "startTime": "2026-04-28T08:05:00",
+    "endTime": "2026-04-28T08:25:00",
+    "status": "SUBMITTED",
+    "finalScore": 7.5,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-227",
+    "classroomQuizId": "clsq-014",
+    "studentId": "usr-stu-002",
+    "startTime": "2026-04-28T08:10:00",
+    "endTime": "2026-04-28T08:35:00",
+    "status": "SUBMITTED",
+    "finalScore": 5,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-228",
+    "classroomQuizId": "clsq-014",
+    "studentId": "usr-stu-003",
+    "startTime": "2026-04-28T08:20:00",
+    "endTime": null,
+    "status": "INPROGRESS",
+    "finalScore": null,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-229",
+    "classroomQuizId": "clsq-014",
+    "studentId": "usr-stu-001",
+    "startTime": "2026-04-28T09:00:00",
+    "endTime": "2026-04-28T09:20:00",
+    "status": "SUBMITTED",
+    "finalScore": 10,
+    "attemptNumber": 2
+  },
+  {
+    "id": "qatt-230",
+    "classroomQuizId": "clsq-015",
+    "studentId": "usr-stu-004",
+    "startTime": "2026-05-01T08:05:00",
+    "endTime": "2026-05-01T08:25:00",
+    "status": "SUBMITTED",
+    "finalScore": 7.5,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-231",
+    "classroomQuizId": "clsq-015",
+    "studentId": "usr-stu-005",
+    "startTime": "2026-05-01T08:12:00",
+    "endTime": "2026-05-01T08:38:00",
+    "status": "SUBMITTED",
+    "finalScore": 2.5,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-232",
+    "classroomQuizId": "clsq-015",
+    "studentId": "usr-stu-006",
+    "startTime": "2026-05-01T08:20:00",
+    "endTime": null,
+    "status": "INPROGRESS",
+    "finalScore": null,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-233",
+    "classroomQuizId": "clsq-016",
+    "studentId": "usr-stu-007",
+    "startTime": "2026-05-03T08:05:00",
+    "endTime": "2026-05-03T08:25:00",
+    "status": "SUBMITTED",
+    "finalScore": 10,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-234",
+    "classroomQuizId": "clsq-016",
+    "studentId": "usr-stu-008",
+    "startTime": "2026-05-03T08:10:00",
+    "endTime": "2026-05-03T08:35:00",
+    "status": "SUBMITTED",
+    "finalScore": 7.5,
+    "attemptNumber": 1
+  },
+  {
+    "id": "qatt-235",
+    "classroomQuizId": "clsq-016",
+    "studentId": "usr-stu-009",
+    "startTime": "2026-05-03T08:18:00",
+    "endTime": null,
+    "status": "INPROGRESS",
+    "finalScore": null,
+    "attemptNumber": 1
+  }
+]

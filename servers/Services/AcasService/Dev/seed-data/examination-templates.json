@@ -1,0 +1,427 @@
+[
+  {
+    "id": "temp-001",
+    "examName": "PRF192 Template - Midterm",
+    "lecturerId": "usr-lec-001",
+    "description": "Standard Midterm Template for C Programming Fundamentals. 3 questions (Easy, Medium, Medium).",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-001", "problemId": "prob-001", "mark": 3.0 },
+      { "examTempId": "temp-001", "problemId": "prob-002", "mark": 3.0 },
+      { "examTempId": "temp-001", "problemId": "prob-003", "mark": 4.0 }
+    ],
+    "createdDate": "2026-01-10T08:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-002",
+    "examName": "PRO192 Template - Final",
+    "lecturerId": "usr-lec-002",
+    "description": "Standard Final Template for Object-Oriented Programming (Java). 4 questions.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-002", "problemId": "prob-004", "mark": 2.0 },
+      { "examTempId": "temp-002", "problemId": "prob-005", "mark": 2.0 },
+      { "examTempId": "temp-002", "problemId": "prob-006", "mark": 3.0 },
+      { "examTempId": "temp-002", "problemId": "prob-007", "mark": 3.0 }
+    ],
+    "createdDate": "2026-01-15T09:30:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-003",
+    "examName": "CSD201 Template - Midterm",
+    "lecturerId": "usr-lec-003",
+    "description": "Data Structures Midterm Template. Focus on Arrays and Linked Lists.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-003", "problemId": "prob-008", "mark": 5.0 },
+      { "examTempId": "temp-003", "problemId": "prob-009", "mark": 5.0 }
+    ],
+    "createdDate": "2026-02-01T14:00:00",
+    "updatedDate": "2026-02-05T10:00:00"
+  },
+  {
+    "id": "temp-004",
+    "examName": "PRJ301 Template - Final",
+    "lecturerId": "usr-lec-004",
+    "description": "Java Web Development Final Exam Template.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-004", "problemId": "prob-010", "mark": 4.0 },
+      { "examTempId": "temp-004", "problemId": "prob-011", "mark": 6.0 }
+    ],
+    "createdDate": "2026-03-10T11:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-005",
+    "examName": "DBI202 Template - Practice Test",
+    "lecturerId": "usr-lec-005",
+    "description": "Database Systems SQL Query Practice Test.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-005", "problemId": "prob-001", "mark": 2.0 },
+      { "examTempId": "temp-005", "problemId": "prob-002", "mark": 2.0 },
+      { "examTempId": "temp-005", "problemId": "prob-003", "mark": 6.0 }
+    ],
+    "createdDate": "2026-04-05T15:45:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-006",
+    "examName": "AI101 Template - Midterm",
+    "lecturerId": "usr-lec-005",
+    "description": "Midterm for AI basics with Python.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-006", "problemId": "prob-001", "mark": 5.0 },
+      { "examTempId": "temp-006", "problemId": "prob-003", "mark": 5.0 }
+    ],
+    "createdDate": "2026-04-10T10:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-007",
+    "examName": "SE201 Template - Final",
+    "lecturerId": "usr-lec-006",
+    "description": "Final for Web App Development with TypeScript.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-007", "problemId": "prob-004", "mark": 3.0 },
+      { "examTempId": "temp-007", "problemId": "prob-005", "mark": 3.0 },
+      { "examTempId": "temp-007", "problemId": "prob-006", "mark": 4.0 }
+    ],
+    "createdDate": "2026-05-15T09:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-008",
+    "examName": "CS402 Template - Practice",
+    "lecturerId": "usr-lec-007",
+    "description": "Backend Development with C# practice test.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-008", "problemId": "prob-002", "mark": 5.0 },
+      { "examTempId": "temp-008", "problemId": "prob-008", "mark": 5.0 }
+    ],
+    "createdDate": "2026-08-01T14:30:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-009",
+    "examName": "CS104 Template - Midterm",
+    "lecturerId": "usr-lec-008",
+    "description": "Introduction to TypeScript Midterm exam.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-009", "problemId": "prob-001", "mark": 2.5 },
+      { "examTempId": "temp-009", "problemId": "prob-003", "mark": 3.5 },
+      { "examTempId": "temp-009", "problemId": "prob-005", "mark": 4.0 }
+    ],
+    "createdDate": "2026-09-10T08:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-010",
+    "examName": "CS303 Template - Final",
+    "lecturerId": "usr-lec-009",
+    "description": "JavaScript Framework Development final test.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-010", "problemId": "prob-007", "mark": 4.0 },
+      { "examTempId": "temp-010", "problemId": "prob-009", "mark": 6.0 }
+    ],
+    "createdDate": "2026-10-05T11:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-011",
+    "examName": "CS304 Template - Practice",
+    "lecturerId": "usr-lec-010",
+    "description": "C# Enterprise Practice Test.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-011", "problemId": "prob-010", "mark": 10.0 }
+    ],
+    "createdDate": "2026-11-01T08:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-012",
+    "examName": "CS403 Template - Final",
+    "lecturerId": "usr-lec-010",
+    "description": "SQL & Python Final Template.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-012", "problemId": "prob-011", "mark": 3.0 },
+      { "examTempId": "temp-012", "problemId": "prob-012", "mark": 3.0 },
+      { "examTempId": "temp-012", "problemId": "prob-013", "mark": 4.0 }
+    ],
+    "createdDate": "2026-11-10T10:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-013",
+    "examName": "CS404 Template - Midterm",
+    "lecturerId": "usr-lec-011",
+    "description": "Full Stack Midterm Template.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-013", "problemId": "prob-014", "mark": 5.0 },
+      { "examTempId": "temp-013", "problemId": "prob-015", "mark": 5.0 }
+    ],
+    "createdDate": "2026-12-05T09:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-014",
+    "examName": "SE102 Template - Practice",
+    "lecturerId": "usr-lec-011",
+    "description": "Version Control Practice.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-014", "problemId": "prob-016", "mark": 10.0 }
+    ],
+    "createdDate": "2026-12-10T14:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-015",
+    "examName": "SE202 Template - Final",
+    "lecturerId": "usr-lec-012",
+    "description": "TS Frontend Final.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-015", "problemId": "prob-017", "mark": 4.0 },
+      { "examTempId": "temp-015", "problemId": "prob-018", "mark": 6.0 }
+    ],
+    "createdDate": "2027-01-05T08:30:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-016",
+    "examName": "SE203 Template - Practice",
+    "lecturerId": "usr-lec-012",
+    "description": "Java API Practice.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-016", "problemId": "prob-019", "mark": 10.0 }
+    ],
+    "createdDate": "2027-01-15T10:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-017",
+    "examName": "SE303 Template - Midterm",
+    "lecturerId": "usr-lec-013",
+    "description": "Architecture Design Midterm.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-017", "problemId": "prob-020", "mark": 5.0 },
+      { "examTempId": "temp-017", "problemId": "prob-021", "mark": 5.0 }
+    ],
+    "createdDate": "2027-02-01T08:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-018",
+    "examName": "SE304 Template - Final",
+    "lecturerId": "usr-lec-013",
+    "description": "Testing QA Final.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-018", "problemId": "prob-022", "mark": 3.0 },
+      { "examTempId": "temp-018", "problemId": "prob-023", "mark": 7.0 }
+    ],
+    "createdDate": "2027-02-15T13:30:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-019",
+    "examName": "IT102 Template - Midterm",
+    "lecturerId": "usr-lec-014",
+    "description": "OS & C Programming Midterm.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-019", "problemId": "prob-024", "mark": 5.0 },
+      { "examTempId": "temp-019", "problemId": "prob-025", "mark": 5.0 }
+    ],
+    "createdDate": "2027-03-01T10:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-020",
+    "examName": "IT202 Template - Practice",
+    "lecturerId": "usr-lec-014",
+    "description": "Cross Platform Practice.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-020", "problemId": "prob-001", "mark": 10.0 }
+    ],
+    "createdDate": "2027-03-10T15:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-021",
+    "examName": "DB102 Template - Final",
+    "lecturerId": "usr-lec-015",
+    "description": "SQL Optimization Final.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-021", "problemId": "prob-002", "mark": 4.0 },
+      { "examTempId": "temp-021", "problemId": "prob-003", "mark": 6.0 }
+    ],
+    "createdDate": "2027-04-05T08:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-022",
+    "examName": "DB202 Template - Midterm",
+    "lecturerId": "usr-lec-015",
+    "description": "NoSQL Midterm.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-022", "problemId": "prob-004", "mark": 5.0 },
+      { "examTempId": "temp-022", "problemId": "prob-005", "mark": 5.0 }
+    ],
+    "createdDate": "2027-04-15T13:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-023",
+    "examName": "AI102 Template - Practice",
+    "lecturerId": "usr-lec-001",
+    "description": "Python Data Analysis Practice.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-023", "problemId": "prob-006", "mark": 10.0 }
+    ],
+    "createdDate": "2027-05-01T09:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-024",
+    "examName": "AI202 Template - Final",
+    "lecturerId": "usr-lec-002",
+    "description": "ML Engineering Final.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-024", "problemId": "prob-007", "mark": 3.0 },
+      { "examTempId": "temp-024", "problemId": "prob-008", "mark": 3.0 },
+      { "examTempId": "temp-024", "problemId": "prob-009", "mark": 4.0 }
+    ],
+    "createdDate": "2027-05-15T14:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-025",
+    "examName": "AI302 Template - Midterm",
+    "lecturerId": "usr-lec-003",
+    "description": "Deep Learning Midterm.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-025", "problemId": "prob-010", "mark": 5.0 },
+      { "examTempId": "temp-025", "problemId": "prob-011", "mark": 5.0 }
+    ],
+    "createdDate": "2027-06-01T10:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-026",
+    "examName": "CS101 Template - Final Retry",
+    "lecturerId": "usr-lec-004",
+    "description": "Retry Final for Intro to Programming.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-026", "problemId": "prob-012", "mark": 3.0 },
+      { "examTempId": "temp-026", "problemId": "prob-013", "mark": 7.0 }
+    ],
+    "createdDate": "2027-06-15T08:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-027",
+    "examName": "SE201 Template - Midterm",
+    "lecturerId": "usr-lec-005",
+    "description": "Midterm for TypeScript App Dev.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-027", "problemId": "prob-014", "mark": 5.0 },
+      { "examTempId": "temp-027", "problemId": "prob-015", "mark": 5.0 }
+    ],
+    "createdDate": "2027-07-01T13:30:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-028",
+    "examName": "CS201 Template - Final",
+    "lecturerId": "usr-lec-006",
+    "description": "Advanced Algorithms Final.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-028", "problemId": "prob-016", "mark": 2.5 },
+      { "examTempId": "temp-028", "problemId": "prob-017", "mark": 2.5 },
+      { "examTempId": "temp-028", "problemId": "prob-018", "mark": 5.0 }
+    ],
+    "createdDate": "2027-07-15T09:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-029",
+    "examName": "DB101 Template - Midterm",
+    "lecturerId": "usr-lec-007",
+    "description": "Database Fundamentals Midterm.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-029", "problemId": "prob-019", "mark": 5.0 },
+      { "examTempId": "temp-029", "problemId": "prob-020", "mark": 5.0 }
+    ],
+    "createdDate": "2027-08-01T14:00:00",
+    "updatedDate": null
+  },
+  {
+    "id": "temp-030",
+    "examName": "AI201 Template - Final",
+    "lecturerId": "usr-lec-008",
+    "description": "ML Final Evaluation.",
+    "totalMark": 10.0,
+    "isDeleted": false,
+    "problems": [
+      { "examTempId": "temp-030", "problemId": "prob-021", "mark": 3.0 },
+      { "examTempId": "temp-030", "problemId": "prob-022", "mark": 3.0 },
+      { "examTempId": "temp-030", "problemId": "prob-023", "mark": 4.0 }
+    ],
+    "createdDate": "2027-08-10T10:00:00",
+    "updatedDate": null
+  }
+]

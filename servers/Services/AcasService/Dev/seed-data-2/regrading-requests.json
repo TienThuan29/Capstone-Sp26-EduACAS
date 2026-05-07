@@ -1,0 +1,106 @@
+[
+  {
+    "id": "rg-001",
+    "examinationId": "exam-cs101-01",
+    "imageUrls": [],
+    "submissionId": "subm-377",
+    "studentId": "usr-stu-006",
+    "reason": "Thưa thầy/cô, em bị sai ở testcase tc-003-03 nhưng em đã chạy thử trên máy local và output ra đúng \"fedcba\". Em nghi ngờ hệ thống so sánh output bị nhạy cảm với khoảng trắng hoặc dấu xuống dòng. Em xin phúc khảo ạ.",
+    "createdDate": "2026-01-15T00:00:00",
+    "status": "REJECTED",
+    "lecturerNote": "Em xử lý sai logic ở trường hợp biên. Kết quả FAIL là đúng.",
+    "handledDate": "2026-01-15T00:00:00"
+  },
+  {
+    "id": "rg-002",
+    "examinationId": "exam-cs101-02",
+    "imageUrls": [],
+    "submissionId": "subm-484",
+    "studentId": "usr-stu-014",
+    "reason": "Thưa thầy/cô, em bị sai ở testcase tc-005-03 nhưng em đã chạy thử trên máy local và output ra đúng \"3\". Em nghi ngờ hệ thống so sánh output bị nhạy cảm với khoảng trắng hoặc dấu xuống dòng. Em xin phúc khảo ạ.",
+    "createdDate": "2026-02-01T00:00:00",
+    "status": "PENDING",
+    "lecturerNote": "",
+    "handledDate": "2026-02-01T00:00:00"
+  },
+  {
+    "id": "rg-003",
+    "examinationId": "exam-002",
+    "imageUrls": [],
+    "submissionId": "subm-558",
+    "studentId": "usr-stu-005",
+    "reason": "Dạ thưa thầy/cô, bài em bị FAIL ở testcase tc-006-03. Em đã debug lại và thấy output chỉ lệch 1 giá trị so với đáp án. Em xin được phúc khảo ạ.",
+    "createdDate": "2026-02-18T00:00:00",
+    "status": "REJECTED",
+    "lecturerNote": "Em xử lý sai logic ở trường hợp biên. Kết quả FAIL là đúng.",
+    "handledDate": "2026-02-18T00:00:00"
+  },
+  {
+    "id": "rg-004",
+    "examinationId": "exam-002",
+    "imageUrls": [],
+    "submissionId": "subm-602",
+    "studentId": "usr-stu-022",
+    "reason": "Dạ thưa thầy/cô, bài em bị FAIL ở testcase tc-006-03. Em đã debug lại và thấy output chỉ lệch 1 giá trị so với đáp án. Em xin được phúc khảo ạ.",
+    "createdDate": "2026-02-18T00:00:00",
+    "status": "APPROVED",
+    "lecturerNote": "Đã kiểm tra lại, đúng là hệ thống chấm bị lỗi so sánh output. Đã chấm lại và cập nhật điểm.",
+    "handledDate": "2026-02-18T00:00:00"
+  },
+  {
+    "id": "rg-005",
+    "examinationId": "exam-003",
+    "imageUrls": [],
+    "submissionId": "subm-693",
+    "studentId": "usr-stu-022",
+    "reason": "Thưa thầy/cô, em bị sai ở testcase tc-011-03 nhưng em đã chạy thử trên máy local và output ra đúng \"1.4142135623730951\". Em nghi ngờ hệ thống so sánh output bị nhạy cảm với khoảng trắng hoặc dấu xuống dòng. Em xin phúc khảo ạ.",
+    "createdDate": "2026-03-01T00:00:00",
+    "status": "PENDING",
+    "lecturerNote": "",
+    "handledDate": "2026-03-01T00:00:00"
+  },
+  {
+    "id": "rg-006",
+    "examinationId": "exam-004",
+    "imageUrls": [],
+    "submissionId": "subm-727",
+    "studentId": "usr-stu-023",
+    "reason": "Em kiểm tra thấy testcase tc-014-03 output của em là \"6\" nhưng expected là \"7.00\". Em nghĩ logic em đúng, có thể do em hiểu sai format output. Xin thầy/cô xem lại giúp em.",
+    "createdDate": "2026-03-08T00:00:00",
+    "status": "APPROVED",
+    "lecturerNote": "Đã kiểm tra lại, đúng là hệ thống chấm bị lỗi so sánh output. Đã chấm lại và cập nhật điểm.",
+    "handledDate": "2026-03-08T00:00:00"
+  },
+  {
+    "id": "rg-007",
+    "examinationId": "exam-008",
+    "imageUrls": [],
+    "submissionId": "subm-871",
+    "studentId": "usr-stu-029",
+    "reason": "Em kiểm tra thấy testcase tc-001-03 output của em là \"14\" nhưng expected là \"15\". Em nghĩ logic em đúng, có thể do em hiểu sai format output. Xin thầy/cô xem lại giúp em.",
+    "createdDate": "2026-03-20T00:00:00",
+    "status": "CANCELED",
+    "lecturerNote": "",
+    "handledDate": "2026-03-20T00:00:00"
+  },
+  {
+    "id": "rg-008",
+    "examinationId": "exam-009",
+    "imageUrls": [],
+    "submissionId": "subm-920",
+    "studentId": "usr-stu-040",
+    "reason": "Thưa thầy/cô, em bị sai ở testcase tc-002-03 nhưng em đã chạy thử trên máy local và output ra đúng \"Buzz\". Em nghi ngờ hệ thống so sánh output bị nhạy cảm với khoảng trắng hoặc dấu xuống dòng. Em xin phúc khảo ạ.",
+    "createdDate": "2026-03-05T00:00:00",
+    "status": "REJECTED",
+    "lecturerNote": "Đã kiểm tra kỹ, output của em thực sự sai. Kết quả chấm là chính xác.",
+    "handledDate": "2026-03-05T00:00:00"
+  },
+  {
+    "id": "reg-new-99",
+    "submissionId": "subm-450",
+    "studentId": "usr-stu-005",
+    "reason": "Em xin phúc khảo vì em tin logic mình đúng.",
+    "status": "PENDING",
+    "createdDate": "2026-05-06T19:46:40.898Z"
+  }
+]

@@ -93,6 +93,7 @@ public class SubmissionMapper
             TestResults = new List<TestResult>(),
             RegradingRequestId = string.Empty,
             LecturerFeedback = string.Empty,
+            MaterialRecommendation = new List<string>(),
             AiFeedback = string.Empty,
             UpdatedDate = now
         };
@@ -122,6 +123,7 @@ public class SubmissionMapper
                 .ToList() ?? new List<KeystrokeLogResponse>(),
             RegradingRequestId = submission.RegradingRequestId,
             LecturerFeedback = submission.LecturerFeedback,
+            MaterialRecommendation = submission.MaterialRecommendation ?? new List<string>(),
             AiFeedback = submission.AiFeedback,
             UpdatedDate = submission.UpdatedDate
         };
