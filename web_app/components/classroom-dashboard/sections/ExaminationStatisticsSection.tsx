@@ -31,10 +31,11 @@ export function ExaminationStatisticsSection({
 
   const [examStatistics, setExamStatistics] = useState<ExamScoreStatistics[]>([]);
   const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
+  const [isAllExamsSelected, setIsAllExamsSelected] = useState(false);
   const [examStatsLoading, setExamStatsLoading] = useState(false);
 
   const [studentScores, setStudentScores] = useState<
-    Record<string, { problemId: string; averageScore: number }[]>
+    Record<string, { examId: string; examName: string; totalScore: number }[]>
   >({});
   const [studentScoresLoading, setStudentScoresLoading] = useState(false);
 
@@ -68,28 +69,58 @@ export function ExaminationStatisticsSection({
   }, [classId, getExamStatistics]);
 
   useEffect(() => {
-    if (!selectedExamId) return;
+    if (!selectedExamId && !isAllExamsSelected) return;
+    if (isAllExamsSelected && examStatistics.length === 0) return;
 
     let cancelled = false;
     setStudentScoresLoading(true);
 
     void (async () => {
       try {
-        const submissions = await getLatestSubmissionsByExam(selectedExamId);
-        if (!cancelled) {
-          const scores: Record<string, { problemId: string; averageScore: number }[]> = {};
-          for (const ps of submissions) {
-            for (const sub of ps.submissions) {
-              if (!scores[sub.studentId]) {
-                scores[sub.studentId] = [];
+        if (isAllExamsSelected) {
+          const allScores: Record<string, { examId: string; examName: string; totalScore: number }[]> = {};
+
+          for (const exam of examStatistics) {
+            const submissions = await getLatestSubmissionsByExam(exam.examId);
+            if (cancelled) return;
+
+            for (const ps of submissions) {
+              for (const sub of ps.submissions) {
+                if (!allScores[sub.studentId]) {
+                  allScores[sub.studentId] = [];
+                }
+                allScores[sub.studentId].push({
+                  examId: exam.examId,
+                  examName: exam.examName,
+                  totalScore: sub.finalScore,
+                });
               }
-              scores[sub.studentId].push({
-                problemId: ps.problemId,
-                averageScore: sub.finalScore,
-              });
             }
           }
-          setStudentScores(scores);
+
+          if (!cancelled) {
+            setStudentScores(allScores);
+          }
+        } else if (selectedExamId) {
+          const submissions = await getLatestSubmissionsByExam(selectedExamId);
+          if (!cancelled) {
+            const scores: Record<string, { examId: string; examName: string; totalScore: number }[]> = {};
+            const selectedExam = examStatistics.find((e) => e.examId === selectedExamId);
+
+            for (const ps of submissions) {
+              for (const sub of ps.submissions) {
+                if (!scores[sub.studentId]) {
+                  scores[sub.studentId] = [];
+                }
+                scores[sub.studentId].push({
+                  examId: selectedExamId,
+                  examName: selectedExam?.examName ?? selectedExamId,
+                  totalScore: sub.finalScore,
+                });
+              }
+            }
+            setStudentScores(scores);
+          }
         }
       } catch (err) {
         if (!cancelled) console.error("Failed to load EXAMINATION student scores:", err);
@@ -101,7 +132,7 @@ export function ExaminationStatisticsSection({
     return () => {
       cancelled = true;
     };
-  }, [selectedExamId, getLatestSubmissionsByExam]);
+  }, [selectedExamId, isAllExamsSelected, examStatistics, getLatestSubmissionsByExam]);
 
   return (
     <div className="mt-8">
@@ -111,13 +142,21 @@ export function ExaminationStatisticsSection({
             EXAMINATION Statistics
           </h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Per-student average scores and submission progress across EXAMINATION exams.
+            {isAllExamsSelected
+              ? "Average score across all EXAMINATION exams."
+              : "Total score per student for selected EXAMINATION exam."}
           </p>
         </div>
         <select
-          value={selectedExamId ?? ""}
+          value={isAllExamsSelected ? "__all__" : (selectedExamId ?? "")}
           onChange={(e) => {
-            setSelectedExamId(e.target.value);
+            if (e.target.value === "__all__") {
+              setIsAllExamsSelected(true);
+              setSelectedExamId(null);
+            } else {
+              setIsAllExamsSelected(false);
+              setSelectedExamId(e.target.value);
+            }
             setSelectedStudentId(null);
           }}
           disabled={examStatsLoading}
@@ -126,6 +165,7 @@ export function ExaminationStatisticsSection({
           <option value="" disabled>
             {examStatsLoading ? "Loading..." : "Select an EXAMINATION exam..."}
           </option>
+          <option value="__all__">Average All Exams</option>
           {examStatistics.map((exam) => (
             <option key={exam.examId} value={exam.examId}>
               {exam.examName}
@@ -138,7 +178,7 @@ export function ExaminationStatisticsSection({
         <div className="flex h-40 items-center justify-center">
           <Spinner size="xl" color="info" />
         </div>
-      ) : !selectedExamId ? (
+      ) : examStatistics.length === 0 ? (
         <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             No EXAMINATION exams available for this classroom.
@@ -148,7 +188,7 @@ export function ExaminationStatisticsSection({
         <div className="space-y-6">
           <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <h4 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Average Score per Student
+              {isAllExamsSelected ? "Average Score per Student (All Exams)" : "Total Score per Student"}
             </h4>
             {studentScoresLoading ? (
               <div className="flex h-48 items-center justify-center">
@@ -164,15 +204,29 @@ export function ExaminationStatisticsSection({
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={Object.entries(studentScores).map(([studentId, entries]) => {
-                    const avg =
-                      entries.length > 0
-                        ? entries.reduce((sum, e) => sum + e.averageScore, 0) / entries.length
-                        : 0;
                     const student = students.find((s) => s.studentId === studentId);
+                    let displayValue: number;
+                    let displayLabel: string;
+
+                    if (isAllExamsSelected) {
+                      const avg =
+                        entries.length > 0
+                          ? entries.reduce((sum, e) => sum + e.totalScore, 0) / entries.length
+                          : 0;
+                      displayValue = Number(avg.toFixed(2));
+                      displayLabel = "Avg Score";
+                    } else {
+                      const total =
+                        entries.reduce((sum, e) => sum + e.totalScore, 0);
+                      displayValue = Number(total.toFixed(2));
+                      displayLabel = "Total Score";
+                    }
+
                     return {
                       studentId,
                       studentName: student?.fullname ?? studentId,
-                      averageScore: Number(avg.toFixed(2)),
+                      displayValue,
+                      displayLabel,
                     };
                   })}
                   margin={{ top: 8, right: 8, left: -16, bottom: 40 }}
@@ -187,7 +241,7 @@ export function ExaminationStatisticsSection({
                     height={60}
                   />
                   <YAxis
-                    domain={[0, 10]}
+                    domain={[0, isAllExamsSelected ? 10 : "auto"]}
                     tick={{ fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
@@ -202,7 +256,7 @@ export function ExaminationStatisticsSection({
                             {d.studentName}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Avg Score: <span className="font-bold">{d.averageScore}</span>
+                            {d.displayLabel}: <span className="font-bold">{d.displayValue}</span>
                           </p>
                           <p className="mt-1 text-xs text-gray-500">
                             Click to view submission breakdown
@@ -212,7 +266,7 @@ export function ExaminationStatisticsSection({
                     }}
                   />
                   <Bar
-                    dataKey="averageScore"
+                    dataKey="displayValue"
                     fill="#10B981"
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
@@ -229,8 +283,8 @@ export function ExaminationStatisticsSection({
             )}
           </div>
 
-          {/* Student Submission Detail */}
-          {selectedStudentId && (
+          {/* Student Submission Detail - Only show when specific exam is selected */}
+          {selectedStudentId && !isAllExamsSelected && selectedExamId && (
             <StudentSubmissionDetail
               examId={selectedExamId}
               studentId={selectedStudentId}
