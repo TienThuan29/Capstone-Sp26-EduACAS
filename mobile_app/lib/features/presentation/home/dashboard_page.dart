@@ -58,26 +58,6 @@ class DashboardPage extends StatelessWidget {
 
               ..._buildQuickActions(context),
 
-              const SizedBox(height: 32),
-              const Text(
-                'COMMUNITY OVERVIEW',
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w900,
-                  color: AppColors.textLight,
-                  letterSpacing: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Expanded(child: _buildSmallStat('1.2K+', 'Students')),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildSmallStat('45+', 'Lecturers')),
-                  const SizedBox(width: 12),
-                  Expanded(child: _buildSmallStat('80+', 'Classrooms')),
-                ],
-              ),
               const SizedBox(height: 40),
             ],
           ),

@@ -30,4 +30,30 @@ class SubmissionService {
       throw Exception('Failed to load student submissions: $e');
     }
   }
+
+  static Future<List<ProblemSubmissionsResponse>> getLatestSubmissionsByExam(String examId) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null || token.isEmpty) {
+        throw Exception('No access token found');
+      }
+
+      final response = await ApiNetwork.getWithAuth(
+        endpoint: ApiConfig.getLatestSubmissionsByExamEndpoint(examId),
+        token: token,
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final data = response['dataResponse'] as List<dynamic>;
+        return data
+            .map((item) => ProblemSubmissionsResponse.fromJson(item as Map<String, dynamic>))
+            .toList();
+      }
+
+      return [];
+    } catch (e) {
+      debugPrint('Failed to get latest submissions by exam: $e');
+      throw Exception('Failed to load latest submissions by exam: $e');
+    }
+  }
 }

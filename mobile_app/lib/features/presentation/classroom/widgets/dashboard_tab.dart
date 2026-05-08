@@ -5,6 +5,9 @@ import 'package:mobile/core/theme/app_colors.dart';
 import 'package:mobile/core/widgets/background.dart';
 import '../../../models/dashboard_stats.dart';
 import '../../../services/dashboard_service.dart';
+import '../../../services/classroom_service.dart';
+import '../../../models/classroom_student.dart';
+import './examination_statistics_section.dart';
 
 
 class DashboardTab extends StatefulWidget {
@@ -22,6 +25,7 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   bool _isLoading = true;
   String? _errorMessage;
   late TabController _subTabController;
+  List<ClassroomStudentResponse> _students = [];
 
   @override
   void initState() {
@@ -45,9 +49,11 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
 
     try {
       final data = await DashboardService.getClassroomDashboardData(widget.classroomId);
+      final students = await ClassroomService.getClassroomStudents(widget.classroomId);
       if (mounted) {
         setState(() {
           _data = data;
+          _students = students;
           _isLoading = false;
         });
       }
@@ -535,14 +541,32 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
 
   Widget _buildExamsTab() {
     final exams = _data?.examStatistics ?? [];
-    if (exams.isEmpty) return _buildEmptyTab('No exam statistics available');
-
+    
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        const Text('Examination Performance', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        const Text(
+          'Examination Performance', 
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary)
+        ),
         const SizedBox(height: 16),
-        ...exams.map((exam) => _buildExamStatsCard(exam)),
+        if (exams.isEmpty) 
+          _buildEmptyTab('No exam statistics available')
+        else
+          ...exams.map((exam) => _buildExamStatsCard(exam)),
+        
+        // Advanced Statistics Sections (Synchronized with Web App)
+        ExaminationStatisticsSection(
+          classId: widget.classroomId, 
+          students: _students, 
+          mode: 'EXAMINATION'
+        ),
+        ExaminationStatisticsSection(
+          classId: widget.classroomId, 
+          students: _students, 
+          mode: 'PRACTICAL'
+        ),
+        const SizedBox(height: 40),
       ],
     );
   }

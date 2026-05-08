@@ -27,6 +27,8 @@ class ApiConfig {
   static String get enrollClassroomEndpoint => '/api/acas/v1/class-enrollments/enroll';
   static String lecturerClassroomsEndpoint(String lecturerId) =>
       '/api/acas/v1/classrooms/lecturer/$lecturerId';
+  static String getClassroomStudentsEndpoint(String classId) =>
+      '/api/acas/v1/class-enrollments/classroom/$classId/students';
   static String studentClassroomsEndpoint(String studentId) =>
       '/api/acas/v1/classrooms/student/$studentId';
   static String classroomByIdEndpoint(String id) =>
@@ -41,6 +43,10 @@ class ApiConfig {
       '/api/acas/v1/classrooms/$classroomId/dashboard/warnings';
   static String get classroomDashboardStatsEndpoint => 
       '/api/acas/v1/classrooms/dashboard/stats';
+  static String classroomDashboardExamStatisticsEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/dashboard/exam-statistics';
+  static String classroomDashboardQuizStatisticsEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/dashboard/quiz-statistics';
 
   // Student Dashboard endpoints
   static String studentDashboardOverviewEndpoint(String classroomId) =>
@@ -90,8 +96,10 @@ class ApiConfig {
       '/api/acas/v1/quiz-attempts/$attemptId';
     static String quizAttemptsByStudentEndpoint(String studentId) =>
       '/api/acas/v1/quiz-attempts/student/$studentId';
+    static String getLatestSubmissionsByExamEndpoint(String examId) =>
+      '/api/v1/submissions/exam/$examId/latest-all';
     static String submissionsByStudentEndpoint(String studentId) =>
-      '/api/acas/v1/submissions/student/$studentId';
+      '/api/v1/submissions/student/$studentId';
     static String quizSubmissionsPagedEndpoint({
       required String classroomQuizId,
       int pageIndex = 1,
