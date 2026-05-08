@@ -612,7 +612,6 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
           </div>
 
           <QuizStatisticsSection
-            classId={classId}
             classroomQuizzes={classroomQuizzes}
             attemptsByStudent={attemptsByStudent}
             students={students}

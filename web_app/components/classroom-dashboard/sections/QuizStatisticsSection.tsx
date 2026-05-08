@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Badge } from "flowbite-react";
 import {
   UserGroupIcon,
@@ -19,13 +19,12 @@ import {
   Cell,
 } from "recharts";
 import { LineChart } from "@/components/classroom-dashboard/charts/LineChart";
-import { ScoreDistributionChart } from "@/components/classroom-dashboard/charts/ScoreDistributionChart";
 import { QuizHeatmapChart } from "@/components/classroom-dashboard/charts/QuizHeatmapChart";
 import { QuizCompletionRateChart } from "@/components/classroom-dashboard/charts/QuizCompletionRateChart";
-import { useQuizStatistics } from "@/hooks/dashboard/useQuizStatistics";
+import { QuizScoreDistributionChart } from "@/components/classroom-dashboard/charts/QuizScoreDistributionChart";
 import type { ClassroomQuiz, QuizAttemptResponse } from "@/types/quiz";
 import type { ClassroomStudentResponse } from "@/types/classroom";
-import type { ScoreDistribution, QuizScoreStatistics } from "@/types/dashboard/DashboardStats";
+import type { ScoreDistribution } from "@/types/dashboard/DashboardStats";
 import { StudentQuizAttemptDetail } from "./StudentQuizAttemptDetail";
 
 type StudentScoreSeries = {
@@ -37,7 +36,6 @@ type StudentScoreSeries = {
 };
 
 interface QuizStatisticsSectionProps {
-  classId: string;
   classroomQuizzes: ClassroomQuiz[];
   attemptsByStudent: Record<string, QuizAttemptResponse[]>;
   students: ClassroomStudentResponse[];
@@ -48,7 +46,6 @@ interface QuizStatisticsSectionProps {
 const PASS_THRESHOLD = 5.0; // out of 10
 
 export function QuizStatisticsSection({
-  classId,
   classroomQuizzes,
   attemptsByStudent,
   students,
@@ -56,21 +53,6 @@ export function QuizStatisticsSection({
   loading = false,
 }: QuizStatisticsSectionProps) {
   const [selectedQuizIndex, setSelectedQuizIndex] = useState(0);
-  const { getQuizStatistics } = useQuizStatistics();
-  const [quizStats, setQuizStats] = useState<QuizScoreStatistics[]>([]);
-  const [statsLoading, setStatsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!classId) return;
-    setStatsLoading(true);
-    getQuizStatistics(classId)
-      .then((data) => {
-        setQuizStats(data);
-      })
-      .finally(() => {
-        setStatsLoading(false);
-      });
-  }, [classId, getQuizStatistics]);
 
   const filteredClassroomQuizzes = useMemo(
     () =>
@@ -169,9 +151,13 @@ export function QuizStatisticsSection({
     });
   }, [filteredClassroomQuizzes, studentSeries, students, quizNameMap]);
 
-  // --- Score distribution from API (aggregated across all quizzes) ---
+  // --- Score distribution computed from local quiz data ---
   const quizScoreDistribution = useMemo<ScoreDistribution[]>(() => {
-    if (quizStats.length === 0) return [];
+    const allScores = studentSeries.flatMap((s) =>
+      s.points.filter((score): score is number => score != null)
+    );
+
+    if (allScores.length === 0) return [];
 
     const rangeMap: Record<string, number> = {
       "9-10": 0,
@@ -180,24 +166,21 @@ export function QuizStatisticsSection({
       "3-4": 0,
       "0-2": 0,
     };
-    let totalCount = 0;
 
-    for (const qs of quizStats) {
-      for (const item of qs.scoreDistribution) {
-        const range = item.range;
-        if (range in rangeMap) {
-          rangeMap[range] += item.count;
-          totalCount += item.count;
-        }
+    for (const score of allScores) {
+      const range = getScoreRangeFromScore(score);
+      if (range in rangeMap) {
+        rangeMap[range]++;
       }
     }
 
+    const totalCount = allScores.length;
     return Object.entries(rangeMap).map(([range, count]) => ({
       range,
       count,
       percentage: totalCount > 0 ? (count / totalCount) * 100 : 0,
     }));
-  }, [quizStats]);
+  }, [studentSeries]);
 
   // --- Pass/Fail counts across all quizzes ---
   const passFailData = useMemo(() => {
@@ -328,12 +311,9 @@ export function QuizStatisticsSection({
       </div> */}
 
       {/* === Score Distribution === */}
-      <ScoreDistributionChart
+      <QuizScoreDistributionChart
         data={quizScoreDistribution}
-        selectedMode="QUIZ"
-        onModeChange={() => {}}
-        loading={statsLoading}
-        showModeSelector={false}
+        loading={loading}
       />
 
       {/* === Quiz Completion Rate & Avg Score === */}
@@ -498,6 +478,38 @@ export function QuizStatisticsSection({
 function truncate(str: string, maxLen: number): string {
   if (str.length <= maxLen) return str;
   return str.slice(0, maxLen - 1) + "…";
+}
+
+function getScoreRangeFromScore(score: number): string {
+  if (score >= 9) return "9-10";
+  if (score >= 7) return "7-8";
+  if (score >= 5) return "5-6";
+  if (score >= 3) return "3-4";
+  return "0-2";
+}
+
+function getScoreDistribution(scores: number[]): ScoreDistribution[] {
+  const rangeMap: Record<string, number> = {
+    "9-10": 0,
+    "7-8": 0,
+    "5-6": 0,
+    "3-4": 0,
+    "0-2": 0,
+  };
+
+  for (const score of scores) {
+    const range = getScoreRangeFromScore(score);
+    if (range in rangeMap) {
+      rangeMap[range]++;
+    }
+  }
+
+  const totalCount = scores.length;
+  return Object.entries(rangeMap).map(([range, count]) => ({
+    range,
+    count,
+    percentage: totalCount > 0 ? (count / totalCount) * 100 : 0,
+  }));
 }
 
 interface MetricCardProps {

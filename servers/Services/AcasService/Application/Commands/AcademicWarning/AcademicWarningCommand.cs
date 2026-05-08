@@ -146,9 +146,9 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                     )
             );
 
-        // Step 4: Lọc sinh viên có ít nhất 1 bài dưới ngưỡng
+        // Step 4: Lọc sinh viên có tổng điểm exam dưới ngưỡng
         var eligibleStudents = latestSubmissionsByStudent
-            .Where(kv => kv.Value.Values.Any(s => s.FinalScore < request.MinScoreThreshold))
+            .Where(kv => kv.Value.Values.Sum(s => s.FinalScore) < request.MinScoreThreshold)
             .ToList();
 
         response.TotalStudents = eligibleStudents.Count;
@@ -270,7 +270,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             );
 
         var eligibleStudents = latestSubmissionsByStudent
-            .Where(kv => kv.Value.Values.Any(s => s.FinalScore < request.MinScoreThreshold))
+            .Where(kv => kv.Value.Values.Sum(s => s.FinalScore) < request.MinScoreThreshold)
             .ToList();
 
         response.TotalStudents = eligibleStudents.Count;
@@ -741,7 +741,7 @@ public class AcademicWarningCommand : IAcademicWarningCommand
                       .ToDictionary(pg => pg.Key, pg => pg.OrderByDescending(s => s.Version).First()));
 
         var eligibleStudents = latestSubmissionsByStudent
-            .Where(kv => kv.Value.Values.Any(s => s.FinalScore < request.MinScoreThreshold))
+            .Where(kv => kv.Value.Values.Sum(s => s.FinalScore) < request.MinScoreThreshold)
             .Select(kv => new EligibleStudentContext
             {
                 StudentId = kv.Key,
@@ -847,41 +847,41 @@ public class AcademicWarningCommand : IAcademicWarningCommand
             .Where(s => s.Status == Models.SubmissionStatus.GRADED || s.Status == Models.SubmissionStatus.REGRADED)
             .ToList();
 
-        if (gradedSubmissions.Count < settings.MinExamCount)
-        {
-            _logger.LogDebug(
-                "Student {StudentId} has {Count} graded submissions, requires {Required} for Level 2. Skipping.",
-                studentId, gradedSubmissions.Count, settings.MinExamCount);
-            return false;
-        }
-
         var classroomExams = await _examinationRepository.GetByClassIdAsync(classroomId);
         var classroomExamIds = classroomExams.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);
         var relevantSubmissions = gradedSubmissions
             .Where(s => classroomExamIds.Contains(s.ExamId))
             .ToList();
 
-        if (relevantSubmissions.Count < settings.MinExamCount)
+        // Calculate total score per exam (latest submission per problem)
+        var examTotals = relevantSubmissions
+            .GroupBy(s => s.ExamId)
+            .Select(examGroup => examGroup
+                .GroupBy(s => s.ProblemId)
+                .Sum(pg => pg.OrderByDescending(s => s.Version).First().FinalScore))
+            .ToList();
+
+        if (examTotals.Count < settings.MinExamCount)
         {
             _logger.LogDebug(
-                "Student {StudentId} has only {Count} graded submissions in classroom {ClassroomId}, requires {Required}",
-                studentId, relevantSubmissions.Count, classroomId, settings.MinExamCount);
+                "Student {StudentId} has {Count} exams with submissions, requires {Required} for Level 2. Skipping.",
+                studentId, examTotals.Count, settings.MinExamCount);
             return false;
         }
 
-        var averageScore = relevantSubmissions.Average(s => s.FinalScore);
+        var averageScore = examTotals.Average();
 
         if (averageScore >= settings.AvgScoreThreshold)
         {
             _logger.LogDebug(
-                "Student {StudentId} average score {Avg:F2} >= threshold {Threshold}. Skipping Level 2.",
+                "Student {StudentId} average exam score {Avg:F2} >= threshold {Threshold}. Skipping Level 2.",
                 studentId, averageScore, settings.AvgScoreThreshold);
             return false;
         }
 
         _logger.LogInformation(
-            "Student {StudentId} qualifies for Level 2 warning: Avg={Avg:F2}, Threshold={Threshold}, Count={Count}",
-            studentId, averageScore, settings.AvgScoreThreshold, relevantSubmissions.Count);
+            "Student {StudentId} qualifies for Level 2 warning: Avg={Avg:F2}, Threshold={Threshold}, Exams={Count}",
+            studentId, averageScore, settings.AvgScoreThreshold, examTotals.Count);
 
         var level2Request = new SendAcademicWarningRequest
         {
