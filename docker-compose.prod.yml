@@ -240,8 +240,6 @@ services:
     build:
       context: ./deploy/nginx
       dockerfile: Dockerfile
-      args:
-        CONFIG: default
     container_name: acas-nginx
     ports:
       - "80:80"

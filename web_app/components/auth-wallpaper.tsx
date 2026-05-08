@@ -46,7 +46,7 @@ export default function AuthWallpaper() {
         </h1>
         
         <p className="text-xl text-white/90 mb-4 leading-relaxed">
-          Professional Programming Learning Platform
+          Professional Programming Learning System
         </p>
         
         <p className="text-lg text-white/70 leading-relaxed">
