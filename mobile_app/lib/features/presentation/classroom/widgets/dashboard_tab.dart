@@ -151,7 +151,7 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   }
 
   Widget _buildOverviewStats() {
-    final overview = _data!.overview;
+    final overview = _data?.overview ?? DashboardOverview.empty();
     return Column(
       children: [
         Row(
@@ -197,7 +197,7 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   }
 
   Widget _buildScoreDistribution() {
-    final dist = _data!.scoreDistribution;
+    final dist = _data?.scoreDistribution ?? [];
     if (dist.isEmpty) return const SizedBox.shrink();
 
     return Container(
@@ -276,7 +276,7 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   }
 
   Widget _buildAtRiskStudents() {
-    final students = _data!.atRiskStudents;
+    final students = _data?.atRiskStudents ?? [];
     if (students.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -331,7 +331,7 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   }
 
   Widget _buildRecentWarnings() {
-    final warnings = _data!.recentWarnings;
+    final warnings = _data?.recentWarnings ?? [];
     if (warnings.isEmpty) return const SizedBox.shrink();
 
     return Column(
@@ -377,8 +377,8 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   }
 
   Widget _buildExamsTab() {
-    final exams = _data!.examStatistics;
-    if (exams.isEmpty) return const Center(child: Text('No exam statistics available'));
+    final exams = _data?.examStatistics ?? [];
+    if (exams.isEmpty) return _buildEmptyTab('No exam statistics available');
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -433,8 +433,8 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
   }
 
   Widget _buildQuizzesTab() {
-    final quizzes = _data!.quizStatistics;
-    if (quizzes.isEmpty) return const Center(child: Text('No quiz statistics available'));
+    final quizzes = _data?.quizStatistics ?? [];
+    if (quizzes.isEmpty) return _buildEmptyTab('No quiz statistics available');
 
     return ListView(
       padding: const EdgeInsets.all(20),
@@ -542,6 +542,19 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
               children: List.generate(3, (index) => Container(height: 100, color: Colors.white, margin: const EdgeInsets.only(bottom: 20))),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyTab(String message) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.inbox_rounded, size: 64, color: Colors.grey[300]),
+          const SizedBox(height: 16),
+          Text(message, style: TextStyle(color: Colors.grey[500], fontSize: 15)),
         ],
       ),
     );
