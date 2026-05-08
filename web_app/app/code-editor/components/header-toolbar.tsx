@@ -246,6 +246,9 @@ export function HeaderToolbar() {
         onConfirm={() => {
           setShowLeaveModal(false);
           if (examId && examClassroomId) {
+            // Signal the guard to stop violation detection before navigating away.
+            // This sets isExamFinishedRef = true so blur/focus events are ignored.
+            window.dispatchEvent(new CustomEvent("exam:leave-problem"));
             router.push(`/my-classroom/${examClassroomId}/exam/${examId}`);
           }
         }}

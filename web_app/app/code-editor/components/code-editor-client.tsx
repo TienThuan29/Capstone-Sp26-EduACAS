@@ -137,6 +137,9 @@ export function CodeEditorClient({
   const forceSubmitTriggeredRef = useRef(false);
 
   const navigateBackToExam = useCallback(() => {
+    // Signal the guard to stop violation detection before navigating away.
+    // This sets isExamFinishedRef = true so blur/focus events are ignored.
+    window.dispatchEvent(new CustomEvent("exam:leave-problem"));
     const classroomId = examination.classroom?.id;
     if (classroomId) {
       router.replace(`/my-classroom/${classroomId}/exam/${examId}`);
