@@ -131,6 +131,26 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
                 Token comparison
               </Label>
             </div>
+            {formData.isTokenComparision && (
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  id="tc-not-ordered-comparison"
+                  checked={formData.isNotOrderedComparision ?? false}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      isNotOrderedComparision: e.target.checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="tc-not-ordered-comparison"
+                  className={`cursor-pointer ${isDark ? "text-gray-300" : "text-gray-700"}`}
+                >
+                  Not ordered comparison (not care about order between tokens)
+                </Label>
+              </div>
+            )}
             <div className="flex items-center gap-2">
               <Checkbox
                 id="tc-floating-point"
@@ -149,24 +169,7 @@ export function TestcaseBlock({ isDark, onAdd, onCancel }: TestcaseBlockProps) {
                 Floating point comparison
               </Label>
             </div>
-            <div className="flex items-center gap-2">
-              <Checkbox
-                id="tc-not-ordered-comparison"
-                checked={formData.isNotOrderedComparision !== null ? formData.isNotOrderedComparision : false}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    isNotOrderedComparision: e.target.checked,
-                  }))
-                }
-              />
-              <Label
-                htmlFor="tc-not-ordered-comparison"
-                className={`cursor-pointer ${isDark ? "text-gray-300" : "text-gray-700"}`}
-              >
-                Not ordered comparison (not care about order between tokens)
-              </Label>
-            </div>
+            
             
           </div>
           {formData.isFloatingPoint && (
