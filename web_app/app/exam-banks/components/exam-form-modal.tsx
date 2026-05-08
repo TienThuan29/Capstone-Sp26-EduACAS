@@ -83,7 +83,7 @@ export const ExamFormModal = ({
               />
             </div>
 
-            <div>
+            {/* <div>
               <Label htmlFor="total-mark">
                 Total Mark{" "}
                 <span className="text-xs text-gray-500">(1 – 10)</span>
@@ -104,7 +104,7 @@ export const ExamFormModal = ({
                 }}
                 placeholder="e.g., 10"
               />
-            </div>
+            </div> */}
 
             <div>
               <div className="mb-3 flex items-center justify-between">

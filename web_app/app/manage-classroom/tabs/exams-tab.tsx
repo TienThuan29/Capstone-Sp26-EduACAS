@@ -111,7 +111,7 @@ export function ExamsTab({
   } = useExamination();
 
   const { getEnabledProgrammingLanguages } = useProgrammingLanguage();
-  const { getAll: getAllTemplates } = useExaminationTemplate();
+  const { getByLecturerId } = useExaminationTemplate();
 
   const [languages, setLanguages] = useState<ProgrammingLanguage[]>([]);
   const [openFormModal, setOpenFormModal] = useState(false);
@@ -138,7 +138,7 @@ export function ExamsTab({
   const loadTemplates = useCallback(async () => {
     setTemplateLoading(true);
     try {
-      const result = await getAllTemplates(1, 100);
+      const result = await getByLecturerId(user?.id ?? "", 1, 100);
       setTemplateList(result.items.filter((t) => !t.isDeleted));
     } catch (e) {
       console.error("Failed to load exam templates", e);
@@ -146,7 +146,7 @@ export function ExamsTab({
     } finally {
       setTemplateLoading(false);
     }
-  }, [getAllTemplates, showError]);
+  }, [getByLecturerId, user?.id, showError]);
 
   const openFromTemplate = (template: ExaminationTemplateResponse) => {
     setOpenTemplateModal(false);
@@ -651,8 +651,8 @@ function ExaminationFormModal({
               className="mt-1"
             />
           </div>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-1">
+            {/* <div>
               <Label htmlFor="totalMark">
                 Total mark <span className="text-xs text-gray-400">(fixed at 10)</span>
               </Label>
@@ -666,8 +666,8 @@ function ExaminationFormModal({
                 value={formData.totalMark}
                 className="mt-1"
               />
-            </div>
-            <div className="flex flex-col gap-2">
+            </div> */}
+            <div className="flex flex-col">
               <Label>Status</Label>
               <Select
                 value={formData.status}
