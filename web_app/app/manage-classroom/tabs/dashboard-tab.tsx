@@ -99,7 +99,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const totalStudents = classStats.reduce((sum, cls) => sum + cls.totalStudents, 0);
   const classAverage =
     classStats.length > 0
-      ? classStats.reduce((sum, cls) => sum + cls.classAverage, 0) / classStats.length
+      ? classStats[0]?.classAverage ?? 0
       : 0;
   const totalAtRisk = classStats.reduce((sum, cls) => sum + cls.atRiskCount, 0);
   const atRiskPercentage = totalStudents > 0 ? (totalAtRisk / totalStudents) * 100 : 0;

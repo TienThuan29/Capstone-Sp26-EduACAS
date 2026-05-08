@@ -84,13 +84,26 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                 return GetDefaultScoreDistribution();
             }
 
-            var scoreGroups = allSubmissions
-                .GroupBy(s => GetScoreRange(s.FinalScore))
+            // Keep latest version per student+exam+problem
+            var latestSubmissions = allSubmissions
+                .GroupBy(s => (s.StudentId, s.ExamId, s.ProblemId))
+                .Select(g => g.OrderByDescending(s => s.Version).First())
+                .ToList();
+
+            // Group by student+exam, sum FinalScore per exam
+            var studentExamTotals = latestSubmissions
+                .GroupBy(s => new { s.StudentId, s.ExamId })
+                .Select(g => new { g.Key.StudentId, g.Key.ExamId, ExamTotal = g.Sum(s => s.FinalScore) })
+                .ToList();
+
+            var scoreGroups = studentExamTotals
+                .Select(s => GetScoreRange(s.ExamTotal))
+                .GroupBy(range => range)
                 .Select(g => new ScoreDistributionItem
                 {
                     Range = g.Key,
                     Count = g.Count(),
-                    Percentage = (float)Math.Round((double)g.Count() / allSubmissions.Count * 100, 2)
+                    Percentage = (float)Math.Round((double)g.Count() / studentExamTotals.Count * 100, 2)
                 })
                 .OrderByDescending(x => x.Count)
                 .ToList();
@@ -166,7 +179,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                     AverageScore = student.AverageScore,
                     RiskLevel = GetRiskLevel(student.AverageScore),
                     WarningLevel = student.WarningCount > 0 ? (student.WarningCount >= 2 ? 2 : 1) : 0,
-                    Trend = DetermineTrend(studentScores[student.StudentId]),
+                    // Trend = DetermineTrend(studentScores[student.StudentId]),
                     WarningCount = student.WarningCount,
                     ClassroomId = classroomId,
                     ClassroomName = classroomName
@@ -239,9 +252,6 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
 
             var allStudentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
             var allSubmissions = await _submissionRepository.GetByStudentIdsAsync(allStudentIds);
-            var submissionsByStudentId = allSubmissions
-                .GroupBy(s => s.StudentId)
-                .ToDictionary(g => g.Key, g => g.ToList());
 
             var result = new List<ClassStatsItem>();
             foreach (var classId in classroomIds)
@@ -249,19 +259,40 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                 var classEnrollments = enrollments.Where(e => e.ClassId == classId).ToList();
                 var studentIds = classEnrollments.Select(e => e.StudentId).Distinct().ToList();
 
-                var classSubmissions = studentIds
-                    .SelectMany(sid => submissionsByStudentId.TryGetValue(sid, out var list) ? list : Enumerable.Empty<Models.Submission>())
+                var classExams = await _examinationRepository.GetByClassIdAsync(classId);
+                var examIds = classExams.Select(e => e.Id).ToHashSet();
+
+                var classSubmissions = allSubmissions
+                    .Where(s => studentIds.Contains(s.StudentId) && examIds.Contains(s.ExamId))
                     .ToList();
 
-                var avgScore = classSubmissions.Count > 0
-                    ? classSubmissions.Average(s => s.FinalScore)
+                // Keep latest version per student+exam+problem
+                var latestByStudentAndExam = classSubmissions
+                    .GroupBy(s => (s.StudentId, s.ExamId, s.ProblemId))
+                    .Select(g => g.OrderByDescending(s => s.Version).First())
+                    .ToList();
+
+                // Group by student+exam, sum FinalScore per exam
+                var studentExamTotals = latestByStudentAndExam
+                    .GroupBy(s => new { s.StudentId, s.ExamId })
+                    .Select(g => new { g.Key.StudentId, g.Key.ExamId, ExamTotal = g.Sum(s => s.FinalScore) })
+                    .ToList();
+
+                // Average per student
+                var studentAverages = studentExamTotals
+                    .GroupBy(s => s.StudentId)
+                    .ToDictionary(
+                        g => g.Key,
+                        g => g.Average(s => s.ExamTotal)
+                    );
+
+                var classAverage = studentAverages.Count > 0
+                    ? (float)Math.Round(studentAverages.Values.Average(), 2)
                     : 0f;
 
                 var atRiskCount = studentIds.Count(studentId =>
                 {
-                    if (!submissionsByStudentId.TryGetValue(studentId, out var studentSubs) || studentSubs.Count == 0)
-                        return false;
-                    return studentSubs.Average(s => s.FinalScore) < 5f;
+                    return studentAverages.TryGetValue(studentId, out var avg) && avg < 5f;
                 });
 
                 classroomMap.TryGetValue(classId, out var classroom);
@@ -270,7 +301,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                     ClassId = classId,
                     ClassName = classroom?.ClassName ?? string.Empty,
                     TotalStudents = studentIds.Count,
-                    ClassAverage = (float)Math.Round(avgScore, 2),
+                    ClassAverage = classAverage,
                     AtRiskCount = atRiskCount
                 });
             }
@@ -324,12 +355,15 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                 submissionsByExamId.TryGetValue(exam.Id, out var submissions);
                 var examSubmissions = submissions ?? new List<Models.Submission>();
 
-                var latestSubmissionsByStudent = examSubmissions
-                    .GroupBy(s => s.StudentId)
+                // Keep latest version per student+problem, then sum FinalScore per student (exam-level total)
+                var studentExamTotals = examSubmissions
+                    .GroupBy(s => (s.StudentId, s.ProblemId))
                     .Select(g => g.OrderByDescending(s => s.Version).First())
+                    .GroupBy(s => s.StudentId)
+                    .Select(g => g.Sum(s => s.FinalScore))
                     .ToList();
 
-                if (latestSubmissionsByStudent.Count == 0)
+                if (studentExamTotals.Count == 0)
                 {
                     result.Add(new ExamScoreStatisticsItem
                     {
@@ -352,9 +386,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                     continue;
                 }
 
-                var scores = latestSubmissionsByStudent
-                    .Where(s => s.Status == SubmissionStatus.GRADED)
-                    .Select(s => s.FinalScore)
+                var scores = studentExamTotals
                     .OrderBy(s => s)
                     .ToList();
 
@@ -363,7 +395,7 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
                 var lowestScore = scores.Count > 0 ? scores.Min() : 0f;
                 var medianScore = CalculateMedian(scores);
 
-                var totalSubmissions = latestSubmissionsByStudent.Count;
+                var totalSubmissions = studentExamTotals.Count;
                 var submissionRate = totalStudents > 0
                     ? (float)Math.Round((double)totalSubmissions / totalStudents * 100, 2)
                     : 0f;
@@ -458,20 +490,20 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
         return "LOW";
     }
 
-    private static string DetermineTrend(List<float> scores)
-    {
-        if (scores.Count < 2) return "stable";
+    // private static string DetermineTrend(List<float> scores)
+    // {
+    //     if (scores.Count < 2) return "stable";
 
-        var orderedScores = scores.OrderBy(s => s).ToList();
-        var midpoint = orderedScores.Count / 2;
-        var firstHalfAvg = orderedScores.Take(midpoint).Average();
-        var secondHalfAvg = orderedScores.Skip(midpoint).Average();
+    //     var orderedScores = scores.OrderBy(s => s).ToList();
+    //     var midpoint = orderedScores.Count / 2;
+    //     var firstHalfAvg = orderedScores.Take(midpoint).Average();
+    //     var secondHalfAvg = orderedScores.Skip(midpoint).Average();
 
-        var diff = secondHalfAvg - firstHalfAvg;
-        if (diff > 0.5f) return "improving";
-        if (diff < -0.5f) return "declining";
-        return "stable";
-    }
+    //     var diff = secondHalfAvg - firstHalfAvg;
+    //     if (diff > 0.5f) return "improving";
+    //     if (diff < -0.5f) return "declining";
+    //     return "stable";
+    // }
 
     private static List<ScoreDistributionItem> GetDefaultScoreDistribution()
     {
