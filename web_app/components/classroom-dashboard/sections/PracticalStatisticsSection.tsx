@@ -31,10 +31,11 @@ export function PracticalStatisticsSection({
 
   const [practicalExamStatistics, setPracticalExamStatistics] = useState<ExamScoreStatistics[]>([]);
   const [selectedPracticalExamId, setSelectedPracticalExamId] = useState<string | null>(null);
+  const [isAllPracticalExamsSelected, setIsAllPracticalExamsSelected] = useState(false);
   const [practicalStatsLoading, setPracticalStatsLoading] = useState(false);
 
   const [practicalStudentScores, setPracticalStudentScores] = useState<
-    Record<string, { problemId: string; averageScore: number }[]>
+    Record<string, { examId: string; examName: string; totalScore: number }[]>
   >({});
   const [practicalStudentScoresLoading, setPracticalStudentScoresLoading] = useState(false);
 
@@ -70,28 +71,58 @@ export function PracticalStatisticsSection({
 
   // Load student scores when a PRACTICAL exam is selected
   useEffect(() => {
-    if (!selectedPracticalExamId) return;
+    if (!selectedPracticalExamId && !isAllPracticalExamsSelected) return;
+    if (isAllPracticalExamsSelected && practicalExamStatistics.length === 0) return;
 
     let cancelled = false;
     setPracticalStudentScoresLoading(true);
 
     void (async () => {
       try {
-        const submissions = await getLatestSubmissionsByExam(selectedPracticalExamId);
-        if (!cancelled) {
-          const scores: Record<string, { problemId: string; averageScore: number }[]> = {};
-          for (const ps of submissions) {
-            for (const sub of ps.submissions) {
-              if (!scores[sub.studentId]) {
-                scores[sub.studentId] = [];
+        if (isAllPracticalExamsSelected) {
+          const allScores: Record<string, { examId: string; examName: string; totalScore: number }[]> = {};
+
+          for (const exam of practicalExamStatistics) {
+            const submissions = await getLatestSubmissionsByExam(exam.examId);
+            if (cancelled) return;
+
+            for (const ps of submissions) {
+              for (const sub of ps.submissions) {
+                if (!allScores[sub.studentId]) {
+                  allScores[sub.studentId] = [];
+                }
+                allScores[sub.studentId].push({
+                  examId: exam.examId,
+                  examName: exam.examName,
+                  totalScore: sub.finalScore,
+                });
               }
-              scores[sub.studentId].push({
-                problemId: ps.problemId,
-                averageScore: sub.finalScore,
-              });
             }
           }
-          setPracticalStudentScores(scores);
+
+          if (!cancelled) {
+            setPracticalStudentScores(allScores);
+          }
+        } else if (selectedPracticalExamId) {
+          const submissions = await getLatestSubmissionsByExam(selectedPracticalExamId);
+          if (!cancelled) {
+            const scores: Record<string, { examId: string; examName: string; totalScore: number }[]> = {};
+            const selectedExam = practicalExamStatistics.find((e) => e.examId === selectedPracticalExamId);
+
+            for (const ps of submissions) {
+              for (const sub of ps.submissions) {
+                if (!scores[sub.studentId]) {
+                  scores[sub.studentId] = [];
+                }
+                scores[sub.studentId].push({
+                  examId: selectedPracticalExamId,
+                  examName: selectedExam?.examName ?? selectedPracticalExamId,
+                  totalScore: sub.finalScore,
+                });
+              }
+            }
+            setPracticalStudentScores(scores);
+          }
         }
       } catch (err) {
         if (!cancelled) console.error("Failed to load PRACTICAL student scores:", err);
@@ -103,7 +134,7 @@ export function PracticalStatisticsSection({
     return () => {
       cancelled = true;
     };
-  }, [selectedPracticalExamId, getLatestSubmissionsByExam]);
+  }, [selectedPracticalExamId, isAllPracticalExamsSelected, practicalExamStatistics, getLatestSubmissionsByExam]);
 
   return (
     <div className="mt-8">
@@ -113,13 +144,21 @@ export function PracticalStatisticsSection({
             PRACTICAL Statistics
           </h3>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
-            Per-student average scores and submission progress across PRACTICAL exams.
+            {isAllPracticalExamsSelected
+              ? "Average score across all PRACTICAL exams."
+              : "Total score per student for selected PRACTICAL exam."}
           </p>
         </div>
         <select
-          value={selectedPracticalExamId ?? ""}
+          value={isAllPracticalExamsSelected ? "__all__" : (selectedPracticalExamId ?? "")}
           onChange={(e) => {
-            setSelectedPracticalExamId(e.target.value);
+            if (e.target.value === "__all__") {
+              setIsAllPracticalExamsSelected(true);
+              setSelectedPracticalExamId(null);
+            } else {
+              setIsAllPracticalExamsSelected(false);
+              setSelectedPracticalExamId(e.target.value);
+            }
             setSelectedStudentId(null);
           }}
           disabled={practicalStatsLoading}
@@ -128,6 +167,7 @@ export function PracticalStatisticsSection({
           <option value="" disabled>
             {practicalStatsLoading ? "Loading..." : "Select a PRACTICAL exam..."}
           </option>
+          <option value="__all__">Average All Exams</option>
           {practicalExamStatistics.map((exam) => (
             <option key={exam.examId} value={exam.examId}>
               {exam.examName}
@@ -140,7 +180,7 @@ export function PracticalStatisticsSection({
         <div className="flex h-40 items-center justify-center">
           <Spinner size="xl" color="info" />
         </div>
-      ) : !selectedPracticalExamId ? (
+      ) : practicalExamStatistics.length === 0 ? (
         <div className="flex h-40 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
           <p className="text-sm text-gray-500 dark:text-gray-400">
             No PRACTICAL exams available for this classroom.
@@ -151,7 +191,7 @@ export function PracticalStatisticsSection({
           {/* Bar Chart — Average Score per Student */}
           <div className="rounded-md border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
             <h4 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-              Average Score per Student
+              {isAllPracticalExamsSelected ? "Average Score per Student (All Exams)" : "Total Score per Student"}
             </h4>
             {practicalStudentScoresLoading ? (
               <div className="flex h-48 items-center justify-center">
@@ -167,15 +207,29 @@ export function PracticalStatisticsSection({
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart
                   data={Object.entries(practicalStudentScores).map(([studentId, entries]) => {
-                    const avg =
-                      entries.length > 0
-                        ? entries.reduce((sum, e) => sum + e.averageScore, 0) / entries.length
-                        : 0;
                     const student = students.find((s) => s.studentId === studentId);
+                    let displayValue: number;
+                    let displayLabel: string;
+
+                    if (isAllPracticalExamsSelected) {
+                      const avg =
+                        entries.length > 0
+                          ? entries.reduce((sum, e) => sum + e.totalScore, 0) / entries.length
+                          : 0;
+                      displayValue = Number(avg.toFixed(2));
+                      displayLabel = "Avg Score";
+                    } else {
+                      const total =
+                        entries.reduce((sum, e) => sum + e.totalScore, 0);
+                      displayValue = Number(total.toFixed(2));
+                      displayLabel = "Total Score";
+                    }
+
                     return {
                       studentId,
                       studentName: student?.fullname ?? studentId,
-                      averageScore: Number(avg.toFixed(2)),
+                      displayValue,
+                      displayLabel,
                     };
                   })}
                   margin={{ top: 8, right: 8, left: -16, bottom: 40 }}
@@ -190,7 +244,7 @@ export function PracticalStatisticsSection({
                     height={60}
                   />
                   <YAxis
-                    domain={[0, 10]}
+                    domain={[0, isAllPracticalExamsSelected ? 10 : "auto"]}
                     tick={{ fontSize: 12 }}
                     tickLine={false}
                     axisLine={false}
@@ -205,7 +259,7 @@ export function PracticalStatisticsSection({
                             {d.studentName}
                           </p>
                           <p className="text-sm text-gray-600 dark:text-gray-300">
-                            Avg Score: <span className="font-bold">{d.averageScore}</span>
+                            {d.displayLabel}: <span className="font-bold">{d.displayValue}</span>
                           </p>
                           <p className="mt-1 text-xs text-gray-500">
                             Click to view submission breakdown
@@ -215,7 +269,7 @@ export function PracticalStatisticsSection({
                     }}
                   />
                   <Bar
-                    dataKey="averageScore"
+                    dataKey="displayValue"
                     fill="#3B82F6"
                     radius={[4, 4, 0, 0]}
                     cursor="pointer"
@@ -232,8 +286,8 @@ export function PracticalStatisticsSection({
             )}
           </div>
 
-          {/* Student Submission Detail */}
-          {selectedStudentId && (
+          {/* Student Submission Detail - Only show when specific exam is selected */}
+          {selectedStudentId && !isAllPracticalExamsSelected && selectedPracticalExamId && (
             <StudentSubmissionDetail
               examId={selectedPracticalExamId}
               studentId={selectedStudentId}
