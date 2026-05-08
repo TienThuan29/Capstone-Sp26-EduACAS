@@ -395,7 +395,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
             Overview of student performance and academic warnings
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        {/* <div className="flex items-center gap-3">
           <DefaultOutlineCustomButton
             label="Export Report"
             icon={<DocumentArrowDownIcon className="h-4 w-4" />}
@@ -404,7 +404,7 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
             label="Settings"
             icon={<Cog6ToothIcon className="h-4 w-4" />}
           />
-        </div>
+        </div> */}
       </div>
 
       {/* Sub-tab navigation */}

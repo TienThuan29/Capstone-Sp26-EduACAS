@@ -14,7 +14,7 @@ export type ExamFormState = {
 export const initialFormState: ExamFormState = {
   examName: "",
   description: "",
-  totalMark: 0,
+  totalMark: 10,
   problems: [],
 };
 
