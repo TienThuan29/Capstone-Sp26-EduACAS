@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Globalization;
 using Amazon.DynamoDBv2.Model;
 using AcasService.Models;
 
@@ -14,7 +15,7 @@ public static class DynamoMapper
             ["examName"] = new AttributeValue { S = template.ExamName },
             ["lecturerId"] = new AttributeValue { S = template.LecturerId },
             ["description"] = new AttributeValue { S = template.Description ?? string.Empty },
-            ["totalMark"] = new AttributeValue { N = template.TotalMark.ToString() },
+            ["totalMark"] = new AttributeValue { N = template.TotalMark.ToString(CultureInfo.InvariantCulture) },
             ["isDeleted"] = new AttributeValue { BOOL = template.IsDeleted },
             ["createdDate"] = new AttributeValue { S = template.CreatedDate.ToString("yyyy-MM-ddTHH:mm:ss.fffZ") }
         };
@@ -37,7 +38,7 @@ public static class DynamoMapper
                     M = new Dictionary<string, AttributeValue>
                     {
                         ["problemId"] = new AttributeValue { S = p.ProblemId },
-                        ["mark"] = new AttributeValue { N = p.Mark.ToString() }
+                        ["mark"] = new AttributeValue { N = p.Mark.ToString(CultureInfo.InvariantCulture) }
                     }
                 }).ToList()
             };
@@ -54,11 +55,11 @@ public static class DynamoMapper
             ExamName = item["examName"].S,
             LecturerId = item["lecturerId"].S,
             Description = item.ContainsKey("description") ? item["description"].S : string.Empty,
-            TotalMark = float.Parse(item["totalMark"].N),
+            TotalMark = float.Parse(item["totalMark"].N, CultureInfo.InvariantCulture),
             IsDeleted = item["isDeleted"].BOOL,
             CreatedDate = DateTime.Parse(item["createdDate"].S),
             UpdatedDate = item.ContainsKey("updatedDate") && !item["updatedDate"].NULL && !string.IsNullOrEmpty(item["updatedDate"].S)
-                ? DateTime.Parse(item["updatedDate"].S)
+                ? DateTime.Parse(item["updatedDate"].S, CultureInfo.InvariantCulture)
                 : null
         };
 

@@ -301,7 +301,7 @@
     "source": "a=int(input())\nb=int(input())\nprint(a+b)",
     "version": 1,
     "submittedDate": "2026-02-15T08:35:00",
-    "finalScore": 0,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-02-15T08:35:00",
     "testResults": [
@@ -1469,7 +1469,7 @@
     "source": "a=int(input())\nb=int(input())\nprint(a+b)",
     "version": 2,
     "submittedDate": "2026-02-15T08:05:00",
-    "finalScore": 0,
+    "finalScore": 10,
     "status": "GRADED",
     "gradedDate": "2026-02-15T08:05:00",
     "testResults": [
@@ -1907,7 +1907,7 @@
     "source": "a=int(input())\nb=int(input())\nprint(a+b)",
     "version": 3,
     "submittedDate": "2026-02-15T08:40:00",
-    "finalScore": 0,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-02-15T08:40:00",
     "testResults": [
@@ -3075,7 +3075,7 @@
     "source": "a=int(input())\nb=int(input())\nprint(a+b)",
     "version": 2,
     "submittedDate": "2026-02-15T08:25:00",
-    "finalScore": 0,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-02-15T08:25:00",
     "testResults": [
@@ -4865,7 +4865,7 @@
     "source": "print(input()[::-1])",
     "version": 1,
     "submittedDate": "2026-01-20T09:30:00",
-    "finalScore": 0,
+    "finalScore": 9,
     "status": "GRADED",
     "gradedDate": "2026-01-20T09:30:00",
     "testResults": [
@@ -5079,7 +5079,7 @@
     "source": "print(input()[::-1])",
     "version": 1,
     "submittedDate": "2026-01-20T09:25:00",
-    "finalScore": 0,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-01-20T09:25:00",
     "testResults": [
@@ -5721,7 +5721,7 @@
     "source": "print(input()[::-1])",
     "version": 1,
     "submittedDate": "2026-01-20T09:45:00",
-    "finalScore": 0,
+    "finalScore": 9,
     "status": "GRADED",
     "gradedDate": "2026-01-20T09:45:00",
     "testResults": [
@@ -7219,7 +7219,7 @@
     "source": "print(input()[::-1])",
     "version": 1,
     "submittedDate": "2026-01-20T10:20:00",
-    "finalScore": 0,
+    "finalScore": 10,
     "status": "GRADED",
     "gradedDate": "2026-01-20T10:20:00",
     "testResults": [
@@ -7861,7 +7861,7 @@
     "source": "print(input()[::-1])",
     "version": 1,
     "submittedDate": "2026-01-20T10:35:00",
-    "finalScore": 0,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-01-20T10:35:00",
     "testResults": [
@@ -8279,7 +8279,7 @@
     "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')",
     "version": 1,
     "submittedDate": "2026-02-05T09:25:00",
-    "finalScore": 0,
+    "finalScore": 9,
     "status": "GRADED",
     "gradedDate": "2026-02-05T09:25:00",
     "testResults": [
@@ -8425,7 +8425,7 @@
     "source": "n=input().strip()\nprint(len(n))",
     "version": 1,
     "submittedDate": "2026-02-05T09:00:00",
-    "finalScore": 0,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-02-05T09:00:00",
     "testResults": [
@@ -8493,7 +8493,7 @@
     "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')",
     "version": 2,
     "submittedDate": "2026-02-05T09:30:00",
-    "finalScore": 0,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-02-05T09:30:00",
     "testResults": [
@@ -8707,7 +8707,7 @@
     "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')",
     "version": 3,
     "submittedDate": "2026-02-05T09:40:00",
-    "finalScore": 0,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-02-05T09:40:00",
     "testResults": [
@@ -9777,7 +9777,7 @@
     "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')",
     "version": 2,
     "submittedDate": "2026-02-05T10:05:00",
-    "finalScore": 0,
+    "finalScore": 10,
     "status": "GRADED",
     "gradedDate": "2026-02-05T10:05:00",
     "testResults": [
@@ -9991,7 +9991,7 @@
     "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')",
     "version": 1,
     "submittedDate": "2026-02-05T10:10:00",
-    "finalScore": 0,
+    "finalScore": 9,
     "status": "GRADED",
     "gradedDate": "2026-02-05T10:10:00",
     "testResults": [
@@ -10137,7 +10137,7 @@
     "source": "n=input().strip()\nprint(len(n))",
     "version": 3,
     "submittedDate": "2026-02-05T09:40:00",
-    "finalScore": 0,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-02-05T09:40:00",
     "testResults": [
@@ -10205,7 +10205,7 @@
     "source": "score=int(input())\nif score>=90: print('A')\nelif score>=80: print('B')\nelif score>=70: print('C')\nelif score>=60: print('D')\nelse: print('F')",
     "version": 2,
     "submittedDate": "2026-02-05T10:15:00",
-    "finalScore": 0,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-02-05T10:15:00",
     "testResults": [
@@ -10925,7 +10925,7 @@
     "source": "s = input()\nprint(s[::-1])\n",
     "version": 1,
     "submittedDate": "2026-01-15T00:00:00",
-    "finalScore": 0,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-01-15T00:00:00",
     "testResults": [
@@ -11353,7 +11353,7 @@
     "source": "s = input()\nprint(s[::-1])\n",
     "version": 3,
     "submittedDate": "2026-01-15T00:00:00",
-    "finalScore": 0,
+    "finalScore": 9,
     "status": "GRADED",
     "gradedDate": "2026-01-15T00:00:00",
     "testResults": [
@@ -12355,7 +12355,7 @@
     "source": "s = input()\nprint(s[::-1])\n",
     "version": 2,
     "submittedDate": "2026-01-15T00:00:00",
-    "finalScore": 4,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-01-15T00:00:00",
     "testResults": [
@@ -13843,7 +13843,7 @@
     "source": "a = int(input())\nb = int(input())\nprint(a + b)\n",
     "version": 3,
     "submittedDate": "2026-01-15T00:00:00",
-    "finalScore": 3,
+    "finalScore": 8,
     "status": "GRADED",
     "gradedDate": "2026-01-15T00:00:00",
     "testResults": [
@@ -15341,7 +15341,7 @@
     "source": "a = int(input())\nb = int(input())\nprint(a + b)\n",
     "version": 1,
     "submittedDate": "2026-01-15T00:00:00",
-    "finalScore": 3,
+    "finalScore": 9,
     "status": "GRADED",
     "gradedDate": "2026-01-15T00:00:00",
     "testResults": [
@@ -18045,7 +18045,7 @@
     "source": "s = input()\nprint(\"YES\" if s == s[::-1] else \"NO\")\n",
     "version": 1,
     "submittedDate": "2026-02-01T00:00:00",
-    "finalScore": 3,
+    "finalScore": 7,
     "status": "GRADED",
     "gradedDate": "2026-02-01T00:00:00",
     "testResults": [

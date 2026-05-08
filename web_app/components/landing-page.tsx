@@ -94,7 +94,7 @@ export default function LandingPage() {
                 className="inline-block px-5 py-2 rounded-full text-sm font-bold"
                 style={{ backgroundColor: "#C9A24D", color: "#FFFFFF" }}
               >
-                🎓 E-LEARNING PLATFORM
+                E-LEARNING SYSTEM
               </div>
 
               <h1 className="text-5xl md:text-6xl font-bold">
@@ -104,7 +104,7 @@ export default function LandingPage() {
 
               <div className="space-y-3">
                 <h2 className="text-3xl font-semibold" style={{ color: "#1F4E79" }}>
-                  E-Learning Platform
+                  E-Learning System
                   <br />
                   <span style={{ color: "#C9A24D" }}>Professional Programming</span>
                 </h2>
@@ -188,7 +188,7 @@ export default function LandingPage() {
                 icon: <FileCodeIcon />,
                 title: "Online Submission",
                 description:
-                  "Students submit code assignments directly on the platform. More details will be added soon.",
+                  "Students submit code assignments directly on the system. More details will be added soon.",
               },
               {
                 icon: <CheckCircleIcon />,
@@ -242,7 +242,7 @@ export default function LandingPage() {
               Our Community
             </h2>
             <p className="text-lg" style={{ color: "#1E1E1E" }}>
-              Join the growing platform
+              Join the growing system
             </p>
           </div>
 
@@ -272,7 +272,7 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Platform Section */}
+      {/* System Section */}
       <section className="py-20 px-4">
         <div className="container mx-auto max-w-7xl">
           <div className="text-center mb-16">
@@ -359,7 +359,7 @@ export default function LandingPage() {
                 <span style={{ color: "#C9A24D" }}>{"<"}</span>Edu-ACAS<span style={{ color: "#C9A24D" }}>{"/>"}</span>
               </h4>
                 <p className="text-white opacity-80 text-sm">
-                  A platform for learning programming through interactive exercises and code challenges.
+                  A system for learning programming through interactive exercises and code challenges.
                 </p>
             </div>
             <div>
@@ -435,7 +435,7 @@ export default function LandingPage() {
           </div>
 
           <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(201, 162, 77, 0.3)" }}>
-            <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Professional Programming Learning Platform.</p>
+            <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Professional Programming Learning System.</p>
           </div>
         </div>
       </footer>
