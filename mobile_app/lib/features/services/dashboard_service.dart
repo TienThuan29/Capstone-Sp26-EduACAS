@@ -5,7 +5,7 @@ import '../../../core/storage/token_storage.dart';
 import '../models/dashboard_stats.dart';
 
 class DashboardService {
-  static Future<ClassroomDashboardData> getClassroomDashboardData(String classroomId) async {
+  static Future<ClassroomDashboardData> getClassroomDashboardData(String classroomId, {String? mode}) async {
     final token = await TokenStorage.getAccessToken();
     if (token == null) throw Exception('No token found');
 
@@ -21,7 +21,7 @@ class DashboardService {
         debugPrint('Failed to fetch overview: $e');
         return DashboardOverview.empty();
       }),
-      _fetchScoreDistribution(token, classroomId).then((v) => scoreDistribution = v).catchError((e) {
+      _fetchScoreDistribution(token, classroomId, mode: mode).then((v) => scoreDistribution = v).catchError((e) {
         debugPrint('Failed to fetch score distribution: $e');
         return <ScoreDistribution>[];
       }),
@@ -69,10 +69,14 @@ class DashboardService {
     return DashboardOverview.fromJson(overviewMap);
   }
 
-  static Future<List<ScoreDistribution>> _fetchScoreDistribution(String token, String classroomId) async {
+  static Future<List<ScoreDistribution>> _fetchScoreDistribution(String token, String classroomId, {String? mode}) async {
+    final Map<String, String> queryParams = {};
+    if (mode != null) queryParams['mode'] = mode;
+
     final res = await ApiNetwork.getWithAuth(
       endpoint: ApiConfig.classroomDashboardScoreDistributionEndpoint(classroomId),
       token: token,
+      queryParameters: queryParams,
     );
     return (res['dataResponse'] as List? ?? [])
         .map((e) => ScoreDistribution.fromJson(e))

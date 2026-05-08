@@ -9,8 +9,9 @@ import '../../../services/dashboard_service.dart';
 
 class DashboardTab extends StatefulWidget {
   final String classroomId;
+  final String? classroomName;
 
-  const DashboardTab({super.key, required this.classroomId});
+  const DashboardTab({super.key, required this.classroomId, this.classroomName});
 
   @override
   State<DashboardTab> createState() => _DashboardTabState();
@@ -84,33 +85,96 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
         const GradientBackground(),
         Column(
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.6),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text(
-                    'Classroom Dashboard',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Overview of student performance and warnings',
-                    style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
-                  ),
-                  const SizedBox(height: 16),
-                  TabBar(
-                    controller: _subTabController,
-                    isScrollable: true,
-                    tabAlignment: TabAlignment.start,
-                    labelColor: AppColors.primary,
-                    unselectedLabelColor: AppColors.textSecondary,
-                    indicatorColor: AppColors.primary,
-                    tabs: const [
-                      Tab(text: 'Overview'),
-                      Tab(text: 'Exams'),
-                      Tab(text: 'Quizzes'),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.classroomName ?? 'Classroom Dashboard',
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.textPrimary,
+                                letterSpacing: -0.5,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            const Text(
+                              'Analytics & Performance Insights',
+                              style: TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: const Icon(Icons.insights_rounded, color: AppColors.primary, size: 24),
+                      ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  Container(
+                    height: 44,
+                    padding: const EdgeInsets.all(4),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: TabBar(
+                      controller: _subTabController,
+                      indicatorSize: TabBarIndicatorSize.tab,
+                      dividerColor: Colors.transparent,
+                      indicator: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      labelColor: AppColors.primary,
+                      unselectedLabelColor: AppColors.textSecondary,
+                      labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                      tabs: const [
+                        Tab(text: 'Overview'),
+                        Tab(text: 'Exams'),
+                        Tab(text: 'Quizzes'),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -152,24 +216,72 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
 
   Widget _buildOverviewStats() {
     final overview = _data?.overview ?? DashboardOverview.empty();
+    final assessmentCount = (_data?.examStatistics.length ?? 0) + (_data?.quizStatistics.length ?? 0);
+    
     return Column(
       children: [
         Row(
           children: [
-            Expanded(child: _buildStatCard('Total Students', overview.totalStudents.toString(), Icons.people_outline, AppColors.primary)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildStatCard('Class Average', overview.classAverage.toStringAsFixed(1), Icons.analytics_outlined, AppColors.accent)),
+            Expanded(child: _buildMetricCard('Active Students', overview.totalStudents.toString(), Icons.people_rounded, AppColors.primary)),
+            const SizedBox(width: 16),
+            Expanded(child: _buildMetricCard('Assessments', assessmentCount.toString(), Icons.assignment_rounded, AppColors.accent)),
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _buildStatCard('At Risk', overview.atRiskCount.toString(), Icons.warning_amber_outlined, AppColors.error)),
-            const SizedBox(width: 12),
-            Expanded(child: _buildStatCard('Warnings', overview.totalWarnings.toString(), Icons.notifications_active_outlined, AppColors.warning)),
+            Expanded(child: _buildMetricCard('Class Average', '${overview.classAverage.toStringAsFixed(1)}/10', Icons.auto_graph_rounded, AppColors.info)),
+            const SizedBox(width: 16),
+            Expanded(child: _buildMetricCard('At Risk', overview.atRiskCount.toString(), Icons.warning_rounded, AppColors.error)),
           ],
         ),
       ],
+    );
+  }
+
+  Widget _buildMetricCard(String label, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 12, offset: const Offset(0, 6)),
+        ],
+        border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    color: AppColors.textLight,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+              color: AppColors.textPrimary,
+              letterSpacing: -0.5,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -196,27 +308,72 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
     );
   }
 
+  String _scoreMode = 'ALL';
+  bool _isDistLoading = false;
+
+  Future<void> _changeScoreMode(String mode) async {
+    if (_scoreMode == mode) return;
+    setState(() {
+      _scoreMode = mode;
+      _isDistLoading = true;
+    });
+
+    try {
+      final res = await DashboardService.getClassroomDashboardData(
+        widget.classroomId,
+        mode: mode == 'ALL' ? null : mode,
+      );
+      if (mounted) {
+        setState(() {
+          _data = ClassroomDashboardData(
+            overview: _data?.overview ?? DashboardOverview.empty(),
+            scoreDistribution: res.scoreDistribution,
+            atRiskStudents: _data?.atRiskStudents ?? [],
+            recentWarnings: _data?.recentWarnings ?? [],
+            examStatistics: _data?.examStatistics ?? [],
+            quizStatistics: _data?.quizStatistics ?? [],
+          );
+          _isDistLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) setState(() => _isDistLoading = false);
+    }
+  }
+
   Widget _buildScoreDistribution() {
     final dist = _data?.scoreDistribution ?? [];
-    if (dist.isEmpty) return const SizedBox.shrink();
+    if (dist.isEmpty && !_isDistLoading) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 15, offset: const Offset(0, 8)),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Score Distribution', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Score Distribution',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: AppColors.textPrimary),
+              ),
+              _buildModeSelector(),
+            ],
+          ),
           const SizedBox(height: 24),
-          SizedBox(
-            height: 200,
-            child: BarChart(
+          if (_isDistLoading)
+            const SizedBox(height: 200, child: Center(child: CircularProgressIndicator()))
+          else
+            SizedBox(
+              height: 200,
+              child: BarChart(
               BarChartData(
                 alignment: BarChartAlignment.spaceAround,
                 maxY: dist.map((e) => e.count).reduce((a, b) => a > b ? a : b).toDouble() * 1.2,
@@ -523,6 +680,46 @@ class _DashboardTabState extends State<DashboardTab> with SingleTickerProviderSt
     if (index <= 1) return AppColors.error;
     if (index <= 3) return AppColors.warning;
     return AppColors.success;
+  }
+
+  Widget _buildModeSelector() {
+    return Container(
+      padding: const EdgeInsets.all(2),
+      decoration: BoxDecoration(
+        color: Colors.grey.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          _buildModeButton('ALL'),
+          _buildModeButton('EXAM'),
+          _buildModeButton('QUIZ'),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeButton(String mode) {
+    final isSelected = _scoreMode == mode;
+    return GestureDetector(
+      onTap: () => _changeScoreMode(mode),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.white : Colors.transparent,
+          borderRadius: BorderRadius.circular(6),
+          boxShadow: isSelected ? [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 2)] : null,
+        ),
+        child: Text(
+          mode,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? AppColors.primary : AppColors.textLight,
+          ),
+        ),
+      ),
+    );
   }
 
   String _formatDateTime(DateTime dt) {

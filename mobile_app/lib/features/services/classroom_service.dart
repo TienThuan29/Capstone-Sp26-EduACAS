@@ -6,9 +6,6 @@ import 'package:mobile/features/models/classroom.dart';
 import 'package:mobile/features/models/classroom/classroom_model.dart' as paged_models;
 
 class ClassroomService {
-  static const String _classroomsEndpoint = '/api/v1/classrooms';
-  static const String _enrollEndpoint = '/api/v1/class-enrollments/enroll';
-
   /// Fetch paginated classrooms, passing userId so the backend fills
   /// the [enrollment.isJoining] flag for the current student.
   static Future<paged_models.PagedClassrooms> getAllClassrooms({
@@ -22,7 +19,7 @@ class ClassroomService {
     }
 
     final response = await ApiNetwork.getWithAuth(
-      endpoint: _classroomsEndpoint,
+      endpoint: ApiConfig.allClassroomsEndpoint,
       token: token,
       queryParameters: {
         'userId': userId,
@@ -59,7 +56,7 @@ class ClassroomService {
     }
 
     final response = await ApiNetwork.postWithAuth(
-      endpoint: _enrollEndpoint,
+      endpoint: ApiConfig.enrollClassroomEndpoint,
       token: token,
       body: {
         'classId': classId,
@@ -189,7 +186,7 @@ class ClassroomService {
       }
 
       final response = await ApiNetwork.postWithAuth(
-        endpoint: '$_classroomsEndpoint/search',
+        endpoint: '${ApiConfig.allClassroomsEndpoint}/search',
         token: token,
         body: {'classCode': keyword},
       );

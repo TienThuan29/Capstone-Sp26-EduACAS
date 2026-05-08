@@ -13,9 +13,8 @@ class ApiConfig {
   }
 
   static String get loginEndpoint => '/api/auth/v1/authenticate';
-  // static String get registerEndpoint => '/api/auth/v1/register';
+  static String get refreshTokenEndpoint => '/api/auth/v1/refresh-token';
   static String get userProfileEndpoint => '/api/auth/v1/profile';
-  static String get refreshTokenEndpoint => '/api/auth/v1/refresh';
   static String get registerDeviceTokenEndpoint =>
       '/api/acas/v1/device-token/register';
   static String get myAnnouncementsEndpoint => '/api/acas/v1/notifications/my';
@@ -24,6 +23,8 @@ class ApiConfig {
 
 
   // Classroom endpoints
+  static String get allClassroomsEndpoint => '/api/acas/v1/classrooms';
+  static String get enrollClassroomEndpoint => '/api/acas/v1/class-enrollments/enroll';
   static String lecturerClassroomsEndpoint(String lecturerId) =>
       '/api/acas/v1/classrooms/lecturer/$lecturerId';
   static String studentClassroomsEndpoint(String studentId) =>
@@ -40,6 +41,18 @@ class ApiConfig {
       '/api/acas/v1/classrooms/$classroomId/dashboard/warnings';
   static String get classroomDashboardStatsEndpoint => 
       '/api/acas/v1/classrooms/dashboard/stats';
+
+  // Student Dashboard endpoints
+  static String studentDashboardOverviewEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/student-dashboard/overview';
+  static String studentDashboardExamScoresEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/student-dashboard/exam-scores';
+  static String studentDashboardWarningsEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/student-dashboard/warnings';
+  static String studentDashboardScoreTrendEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/student-dashboard/score-trend';
+  static String studentDashboardSubmissionStatsEndpoint(String classroomId) =>
+      '/api/acas/v1/classrooms/$classroomId/student-dashboard/submission-stats';
 
   // Material endpoints
   static String materialsByClassroomEndpoint(String classroomId) =>
@@ -146,9 +159,7 @@ class ApiConfig {
       '/api/acas/v1/quizzes/$id/soft-delete';
     static String restoreQuizEndpoint(String id) => '/api/acas/v1/quizzes/$id/restore';
 
-    // Academic Warning endpoints (uses student dashboard endpoint - aligned with web_app)
-    static String studentDashboardWarningsEndpoint(String classroomId) =>
-        '/api/acas/v1/classrooms/$classroomId/student-dashboard/warnings';
+    // Academic Warning endpoints
     static String academicWarningByIdEndpoint(String id) =>
         '/api/v1/academic-warnings/$id';
 

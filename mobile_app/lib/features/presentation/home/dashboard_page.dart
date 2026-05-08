@@ -57,10 +57,66 @@ class DashboardPage extends StatelessWidget {
               const SizedBox(height: 20),
 
               ..._buildQuickActions(context),
+
+              const SizedBox(height: 32),
+              const Text(
+                'COMMUNITY OVERVIEW',
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textLight,
+                  letterSpacing: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(child: _buildSmallStat('1.2K+', 'Students')),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildSmallStat('45+', 'Lecturers')),
+                  const SizedBox(width: 12),
+                  Expanded(child: _buildSmallStat('80+', 'Classrooms')),
+                ],
+              ),
+              const SizedBox(height: 40),
             ],
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildSmallStat(String value, String label) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 10, offset: const Offset(0, 4)),
+        ],
+      ),
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textLight,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
