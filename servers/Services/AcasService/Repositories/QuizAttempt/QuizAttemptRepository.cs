@@ -1,6 +1,7 @@
 using AcasService.Repositories.DynamoDb;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using System.Globalization;
 
 namespace AcasService.Repositories.QuizAttempt;
 
@@ -36,7 +37,7 @@ public class QuizAttemptRepository : DynamoRepository, IQuizAttemptRepository
         if (quizAttempt.EndTime.HasValue)
             item["endTime"] = new AttributeValue { S = quizAttempt.EndTime.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ") };
         if (quizAttempt.FinalScore.HasValue)
-            item["finalScore"] = new AttributeValue { N = quizAttempt.FinalScore.Value.ToString() };
+            item["finalScore"] = new AttributeValue { N = quizAttempt.FinalScore.Value.ToString(CultureInfo.InvariantCulture) };
 
         await PutItemAsync(item, _quizAttemptTableName);
         return quizAttempt;
@@ -57,7 +58,7 @@ public class QuizAttemptRepository : DynamoRepository, IQuizAttemptRepository
             StartTime = DateTime.Parse(item["startTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
             EndTime = item.ContainsKey("endTime") ? DateTime.Parse(item["endTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal) : null,
             Status = Enum.Parse<Models.QuizAttemptStatus>(item["status"].S),
-            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N) : null,
+            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N, CultureInfo.InvariantCulture) : null,
             AttemptNumber = int.Parse(item["attemptNumber"].N)
         };
     }
@@ -73,7 +74,7 @@ public class QuizAttemptRepository : DynamoRepository, IQuizAttemptRepository
             StartTime = DateTime.Parse(item["startTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
             EndTime = item.ContainsKey("endTime") ? DateTime.Parse(item["endTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal) : null,
             Status = Enum.Parse<Models.QuizAttemptStatus>(item["status"].S),
-            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N) : null,
+            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N, CultureInfo.InvariantCulture) : null,
             AttemptNumber = int.Parse(item["attemptNumber"].N)
         }).ToList();
     }
@@ -98,7 +99,7 @@ public class QuizAttemptRepository : DynamoRepository, IQuizAttemptRepository
             StartTime = DateTime.Parse(item["startTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal),
             EndTime = item.ContainsKey("endTime") ? DateTime.Parse(item["endTime"].S, null, System.Globalization.DateTimeStyles.AdjustToUniversal | System.Globalization.DateTimeStyles.AssumeUniversal) : null,
             Status = Enum.Parse<Models.QuizAttemptStatus>(item["status"].S),
-            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N) : null,
+            FinalScore = item.ContainsKey("finalScore") ? double.Parse(item["finalScore"].N, CultureInfo.InvariantCulture) : null,
             AttemptNumber = int.Parse(item["attemptNumber"].N)
         }).ToList();
     }
