@@ -1,0 +1,1532 @@
+[
+  {
+    "id": "quiz-009",
+    "subjectId": "sub-008",
+    "classroomId": "cls-013",
+    "title": "Algorithm Design with Python Quiz",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-04-28T08:00:00",
+    "endDatetime": "2026-04-28T10:00:00",
+    "createdBy": "usr-lec-003",
+    "createdAt": "2026-04-20T10:00:00",
+    "updatedAt": "2026-04-28T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-037",
+        "marks": 0.15,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-038",
+        "marks": 0.15,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-039",
+        "marks": 0.15,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-040",
+        "marks": 0.15,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-049",
+        "marks": 0.15,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-052",
+        "marks": 0.15,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-053",
+        "marks": 0.15,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-054",
+        "marks": 0.15,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-055",
+        "marks": 0.15,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-056",
+        "marks": 0.15,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-057",
+        "marks": 0.15,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-058",
+        "marks": 0.15,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-059",
+        "marks": 0.15,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-060",
+        "marks": 0.15,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-009",
+        "questionId": "qzq-061",
+        "marks": 0.15,
+        "displayOrder": 15
+      }
+    ]
+  },
+  {
+    "id": "quiz-010",
+    "subjectId": "sub-013",
+    "classroomId": "cls-014",
+    "title": "C Programming Fundamentals Quiz",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-05-01T08:00:00",
+    "endDatetime": "2026-05-01T10:00:00",
+    "createdBy": "usr-lec-003",
+    "createdAt": "2026-04-24T10:00:00",
+    "updatedAt": "2026-05-01T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-041",
+        "marks": 0.15,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-042",
+        "marks": 0.15,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-043",
+        "marks": 0.15,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-044",
+        "marks": 0.15,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-050",
+        "marks": 0.15,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-062",
+        "marks": 0.15,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-063",
+        "marks": 0.15,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-064",
+        "marks": 0.15,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-065",
+        "marks": 0.15,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-066",
+        "marks": 0.15,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-067",
+        "marks": 0.15,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-068",
+        "marks": 0.15,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-069",
+        "marks": 0.15,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-070",
+        "marks": 0.15,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-010",
+        "questionId": "qzq-071",
+        "marks": 0.15,
+        "displayOrder": 15
+      }
+    ]
+  },
+  {
+    "id": "quiz-011",
+    "subjectId": "sub-014",
+    "classroomId": "cls-015",
+    "title": "Full Stack JavaScript Development Quiz",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-05-03T08:00:00",
+    "endDatetime": "2026-05-03T10:00:00",
+    "createdBy": "usr-lec-004",
+    "createdAt": "2026-04-26T10:00:00",
+    "updatedAt": "2026-05-03T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-045",
+        "marks": 0.15,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-046",
+        "marks": 0.15,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-047",
+        "marks": 0.15,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-048",
+        "marks": 0.15,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-051",
+        "marks": 0.15,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-072",
+        "marks": 0.15,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-073",
+        "marks": 0.15,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-074",
+        "marks": 0.15,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-075",
+        "marks": 0.15,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-076",
+        "marks": 0.15,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-077",
+        "marks": 0.15,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-078",
+        "marks": 0.15,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-079",
+        "marks": 0.15,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-080",
+        "marks": 0.15,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-011",
+        "questionId": "qzq-081",
+        "marks": 0.15,
+        "displayOrder": 15
+      }
+    ]
+  },
+  {
+    "id": "quiz-012",
+    "subjectId": "sub-001",
+    "classroomId": "cls-001",
+    "title": "Python Fundamentals Quiz 1",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-06T08:00:00",
+    "endDatetime": "2026-01-06T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2025-12-30T08:00:00",
+    "updatedAt": "2026-01-06T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-082",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-083",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-084",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-085",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-086",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-087",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-088",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-089",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-090",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-091",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-092",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-093",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-094",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-095",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-096",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-097",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-098",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-099",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-100",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-012",
+        "questionId": "qzq-101",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-013",
+    "subjectId": "sub-001",
+    "classroomId": "cls-001",
+    "title": "Python Fundamentals Quiz 2",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-08T08:00:00",
+    "endDatetime": "2026-01-08T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-01-01T08:00:00",
+    "updatedAt": "2026-01-08T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-082",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-083",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-084",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-085",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-086",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-087",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-088",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-089",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-090",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-091",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-092",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-093",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-094",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-095",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-096",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-097",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-098",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-099",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-100",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-013",
+        "questionId": "qzq-101",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-014",
+    "subjectId": "sub-001",
+    "classroomId": "cls-001",
+    "title": "Python Fundamentals Quiz 3",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-10T08:00:00",
+    "endDatetime": "2026-01-10T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-01-03T08:00:00",
+    "updatedAt": "2026-01-10T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-082",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-083",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-084",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-085",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-086",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-087",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-088",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-089",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-090",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-091",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-092",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-093",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-094",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-095",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-096",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-097",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-098",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-099",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-100",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-014",
+        "questionId": "qzq-101",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-015",
+    "subjectId": "sub-007",
+    "classroomId": "cls-002",
+    "title": "C++ Data Structures Quiz 1",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-07T08:00:00",
+    "endDatetime": "2026-01-07T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2025-12-31T08:00:00",
+    "updatedAt": "2026-01-07T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-102",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-103",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-104",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-105",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-106",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-107",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-108",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-109",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-110",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-111",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-112",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-113",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-114",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-115",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-116",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-117",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-118",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-119",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-120",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-015",
+        "questionId": "qzq-121",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-016",
+    "subjectId": "sub-007",
+    "classroomId": "cls-002",
+    "title": "C++ Data Structures Quiz 2",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-09T08:00:00",
+    "endDatetime": "2026-01-09T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-01-02T08:00:00",
+    "updatedAt": "2026-01-09T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-102",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-103",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-104",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-105",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-106",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-107",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-108",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-109",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-110",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-111",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-112",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-113",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-114",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-115",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-116",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-117",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-118",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-119",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-120",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-016",
+        "questionId": "qzq-121",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-017",
+    "subjectId": "sub-007",
+    "classroomId": "cls-002",
+    "title": "C++ Data Structures Quiz 3",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-11T08:00:00",
+    "endDatetime": "2026-01-11T10:00:00",
+    "createdBy": "usr-lec-001",
+    "createdAt": "2026-01-04T08:00:00",
+    "updatedAt": "2026-01-11T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-102",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-103",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-104",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-105",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-106",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-107",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-108",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-109",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-110",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-111",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-112",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-113",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-114",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-115",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-116",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-117",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-118",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-119",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-120",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-017",
+        "questionId": "qzq-121",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-018",
+    "subjectId": "sub-003",
+    "classroomId": "cls-003",
+    "title": "Object-Oriented Programming Quiz 1",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-12T08:00:00",
+    "endDatetime": "2026-01-12T10:00:00",
+    "createdBy": "usr-lec-002",
+    "createdAt": "2026-01-05T08:00:00",
+    "updatedAt": "2026-01-12T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-122",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-123",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-124",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-125",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-126",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-127",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-128",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-129",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-130",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-131",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-132",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-133",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-134",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-135",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-136",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-137",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-138",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-139",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-140",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-018",
+        "questionId": "qzq-141",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-019",
+    "subjectId": "sub-003",
+    "classroomId": "cls-003",
+    "title": "Object-Oriented Programming Quiz 2",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-14T08:00:00",
+    "endDatetime": "2026-01-14T10:00:00",
+    "createdBy": "usr-lec-002",
+    "createdAt": "2026-01-07T08:00:00",
+    "updatedAt": "2026-01-14T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-122",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-123",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-124",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-125",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-126",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-127",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-128",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-129",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-130",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-131",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-132",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-133",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-134",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-135",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-136",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-137",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-138",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-139",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-140",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-019",
+        "questionId": "qzq-141",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  },
+  {
+    "id": "quiz-020",
+    "subjectId": "sub-003",
+    "classroomId": "cls-003",
+    "title": "Object-Oriented Programming Quiz 3",
+    "duration": 30,
+    "status": "CLOSED",
+    "startDatetime": "2026-01-16T08:00:00",
+    "endDatetime": "2026-01-16T10:00:00",
+    "createdBy": "usr-lec-002",
+    "createdAt": "2026-01-09T08:00:00",
+    "updatedAt": "2026-01-16T10:05:00",
+    "questions": [
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-122",
+        "marks": 0.5,
+        "displayOrder": 1
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-123",
+        "marks": 0.5,
+        "displayOrder": 2
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-124",
+        "marks": 0.5,
+        "displayOrder": 3
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-125",
+        "marks": 0.5,
+        "displayOrder": 4
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-126",
+        "marks": 0.5,
+        "displayOrder": 5
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-127",
+        "marks": 0.5,
+        "displayOrder": 6
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-128",
+        "marks": 0.5,
+        "displayOrder": 7
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-129",
+        "marks": 0.5,
+        "displayOrder": 8
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-130",
+        "marks": 0.5,
+        "displayOrder": 9
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-131",
+        "marks": 0.5,
+        "displayOrder": 10
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-132",
+        "marks": 0.5,
+        "displayOrder": 11
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-133",
+        "marks": 0.5,
+        "displayOrder": 12
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-134",
+        "marks": 0.5,
+        "displayOrder": 13
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-135",
+        "marks": 0.5,
+        "displayOrder": 14
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-136",
+        "marks": 0.5,
+        "displayOrder": 15
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-137",
+        "marks": 0.5,
+        "displayOrder": 16
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-138",
+        "marks": 0.5,
+        "displayOrder": 17
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-139",
+        "marks": 0.5,
+        "displayOrder": 18
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-140",
+        "marks": 0.5,
+        "displayOrder": 19
+      },
+      {
+        "quizId": "quiz-020",
+        "questionId": "qzq-141",
+        "marks": 0.5,
+        "displayOrder": 20
+      }
+    ]
+  }
+]

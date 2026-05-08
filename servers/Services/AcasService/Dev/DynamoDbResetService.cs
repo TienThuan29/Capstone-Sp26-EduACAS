@@ -12,7 +12,8 @@ public class DynamoDbResetService : IDynamoDbResetService
 {
     private const int BatchWriteLimit = 25;
     private const string PartitionKeyName = "id";
-    private static readonly string SeedDataPath = Path.Combine(AppContext.BaseDirectory, "Dev", "seed-data");
+    private const string DefaultSeedDataFolder = "seed-data";
+    private string _seedDataFolder = DefaultSeedDataFolder;
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -63,6 +64,11 @@ public class DynamoDbResetService : IDynamoDbResetService
         }
 
         return new ResetResult(true, tablesToWipe.Count + 1, seeded);
+    }
+
+    public async Task<ResetResult> ResetAndSeedSeedData2Async(CancellationToken cancellationToken = default)
+    {
+        return await UseSeedDataFolderAsync("seed-data-2", () => ResetAndSeedAsync(cancellationToken));
     }
 
     public async Task<ResetResult> ResetAndSeedQuizDataAsync(CancellationToken cancellationToken = default)
@@ -571,7 +577,80 @@ public class DynamoDbResetService : IDynamoDbResetService
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(DiscussionIssue)),
             discussions, Repositories.DiscussionIssue.DynamoMapper.DiscussionIssueToDynamoItem, ct);
 
-        // 11) Academic Warnings
+        // 11) Student Answers
+        var studentAnswerDtos = LoadJson<StudentAnswerDto>("student-answers.json");
+        var studentAnswers = studentAnswerDtos.Select(dto => new StudentAnswer
+        {
+            Id = AllocateSeedId(seedIdMap, dto.Id),
+            AttemptId = RemapSeedId(seedIdMap, dto.AttemptId, "studentAnswer.attemptId"),
+            QuestionId = RemapSeedId(seedIdMap, dto.QuestionId, "studentAnswer.questionId"),
+            AnswerOptionId = string.IsNullOrWhiteSpace(dto.AnswerOptionId)
+                ? null
+                : RemapSeedId(seedIdMap, dto.AnswerOptionId, "studentAnswer.answerOptionId"),
+            TextAnswer = dto.TextAnswer,
+            IsCorrect = dto.IsCorrect
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(StudentAnswer)),
+            studentAnswers, Repositories.StudentAnswer.DynamoMapper.StudentAnswerToDynamoItem, ct);
+
+        // 12) Error Groups
+        var errorGroupDtos = LoadJson<ErrorGroupDto>("error-groups.json");
+        var errorGroups = errorGroupDtos.Select(dto => new ErrorGroup
+        {
+            Id = AllocateSeedId(seedIdMap, dto.Id),
+            ProblemId = RemapSeedId(seedIdMap, dto.ProblemId, "errorGroup.problemId"),
+            ExamId = RemapSeedId(seedIdMap, dto.ExamId, "errorGroup.examId"),
+            ErrorSignature = dto.ErrorSignature,
+            JPlagStatus = Enum.TryParse<JPlagStatus>(dto.JPlagStatus, true, out var jPlagStatus)
+                ? jPlagStatus
+                : JPlagStatus.PENDING,
+            SubmissionIds = (dto.SubmissionIds ?? new List<string>())
+                .Select(submissionId => RemapSeedId(seedIdMap, submissionId, "errorGroup.submissionId"))
+                .ToList(),
+            JPlagResults = (dto.JPlagResults ?? new List<JPlagMatchDto>())
+                .Select(match => new JPlagMatch
+                {
+                    Submission1Id = RemapSeedId(seedIdMap, match.Submission1Id, "errorGroup.submission1Id"),
+                    Submission2Id = RemapSeedId(seedIdMap, match.Submission2Id, "errorGroup.submission2Id"),
+                    SimilarityScore = match.SimilarityScore,
+                    Details = (match.Details ?? new List<JPlagMatchDetailDto>())
+                        .Select(detail => new JPlagMatchDetail
+                        {
+                            StartLine1 = detail.StartLine1,
+                            EndLine1 = detail.EndLine1,
+                            StartLine2 = detail.StartLine2,
+                            EndLine2 = detail.EndLine2,
+                            Tokens = detail.Tokens
+                        }).ToList()
+                }).ToList(),
+            CreatedDate = dto.CreatedDate
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(ErrorGroup)),
+            errorGroups, Repositories.ErrorGroup.DynamoMapper.ErrorGroupToDynamoItem, ct);
+
+        // 14) Regrading Requests
+        var regradingRequestDtos = LoadJson<RegradingRequestDto>("regrading-requests.json");
+        var regradingRequests = regradingRequestDtos.Select(dto => new RegradingRequest
+        {
+            Id = AllocateSeedId(seedIdMap, dto.Id),
+            ExaminationId = RemapSeedId(seedIdMap, dto.ExaminationId, "regradingRequest.examinationId"),
+            ImageUrls = dto.ImageUrls ?? new List<string>(),
+            SubmissionId = string.IsNullOrWhiteSpace(dto.SubmissionId)
+                ? string.Empty
+                : RemapSeedId(seedIdMap, dto.SubmissionId, "regradingRequest.submissionId"),
+            StudentId = RemapSeedId(seedIdMap, dto.StudentId, "regradingRequest.studentId"),
+            Reason = dto.Reason,
+            CreatedDate = dto.CreatedDate,
+            Status = Enum.TryParse<RegradingRequestStatus>(dto.Status, true, out var regradingStatus)
+                ? regradingStatus
+                : RegradingRequestStatus.PENDING,
+            LecturerNote = dto.LecturerNote ?? string.Empty,
+            HandledDate = dto.HandledDate
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(RegradingRequest)),
+            regradingRequests, Repositories.RegradingRequest.DynamoMapper.RegradingRequestToDynamoItem, ct);
+
+        // 13) Academic Warnings
         var warningDtos = LoadJson<AcademicWarningDto>("academic-warnings.json");
         var warnings = warningDtos.Select(w =>
         {
@@ -695,7 +774,7 @@ public class DynamoDbResetService : IDynamoDbResetService
 
     private List<T> LoadJson<T>(string filename)
     {
-        var path = Path.Combine(SeedDataPath, filename);
+        var path = Path.Combine(AppContext.BaseDirectory, "Dev", _seedDataFolder, filename);
         if (!File.Exists(path))
         {
             _logger.LogWarning("Seed file {File} not found at {Path}; skipping", filename, path);
@@ -712,6 +791,21 @@ public class DynamoDbResetService : IDynamoDbResetService
 
         _logger.LogInformation("Loaded {Count} items from {File}", items.Count, filename);
         return items;
+    }
+
+    private async Task<T> UseSeedDataFolderAsync<T>(string seedDataFolder, Func<Task<T>> action)
+    {
+        var previousFolder = _seedDataFolder;
+        _seedDataFolder = seedDataFolder;
+
+        try
+        {
+            return await action();
+        }
+        finally
+        {
+            _seedDataFolder = previousFolder;
+        }
     }
 
     // ───────────────────────────── Helpers ─────────────────────────────
@@ -1210,6 +1304,59 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string? Filename { get; set; }
         public string? FileUrl { get; set; }
         public string? Description { get; set; }
+    }
+
+    private sealed class StudentAnswerDto
+    {
+        public string Id { get; set; } = "";
+        public string AttemptId { get; set; } = "";
+        public string QuestionId { get; set; } = "";
+        public string? AnswerOptionId { get; set; }
+        public string? TextAnswer { get; set; }
+        public bool IsCorrect { get; set; }
+    }
+
+    private sealed class ErrorGroupDto
+    {
+        public string Id { get; set; } = "";
+        public string ProblemId { get; set; } = "";
+        public string ExamId { get; set; } = "";
+        public string ErrorSignature { get; set; } = "";
+        public string JPlagStatus { get; set; } = "PENDING";
+        public List<string>? SubmissionIds { get; set; }
+        public List<JPlagMatchDto>? JPlagResults { get; set; }
+        public DateTime CreatedDate { get; set; }
+    }
+
+    private sealed class JPlagMatchDto
+    {
+        public string Submission1Id { get; set; } = "";
+        public string Submission2Id { get; set; } = "";
+        public float SimilarityScore { get; set; }
+        public List<JPlagMatchDetailDto>? Details { get; set; }
+    }
+
+    private sealed class JPlagMatchDetailDto
+    {
+        public int StartLine1 { get; set; }
+        public int EndLine1 { get; set; }
+        public int StartLine2 { get; set; }
+        public int EndLine2 { get; set; }
+        public int Tokens { get; set; }
+    }
+
+    private sealed class RegradingRequestDto
+    {
+        public string Id { get; set; } = "";
+        public string ExaminationId { get; set; } = "";
+        public List<string>? ImageUrls { get; set; }
+        public string SubmissionId { get; set; } = "";
+        public string StudentId { get; set; } = "";
+        public string Reason { get; set; } = "";
+        public DateTime CreatedDate { get; set; }
+        public string Status { get; set; } = "PENDING";
+        public string? LecturerNote { get; set; }
+        public DateTime HandledDate { get; set; }
     }
 
     private sealed class DiscussionDto

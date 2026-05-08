@@ -374,7 +374,7 @@ export default function HeroParallaxBackground({
             <span
               className={`inline-block h-2 w-2 rounded-full animate-pulse ${tokens.dotClass}`}
             />
-            E-LEARNING PLATFORM
+            E-LEARNING SYSTEM
           </motion.div>
 
           <motion.h1

@@ -1,0 +1,2126 @@
+[
+  {
+    "id": "qzao-161",
+    "questionId": "qzq-037",
+    "content": "True",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-162",
+    "questionId": "qzq-037",
+    "content": "False",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-163",
+    "questionId": "qzq-038",
+    "content": "Merge sort",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-164",
+    "questionId": "qzq-038",
+    "content": "Bubble sort",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-165",
+    "questionId": "qzq-038",
+    "content": "Quick sort",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-166",
+    "questionId": "qzq-038",
+    "content": "Heap sort",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-167",
+    "questionId": "qzq-039",
+    "content": "Linked list",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-168",
+    "questionId": "qzq-039",
+    "content": "Array",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-169",
+    "questionId": "qzq-039",
+    "content": "Stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-170",
+    "questionId": "qzq-039",
+    "content": "Tree",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-171",
+    "questionId": "qzq-040",
+    "content": "Merge sort",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-172",
+    "questionId": "qzq-040",
+    "content": "Quick sort",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-173",
+    "questionId": "qzq-040",
+    "content": "Binary search",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-174",
+    "questionId": "qzq-040",
+    "content": "Breadth-first search",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-175",
+    "questionId": "qzq-041",
+    "content": "True",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-176",
+    "questionId": "qzq-041",
+    "content": "False",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-177",
+    "questionId": "qzq-042",
+    "content": "`malloc` allocates heap memory",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-178",
+    "questionId": "qzq-042",
+    "content": "`free` releases dynamically allocated memory",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-179",
+    "questionId": "qzq-042",
+    "content": "Stack memory must be freed manually",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-180",
+    "questionId": "qzq-042",
+    "content": "Forgetting to call `free` can cause memory leaks",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-181",
+    "questionId": "qzq-043",
+    "content": "char",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-182",
+    "questionId": "qzq-043",
+    "content": "int",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-183",
+    "questionId": "qzq-043",
+    "content": "string",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-184",
+    "questionId": "qzq-043",
+    "content": "bool",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-185",
+    "questionId": "qzq-044",
+    "content": "Dereferencing a null pointer",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-186",
+    "questionId": "qzq-044",
+    "content": "Reading past array bounds",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-187",
+    "questionId": "qzq-044",
+    "content": "Freeing stack memory",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-188",
+    "questionId": "qzq-044",
+    "content": "Double free of the same pointer",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-189",
+    "questionId": "qzq-045",
+    "content": "let",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-190",
+    "questionId": "qzq-045",
+    "content": "var",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-191",
+    "questionId": "qzq-046",
+    "content": "GET",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-192",
+    "questionId": "qzq-046",
+    "content": "POST",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-193",
+    "questionId": "qzq-046",
+    "content": "PUT",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-194",
+    "questionId": "qzq-046",
+    "content": "DELETE",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-195",
+    "questionId": "qzq-047",
+    "content": "slice()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-196",
+    "questionId": "qzq-047",
+    "content": "map()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-197",
+    "questionId": "qzq-047",
+    "content": "filter()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-198",
+    "questionId": "qzq-047",
+    "content": "pop()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-199",
+    "questionId": "qzq-048",
+    "content": "export",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-200",
+    "questionId": "qzq-048",
+    "content": "import",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-201",
+    "questionId": "qzq-048",
+    "content": "default",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-202",
+    "questionId": "qzq-048",
+    "content": "interface",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-203",
+    "questionId": "qzq-049",
+    "content": "O(log n)",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-204",
+    "questionId": "qzq-049",
+    "content": "O(n)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-205",
+    "questionId": "qzq-049",
+    "content": "O(n log n)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-206",
+    "questionId": "qzq-049",
+    "content": "O(1)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-207",
+    "questionId": "qzq-050",
+    "content": "int *ptr;",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-208",
+    "questionId": "qzq-050",
+    "content": "int ptr*;",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-209",
+    "questionId": "qzq-050",
+    "content": "pointer int ptr;",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-210",
+    "questionId": "qzq-050",
+    "content": "int ptr;",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-211",
+    "questionId": "qzq-051",
+    "content": ".ts",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-212",
+    "questionId": "qzq-051",
+    "content": ".js",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-213",
+    "questionId": "qzq-051",
+    "content": ".java",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-214",
+    "questionId": "qzq-051",
+    "content": ".py",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-215",
+    "questionId": "qzq-052",
+    "content": "def",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-216",
+    "questionId": "qzq-052",
+    "content": "fun",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-217",
+    "questionId": "qzq-053",
+    "content": "tuple",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-218",
+    "questionId": "qzq-053",
+    "content": "list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-219",
+    "questionId": "qzq-054",
+    "content": "#",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-220",
+    "questionId": "qzq-054",
+    "content": "//",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-221",
+    "questionId": "qzq-055",
+    "content": "append()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-222",
+    "questionId": "qzq-055",
+    "content": "push()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-223",
+    "questionId": "qzq-056",
+    "content": "**",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-224",
+    "questionId": "qzq-056",
+    "content": "^",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-225",
+    "questionId": "qzq-057",
+    "content": "len()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-226",
+    "questionId": "qzq-057",
+    "content": "count()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-227",
+    "questionId": "qzq-058",
+    "content": "json",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-228",
+    "questionId": "qzq-058",
+    "content": "random",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-229",
+    "questionId": "qzq-059",
+    "content": "for",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-230",
+    "questionId": "qzq-059",
+    "content": "switch",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-231",
+    "questionId": "qzq-060",
+    "content": "try",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-232",
+    "questionId": "qzq-060",
+    "content": "catch",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-233",
+    "questionId": "qzq-061",
+    "content": ".py",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-234",
+    "questionId": "qzq-061",
+    "content": ".pt",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-235",
+    "questionId": "qzq-062",
+    "content": "&",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-236",
+    "questionId": "qzq-062",
+    "content": "*",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-237",
+    "questionId": "qzq-063",
+    "content": "*",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-238",
+    "questionId": "qzq-063",
+    "content": "&",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-239",
+    "questionId": "qzq-064",
+    "content": "const",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-240",
+    "questionId": "qzq-064",
+    "content": "var",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-241",
+    "questionId": "qzq-065",
+    "content": "malloc()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-242",
+    "questionId": "qzq-065",
+    "content": "printf()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-243",
+    "questionId": "qzq-066",
+    "content": "stdio.h",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-244",
+    "questionId": "qzq-066",
+    "content": "string.h",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-245",
+    "questionId": "qzq-067",
+    "content": "char",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-246",
+    "questionId": "qzq-067",
+    "content": "int",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-247",
+    "questionId": "qzq-068",
+    "content": ";",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-248",
+    "questionId": "qzq-068",
+    "content": ":",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-249",
+    "questionId": "qzq-069",
+    "content": "while",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-250",
+    "questionId": "qzq-069",
+    "content": "foreach",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-251",
+    "questionId": "qzq-070",
+    "content": "struct",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-252",
+    "questionId": "qzq-070",
+    "content": "class",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-253",
+    "questionId": "qzq-071",
+    "content": ".c",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-254",
+    "questionId": "qzq-071",
+    "content": ".cpp",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-255",
+    "questionId": "qzq-072",
+    "content": "let",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-256",
+    "questionId": "qzq-072",
+    "content": "var",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-257",
+    "questionId": "qzq-073",
+    "content": "push()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-258",
+    "questionId": "qzq-073",
+    "content": "pop()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-259",
+    "questionId": "qzq-074",
+    "content": "===",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-260",
+    "questionId": "qzq-074",
+    "content": "==",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-261",
+    "questionId": "qzq-075",
+    "content": "JSON.parse()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-262",
+    "questionId": "qzq-075",
+    "content": "JSON.stringify()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-263",
+    "questionId": "qzq-076",
+    "content": ".ts",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-264",
+    "questionId": "qzq-076",
+    "content": ".js",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-265",
+    "questionId": "qzq-077",
+    "content": "export",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-266",
+    "questionId": "qzq-077",
+    "content": "import",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-267",
+    "questionId": "qzq-078",
+    "content": "map()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-268",
+    "questionId": "qzq-078",
+    "content": "filter()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-269",
+    "questionId": "qzq-079",
+    "content": "console.log()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-270",
+    "questionId": "qzq-079",
+    "content": "alert()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-271",
+    "questionId": "qzq-080",
+    "content": "export",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-272",
+    "questionId": "qzq-080",
+    "content": "private",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-273",
+    "questionId": "qzq-081",
+    "content": "static typing",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-274",
+    "questionId": "qzq-081",
+    "content": "image processing",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-275",
+    "questionId": "qzq-082",
+    "content": "def",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-276",
+    "questionId": "qzq-082",
+    "content": "fun",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-277",
+    "questionId": "qzq-082",
+    "content": "function",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-278",
+    "questionId": "qzq-082",
+    "content": "lambda",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-279",
+    "questionId": "qzq-083",
+    "content": "tuple",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-280",
+    "questionId": "qzq-083",
+    "content": "list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-281",
+    "questionId": "qzq-083",
+    "content": "dict",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-282",
+    "questionId": "qzq-083",
+    "content": "set",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-283",
+    "questionId": "qzq-084",
+    "content": "#",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-284",
+    "questionId": "qzq-084",
+    "content": "//",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-285",
+    "questionId": "qzq-084",
+    "content": "/*",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-286",
+    "questionId": "qzq-084",
+    "content": "--",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-287",
+    "questionId": "qzq-085",
+    "content": "append()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-288",
+    "questionId": "qzq-085",
+    "content": "push()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-289",
+    "questionId": "qzq-085",
+    "content": "add()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-290",
+    "questionId": "qzq-085",
+    "content": "insert()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-291",
+    "questionId": "qzq-086",
+    "content": "**",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-292",
+    "questionId": "qzq-086",
+    "content": "^",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-293",
+    "questionId": "qzq-086",
+    "content": "//",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-294",
+    "questionId": "qzq-086",
+    "content": "%",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-295",
+    "questionId": "qzq-087",
+    "content": "len()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-296",
+    "questionId": "qzq-087",
+    "content": "size()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-297",
+    "questionId": "qzq-087",
+    "content": "count()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-298",
+    "questionId": "qzq-087",
+    "content": "length()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-299",
+    "questionId": "qzq-088",
+    "content": "json",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-300",
+    "questionId": "qzq-088",
+    "content": "random",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-301",
+    "questionId": "qzq-088",
+    "content": "math",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-302",
+    "questionId": "qzq-088",
+    "content": "os",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-303",
+    "questionId": "qzq-089",
+    "content": "for",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-304",
+    "questionId": "qzq-089",
+    "content": "switch",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-305",
+    "questionId": "qzq-089",
+    "content": "do",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-306",
+    "questionId": "qzq-089",
+    "content": "until",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-307",
+    "questionId": "qzq-090",
+    "content": "try",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-308",
+    "questionId": "qzq-090",
+    "content": "catch",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-309",
+    "questionId": "qzq-090",
+    "content": "except",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-310",
+    "questionId": "qzq-090",
+    "content": "raise",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-311",
+    "questionId": "qzq-091",
+    "content": ".py",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-312",
+    "questionId": "qzq-091",
+    "content": ".pt",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-313",
+    "questionId": "qzq-091",
+    "content": ".pyth",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-314",
+    "questionId": "qzq-091",
+    "content": ".java",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-315",
+    "questionId": "qzq-092",
+    "content": "int()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-316",
+    "questionId": "qzq-092",
+    "content": "str()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-317",
+    "questionId": "qzq-092",
+    "content": "float()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-318",
+    "questionId": "qzq-092",
+    "content": "bool()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-319",
+    "questionId": "qzq-093",
+    "content": "print()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-320",
+    "questionId": "qzq-093",
+    "content": "echo()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-321",
+    "questionId": "qzq-093",
+    "content": "output()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-322",
+    "questionId": "qzq-093",
+    "content": "show()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-323",
+    "questionId": "qzq-094",
+    "content": "dict",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-324",
+    "questionId": "qzq-094",
+    "content": "list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-325",
+    "questionId": "qzq-094",
+    "content": "tuple",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-326",
+    "questionId": "qzq-094",
+    "content": "set",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-327",
+    "questionId": "qzq-095",
+    "content": "split()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-328",
+    "questionId": "qzq-095",
+    "content": "join()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-329",
+    "questionId": "qzq-095",
+    "content": "separate()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-330",
+    "questionId": "qzq-095",
+    "content": "divide()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-331",
+    "questionId": "qzq-096",
+    "content": "elif",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-332",
+    "questionId": "qzq-096",
+    "content": "else",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-333",
+    "questionId": "qzq-096",
+    "content": "except",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-334",
+    "questionId": "qzq-096",
+    "content": "case",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-335",
+    "questionId": "qzq-097",
+    "content": "sorted()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-336",
+    "questionId": "qzq-097",
+    "content": "order()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-337",
+    "questionId": "qzq-097",
+    "content": "arrange()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-338",
+    "questionId": "qzq-097",
+    "content": "sortlist()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-339",
+    "questionId": "qzq-098",
+    "content": "class",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-340",
+    "questionId": "qzq-098",
+    "content": "object",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-341",
+    "questionId": "qzq-098",
+    "content": "struct",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-342",
+    "questionId": "qzq-098",
+    "content": "type",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-343",
+    "questionId": "qzq-099",
+    "content": "indentation",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-344",
+    "questionId": "qzq-099",
+    "content": "braces",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-345",
+    "questionId": "qzq-099",
+    "content": "semicolons",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-346",
+    "questionId": "qzq-099",
+    "content": "operators",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-347",
+    "questionId": "qzq-100",
+    "content": "import",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-348",
+    "questionId": "qzq-100",
+    "content": "include",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-349",
+    "questionId": "qzq-100",
+    "content": "require",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-350",
+    "questionId": "qzq-100",
+    "content": "using",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-351",
+    "questionId": "qzq-101",
+    "content": "range()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-352",
+    "questionId": "qzq-101",
+    "content": "list()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-353",
+    "questionId": "qzq-101",
+    "content": "sequence()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-354",
+    "questionId": "qzq-101",
+    "content": "iter()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-355",
+    "questionId": "qzq-102",
+    "content": "vector",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-356",
+    "questionId": "qzq-102",
+    "content": "array",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-357",
+    "questionId": "qzq-102",
+    "content": "struct",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-358",
+    "questionId": "qzq-102",
+    "content": "pointer",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-359",
+    "questionId": "qzq-103",
+    "content": "stack",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-360",
+    "questionId": "qzq-103",
+    "content": "queue",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-361",
+    "questionId": "qzq-103",
+    "content": "tree",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-362",
+    "questionId": "qzq-103",
+    "content": "graph",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-363",
+    "questionId": "qzq-104",
+    "content": "queue",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-364",
+    "questionId": "qzq-104",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-365",
+    "questionId": "qzq-104",
+    "content": "tree",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-366",
+    "questionId": "qzq-104",
+    "content": "list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-367",
+    "questionId": "qzq-105",
+    "content": "linked list",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-368",
+    "questionId": "qzq-105",
+    "content": "vector",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-369",
+    "questionId": "qzq-105",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-370",
+    "questionId": "qzq-105",
+    "content": "heap",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-371",
+    "questionId": "qzq-106",
+    "content": "O(log n)",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-372",
+    "questionId": "qzq-106",
+    "content": "O(n)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-373",
+    "questionId": "qzq-106",
+    "content": "O(n log n)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-374",
+    "questionId": "qzq-106",
+    "content": "O(1)",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-375",
+    "questionId": "qzq-107",
+    "content": "queue",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-376",
+    "questionId": "qzq-107",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-377",
+    "questionId": "qzq-107",
+    "content": "set",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-378",
+    "questionId": "qzq-107",
+    "content": "map",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-379",
+    "questionId": "qzq-108",
+    "content": "stack top",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-380",
+    "questionId": "qzq-108",
+    "content": "queue front",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-381",
+    "questionId": "qzq-108",
+    "content": "vector back",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-382",
+    "questionId": "qzq-108",
+    "content": "list begin",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-383",
+    "questionId": "qzq-109",
+    "content": "push_back()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-384",
+    "questionId": "qzq-109",
+    "content": "pop_back()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-385",
+    "questionId": "qzq-109",
+    "content": "insert_front()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-386",
+    "questionId": "qzq-109",
+    "content": "append()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-387",
+    "questionId": "qzq-110",
+    "content": "deque",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-388",
+    "questionId": "qzq-110",
+    "content": "vector",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-389",
+    "questionId": "qzq-110",
+    "content": "set",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-390",
+    "questionId": "qzq-110",
+    "content": "map",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-391",
+    "questionId": "qzq-111",
+    "content": "tree",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-392",
+    "questionId": "qzq-111",
+    "content": "queue",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-393",
+    "questionId": "qzq-111",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-394",
+    "questionId": "qzq-111",
+    "content": "array",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-395",
+    "questionId": "qzq-112",
+    "content": "tree traversal",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-396",
+    "questionId": "qzq-112",
+    "content": "vector iteration",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-397",
+    "questionId": "qzq-112",
+    "content": "queue iteration",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-398",
+    "questionId": "qzq-112",
+    "content": "heap pop",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-399",
+    "questionId": "qzq-113",
+    "content": "unordered_map",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-400",
+    "questionId": "qzq-113",
+    "content": "vector",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-401",
+    "questionId": "qzq-113",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-402",
+    "questionId": "qzq-113",
+    "content": "list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-403",
+    "questionId": "qzq-114",
+    "content": "next",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-404",
+    "questionId": "qzq-114",
+    "content": "prev",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-405",
+    "questionId": "qzq-114",
+    "content": "child",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-406",
+    "questionId": "qzq-114",
+    "content": "root",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-407",
+    "questionId": "qzq-115",
+    "content": "stack",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-408",
+    "questionId": "qzq-115",
+    "content": "queue",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-409",
+    "questionId": "qzq-115",
+    "content": "graph",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-410",
+    "questionId": "qzq-115",
+    "content": "tree",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-411",
+    "questionId": "qzq-116",
+    "content": "array",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-412",
+    "questionId": "qzq-116",
+    "content": "linked list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-413",
+    "questionId": "qzq-116",
+    "content": "tree",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-414",
+    "questionId": "qzq-116",
+    "content": "graph",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-415",
+    "questionId": "qzq-117",
+    "content": "priority queue",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-416",
+    "questionId": "qzq-117",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-417",
+    "questionId": "qzq-117",
+    "content": "queue",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-418",
+    "questionId": "qzq-117",
+    "content": "vector",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-419",
+    "questionId": "qzq-118",
+    "content": "pop()",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-420",
+    "questionId": "qzq-118",
+    "content": "enqueue()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-421",
+    "questionId": "qzq-118",
+    "content": "push_back()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-422",
+    "questionId": "qzq-118",
+    "content": "top()",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-423",
+    "questionId": "qzq-119",
+    "content": "internal node",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-424",
+    "questionId": "qzq-119",
+    "content": "root",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-425",
+    "questionId": "qzq-119",
+    "content": "queue node",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-426",
+    "questionId": "qzq-119",
+    "content": "stack node",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-427",
+    "questionId": "qzq-120",
+    "content": "vector",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-428",
+    "questionId": "qzq-120",
+    "content": "queue",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-429",
+    "questionId": "qzq-120",
+    "content": "stack",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-430",
+    "questionId": "qzq-120",
+    "content": "list",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-431",
+    "questionId": "qzq-121",
+    "content": "nullptr",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-432",
+    "questionId": "qzq-121",
+    "content": "0x1",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-433",
+    "questionId": "qzq-121",
+    "content": "root",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-434",
+    "questionId": "qzq-121",
+    "content": "empty",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-435",
+    "questionId": "qzq-122",
+    "content": "blueprint for objects",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-436",
+    "questionId": "qzq-122",
+    "content": "instance of an object",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-437",
+    "questionId": "qzq-122",
+    "content": "module container",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-438",
+    "questionId": "qzq-122",
+    "content": "data file",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-439",
+    "questionId": "qzq-123",
+    "content": "instance of a class",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-440",
+    "questionId": "qzq-123",
+    "content": "a method",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-441",
+    "questionId": "qzq-123",
+    "content": "a package",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-442",
+    "questionId": "qzq-123",
+    "content": "an interface",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-443",
+    "questionId": "qzq-124",
+    "content": "encapsulation",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-444",
+    "questionId": "qzq-124",
+    "content": "polymorphism",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-445",
+    "questionId": "qzq-124",
+    "content": "inheritance",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-446",
+    "questionId": "qzq-124",
+    "content": "recursion",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-447",
+    "questionId": "qzq-125",
+    "content": "inheritance",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-448",
+    "questionId": "qzq-125",
+    "content": "abstraction",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-449",
+    "questionId": "qzq-125",
+    "content": "composition",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-450",
+    "questionId": "qzq-125",
+    "content": "casting",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-451",
+    "questionId": "qzq-126",
+    "content": "polymorphism",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-452",
+    "questionId": "qzq-126",
+    "content": "encapsulation",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-453",
+    "questionId": "qzq-126",
+    "content": "coupling",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-454",
+    "questionId": "qzq-126",
+    "content": "boxing",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-455",
+    "questionId": "qzq-127",
+    "content": "abstraction",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-456",
+    "questionId": "qzq-127",
+    "content": "inheritance",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-457",
+    "questionId": "qzq-127",
+    "content": "reflection",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-458",
+    "questionId": "qzq-127",
+    "content": "serialization",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-459",
+    "questionId": "qzq-128",
+    "content": "constructor",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-460",
+    "questionId": "qzq-128",
+    "content": "destructor",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-461",
+    "questionId": "qzq-128",
+    "content": "getter",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-462",
+    "questionId": "qzq-128",
+    "content": "setter",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-463",
+    "questionId": "qzq-129",
+    "content": "this",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-464",
+    "questionId": "qzq-129",
+    "content": "super",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-465",
+    "questionId": "qzq-129",
+    "content": "self",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-466",
+    "questionId": "qzq-129",
+    "content": "base",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-467",
+    "questionId": "qzq-130",
+    "content": "super",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-468",
+    "questionId": "qzq-130",
+    "content": "this",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-469",
+    "questionId": "qzq-130",
+    "content": "parent",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-470",
+    "questionId": "qzq-130",
+    "content": "base",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-471",
+    "questionId": "qzq-131",
+    "content": "same signature in a subclass",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-472",
+    "questionId": "qzq-131",
+    "content": "same name with different parameters",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-473",
+    "questionId": "qzq-131",
+    "content": "two unrelated methods",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-474",
+    "questionId": "qzq-131",
+    "content": "private method reuse",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-475",
+    "questionId": "qzq-132",
+    "content": "same name with different parameters",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-476",
+    "questionId": "qzq-132",
+    "content": "same signature in a subclass",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-477",
+    "questionId": "qzq-132",
+    "content": "hiding fields",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-478",
+    "questionId": "qzq-132",
+    "content": "creating objects",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-479",
+    "questionId": "qzq-133",
+    "content": "private",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-480",
+    "questionId": "qzq-133",
+    "content": "public",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-481",
+    "questionId": "qzq-133",
+    "content": "protected",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-482",
+    "questionId": "qzq-133",
+    "content": "package",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-483",
+    "questionId": "qzq-134",
+    "content": "getter",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-484",
+    "questionId": "qzq-134",
+    "content": "setter",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-485",
+    "questionId": "qzq-134",
+    "content": "constructor",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-486",
+    "questionId": "qzq-134",
+    "content": "interface",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-487",
+    "questionId": "qzq-135",
+    "content": "setter",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-488",
+    "questionId": "qzq-135",
+    "content": "getter",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-489",
+    "questionId": "qzq-135",
+    "content": "method",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-490",
+    "questionId": "qzq-135",
+    "content": "factory",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-491",
+    "questionId": "qzq-136",
+    "content": "composition",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-492",
+    "questionId": "qzq-136",
+    "content": "inheritance",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-493",
+    "questionId": "qzq-136",
+    "content": "polymorphism",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-494",
+    "questionId": "qzq-136",
+    "content": "abstraction",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-495",
+    "questionId": "qzq-137",
+    "content": "a contract",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-496",
+    "questionId": "qzq-137",
+    "content": "a concrete object",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-497",
+    "questionId": "qzq-137",
+    "content": "a database table",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-498",
+    "questionId": "qzq-137",
+    "content": "a loop rule",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-499",
+    "questionId": "qzq-138",
+    "content": "static",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-500",
+    "questionId": "qzq-138",
+    "content": "final",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-501",
+    "questionId": "qzq-138",
+    "content": "abstract",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-502",
+    "questionId": "qzq-138",
+    "content": "transient",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-503",
+    "questionId": "qzq-139",
+    "content": "composition",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-504",
+    "questionId": "qzq-139",
+    "content": "inheritance",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-505",
+    "questionId": "qzq-139",
+    "content": "dependency",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-506",
+    "questionId": "qzq-139",
+    "content": "generalization",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-507",
+    "questionId": "qzq-140",
+    "content": "single responsibility",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-508",
+    "questionId": "qzq-140",
+    "content": "open closed",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-509",
+    "questionId": "qzq-140",
+    "content": "liskov substitution",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-510",
+    "questionId": "qzq-140",
+    "content": "interface segregation",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-511",
+    "questionId": "qzq-141",
+    "content": "overloading",
+    "isCorrect": true
+  },
+  {
+    "id": "qzao-512",
+    "questionId": "qzq-141",
+    "content": "overriding",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-513",
+    "questionId": "qzq-141",
+    "content": "encapsulation",
+    "isCorrect": false
+  },
+  {
+    "id": "qzao-514",
+    "questionId": "qzq-141",
+    "content": "abstraction",
+    "isCorrect": false
+  }
+]

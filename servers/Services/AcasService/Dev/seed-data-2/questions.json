@@ -1,0 +1,632 @@
+[
+  {
+    "id": "qzq-037",
+    "content": "True or False: Binary search requires the input list to be sorted.",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-038",
+    "content": "Which of the following are stable sorting algorithms?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-039",
+    "content": "Which data structure is most suitable for implementing a FIFO queue?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-040",
+    "content": "Which of the following are divide-and-conquer algorithms?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-041",
+    "content": "True or False: In C, the expression `*ptr` accesses the value stored at the address in `ptr`.",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-042",
+    "content": "Which statements about `malloc` and `free` are correct?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-043",
+    "content": "Which type is most appropriate to store a single ASCII character?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-044",
+    "content": "Which actions can lead to a segmentation fault in C?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-045",
+    "content": "Which keyword declares a block-scoped variable in JavaScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-046",
+    "content": "Which of the following are valid HTTP methods commonly used in REST APIs?",
+    "type": "MULTIPLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-047",
+    "content": "Which array method returns a shallow copy of part of an array?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-048",
+    "content": "Which keyword exports a symbol from a TypeScript module?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-049",
+    "content": "What is the time complexity of binary search on a sorted list?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-050",
+    "content": "Which declaration correctly creates an integer pointer in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-051",
+    "content": "Which file extension is used for TypeScript source files?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-052",
+    "content": "Which keyword defines a function in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-053",
+    "content": "Which Python data type is immutable?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-054",
+    "content": "What symbol starts a comment in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-055",
+    "content": "Which method adds an item to the end of a Python list?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-056",
+    "content": "Which operator is used for exponentiation in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-057",
+    "content": "Which built-in function returns the length of a collection in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-058",
+    "content": "Which Python module is commonly used to work with JSON data?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-059",
+    "content": "Which loop is typically used to iterate over items in a Python sequence?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-060",
+    "content": "Which keyword starts an exception-handling block in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-061",
+    "content": "Which file extension is used for Python source files?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-062",
+    "content": "Which operator gets the address of a variable in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-063",
+    "content": "Which symbol dereferences a pointer in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-064",
+    "content": "Which keyword declares a constant value in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-065",
+    "content": "Which function allocates dynamic memory in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-066",
+    "content": "Which header is required for printf in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-067",
+    "content": "Which type stores a single character in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-068",
+    "content": "Which symbol ends a C statement?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-069",
+    "content": "Which loop repeats while its condition is true in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-070",
+    "content": "Which keyword defines a structure in C?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-071",
+    "content": "Which file extension is used for C source files?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-003"
+  },
+  {
+    "id": "qzq-072",
+    "content": "Which keyword declares a block-scoped variable in JavaScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-073",
+    "content": "Which array method adds an item to the end of an array in JavaScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-074",
+    "content": "Which operator checks both value and type in JavaScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-075",
+    "content": "Which function parses a JSON string in JavaScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-076",
+    "content": "Which file extension is used for TypeScript source files?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-077",
+    "content": "Which keyword is used to export a symbol from a TypeScript file?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-078",
+    "content": "Which array method creates a new array from transformed elements?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-079",
+    "content": "Which browser API writes messages to the console?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-080",
+    "content": "Which keyword marks a module item as accessible from other files in TypeScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-081",
+    "content": "What does TypeScript add to JavaScript?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-004"
+  },
+  {
+    "id": "qzq-082",
+    "content": "Which keyword defines a function in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-083",
+    "content": "Which data type is immutable in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-084",
+    "content": "What symbol starts a comment in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-085",
+    "content": "Which method adds an item to the end of a list?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-086",
+    "content": "Which operator is used for exponentiation in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-087",
+    "content": "Which built-in function returns the length of a collection?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-088",
+    "content": "Which module is commonly used to work with JSON data?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-089",
+    "content": "Which loop is typically used to iterate over a sequence?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-090",
+    "content": "Which keyword starts an exception handling block in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-091",
+    "content": "Which file extension is used for Python source files?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-092",
+    "content": "Which function converts text input to an integer?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-093",
+    "content": "Which built-in function prints output to the screen?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-094",
+    "content": "Which data structure stores key-value pairs?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-095",
+    "content": "Which method splits a string into a list?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-096",
+    "content": "Which keyword is used for an alternative condition?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-097",
+    "content": "Which built-in function returns a sorted copy of a list?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-098",
+    "content": "Which statement is used to define a class in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-099",
+    "content": "Which concept describes indentation in Python syntax?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-100",
+    "content": "Which keyword imports a module in Python?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-101",
+    "content": "Which built-in creates a sequence of numbers?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-102",
+    "content": "Which container grows dynamically in C++?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-103",
+    "content": "Which structure follows LIFO order?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-104",
+    "content": "Which structure follows FIFO order?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-105",
+    "content": "Which structure stores nodes with next pointers?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-106",
+    "content": "What is the time complexity of binary search on a sorted array?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-107",
+    "content": "Which structure is best for the BFS frontier?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-108",
+    "content": "Which STL adapter exposes the last pushed element?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-109",
+    "content": "Which operation adds an element to the end of a vector?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-110",
+    "content": "Which structure is best for insert and delete at both ends?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-111",
+    "content": "Which structure is hierarchical?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-112",
+    "content": "Which traversal is naturally implemented with recursion?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-113",
+    "content": "Which data structure is commonly used for fast key lookup?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-114",
+    "content": "Which field usually points to the next node in a singly linked list?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-115",
+    "content": "Which structure is often used for undo history?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-116",
+    "content": "Which concept describes data stored contiguously in memory?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-117",
+    "content": "Which structure is useful for priority scheduling?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-118",
+    "content": "Which operation removes an element from the front of a queue?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-119",
+    "content": "Which term refers to a non-leaf internal node?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-120",
+    "content": "Which container offers indexed random access?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-121",
+    "content": "Which pointer value means it does not refer to an object?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-001"
+  },
+  {
+    "id": "qzq-122",
+    "content": "A class is best described as what?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-123",
+    "content": "An object is what in OOP?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-124",
+    "content": "Which principle hides internal state behind methods?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-125",
+    "content": "Which principle lets one class reuse another class structure?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-126",
+    "content": "Which principle lets the same interface behave differently?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-127",
+    "content": "Which principle focuses on essential features and hides detail?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-128",
+    "content": "Which special method initializes a new object?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-129",
+    "content": "Which keyword refers to the current object in Java?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-130",
+    "content": "Which keyword calls the parent constructor in Java?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-131",
+    "content": "What is method overriding?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-132",
+    "content": "What is method overloading?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-133",
+    "content": "Which access modifier allows access only inside the class?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-134",
+    "content": "Which member type is used to read a private field?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-135",
+    "content": "Which member type is used to update a field?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-136",
+    "content": "Which relationship means has-a?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-137",
+    "content": "What does an interface define?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-138",
+    "content": "Which keyword marks a member as shared by all instances?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-139",
+    "content": "Which relationship means one class contains another as a field?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-140",
+    "content": "Which principle says a class should have one reason to change?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  },
+  {
+    "id": "qzq-141",
+    "content": "Which mechanism allows one method name with different parameter lists in the same class?",
+    "type": "SINGLE_CHOICE",
+    "createdBy": "usr-lec-002"
+  }
+]

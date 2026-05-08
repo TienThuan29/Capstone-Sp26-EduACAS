@@ -172,7 +172,7 @@ export function StudentDashboardTab({
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {/* My Average Score */}
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
@@ -191,7 +191,7 @@ export function StudentDashboardTab({
             </span>
             <span className="text-sm text-gray-500 dark:text-gray-400">/10</span>
           </div>
-          <div className="mt-2 flex items-center gap-1 text-sm">
+          {/* <div className="mt-2 flex items-center gap-1 text-sm">
             <TrendIcon
               trend={(overview?.trend as "improving" | "stable" | "declining") ?? "stable"}
               className={
@@ -205,7 +205,7 @@ export function StudentDashboardTab({
             <span className="capitalize text-gray-500 dark:text-gray-400">
               {overview?.trend ?? "stable"}
             </span>
-          </div>
+          </div> */}
         </div>
 
         {/* Class Average */}
@@ -243,7 +243,7 @@ export function StudentDashboardTab({
         </div>
 
         {/* My Rank */}
-        <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        {/* <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
               My Rank
@@ -261,7 +261,7 @@ export function StudentDashboardTab({
           <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
             Top {overview?.percentile.toFixed(0) ?? "0"}%
           </p>
-        </div>
+        </div> */}
 
         {/* Submission Rate */}
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800">

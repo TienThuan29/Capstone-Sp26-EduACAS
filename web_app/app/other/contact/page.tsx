@@ -259,14 +259,14 @@ export default function ContactPage() {
               </p>
             </Card>
 
-            <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
+            {/* <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">
-                Is there a fee for using the platform?
+                Is there a fee for using the system?
               </h4>
               <p className="text-gray-700 dark:text-gray-300">
                 Edu-ACAS is a free educational platform provided by FPT University. Students and lecturers can access all features including assignments, automatic grading, discussion forums, and progress tracking at no cost.
               </p>
-            </Card>
+            </Card> */}
 
             <Card className="p-6 border-2 bg-white dark:bg-gray-700" style={{ borderColor: "#C9A24D" }}>
               <h4 className="text-lg font-bold text-[#1F4E79] dark:text-[#C9A24D] mb-2">

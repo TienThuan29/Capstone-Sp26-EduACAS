@@ -36,7 +36,7 @@ export default function Footer() {
               />
             </div>
             <p className="text-white opacity-80 text-sm">
-              A platform for learning programming through interactive exercises and code challenges.
+              A system for learning programming through interactive exercises and code challenges.
             </p>
           </div>
           <div>
@@ -123,7 +123,7 @@ export default function Footer() {
         </div>
 
         <div className="border-t pt-6 text-center" style={{ borderColor: "rgba(201, 162, 77, 0.3)" }}>
-          <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Professional programming learning platform.</p>
+          <p className="text-white opacity-70 text-sm">© 2025 Edu-ACAS. Professional programming learning system.</p>
         </div>
       </div>
     </footer>

@@ -304,8 +304,7 @@ export function QuizStatisticsSection({
       </div>
 
       {/* === Row: Class Trend + Quiz Pass/Fail Distribution === */}
-      <div className="">
-        {/* Class Average Trend */}
+      {/* <div className="">Ư
         <div className="rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 lg:col-span-3">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
             <div>
@@ -326,7 +325,7 @@ export function QuizStatisticsSection({
             strokeClassName="stroke-emerald-500"
           />
         </div>
-      </div>
+      </div> */}
 
       {/* === Score Distribution === */}
       <ScoreDistributionChart

@@ -53,12 +53,56 @@ public class DeveloperController : ControllerBase
                 ItemsSeeded = result.ItemsSeeded,
                 Message = result.Success
                     ? $"Wiped {result.TablesWiped} tables and seeded {result.ItemsSeeded} items."
-                    : result.ErrorMessage
+                    : result.ErrorMessage ?? string.Empty
             });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "reset-db failed");
+            return StatusCode(500, new ResetDbResponse
+            {
+                Success = false,
+                Message = ex.Message
+            });
+        }
+    }
+
+    /// <summary>
+    /// Wipes all discovered DynamoDB tables and re-seeds them with the seed-data-2 dataset.
+    /// Only available when running in Development environment.
+    /// </summary>
+    [HttpPost("reset-db-seed-data-2")]
+    [ProducesResponseType(typeof(ResetDbResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<ActionResult<ResetDbResponse>> ResetDatabaseSeedData2(CancellationToken cancellationToken)
+    {
+        if (!_env.IsDevelopment())
+        {
+            _logger.LogWarning("reset-db-seed-data-2 was called in non-Development environment; rejecting");
+            return StatusCode(403, new ResetDbResponse
+            {
+                Success = false,
+                Message = "This endpoint is only available in Development environment."
+            });
+        }
+
+        try
+        {
+            var result = await _resetService.ResetAndSeedSeedData2Async(cancellationToken);
+            return Ok(new ResetDbResponse
+            {
+                Success = result.Success,
+                TablesWiped = result.TablesWiped,
+                ItemsSeeded = result.ItemsSeeded,
+                Message = result.Success
+                    ? $"Wiped {result.TablesWiped} tables and seeded {result.ItemsSeeded} items from seed-data-2."
+                    : result.ErrorMessage ?? string.Empty
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "reset-db-seed-data-2 failed");
             return StatusCode(500, new ResetDbResponse
             {
                 Success = false,
@@ -97,7 +141,7 @@ public class DeveloperController : ControllerBase
                 ItemsSeeded = result.ItemsSeeded,
                 Message = result.Success
                     ? $"Wiped {result.TablesWiped} quiz-related tables and seeded {result.ItemsSeeded} items."
-                    : result.ErrorMessage
+                    : result.ErrorMessage ?? string.Empty
             });
         }
         catch (Exception ex)
@@ -143,7 +187,7 @@ public class DeveloperController : ControllerBase
                 ItemsSeeded = result.ItemsSeeded,
                 Message = result.Success
                     ? $"Seeded {result.ItemsSeeded} quiz items for cls-001 (Introduction to Programming)."
-                    : result.ErrorMessage
+                    : result.ErrorMessage ?? string.Empty
             });
         }
         catch (Exception ex)
