@@ -1,0 +1,352 @@
+[
+  {
+    "id": "disc-101",
+    "classroomId": "cls-001",
+    "title": "Reading input line by line in Python",
+    "authorId": "usr-stu-014",
+    "content": "I keep mixing up split() and input() when a problem asks for values on separate lines. What is the safest pattern to read them in Python?",
+    "refProblemId": "prob-001",
+    "status": "OPEN",
+    "viewCount": 14,
+    "createdDate": "2026-04-03T09:15:00",
+    "updatedDate": "2026-04-03T11:20:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": [
+      {
+        "id": "cmt-101-01",
+        "issueId": "disc-101",
+        "authorId": "usr-stu-002",
+        "authorName": "Nguyen Huu Khoan",
+        "content": "For separate lines, I usually read each line with `input()` and convert immediately, like `a = int(input())` and `b = int(input())`.",
+        "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-04-03T09:45:00",
+        "updatedDate": "2026-04-03T09:45:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-101-01-r1",
+            "issueId": "disc-101",
+            "authorId": "usr-lec-001",
+            "authorName": "Dr. Nguyen Van An",
+            "content": "That is the safest approach for this kind of beginner problem. Use `split()` only when the statement says the inputs are on the same line.",
+            "upVoteCount": 6,
+            "isDeleted": false,
+            "createdDate": "2026-04-03T10:10:00",
+            "updatedDate": "2026-04-03T10:10:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-101-02",
+        "issueId": "disc-101",
+        "authorId": "usr-stu-006",
+        "authorName": "Hoang Thi Quyen",
+        "content": "If the input is on one line, then `map(int, input().split())` is fine. The key is matching the exact input format.",
+        "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-04-03T10:40:00",
+        "updatedDate": "2026-04-03T10:40:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-101-02-r1",
+            "issueId": "disc-101",
+            "authorId": "usr-stu-014",
+            "authorName": "Dinh Thi Linh",
+            "content": "Got it, so the input format in the statement decides whether I should use one call or many calls to `input()`.",
+            "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-04-03T11:20:00",
+            "updatedDate": "2026-04-03T11:20:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-102",
+    "classroomId": "cls-001",
+    "title": "Best order for FizzBuzz conditions",
+    "authorId": "usr-stu-015",
+    "content": "In FizzBuzz, should we check divisible by 15 first or can we check 3 and 5 separately? I keep getting the wrong output for 15.",
+    "refProblemId": "prob-002",
+    "status": "CLOSED",
+    "viewCount": 21,
+    "createdDate": "2026-04-06T13:00:00",
+    "updatedDate": "2026-04-07T08:30:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": [
+      {
+        "id": "cmt-102-01",
+        "issueId": "disc-102",
+        "authorId": "usr-stu-003",
+        "authorName": "Le Minh Khoi",
+        "content": "Check `n % 15 == 0` first. If you check `n % 3 == 0` before that, the 15 case will stop too early and print `Fizz`.",
+        "upVoteCount": 7,
+        "isDeleted": false,
+        "createdDate": "2026-04-06T13:20:00",
+        "updatedDate": "2026-04-06T13:20:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-102-01-r1",
+            "issueId": "disc-102",
+            "authorId": "usr-lec-001",
+            "authorName": "Dr. Nguyen Van An",
+            "content": "Exactly. The safest logic is `15`, then `3`, then `5`, and finally the default case.",
+            "upVoteCount": 8,
+            "isDeleted": false,
+            "createdDate": "2026-04-06T13:45:00",
+            "updatedDate": "2026-04-06T13:45:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-102-02",
+        "issueId": "disc-102",
+        "authorId": "usr-stu-008",
+        "authorName": "Do Thi Thao",
+        "content": "That also explains why some of my test cases passed for 3 and 5 individually but failed on 15.",
+        "upVoteCount": 2,
+        "isDeleted": false,
+        "createdDate": "2026-04-06T14:10:00",
+        "updatedDate": "2026-04-06T14:10:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-102-02-r1",
+            "issueId": "disc-102",
+            "authorId": "usr-stu-015",
+            "authorName": "Vu Van Nam",
+            "content": "I fixed it by moving the `15` check to the top. The output is now correct on all sample tests.",
+            "upVoteCount": 1,
+            "isDeleted": false,
+            "createdDate": "2026-04-06T14:30:00",
+            "updatedDate": "2026-04-06T14:30:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-103",
+    "classroomId": "cls-002",
+    "title": "When should I choose vector over array in C++?",
+    "authorId": "usr-stu-010",
+    "content": "For Data Structures in C++, I am unsure when to use `vector<int>` instead of a plain array. What is the practical rule in contest problems?",
+    "refProblemId": "prob-003",
+    "status": "OPEN",
+    "viewCount": 11,
+    "createdDate": "2026-04-08T10:00:00",
+    "updatedDate": "2026-04-08T12:00:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": [
+      {
+        "id": "cmt-103-01",
+        "issueId": "disc-103",
+        "authorId": "usr-stu-012",
+        "authorName": "Mai Thi Huong",
+        "content": "I use `vector` when the size is not fixed or when I need convenience like `push_back`, `size()`, and automatic memory management.",
+        "upVoteCount": 5,
+        "isDeleted": false,
+        "createdDate": "2026-04-08T10:20:00",
+        "updatedDate": "2026-04-08T10:20:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-103-01-r1",
+            "issueId": "disc-103",
+            "authorId": "usr-lec-002",
+            "authorName": "Dr. Tran Thi Binh",
+            "content": "That is the right default choice for most problems. Use arrays only when the size is truly fixed and you need the lowest-level control.",
+            "upVoteCount": 7,
+            "isDeleted": false,
+            "createdDate": "2026-04-08T10:50:00",
+            "updatedDate": "2026-04-08T10:50:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-103-02",
+        "issueId": "disc-103",
+        "authorId": "usr-stu-018",
+        "authorName": "Trinh Thi Quanh",
+        "content": "Also, `vector` is easier to pass around to functions by reference, especially when the data size may change during processing.",
+        "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-04-08T11:15:00",
+        "updatedDate": "2026-04-08T11:15:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-103-02-r1",
+            "issueId": "disc-103",
+            "authorId": "usr-stu-010",
+            "authorName": "Dang Thi Vy",
+            "content": "That makes sense. I was overusing raw arrays because they looked simpler, but `vector` is more flexible for real problems.",
+            "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-04-08T12:00:00",
+            "updatedDate": "2026-04-08T12:00:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-104",
+    "classroomId": "cls-002",
+    "title": "How do I explain stack vs queue using real examples?",
+    "authorId": "usr-stu-021",
+    "content": "I understand the definitions, but I still confuse stack and queue in practice. What are good problem examples for each structure?",
+    "refProblemId": "prob-005",
+    "status": "OPEN",
+    "viewCount": 9,
+    "createdDate": "2026-04-10T15:00:00",
+    "updatedDate": "2026-04-10T16:10:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": [
+      {
+        "id": "cmt-104-01",
+        "issueId": "disc-104",
+        "authorId": "usr-stu-005",
+        "authorName": "Phan Manh Khoi",
+        "content": "A stack fits undo operations or parentheses matching because the last item added is the first one removed. A queue fits task scheduling or BFS because items leave in arrival order.",
+        "upVoteCount": 6,
+        "isDeleted": false,
+        "createdDate": "2026-04-10T15:25:00",
+        "updatedDate": "2026-04-10T15:25:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-104-01-r1",
+            "issueId": "disc-104",
+            "authorId": "usr-lec-002",
+            "authorName": "Dr. Tran Thi Binh",
+            "content": "Good examples. When you explain them, tie the data structure to the access rule: LIFO for stack and FIFO for queue.",
+            "upVoteCount": 5,
+            "isDeleted": false,
+            "createdDate": "2026-04-10T15:50:00",
+            "updatedDate": "2026-04-10T15:50:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-104-02",
+        "issueId": "disc-104",
+        "authorId": "usr-stu-024",
+        "authorName": "Pham Thi Lan",
+        "content": "I remember it better by thinking of a stack of plates and a queue at the cafeteria. The behavior is very natural in those analogies.",
+        "upVoteCount": 4,
+        "isDeleted": false,
+        "createdDate": "2026-04-10T16:00:00",
+        "updatedDate": "2026-04-10T16:00:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-104-02-r1",
+            "issueId": "disc-104",
+            "authorId": "usr-stu-021",
+            "authorName": "Nguyen Van Thanh",
+            "content": "Those analogies help a lot. I can now map stack to `push/pop` and queue to `enqueue/dequeue` more quickly.",
+            "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-04-10T16:10:00",
+            "updatedDate": "2026-04-10T16:10:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "disc-105",
+    "classroomId": "cls-003",
+    "title": "Interface or abstract class for reusable OOP design?",
+    "authorId": "usr-stu-027",
+    "content": "In Object-Oriented Programming, how do I decide between an interface and an abstract class when I want shared behavior and a common contract?",
+    "refProblemId": "prob-004",
+    "status": "OPEN",
+    "viewCount": 16,
+    "createdDate": "2026-04-12T09:30:00",
+    "updatedDate": "2026-04-12T11:15:00",
+    "isDeleted": false,
+    "attachments": [],
+    "comments": [
+      {
+        "id": "cmt-105-01",
+        "issueId": "disc-105",
+        "authorId": "usr-stu-019",
+        "authorName": "Duong Van Ren",
+        "content": "I think of an interface as a contract and an abstract class as a partial implementation. If classes need a shared base state or helper methods, abstract class is usually better.",
+        "upVoteCount": 6,
+        "isDeleted": false,
+        "createdDate": "2026-04-12T10:00:00",
+        "updatedDate": "2026-04-12T10:00:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-105-01-r1",
+            "issueId": "disc-105",
+            "authorId": "usr-lec-003",
+            "authorName": "Dr. Pham Van Cuong",
+            "content": "That is a solid rule of thumb. If you need multiple inheritance of type, prefer an interface; if you need shared code, prefer an abstract class.",
+            "upVoteCount": 9,
+            "isDeleted": false,
+            "createdDate": "2026-04-12T10:35:00",
+            "updatedDate": "2026-04-12T10:35:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      },
+      {
+        "id": "cmt-105-02",
+        "issueId": "disc-105",
+        "authorId": "usr-stu-034",
+        "authorName": "Nguyen Thi Ngoc Anh",
+        "content": "For exam questions, I usually write that interfaces focus on capability and abstract classes focus on shared implementation.",
+        "upVoteCount": 3,
+        "isDeleted": false,
+        "createdDate": "2026-04-12T10:50:00",
+        "updatedDate": "2026-04-12T10:50:00",
+        "attachments": [],
+        "replies": [
+          {
+            "id": "cmt-105-02-r1",
+            "issueId": "disc-105",
+            "authorId": "usr-stu-027",
+            "authorName": "Do Van Tuan",
+            "content": "That phrasing is concise and easy to remember. I will use it in my review notes.",
+            "upVoteCount": 2,
+            "isDeleted": false,
+            "createdDate": "2026-04-12T11:15:00",
+            "updatedDate": "2026-04-12T11:15:00",
+            "attachments": [],
+            "replies": []
+          }
+        ]
+      }
+    ]
+  }
+]

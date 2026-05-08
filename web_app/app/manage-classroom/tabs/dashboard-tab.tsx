@@ -104,6 +104,35 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
   const totalAtRisk = classStats.reduce((sum, cls) => sum + cls.atRiskCount, 0);
   const atRiskPercentage = totalStudents > 0 ? (totalAtRisk / totalStudents) * 100 : 0;
   const totalWarnings = recentWarnings.length;
+  const quizOverview = useMemo(() => {
+    const attempts = Object.values(attemptsByStudent).flat();
+    const submittedAttempts = attempts.filter(
+      (attempt) => attempt.status === "SUBMITTED" && attempt.score != null,
+    );
+    const studentsWithAttempts = new Set(attempts.map((attempt) => attempt.studentId)).size;
+    const averageScore =
+      submittedAttempts.length > 0
+        ? submittedAttempts.reduce((sum, attempt) => sum + Number(attempt.score ?? 0), 0) /
+          submittedAttempts.length
+        : 0;
+
+    return {
+      activeStudents: students.length,
+      studentsWithAttempts,
+      totalQuizzes: classroomQuizzes.length,
+      totalAttempts: attempts.length,
+      submittedAttempts: submittedAttempts.length,
+      completionRate:
+        students.length > 0 ? (studentsWithAttempts / students.length) * 100 : 0,
+      averageScore,
+      latestQuizName:
+        classroomQuizzes.length > 0
+          ? quizNameMap[classroomQuizzes[classroomQuizzes.length - 1]?.quizId] ??
+            classroomQuizzes[classroomQuizzes.length - 1]?.quizId ??
+            "N/A"
+          : "N/A",
+    };
+  }, [attemptsByStudent, classroomQuizzes, quizNameMap, students]);
 
   // Load score distribution when mode changes
   const loadScoreDistribution = async (mode: ScoreMode) => {
@@ -534,14 +563,63 @@ export function DashboardTab({ classId, classroomName }: DashboardTabProps) {
 
       {/* ===== Quiz Tab ===== */}
       {activeSubTab === "quiz" && (
-        <QuizStatisticsSection
-          classId={classId}
-          classroomQuizzes={classroomQuizzes}
-          attemptsByStudent={attemptsByStudent}
-          students={students}
-          quizNameMap={quizNameMap}
-          loading={quizLoading}
-        />
+        <div className="space-y-6">
+          <div className="flex flex-col justify-between gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 md:flex-row md:items-center">
+            <div>
+              <div className="mb-2 flex items-center gap-2">
+                <Badge color="info" className="px-2.5 py-1 text-xs font-semibold">
+                  Quiz Dashboard
+                </Badge>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {quizOverview.latestQuizName === "N/A"
+                    ? "No quiz activity yet"
+                    : `Latest quiz: ${quizOverview.latestQuizName}`}
+                </span>
+              </div>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                Quiz performance overview
+              </h2>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Track completion, score trends, and per-student attempt progress across quizzes.
+              </p>
+            </div>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <MetricCard
+                icon={<UserGroupIcon className="h-5 w-5" />}
+                label="Active Students"
+                value={quizOverview.activeStudents.toString()}
+                accent="text-[#1F4E79]"
+              />
+              <MetricCard
+                icon={<AcademicCapIcon className="h-5 w-5" />}
+                label="Total Quizzes"
+                value={quizOverview.totalQuizzes.toString()}
+                accent="text-[#C9A24D]"
+              />
+              <MetricCard
+                icon={<ChartBarIcon className="h-5 w-5" />}
+                label="Completion Rate"
+                value={`${quizOverview.completionRate.toFixed(0)}%`}
+                accent="text-emerald-600"
+              />
+              <MetricCard
+                icon={<DocumentArrowDownIcon className="h-5 w-5" />}
+                label="Submitted Attempts"
+                value={quizOverview.submittedAttempts.toString()}
+                accent="text-indigo-600"
+              />
+            </div>
+          </div>
+
+          <QuizStatisticsSection
+            classId={classId}
+            classroomQuizzes={classroomQuizzes}
+            attemptsByStudent={attemptsByStudent}
+            students={students}
+            quizNameMap={quizNameMap}
+            loading={quizLoading}
+          />
+        </div>
       )}
     </div>
   );
