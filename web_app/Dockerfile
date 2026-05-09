@@ -6,7 +6,7 @@ ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-COPY web_app/package.json web_app/package-lock.json* ./
+COPY package.json package-lock.json* ./
 
 RUN npm install --legacy-peer-deps
 
@@ -18,7 +18,7 @@ WORKDIR /app
 ARG NEXT_PUBLIC_BACKEND_BASE_URL
 ARG NEXT_PUBLIC_GOOGLE_CLIENT_ID
 
-COPY web_app/. .
+COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
 # Lúc này ENV mới nhận được đúng URL từ file docker-compose / .env
