@@ -64,6 +64,7 @@ export function CodeEditorClient({
     setLanguage,
     setCode,
     startTimer,
+    stopTimer,
     setExamBackLink,
     submitCode,
     isSubmitting,
@@ -74,6 +75,7 @@ export function CodeEditorClient({
     monacoEditorRef,
     registerOnEditorMount,
     lastSubmissionId,
+    timerSeconds,
   } = useEditorContext();
 
   const problemId = examination.problem.id;
@@ -256,7 +258,19 @@ export function CodeEditorClient({
       setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
-  }, [examination, setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer, setExamBackLink, problemId, examId]);
+  }, [
+    examination,
+    setProblem,
+    setExamMode,
+    setTestCases,
+    setLanguage,
+    setCode,
+    startTimer,
+    setExamBackLink,
+    problemId,
+    examId,
+    isExamMode,
+  ]);
 
   useEffect(() => {
     if (!isExamMode) return;
@@ -481,6 +495,55 @@ export function CodeEditorClient({
     monacoEditorRef,
     onMonacoEditorMount: registerOnEditorMount,
   });
+
+  // When exam timer reaches 0, force-submit current problem, lock exam session, and navigate back.
+  useEffect(() => {
+    if (!isExamMode) return;
+    if (timerSeconds !== 0) return;
+    if (isExamFinishedRef.current) return;
+
+    isExamFinishedRef.current = true;
+    stopTimer();
+
+    void (async () => {
+      try {
+        await submitCode();
+      } catch (err) {
+        console.error('[AutoSubmit] Force submit current problem failed on time expiry:', err);
+      }
+
+      let lockedOnServer = false;
+      try {
+        const lockSession = await lock(examId, 'Time expired');
+        lockedOnServer = lockSession?.phase === 'LOCKED';
+      } catch (err) {
+        console.error('[AutoSubmit] Lock request failed on time expiry:', err);
+      }
+
+      if (!lockedOnServer) {
+        try {
+          const latestSession = await getByExam(examId);
+          lockedOnServer = latestSession?.phase === 'LOCKED';
+        } catch {
+          // ignore
+        }
+      }
+
+      if (lockedOnServer) {
+        markExamLockedNotice(examId);
+        clearExamSessionClientStorage(examId, studentId);
+        if (document.fullscreenElement) {
+          try {
+            await document.exitFullscreen();
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      navigateBackToExam();
+    })();
+  }, [isExamMode, timerSeconds, examId, studentId, stopTimer, lock, getByExam, navigateBackToExam]);
 
   useEffect(() => {
     if (!isExamMode || !sessionKeys || !studentId) return;
