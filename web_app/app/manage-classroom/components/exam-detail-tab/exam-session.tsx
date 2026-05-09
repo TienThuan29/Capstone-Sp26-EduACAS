@@ -26,6 +26,7 @@ import { useToast } from "@/hooks/useToast";
 import { formatDate } from "@/utils/datetime-utils";
 import { CheckCircle } from "lucide-react";
 import { ExamSessionTabSkeleton } from "@/components/ui/skeletons";
+// import { clearExamSessionClientStorage } from "@/utils/student-exam-session";
 
 const PHASE_LABELS: Record<
   StudentExamSessionPhase,
@@ -91,6 +92,7 @@ export function ExamSessionTabContent({
         sessionToRetake.studentId,
       );
       setRetakeModalOpen(false);
+      // clearExamSessionClientStorage(sessionToRetake.examId, sessionToRetake.studentId);
       setDeletedSessionName(sessionToRetake.studentName);
       setSuccessModalOpen(true);
       await fetchSessions();
