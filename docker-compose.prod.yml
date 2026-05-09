@@ -218,8 +218,8 @@ services:
 
   web-app:
     build:
-      context: .
-      dockerfile: web_app/Dockerfile
+      context: ./web_app
+      dockerfile: Dockerfile
       args:
         NEXT_PUBLIC_BACKEND_BASE_URL: ${NEXT_PUBLIC_BACKEND_BASE_URL}
         NEXT_PUBLIC_GOOGLE_CLIENT_ID: ${NEXT_PUBLIC_GOOGLE_CLIENT_ID}
