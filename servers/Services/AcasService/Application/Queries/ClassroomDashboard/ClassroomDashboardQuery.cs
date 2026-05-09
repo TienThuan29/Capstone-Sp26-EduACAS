@@ -253,14 +253,19 @@ public class ClassroomDashboardQuery : IClassroomDashboardQuery
             var allStudentIds = enrollments.Select(e => e.StudentId).Distinct().ToList();
             var allSubmissions = await _submissionRepository.GetByStudentIdsAsync(allStudentIds);
 
+            var allClassExams = await _examinationRepository.GetByClassIdsAsync(classroomIds);
+            var examsByClassId = allClassExams
+                .GroupBy(e => e.ClassroomId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
             var result = new List<ClassStatsItem>();
             foreach (var classId in classroomIds)
             {
                 var classEnrollments = enrollments.Where(e => e.ClassId == classId).ToList();
                 var studentIds = classEnrollments.Select(e => e.StudentId).Distinct().ToList();
 
-                var classExams = await _examinationRepository.GetByClassIdAsync(classId);
-                var examIds = classExams.Select(e => e.Id).ToHashSet();
+                examsByClassId.TryGetValue(classId, out var classExams);
+                var examIds = (classExams ?? []).Select(e => e.Id).ToHashSet();
 
                 var classSubmissions = allSubmissions
                     .Where(s => studentIds.Contains(s.StudentId) && examIds.Contains(s.ExamId))

@@ -417,7 +417,7 @@ export function SubmissionsTabContent({
         classroomId: classId,
         examId: examId,
         warningLevel: 1,
-        minScoreThreshold: 5.0,
+        minScoreThreshold: examination.minScoreThreshold,
       });
       showSuccess("Academic warning job enqueued successfully. Warnings and emails will be sent in the background.");
       onWarningSent?.();
@@ -427,7 +427,7 @@ export function SubmissionsTabContent({
     } finally {
       setSendingWarning(false);
     }
-  }, [classId, examId, sendBatchAcademicWarnings, showSuccess, showError, onWarningSent]);
+  }, [classId, examId, examination.minScoreThreshold, sendBatchAcademicWarnings, showSuccess, showError, onWarningSent]);
 
   if (loading) {
     return <ExamSubmissionsTabSkeleton />;

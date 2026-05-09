@@ -188,6 +188,33 @@ public class ExaminationRepository : DynamoRepository, IExaminationRepository
         }
     }
 
+    public async Task<List<Models.Examination>> GetByClassIdsAsync(IEnumerable<string> classIds)
+    {
+        try
+        {
+            var classIdSet = classIds.Where(id => !string.IsNullOrEmpty(id)).ToHashSet();
+            if (classIdSet.Count == 0)
+                return new List<Models.Examination>();
+
+            var request = new ScanRequest { TableName = _examinationTableName };
+            var response = await _dynamoDBClient.ScanAsync(request);
+            var result = response.Items
+                .Where(item =>
+                    item.ContainsKey("classroomId") &&
+                    classIdSet.Contains(item["classroomId"].S)
+                )
+                .Select(DynamoMapper.DynamoItemToExamination)
+                .ToList();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error occurred while getting examinations by class Ids");
+            throw;
+        }
+    }
+
     public async Task<List<Models.Examination>> GetByClassIdAndModeAsync(string classId, string mode)
     {
         try
