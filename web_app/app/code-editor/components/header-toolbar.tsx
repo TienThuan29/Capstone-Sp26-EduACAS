@@ -30,6 +30,7 @@ export function HeaderToolbar() {
     submitAndGrade,
     isSubmitting,
     isExamMode,
+    isExaminationMode,
     examId,
     examClassroomId,
     selectedCompiler,
@@ -87,8 +88,10 @@ export function HeaderToolbar() {
     return () => window.removeEventListener(EXAM_SESSION_SYNC_EVENT, onSync);
   }, [examId, studentId, getByExam]);
 
-  const isExamEnded = serverPhase === "LOCKED" || serverPhase === "COMPLETED";
-  const isExamSessionLoading = Boolean(examId && serverPhase === undefined);
+  // Only check session phase when in strict exam mode.
+  // In PRACTICAL mode, examId may be present but there's no session to manage.
+  const isExamEnded = isExaminationMode && (serverPhase === "LOCKED" || serverPhase === "COMPLETED");
+  const isExamSessionLoading = isExaminationMode && Boolean(examId && serverPhase === undefined);
 
   return (
     <>
@@ -276,7 +279,7 @@ export function HeaderToolbar() {
         isOpen={showSubmitModal}
         onClose={() => !(isSubmitting || isPracticeSubmitting) && setShowSubmitModal(false)}
         onConfirm={async () => {
-          if (isExamMode) {
+          if (isExaminationMode) {
             await submitCode();
           } else {
             clearSubmissionError();
@@ -288,9 +291,9 @@ export function HeaderToolbar() {
           }
           setShowSubmitModal(false);
         }}
-        title={isExamMode ? "Submit code" : "Submit & Grade"}
+        title={isExaminationMode ? "Submit code" : "Submit & Grade"}
         message={
-          isExamMode
+          isExaminationMode
             ? "Are you sure you want to submit your code for this problem? You may not be able to resubmit depending on exam settings."
             : "Submit your code to run all test cases and get your score. This will not count against any exam attempt limits."
         }
