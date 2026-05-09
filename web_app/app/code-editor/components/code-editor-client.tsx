@@ -64,6 +64,7 @@ export function CodeEditorClient({
     setLanguage,
     setCode,
     startTimer,
+    stopTimer,
     setExamBackLink,
     submitCode,
     isSubmitting,
@@ -74,6 +75,8 @@ export function CodeEditorClient({
     monacoEditorRef,
     registerOnEditorMount,
     lastSubmissionId,
+    timerSeconds,
+    isTimerExpired,
   } = useEditorContext();
 
   const problemId = examination.problem.id;
@@ -84,17 +87,7 @@ export function CodeEditorClient({
    * Check if the exam mode is EXAMINATION and useStrict is true.
    * The backend uses JsonStringEnumConverter, so mode is serialized as "EXAMINATION" (string).
    */
-  // const isExamMode = useMemo(() => {
-  //   const rawMode = examination.mode as unknown;
-  //   const useStrict = examination.useStrict;
-  //   if (typeof rawMode === 'number' && useStrict) {
-  //     return rawMode === Mode.EXAMINATION;
-  //   }
-  //   if (typeof rawMode === 'string' && useStrict) {
-  //     return rawMode.toUpperCase() === 'EXAMINATION';
-  //   }
-  //   return false;
-  // }, [examination.mode]);
+  const isTimedMode = examination.mode === "PRACTICAL" || (examination.useStrict === true && examination.mode === "EXAMINATION");
   const isExamMode = examination.useStrict === true && examination.mode === "EXAMINATION";
   // console.log('strict mode:' , examination.useStrict)
 
@@ -137,6 +130,9 @@ export function CodeEditorClient({
   const forceSubmitTriggeredRef = useRef(false);
 
   const navigateBackToExam = useCallback(() => {
+    // Signal the guard to stop violation detection before navigating away.
+    // This sets isExamFinishedRef = true so blur/focus events are ignored.
+    window.dispatchEvent(new CustomEvent("exam:leave-problem"));
     const classroomId = examination.classroom?.id;
     if (classroomId) {
       router.replace(`/my-classroom/${classroomId}/exam/${examId}`);
@@ -252,11 +248,30 @@ export function CodeEditorClient({
     }
 
     // if (examination.endDatetime) {
-    if (isExamMode && examination.endDatetime) {
+    if (isTimedMode && examination.endDatetime) {
       setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
-  }, [examination, setProblem, setExamMode, setTestCases, setLanguage, setCode, startTimer, setExamBackLink, problemId, examId]);
+  }, [
+    examination,
+    setProblem,
+    setExamMode,
+    setTestCases,
+    setLanguage,
+    setCode,
+    startTimer,
+    setExamBackLink,
+    problemId,
+    examId,
+    isExamMode,
+  ]);
+
+  // When timer expires, force-navigate back to the exam
+  useEffect(() => {
+    if (!isTimerExpired) return;
+    console.log('[CodeEditor] Timer expired — navigating back to exam');
+    navigateBackToExam();
+  }, [isTimerExpired, navigateBackToExam]);
 
   useEffect(() => {
     if (!isExamMode) return;
@@ -481,6 +496,55 @@ export function CodeEditorClient({
     monacoEditorRef,
     onMonacoEditorMount: registerOnEditorMount,
   });
+
+  // When exam timer reaches 0, force-submit current problem, lock exam session, and navigate back.
+  useEffect(() => {
+    if (!isExamMode) return;
+    if (timerSeconds !== 0) return;
+    if (isExamFinishedRef.current) return;
+
+    isExamFinishedRef.current = true;
+    stopTimer();
+
+    void (async () => {
+      try {
+        await submitCode();
+      } catch (err) {
+        console.error('[AutoSubmit] Force submit current problem failed on time expiry:', err);
+      }
+
+      let lockedOnServer = false;
+      try {
+        const lockSession = await lock(examId, 'Time expired');
+        lockedOnServer = lockSession?.phase === 'LOCKED';
+      } catch (err) {
+        console.error('[AutoSubmit] Lock request failed on time expiry:', err);
+      }
+
+      if (!lockedOnServer) {
+        try {
+          const latestSession = await getByExam(examId);
+          lockedOnServer = latestSession?.phase === 'LOCKED';
+        } catch {
+          // ignore
+        }
+      }
+
+      if (lockedOnServer) {
+        markExamLockedNotice(examId);
+        clearExamSessionClientStorage(examId, studentId);
+        if (document.fullscreenElement) {
+          try {
+            await document.exitFullscreen();
+          } catch {
+            // ignore
+          }
+        }
+      }
+
+      navigateBackToExam();
+    })();
+  }, [isExamMode, timerSeconds, examId, studentId, stopTimer, lock, getByExam, navigateBackToExam]);
 
   useEffect(() => {
     if (!isExamMode || !sessionKeys || !studentId) return;

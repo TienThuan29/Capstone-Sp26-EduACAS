@@ -3,12 +3,10 @@ import 'package:mobile/core/configs/api_config.dart';
 import 'package:mobile/core/network/api_network.dart';
 import 'package:mobile/core/storage/token_storage.dart';
 import 'package:mobile/features/models/classroom.dart';
+import 'package:mobile/features/models/classroom_student.dart';
 import 'package:mobile/features/models/classroom/classroom_model.dart' as paged_models;
 
 class ClassroomService {
-  static const String _classroomsEndpoint = '/api/v1/classrooms';
-  static const String _enrollEndpoint = '/api/v1/class-enrollments/enroll';
-
   /// Fetch paginated classrooms, passing userId so the backend fills
   /// the [enrollment.isJoining] flag for the current student.
   static Future<paged_models.PagedClassrooms> getAllClassrooms({
@@ -22,7 +20,7 @@ class ClassroomService {
     }
 
     final response = await ApiNetwork.getWithAuth(
-      endpoint: _classroomsEndpoint,
+      endpoint: ApiConfig.allClassroomsEndpoint,
       token: token,
       queryParameters: {
         'userId': userId,
@@ -59,7 +57,7 @@ class ClassroomService {
     }
 
     final response = await ApiNetwork.postWithAuth(
-      endpoint: _enrollEndpoint,
+      endpoint: ApiConfig.enrollClassroomEndpoint,
       token: token,
       body: {
         'classId': classId,
@@ -189,7 +187,7 @@ class ClassroomService {
       }
 
       final response = await ApiNetwork.postWithAuth(
-        endpoint: '$_classroomsEndpoint/search',
+        endpoint: '${ApiConfig.allClassroomsEndpoint}/search',
         token: token,
         body: {'classCode': keyword},
       );
@@ -203,6 +201,28 @@ class ClassroomService {
     } catch (e) {
       debugPrint('Failed to search classrooms: $e');
       throw Exception('Failed to search classrooms: $e');
+    }
+  }
+
+  // Get all students in a classroom
+  static Future<List<ClassroomStudentResponse>> getClassroomStudents(String classId) async {
+    try {
+      final token = await TokenStorage.getAccessToken();
+      if (token == null) throw Exception('No token found');
+
+      final response = await ApiNetwork.getWithAuth(
+        endpoint: ApiConfig.getClassroomStudentsEndpoint(classId),
+        token: token,
+      );
+
+      if (response['success'] == true && response['dataResponse'] != null) {
+        final data = response['dataResponse'] as List<dynamic>;
+        return data.map((e) => ClassroomStudentResponse.fromJson(e)).toList();
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Failed to get classroom students: $e');
+      throw Exception('Failed to load students: $e');
     }
   }
 }

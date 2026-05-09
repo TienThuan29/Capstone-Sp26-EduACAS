@@ -489,9 +489,17 @@ public class AcademicWarningJob
             var classroomExamIds = classroomExams.Select(e => e.Id).ToHashSet(StringComparer.Ordinal);
             var relevant = graded.Where(s => classroomExamIds.Contains(s.ExamId)).ToList();
 
-            if (relevant.Count < settings.MinExamCount) return;
+            // Calculate total score per exam (latest submission per problem)
+            var examTotals = relevant
+                .GroupBy(s => s.ExamId)
+                .Select(examGroup => examGroup
+                    .GroupBy(s => s.ProblemId)
+                    .Sum(pg => pg.OrderByDescending(s => s.Version).First().FinalScore))
+                .ToList();
 
-            var avg = relevant.Average(s => s.FinalScore);
+            if (examTotals.Count < settings.MinExamCount) return;
+
+            var avg = examTotals.Average();
             if (avg >= settings.AvgScoreThreshold) return;
 
             // Trigger Level 2 by calling ProcessSingleAsync recursively

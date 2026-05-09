@@ -145,6 +145,8 @@ export function mirrorExamSessionPhaseToLocalStorage(
   const local = mapServerPhaseToLocal(phase);
   if (local === 'verify') {
     window.localStorage.removeItem(keys.phaseStorageKey);
+    window.localStorage.removeItem(keys.aggregatedViolationsStorageKey);
+    window.localStorage.removeItem(keys.aggregatedLogsStorageKey);
     clearExamActiveClientContextIfMatches(keys.examId);
   } else {
     window.localStorage.setItem(keys.phaseStorageKey, local);

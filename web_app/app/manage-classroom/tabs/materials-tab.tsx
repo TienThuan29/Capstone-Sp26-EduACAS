@@ -89,8 +89,13 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
+    const trimmedDescription = uploadData.description.trim();
     if (!uploadData.file) {
       showError("Please select a file");
+      return;
+    }
+    if (!trimmedDescription) {
+      showError("Please enter a description for the material");
       return;
     }
     try {
@@ -104,7 +109,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
       await createMaterial({
         classroomId: classId,
         lecturerId: user.id,
-        description: uploadData.description,
+        description: trimmedDescription,
         file: uploadData.file,
       });
       showSuccess("Material uploaded successfully");
@@ -182,7 +187,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
             Manage and share course materials with students
           </p>
         </div>
-        <Button color="info" onClick={openUpload} className="bg-[#1F4E79] hover:bg-[#2A6BA3] text-white">
+        <Button color="info" onClick={openUpload} className="bg-[#1F4E79] hover:bg-[#2A6BA3] text-white cursor-pointer">
           <PlusIcon className="mr-2 h-5 w-5" />
           Upload Material
         </Button>
@@ -197,7 +202,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
           <p className="mb-4 text-sm text-gray-500">
             Upload your first course material to get started
           </p>
-          <Button color="info" size="sm" onClick={openUpload} className="bg-[#1F4E79] hover:bg-[#2A6BA3] text-white">
+          <Button color="info" size="sm" onClick={openUpload} className="bg-[#1F4E79] hover:bg-[#2A6BA3] text-white cursor-pointer">
             <PlusIcon className="mr-2 h-4 w-4" />
             Upload Material
           </Button>
@@ -249,6 +254,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
                     <div className="flex items-center gap-2">
                       <Tooltip content="Preview">
                         <Button
+                          className="cursor-pointer"
                           color="gray"
                           size="sm"
                           onClick={() => setPreviewMaterial(material)}
@@ -296,7 +302,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
             <div className="space-y-4">
               <div>
                 <div className="mb-2 block">
-                  <Label htmlFor="file">Select File *</Label>
+                  <Label htmlFor="file">Select File <span className="text-red-500">*</span></Label>
                 </div>
                 <FileInput
                   id="file"
@@ -320,7 +326,7 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
               </div>
               <div>
                 <div className="mb-2 block">
-                  <Label htmlFor="description">Description</Label>
+                  <Label htmlFor="description">Description <span className="text-red-500">*</span></Label>
                 </div>
                 <Textarea
                   id="description"
@@ -339,11 +345,11 @@ export function MaterialsTab({ classId }: MaterialsTabProps) {
               type="submit"
               color="info"
               disabled={actionLoading || !uploadData.file}
-              className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-blue-400"
+              className="bg-blue-600 hover:bg-blue-700 text-white disabled:bg-blue-400 cursor-pointer"
             >
               {actionLoading ? <Spinner size="sm" /> : "Upload"}
             </Button>
-            <Button color="gray" onClick={() => setOpenUploadModal(false)}>
+            <Button className="cursor-pointer" color="gray" onClick={() => setOpenUploadModal(false)}>
               Cancel
             </Button>
           </ModalFooter>

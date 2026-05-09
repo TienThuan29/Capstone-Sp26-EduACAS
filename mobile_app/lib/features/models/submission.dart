@@ -55,3 +55,22 @@ class Submission {
     return null;
   }
 }
+
+class ProblemSubmissionsResponse {
+  final String problemId;
+  final List<Submission> submissions;
+
+  const ProblemSubmissionsResponse({
+    required this.problemId,
+    required this.submissions,
+  });
+
+  factory ProblemSubmissionsResponse.fromJson(Map<String, dynamic> json) {
+    return ProblemSubmissionsResponse(
+      problemId: json['problemId'] ?? '',
+      submissions: (json['submissions'] as List? ?? [])
+          .map((e) => Submission.fromJson(e as Map<String, dynamic>))
+          .toList(),
+    );
+  }
+}

@@ -5,6 +5,7 @@ using System.Text.Json;
 using AcasService.Models;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.Model;
+using System.Globalization;
 
 namespace AcasService.Dev;
 
@@ -68,47 +69,95 @@ public class DynamoDbResetService : IDynamoDbResetService
 
     public async Task<ResetResult> ResetAndSeedSeedData2Async(CancellationToken cancellationToken = default)
     {
-        return await UseSeedDataFolderAsync("seed-data-2", () => ResetAndSeedAsync(cancellationToken));
+        return await UseSeedDataFolderAsync("seed-data-2", () => ResetAndSeedAsync(CancellationToken.None));
+    }
+
+    public async Task<ResetResult> ResetAndSeedSubmissionDataAsync(CancellationToken cancellationToken = default)
+    {
+        return await UseSeedDataFolderAsync("seed-data-2", async () =>
+        {
+            var tables = DiscoverTableNames();
+            if (tables.Count == 0)
+            {
+                _logger.LogWarning("No DynamoDB tables discovered for submission data reset");
+                return new ResetResult(true, 0, 0);
+            }
+
+            var tablesToWipe = tables
+                .Where(t => t.EntityType == typeof(Submission))
+                .ToList();
+
+            if (tablesToWipe.Count == 0)
+            {
+                _logger.LogWarning("No submission table found for submission reset");
+                return new ResetResult(true, 0, 0);
+            }
+
+            foreach (var (tableName, _) in tablesToWipe)
+                await SafeWipeTableAsync(tableName, cancellationToken);
+
+            try
+            {
+                var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
+                var seeded = await SeedSubmissionBundleAsync(tableMap, DateTime.UtcNow, cancellationToken);
+                _logger.LogInformation("Seeded submission data with {Count} items", seeded);
+                return new ResetResult(true, tablesToWipe.Count, seeded);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Submission data seed failed after wipe");
+                return new ResetResult(false, tablesToWipe.Count, 0, ex.Message);
+            }
+        });
     }
 
     public async Task<ResetResult> ResetAndSeedQuizDataAsync(CancellationToken cancellationToken = default)
     {
-        var tables = DiscoverTableNames();
-        if (tables.Count == 0)
+        return await UseSeedDataFolderAsync("seed-data-2", async () =>
         {
-            _logger.LogWarning("No DynamoDB tables discovered for quiz data reset");
-            return new ResetResult(true, 0, 0);
-        }
+            var tables = DiscoverTableNames();
+            if (tables.Count == 0)
+            {
+                _logger.LogWarning("No DynamoDB tables discovered for quiz data reset");
+                return new ResetResult(true, 0, 0);
+            }
 
-        var targetEntityTypes = new[] { typeof(Question), typeof(AnswerOption), typeof(Quiz) };
-        var tablesToWipe = tables
-            .Where(t => targetEntityTypes.Contains(t.EntityType))
-            .ToList();
+            var targetEntityTypes = new[]
+            {
+                typeof(Question),
+                typeof(AnswerOption),
+                typeof(Quiz),
+                typeof(ClassroomQuiz),
+                typeof(Models.QuizAttempt),
+                typeof(StudentAnswer)
+            };
+            var tablesToWipe = tables
+                .Where(t => targetEntityTypes.Contains(t.EntityType))
+                .ToList();
 
-        if (tablesToWipe.Count == 0)
-        {
-            _logger.LogWarning("No target tables found for quiz-related reset");
-            return new ResetResult(true, 0, 0);
-        }
+            if (tablesToWipe.Count == 0)
+            {
+                _logger.LogWarning("No target tables found for quiz-related reset");
+                return new ResetResult(true, 0, 0);
+            }
 
-        var totalWiped = 0;
-        foreach (var (tableName, _) in tablesToWipe)
-            totalWiped += await SafeWipeTableAsync(tableName, cancellationToken);
+            foreach (var (tableName, _) in tablesToWipe)
+                await SafeWipeTableAsync(tableName, cancellationToken);
 
-        try
-        {
-            var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
-            var seedIdMap = await BuildQuizForeignKeyMapFromDynamoAsync(tableMap, cancellationToken);
-            var seeded = await SeedQuizQuestionAnswerOptionAsync(
-                tableMap, DateTime.UtcNow, seedIdMap, cancellationToken);
-            _logger.LogInformation("Seeded quiz-related data with {Count} items", seeded);
-            return new ResetResult(true, tablesToWipe.Count, seeded);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Quiz data seed failed after wipe");
-            return new ResetResult(false, tablesToWipe.Count, 0, ex.Message);
-        }
+            try
+            {
+                var tableMap = tables.ToDictionary(t => t.TableName, t => t.EntityType);
+                var seedIdMap = await BuildQuizForeignKeyMapFromDynamoAsync(tableMap, cancellationToken);
+                var seeded = await SeedQuizBundleAsync(tableMap, DateTime.UtcNow, seedIdMap, cancellationToken);
+                _logger.LogInformation("Seeded quiz-related data with {Count} items", seeded);
+                return new ResetResult(true, tablesToWipe.Count, seeded);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Quiz data seed failed after wipe");
+                return new ResetResult(false, tablesToWipe.Count, 0, ex.Message);
+            }
+        });
     }
 
     public async Task<ResetResult> SeedCls001QuizDataAsync(CancellationToken cancellationToken = default)
@@ -147,7 +196,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             };
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Question)),
-            questions, Repositories.Question.DynamoMapper.QuestionToDynamoItem, cancellationToken);
+            questions, Repositories.Question.DynamoMapper.QuestionToDynamoItem, CancellationToken.None);
 
         // 2) Answer Options
         var answerOptionDtos = LoadJson<AnswerOptionDto>("answer-options-new.json");
@@ -161,7 +210,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             UpdatedAt = now
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(AnswerOption)),
-            answerOptions, Repositories.AnswerOption.DynamoMapper.AnswerOptionToDynamoItem, cancellationToken);
+            answerOptions, Repositories.AnswerOption.DynamoMapper.AnswerOptionToDynamoItem, CancellationToken.None);
 
         // 3) Quizzes
         var quizDtos = LoadJson<QuizDto>("quizzes-new.json");
@@ -194,7 +243,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             };
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Quiz)),
-            quizzes, Repositories.Quiz.DynamoMapper.QuizToDynamoItem, cancellationToken);
+            quizzes, Repositories.Quiz.DynamoMapper.QuizToDynamoItem, CancellationToken.None);
 
         // 4) Classroom Quizzes
         var classroomQuizDtos = LoadJson<ClassroomQuizDto>("classroom-quizzes-new.json");
@@ -221,7 +270,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             };
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(ClassroomQuiz)),
-            classroomQuizzes, Repositories.ClassroomQuiz.DynamoMapper.ClassroomQuizToDynamoItem, cancellationToken);
+            classroomQuizzes, Repositories.ClassroomQuiz.DynamoMapper.ClassroomQuizToDynamoItem, CancellationToken.None);
 
         // 5) Quiz Attempts
         var quizAttemptDtos = LoadJson<QuizAttemptDto>("quiz-attempts-new.json");
@@ -244,7 +293,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             };
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, "QuizAttempt"),
-            quizAttempts, QuizAttemptToDynamoItem, cancellationToken);
+            quizAttempts, QuizAttemptToDynamoItem, CancellationToken.None);
 
         _logger.LogInformation("Seeded cls-001 quiz data: {Count} items", seeded);
         return new ResetResult(true, 0, seeded);
@@ -266,7 +315,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             item["endTime"] = new AttributeValue { S = attempt.EndTime.Value.ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ss.fffZ") };
 
         if (attempt.FinalScore.HasValue)
-            item["finalScore"] = new AttributeValue { N = attempt.FinalScore.Value.ToString("F2") };
+            item["finalScore"] = new AttributeValue { N = attempt.FinalScore.Value.ToString("F2", CultureInfo.InvariantCulture) };
 
         return item;
     }
@@ -424,6 +473,34 @@ public class DynamoDbResetService : IDynamoDbResetService
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Problem)),
             problems, Repositories.Problem.DynamoMapper.ProblemToDynamoItem, ct);
 
+        // 4b) Examination Templates
+        var examTemplateDtos = LoadJson<ExaminationTemplateDto>("examination-templates.json");
+        var examinationTemplates = examTemplateDtos.Select(dto =>
+        {
+            var templateId = AllocateSeedId(seedIdMap, dto.Id);
+            return new ExaminationTemplate
+            {
+                Id = templateId,
+                ExamName = dto.ExamName,
+                LecturerId = RemapSeedId(seedIdMap, dto.LecturerId, "examinationTemplate.lecturerId"),
+                Description = dto.Description ?? string.Empty,
+                TotalMark = dto.TotalMark,
+                IsDeleted = dto.IsDeleted,
+                Problems = (dto.Problems ?? new List<ExamTempProblemDto>())
+                    .Select(problem => new ExamTempProblem
+                    {
+                        ExamTempId = templateId,
+                        ProblemId = RemapSeedId(seedIdMap, problem.ProblemId, "examinationTemplate.problemId"),
+                        Mark = problem.Mark
+                    })
+                    .ToList(),
+                CreatedDate = dto.CreatedDate,
+                UpdatedDate = dto.UpdatedDate
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(ExaminationTemplate)),
+            examinationTemplates, Repositories.ExaminationTemplate.DynamoMapper.ExaminationTemplateToDynamoItem, ct);
+
         // 4) Classrooms
         var classroomDtos = LoadJson<ClassroomDto>("classrooms.json");
         var classrooms = classroomDtos.Select(c => new Classroom
@@ -519,6 +596,28 @@ public class DynamoDbResetService : IDynamoDbResetService
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Submission)),
             submissions, Repositories.Submission.DynamoMapper.SubmissionToDynamoItem, ct);
+        var studentExamSessionDtos = LoadJson<StudentExamSessionDto>("student-exam-sessions.json");
+        var studentExamSessions = studentExamSessionDtos.Select(dto =>
+        {
+            var phase = Enum.TryParse<StudentExamSessionPhase>(dto.Phase, true, out var parsedPhase)
+                ? parsedPhase
+                : StudentExamSessionPhase.NotStarted;
+
+            return new StudentExamSession
+            {
+                Id = dto.Id,
+                StudentId = dto.StudentId,
+                ExamId = dto.ExamId,
+                ClassroomId = dto.ClassroomId,
+                Phase = phase,
+                ActiveProblemId = dto.ActiveProblemId,
+                LockReason = dto.LockReason,
+                CreatedDate = dto.CreatedDate,
+                UpdatedDate = dto.UpdatedDate
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(StudentExamSession)),
+            studentExamSessions, Repositories.StudentExamSession.DynamoMapper.ToDynamoItem, ct);
 
         // 8) Slots
         var slotDtos = LoadJson<SlotDto>("slots.json");
@@ -591,7 +690,7 @@ public class DynamoDbResetService : IDynamoDbResetService
             IsCorrect = dto.IsCorrect
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(StudentAnswer)),
-            studentAnswers, Repositories.StudentAnswer.DynamoMapper.StudentAnswerToDynamoItem, ct);
+            studentAnswers, Repositories.StudentAnswer.DynamoMapper.StudentAnswerToDynamoItem, CancellationToken.None);
 
         // 12) Error Groups
         var errorGroupDtos = LoadJson<ErrorGroupDto>("error-groups.json");
@@ -1046,6 +1145,85 @@ public class DynamoDbResetService : IDynamoDbResetService
             };
         }).ToList();
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Question)),
+            questions, Repositories.Question.DynamoMapper.QuestionToDynamoItem, CancellationToken.None);
+
+        var answerOptionDtos = LoadJson<AnswerOptionDto>("answer-options.json");
+        var answerOptions = answerOptionDtos.Select(a => new AnswerOption
+        {
+            Id = AllocateSeedId(seedIdMap, a.Id),
+            QuestionId = RemapSeedId(seedIdMap, a.QuestionId, "answerOption.questionId"),
+            Content = a.Content,
+            IsCorrect = a.IsCorrect,
+            CreatedAt = now.AddMonths(-2),
+            UpdatedAt = now
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(AnswerOption)),
+            answerOptions, Repositories.AnswerOption.DynamoMapper.AnswerOptionToDynamoItem, CancellationToken.None);
+
+        var quizDtos = LoadJson<QuizDto>("quizzes.json");
+        var quizzes = quizDtos.Select(q =>
+        {
+            var newQuizId = AllocateSeedId(seedIdMap, q.Id);
+            var quizQuestions = (q.Questions ?? new List<QuizQuestionDto>())
+                .Select(item => new QuizQuestion
+                {
+                    QuizId = newQuizId,
+                    QuestionId = RemapSeedId(seedIdMap, item.QuestionId, "quiz.questionId"),
+                    Marks = item.Marks,
+                    DisplayOrder = item.DisplayOrder
+                })
+                .OrderBy(item => item.DisplayOrder)
+                .ToList();
+
+            return new Quiz
+            {
+                Id = newQuizId,
+                SubjectId = RemapSeedId(seedIdMap, q.SubjectId, "quiz.subjectId"),
+                Title = q.Title,
+                Duration = q.Duration,
+                TotalQuestions = quizQuestions.Count,
+                IsDeleted = false,
+                CreatedBy = RemapSeedId(seedIdMap, q.CreatedBy, "quiz.createdBy"),
+                CreatedAt = now.AddMonths(-1),
+                UpdatedAt = now,
+                Questions = quizQuestions
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(Quiz)),
+            quizzes, Repositories.Quiz.DynamoMapper.QuizToDynamoItem, CancellationToken.None);
+
+        return seeded;
+    }
+
+    private async Task<int> SeedQuizBundleAsync(
+        Dictionary<string, Type> tableMap,
+        DateTime now,
+        Dictionary<string, string> seedIdMap,
+        CancellationToken ct)
+    {
+        var seeded = 0;
+
+        var questionDtos = LoadJson<QuestionDto>("questions.json");
+        var questions = questionDtos.Select(q =>
+        {
+            var questionType = Enum.TryParse<QuestionType>(q.Type, true, out var parsedType)
+                ? parsedType
+                : QuestionType.SINGLE_CHOICE;
+
+            return new Question
+            {
+                Id = AllocateSeedId(seedIdMap, q.Id),
+                Content = q.Content,
+                ImageUrl = q.ImageUrl,
+                Type = questionType,
+                TextAnswer = q.TextAnswer,
+                IsDeleted = false,
+                CreatedBy = RemapSeedId(seedIdMap, q.CreatedBy, "question.createdBy"),
+                CreatedAt = now.AddMonths(-2),
+                UpdatedAt = now
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(Question)),
             questions, Repositories.Question.DynamoMapper.QuestionToDynamoItem, ct);
 
         var answerOptionDtos = LoadJson<AnswerOptionDto>("answer-options.json");
@@ -1093,7 +1271,142 @@ public class DynamoDbResetService : IDynamoDbResetService
         seeded += await PutAllAsync(GetTableName(tableMap, nameof(Quiz)),
             quizzes, Repositories.Quiz.DynamoMapper.QuizToDynamoItem, ct);
 
+        var classroomQuizDtos = LoadJson<ClassroomQuizDto>("classroom-quizzes.json");
+        var classroomQuizzes = classroomQuizDtos.Select(dto =>
+        {
+            var status = Enum.TryParse<ClassroomQuizStatus>(dto.Status, true, out var s)
+                ? s
+                : ClassroomQuizStatus.CLOSED;
+
+            return new ClassroomQuiz
+            {
+                Id = AllocateSeedId(seedIdMap, dto.Id),
+                ClassroomId = RemapSeedId(seedIdMap, dto.ClassroomId, "classroomQuiz.classroomId"),
+                QuizId = RemapSeedId(seedIdMap, dto.QuizId, "classroomQuiz.quizId"),
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                MaxOfAttempts = dto.MaxOfAttempts,
+                Passcode = dto.Passcode,
+                Status = status,
+                IsDeleted = dto.IsDeleted,
+                CreatedBy = RemapSeedId(seedIdMap, dto.CreatedBy, "classroomQuiz.createdBy"),
+                CreatedAt = dto.CreatedAt,
+                UpdatedAt = dto.UpdatedAt
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(ClassroomQuiz)),
+            classroomQuizzes, Repositories.ClassroomQuiz.DynamoMapper.ClassroomQuizToDynamoItem, CancellationToken.None);
+
+        var quizAttemptDtos = LoadJson<QuizAttemptDto>("quiz-attempts.json");
+        var quizAttempts = quizAttemptDtos.Select(dto =>
+        {
+            var status = Enum.TryParse<QuizAttemptStatus>(dto.Status, true, out var s)
+                ? s
+                : QuizAttemptStatus.SUBMITTED;
+
+            return new Models.QuizAttempt
+            {
+                Id = AllocateSeedId(seedIdMap, dto.Id),
+                ClassroomQuizId = RemapSeedId(seedIdMap, dto.ClassroomQuizId, "quizAttempt.classroomQuizId"),
+                StudentId = RemapSeedId(seedIdMap, dto.StudentId, "quizAttempt.studentId"),
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                Status = status,
+                FinalScore = dto.FinalScore,
+                AttemptNumber = dto.AttemptNumber
+            };
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, "QuizAttempt"),
+            quizAttempts, QuizAttemptToDynamoItem, CancellationToken.None);
+
+        var studentAnswerDtos = LoadJson<StudentAnswerDto>("student-answers.json");
+        var studentAnswers = studentAnswerDtos.Select(dto => new StudentAnswer
+        {
+            Id = AllocateSeedId(seedIdMap, dto.Id),
+            AttemptId = RemapSeedId(seedIdMap, dto.AttemptId, "studentAnswer.attemptId"),
+            QuestionId = RemapSeedId(seedIdMap, dto.QuestionId, "studentAnswer.questionId"),
+            AnswerOptionId = string.IsNullOrWhiteSpace(dto.AnswerOptionId)
+                ? null
+                : RemapSeedId(seedIdMap, dto.AnswerOptionId, "studentAnswer.answerOptionId"),
+            TextAnswer = dto.TextAnswer,
+            IsCorrect = dto.IsCorrect
+        }).ToList();
+        seeded += await PutAllAsync(GetTableName(tableMap, nameof(StudentAnswer)),
+            studentAnswers, Repositories.StudentAnswer.DynamoMapper.StudentAnswerToDynamoItem, CancellationToken.None);
+
         return seeded;
+    }
+
+    private async Task<int> SeedSubmissionBundleAsync(
+        Dictionary<string, Type> tableMap,
+        DateTime now,
+        CancellationToken ct)
+    {
+        var submissionTable = GetTableName(tableMap, nameof(Submission));
+        if (string.IsNullOrEmpty(submissionTable))
+            return 0;
+
+        var defaultLanguageId = await GetDefaultLanguageIdAsync(tableMap, ct);
+        var submDtos = LoadJson<SubmissionDto>("submissions.json");
+        var submissions = submDtos.Select(s => new Submission
+        {
+            Id = s.Id,
+            StudentId = s.StudentId,
+            ExamId = s.ExamId,
+            ProblemId = s.ProblemId,
+            LanguageId = string.IsNullOrWhiteSpace(s.LanguageId) ? defaultLanguageId : s.LanguageId!,
+            CompilerId = "default",
+            Source = s.Source ?? string.Empty,
+            Version = s.Version > 0 ? s.Version : 1,
+            SubmittedDate = now.AddHours(-2),
+            FinalScore = s.FinalScore,
+            Status = SubmissionStatus.GRADED,
+            GradedDate = now.AddHours(-1),
+            TestResults = (s.TestResults ?? new List<TestResultDto>()).Select(tr => new TestResult
+            {
+                Id = string.IsNullOrWhiteSpace(tr.Id) ? Guid.NewGuid().ToString() : tr.Id!,
+                TestcaseId = tr.TestcaseId ?? string.Empty,
+                Input = tr.Input ?? string.Empty,
+                ActualOutput = tr.ActualOutput ?? string.Empty,
+                ExpectedOutput = tr.ExpectedOutput ?? string.Empty,
+                ExecutionTimeMs = tr.ExecutionTimeMs,
+                Status = Enum.TryParse<TestcaseStatus>(tr.Status, true, out var parsedStatus)
+                    ? parsedStatus
+                    : TestcaseStatus.SUCCESS,
+                CreatedDate = now.AddHours(-1)
+            }).ToList(),
+            RegradingRequestId = string.Empty,
+            LecturerFeedback = string.Empty,
+            MaterialRecommendation = new List<string>(),
+            AiFeedback = string.Empty,
+            UpdatedDate = now.AddHours(-2),
+            KeystrokeLogs = new List<KeystrokeLog>()
+        }).ToList();
+
+        return await PutAllAsync(submissionTable, submissions,
+            Repositories.Submission.DynamoMapper.SubmissionToDynamoItem, ct);
+    }
+
+    private async Task<string> GetDefaultLanguageIdAsync(Dictionary<string, Type> tableMap, CancellationToken ct)
+    {
+        var languageTable = GetTableName(tableMap, nameof(ProgrammingLanguage));
+        if (string.IsNullOrEmpty(languageTable))
+            return string.Empty;
+
+        var request = new ScanRequest
+        {
+            TableName = languageTable,
+            ProjectionExpression = "#pk",
+            ExpressionAttributeNames = new Dictionary<string, string>
+            {
+                ["#pk"] = PartitionKeyName
+            }
+        };
+
+        var response = await _dynamoDb.ScanAsync(request, ct);
+        return response.Items.Count > 0 && response.Items[0].TryGetValue(PartitionKeyName, out var idAv)
+            ? idAv.S
+            : string.Empty;
     }
 
     private List<Comment> MapComments(
@@ -1144,6 +1457,26 @@ public class DynamoDbResetService : IDynamoDbResetService
         public string? CodeTemplate { get; set; }
         public string? Content { get; set; }
         public List<TestCaseDto>? TestCases { get; set; }
+    }
+
+    private sealed class ExaminationTemplateDto
+    {
+        public string Id { get; set; } = "";
+        public string ExamName { get; set; } = "";
+        public string LecturerId { get; set; } = "";
+        public string? Description { get; set; }
+        public float TotalMark { get; set; }
+        public bool IsDeleted { get; set; }
+        public List<ExamTempProblemDto>? Problems { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+    }
+
+    private sealed class ExamTempProblemDto
+    {
+        public string ExamTempId { get; set; } = "";
+        public string ProblemId { get; set; } = "";
+        public float Mark { get; set; }
     }
 
     private sealed class QuestionDto
@@ -1359,6 +1692,18 @@ public class DynamoDbResetService : IDynamoDbResetService
         public DateTime HandledDate { get; set; }
     }
 
+    private sealed class StudentExamSessionDto
+    {
+        public string Id { get; set; } = "";
+        public string StudentId { get; set; } = "";
+        public string ExamId { get; set; } = "";
+        public string ClassroomId { get; set; } = "";
+        public string Phase { get; set; } = "NotStarted";
+        public string? ActiveProblemId { get; set; }
+        public string? LockReason { get; set; }
+        public DateTime CreatedDate { get; set; }
+        public DateTime UpdatedDate { get; set; }
+    }
     private sealed class DiscussionDto
     {
         public string Id { get; set; } = "";

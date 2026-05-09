@@ -1,5 +1,4 @@
 import '../../../../core/network/api_network.dart';
-import '../../../../core/configs/api_config.dart';
 import '../../../../core/storage/token_storage.dart';
 
 class StudentDashboardOverview {
@@ -207,27 +206,27 @@ class StudentDashboardService {
 
       final results = await Future.wait([
         ApiNetwork.getWithAuth(
-          endpoint: '/api/acas/v1/classrooms/$classroomId/student-dashboard/overview',
+          endpoint: ApiConfig.studentDashboardOverviewEndpoint(classroomId),
           token: token,
           queryParameters: queryParams,
         ),
         ApiNetwork.getWithAuth(
-          endpoint: '/api/acas/v1/classrooms/$classroomId/student-dashboard/exam-scores',
+          endpoint: ApiConfig.studentDashboardExamScoresEndpoint(classroomId),
           token: token,
           queryParameters: queryParams,
         ),
         ApiNetwork.getWithAuth(
-          endpoint: '/api/acas/v1/classrooms/$classroomId/student-dashboard/warnings',
+          endpoint: ApiConfig.studentDashboardWarningsEndpoint(classroomId),
           token: token,
           queryParameters: {...queryParams, 'limit': '5'},
         ),
         ApiNetwork.getWithAuth(
-          endpoint: '/api/acas/v1/classrooms/$classroomId/student-dashboard/score-trend',
+          endpoint: ApiConfig.studentDashboardScoreTrendEndpoint(classroomId),
           token: token,
           queryParameters: queryParams,
         ),
         ApiNetwork.getWithAuth(
-          endpoint: '/api/acas/v1/classrooms/$classroomId/student-dashboard/submission-stats',
+          endpoint: ApiConfig.studentDashboardSubmissionStatsEndpoint(classroomId),
           token: token,
           queryParameters: queryParams,
         ),

@@ -37,6 +37,7 @@ import {
   mapServerPhaseToLocal,
   mirrorExamSessionPhaseToLocalStorage,
 } from "@/utils/student-exam-session";
+import { requestClipboardWritePermission } from "@/hooks/examination/useExamViolationGuard";
 import { ExamSessionGuard } from "@/components/test-tracker/exam-session-guard";
 import { useStudentExamSession } from "@/hooks/examination/useStudentExamSession";
 import type { StudentExamSessionDto } from "@/types/student-exam-session";
@@ -79,6 +80,7 @@ function ExamDetailContent() {
   const [problemsLoading, setProblemsLoading] = useState(false);
   const [problemsPage, setProblemsPage] = useState(1);
   const [showStartModal, setShowStartModal] = useState(false);
+  const [showClipboardPermissionModal, setShowClipboardPermissionModal] = useState(false);
   const [pendingSolveProblemId, setPendingSolveProblemId] = useState<string | null>(null);
   const [showFinishModal, setShowFinishModal] = useState(false);
   const [showLockedNoticeModal, setShowLockedNoticeModal] = useState(false);
@@ -619,13 +621,20 @@ function ExamDetailContent() {
 
                         <div className="flex items-center gap-4">
                           <Button
-                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                            disabled={examination.mode === "EXAMINATION" && isSessionEnded}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            disabled={
+                              (examination.mode === "EXAMINATION" && isSessionEnded) ||
+                              (examination.mode === "PRACTICAL" && examination.status === "COMPLETED")
+                            }
                             onClick={() => {
                               if (examination.mode === "EXAMINATION" && isSessionEnded) return;
+                              if (examination.mode === "PRACTICAL" && examination.status === "COMPLETED") return;
                               if (examination.mode === "EXAMINATION" && !isSessionActive) {
+                                // Ask clipboard permission BEFORE exam guard activates.
+                                // This dialog appears outside fullscreen, so any
+                                // fullscreen exit from it cannot trigger a violation strike.
                                 setPendingSolveProblemId(problem.id);
-                                setShowStartModal(true);
+                                setShowClipboardPermissionModal(true);
                                 return;
                               }
                               if (sessionKeys) {
@@ -728,13 +737,18 @@ function ExamDetailContent() {
             if (!started) return;
             mirrorExamSessionPhaseToLocalStorage(sessionKeys, started.phase, classId);
             setServerSession(started);
+
+            // Reset clipboard content. handleResetClipboard checks hasClipboardWritePermission()
+            // internally — if granted it writes silently, otherwise skips. No browser prompt,
+            // so no risk of fullscreen exit before guard activates.
+            window.dispatchEvent(new CustomEvent("exam:reset-clipboard"));
+
+            // Enter fullscreen — guard activates after this.
             try {
               await document.documentElement.requestFullscreen();
             } catch {
               // ignore; fullscreen requires user gesture in some browsers
             }
-            window.dispatchEvent(new CustomEvent("exam:reset-clipboard"));
-            localStorage.setItem(sessionKeys.activeProblemIdStorageKey, pid);
             dispatchExamActiveProblemChanged();
             void setActiveProblem(examId, pid).catch((err) => {
               console.warn('setActiveProblem failed after starting exam session:', err);
@@ -749,6 +763,32 @@ function ExamDetailContent() {
         confirmText="Start"
         cancelText="Cancel"
         confirmVariant="green"
+      />
+
+      <ConfirmModal
+        isOpen={showClipboardPermissionModal}
+        onClose={() => {
+          setShowClipboardPermissionModal(false);
+          setPendingSolveProblemId(null);
+        }}
+        onConfirm={() => {
+          void requestClipboardWritePermission().then((granted) => {
+            if (granted) {
+              // Permission granted — proceed to the Start Exam confirmation.
+              // The guard is NOT active yet, so any fullscreen exit from
+              // the next dialog cannot cause a false violation strike.
+              setShowClipboardPermissionModal(false);
+              setShowStartModal(true);
+            }
+            // If not granted, the modal stays open so the user can try again.
+            // We deliberately do NOT clear pendingSolveProblemId.
+          });
+        }}
+        title="Permission required"
+        message="To start the exam safely, please allow clipboard access when prompted by your browser. Click 'Allow' to continue."
+        confirmText="Allow"
+        cancelText="Cancel"
+        confirmVariant="yellow"
       />
 
       <ConfirmModal

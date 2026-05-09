@@ -73,6 +73,46 @@ type LatestParams = Omit<UseExamViolationGuardParams, 'enableDevtoolsInDevelopme
 // HELPERS (module-level, no React state)
 // ═══════════════════════════════════════════════════════════════════
 
+/** localStorage key used to cache the clipboard-write permission state. */
+export const EXAM_CLIPBOARD_PERMISSION_KEY = 'exam:clipboard-write-permission';
+
+/**
+ * Checks whether clipboard-write permission has already been granted by the browser.
+ * Returns true only if the permission state is stored as 'granted' in localStorage.
+ */
+export const hasClipboardWritePermission = (): boolean => {
+  if (typeof localStorage === 'undefined') return false;
+  return localStorage.getItem(EXAM_CLIPBOARD_PERMISSION_KEY) === 'granted';
+};
+
+/**
+ * Requests clipboard-write permission from the browser.
+ * If granted, stores the result in localStorage so that handleResetClipboard
+ * can later write to the clipboard without triggering a browser prompt
+ * (which would cause fullscreen to exit and generate a FULLSCREEN_EXIT strike).
+ *
+ * Call this when the user clicks "Solve" (before entering the exam / before
+ * violation guard is fully active) so the permission dialog does not cause
+ * a false FULLSCREEN_EXIT strike.
+ */
+export const requestClipboardWritePermission = async (): Promise<boolean> => {
+  if (typeof navigator === 'undefined' || typeof navigator.permissions === 'undefined') {
+    return false;
+  }
+  try {
+    const result = await navigator.permissions.query({ name: 'clipboard-write' as PermissionName });
+    if (result.state === 'granted') {
+      localStorage.setItem(EXAM_CLIPBOARD_PERMISSION_KEY, 'granted');
+      return true;
+    }
+    // 'denied' or 'prompt' — do not store; the browser will prompt on write.
+    localStorage.removeItem(EXAM_CLIPBOARD_PERMISSION_KEY);
+    return false;
+  } catch {
+    return false;
+  }
+};
+
 /** Checks if the exam session is currently active by reading localStorage. */
 const isExamInProgress = (params: { examStatusStorageKey: string }): boolean => {
   const status = localStorage.getItem(params.examStatusStorageKey);
@@ -126,8 +166,8 @@ const getSelectedTextFromMonaco = (
   return model.getValueInRange(selection);
 };
 
-const FULLSCREEN_VIEWPORT_TOLERANCE_PX = 4;
-const FULLSCREEN_CHROME_TOLERANCE_PX = 12;
+const FULLSCREEN_VIEWPORT_TOLERANCE_PX = 8;
+const FULLSCREEN_AVAIL_TOLERANCE_PX = 8;
 
 const isFullscreenActive = (): boolean => {
   if (typeof window === 'undefined' || typeof document === 'undefined') {
@@ -143,14 +183,18 @@ const isFullscreenActive = (): boolean => {
     return true;
   }
 
-  const near = (a: number, b: number): boolean => Math.abs(a - b) <= FULLSCREEN_VIEWPORT_TOLERANCE_PX;
-  const viewportWidth = window.visualViewport?.width ?? window.innerWidth;
-  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-  const matchesScreen = near(viewportWidth, window.screen.width)
-    && near(viewportHeight, window.screen.height);
-  const browserChromeHidden = Math.abs(window.outerHeight - window.innerHeight) <= FULLSCREEN_CHROME_TOLERANCE_PX;
+  if (window.matchMedia?.('(display-mode: fullscreen)')?.matches) {
+    return true;
+  }
 
-  return matchesScreen && browserChromeHidden;
+  const viewportWidth  = window.visualViewport?.width  ?? window.innerWidth;
+  const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+  const near = (a: number, b: number): boolean => Math.abs(a - b) <= FULLSCREEN_VIEWPORT_TOLERANCE_PX;
+  const availNear = (a: number, b: number): boolean => Math.abs(a - b) <= FULLSCREEN_AVAIL_TOLERANCE_PX;
+  return (
+    (near(viewportWidth, window.screen.width) && near(viewportHeight, window.screen.height)) ||
+    (availNear(viewportWidth, screen.availWidth) && availNear(viewportHeight, screen.availHeight))
+  );
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -180,6 +224,8 @@ const buildCriticalLockOverlay = (reason: string): ViolationOverlay => ({
 type ShortcutRule = {
   ctrl?: boolean;
   shift?: boolean;
+  /** Meta/Win key — used for Win+V (Clipboard History). */
+  meta?: boolean;
   key: string;
   intent: string;
 };
@@ -192,6 +238,8 @@ const BLOCKED_SHORTCUTS: ShortcutRule[] = [
   { ctrl: true, key: 'U', intent: 'view_source' },
   { ctrl: true, key: 'S', intent: 'save_page' },
   { ctrl: true, key: 'P', intent: 'print_page' },
+  /** Windows + V opens Clipboard History — a potential answer-leak vector. */
+  { meta: true, key: 'v', intent: 'clipboard_history' },
 ];
 
 const INTENT_LABELS: Record<string, string> = {
@@ -200,6 +248,7 @@ const INTENT_LABELS: Record<string, string> = {
   print_page: 'print page',
   view_source: 'view source',
   screenshot: 'screenshot',
+  clipboard_history: 'open clipboard history',
 };
 
 // ═══════════════════════════════════════════════════════════════════
@@ -241,6 +290,8 @@ export function useExamViolationGuard({
   const fullscreenViolationLoggedRef = useRef(false);
   const fullscreenWatchdogStartAtRef = useRef<number | null>(null);
   const fullscreenWatchdogWarningShownRef = useRef(false);
+  /** Set when reload is triggered (F5 / Ctrl+R / address bar Enter). Fullscreen enforcement pauses. */
+  const reloadGraceAtRef = useRef<number | null>(null);
   /** Tracks whether the last copy/cut operation was a cut, so paste can log CUT_PASTE vs COPY_PASTE. */
   const lastCopyOperationWasCutRef = useRef(false);
   /** Tracks the problemId from which the last copy/cut was performed. */
@@ -253,8 +304,10 @@ export function useExamViolationGuard({
   } | null>(null);
 
   const FULLSCREEN_EXIT_GRACE_MS = 500;
+  const FULLSCREEN_RELOAD_GRACE_MS = 6000;
   const FULLSCREEN_ENFORCEMENT_INTERVAL_MS = 500;
-  const STARTUP_GUARD_GRACE_MS = 1200;
+  /** Grace period after examStartTimeRef is set — covers navigate + fullscreen entry delay. */
+  const STARTUP_GUARD_GRACE_MS = 3000;
   const isSessionActiveStatus = (status: string | null): boolean => {
     const normalized = status?.trim().toLowerCase();
     return normalized === 'in_progress' || normalized === 'active';
@@ -267,6 +320,11 @@ export function useExamViolationGuard({
     }
     return (Date.now() - startedAt) < STARTUP_GUARD_GRACE_MS;
   };
+  /** Skips fullscreen enforcement only; other violations (blur, copy, etc.) remain active. */
+  const isWithinReloadGrace = (): boolean => {
+    const t = reloadGraceAtRef.current;
+    return t !== null && (Date.now() - t) < FULLSCREEN_RELOAD_GRACE_MS;
+  };
   const applyViolationOutcome = (
     current: LatestParams,
     eventType: string,
@@ -276,6 +334,8 @@ export function useExamViolationGuard({
     forceLock: boolean = false,
     options: { includeLockedInDetail?: boolean } = {}
   ) => {
+    if (current.isExamFinishedRef.current) return;
+
     const includeLockedInDetail = options.includeLockedInDetail ?? true;
     const isExceededTolerance = count >= current.maxTolerance;
     const shouldLock = forceLock || isExceededTolerance;
@@ -328,6 +388,8 @@ export function useExamViolationGuard({
       warningDetail,
     );
     current.setOverlay(buildViolationOverlay(reason, current.maxTolerance, count));
+    // Reset clipboard so any copied content is wiped the moment the violation modal appears.
+    window.dispatchEvent(new CustomEvent('exam:reset-clipboard'));
   };
 
   const consumeAwayDuration = (timestampRef: RefObject<number | null>): number => {
@@ -368,6 +430,7 @@ export function useExamViolationGuard({
   useEffect(() => {
     const current = latestRef.current;
     current.isReloadingRef.current = false;
+    reloadGraceAtRef.current = null;
 
     if (!current.examStatusStorageKey) {
       return;
@@ -390,6 +453,10 @@ export function useExamViolationGuard({
 
     const status = localStorage.getItem(current.examStatusStorageKey);
     const isSessionActive = status === 'in_progress' || status === 'active';
+    // If reloaded during an active session, grant the reload grace period so fullscreen
+    // enforcement does not fire before the user has had a chance to re-enter fullscreen.
+    reloadGraceAtRef.current = isSessionActive ? Date.now() : null;
+    current.isReloadingRef.current = false;
 
     if (isSessionActive) {
       if (current.restoreAnswers) {
@@ -407,12 +474,12 @@ export function useExamViolationGuard({
 
       current.setScreen('exam');
     }
-
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       const latest = latestRef.current;
       const s = localStorage.getItem(latest.examStatusStorageKey);
       if (s === 'in_progress' || s === 'active') {
         latest.isReloadingRef.current = true;
+        reloadGraceAtRef.current = Date.now();
         event.preventDefault();
         (event as any).returnValue = '';
         setTimeout(() => {
@@ -441,6 +508,8 @@ export function useExamViolationGuard({
       forceLock: boolean = false,
       options: { includeLockedInDetail?: boolean } = {}
     ) => {
+      if (current.isExamFinishedRef.current) return;
+
       const includeLockedInDetail = options.includeLockedInDetail ?? true;
 
       if (!current.examStatusStorageKey?.trim() || !current.violationStorageKey?.trim()) {
@@ -482,6 +551,7 @@ export function useExamViolationGuard({
             || !isExamInProgress(latest)
             || latest.isInitializingRef.current
             || latest.isReloadingRef.current
+            || isWithinReloadGrace()
           ) {
             return;
           }
@@ -511,7 +581,7 @@ export function useExamViolationGuard({
       }
 
       const durationAwayMs = consumeAwayDuration(fullscreenExitAtRef);
-      if (durationAwayMs >= FULLSCREEN_EXIT_GRACE_MS && !fullscreenViolationLoggedRef.current) {
+      if (durationAwayMs >= FULLSCREEN_EXIT_GRACE_MS && !fullscreenViolationLoggedRef.current && !isWithinReloadGrace()) {
         processViolation(
           current,
           'FULLSCREEN_EXIT',
@@ -564,23 +634,29 @@ export function useExamViolationGuard({
     // Track operation type and source problemId so paste can log COPY_PASTE/CUT_PASTE with from/to.
     const handleCopy = () => {
       const current = latestRef.current;
-      if (!isExamInProgress(current)) return;
+      if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
       lastCopyOperationWasCutRef.current = false;
       lastCopyFromProblemIdRef.current = findProblemId(document.activeElement);
     };
 
     const handleCut = () => {
       const current = latestRef.current;
-      if (!isExamInProgress(current)) return;
+      if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
       lastCopyOperationWasCutRef.current = true;
       lastCopyFromProblemIdRef.current = findProblemId(document.activeElement);
     };
 
     // ── RESET SYSTEM CLIPBOARD ────────────────────────────────
     /** Clears the system clipboard when the exam starts. This is called from
-     *  page.tsx via a custom event before the exam begins. */
+     *  page.tsx via a custom event before the exam begins.
+     *
+     *  Before writing, this function checks localStorage for a cached permission
+     *  state (set by requestClipboardWritePermission during Solve). If permission
+     *  was not pre-granted, it skips the write to avoid triggering a browser prompt
+     *  that would cause fullscreen to exit and generate a FULLSCREEN_EXIT strike. */
     const handleResetClipboard = async () => {
       if (typeof navigator !== 'undefined' && typeof ClipboardItem !== 'undefined') {
+        if (!hasClipboardWritePermission()) return;
         try {
           const item = new ClipboardItem({ 'text/plain': new Blob([' '], { type: 'text/plain' }) });
           await navigator.clipboard.write([item]);
@@ -656,7 +732,7 @@ export function useExamViolationGuard({
     // ── RIGHT CLICK ─────────────────────────────────────────
     const handleContextMenu = (event: MouseEvent) => {
       const current = latestRef.current;
-      if (!isExamInProgress(current)) return;
+      if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
 
       event.preventDefault();
       current.onLog(
@@ -669,7 +745,7 @@ export function useExamViolationGuard({
     // ── KEYBOARD SHORTCUTS ──────────────────────────────────
     const handleKeyDown = (event: KeyboardEvent) => {
       const current = latestRef.current;
-      if (!isExamInProgress(current)) return;
+      if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
 
       // Let Ctrl+V pass through so the paste handler in EFFECT 6 can detect it.
       if ((event.ctrlKey || event.metaKey) && !event.shiftKey && event.key.toUpperCase() === 'V') {
@@ -682,16 +758,38 @@ export function useExamViolationGuard({
         return;
       }
 
+      // Win+V opens Windows Clipboard History — block it specifically since
+      // event.metaKey may not be reliably set on all Windows configurations.
+      if (
+        event.metaKey ||
+        (event.key.toUpperCase() === 'V' && (
+          (event as any).location === 2 || // Extended key location (Right Win key)
+          navigator.userAgent.toLowerCase().includes('win')
+        ))
+      && !event.ctrlKey && !event.shiftKey && !event.altKey) {
+        // Check if the key location suggests the Win key was involved.
+        const hasWinModifier = event.metaKey || (event as any).location === 2;
+        if (hasWinModifier) {
+          event.preventDefault();
+          processViolation(current, 'KEYBOARD_SHORTCUT', `Blocked keyboard shortcut: Win+V (${INTENT_LABELS.clipboard_history})`);
+          return;
+        }
+      }
+
       for (const rule of BLOCKED_SHORTCUTS) {
-        const ctrlMatch = rule.ctrl ? (event.ctrlKey || event.metaKey) : !event.ctrlKey && !event.metaKey;
+        // Ctrl: only relevant when rule.ctrl is true; otherwise ignore Ctrl state.
+        const ctrlMatch = rule.ctrl ? (event.ctrlKey || event.metaKey) : true;
         const shiftMatch = rule.shift ? event.shiftKey : !event.shiftKey;
+        // Meta (Win key on Windows, Cmd on Mac): requires exact match.
+        const metaMatch = rule.meta ? event.metaKey : !event.metaKey;
         const keyMatch = event.key.toUpperCase() === rule.key.toUpperCase();
 
-        if (ctrlMatch && shiftMatch && keyMatch) {
+        if (ctrlMatch && shiftMatch && metaMatch && keyMatch) {
           event.preventDefault();
           const keyCombo = [
             rule.ctrl ? 'Ctrl' : '',
             rule.shift ? 'Shift' : '',
+            rule.meta ? 'Win' : '',
             rule.key,
           ].filter(Boolean).join('+');
 
@@ -875,42 +973,66 @@ export function useExamViolationGuard({
           fullscreenWatchdogStartAtRef.current = Date.now();
         }
 
-        if (!fullscreenWatchdogWarningShownRef.current && !fullscreenViolationLoggedRef.current) {
-          fullscreenWatchdogWarningShownRef.current = true;
-          current.setOverlay({
-            title: 'Fullscreen required',
-            msg: 'You are not in fullscreen mode. Please return to fullscreen to continue your exam.',
-            sub: 'If you do not return to fullscreen, this will be recorded as a violation.',
-            showBtn: true,
-            alertType: 'violation',
-          });
-          current.onLog(
-            'FULLSCREEN_NOT_ACTIVE', 'warning', false,
-            'Exam is active but fullscreen is not enabled (e.g. after page reload)',
-            {},
-          );
-        }
-
         const durationAwayMs = Math.max(0, Date.now() - fullscreenWatchdogStartAtRef.current);
-        if (
-          durationAwayMs >= FULLSCREEN_EXIT_GRACE_MS
-          && !fullscreenViolationLoggedRef.current
-          && current.examStatusStorageKey.trim()
-          && current.violationStorageKey.trim()
-        ) {
-          current.violationCountRef.current += 1;
-          const count = current.violationCountRef.current;
-          localStorage.setItem(current.violationStorageKey, String(count));
-          fullscreenViolationLoggedRef.current = true;
-          applyViolationOutcome(
-            current,
-            'FULLSCREEN_EXIT',
-            'Exited fullscreen mode',
-            count,
-            { durationAwayMs, detectedBy: 'fullscreen_enforcement' },
-            false,
-            { includeLockedInDetail: false },
-          );
+
+        // Reload case: show warning overlay, wait for reload grace period, then log violation
+        if (isWithinReloadGrace()) {
+          if (
+            !fullscreenWatchdogWarningShownRef.current
+            && !fullscreenViolationLoggedRef.current
+          ) {
+            fullscreenWatchdogWarningShownRef.current = true;
+            current.setOverlay({
+              title: 'Fullscreen required',
+              msg: 'You are not in fullscreen mode. Please return to fullscreen to continue your exam.',
+              sub: 'If you do not return to fullscreen, this will be recorded as a violation.',
+              showBtn: true,
+              alertType: 'violation',
+            });
+            current.onLog(
+              'FULLSCREEN_NOT_ACTIVE', 'warning', false,
+              'Exam is active but fullscreen is not enabled (e.g. after page reload)',
+              {},
+            );
+          }
+
+          if (
+            durationAwayMs >= FULLSCREEN_RELOAD_GRACE_MS
+            && !fullscreenViolationLoggedRef.current
+            && current.examStatusStorageKey.trim()
+            && current.violationStorageKey.trim()
+          ) {
+            current.violationCountRef.current += 1;
+            const count = current.violationCountRef.current;
+            localStorage.setItem(current.violationStorageKey, String(count));
+            fullscreenViolationLoggedRef.current = true;
+            applyViolationOutcome(
+              current,
+              'FULLSCREEN_EXIT',
+              'Exited fullscreen mode',
+              count,
+              { durationAwayMs, detectedBy: 'fullscreen_enforcement' },
+              false,
+              { includeLockedInDetail: false },
+            );
+          }
+        } else {
+          // Non-reload case: log violation immediately, no overlay
+          if (!fullscreenViolationLoggedRef.current) {
+            current.violationCountRef.current += 1;
+            const count = current.violationCountRef.current;
+            localStorage.setItem(current.violationStorageKey, String(count));
+            fullscreenViolationLoggedRef.current = true;
+            applyViolationOutcome(
+              current,
+              'FULLSCREEN_EXIT',
+              'Exited fullscreen mode',
+              count,
+              { durationAwayMs, detectedBy: 'fullscreen_enforcement' },
+              false,
+              { includeLockedInDetail: false },
+            );
+          }
         }
 
         return;
@@ -953,7 +1075,7 @@ export function useExamViolationGuard({
 
       const handleContainerKeyDown = (e: KeyboardEvent) => {
         const current = latestRef.current;
-        if (!isExamInProgress(current)) return;
+        if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
         if (e.ctrlKey || e.metaKey) {
           if (e.key === 'c' || e.key === 'C') {
             e.preventDefault();
@@ -1025,7 +1147,7 @@ export function useExamViolationGuard({
       // ── DRAG START & DROP ───────────────────────────────────
       const handleDragStart = (event: DragEvent) => {
         const current = latestRef.current;
-        if (!isExamInProgress(current)) return;
+        if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
 
         event.stopImmediatePropagation();
 
@@ -1041,7 +1163,7 @@ export function useExamViolationGuard({
 
       const handleDrop = (event: DragEvent) => {
         const current = latestRef.current;
-        if (!isExamInProgress(current)) return;
+        if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
 
         event.stopImmediatePropagation();
 

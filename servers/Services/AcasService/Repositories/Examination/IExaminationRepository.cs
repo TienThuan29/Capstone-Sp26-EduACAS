@@ -11,5 +11,6 @@ public interface IExaminationRepository
     Task DeleteAsync(string id);
 
     Task<List<Models.Examination>> GetByClassIdAsync(string classId);
+    Task<List<Models.Examination>> GetByClassIdsAsync(IEnumerable<string> classIds);
     Task<List<Models.Examination>> GetByClassIdAndModeAsync(string classId, string mode);
 }

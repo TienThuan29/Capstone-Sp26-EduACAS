@@ -198,10 +198,16 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Recent classrooms</h2>
               <Button
                 color="gray"
-                className="px-4 py-2 font-medium text-sm"
-                onClick={() => router.push(PageUrl.MY_CLASSROOM_PAGE)}
+                className="px-4 py-2 font-medium text-sm cursor-pointer"
+                onClick={() =>
+                  router.push(
+                    isLecturer
+                      ? PageUrl.MANAGE_CLASSROOM_PAGE
+                      : PageUrl.MY_CLASSROOM_PAGE,
+                  )
+                }
               >
-                All classroom
+                {isLecturer ? "Manage All Classrooms" : "All classroom"}
               </Button>
             </div>
 
@@ -237,7 +243,7 @@ export default function HomePage() {
             )}
 
             {/* Search Bar */}
-            <div className="mb-6 flex gap-2">
+            {/* <div className="mb-6 flex gap-2">
               <TextInput
                 placeholder="Search classes"
                 value={searchQuery}
@@ -247,7 +253,7 @@ export default function HomePage() {
               <Button style={{ backgroundColor: "#1F4E79" }} className="!p-0 !px-4">
                 <IconSearch className="w-5 h-5" />
               </Button>
-            </div>
+            </div> */}
 
             {loadingClassrooms ? (
               <ClassroomListSkeleton />
