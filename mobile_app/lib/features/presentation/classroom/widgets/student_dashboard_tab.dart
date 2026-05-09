@@ -6,8 +6,9 @@ import '../../../services/student_dashboard_service.dart';
 
 class StudentDashboardTab extends StatefulWidget {
   final String classroomId;
+  final String? classroomName;
 
-  const StudentDashboardTab({super.key, required this.classroomId});
+  const StudentDashboardTab({super.key, required this.classroomId, this.classroomName});
 
   @override
   State<StudentDashboardTab> createState() => _StudentDashboardTabState();
@@ -92,19 +93,48 @@ class _StudentDashboardTabState extends State<StudentDashboardTab> {
   }
 
   Widget _buildHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Course Dashboard',
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          'Performance overview for ${_data?.overview.className ?? 'this class'}',
-          style: const TextStyle(fontSize: 14, color: AppColors.textSecondary),
-        ),
-      ],
+    return Container(
+      padding: const EdgeInsets.fromLTRB(4, 8, 4, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(Icons.dashboard_rounded, color: AppColors.primary, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  widget.classroomName ?? 'My Performance',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                    letterSpacing: -0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Insights for ${_data?.overview.className ?? 'this course'}',
+            style: const TextStyle(
+              fontSize: 14,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -170,12 +200,12 @@ class _StudentDashboardTabState extends State<StudentDashboardTab> {
 
   Widget _buildStatCard(String title, String value, String unit, IconData icon, Color color, {String? trend, String? subtitle}) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
         boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 10, offset: const Offset(0, 4)),
+          BoxShadow(color: Colors.black.withValues(alpha: 0.03), blurRadius: 12, offset: const Offset(0, 6)),
         ],
         border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
       ),
@@ -185,56 +215,64 @@ class _StudentDashboardTabState extends State<StudentDashboardTab> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+              Icon(icon, size: 18, color: color.withValues(alpha: 0.8)),
+              if (trend != null)
+                Icon(
+                  trend == 'improving' ? Icons.trending_up_rounded : (trend == 'declining' ? Icons.trending_down_rounded : Icons.trending_flat_rounded),
+                  size: 16,
+                  color: trend == 'improving' ? AppColors.success : (trend == 'declining' ? AppColors.error : Colors.grey),
                 ),
-              ),
-              Icon(icon, size: 16, color: color.withValues(alpha: 0.8)),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 value,
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: color),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w900,
+                  color: color,
+                  letterSpacing: -1,
+                ),
               ),
               if (unit.isNotEmpty) ...[
                 const SizedBox(width: 2),
-                Text(unit, style: const TextStyle(fontSize: 12, color: AppColors.textLight)),
-              ],
-            ],
-          ),
-          if (trend != null) ...[
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  trend == 'improving' ? Icons.trending_up : (trend == 'declining' ? Icons.trending_down : Icons.trending_flat),
-                  size: 14,
-                  color: trend == 'improving' ? AppColors.success : (trend == 'declining' ? AppColors.error : Colors.grey),
-                ),
-                const SizedBox(width: 4),
                 Text(
-                  trend.toUpperCase(),
-                  style: TextStyle(
-                    fontSize: 10,
+                  unit,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: AppColors.textLight,
                     fontWeight: FontWeight.bold,
-                    color: trend == 'improving' ? AppColors.success : (trend == 'declining' ? AppColors.error : Colors.grey),
                   ),
                 ),
               ],
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              color: AppColors.textLight,
+              letterSpacing: 0.5,
             ),
-          ],
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(fontSize: 11, color: AppColors.textLight)),
+            Text(
+              subtitle,
+              style: TextStyle(
+                fontSize: 10,
+                color: color.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w600,
+              ),
+            ),
           ],
         ],
       ),

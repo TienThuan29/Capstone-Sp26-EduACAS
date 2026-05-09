@@ -79,11 +79,15 @@ class FcmService {
     });
 
     FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
-      final accessToken = await TokenStorage.getAccessToken();
-      if (accessToken == null || accessToken.isEmpty) {
-        return;
+      try {
+        final accessToken = await TokenStorage.getAccessToken();
+        if (accessToken == null || accessToken.isEmpty) {
+          return;
+        }
+        await registerDeviceToken(token: token, accessToken: accessToken);
+      } catch (e) {
+        debugPrint('FCM: onTokenRefresh failed: $e');
       }
-      await registerDeviceToken(token: token, accessToken: accessToken);
     });
 
     _fullyInitialized = true;
@@ -96,34 +100,66 @@ class FcmService {
     await initializePostRun();
   }
 
+  /// Registers the current device for FCM push notifications.
+  /// This is a BEST-EFFORT operation — it MUST NOT block login success.
+  /// If FCM fails (e.g. no Google Play Services), login should still complete.
   static Future<void> registerCurrentDeviceForLoggedInUser() async {
-    final accessToken = await TokenStorage.getAccessToken();
-    if (accessToken == null || accessToken.isEmpty) {
-      return;
-    }
+    try {
+      final accessToken = await TokenStorage.getAccessToken();
+      if (accessToken == null || accessToken.isEmpty) {
+        return;
+      }
 
-    final token = await FirebaseMessaging.instance.getToken();
-    if (token == null || token.isEmpty) {
-      return;
-    }
+      final token = await _getFcmTokenWithTimeout();
+      if (token == null || token.isEmpty) {
+        debugPrint('FCM: No token available, skipping device registration');
+        return;
+      }
 
-    await registerDeviceToken(token: token, accessToken: accessToken);
+      await registerDeviceToken(token: token, accessToken: accessToken);
+    } catch (e) {
+      // Log but do NOT re-throw — FCM registration failure must never block login.
+      debugPrint('FCM: Device registration skipped (non-critical): $e');
+    }
   }
 
-  static Future<void> registerDeviceToken({required String token, required String accessToken}) async {
-    final installationId = await _getOrCreateInstallationId();
-    final packageInfo = await PackageInfo.fromPlatform();
+  /// Retrieves FCM token with a 5-second timeout to prevent blocking.
+  /// Returns null on any failure (no Play Services, network, timeout, etc.).
+  static Future<String?> _getFcmTokenWithTimeout() async {
+    try {
+      return await FirebaseMessaging.instance.getToken().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () {
+          debugPrint('FCM: getToken() timed out after 5 seconds');
+          return null;
+        },
+      );
+    } catch (e) {
+      debugPrint('FCM: getToken() failed: $e');
+      return null;
+    }
+  }
 
-    await ApiNetwork.postWithAuth(
-      endpoint: ApiConfig.registerDeviceTokenEndpoint,
-      token: accessToken,
-      body: {
-        'deviceToken': token,
-        'platform': _platformName,
-        'deviceId': installationId,
-        'appVersion': packageInfo.version,
-      },
-    );
+  /// Registers the device token with the backend.
+  /// This is a BEST-EFFORT operation.
+  static Future<void> registerDeviceToken({required String token, required String accessToken}) async {
+    try {
+      final installationId = await _getOrCreateInstallationId();
+      final packageInfo = await PackageInfo.fromPlatform();
+
+      await ApiNetwork.postWithAuth(
+        endpoint: ApiConfig.registerDeviceTokenEndpoint,
+        token: accessToken,
+        body: {
+          'deviceToken': token,
+          'platform': _platformName,
+          'deviceId': installationId,
+          'appVersion': packageInfo.version,
+        },
+      );
+    } catch (e) {
+      debugPrint('FCM: Failed to register device token with backend: $e');
+    }
   }
 
   static Future<String> _getOrCreateInstallationId() async {

@@ -3,20 +3,20 @@ using Microsoft.AspNetCore.Mvc;
 namespace AcasService.Dev;
 
 /// <summary>
-/// Development-only endpoints. All actions are disabled when not running in Development environment.
+/// Development-only endpoints for quiz data reset and seeding.
 /// </summary>
 [ApiController]
 [Route("api/dev")]
-public class DeveloperController : ControllerBase
+public class QuizDataController : ControllerBase
 {
     private readonly IDynamoDbResetService _resetService;
     private readonly IWebHostEnvironment _env;
-    private readonly ILogger<DeveloperController> _logger;
+    private readonly ILogger<QuizDataController> _logger;
 
-    public DeveloperController(
+    public QuizDataController(
         IDynamoDbResetService resetService,
         IWebHostEnvironment env,
-        ILogger<DeveloperController> logger)
+        ILogger<QuizDataController> logger)
     {
         _resetService = resetService;
         _env = env;
@@ -24,18 +24,19 @@ public class DeveloperController : ControllerBase
     }
 
     /// <summary>
-    /// Wipes all discovered DynamoDB tables and re-seeds them with realistic mock data.
+    /// Wipes and re-seeds quiz-related data from seed-data-2, including Question,
+    /// AnswerOption, Quiz, ClassroomQuiz, QuizAttempt, and StudentAnswer.
     /// Only available when running in Development environment.
     /// </summary>
-    [HttpPost("reset-db")]
+    [HttpPost("reset-quiz-data")]
     [ProducesResponseType(typeof(ResetDbResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ResetDbResponse>> ResetDatabase(CancellationToken cancellationToken)
+    public async Task<ActionResult<ResetDbResponse>> ResetQuizData(CancellationToken cancellationToken)
     {
         if (!_env.IsDevelopment())
         {
-            _logger.LogWarning("reset-db was called in non-Development environment; rejecting");
+            _logger.LogWarning("reset-quiz-data was called in non-Development environment; rejecting");
             return StatusCode(403, new ResetDbResponse
             {
                 Success = false,
@@ -45,20 +46,20 @@ public class DeveloperController : ControllerBase
 
         try
         {
-            var result = await _resetService.ResetAndSeedAsync(cancellationToken);
+            var result = await _resetService.ResetAndSeedQuizDataAsync(cancellationToken);
             return Ok(new ResetDbResponse
             {
                 Success = result.Success,
                 TablesWiped = result.TablesWiped,
                 ItemsSeeded = result.ItemsSeeded,
                 Message = result.Success
-                    ? $"Wiped {result.TablesWiped} tables and seeded {result.ItemsSeeded} items."
+                    ? $"Wiped {result.TablesWiped} quiz-related tables and seeded {result.ItemsSeeded} items from seed-data-2."
                     : result.ErrorMessage ?? string.Empty
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "reset-db failed");
+            _logger.LogError(ex, "reset-quiz-data failed");
             return StatusCode(500, new ResetDbResponse
             {
                 Success = false,
@@ -68,18 +69,20 @@ public class DeveloperController : ControllerBase
     }
 
     /// <summary>
-    /// Wipes all discovered DynamoDB tables and re-seeds them with the seed-data-2 dataset.
+    /// Seeds rich quiz data (questions, quizzes, classroom quizzes, quiz attempts)
+    /// for Introduction to Programming class (cls-001) without wiping existing data.
+    /// Creates realistic data for dashboard visualization including multi-attempt students.
     /// Only available when running in Development environment.
     /// </summary>
-    [HttpPost("reset-db-seed-data-2")]
+    [HttpPost("seed-cls001-quiz-data")]
     [ProducesResponseType(typeof(ResetDbResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<ActionResult<ResetDbResponse>> ResetDatabaseSeedData2(CancellationToken cancellationToken)
+    public async Task<ActionResult<ResetDbResponse>> SeedCls001QuizData(CancellationToken cancellationToken)
     {
         if (!_env.IsDevelopment())
         {
-            _logger.LogWarning("reset-db-seed-data-2 was called in non-Development environment; rejecting");
+            _logger.LogWarning("seed-cls001-quiz-data was called in non-Development environment; rejecting");
             return StatusCode(403, new ResetDbResponse
             {
                 Success = false,
@@ -89,20 +92,20 @@ public class DeveloperController : ControllerBase
 
         try
         {
-            var result = await _resetService.ResetAndSeedSeedData2Async(cancellationToken);
+            var result = await _resetService.SeedCls001QuizDataAsync(cancellationToken);
             return Ok(new ResetDbResponse
             {
                 Success = result.Success,
                 TablesWiped = result.TablesWiped,
                 ItemsSeeded = result.ItemsSeeded,
                 Message = result.Success
-                    ? $"Wiped {result.TablesWiped} tables and seeded {result.ItemsSeeded} items from seed-data-2."
+                    ? $"Seeded {result.ItemsSeeded} quiz items for cls-001 (Introduction to Programming)."
                     : result.ErrorMessage ?? string.Empty
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "reset-db-seed-data-2 failed");
+            _logger.LogError(ex, "seed-cls001-quiz-data failed");
             return StatusCode(500, new ResetDbResponse
             {
                 Success = false,
@@ -110,12 +113,4 @@ public class DeveloperController : ControllerBase
             });
         }
     }
-}
-
-public class ResetDbResponse
-{
-    public bool Success { get; set; }
-    public int TablesWiped { get; set; }
-    public int ItemsSeeded { get; set; }
-    public string Message { get; set; } = string.Empty;
 }
