@@ -1199,13 +1199,49 @@ export function useExamViolationGuard({
         event.preventDefault();
       };
 
+      // ── PASTE (all sources: Ctrl+V, Shift+Insert, context menu) ──
+      // Intercept ALL paste events before Monaco's default handler runs.
+      // The keydown handler only catches Ctrl+V — context menu paste bypasses keydown.
+      const handlePaste = (e: ClipboardEvent) => {
+        const current = latestRef.current;
+        if (!isExamInProgress(current) || current.isExamFinishedRef.current) return;
+
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        // Get pasted text from clipboardData (works for all paste sources without permissions)
+        const currentInner = latestRef.current;
+        if (!isExamInProgress(currentInner)) return;
+
+        const pastedText = e.clipboardData?.getData('text/plain') ?? '';
+        if (!pastedText) return;
+
+        const selection = editor.getSelection();
+        if (selection) {
+          editor.executeEdits('exam-guard-paste', [
+            { range: selection, text: pastedText, forceMoveMarkers: true },
+          ]);
+          editor.setPosition(selection.getEndPosition());
+        }
+
+        const toProblemId = findProblemId(container);
+
+        currentInner.onLog(
+          'COPY_PASTE', 'warning', false,
+          `Pasted ${pastedText.length} character(s)${toProblemId ? ` into Problem ${toProblemId}` : ''} [context menu paste]`,
+          { length: pastedText.length, content: pastedText, from: lastCopyFromProblemIdRef.current, to: toProblemId },
+        );
+      };
+
       container.addEventListener('keydown', handleContainerKeyDown, true);
+      container.addEventListener('paste', handlePaste, true);
       container.addEventListener('dragstart', handleDragStart, true);
       container.addEventListener('dragover', handleDragOver, true);
       container.addEventListener('drop', handleDrop, false);
 
       return () => {
         container.removeEventListener('keydown', handleContainerKeyDown, true);
+        container.removeEventListener('paste', handlePaste, true);
         container.removeEventListener('dragstart', handleDragStart, true);
         container.removeEventListener('dragover', handleDragOver, true);
         container.removeEventListener('drop', handleDrop, false);

@@ -110,6 +110,9 @@ interface EditorContextType {
   stopTimer: () => void;
   resetTimer: () => void;
   isExamMode: boolean;
+  /** True when mode is EXAMINATION (strict or not). Used to determine grading behavior. */
+  isExaminationMode: boolean;
+  setExaminationMode: (isExamination: boolean) => void;
   examDuration: number; // in seconds
   setExamMode: (isExam: boolean, endTime?: Date) => void;
   syncServerTime: (serverTimeStr: string) => void;
@@ -253,6 +256,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [isTimerExpired, setIsTimerExpired] = useState(false);
   const [isExamMode, setIsExamModeState] = useState(false);
+  const [isExaminationMode, setIsExaminationModeState] = useState(false);
   const [examDuration, setExamDuration] = useState(3600); // 1 hour default (fallback)
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [timeOffset, setTimeOffset] = useState(0); // Difference between server and client time
@@ -531,6 +535,11 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     }
   }, [examDuration, timeOffset]);
 
+  /** Sets examination mode flag (strict or not). Used to control grading behavior (not violation guard). */
+  const setExaminationMode = useCallback((isExamination: boolean) => {
+    setIsExaminationModeState(isExamination);
+  }, []);
+
   const toggleLeftPanel = useCallback(() => {
     setIsLeftPanelCollapsed((prev) => !prev);
   }, []);
@@ -732,6 +741,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     stopTimer,
     resetTimer,
     isExamMode,
+    isExaminationMode,
+    setExaminationMode,
     examDuration,
     setExamMode,
     syncServerTime,
