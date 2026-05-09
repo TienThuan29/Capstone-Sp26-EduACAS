@@ -60,6 +60,7 @@ export function CodeEditorClient({
     editorState,
     setProblem,
     setExamMode,
+    setExaminationMode,
     setTestCases,
     setLanguage,
     setCode,
@@ -89,7 +90,10 @@ export function CodeEditorClient({
    * The backend uses JsonStringEnumConverter, so mode is serialized as "EXAMINATION" (string).
    */
   const isTimedMode = examination.mode === "PRACTICAL" || (examination.useStrict === true && examination.mode === "EXAMINATION");
+  /** Controls submission behavior and violation guard. Only true when strict mode is enabled. */
   const isExamMode = examination.useStrict === true && examination.mode === "EXAMINATION";
+  /** True for any EXAMINATION mode (strict or not). Used for grading behavior. */
+  const isExaminationMode = examination.mode === "EXAMINATION";
   // console.log('strict mode:' , examination.useStrict)
 
   const storageKeys = useMemo(
@@ -256,10 +260,13 @@ export function CodeEditorClient({
       setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
+    // Controls grading behavior (not violation guard). True for any EXAMINATION mode (strict or not).
+    setExaminationMode(examination.mode === "EXAMINATION");
   }, [
     examination,
     setProblem,
     setExamMode,
+    setExaminationMode,
     setTestCases,
     setLanguage,
     setCode,
