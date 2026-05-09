@@ -77,6 +77,7 @@ export function CodeEditorClient({
     lastSubmissionId,
     timerSeconds,
     isTimerExpired,
+    isTimerRunning,
   } = useEditorContext();
 
   const problemId = examination.problem.id;
@@ -128,6 +129,8 @@ export function CodeEditorClient({
   const isExamFinishedRef = useRef(false);
   const examStartTimeRef = useRef(0);
   const forceSubmitTriggeredRef = useRef(false);
+  /** Prevents multiple navigations from stale async blocks in React Strict Mode */
+  const hasNavigatedRef = useRef(false);
 
   const navigateBackToExam = useCallback(() => {
     // Signal the guard to stop violation detection before navigating away.
@@ -249,6 +252,7 @@ export function CodeEditorClient({
 
     // if (examination.endDatetime) {
     if (isTimedMode && examination.endDatetime) {
+      console.log('[CodeEditor] Calling setExamMode(true, endDatetime)', { endDatetime: examination.endDatetime });
       setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
@@ -268,10 +272,19 @@ export function CodeEditorClient({
 
   // When timer expires, force-navigate back to the exam
   useEffect(() => {
+    console.log('[CodeEditor] isTimerExpired changed to', isTimerExpired, 'isExamMode:', isExamMode);
     if (!isTimerExpired) return;
+    // Guard: only navigate if we're actually in exam mode.
+    // During initial render (before setExamMode is called), endTime is null
+    // and the Timer Effect Guard sets isTimerExpired=true prematurely.
+    // We must NOT navigate in that case — wait for the actual exam to start.
+    if (!isExamMode) {
+      console.log('[CodeEditor] isTimerExpired=true but not in exam mode — ignoring');
+      return;
+    }
     console.log('[CodeEditor] Timer expired — navigating back to exam');
     navigateBackToExam();
-  }, [isTimerExpired, navigateBackToExam]);
+  }, [isTimerExpired, navigateBackToExam, isExamMode]);
 
   useEffect(() => {
     if (!isExamMode) return;
@@ -498,15 +511,33 @@ export function CodeEditorClient({
   });
 
   // When exam timer reaches 0, force-submit current problem, lock exam session, and navigate back.
+  // Note: isTimerRunning is in deps so that in React Strict Mode double-invoke, the effect
+  // re-runs after cleanup and the second invocation can properly guard against the stale
+  // async block from the first invocation (which may have started before isExamFinishedRef=true).
   useEffect(() => {
+    console.log('[AutoSubmit] Effect triggered', { isExamMode, timerSeconds, isTimerRunning, isExamFinishedRef: isExamFinishedRef.current });
     if (!isExamMode) return;
     if (timerSeconds !== 0) return;
     if (isExamFinishedRef.current) return;
+    // Also guard: if the exam timer was stopped (isTimerRunning=false), this is likely
+    // a stale invocation from the previous effect run — do not start a new async block.
+    if (!isTimerRunning) {
+      console.log('[AutoSubmit] isTimerRunning=false — likely stale invocation, ignoring');
+      return;
+    }
 
+    console.log('[AutoSubmit] Starting auto-submit + lock flow');
     isExamFinishedRef.current = true;
     stopTimer();
 
     void (async () => {
+      // Guard: if we've already navigated away (from a stale async block), don't navigate again.
+      if (hasNavigatedRef.current) {
+        console.log('[AutoSubmit] Already navigated — skipping');
+        return;
+      }
+      hasNavigatedRef.current = true;
+
       try {
         await submitCode();
       } catch (err) {
@@ -544,7 +575,7 @@ export function CodeEditorClient({
 
       navigateBackToExam();
     })();
-  }, [isExamMode, timerSeconds, examId, studentId, stopTimer, lock, getByExam, navigateBackToExam]);
+  }, [isExamMode, timerSeconds, isTimerRunning, examId, studentId, stopTimer, lock, getByExam, navigateBackToExam]);
 
   useEffect(() => {
     if (!isExamMode || !sessionKeys || !studentId) return;

@@ -8,6 +8,7 @@ import React, {
   useEffect,
   useRef,
 } from 'react';
+import { flushSync } from 'react-dom';
 // import {
 //   SubmissionStatus,
 //   BOILERPLATE_CODE,
@@ -344,12 +345,51 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     //   }
     // }
 
+    // Guard: skip if endTime has already passed (prevents immediate tick firing on mount).
+    // Note: we intentionally do NOT check !Number.isFinite(timeOffset) here.
+    // timeOffset starts at 0 (not synced) — if we treated 0 as invalid, the guard
+    // would fire before syncServerTime is called and incorrectly expire the exam.
+    // Instead, we use client time as fallback, and the effect will re-run with the
+    // correct offset once syncServerTime is called.
+    //
+    // We also skip if the exam timer hasn't been started yet (isTimerRunning=false).
+    // This prevents the guard from expiring the timer during the initial render,
+    // before setExamMode/setEndTime have been called by CodeEditorClient.
+    const nowForGuard = Number.isFinite(timeOffset) ? Date.now() + timeOffset : Date.now();
+    const isExpired = !endTime || endTime.getTime() <= nowForGuard;
+    console.log('[TimerEffect] guard check', {
+      timeOffset,
+      nowForGuard,
+      endTimeMs: endTime?.getTime(),
+      isExpired,
+      isTimerRunning,
+      isExamMode,
+    });
+    // Only expire if: (1) exam timer is running, AND (2) exam mode is active, AND (3) time has passed.
+    // NEVER expire if the exam hasn't been started yet (isTimerRunning=false).
+    // This prevents the timer from being incorrectly expired during the initial render
+    // when setExamMode/endTime have not yet been called.
+    if (isExpired) {
+      if (!isTimerRunning) {
+        console.log('[TimerEffect] Guard skipped — isTimerRunning=false, exam not started yet');
+        return;
+      }
+      console.log('[TimerEffect] GUARD TRIGGERED — expiring timer', { reason: !endTime ? 'no endTime' : 'endTime passed' });
+      setTimerSeconds(0);
+      setIsTimerRunning(false);
+      setIsTimerExpired(true);
+      isTimerExpiredRef.current = true;
+      return;
+    }
+
     if (!isTimerRunning || !isExamMode || !endTime) return;
 
     const tick = () => {
       const serverNow = Date.now() + timeOffset;
       const diff = Math.floor((endTime.getTime() - serverNow) / 1000);
       if (diff <= 0) {
+        // Exam has ended — clamp to 0 and stop.
+        // Guard against negative diff (e.g. server clock behind client, or NaN from invalid HTTP date header).
         setTimerSeconds(0);
         setIsTimerRunning(false);
         setIsTimerExpired(true);
@@ -446,11 +486,16 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   // }, []);
 
   const startTimer = useCallback(() => {
+    console.log('[startTimer] called');
     setIsTimerRunning(true);
   }, []);
 
   const stopTimer = useCallback(() => {
-    setIsTimerRunning(false);
+    // Use flushSync to immediately update state — important for React Strict Mode double-invoke
+    // to prevent stale async blocks from running after cleanup.
+    flushSync(() => {
+      setIsTimerRunning(false);
+    });
   }, []);
 
   const resetTimer = useCallback(() => {
@@ -463,15 +508,20 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   const syncServerTime = useCallback((serverTimeStr: string) => {
     const serverTime = new Date(serverTimeStr).getTime();
     const clientTime = Date.now();
+    const newOffset = serverTime - clientTime;
+    console.log('[syncServerTime] setting offset', { serverTime, clientTime, newOffset });
     setTimeOffset(serverTime - clientTime);
   }, []);
 
   const setExamMode = useCallback((isExam: boolean, end?: Date) => {
+    console.log('[setExamMode] called', { isExam, endTime: end?.getTime() });
     setIsExamModeState(isExam);
     if (end) {
       setEndTime(end);
-      const serverNow = Date.now() + timeOffset;
+      // Use server time if offset is valid, otherwise client time.
+      const serverNow = Number.isFinite(timeOffset) ? Date.now() + timeOffset : Date.now();
       const initialDiff = Math.max(0, Math.floor((end.getTime() - serverNow) / 1000));
+      console.log('[setExamMode] setTimerSeconds to', initialDiff, { serverNow, timeOffset });
       setTimerSeconds(initialDiff);
     } else if (isExam) {
        // Fallback if no specific end time is provided but exam mode is on
