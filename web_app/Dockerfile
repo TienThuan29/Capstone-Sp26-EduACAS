@@ -31,15 +31,22 @@ RUN npx next build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Cài compilers cho syntax check (python, gcc, g++, java, dotnet)
+# Cài compilers cho syntax check (python, gcc, g++, java, dotnet SDK)
 RUN apk add --no-cache \
+    bash \
     python3 \
     gcc \
     g++ \
     musl-dev \
     openjdk21 \
-    dotnet8 \
-    && ln -sf /usr/bin/python3 /usr/bin/python
+    icu-libs \
+    && ln -sf /usr/bin/python3 /usr/bin/python \
+    # Cài .NET SDK bằng script chính thức (apk chỉ có runtime, không có SDK)
+    && wget -q https://dot.net/v1/dotnet-install.sh -O /tmp/dotnet-install.sh \
+    && chmod +x /tmp/dotnet-install.sh \
+    && /tmp/dotnet-install.sh --channel 8.0 --install-dir /usr/share/dotnet \
+    && ln -sf /usr/share/dotnet/dotnet /usr/bin/dotnet \
+    && rm /tmp/dotnet-install.sh
 
 # Gọi lại ARG nếu bạn muốn biến này tồn tại ở runtime (tuỳ chọn nhưng nên có)
 ARG NEXT_PUBLIC_BACKEND_BASE_URL

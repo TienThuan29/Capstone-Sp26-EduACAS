@@ -58,6 +58,7 @@ export function EditorSettingsModal({ isOpen, onClose }: EditorSettingsModalProp
     setFontFamily,
     setCursorBlinking,
     setCursorSmoothCaretAnimation,
+    resetCode,
   } = useEditorContext();
 
   const handleResetToDefaults = () => {
@@ -69,6 +70,7 @@ export function EditorSettingsModal({ isOpen, onClose }: EditorSettingsModalProp
     setFontFamily(DEFAULT_EDITOR_SETTINGS.fontFamily);
     setCursorBlinking(DEFAULT_EDITOR_SETTINGS.cursorBlinking);
     setCursorSmoothCaretAnimation(DEFAULT_EDITOR_SETTINGS.cursorSmoothCaretAnimation);
+    resetCode();
   };
 
   if (!isOpen) return null;

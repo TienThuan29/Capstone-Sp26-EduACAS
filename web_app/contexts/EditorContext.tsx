@@ -104,6 +104,7 @@ interface EditorContextType {
   // Timer
   timerSeconds: number;
   isTimerRunning: boolean;
+  isTimerExpired: boolean;
   startTimer: () => void;
   stopTimer: () => void;
   resetTimer: () => void;
@@ -249,12 +250,14 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   // Timer
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isTimerExpired, setIsTimerExpired] = useState(false);
   const [isExamMode, setIsExamModeState] = useState(false);
   const [examDuration, setExamDuration] = useState(3600); // 1 hour default (fallback)
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [timeOffset, setTimeOffset] = useState(0); // Difference between server and client time
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const submitCodeForceRef = useRef<(() => Promise<SubmissionResponse | null>) | null>(null);
+  const isTimerExpiredRef = useRef(false); // stable ref to avoid stale closure in code-editor-client
+  // const submitCodeForceRef = useRef<(() => Promise<SubmissionResponse | null>) | null>(null);
 
   // Layout
   const [isLeftPanelCollapsed, setIsLeftPanelCollapsed] = useState(false);
@@ -307,45 +310,65 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setPracticeTestResultsState(result);
   }, []);
 
-  // Timer Effect
+  // Timer Effect — only updates timerSeconds; force-submit-on-expiry is handled in code-editor-client.tsx
+  // to keep the callback fresh (no stale-closure risk from ref-based patterns).
   useEffect(() => {
-    if (isTimerRunning) {
-      if (isExamMode && endTime) {
-        // Precise timer for exam mode based on endTime and server offset
-        timerRef.current = setInterval(() => {
-          const serverNow = Date.now() + timeOffset;
-          const diff = Math.floor((endTime.getTime() - serverNow) / 1000);
+    // if (isTimerRunning) {
+    //   if (isExamMode && endTime) {
+    //     // Precise timer for exam mode based on endTime and server offset
+    //     timerRef.current = setInterval(() => {
+    //       const serverNow = Date.now() + timeOffset;
+    //       const diff = Math.floor((endTime.getTime() - serverNow) / 1000);
           
-          if (diff <= 0) {
-            setTimerSeconds(0);
-            setIsTimerRunning(false);
-            if (timerRef.current) {
-              clearInterval(timerRef.current);
-              timerRef.current = null;
-            }
-            // Trigger auto-submit (force bypasses MaxAttempts)
-            if (isExamMode) {
-              console.log('Time is up! Auto-submitting (force)...');
-              submitCodeForceRef.current?.();
-            }
-          } else {
-            setTimerSeconds(diff);
-          }
-        }, 1000);
-      } else {
-        // Count up for practice mode
-        timerRef.current = setInterval(() => {
-          setTimerSeconds((prev) => prev + 1);
-        }, 1000);
-      }
-    }
+    //       if (diff <= 0) {
+    //         setTimerSeconds(0);
+    //         setIsTimerRunning(false);
+    //         if (timerRef.current) {
+    //           clearInterval(timerRef.current);
+    //           timerRef.current = null;
+    //         }
+    //         // Trigger auto-submit (force bypasses MaxAttempts)
+    //         if (isExamMode) {
+    //           console.log('Time is up! Auto-submitting (force)...');
+    //           submitCodeForceRef.current?.();
+    //         }
+    //       } else {
+    //         setTimerSeconds(diff);
+    //       }
+    //     }, 1000);
+    //   } else {
+    //     // Count up for practice mode
+    //     timerRef.current = setInterval(() => {
+    //       setTimerSeconds((prev) => prev + 1);
+    //     }, 1000);
+    //   }
+    // }
 
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
+    if (!isTimerRunning || !isExamMode || !endTime) return;
+
+    const tick = () => {
+      const serverNow = Date.now() + timeOffset;
+      const diff = Math.floor((endTime.getTime() - serverNow) / 1000);
+      if (diff <= 0) {
+        setTimerSeconds(0);
+        setIsTimerRunning(false);
+        setIsTimerExpired(true);
+        isTimerExpiredRef.current = true;
+        clearInterval(timerRef.current ?? undefined);
+        timerRef.current = null;
+      } else {
+        setTimerSeconds(diff);
       }
     };
-  }, [isTimerRunning, isExamMode, endTime, timeOffset, submitCodeForceRef]);
+
+    tick(); // run immediately so the initial value is correct
+    timerRef.current = setInterval(tick, 1000);
+
+    return () => {
+      clearInterval(timerRef.current ?? undefined);
+      timerRef.current = null;
+    };
+  }, [isTimerRunning, isExamMode, endTime, timeOffset]);
 
   const setCode = useCallback((code: string) => {
     setEditorState((prev) => ({ ...prev, code }));
@@ -432,6 +455,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   const resetTimer = useCallback(() => {
     setIsTimerRunning(false);
+    setIsTimerExpired(false);
+    isTimerExpiredRef.current = false;
     setTimerSeconds(isExamMode ? examDuration : 0);
   }, [isExamMode, examDuration]);
 
@@ -573,8 +598,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     forceSubmission,
   ]);
 
-  // Keep ref in sync with latest submitCodeForce (so Timer Effect can use it safely)
-  submitCodeForceRef.current = submitCodeForce;
+  // Force-submit-on-expiry is handled in code-editor-client.tsx to avoid stale-closure issues.
 
   /** Submit and grade for PRACTICE mode — returns AutoGradeSubmissionResult with test results. */
   const submitAndGrade = useCallback(async (): Promise<AutoGradeSubmissionResult | null> => {
@@ -653,6 +677,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setSubmissionsCache,
     timerSeconds,
     isTimerRunning,
+    isTimerExpired,
     startTimer,
     stopTimer,
     resetTimer,
