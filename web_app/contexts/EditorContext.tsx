@@ -104,6 +104,7 @@ interface EditorContextType {
   // Timer
   timerSeconds: number;
   isTimerRunning: boolean;
+  isTimerExpired: boolean;
   startTimer: () => void;
   stopTimer: () => void;
   resetTimer: () => void;
@@ -249,11 +250,13 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
   // Timer
   const [timerSeconds, setTimerSeconds] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [isTimerExpired, setIsTimerExpired] = useState(false);
   const [isExamMode, setIsExamModeState] = useState(false);
   const [examDuration, setExamDuration] = useState(3600); // 1 hour default (fallback)
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [timeOffset, setTimeOffset] = useState(0); // Difference between server and client time
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isTimerExpiredRef = useRef(false); // stable ref to avoid stale closure in code-editor-client
   // const submitCodeForceRef = useRef<(() => Promise<SubmissionResponse | null>) | null>(null);
 
   // Layout
@@ -349,6 +352,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
       if (diff <= 0) {
         setTimerSeconds(0);
         setIsTimerRunning(false);
+        setIsTimerExpired(true);
+        isTimerExpiredRef.current = true;
         clearInterval(timerRef.current ?? undefined);
         timerRef.current = null;
       } else {
@@ -450,6 +455,8 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
 
   const resetTimer = useCallback(() => {
     setIsTimerRunning(false);
+    setIsTimerExpired(false);
+    isTimerExpiredRef.current = false;
     setTimerSeconds(isExamMode ? examDuration : 0);
   }, [isExamMode, examDuration]);
 
@@ -670,6 +677,7 @@ export function EditorProvider({ children }: { children: React.ReactNode }) {
     setSubmissionsCache,
     timerSeconds,
     isTimerRunning,
+    isTimerExpired,
     startTimer,
     stopTimer,
     resetTimer,

@@ -591,13 +591,13 @@ export function LecturerSubmissionWorkspace({
         <ModalBody>
           <div className="flex flex-col gap-5">
             <div>
-              <p className="text-base font-medium text-gray-300">
+              <p className="text-base font-medium text-black">
                 Save score for this submission?
               </p>
-              <p className="mt-1 text-sm text-gray-500">
-                The score <span className="font-semibold text-white">{scoreInput}</span>
+              <p className="mt-1 text-sm text-black">
+                The score <span className="font-semibold text-black">{scoreInput}</span>
                 {submission.maxMark != null && submission.maxMark > 0 && (
-                  <span className="text-gray-500"> / {submission.maxMark}</span>
+                  <span className="text-black"> / {submission.maxMark}</span>
                 )}
                 {' '}will be saved and the submission will be marked as graded.
               </p>
@@ -612,20 +612,20 @@ export function LecturerSubmissionWorkspace({
                 className="mt-0.5 h-4 w-4 cursor-pointer rounded border-gray-600 bg-gray-700 text-blue-500 focus:ring-blue-600 focus:ring-offset-gray-800"
               />
               <label htmlFor="send-feedback-checkbox" className="cursor-pointer">
-                <span className="text-sm font-medium text-gray-200">
+                <span className="text-sm font-medium text-black">
                   Send feedback to student
                 </span>
-                <p className="mt-0.5 text-xs text-gray-400">
+                <p className="mt-0.5 text-xs text-gray-700">
                   Notify the student about the feedback you have written in the Lecturer Note tab.
                 </p>
               </label>
             </div>
 
             {sendFeedbackToStudent && (
-              <div className="rounded-md border border-gray-700 bg-gray-800/50 p-3">
-                <p className="mb-1 text-xs font-medium text-gray-400">Feedback preview:</p>
-                <p className="text-sm text-gray-300">
-                  {lecturerFeedback.trim() || <span className="italic text-gray-500">No feedback written yet</span>}
+              <div className="rounded-md border border-gray-300 bg-gray-300/50 p-3">
+                <p className="mb-1 text-xs font-medium text-black">Feedback preview:</p>
+                <p className="text-sm text-black">
+                  {lecturerFeedback.trim() || <span className="italic text-gray-700">No feedback written yet</span>}
                 </p>
               </div>
             )}

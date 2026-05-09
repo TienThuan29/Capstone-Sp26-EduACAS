@@ -76,6 +76,7 @@ export function CodeEditorClient({
     registerOnEditorMount,
     lastSubmissionId,
     timerSeconds,
+    isTimerExpired,
   } = useEditorContext();
 
   const problemId = examination.problem.id;
@@ -86,17 +87,7 @@ export function CodeEditorClient({
    * Check if the exam mode is EXAMINATION and useStrict is true.
    * The backend uses JsonStringEnumConverter, so mode is serialized as "EXAMINATION" (string).
    */
-  // const isExamMode = useMemo(() => {
-  //   const rawMode = examination.mode as unknown;
-  //   const useStrict = examination.useStrict;
-  //   if (typeof rawMode === 'number' && useStrict) {
-  //     return rawMode === Mode.EXAMINATION;
-  //   }
-  //   if (typeof rawMode === 'string' && useStrict) {
-  //     return rawMode.toUpperCase() === 'EXAMINATION';
-  //   }
-  //   return false;
-  // }, [examination.mode]);
+  const isTimedMode = examination.mode === "PRACTICAL" || (examination.useStrict === true && examination.mode === "EXAMINATION");
   const isExamMode = examination.useStrict === true && examination.mode === "EXAMINATION";
   // console.log('strict mode:' , examination.useStrict)
 
@@ -257,7 +248,7 @@ export function CodeEditorClient({
     }
 
     // if (examination.endDatetime) {
-    if (isExamMode && examination.endDatetime) {
+    if (isTimedMode && examination.endDatetime) {
       setExamMode(true, new Date(examination.endDatetime));
       startTimer();
     }
@@ -274,6 +265,13 @@ export function CodeEditorClient({
     examId,
     isExamMode,
   ]);
+
+  // When timer expires, force-navigate back to the exam
+  useEffect(() => {
+    if (!isTimerExpired) return;
+    console.log('[CodeEditor] Timer expired — navigating back to exam');
+    navigateBackToExam();
+  }, [isTimerExpired, navigateBackToExam]);
 
   useEffect(() => {
     if (!isExamMode) return;

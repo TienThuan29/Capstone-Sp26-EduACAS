@@ -621,10 +621,14 @@ function ExamDetailContent() {
 
                         <div className="flex items-center gap-4">
                           <Button
-                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
-                            disabled={examination.mode === "EXAMINATION" && isSessionEnded}
+                            className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-1.5 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600"
+                            disabled={
+                              (examination.mode === "EXAMINATION" && isSessionEnded) ||
+                              (examination.mode === "PRACTICAL" && examination.status === "COMPLETED")
+                            }
                             onClick={() => {
                               if (examination.mode === "EXAMINATION" && isSessionEnded) return;
+                              if (examination.mode === "PRACTICAL" && examination.status === "COMPLETED") return;
                               if (examination.mode === "EXAMINATION" && !isSessionActive) {
                                 // Ask clipboard permission BEFORE exam guard activates.
                                 // This dialog appears outside fullscreen, so any

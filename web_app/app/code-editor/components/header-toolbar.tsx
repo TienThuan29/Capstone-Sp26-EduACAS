@@ -40,6 +40,7 @@ export function HeaderToolbar() {
     incrementSubmissionsRefresh,
     setPracticeTestResults,
     isPracticeSubmitting,
+    isTimerExpired,
   } = useEditorContext();
 
   const formatTime = (s: number) => {
@@ -144,7 +145,7 @@ export function HeaderToolbar() {
             >
               <Minus className="h-4 w-4" />
             </button>
-            <span className="min-w-[3rem] text-center text-sm text-gray-300">
+            <span className="min-w-12 text-center text-sm text-gray-300">
               {editorState.fontSize}px
             </span>
             <button
@@ -171,8 +172,14 @@ export function HeaderToolbar() {
         </div>
 
         {/* Center Section - Timer */}
-        {isExamMode && (
-          <div className="flex items-center gap-3 rounded-full bg-red-500/10 px-6 py-2.5 font-mono font-bold text-red-500 border border-red-500/20 whitespace-nowrap shadow-sm">
+        {(isExamMode || examId) && (
+          <div className={`flex items-center gap-3 rounded-full px-6 py-2.5 font-mono font-bold border shadow-sm whitespace-nowrap ${
+            isTimerExpired
+              ? 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse'
+              : isExamMode
+              ? 'bg-red-500/10 text-red-500 border-red-500/20'
+              : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
+          }`}>
             <Clock className="h-6 w-6" />
             <span className="text-lg">{formatTime(timerSeconds)}</span>
           </div>

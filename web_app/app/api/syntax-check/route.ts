@@ -243,9 +243,27 @@ async function checkCpp(source: string): Promise<SyntaxError[]> {
   }
 }
 
+function extractJavaClassName(source: string): string | null {
+  // Match: public class ClassName { or public class ClassName<T> {
+  const match = source.match(/\bpublic\s+class\s+(\w[\w]*)\s*[<{]/);
+  return match ? match[1] : null;
+}
+
 async function checkJava(source: string): Promise<SyntaxError[]> {
-  const filepath = createTempFile(source, 'java');
-  console.log('[syntax-check] checkJava - temp file:', filepath);
+  const tmpDir = os.tmpdir();
+  const className = extractJavaClassName(source);
+  let filepath: string;
+
+  if (className) {
+    // Name file after the public class so javac doesn't error "class X should be in file X.java"
+    filepath = path.join(tmpDir, `${className}.java`);
+  } else {
+    filepath = path.join(tmpDir, `syntax_check_${Date.now()}.java`);
+  }
+
+  console.log('[syntax-check] checkJava - className:', className, 'filepath:', filepath);
+  fs.writeFileSync(filepath, source, 'utf-8');
+
   try {
     const result = execSync(`javac -Xdiags:verbose "${filepath}" 2>&1`, {
       timeout: SYNTAX_CHECK_TIMEOUT_MS,
@@ -314,8 +332,9 @@ async function checkCSharp(source: string): Promise<SyntaxError[]> {
 function parseDotnetOutput(output: string): SyntaxError[] {
   const errors: SyntaxError[] = [];
   // dotnet format: file(N,col): error CSxxxx: message
-  // file(N,N): error CSxxxx: message
+  // dotnet format: file(N,N): error CSxxxx: message
   const dotnetRegex = /^.+[/\\](\w+\.cs)\((\d+),(\d+)\):\s*(error|warning)\s+(CS\d+):\s*(.+)$/gm;
+  const seen = new Set<string>();
   let match;
   while ((match = dotnetRegex.exec(output)) !== null) {
     const line = parseInt(match[2], 10);
@@ -323,6 +342,10 @@ function parseDotnetOutput(output: string): SyntaxError[] {
     const severity = match[4] as 'error' | 'warning';
     const code = match[5];
     const message = match[6].trim();
+
+    const key = `${line}:${column}:${code}:${message}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
 
     errors.push({
       line,
