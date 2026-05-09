@@ -52,6 +52,7 @@ export default function CodeEditorPage({ params, searchParams }: PageProps) {
           if (result && result.data) {
             setExamWithSpecProblem(result.data);
             if (result.serverDate) {
+              console.log('[CodeEditorPage] Calling syncServerTime', { serverDate: result.serverDate });
               syncServerTime(result.serverDate);
             }
           } else {
